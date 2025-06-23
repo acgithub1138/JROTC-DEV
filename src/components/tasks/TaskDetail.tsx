@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -67,6 +66,9 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
     
     if (field === 'due_date') {
       updateData.due_date = editState.value ? editState.value.toISOString() : null;
+    } else if (field === 'assigned_to') {
+      // Handle the special "unassigned" value
+      updateData.assigned_to = editState.value === 'unassigned' ? null : editState.value;
     } else {
       updateData[field] = editState.value;
     }
@@ -117,7 +119,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
             onValueChange={(value) => {
               setEditState({ ...editState, value });
               setTimeout(() => {
-                updateTask({ id: task.id, [field]: value });
+                updateTask({ id: task.id, [field]: field === 'assigned_to' && value === 'unassigned' ? null : value });
                 cancelEdit();
               }, 100);
             }}
@@ -218,8 +220,9 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
     );
   };
 
+  // Fix the assignee options to use 'unassigned' instead of empty string
   const assigneeOptions = [
-    { value: '', label: 'Unassigned' },
+    { value: 'unassigned', label: 'Unassigned' },
     ...users.map(user => ({
       value: user.id,
       label: `${user.first_name} ${user.last_name}`
@@ -250,40 +253,44 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {editState.field === 'priority' ? (
-                    renderEditableField('priority', task.priority, '', 'select', priorityOptions)
-                  ) : (
-                    <div 
-                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
-                      onClick={() => canEdit && startEdit('priority', task.priority)}
-                    >
-                      <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                        {currentPriorityOption?.label || task.priority}
-                      </Badge>
-                      {canEdit && (
-                        <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-                      )}
-                    </div>
-                  )}
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
+                    onClick={() => canEdit && startEdit('priority', task.priority)}
+                  >
+                    {editState.field === 'priority' ? (
+                      renderEditableField('priority', task.priority, '', 'select', priorityOptions)
+                    ) : (
+                      <>
+                        <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                          {currentPriorityOption?.label || task.priority}
+                        </Badge>
+                        {canEdit && (
+                          <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {editState.field === 'status' ? (
-                    renderEditableField('status', task.status, '', 'select', statusOptions)
-                  ) : (
-                    <div 
-                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
-                      onClick={() => canEdit && startEdit('status', task.status)}
-                    >
-                      <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                        {currentStatusOption?.label || task.status.replace('_', ' ')}
-                      </Badge>
-                      {canEdit && (
-                        <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-                      )}
-                    </div>
-                  )}
+                  <div 
+                    className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
+                    onClick={() => canEdit && startEdit('status', task.status)}
+                  >
+                    {editState.field === 'status' ? (
+                      renderEditableField('status', task.status, '', 'select', statusOptions)
+                    ) : (
+                      <>
+                        <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                          {currentStatusOption?.label || task.status.replace('_', ' ')}
+                        </Badge>
+                        {canEdit && (
+                          <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
+                        )}
+                      </>
+                    )}
+                  </div>
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
@@ -309,7 +316,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                   {userProfile?.role === 'instructor' || userProfile?.role === 'command_staff' ? (
                     renderEditableField(
                       'assigned_to',
-                      task.assigned_to,
+                      task.assigned_to || 'unassigned',
                       task.assigned_to_profile
                         ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}`
                         : 'Unassigned',
