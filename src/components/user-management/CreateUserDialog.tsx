@@ -8,8 +8,10 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
 
+type UserRole = 'school_admin' | 'instructor' | 'nco' | 'cadet';
+
 interface CreateUserDialogProps {
-  allowedRoles: string[];
+  allowedRoles: UserRole[];
   trigger?: React.ReactNode;
 }
 
@@ -22,11 +24,13 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     password: '',
     firstName: '',
     lastName: '',
-    role: '',
+    role: '' as UserRole | '',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!formData.role) return;
+    
     setLoading(true);
     
     const { error } = await createUser(formData.email, formData.password, {
@@ -50,7 +54,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     setLoading(false);
   };
 
-  const getRoleIcon = (role: string) => {
+  const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case 'instructor': return <Shield className="w-4 h-4" />;
       case 'nco': return <Users className="w-4 h-4" />;
@@ -59,7 +63,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     }
   };
 
-  const getRoleLabel = (role: string) => {
+  const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'instructor': return 'Instructor';
       case 'nco': return 'NCO (Command Staff)';
@@ -128,7 +132,10 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
           
           <div className="space-y-2">
             <Label htmlFor="role">Role</Label>
-            <Select value={formData.role} onValueChange={(value) => setFormData({ ...formData, role: value })}>
+            <Select 
+              value={formData.role} 
+              onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>

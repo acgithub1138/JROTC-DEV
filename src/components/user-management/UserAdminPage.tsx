@@ -22,12 +22,14 @@ import {
 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
 
+type UserRole = 'school_admin' | 'instructor' | 'nco' | 'cadet';
+
 interface User {
   id: string;
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role: UserRole;
   created_at: string;
   schools?: { name: string };
 }
@@ -140,7 +142,7 @@ const UserAdminPage = () => {
     }
   };
 
-  const getRoleIcon = (role: string) => {
+  const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case 'school_admin': return <Shield className="w-4 h-4" />;
       case 'instructor': return <Shield className="w-4 h-4" />;
@@ -150,7 +152,7 @@ const UserAdminPage = () => {
     }
   };
 
-  const getRoleColor = (role: string) => {
+  const getRoleColor = (role: UserRole) => {
     switch (role) {
       case 'school_admin': return 'bg-red-100 text-red-800';
       case 'instructor': return 'bg-blue-100 text-blue-800';
@@ -160,7 +162,7 @@ const UserAdminPage = () => {
     }
   };
 
-  const getAllowedRoles = () => {
+  const getAllowedRoles = (): UserRole[] => {
     return ['instructor'];
   };
 
@@ -342,7 +344,7 @@ const UserAdminPage = () => {
                 <Label htmlFor="edit-role">Role</Label>
                 <Select 
                   value={editingUser.role} 
-                  onValueChange={(value) => setEditingUser({
+                  onValueChange={(value: UserRole) => setEditingUser({
                     ...editingUser,
                     role: value
                   })}
