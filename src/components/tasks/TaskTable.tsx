@@ -1,18 +1,14 @@
+
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MoreHorizontal, Edit, Trash2, Eye, CalendarIcon, Check, X, ChevronDown } from 'lucide-react';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { format } from 'date-fns';
+import { TableHeader as TaskTableHeader } from './table/TableHeader';
+import { EditableCell } from './table/EditableCell';
 
 interface TaskTableProps {
   tasks: Task[];
@@ -83,14 +79,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     }
   };
 
-  const handleTaskNumberClick = (task: Task) => {
-    onTaskSelect(task);
-  };
-
-  const startEdit = (taskId: string, field: string, currentValue: any) => {
-    setEditState({ taskId, field, value: currentValue });
-  };
-
   const cancelEdit = () => {
     setEditState({ taskId: null, field: null, value: null });
   };
@@ -114,200 +102,19 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     }
   };
 
-  const handleDelete = (taskId: string) => {
-    if (confirm('Are you sure you want to delete this task?')) {
-      deleteTask(taskId);
-    }
-  };
-
   const canEditTask = (task: Task) => {
     return canEdit || task.assigned_to === userProfile?.id;
   };
 
-  const renderEditableCell = (task: Task, field: string, value: any, displayValue: string) => {
-    const isEditing = editState.taskId === task.id && editState.field === field;
-    const canEditThisTask = canEditTask(task);
-
-    if (!canEditThisTask) {
-      return <span>{displayValue}</span>;
-    }
-
-    if (isEditing) {
-      if (field === 'title') {
-        return (
-          <div className="flex items-center gap-2">
-            <Input
-              value={editState.value}
-              onChange={(e) => setEditState({ ...editState, value: e.target.value })}
-              onKeyDown={(e) => {
-                if (e.key === 'Enter') saveEdit(task);
-                if (e.key === 'Escape') cancelEdit();
-              }}
-              className="h-8"
-              autoFocus
-            />
-            <Button size="sm" variant="ghost" onClick={() => saveEdit(task)}>
-              <Check className="w-4 h-4" />
-            </Button>
-            <Button size="sm" variant="ghost" onClick={cancelEdit}>
-              <X className="w-4 h-4" />
-            </Button>
-          </div>
-        );
-      }
-
-      if (field === 'status') {
-        return (
-          <Select
-            value={editState.value}
-            onValueChange={(value) => {
-              setEditState({ ...editState, value });
-              // Auto-save for select fields
-              setTimeout(() => {
-                updateTask({ id: task.id, status: value as Task['status'] });
-                cancelEdit();
-              }, 100);
-            }}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="not_started">Not Started</SelectItem>
-              <SelectItem value="working_on_it">Working On It</SelectItem>
-              <SelectItem value="stuck">Stuck</SelectItem>
-              <SelectItem value="done">Done</SelectItem>
-            </SelectContent>
-          </Select>
-        );
-      }
-
-      if (field === 'priority') {
-        return (
-          <Select
-            value={editState.value}
-            onValueChange={(value) => {
-              setEditState({ ...editState, value });
-              // Auto-save for select fields
-              setTimeout(() => {
-                updateTask({ id: task.id, priority: value as Task['priority'] });
-                cancelEdit();
-              }, 100);
-            }}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="low">Low</SelectItem>
-              <SelectItem value="medium">Medium</SelectItem>
-              <SelectItem value="high">High</SelectItem>
-              <SelectItem value="urgent">Urgent</SelectItem>
-              <SelectItem value="critical">Critical</SelectItem>
-            </SelectContent>
-          </Select>
-        );
-      }
-
-      if (field === 'assigned_to' && canEdit) {
-        return (
-          <Select
-            value={editState.value || ''}
-            onValueChange={(value) => {
-              setEditState({ ...editState, value: value || null });
-              // Auto-save for select fields
-              setTimeout(() => {
-                updateTask({ id: task.id, assigned_to: value || null });
-                cancelEdit();
-              }, 100);
-            }}
-          >
-            <SelectTrigger className="h-8">
-              <SelectValue placeholder="Unassigned" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="">Unassigned</SelectItem>
-              {users.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.first_name} {user.last_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        );
-      }
-
-      if (field === 'due_date') {
-        return (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="h-8 text-left">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {editState.value ? format(editState.value, 'MMM d, yyyy') : 'Set date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={editState.value}
-                onSelect={(date) => {
-                  setEditState({ ...editState, value: date });
-                  // Auto-save for date picker
-                  setTimeout(() => {
-                    updateTask({ id: task.id, due_date: date ? date.toISOString() : null });
-                    cancelEdit();
-                  }, 100);
-                }}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-        );
-      }
-    }
-
-    return (
-      <div
-        className="cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 flex items-center gap-2"
-        onClick={() => startEdit(task.id, field, value)}
-      >
-        <span>{displayValue}</span>
-        <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-      </div>
-    );
-  };
-
   return (
     <div className="rounded-md border">
-      <div className="flex items-center justify-between p-4 border-b">
-        <div className="flex items-center gap-2">
-          <Checkbox
-            checked={selectedTasks.length === tasks.length && tasks.length > 0}
-            onCheckedChange={handleSelectAll}
-          />
-          <span className="text-sm text-gray-600">
-            {selectedTasks.length > 0 ? `${selectedTasks.length} selected` : 'Select all'}
-          </span>
-        </div>
-        {selectedTasks.length > 0 && canEdit && (
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Actions <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white">
-              <DropdownMenuItem 
-                onClick={handleBulkDelete}
-                className="text-red-600"
-              >
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Selected
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        )}
-      </div>
+      <TaskTableHeader
+        selectedTasks={selectedTasks}
+        totalTasks={tasks.length}
+        onSelectAll={handleSelectAll}
+        onBulkDelete={handleBulkDelete}
+        canEdit={canEdit}
+      />
       <Table>
         <TableHeader>
           <TableRow>
@@ -337,27 +144,37 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               </TableCell>
               <TableCell className="font-mono text-sm">
                 <button
-                  onClick={() => handleTaskNumberClick(task)}
+                  onClick={() => onTaskSelect(task)}
                   className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                 >
                   {task.task_number || 'N/A'}
                 </button>
               </TableCell>
               <TableCell className="font-medium">
-                {renderEditableCell(
-                  task,
-                  'title',
-                  task.title,
-                  task.title
-                )}
+                <EditableCell
+                  task={task}
+                  field="title"
+                  value={task.title}
+                  displayValue={task.title}
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
               </TableCell>
               <TableCell>
-                {renderEditableCell(
-                  task,
-                  'status',
-                  task.status,
-                  ''
-                )}
+                <EditableCell
+                  task={task}
+                  field="status"
+                  value={task.status}
+                  displayValue=""
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
                 {!(editState.taskId === task.id && editState.field === 'status') && (
                   <Badge className={statusColors[task.status as keyof typeof statusColors]}>
                     {task.status.replace('_', ' ')}
@@ -365,12 +182,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
                 )}
               </TableCell>
               <TableCell>
-                {renderEditableCell(
-                  task,
-                  'priority',
-                  task.priority,
-                  ''
-                )}
+                <EditableCell
+                  task={task}
+                  field="priority"
+                  value={task.priority}
+                  displayValue=""
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
                 {!(editState.taskId === task.id && editState.field === 'priority') && (
                   <Badge className={priorityColors[task.priority as keyof typeof priorityColors]}>
                     {task.priority}
@@ -379,14 +201,22 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               </TableCell>
               <TableCell>
                 {canEdit ? (
-                  renderEditableCell(
-                    task,
-                    'assigned_to',
-                    task.assigned_to,
-                    task.assigned_to_profile
-                      ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}`
-                      : 'Unassigned'
-                  )
+                  <EditableCell
+                    task={task}
+                    field="assigned_to"
+                    value={task.assigned_to}
+                    displayValue={
+                      task.assigned_to_profile
+                        ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}`
+                        : 'Unassigned'
+                    }
+                    editState={editState}
+                    setEditState={setEditState}
+                    onSave={saveEdit}
+                    onCancel={cancelEdit}
+                    canEdit={canEdit}
+                    users={users}
+                  />
                 ) : (
                   <span>
                     {task.assigned_to_profile
@@ -396,12 +226,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
                 )}
               </TableCell>
               <TableCell>
-                {renderEditableCell(
-                  task,
-                  'due_date',
-                  task.due_date ? new Date(task.due_date) : null,
-                  task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'
-                )}
+                <EditableCell
+                  task={task}
+                  field="due_date"
+                  value={task.due_date ? new Date(task.due_date) : null}
+                  displayValue={task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'}
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
               </TableCell>
               <TableCell>
                 {format(new Date(task.created_at), 'MMM d, yyyy')}
