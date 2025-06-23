@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -65,7 +66,6 @@ const UserAdminPage = () => {
           school_id,
           schools (name)
         `)
-        .eq('school_id', userProfile?.school_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -97,10 +97,8 @@ const UserAdminPage = () => {
   };
 
   useEffect(() => {
-    if (userProfile?.school_id) {
-      fetchUsers();
-      fetchSchools();
-    }
+    fetchUsers();
+    fetchSchools();
   }, [userProfile]);
 
   const handleEditUser = async (e: React.FormEvent) => {
@@ -197,7 +195,63 @@ const UserAdminPage = () => {
   };
 
   const getAllowedRoles = (): UserRole[] => {
-    return ['admin', 'instructor', 'command_staff', 'cadet', 'parent'];
+    if (!userProfile) return [];
+    
+    // Admins can assign any role
+    if (userProfile.role === 'admin') {
+      return ['admin', 'instructor', 'command_staff', 'cadet', 'parent'];
+    }
+    
+    // Instructors can assign instructor, command_staff, cadet, and parent roles
+    if (userProfile.role === 'instructor') {
+      return ['instructor', 'command_staff', 'cadet', 'parent'];
+    }
+    
+    // Command staff can only create cadet roles
+    if (userProfile.role === 'command_staff') {
+      return ['cadet'];
+    }
+    
+    // Default fallback
+    return ['cadet'];
+  };
+
+  const canCreateUsers = () => {
+    return userProfile?.role === 'admin' || userProfile?.role === 'instructor';
+  };
+
+  const canEditUser = (user: User) => {
+    if (!userProfile) return false;
+    
+    // Admins can edit anyone
+    if (userProfile.role === 'admin') return true;
+    
+    // Instructors can edit users in their school
+    if (userProfile.role === 'instructor' && user.school_id === userProfile.school_id) return true;
+    
+    // Command staff can edit command staff and cadets in their school
+    if (userProfile.role === 'command_staff' && 
+        user.school_id === userProfile.school_id && 
+        (user.role === 'command_staff' || user.role === 'cadet')) return true;
+    
+    // Users can edit themselves
+    if (user.id === userProfile.id) return true;
+    
+    return false;
+  };
+
+  const canDeleteUser = (user: User) => {
+    if (!userProfile) return false;
+    
+    // Admins can delete anyone
+    if (userProfile.role === 'admin') return true;
+    
+    // Instructors can delete users in their school (except admins and instructors)
+    if (userProfile.role === 'instructor' && 
+        user.school_id === userProfile.school_id && 
+        user.role !== 'admin' && user.role !== 'instructor') return true;
+    
+    return false;
   };
 
   const filteredUsers = users.filter(user =>
@@ -228,19 +282,21 @@ const UserAdminPage = () => {
         <div>
           <h2 className="text-3xl font-bold tracking-tight">User Management</h2>
           <p className="text-muted-foreground">
-            Manage users in your school
+            Manage users based on your role permissions
           </p>
         </div>
-        <CreateUserDialog 
-          allowedRoles={getAllowedRoles()}
-          trigger={
-            <Button>
-              <UserPlus className="w-4 h-4 mr-2" />
-              Create User
-            </Button>
-          }
-          onUserCreated={fetchUsers}
-        />
+        {canCreateUsers() && (
+          <CreateUserDialog 
+            allowedRoles={getAllowedRoles()}
+            trigger={
+              <Button>
+                <UserPlus className="w-4 h-4 mr-2" />
+                Create User
+              </Button>
+            }
+            onUserCreated={fetchUsers}
+          />
+        )}
       </div>
 
       <Card>
@@ -295,26 +351,30 @@ const UserAdminPage = () => {
                   </TableCell>
                   <TableCell className="text-right">
                     <div className="flex items-center justify-end gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingUser(user);
-                          setEditDialogOpen(true);
-                        }}
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setUserToDelete(user);
-                          setDeleteDialogOpen(true);
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                      {canEditUser(user) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setEditingUser(user);
+                            setEditDialogOpen(true);
+                          }}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDeleteUser(user) && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setUserToDelete(user);
+                            setDeleteDialogOpen(true);
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
@@ -401,27 +461,29 @@ const UserAdminPage = () => {
                 </Select>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="edit-school">School</Label>
-                <Select 
-                  value={editingUser.school_id} 
-                  onValueChange={(value) => setEditingUser({
-                    ...editingUser,
-                    school_id: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select school" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {schools.map((school) => (
-                      <SelectItem key={school.id} value={school.id}>
-                        {school.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+              {userProfile?.role === 'admin' && (
+                <div className="space-y-2">
+                  <Label htmlFor="edit-school">School</Label>
+                  <Select 
+                    value={editingUser.school_id} 
+                    onValueChange={(value) => setEditingUser({
+                      ...editingUser,
+                      school_id: value
+                    })}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select school" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {schools.map((school) => (
+                        <SelectItem key={school.id} value={school.id}>
+                          {school.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              )}
               
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>

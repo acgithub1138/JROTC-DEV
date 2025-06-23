@@ -38,10 +38,15 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
 
   const fetchSchools = async () => {
     try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('id, name')
-        .order('name', { ascending: true });
+      // Admins can see all schools, others only see their own
+      let query = supabase.from('schools').select('id, name').order('name', { ascending: true });
+      
+      // If not admin, filter to only current user's school
+      if (userProfile?.role !== 'admin' && userProfile?.school_id) {
+        query = query.eq('id', userProfile.school_id);
+      }
+      
+      const { data, error } = await query;
 
       if (error) throw error;
       setSchools(data || []);
@@ -53,10 +58,10 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
   useEffect(() => {
     if (open) {
       fetchSchools();
-      // Set default school to current user's school
+      // Set default school to current user's school for non-admins
       setFormData(prev => ({
         ...prev,
-        schoolId: userProfile?.school_id || ''
+        schoolId: userProfile?.role !== 'admin' ? (userProfile?.school_id || '') : ''
       }));
     }
   }, [open, userProfile]);
@@ -112,6 +117,10 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
       case 'parent': return 'Parent';
       default: return role;
     }
+  };
+
+  const canEditSchool = () => {
+    return userProfile?.role === 'admin';
   };
 
   return (
@@ -200,6 +209,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
             <Select 
               value={formData.schoolId} 
               onValueChange={(value) => setFormData({ ...formData, schoolId: value })}
+              disabled={!canEditSchool() && schools.length === 1}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select school" />
@@ -212,6 +222,11 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
                 ))}
               </SelectContent>
             </Select>
+            {!canEditSchool() && (
+              <p className="text-sm text-muted-foreground">
+                You can only create users for your school
+              </p>
+            )}
           </div>
           
           <div className="flex justify-end space-x-2">
