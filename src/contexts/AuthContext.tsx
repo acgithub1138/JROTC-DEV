@@ -92,28 +92,48 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const createUser = async (email: string, password: string, userData: any) => {
-    // This function is for admin/instructor use only
-    const { error } = await supabase.auth.admin.createUser({
-      email,
-      password,
-      user_metadata: userData,
-      email_confirm: true // Skip email confirmation for admin-created users
-    });
-    
-    if (error) {
+    try {
+      // Create the user with proper metadata including school_id
+      const { data, error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          data: {
+            first_name: userData.first_name,
+            last_name: userData.last_name,
+            role: userData.role,
+            school_id: userData.school_id
+          }
+        }
+      });
+      
+      if (error) {
+        console.error('User creation error:', error);
+        toast({
+          title: "User Creation Error",
+          description: error.message,
+          variant: "destructive",
+        });
+        return { error };
+      }
+
+      if (data.user) {
+        toast({
+          title: "User Created Successfully",
+          description: `Account created for ${userData.first_name} ${userData.last_name}`,
+        });
+      }
+      
+      return { error: null };
+    } catch (err) {
+      console.error('Unexpected error during user creation:', err);
       toast({
         title: "User Creation Error",
-        description: error.message,
+        description: "An unexpected error occurred while creating the user.",
         variant: "destructive",
       });
-    } else {
-      toast({
-        title: "User Created Successfully",
-        description: `Account created for ${userData.first_name} ${userData.last_name}`,
-      });
+      return { error: err };
     }
-    
-    return { error };
   };
 
   const signOut = async () => {
