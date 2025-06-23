@@ -83,6 +83,10 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     }
   };
 
+  const handleTaskNumberClick = (task: Task) => {
+    onTaskSelect(task);
+  };
+
   const startEdit = (taskId: string, field: string, currentValue: any) => {
     setEditState({ taskId, field, value: currentValue });
   };
@@ -332,7 +336,12 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
                 />
               </TableCell>
               <TableCell className="font-mono text-sm">
-                {task.task_number || 'N/A'}
+                <button
+                  onClick={() => handleTaskNumberClick(task)}
+                  className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {task.task_number || 'N/A'}
+                </button>
               </TableCell>
               <TableCell className="font-medium">
                 {renderEditableCell(
