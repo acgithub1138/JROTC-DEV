@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -40,7 +39,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
   const { priorityOptions } = useTaskPriorityOptions();
   const [newComment, setNewComment] = useState('');
   const [editState, setEditState] = useState<EditState>({ field: null, value: null });
-  const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('asc');
+  const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
 
   const canEdit = userProfile?.role === 'instructor' || 
                   userProfile?.role === 'command_staff' || 
