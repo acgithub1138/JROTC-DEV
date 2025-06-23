@@ -52,6 +52,12 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
   const { userProfile } = useAuth();
   const { menuItems, isLoading } = useSidebarPreferences();
   const [showCustomization, setShowCustomization] = useState(false);
+  const [refreshKey, setRefreshKey] = useState(0);
+
+  const handlePreferencesUpdated = () => {
+    // Force a re-render by updating the refresh key
+    setRefreshKey(prev => prev + 1);
+  };
 
   if (isLoading) {
     return (
@@ -75,7 +81,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
   return (
     <>
-      <div className={cn('bg-gray-900 text-white flex flex-col', className)}>
+      <div className={cn('bg-gray-900 text-white flex flex-col', className)} key={refreshKey}>
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -122,6 +128,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
       <SidebarCustomization
         open={showCustomization}
         onOpenChange={setShowCustomization}
+        onPreferencesUpdated={handlePreferencesUpdated}
       />
     </>
   );

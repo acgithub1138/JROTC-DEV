@@ -73,11 +73,13 @@ const SortableItem: React.FC<SortableItemProps> = ({ item }) => {
 interface SidebarCustomizationProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onPreferencesUpdated?: () => void;
 }
 
 export const SidebarCustomization: React.FC<SidebarCustomizationProps> = ({
   open,
   onOpenChange,
+  onPreferencesUpdated,
 }) => {
   const { menuItems, savePreferences, resetToDefault, getDefaultMenuItems } = useSidebarPreferences();
   const [localItems, setLocalItems] = useState<MenuItem[]>([]);
@@ -120,6 +122,10 @@ export const SidebarCustomization: React.FC<SidebarCustomizationProps> = ({
         description: "Your sidebar preferences have been saved.",
       });
       onOpenChange(false);
+      // Trigger sidebar refresh
+      if (onPreferencesUpdated) {
+        onPreferencesUpdated();
+      }
     } else {
       toast({
         title: "Error",
@@ -141,6 +147,10 @@ export const SidebarCustomization: React.FC<SidebarCustomizationProps> = ({
         description: "Sidebar has been reset to default layout.",
       });
       onOpenChange(false);
+      // Trigger sidebar refresh
+      if (onPreferencesUpdated) {
+        onPreferencesUpdated();
+      }
     } else {
       toast({
         title: "Error",
@@ -201,5 +211,40 @@ export const SidebarCustomization: React.FC<SidebarCustomizationProps> = ({
         </DialogFooter>
       </DialogContent>
     </Dialog>
+  );
+};
+
+const SortableItem: React.FC<SortableItemProps> = ({ item }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+  } = useSortable({ id: item.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+  };
+
+  const IconComponent = (Icons as any)[item.icon];
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      className="flex items-center gap-3 p-3 bg-white border rounded-lg shadow-sm"
+    >
+      <div
+        {...attributes}
+        {...listeners}
+        className="cursor-grab active:cursor-grabbing"
+      >
+        <GripVertical className="w-4 h-4 text-gray-400" />
+      </div>
+      {IconComponent && <IconComponent className="w-4 h-4" />}
+      <span className="flex-1">{item.label}</span>
+    </div>
   );
 };
