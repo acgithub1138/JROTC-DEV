@@ -93,18 +93,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createUser = async (email: string, password: string, userData: any) => {
     try {
-      // Create the user with proper metadata including school_id
-      const { data, error } = await supabase.auth.signUp({
+      // Use admin API to create user with proper metadata
+      const { data, error } = await supabase.auth.admin.createUser({
         email,
         password,
-        options: {
-          data: {
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            role: userData.role,
-            school_id: userData.school_id
-          }
-        }
+        user_metadata: {
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          role: userData.role,
+          school_id: userData.school_id
+        },
+        email_confirm: true // Skip email confirmation for admin-created users
       });
       
       if (error) {
