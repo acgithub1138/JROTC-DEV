@@ -70,58 +70,53 @@ export const EditableField: React.FC<EditableFieldProps> = ({
 
     if (type === 'select' && options) {
       return (
-        <div className="flex items-center gap-2">
-          <Select
-            value={editState.value}
-            onValueChange={(value) => onEditStateChange({ ...editState, value })}
-          >
-            <SelectTrigger className="h-8 w-auto min-w-[120px]">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {options.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-          <Button size="sm" variant="ghost" onClick={() => onSaveEdit(field)}>
-            <Check className="w-4 h-4" />
-          </Button>
-          <Button size="sm" variant="ghost" onClick={onCancelEdit}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+        <Select
+          value={editState.value}
+          onValueChange={(value) => {
+            if (onQuickUpdate) {
+              const finalValue = field === 'assigned_to' && value === 'unassigned' ? null : value;
+              onQuickUpdate(field, finalValue);
+              onCancelEdit();
+            }
+          }}
+        >
+          <SelectTrigger className="h-8 w-auto min-w-[120px]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            {options.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       );
     }
 
     if (type === 'date') {
       return (
-        <div className="flex items-center gap-2">
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="h-8 text-left">
-                <CalendarIcon className="mr-2 h-4 w-4" />
-                {editState.value ? format(editState.value, 'MMM d, yyyy') : 'Set date'}
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0">
-              <Calendar
-                mode="single"
-                selected={editState.value}
-                onSelect={(date) => onEditStateChange({ ...editState, value: date })}
-                initialFocus
-              />
-            </PopoverContent>
-          </Popover>
-          <Button size="sm" variant="ghost" onClick={() => onSaveEdit(field)}>
-            <Check className="w-4 h-4" />
-          </Button>
-          <Button size="sm" variant="ghost" onClick={onCancelEdit}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button variant="outline" className="h-8 text-left">
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {editState.value ? format(editState.value, 'MMM d, yyyy') : 'Set date'}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0">
+            <Calendar
+              mode="single"
+              selected={editState.value}
+              onSelect={(date) => {
+                if (onQuickUpdate) {
+                  onQuickUpdate(field, date ? date.toISOString() : null);
+                  onCancelEdit();
+                }
+              }}
+              initialFocus
+            />
+          </PopoverContent>
+        </Popover>
       );
     }
   }
