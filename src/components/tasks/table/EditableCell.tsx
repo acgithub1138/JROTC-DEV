@@ -50,7 +50,14 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   }
 
   const startEdit = () => {
-    setEditState({ taskId: task.id, field, value });
+    // Handle initial value for assigned_to field - convert null to 'unassigned'
+    let initialValue = value;
+    if (field === 'assigned_to' && value === null) {
+      initialValue = 'unassigned';
+    }
+    
+    console.log(`Starting edit for ${field}, initial value:`, initialValue, 'original value:', value);
+    setEditState({ taskId: task.id, field, value: initialValue });
   };
 
   if (isEditing) {
@@ -129,6 +136,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
           value={editState.value || 'unassigned'}
           onValueChange={(value) => {
             const actualValue = value === 'unassigned' ? null : value;
+            console.log('Assigned to changed:', value, '-> actualValue:', actualValue);
             setEditState({ ...editState, value: actualValue });
             setTimeout(() => onSave(task), 100);
           }}
@@ -162,10 +170,12 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               mode="single"
               selected={editState.value}
               onSelect={(date) => {
+                console.log('Due date changed:', date);
                 setEditState({ ...editState, value: date });
                 setTimeout(() => onSave(task), 100);
               }}
               initialFocus
+              className="pointer-events-auto"
             />
           </PopoverContent>
         </Popover>
