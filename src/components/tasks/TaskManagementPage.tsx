@@ -36,6 +36,12 @@ const TaskManagementPage = () => {
     setEditingTask(null);
   };
 
+  // Update the onEdit handler to just update local state without opening TaskForm modal
+  const handleTaskUpdate = (updatedTask: Task) => {
+    // Just update the selected task to reflect changes in the detail modal
+    setSelectedTask(updatedTask);
+  };
+
   if (isLoading) {
     return (
       <div className="p-6">
@@ -116,7 +122,7 @@ const TaskManagementPage = () => {
           task={selectedTask}
           open={!!selectedTask}
           onOpenChange={handleCloseDetail}
-          onEdit={handleEditTask}
+          onEdit={handleTaskUpdate}
         />
       )}
     </div>

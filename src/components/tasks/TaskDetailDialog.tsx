@@ -65,7 +65,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       // Update the local task state immediately for better UX
       const updatedTask = { ...currentTask, [field]: editState.value };
       setCurrentTask(updatedTask);
-      onEdit(updatedTask);
+      // Remove the onEdit call that triggers the TaskForm modal
     } catch (error) {
       console.error('Failed to update task:', error);
     }
@@ -81,7 +81,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       // Update the local task state immediately
       const updatedTask = { ...currentTask, [field]: value };
       setCurrentTask(updatedTask);
-      onEdit(updatedTask);
+      // Remove the onEdit call that triggers the TaskForm modal
     } catch (error) {
       console.error('Failed to update task:', error);
     }
