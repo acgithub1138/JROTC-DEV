@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -9,7 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
-import { Edit, Calendar as CalendarIcon, User, Flag, MessageSquare, Check, X } from 'lucide-react';
+import { Edit, Calendar as CalendarIcon, User, Flag, MessageSquare, Check, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { Task } from '@/hooks/useTasks';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -39,6 +40,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
   const { priorityOptions } = useTaskPriorityOptions();
   const [newComment, setNewComment] = useState('');
   const [editState, setEditState] = useState<EditState>({ field: null, value: null });
+  const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('asc');
 
   const canEdit = userProfile?.role === 'instructor' || 
                   userProfile?.role === 'command_staff' || 
@@ -76,6 +78,10 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
     try {
       await updateTask(updateData);
       cancelEdit();
+      // Force a refresh of the task data by calling onEdit
+      if (field === 'description') {
+        onEdit({ ...task, [field]: editState.value });
+      }
     } catch (error) {
       console.error('Failed to update task:', error);
     }
@@ -233,6 +239,17 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
   const currentStatusOption = statusOptions.find(option => option.value === task.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === task.priority);
 
+  // Sort comments based on the selected order
+  const sortedComments = [...comments].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return commentsSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
+
+  const toggleSortOrder = () => {
+    setCommentsSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -365,7 +382,27 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
 
           {/* Comments Section */}
           <div>
-            <h3 className="text-lg font-semibold mb-4">Activity & Comments</h3>
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-lg font-semibold">Activity & Comments</h3>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSortOrder}
+                className="flex items-center gap-2"
+              >
+                {commentsSortOrder === 'asc' ? (
+                  <>
+                    <ArrowUp className="w-4 h-4" />
+                    Old to New
+                  </>
+                ) : (
+                  <>
+                    <ArrowDown className="w-4 h-4" />
+                    New to Old
+                  </>
+                )}
+              </Button>
+            </div>
             
             {/* Add Comment */}
             <div className="mb-6">
@@ -388,7 +425,7 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
 
             {/* Comments List */}
             <div className="space-y-4 max-h-64 overflow-y-auto">
-              {comments.map((comment) => (
+              {sortedComments.map((comment) => (
                 <div key={comment.id} className="border rounded-lg p-4">
                   <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
