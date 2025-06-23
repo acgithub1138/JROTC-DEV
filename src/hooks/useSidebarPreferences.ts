@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -62,9 +62,10 @@ export const useSidebarPreferences = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadPreferences = async () => {
+  const loadPreferences = useCallback(async () => {
     if (!userProfile?.id) return;
 
+    setIsLoading(true);
     try {
       const { data, error } = await supabase
         .from('user_sidebar_preferences')
@@ -97,7 +98,7 @@ export const useSidebarPreferences = () => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userProfile?.id, userProfile?.role]);
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
     if (!userProfile?.id) {
@@ -134,7 +135,7 @@ export const useSidebarPreferences = () => {
   };
 
   const resetToDefault = async () => {
-    if (!userProfile?.id) return;
+    if (!userProfile?.id) return false;
 
     try {
       await supabase
@@ -151,15 +152,20 @@ export const useSidebarPreferences = () => {
     }
   };
 
+  const refreshPreferences = useCallback(async () => {
+    await loadPreferences();
+  }, [loadPreferences]);
+
   useEffect(() => {
     loadPreferences();
-  }, [userProfile?.id, userProfile?.role]);
+  }, [loadPreferences]);
 
   return {
     menuItems,
     isLoading,
     savePreferences,
     resetToDefault,
+    refreshPreferences,
     getDefaultMenuItems: () => getDefaultMenuItemsForRole(userProfile?.role || 'cadet'),
   };
 };
