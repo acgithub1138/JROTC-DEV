@@ -8,6 +8,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Check, X, Edit, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { Task } from '@/hooks/useTasks';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 
 interface EditState {
   taskId: string | null;
@@ -40,6 +41,8 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   canEdit,
   users = []
 }) => {
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
   const isEditing = editState.taskId === task.id && editState.field === field;
 
   if (!canEdit) {
@@ -87,10 +90,11 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="not_started">Not Started</SelectItem>
-            <SelectItem value="working_on_it">Working On It</SelectItem>
-            <SelectItem value="stuck">Stuck</SelectItem>
-            <SelectItem value="done">Done</SelectItem>
+            {statusOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       );
@@ -109,11 +113,11 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
+            {priorityOptions.map((option) => (
+              <SelectItem key={option.value} value={option.value}>
+                {option.label}
+              </SelectItem>
+            ))}
           </SelectContent>
         </Select>
       );

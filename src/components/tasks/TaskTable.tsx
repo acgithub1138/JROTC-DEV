@@ -6,6 +6,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { format } from 'date-fns';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
 import { EditableCell } from './table/EditableCell';
@@ -15,26 +16,6 @@ interface TaskTableProps {
   onTaskSelect: (task: Task) => void;
   onEditTask: (task: Task) => void;
 }
-
-const priorityColors = {
-  low: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800',
-  critical: 'bg-purple-100 text-purple-800',
-};
-
-const statusColors = {
-  not_started: 'bg-gray-100 text-gray-800',
-  working_on_it: 'bg-blue-100 text-blue-800',
-  stuck: 'bg-red-100 text-red-800',
-  done: 'bg-green-100 text-green-800',
-  pending: 'bg-gray-100 text-gray-800',
-  in_progress: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
-  overdue: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800',
-};
 
 interface EditState {
   taskId: string | null;
@@ -46,10 +27,33 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
   const { userProfile } = useAuth();
   const { updateTask, deleteTask } = useTasks();
   const { users } = useSchoolUsers();
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
   const [editState, setEditState] = useState<EditState>({ taskId: null, field: null, value: null });
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
   const canEdit = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+
+  // Helper functions to get labels from options
+  const getStatusLabel = (statusValue: string) => {
+    const option = statusOptions.find(opt => opt.value === statusValue);
+    return option ? option.label : statusValue.replace('_', ' ');
+  };
+
+  const getPriorityLabel = (priorityValue: string) => {
+    const option = priorityOptions.find(opt => opt.value === priorityValue);
+    return option ? option.label : priorityValue;
+  };
+
+  const getStatusColorClass = (statusValue: string) => {
+    const option = statusOptions.find(opt => opt.value === statusValue);
+    return option ? option.color_class : 'bg-gray-100 text-gray-800';
+  };
+
+  const getPriorityColorClass = (priorityValue: string) => {
+    const option = priorityOptions.find(opt => opt.value === priorityValue);
+    return option ? option.color_class : 'bg-gray-100 text-gray-800';
+  };
 
   const handleSelectTask = (taskId: string, checked: boolean) => {
     if (checked) {
@@ -164,39 +168,45 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
                 />
               </TableCell>
               <TableCell>
-                <EditableCell
-                  task={task}
-                  field="status"
-                  value={task.status}
-                  displayValue=""
-                  editState={editState}
-                  setEditState={setEditState}
-                  onSave={saveEdit}
-                  onCancel={cancelEdit}
-                  canEdit={canEditTask(task)}
-                />
-                {!(editState.taskId === task.id && editState.field === 'status') && (
-                  <Badge className={statusColors[task.status as keyof typeof statusColors]}>
-                    {task.status.replace('_', ' ')}
-                  </Badge>
+                {editState.taskId === task.id && editState.field === 'status' ? (
+                  <EditableCell
+                    task={task}
+                    field="status"
+                    value={task.status}
+                    displayValue=""
+                    editState={editState}
+                    setEditState={setEditState}
+                    onSave={saveEdit}
+                    onCancel={cancelEdit}
+                    canEdit={canEditTask(task)}
+                  />
+                ) : (
+                  <div onClick={() => canEditTask(task) && setEditState({ taskId: task.id, field: 'status', value: task.status })}>
+                    <Badge className={getStatusColorClass(task.status)}>
+                      {getStatusLabel(task.status)}
+                    </Badge>
+                  </div>
                 )}
               </TableCell>
               <TableCell>
-                <EditableCell
-                  task={task}
-                  field="priority"
-                  value={task.priority}
-                  displayValue=""
-                  editState={editState}
-                  setEditState={setEditState}
-                  onSave={saveEdit}
-                  onCancel={cancelEdit}
-                  canEdit={canEditTask(task)}
-                />
-                {!(editState.taskId === task.id && editState.field === 'priority') && (
-                  <Badge className={priorityColors[task.priority as keyof typeof priorityColors]}>
-                    {task.priority}
-                  </Badge>
+                {editState.taskId === task.id && editState.field === 'priority' ? (
+                  <EditableCell
+                    task={task}
+                    field="priority"
+                    value={task.priority}
+                    displayValue=""
+                    editState={editState}
+                    setEditState={setEditState}
+                    onSave={saveEdit}
+                    onCancel={cancelEdit}
+                    canEdit={canEditTask(task)}
+                  />
+                ) : (
+                  <div onClick={() => canEditTask(task) && setEditState({ taskId: task.id, field: 'priority', value: task.priority })}>
+                    <Badge className={getPriorityColorClass(task.priority)}>
+                      {getPriorityLabel(task.priority)}
+                    </Badge>
+                  </div>
                 )}
               </TableCell>
               <TableCell>
