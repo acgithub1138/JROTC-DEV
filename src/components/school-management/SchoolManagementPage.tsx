@@ -1,0 +1,441 @@
+
+import React, { useState, useEffect } from 'react';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Label } from '@/components/ui/label';
+import { useToast } from '@/hooks/use-toast';
+import { 
+  Building2, 
+  Edit, 
+  Trash2, 
+  Search, 
+  Plus 
+} from 'lucide-react';
+
+interface School {
+  id: string;
+  name: string;
+  district?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  phone?: string;
+  email?: string;
+  created_at: string;
+}
+
+const SchoolManagementPage = () => {
+  const { userProfile } = useAuth();
+  const { toast } = useToast();
+  const [schools, setSchools] = useState<School[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [editingSchool, setEditingSchool] = useState<School | null>(null);
+  const [isCreating, setIsCreating] = useState(false);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
+
+  const emptySchool: Omit<School, 'id' | 'created_at'> = {
+    name: '',
+    district: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    phone: '',
+    email: '',
+  };
+
+  const fetchSchools = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('*')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setSchools(data || []);
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+      toast({
+        title: "Error",
+        description: "Failed to fetch schools",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    fetchSchools();
+  }, []);
+
+  const handleCreateSchool = () => {
+    setEditingSchool({ ...emptySchool, id: '', created_at: '' });
+    setIsCreating(true);
+    setEditDialogOpen(true);
+  };
+
+  const handleEditSchool = (school: School) => {
+    setEditingSchool(school);
+    setIsCreating(false);
+    setEditDialogOpen(true);
+  };
+
+  const handleSaveSchool = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingSchool) return;
+
+    try {
+      if (isCreating) {
+        const { error } = await supabase
+          .from('schools')
+          .insert([{
+            name: editingSchool.name,
+            district: editingSchool.district,
+            address: editingSchool.address,
+            city: editingSchool.city,
+            state: editingSchool.state,
+            zip_code: editingSchool.zip_code,
+            phone: editingSchool.phone,
+            email: editingSchool.email,
+          }]);
+
+        if (error) throw error;
+        toast({
+          title: "Success",
+          description: "School created successfully",
+        });
+      } else {
+        const { error } = await supabase
+          .from('schools')
+          .update({
+            name: editingSchool.name,
+            district: editingSchool.district,
+            address: editingSchool.address,
+            city: editingSchool.city,
+            state: editingSchool.state,
+            zip_code: editingSchool.zip_code,
+            phone: editingSchool.phone,
+            email: editingSchool.email,
+          })
+          .eq('id', editingSchool.id);
+
+        if (error) throw error;
+        toast({
+          title: "Success",
+          description: "School updated successfully",
+        });
+      }
+
+      setEditDialogOpen(false);
+      setEditingSchool(null);
+      fetchSchools();
+    } catch (error) {
+      console.error('Error saving school:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save school",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleDeleteSchool = async () => {
+    if (!schoolToDelete) return;
+
+    try {
+      const { error } = await supabase
+        .from('schools')
+        .delete()
+        .eq('id', schoolToDelete.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "School deleted successfully",
+      });
+
+      setDeleteDialogOpen(false);
+      setSchoolToDelete(null);
+      fetchSchools();
+    } catch (error) {
+      console.error('Error deleting school:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete school",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const filteredSchools = schools.filter(school =>
+    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.district?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.city?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
+  if (loading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse">
+          <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
+          <div className="space-y-4">
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">School Management</h2>
+          <p className="text-muted-foreground">
+            Manage schools in the system
+          </p>
+        </div>
+        <Button onClick={handleCreateSchool}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add School
+        </Button>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Building2 className="w-5 h-5" />
+            Schools ({filteredSchools.length})
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="flex items-center space-x-2 mb-4">
+            <div className="relative flex-1">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+              <Input
+                placeholder="Search schools..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
+            </div>
+          </div>
+
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Name</TableHead>
+                <TableHead>District</TableHead>
+                <TableHead>City</TableHead>
+                <TableHead>Phone</TableHead>
+                <TableHead>Email</TableHead>
+                <TableHead className="text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {filteredSchools.map((school) => (
+                <TableRow key={school.id}>
+                  <TableCell className="font-medium">{school.name}</TableCell>
+                  <TableCell>{school.district}</TableCell>
+                  <TableCell>{school.city}</TableCell>
+                  <TableCell>{school.phone}</TableCell>
+                  <TableCell>{school.email}</TableCell>
+                  <TableCell className="text-right">
+                    <div className="flex items-center justify-end gap-2">
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => handleEditSchool(school)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        variant="outline"
+                        size="sm"
+                        onClick={() => {
+                          setSchoolToDelete(school);
+                          setDeleteDialogOpen(true);
+                        }}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+
+          {filteredSchools.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
+              No schools found
+            </div>
+          )}
+        </CardContent>
+      </Card>
+
+      {/* Edit/Create School Dialog */}
+      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>{isCreating ? 'Create School' : 'Edit School'}</DialogTitle>
+          </DialogHeader>
+          {editingSchool && (
+            <form onSubmit={handleSaveSchool} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">School Name *</Label>
+                  <Input
+                    id="name"
+                    value={editingSchool.name}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      name: e.target.value
+                    })}
+                    required
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="district">District</Label>
+                  <Input
+                    id="district"
+                    value={editingSchool.district || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      district: e.target.value
+                    })}
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="address">Address</Label>
+                <Input
+                  id="address"
+                  value={editingSchool.address || ''}
+                  onChange={(e) => setEditingSchool({
+                    ...editingSchool,
+                    address: e.target.value
+                  })}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="city">City</Label>
+                  <Input
+                    id="city"
+                    value={editingSchool.city || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      city: e.target.value
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input
+                    id="state"
+                    value={editingSchool.state || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      state: e.target.value
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="zip_code">ZIP Code</Label>
+                  <Input
+                    id="zip_code"
+                    value={editingSchool.zip_code || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      zip_code: e.target.value
+                    })}
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="phone">Phone</Label>
+                  <Input
+                    id="phone"
+                    value={editingSchool.phone || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      phone: e.target.value
+                    })}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    value={editingSchool.email || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      email: e.target.value
+                    })}
+                  />
+                </div>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {isCreating ? 'Create School' : 'Update School'}
+                </Button>
+              </div>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete School Dialog */}
+      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Delete School</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p>Are you sure you want to delete this school? This action cannot be undone.</p>
+            {schoolToDelete && (
+              <div className="bg-gray-50 p-3 rounded">
+                <p><strong>Name:</strong> {schoolToDelete.name}</p>
+                <p><strong>District:</strong> {schoolToDelete.district}</p>
+                <p><strong>City:</strong> {schoolToDelete.city}</p>
+              </div>
+            )}
+            <div className="flex justify-end space-x-2">
+              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteSchool}>
+                Delete School
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </div>
+  );
+};
+
+export default SchoolManagementPage;

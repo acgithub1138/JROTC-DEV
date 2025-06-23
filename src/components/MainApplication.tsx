@@ -4,6 +4,7 @@ import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import UserAdminPage from '@/components/user-management/UserAdminPage';
+import SchoolManagementPage from '@/components/school-management/SchoolManagementPage';
 
 const MainApplication = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
@@ -14,6 +15,8 @@ const MainApplication = () => {
         return <DashboardOverview />;
       case 'user-admin':
         return <UserAdminPage />;
+      case 'school-management':
+        return <SchoolManagementPage />;
       case 'cadets':
         return (
           <div className="p-6">

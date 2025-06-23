@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +10,11 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
 
 type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+
+interface School {
+  id: string;
+  name: string;
+}
 
 interface CreateUserDialogProps {
   allowedRoles: UserRole[];
@@ -20,17 +26,44 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
   const { createUser, userProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
+  const [schools, setSchools] = useState<School[]>([]);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     role: '' as UserRole | '',
+    schoolId: '',
   });
+
+  const fetchSchools = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('id, name')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setSchools(data || []);
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+    }
+  };
+
+  useEffect(() => {
+    if (open) {
+      fetchSchools();
+      // Set default school to current user's school
+      setFormData(prev => ({
+        ...prev,
+        schoolId: userProfile?.school_id || ''
+      }));
+    }
+  }, [open, userProfile]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.role) return;
+    if (!formData.role || !formData.schoolId) return;
     
     setLoading(true);
     
@@ -38,7 +71,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
       first_name: formData.firstName,
       last_name: formData.lastName,
       role: formData.role,
-      school_id: userProfile?.school_id,
+      school_id: formData.schoolId,
     });
     
     if (!error) {
@@ -48,6 +81,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
         firstName: '',
         lastName: '',
         role: '',
+        schoolId: '',
       });
       setOpen(false);
       if (onUserCreated) {
@@ -155,6 +189,25 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
                       {getRoleIcon(role)}
                       <span className="ml-2">{getRoleLabel(role)}</span>
                     </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="school">School</Label>
+            <Select 
+              value={formData.schoolId} 
+              onValueChange={(value) => setFormData({ ...formData, schoolId: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select school" />
+              </SelectTrigger>
+              <SelectContent>
+                {schools.map((school) => (
+                  <SelectItem key={school.id} value={school.id}>
+                    {school.name}
                   </SelectItem>
                 ))}
               </SelectContent>
