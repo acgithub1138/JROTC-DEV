@@ -49,70 +49,46 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
           <div className="flex items-center gap-2">
             <Flag className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Priority:</span>
-            <div 
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
-              onClick={() => canEdit && onStartEdit('priority', task.priority)}
-            >
-              {editState.field === 'priority' ? (
-                <EditableField
-                  field="priority"
-                  currentValue={task.priority}
-                  displayValue=""
-                  type="select"
-                  options={priorityOptions}
-                  canEdit={canEdit}
-                  editState={editState}
-                  onStartEdit={onStartEdit}
-                  onCancelEdit={onCancelEdit}
-                  onSaveEdit={onSaveEdit}
-                  onEditStateChange={onEditStateChange}
-                  onQuickUpdate={onQuickUpdate}
-                />
-              ) : (
-                <>
-                  <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                    {currentPriorityOption?.label || task.priority}
-                  </Badge>
-                  {canEdit && (
-                    <MessageSquare className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-                  )}
-                </>
-              )}
-            </div>
+            <EditableField
+              field="priority"
+              currentValue={task.priority}
+              displayValue={
+                <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                  {currentPriorityOption?.label || task.priority}
+                </Badge>
+              }
+              type="select"
+              options={priorityOptions}
+              canEdit={canEdit}
+              editState={editState}
+              onStartEdit={onStartEdit}
+              onCancelEdit={onCancelEdit}
+              onSaveEdit={onSaveEdit}
+              onEditStateChange={onEditStateChange}
+              onQuickUpdate={onQuickUpdate}
+            />
           </div>
           <div className="flex items-center gap-2">
             <MessageSquare className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Status:</span>
-            <div 
-              className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
-              onClick={() => canEdit && onStartEdit('status', task.status)}
-            >
-              {editState.field === 'status' ? (
-                <EditableField
-                  field="status"
-                  currentValue={task.status}
-                  displayValue=""
-                  type="select"
-                  options={statusOptions}
-                  canEdit={canEdit}
-                  editState={editState}
-                  onStartEdit={onStartEdit}
-                  onCancelEdit={onCancelEdit}
-                  onSaveEdit={onSaveEdit}
-                  onEditStateChange={onEditStateChange}
-                  onQuickUpdate={onQuickUpdate}
-                />
-              ) : (
-                <>
-                  <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                    {currentStatusOption?.label || task.status.replace('_', ' ')}
-                  </Badge>
-                  {canEdit && (
-                    <MessageSquare className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-                  )}
-                </>
-              )}
-            </div>
+            <EditableField
+              field="status"
+              currentValue={task.status}
+              displayValue={
+                <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                  {currentStatusOption?.label || task.status.replace('_', ' ')}
+                </Badge>
+              }
+              type="select"
+              options={statusOptions}
+              canEdit={canEdit}
+              editState={editState}
+              onStartEdit={onStartEdit}
+              onCancelEdit={onCancelEdit}
+              onSaveEdit={onSaveEdit}
+              onEditStateChange={onEditStateChange}
+              onQuickUpdate={onQuickUpdate}
+            />
           </div>
           <div className="flex items-center gap-2">
             <CalendarIcon className="w-4 h-4 text-gray-500" />

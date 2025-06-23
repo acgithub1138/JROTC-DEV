@@ -12,7 +12,7 @@ import { EditState } from '../types/TaskDetailTypes';
 interface EditableFieldProps {
   field: string;
   currentValue: any;
-  displayValue: string;
+  displayValue: string | React.ReactNode;
   type?: 'text' | 'select' | 'date';
   options?: any[];
   canEdit: boolean;
@@ -41,7 +41,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const isEditing = editState.field === field;
 
   if (!canEdit) {
-    return <span className="text-sm font-medium">{displayValue}</span>;
+    return <div className="flex items-center">{displayValue}</div>;
   }
 
   if (isEditing) {
@@ -82,7 +82,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
             }
           }}
         >
-          <SelectTrigger className="h-8">
+          <SelectTrigger className="h-8 w-auto min-w-[120px]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
@@ -131,7 +131,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
       className="cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 flex items-center gap-2 group"
       onClick={() => onStartEdit(field, currentValue)}
     >
-      <span className="text-sm font-medium">{displayValue}</span>
+      <div className="flex items-center">{displayValue}</div>
       <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
     </div>
   );
