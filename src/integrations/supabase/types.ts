@@ -664,6 +664,7 @@ export type Database = {
           priority: Database["public"]["Enums"]["task_priority"]
           school_id: string
           status: Database["public"]["Enums"]["task_status"]
+          task_number: string | null
           team_id: string | null
           title: string
           updated_at: string
@@ -679,6 +680,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["task_priority"]
           school_id: string
           status?: Database["public"]["Enums"]["task_status"]
+          task_number?: string | null
           team_id?: string | null
           title: string
           updated_at?: string
@@ -694,6 +696,7 @@ export type Database = {
           priority?: Database["public"]["Enums"]["task_priority"]
           school_id?: string
           status?: Database["public"]["Enums"]["task_status"]
+          task_number?: string | null
           team_id?: string | null
           title?: string
           updated_at?: string
@@ -850,6 +853,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      generate_task_number: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string

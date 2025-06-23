@@ -19,6 +19,7 @@ export interface Task {
   completed_at: string | null;
   school_id: string;
   team_id: string | null;
+  task_number: string | null;
   assigned_to_profile?: {
     id: string;
     first_name: string;

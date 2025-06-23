@@ -249,6 +249,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead>Task #</TableHead>
             <TableHead>Task Name</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
@@ -261,6 +262,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
         <TableBody>
           {tasks.map((task) => (
             <TableRow key={task.id} className="group">
+              <TableCell className="font-mono text-sm">
+                {task.task_number || 'N/A'}
+              </TableCell>
               <TableCell className="font-medium">
                 {renderEditableCell(
                   task,
