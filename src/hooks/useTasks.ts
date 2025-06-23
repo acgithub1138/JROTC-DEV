@@ -73,7 +73,15 @@ export const useTasks = () => {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'assigned_to_profile' | 'assigned_by_profile'>) => {
+    mutationFn: async (taskData: {
+      title: string;
+      description?: string | null;
+      status: Task['status'];
+      priority: Task['priority'];
+      assigned_to?: string | null;
+      due_date?: string | null;
+      team_id?: string | null;
+    }) => {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
