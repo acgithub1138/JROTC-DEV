@@ -253,14 +253,15 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                   {editState.field === 'priority' ? (
                     renderEditableField('priority', task.priority, '', 'select', priorityOptions)
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div 
+                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
+                      onClick={() => canEdit && startEdit('priority', task.priority)}
+                    >
                       <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
                         {currentPriorityOption?.label || task.priority}
                       </Badge>
                       {canEdit && (
-                        <button onClick={() => startEdit('priority', task.priority)}>
-                          <Edit className="w-3 h-3 opacity-50 hover:opacity-100" />
-                        </button>
+                        <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
                       )}
                     </div>
                   )}
@@ -271,14 +272,15 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                   {editState.field === 'status' ? (
                     renderEditableField('status', task.status, '', 'select', statusOptions)
                   ) : (
-                    <div className="flex items-center gap-2">
+                    <div 
+                      className="flex items-center gap-2 cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 group"
+                      onClick={() => canEdit && startEdit('status', task.status)}
+                    >
                       <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
                         {currentStatusOption?.label || task.status.replace('_', ' ')}
                       </Badge>
                       {canEdit && (
-                        <button onClick={() => startEdit('status', task.status)}>
-                          <Edit className="w-3 h-3 opacity-50 hover:opacity-100" />
-                        </button>
+                        <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
                       )}
                     </div>
                   )}
