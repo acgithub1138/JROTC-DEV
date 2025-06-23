@@ -9,16 +9,824 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      budget: {
+        Row: {
+          allocated_amount: number
+          category: Database["public"]["Enums"]["budget_category"]
+          created_at: string
+          created_by: string | null
+          description: string | null
+          fiscal_year: number
+          id: string
+          name: string
+          school_id: string
+          spent_amount: number
+          updated_at: string
+        }
+        Insert: {
+          allocated_amount?: number
+          category: Database["public"]["Enums"]["budget_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fiscal_year: number
+          id?: string
+          name: string
+          school_id: string
+          spent_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          allocated_amount?: number
+          category?: Database["public"]["Enums"]["budget_category"]
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          fiscal_year?: number
+          id?: string
+          name?: string
+          school_id?: string
+          spent_amount?: number
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "budget_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "budget_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cadets: {
+        Row: {
+          attendance_percentage: number | null
+          cadet_id: string
+          created_at: string
+          date_of_birth: string | null
+          emergency_contact_name: string | null
+          emergency_contact_phone: string | null
+          enlistment_date: string | null
+          gpa: number | null
+          grade_level: number | null
+          graduation_date: string | null
+          id: string
+          medical_conditions: string | null
+          parent_email: string | null
+          parent_name: string | null
+          parent_phone: string | null
+          profile_id: string
+          school_id: string
+          uniform_size: string | null
+          updated_at: string
+        }
+        Insert: {
+          attendance_percentage?: number | null
+          cadet_id: string
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          enlistment_date?: string | null
+          gpa?: number | null
+          grade_level?: number | null
+          graduation_date?: string | null
+          id?: string
+          medical_conditions?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
+          profile_id: string
+          school_id: string
+          uniform_size?: string | null
+          updated_at?: string
+        }
+        Update: {
+          attendance_percentage?: number | null
+          cadet_id?: string
+          created_at?: string
+          date_of_birth?: string | null
+          emergency_contact_name?: string | null
+          emergency_contact_phone?: string | null
+          enlistment_date?: string | null
+          gpa?: number | null
+          grade_level?: number | null
+          graduation_date?: string | null
+          id?: string
+          medical_conditions?: string | null
+          parent_email?: string | null
+          parent_name?: string | null
+          parent_phone?: string | null
+          profile_id?: string
+          school_id?: string
+          uniform_size?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cadets_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cadets_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_results: {
+        Row: {
+          cadet_id: string | null
+          competition_id: string
+          created_at: string
+          id: string
+          notes: string | null
+          placement: number | null
+          school_id: string
+          score: number | null
+          team_id: string | null
+        }
+        Insert: {
+          cadet_id?: string | null
+          competition_id: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          placement?: number | null
+          school_id: string
+          score?: number | null
+          team_id?: string | null
+        }
+        Update: {
+          cadet_id?: string | null
+          competition_id?: string
+          created_at?: string
+          id?: string
+          notes?: string | null
+          placement?: number | null
+          school_id?: string
+          score?: number | null
+          team_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_results_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "cadets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_results_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_results_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_results_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competitions: {
+        Row: {
+          competition_date: string
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          registration_deadline: string | null
+          type: Database["public"]["Enums"]["competition_type"]
+          updated_at: string
+        }
+        Insert: {
+          competition_date: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          registration_deadline?: string | null
+          type: Database["public"]["Enums"]["competition_type"]
+          updated_at?: string
+        }
+        Update: {
+          competition_date?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          registration_deadline?: string | null
+          type?: Database["public"]["Enums"]["competition_type"]
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contacts: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          created_by: string | null
+          email: string | null
+          first_name: string
+          id: string
+          last_name: string
+          notes: string | null
+          organization: string | null
+          phone: string | null
+          school_id: string
+          state: string | null
+          title: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name: string
+          id?: string
+          last_name: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          school_id: string
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          created_by?: string | null
+          email?: string | null
+          first_name?: string
+          id?: string
+          last_name?: string
+          notes?: string | null
+          organization?: string | null
+          phone?: string | null
+          school_id?: string
+          state?: string | null
+          title?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "contacts_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "contacts_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      expenses: {
+        Row: {
+          amount: number
+          approved_at: string | null
+          approved_by: string | null
+          budget_id: string
+          created_at: string
+          created_by: string | null
+          description: string
+          expense_date: string
+          id: string
+          receipt_url: string | null
+          school_id: string
+          vendor: string | null
+        }
+        Insert: {
+          amount: number
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_id: string
+          created_at?: string
+          created_by?: string | null
+          description: string
+          expense_date: string
+          id?: string
+          receipt_url?: string | null
+          school_id: string
+          vendor?: string | null
+        }
+        Update: {
+          amount?: number
+          approved_at?: string | null
+          approved_by?: string | null
+          budget_id?: string
+          created_at?: string
+          created_by?: string | null
+          description?: string
+          expense_date?: string
+          id?: string
+          receipt_url?: string | null
+          school_id?: string
+          vendor?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "expenses_approved_by_fkey"
+            columns: ["approved_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_budget_id_fkey"
+            columns: ["budget_id"]
+            isOneToOne: false
+            referencedRelation: "budget"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "expenses_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_checkout: {
+        Row: {
+          cadet_id: string
+          checked_in_at: string | null
+          checked_in_by: string | null
+          checked_out_at: string
+          checked_out_by: string | null
+          condition_on_return: string | null
+          expected_return_date: string | null
+          id: string
+          item_id: string
+          notes: string | null
+        }
+        Insert: {
+          cadet_id: string
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          checked_out_at?: string
+          checked_out_by?: string | null
+          condition_on_return?: string | null
+          expected_return_date?: string | null
+          id?: string
+          item_id: string
+          notes?: string | null
+        }
+        Update: {
+          cadet_id?: string
+          checked_in_at?: string | null
+          checked_in_by?: string | null
+          checked_out_at?: string
+          checked_out_by?: string | null
+          condition_on_return?: string | null
+          expected_return_date?: string | null
+          id?: string
+          item_id?: string
+          notes?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_checkout_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "cadets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_checkout_checked_in_by_fkey"
+            columns: ["checked_in_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_checkout_checked_out_by_fkey"
+            columns: ["checked_out_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "inventory_checkout_item_id_fkey"
+            columns: ["item_id"]
+            isOneToOne: false
+            referencedRelation: "inventory_items"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      inventory_items: {
+        Row: {
+          category: string | null
+          condition: string | null
+          created_at: string
+          description: string | null
+          id: string
+          location: string | null
+          name: string
+          notes: string | null
+          purchase_date: string | null
+          purchase_price: number | null
+          school_id: string
+          serial_number: string | null
+          status: Database["public"]["Enums"]["inventory_status"]
+          updated_at: string
+        }
+        Insert: {
+          category?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name: string
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          school_id: string
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["inventory_status"]
+          updated_at?: string
+        }
+        Update: {
+          category?: string | null
+          condition?: string | null
+          created_at?: string
+          description?: string | null
+          id?: string
+          location?: string | null
+          name?: string
+          notes?: string | null
+          purchase_date?: string | null
+          purchase_price?: number | null
+          school_id?: string
+          serial_number?: string | null
+          status?: Database["public"]["Enums"]["inventory_status"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "inventory_items_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone: string | null
+          rank: Database["public"]["Enums"]["rank_type"] | null
+          role: Database["public"]["Enums"]["user_role"]
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          first_name: string
+          id: string
+          last_name: string
+          phone?: string | null
+          rank?: Database["public"]["Enums"]["rank_type"] | null
+          role?: Database["public"]["Enums"]["user_role"]
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          first_name?: string
+          id?: string
+          last_name?: string
+          phone?: string | null
+          rank?: Database["public"]["Enums"]["rank_type"] | null
+          role?: Database["public"]["Enums"]["user_role"]
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "profiles_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      schools: {
+        Row: {
+          address: string | null
+          city: string | null
+          created_at: string
+          district: string | null
+          email: string | null
+          id: string
+          name: string
+          phone: string | null
+          state: string | null
+          updated_at: string
+          zip_code: string | null
+        }
+        Insert: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Update: {
+          address?: string | null
+          city?: string | null
+          created_at?: string
+          district?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          phone?: string | null
+          state?: string | null
+          updated_at?: string
+          zip_code?: string | null
+        }
+        Relationships: []
+      }
+      tasks: {
+        Row: {
+          assigned_by: string | null
+          assigned_to: string | null
+          completed_at: string | null
+          created_at: string
+          description: string | null
+          due_date: string | null
+          id: string
+          priority: Database["public"]["Enums"]["task_priority"]
+          school_id: string
+          status: Database["public"]["Enums"]["task_status"]
+          team_id: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          school_id: string
+          status?: Database["public"]["Enums"]["task_status"]
+          team_id?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_by?: string | null
+          assigned_to?: string | null
+          completed_at?: string | null
+          created_at?: string
+          description?: string | null
+          due_date?: string | null
+          id?: string
+          priority?: Database["public"]["Enums"]["task_priority"]
+          school_id?: string
+          status?: Database["public"]["Enums"]["task_status"]
+          team_id?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "tasks_assigned_by_fkey"
+            columns: ["assigned_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_assigned_to_fkey"
+            columns: ["assigned_to"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "tasks_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      team_members: {
+        Row: {
+          cadet_id: string
+          id: string
+          joined_at: string
+          role: string | null
+          team_id: string
+        }
+        Insert: {
+          cadet_id: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          team_id: string
+        }
+        Update: {
+          cadet_id?: string
+          id?: string
+          joined_at?: string
+          role?: string | null
+          team_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "team_members_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "cadets"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "team_members_team_id_fkey"
+            columns: ["team_id"]
+            isOneToOne: false
+            referencedRelation: "teams"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      teams: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          name: string
+          school_id: string
+          team_lead_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name: string
+          school_id: string
+          team_lead_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          name?: string
+          school_id?: string
+          team_lead_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "teams_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "teams_team_lead_id_fkey"
+            columns: ["team_lead_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      get_user_school_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
     }
     Enums: {
-      [_ in never]: never
+      budget_category:
+        | "equipment"
+        | "uniforms"
+        | "travel"
+        | "competition"
+        | "training"
+        | "administrative"
+        | "other"
+      competition_type:
+        | "drill"
+        | "marksmanship"
+        | "academic"
+        | "leadership"
+        | "physical_fitness"
+        | "inspection"
+      inventory_status:
+        | "available"
+        | "checked_out"
+        | "maintenance"
+        | "damaged"
+        | "lost"
+      rank_type:
+        | "cadet_private"
+        | "cadet_private_first_class"
+        | "cadet_corporal"
+        | "cadet_sergeant"
+        | "cadet_staff_sergeant"
+        | "cadet_sergeant_first_class"
+        | "cadet_master_sergeant"
+        | "cadet_first_sergeant"
+        | "cadet_sergeant_major"
+        | "cadet_second_lieutenant"
+        | "cadet_first_lieutenant"
+        | "cadet_captain"
+        | "cadet_major"
+        | "cadet_lieutenant_colonel"
+        | "cadet_colonel"
+      task_priority: "low" | "medium" | "high" | "urgent"
+      task_status:
+        | "pending"
+        | "in_progress"
+        | "completed"
+        | "overdue"
+        | "cancelled"
+      user_role: "school_admin" | "instructor" | "nco" | "cadet"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +941,57 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      budget_category: [
+        "equipment",
+        "uniforms",
+        "travel",
+        "competition",
+        "training",
+        "administrative",
+        "other",
+      ],
+      competition_type: [
+        "drill",
+        "marksmanship",
+        "academic",
+        "leadership",
+        "physical_fitness",
+        "inspection",
+      ],
+      inventory_status: [
+        "available",
+        "checked_out",
+        "maintenance",
+        "damaged",
+        "lost",
+      ],
+      rank_type: [
+        "cadet_private",
+        "cadet_private_first_class",
+        "cadet_corporal",
+        "cadet_sergeant",
+        "cadet_staff_sergeant",
+        "cadet_sergeant_first_class",
+        "cadet_master_sergeant",
+        "cadet_first_sergeant",
+        "cadet_sergeant_major",
+        "cadet_second_lieutenant",
+        "cadet_first_lieutenant",
+        "cadet_captain",
+        "cadet_major",
+        "cadet_lieutenant_colonel",
+        "cadet_colonel",
+      ],
+      task_priority: ["low", "medium", "high", "urgent"],
+      task_status: [
+        "pending",
+        "in_progress",
+        "completed",
+        "overdue",
+        "cancelled",
+      ],
+      user_role: ["school_admin", "instructor", "nco", "cadet"],
+    },
   },
 } as const
