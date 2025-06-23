@@ -37,8 +37,6 @@ const getMenuItemsForRole = (role: string) => {
         ...baseItems,
         { id: 'user-admin', label: 'User Management', icon: UserCog },
         { id: 'school-management', label: 'School Management', icon: Building2 },
-        { id: 'cadets', label: 'Cadets', icon: Users },
-        { id: 'teams', label: 'Teams', icon: Shield },
         { id: 'tasks', label: 'Tasks', icon: CheckSquare },
         { id: 'settings', label: 'Settings', icon: Settings },
       ];
