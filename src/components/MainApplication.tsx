@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Sidebar } from '@/components/layout/Sidebar';
 import { Header } from '@/components/layout/Header';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
+import UserAdminPage from '@/components/user-management/UserAdminPage';
 
 const MainApplication = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
@@ -11,6 +12,8 @@ const MainApplication = () => {
     switch (activeModule) {
       case 'dashboard':
         return <DashboardOverview />;
+      case 'user-admin':
+        return <UserAdminPage />;
       case 'cadets':
         return (
           <div className="p-6">

@@ -3,6 +3,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { useAuth } from '@/contexts/AuthContext';
 import {
   Users,
   CheckSquare,
@@ -16,6 +17,7 @@ import {
   Calendar,
   FileText,
   Home,
+  UserCog,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -24,22 +26,59 @@ interface SidebarProps {
   onModuleChange: (module: string) => void;
 }
 
-const menuItems = [
-  { id: 'dashboard', label: 'Dashboard', icon: Home },
-  { id: 'cadets', label: 'Cadets', icon: Users },
-  { id: 'teams', label: 'Teams', icon: Shield },
-  { id: 'tasks', label: 'Tasks', icon: CheckSquare },
-  { id: 'budget', label: 'Budget', icon: DollarSign },
-  { id: 'inventory', label: 'Inventory', icon: Package },
-  { id: 'contacts', label: 'Contacts', icon: Contact },
-  { id: 'competitions', label: 'Competitions', icon: Trophy },
-  { id: 'reports', label: 'Reports', icon: BarChart3 },
-  { id: 'calendar', label: 'Calendar', icon: Calendar },
-  { id: 'documents', label: 'Documents', icon: FileText },
-  { id: 'settings', label: 'Settings', icon: Settings },
-];
+const getMenuItemsForRole = (role: string) => {
+  const baseItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: Home },
+  ];
+
+  switch (role) {
+    case 'school_admin':
+      return [
+        ...baseItems,
+        { id: 'user-admin', label: 'User Management', icon: UserCog },
+        { id: 'cadets', label: 'Cadets', icon: Users },
+        { id: 'teams', label: 'Teams', icon: Shield },
+        { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
+    
+    case 'instructor':
+      return [
+        ...baseItems,
+        { id: 'cadets', label: 'Cadets', icon: Users },
+        { id: 'teams', label: 'Teams', icon: Shield },
+        { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+        { id: 'budget', label: 'Budget', icon: DollarSign },
+        { id: 'inventory', label: 'Inventory', icon: Package },
+        { id: 'contacts', label: 'Contacts', icon: Contact },
+        { id: 'competitions', label: 'Competitions', icon: Trophy },
+        { id: 'reports', label: 'Reports', icon: BarChart3 },
+        { id: 'calendar', label: 'Calendar', icon: Calendar },
+        { id: 'documents', label: 'Documents', icon: FileText },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
+    
+    case 'nco':
+    case 'cadet':
+      return [
+        ...baseItems,
+        { id: 'cadets', label: 'Cadets', icon: Users },
+        { id: 'teams', label: 'Teams', icon: Shield },
+        { id: 'tasks', label: 'Tasks', icon: CheckSquare },
+        { id: 'competitions', label: 'Competitions', icon: Trophy },
+        { id: 'calendar', label: 'Calendar', icon: Calendar },
+        { id: 'settings', label: 'Settings', icon: Settings },
+      ];
+    
+    default:
+      return baseItems;
+  }
+};
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
+  const { userProfile } = useAuth();
+  const menuItems = getMenuItemsForRole(userProfile?.role || 'cadet');
+
   return (
     <div className={cn('bg-gray-900 text-white flex flex-col', className)}>
       <div className="p-6">
