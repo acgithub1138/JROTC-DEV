@@ -31,13 +31,20 @@ interface User {
   email: string;
   role: UserRole;
   created_at: string;
+  school_id: string;
   schools?: { name: string };
+}
+
+interface School {
+  id: string;
+  name: string;
 }
 
 const UserAdminPage = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const [users, setUsers] = useState<User[]>([]);
+  const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [editingUser, setEditingUser] = useState<User | null>(null);
@@ -56,6 +63,7 @@ const UserAdminPage = () => {
           email,
           role,
           created_at,
+          school_id,
           schools (name)
         `)
         .eq('school_id', userProfile?.school_id)
@@ -75,9 +83,24 @@ const UserAdminPage = () => {
     }
   };
 
+  const fetchSchools = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('id, name')
+        .order('name', { ascending: true });
+
+      if (error) throw error;
+      setSchools(data || []);
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+    }
+  };
+
   useEffect(() => {
     if (userProfile?.school_id) {
       fetchUsers();
+      fetchSchools();
     }
   }, [userProfile]);
 
@@ -86,17 +109,35 @@ const UserAdminPage = () => {
     if (!editingUser) return;
 
     try {
-      const { error } = await supabase
+      // Update user metadata in auth.users table
+      const { error: authError } = await supabase.auth.admin.updateUserById(
+        editingUser.id,
+        {
+          email: editingUser.email,
+          user_metadata: {
+            first_name: editingUser.first_name,
+            last_name: editingUser.last_name,
+            role: editingUser.role,
+            school_id: editingUser.school_id,
+          }
+        }
+      );
+
+      if (authError) throw authError;
+
+      // Update profile in profiles table
+      const { error: profileError } = await supabase
         .from('profiles')
         .update({
           first_name: editingUser.first_name,
           last_name: editingUser.last_name,
           email: editingUser.email,
           role: editingUser.role,
+          school_id: editingUser.school_id,
         })
         .eq('id', editingUser.id);
 
-      if (error) throw error;
+      if (profileError) throw profileError;
 
       toast({
         title: "Success",
@@ -120,28 +161,26 @@ const UserAdminPage = () => {
     if (!userToDelete) return;
 
     try {
-      // Instead of using admin.deleteUser, we'll just delete from profiles
-      // The user will still exist in auth.users but won't be able to access the app
-      const { error } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userToDelete.id);
+      // Delete user from auth.users table (this will cascade to profiles due to foreign key)
+      const { error: authError } = await supabase.auth.admin.deleteUser(
+        userToDelete.id
+      );
 
-      if (error) throw error;
+      if (authError) throw authError;
 
       toast({
         title: "Success",
-        description: "User removed from the system successfully",
+        description: "User deleted successfully",
       });
 
       setDeleteDialogOpen(false);
       setUserToDelete(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error removing user:', error);
+      console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to remove user",
+        description: "Failed to delete user",
         variant: "destructive",
       });
     }
@@ -170,8 +209,7 @@ const UserAdminPage = () => {
   };
 
   const getAllowedRoles = (): UserRole[] => {
-    // Only allow creating instructors for now since admin functions aren't available
-    return ['instructor', 'cadet'];
+    return ['admin', 'instructor', 'command_staff', 'cadet', 'parent'];
   };
 
   const filteredUsers = users.filter(user =>
@@ -243,6 +281,7 @@ const UserAdminPage = () => {
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
+                <TableHead>School</TableHead>
                 <TableHead>Created</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
@@ -259,6 +298,9 @@ const UserAdminPage = () => {
                       {getRoleIcon(user.role)}
                       {user.role.replace('_', ' ').toUpperCase()}
                     </Badge>
+                  </TableCell>
+                  <TableCell>
+                    {user.schools?.name || 'No school assigned'}
                   </TableCell>
                   <TableCell>
                     {new Date(user.created_at).toLocaleDateString()}
@@ -370,6 +412,28 @@ const UserAdminPage = () => {
                   </SelectContent>
                 </Select>
               </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="edit-school">School</Label>
+                <Select 
+                  value={editingUser.school_id} 
+                  onValueChange={(value) => setEditingUser({
+                    ...editingUser,
+                    school_id: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select school" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {schools.map((school) => (
+                      <SelectItem key={school.id} value={school.id}>
+                        {school.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
@@ -388,10 +452,10 @@ const UserAdminPage = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Remove User</DialogTitle>
+            <DialogTitle>Delete User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Are you sure you want to remove this user from the system? This will remove their access but their account will still exist.</p>
+            <p>Are you sure you want to permanently delete this user? This action cannot be undone.</p>
             {userToDelete && (
               <div className="bg-gray-50 p-3 rounded">
                 <p><strong>Name:</strong> {userToDelete.first_name} {userToDelete.last_name}</p>
@@ -404,7 +468,7 @@ const UserAdminPage = () => {
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleDeleteUser}>
-                Remove User
+                Delete User
               </Button>
             </div>
           </div>
