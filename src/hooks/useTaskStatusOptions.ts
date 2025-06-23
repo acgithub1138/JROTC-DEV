@@ -1,7 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 export interface TaskStatusOption {
@@ -11,16 +10,14 @@ export interface TaskStatusOption {
   color_class: string;
   sort_order: number;
   is_active: boolean;
-  school_id: string;
 }
 
 export const useTaskStatusOptions = () => {
-  const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: statusOptions = [], isLoading } = useQuery({
-    queryKey: ['task-status-options', userProfile?.school_id],
+    queryKey: ['task-status-options'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_status_options')
@@ -31,17 +28,13 @@ export const useTaskStatusOptions = () => {
       if (error) throw error;
       return data as TaskStatusOption[];
     },
-    enabled: !!userProfile?.school_id,
   });
 
   const createStatusOption = useMutation({
-    mutationFn: async (optionData: Omit<TaskStatusOption, 'id' | 'school_id'>) => {
+    mutationFn: async (optionData: Omit<TaskStatusOption, 'id'>) => {
       const { data, error } = await supabase
         .from('task_status_options')
-        .insert({
-          ...optionData,
-          school_id: userProfile?.school_id,
-        })
+        .insert(optionData)
         .select()
         .single();
 

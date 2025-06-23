@@ -1,7 +1,6 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 
 export interface TaskPriorityOption {
@@ -11,16 +10,14 @@ export interface TaskPriorityOption {
   color_class: string;
   sort_order: number;
   is_active: boolean;
-  school_id: string;
 }
 
 export const useTaskPriorityOptions = () => {
-  const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
   const { data: priorityOptions = [], isLoading } = useQuery({
-    queryKey: ['task-priority-options', userProfile?.school_id],
+    queryKey: ['task-priority-options'],
     queryFn: async () => {
       const { data, error } = await supabase
         .from('task_priority_options')
@@ -31,17 +28,13 @@ export const useTaskPriorityOptions = () => {
       if (error) throw error;
       return data as TaskPriorityOption[];
     },
-    enabled: !!userProfile?.school_id,
   });
 
   const createPriorityOption = useMutation({
-    mutationFn: async (optionData: Omit<TaskPriorityOption, 'id' | 'school_id'>) => {
+    mutationFn: async (optionData: Omit<TaskPriorityOption, 'id'>) => {
       const { data, error } = await supabase
         .from('task_priority_options')
-        .insert({
-          ...optionData,
-          school_id: userProfile?.school_id,
-        })
+        .insert(optionData)
         .select()
         .single();
 

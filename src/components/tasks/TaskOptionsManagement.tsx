@@ -9,14 +9,20 @@ import { PriorityOptionsTab } from './options/PriorityOptionsTab';
 const TaskOptionsManagement: React.FC = () => {
   const { userProfile } = useAuth();
 
-  // Only show for admin users
+  // Only show for admin users since options are now global
   if (userProfile?.role !== 'admin') {
     return (
       <Card>
         <CardHeader>
           <CardTitle>Task Options Management</CardTitle>
-          <CardDescription>Access restricted to administrators</CardDescription>
+          <CardDescription>Access restricted to administrators only</CardDescription>
         </CardHeader>
+        <CardContent>
+          <p className="text-sm text-gray-600">
+            Task status and priority options are managed globally by administrators. 
+            Contact your administrator if you need changes to the available options.
+          </p>
+        </CardContent>
       </Card>
     );
   }
@@ -25,7 +31,7 @@ const TaskOptionsManagement: React.FC = () => {
     <Card>
       <CardHeader>
         <CardTitle>Task Options Management</CardTitle>
-        <CardDescription>Manage status and priority options for tasks</CardDescription>
+        <CardDescription>Manage global status and priority options for all tasks</CardDescription>
       </CardHeader>
       <CardContent>
         <Tabs defaultValue="status" className="w-full">
