@@ -8,7 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
 
-type UserRole = 'school_admin' | 'instructor' | 'nco' | 'cadet';
+type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
 
 interface CreateUserDialogProps {
   allowedRoles: UserRole[];
@@ -57,8 +57,10 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
       case 'instructor': return <Shield className="w-4 h-4" />;
-      case 'nco': return <Users className="w-4 h-4" />;
+      case 'command_staff': return <Users className="w-4 h-4" />;
       case 'cadet': return <GraduationCap className="w-4 h-4" />;
+      case 'admin': return <Shield className="w-4 h-4" />;
+      case 'parent': return <Users className="w-4 h-4" />;
       default: return <UserPlus className="w-4 h-4" />;
     }
   };
@@ -66,8 +68,10 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
   const getRoleLabel = (role: UserRole) => {
     switch (role) {
       case 'instructor': return 'Instructor';
-      case 'nco': return 'NCO (Command Staff)';
+      case 'command_staff': return 'Command Staff';
       case 'cadet': return 'Cadet';
+      case 'admin': return 'Admin';
+      case 'parent': return 'Parent';
       default: return role;
     }
   };

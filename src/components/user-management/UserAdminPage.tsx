@@ -22,7 +22,7 @@ import {
 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
 
-type UserRole = 'school_admin' | 'instructor' | 'nco' | 'cadet';
+type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
 
 interface User {
   id: string;
@@ -144,20 +144,22 @@ const UserAdminPage = () => {
 
   const getRoleIcon = (role: UserRole) => {
     switch (role) {
-      case 'school_admin': return <Shield className="w-4 h-4" />;
+      case 'admin': return <Shield className="w-4 h-4" />;
       case 'instructor': return <Shield className="w-4 h-4" />;
-      case 'nco': return <Users className="w-4 h-4" />;
+      case 'command_staff': return <Users className="w-4 h-4" />;
       case 'cadet': return <GraduationCap className="w-4 h-4" />;
+      case 'parent': return <Users className="w-4 h-4" />;
       default: return <Users className="w-4 h-4" />;
     }
   };
 
   const getRoleColor = (role: UserRole) => {
     switch (role) {
-      case 'school_admin': return 'bg-red-100 text-red-800';
+      case 'admin': return 'bg-red-100 text-red-800';
       case 'instructor': return 'bg-blue-100 text-blue-800';
-      case 'nco': return 'bg-green-100 text-green-800';
+      case 'command_staff': return 'bg-green-100 text-green-800';
       case 'cadet': return 'bg-gray-100 text-gray-800';
+      case 'parent': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };

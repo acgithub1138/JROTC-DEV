@@ -32,7 +32,7 @@ const getMenuItemsForRole = (role: string) => {
   ];
 
   switch (role) {
-    case 'school_admin':
+    case 'admin':
       return [
         ...baseItems,
         { id: 'user-admin', label: 'User Management', icon: UserCog },
@@ -58,7 +58,7 @@ const getMenuItemsForRole = (role: string) => {
         { id: 'settings', label: 'Settings', icon: Settings },
       ];
     
-    case 'nco':
+    case 'command_staff':
     case 'cadet':
       return [
         ...baseItems,

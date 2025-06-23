@@ -13,6 +13,8 @@ import {
 import { Bell, Search, User, LogOut, Settings } from 'lucide-react';
 import CreateUserDialog from '@/components/user-management/CreateUserDialog';
 
+type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+
 interface HeaderProps {
   activeModule: string;
 }
@@ -40,26 +42,27 @@ export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
 
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'school_admin': return 'bg-red-100 text-red-800';
+      case 'admin': return 'bg-red-100 text-red-800';
       case 'instructor': return 'bg-blue-100 text-blue-800';
-      case 'nco': return 'bg-green-100 text-green-800';
+      case 'command_staff': return 'bg-green-100 text-green-800';
       case 'cadet': return 'bg-gray-100 text-gray-800';
+      case 'parent': return 'bg-purple-100 text-purple-800';
       default: return 'bg-gray-100 text-gray-800';
     }
   };
 
-  const getAllowedRoles = () => {
+  const getAllowedRoles = (): UserRole[] => {
     switch (userProfile?.role) {
-      case 'school_admin':
+      case 'admin':
         return ['instructor'];
       case 'instructor':
-        return ['nco', 'cadet'];
+        return ['command_staff', 'cadet'];
       default:
         return [];
     }
   };
 
-  const canCreateUsers = ['school_admin', 'instructor'].includes(userProfile?.role);
+  const canCreateUsers = ['admin', 'instructor'].includes(userProfile?.role);
 
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
