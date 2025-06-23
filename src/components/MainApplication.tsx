@@ -5,6 +5,7 @@ import { Header } from '@/components/layout/Header';
 import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import UserAdminPage from '@/components/user-management/UserAdminPage';
 import SchoolManagementPage from '@/components/school-management/SchoolManagementPage';
+import TaskManagementPage from '@/components/tasks/TaskManagementPage';
 
 const MainApplication = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
@@ -17,6 +18,8 @@ const MainApplication = () => {
         return <UserAdminPage />;
       case 'school-management':
         return <SchoolManagementPage />;
+      case 'tasks':
+        return <TaskManagementPage />;
       case 'cadets':
         return (
           <div className="p-6">
@@ -29,13 +32,6 @@ const MainApplication = () => {
           <div className="p-6">
             <h2 className="text-2xl font-bold mb-4">Team Management</h2>
             <p className="text-gray-600">Team management module coming soon...</p>
-          </div>
-        );
-      case 'tasks':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Task Management</h2>
-            <p className="text-gray-600">Task management module coming soon...</p>
           </div>
         );
       case 'budget':

@@ -610,6 +610,48 @@ export type Database = {
         }
         Relationships: []
       }
+      task_comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          id: string
+          is_system_comment: boolean
+          task_id: string
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          id?: string
+          is_system_comment?: boolean
+          task_id: string
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          id?: string
+          is_system_comment?: boolean
+          task_id?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "task_comments_task_id_fkey"
+            columns: ["task_id"]
+            isOneToOne: false
+            referencedRelation: "tasks"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "task_comments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       tasks: {
         Row: {
           assigned_by: string | null
@@ -859,13 +901,17 @@ export type Database = {
         | "cadet_major"
         | "cadet_lieutenant_colonel"
         | "cadet_colonel"
-      task_priority: "low" | "medium" | "high" | "urgent"
+      task_priority: "low" | "medium" | "high" | "urgent" | "critical"
       task_status:
         | "pending"
         | "in_progress"
         | "completed"
         | "overdue"
         | "cancelled"
+        | "not_started"
+        | "working_on_it"
+        | "stuck"
+        | "done"
       user_role: "admin" | "instructor" | "command_staff" | "cadet" | "parent"
     }
     CompositeTypes: {
@@ -1023,13 +1069,17 @@ export const Constants = {
         "cadet_lieutenant_colonel",
         "cadet_colonel",
       ],
-      task_priority: ["low", "medium", "high", "urgent"],
+      task_priority: ["low", "medium", "high", "urgent", "critical"],
       task_status: [
         "pending",
         "in_progress",
         "completed",
         "overdue",
         "cancelled",
+        "not_started",
+        "working_on_it",
+        "stuck",
+        "done",
       ],
       user_role: ["admin", "instructor", "command_staff", "cadet", "parent"],
     },
