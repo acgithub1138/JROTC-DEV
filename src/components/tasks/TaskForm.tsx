@@ -112,10 +112,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
               <Label htmlFor="assigned_to">Assigned To</Label>
               <Select value={form.watch('assigned_to')} onValueChange={(value) => form.setValue('assigned_to', value)}>
                 <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
+                  <SelectValue placeholder="Select assignee (optional)" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.first_name} {user.last_name} ({user.role})
