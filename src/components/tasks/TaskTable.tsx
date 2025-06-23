@@ -131,7 +131,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               setEditState({ ...editState, value });
               // Auto-save for select fields
               setTimeout(() => {
-                updateTask({ id: task.id, status: value });
+                updateTask({ id: task.id, status: value as Task['status'] });
                 cancelEdit();
               }, 100);
             }}
@@ -157,7 +157,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               setEditState({ ...editState, value });
               // Auto-save for select fields
               setTimeout(() => {
-                updateTask({ id: task.id, priority: value });
+                updateTask({ id: task.id, priority: value as Task['priority'] });
                 cancelEdit();
               }, 100);
             }}
