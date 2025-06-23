@@ -126,9 +126,10 @@ export const EditableCell: React.FC<EditableCellProps> = ({
     if (field === 'assigned_to') {
       return (
         <Select
-          value={editState.value || ''}
+          value={editState.value || 'unassigned'}
           onValueChange={(value) => {
-            setEditState({ ...editState, value: value || null });
+            const actualValue = value === 'unassigned' ? null : value;
+            setEditState({ ...editState, value: actualValue });
             setTimeout(() => onSave(task), 100);
           }}
         >
@@ -136,7 +137,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             <SelectValue placeholder="Unassigned" />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="">Unassigned</SelectItem>
+            <SelectItem value="unassigned">Unassigned</SelectItem>
             {users.map((user) => (
               <SelectItem key={user.id} value={user.id}>
                 {user.first_name} {user.last_name}
