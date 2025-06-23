@@ -1,8 +1,19 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+
+interface School {
+  id: string;
+  name: string;
+  district?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip_code?: string;
+  phone?: string;
+  email?: string;
+}
 
 interface Profile {
   id: string;
@@ -13,6 +24,7 @@ interface Profile {
   school_id: string;
   phone?: string;
   rank?: string;
+  schools?: School;
 }
 
 interface AuthContextType {
@@ -47,7 +59,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          schools (
+            id,
+            name,
+            district,
+            address,
+            city,
+            state,
+            zip_code,
+            phone,
+            email
+          )
+        `)
         .eq('id', userId)
         .single();
 
