@@ -18,6 +18,7 @@ interface OptionFormData {
   label: string;
   color_class: string;
   sort_order: number;
+  is_active: boolean;
 }
 
 const TaskOptionsManagement: React.FC = () => {
@@ -35,14 +36,16 @@ const TaskOptionsManagement: React.FC = () => {
     value: '',
     label: '',
     color_class: 'bg-gray-100 text-gray-800',
-    sort_order: 0
+    sort_order: 0,
+    is_active: true
   });
   
   const [priorityForm, setPriorityForm] = useState<OptionFormData>({
     value: '',
     label: '',
     color_class: 'bg-gray-100 text-gray-800',
-    sort_order: 0
+    sort_order: 0,
+    is_active: true
   });
 
   // Only show for admin users
@@ -76,7 +79,7 @@ const TaskOptionsManagement: React.FC = () => {
     }
     setStatusDialogOpen(false);
     setEditingStatus(null);
-    setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0 });
+    setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0, is_active: true });
   };
 
   const handlePrioritySubmit = (e: React.FormEvent) => {
@@ -88,7 +91,7 @@ const TaskOptionsManagement: React.FC = () => {
     }
     setPriorityDialogOpen(false);
     setEditingPriority(null);
-    setPriorityForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0 });
+    setPriorityForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: 0, is_active: true });
   };
 
   const editStatus = (status: any) => {
@@ -97,7 +100,8 @@ const TaskOptionsManagement: React.FC = () => {
       value: status.value,
       label: status.label,
       color_class: status.color_class,
-      sort_order: status.sort_order
+      sort_order: status.sort_order,
+      is_active: status.is_active
     });
     setStatusDialogOpen(true);
   };
@@ -108,7 +112,8 @@ const TaskOptionsManagement: React.FC = () => {
       value: priority.value,
       label: priority.label,
       color_class: priority.color_class,
-      sort_order: priority.sort_order
+      sort_order: priority.sort_order,
+      is_active: priority.is_active
     });
     setPriorityDialogOpen(true);
   };
@@ -133,7 +138,7 @@ const TaskOptionsManagement: React.FC = () => {
                 <DialogTrigger asChild>
                   <Button onClick={() => {
                     setEditingStatus(null);
-                    setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: statusOptions.length + 1 });
+                    setStatusForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: statusOptions.length + 1, is_active: true });
                   }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Status
@@ -242,7 +247,7 @@ const TaskOptionsManagement: React.FC = () => {
                 <DialogTrigger asChild>
                   <Button onClick={() => {
                     setEditingPriority(null);
-                    setPriorityForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: priorityOptions.length + 1 });
+                    setPriorityForm({ value: '', label: '', color_class: 'bg-gray-100 text-gray-800', sort_order: priorityOptions.length + 1, is_active: true });
                   }}>
                     <Plus className="w-4 h-4 mr-2" />
                     Add Priority
