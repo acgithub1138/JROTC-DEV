@@ -13,9 +13,10 @@ type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
 interface CreateUserDialogProps {
   allowedRoles: UserRole[];
   trigger?: React.ReactNode;
+  onUserCreated?: () => void;
 }
 
-const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigger }) => {
+const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigger, onUserCreated }) => {
   const { createUser, userProfile } = useAuth();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
@@ -49,6 +50,9 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
         role: '',
       });
       setOpen(false);
+      if (onUserCreated) {
+        onUserCreated();
+      }
     }
     
     setLoading(false);
@@ -131,6 +135,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
               value={formData.password}
               onChange={(e) => setFormData({ ...formData, password: e.target.value })}
               required
+              minLength={6}
             />
           </div>
           

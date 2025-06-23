@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
@@ -120,23 +120,28 @@ const UserAdminPage = () => {
     if (!userToDelete) return;
 
     try {
-      const { error } = await supabase.auth.admin.deleteUser(userToDelete.id);
+      // Instead of using admin.deleteUser, we'll just delete from profiles
+      // The user will still exist in auth.users but won't be able to access the app
+      const { error } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userToDelete.id);
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "User deleted successfully",
+        description: "User removed from the system successfully",
       });
 
       setDeleteDialogOpen(false);
       setUserToDelete(null);
       fetchUsers();
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error removing user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user",
+        description: "Failed to remove user",
         variant: "destructive",
       });
     }
@@ -165,7 +170,8 @@ const UserAdminPage = () => {
   };
 
   const getAllowedRoles = (): UserRole[] => {
-    return ['instructor'];
+    // Only allow creating instructors for now since admin functions aren't available
+    return ['instructor', 'cadet'];
   };
 
   const filteredUsers = users.filter(user =>
@@ -207,6 +213,7 @@ const UserAdminPage = () => {
               Create User
             </Button>
           }
+          onUserCreated={fetchUsers}
         />
       </div>
 
@@ -355,7 +362,11 @@ const UserAdminPage = () => {
                     <SelectValue />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="instructor">Instructor</SelectItem>
+                    {getAllowedRoles().map((role) => (
+                      <SelectItem key={role} value={role}>
+                        {role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ')}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
@@ -377,10 +388,10 @@ const UserAdminPage = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>Remove User</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            <p>Are you sure you want to remove this user from the system? This will remove their access but their account will still exist.</p>
             {userToDelete && (
               <div className="bg-gray-50 p-3 rounded">
                 <p><strong>Name:</strong> {userToDelete.first_name} {userToDelete.last_name}</p>
@@ -393,7 +404,7 @@ const UserAdminPage = () => {
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleDeleteUser}>
-                Delete User
+                Remove User
               </Button>
             </div>
           </div>

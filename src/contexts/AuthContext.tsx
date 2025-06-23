@@ -4,14 +4,26 @@ import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 
+interface Profile {
+  id: string;
+  email: string;
+  first_name: string;
+  last_name: string;
+  role: 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+  school_id: string;
+  phone?: string;
+  rank?: string;
+}
+
 interface AuthContextType {
   user: User | null;
   session: Session | null;
-  loading: boolean;
-  userProfile: any | null;
+  userProfile: Profile | null;
+  signUp: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
   signIn: (email: string, password: string) => Promise<{ error: any }>;
   signOut: () => Promise<void>;
-  createUser: (email: string, password: string, userData: any) => Promise<{ error: any }>;
+  createUser: (email: string, password: string, userData?: any) => Promise<{ error: any }>;
+  loading: boolean;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -27,9 +39,24 @@ export const useAuth = () => {
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
-  const [userProfile, setUserProfile] = useState<any | null>(null);
+  const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+
+  const fetchUserProfile = async (userId: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('id', userId)
+        .single();
+
+      if (error) throw error;
+      setUserProfile(data);
+    } catch (error) {
+      console.error('Error fetching user profile:', error);
+    }
+  };
 
   useEffect(() => {
     // Set up auth state listener
@@ -39,124 +66,143 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Fetch user profile
-          const { data: profile } = await supabase
-            .from('profiles')
-            .select('*, schools(name)')
-            .eq('id', session.user.id)
-            .single();
-          setUserProfile(profile);
+          await fetchUserProfile(session.user.id);
         } else {
           setUserProfile(null);
         }
-        
         setLoading(false);
       }
     );
 
     // Check for existing session
-    supabase.auth.getSession().then(async ({ data: { session } }) => {
+    supabase.auth.getSession().then(({ data: { session } }) => {
       setSession(session);
       setUser(session?.user ?? null);
-      
       if (session?.user) {
-        const { data: profile } = await supabase
-          .from('profiles')
-          .select('*, schools(name)')
-          .eq('id', session.user.id)
-          .single();
-        setUserProfile(profile);
+        fetchUserProfile(session.user.id);
       }
-      
       setLoading(false);
     });
 
     return () => subscription.unsubscribe();
   }, []);
 
-  const signIn = async (email: string, password: string) => {
-    const { error } = await supabase.auth.signInWithPassword({
-      email,
-      password,
-    });
-    
-    if (error) {
-      toast({
-        title: "Sign In Error",
-        description: error.message,
-        variant: "destructive",
-      });
-    }
-    
-    return { error };
-  };
-
-  const createUser = async (email: string, password: string, userData: any) => {
+  const signUp = async (email: string, password: string, userData?: any) => {
     try {
-      // Use admin API to create user with proper metadata
-      const { data, error } = await supabase.auth.admin.createUser({
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
         email,
         password,
-        user_metadata: {
-          first_name: userData.first_name,
-          last_name: userData.last_name,
-          role: userData.role,
-          school_id: userData.school_id
-        },
-        email_confirm: true // Skip email confirmation for admin-created users
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: userData
+        }
       });
-      
+
       if (error) {
-        console.error('User creation error:', error);
         toast({
-          title: "User Creation Error",
+          title: "Sign up failed",
           description: error.message,
           variant: "destructive",
         });
-        return { error };
-      }
-
-      if (data.user) {
+      } else {
         toast({
-          title: "User Created Successfully",
-          description: `Account created for ${userData.first_name} ${userData.last_name}`,
+          title: "Success",
+          description: "Please check your email to confirm your account",
         });
       }
-      
-      return { error: null };
-    } catch (err) {
-      console.error('Unexpected error during user creation:', err);
-      toast({
-        title: "User Creation Error",
-        description: "An unexpected error occurred while creating the user.",
-        variant: "destructive",
+
+      return { error };
+    } catch (error: any) {
+      console.error('Sign up error:', error);
+      return { error };
+    }
+  };
+
+  const signIn = async (email: string, password: string) => {
+    try {
+      const { error } = await supabase.auth.signInWithPassword({
+        email,
+        password,
       });
-      return { error: err };
+
+      if (error) {
+        toast({
+          title: "Sign in failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      }
+
+      return { error };
+    } catch (error: any) {
+      console.error('Sign in error:', error);
+      return { error };
     }
   };
 
   const signOut = async () => {
-    await supabase.auth.signOut();
-    setUserProfile(null);
-    toast({
-      title: "Signed Out",
-      description: "You have been successfully signed out.",
-    });
+    try {
+      await supabase.auth.signOut();
+      setUser(null);
+      setSession(null);
+      setUserProfile(null);
+    } catch (error) {
+      console.error('Sign out error:', error);
+    }
   };
 
-  const value = {
+  const createUser = async (email: string, password: string, userData?: any) => {
+    try {
+      // For regular users, we can only use the standard signUp method
+      // Admin functions require service role which regular users don't have
+      const redirectUrl = `${window.location.origin}/`;
+      
+      const { error } = await supabase.auth.signUp({
+        email,
+        password,
+        options: {
+          emailRedirectTo: redirectUrl,
+          data: userData
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "User creation failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Success",
+          description: "User created successfully. They will need to check their email to confirm their account.",
+        });
+      }
+
+      return { error };
+    } catch (error: any) {
+      console.error('User creation error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to create user",
+        variant: "destructive",
+      });
+      return { error };
+    }
+  };
+
+  const value: AuthContextType = {
     user,
     session,
-    loading,
     userProfile,
+    signUp,
     signIn,
     signOut,
     createUser,
+    loading,
   };
 
-  return (
-    <AuthContext.Provider value={value}>
-      {children}
-    </AuthContext.Provider>
-  );
+  return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };
