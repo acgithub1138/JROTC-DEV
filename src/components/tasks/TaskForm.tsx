@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -59,8 +58,13 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
 
   const onSubmit = (data: TaskFormData) => {
     const taskData = {
-      ...data,
+      title: data.title,
+      description: data.description || null,
+      status: data.status,
+      priority: data.priority,
+      assigned_to: data.assigned_to || null,
       due_date: selectedDate ? selectedDate.toISOString() : null,
+      team_id: null,
     };
 
     if (mode === 'create') {
