@@ -6,9 +6,12 @@ import DashboardOverview from '@/components/dashboard/DashboardOverview';
 import UserAdminPage from '@/components/user-management/UserAdminPage';
 import SchoolManagementPage from '@/components/school-management/SchoolManagementPage';
 import TaskManagementPage from '@/components/tasks/TaskManagementPage';
+import TaskOptionsManagement from '@/components/tasks/TaskOptionsManagement';
+import { useAuth } from '@/contexts/AuthContext';
 
 const MainApplication = () => {
   const [activeModule, setActiveModule] = useState('dashboard');
+  const { userProfile } = useAuth();
 
   const renderModule = () => {
     switch (activeModule) {
@@ -20,6 +23,26 @@ const MainApplication = () => {
         return <SchoolManagementPage />;
       case 'tasks':
         return <TaskManagementPage />;
+      case 'settings':
+        return (
+          <div className="p-6 space-y-6">
+            <div>
+              <h2 className="text-2xl font-bold mb-4">Settings</h2>
+              <p className="text-gray-600 mb-6">Manage application settings and configurations</p>
+            </div>
+            
+            {userProfile?.role === 'admin' && (
+              <TaskOptionsManagement />
+            )}
+            
+            {userProfile?.role !== 'admin' && (
+              <div className="bg-white p-6 rounded-lg shadow">
+                <h3 className="text-lg font-medium mb-2">Settings Access</h3>
+                <p className="text-gray-600">Additional settings are available to administrators.</p>
+              </div>
+            )}
+          </div>
+        );
       case 'cadets':
         return (
           <div className="p-6">
