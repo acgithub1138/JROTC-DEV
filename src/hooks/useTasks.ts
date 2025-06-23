@@ -133,14 +133,18 @@ export const useTasks = () => {
       if (taskData.team_id !== undefined) updateData.team_id = taskData.team_id;
       if (taskData.completed_at !== undefined) updateData.completed_at = taskData.completed_at;
 
+      console.log('Updating task:', { id, updateData });
+
       const { data, error } = await supabase
         .from('tasks')
         .update(updateData)
-        .eq('id', id)
-        .select()
-        .single();
+        .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Update error:', error);
+        throw error;
+      }
+      
       return data;
     },
     onSuccess: () => {
@@ -150,13 +154,23 @@ export const useTasks = () => {
         description: "The task has been updated successfully.",
       });
     },
-    onError: (error) => {
+    onError: (error: any) => {
+      console.error('Error updating task:', error);
+      
+      // Provide more specific error messages
+      let errorMessage = "Failed to update task. Please try again.";
+      
+      if (error?.code === 'PGRST116') {
+        errorMessage = "You don't have permission to update this task.";
+      } else if (error?.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to update task. Please try again.",
+        description: errorMessage,
         variant: "destructive",
       });
-      console.error('Error updating task:', error);
     },
   });
 
