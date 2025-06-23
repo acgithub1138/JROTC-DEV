@@ -24,13 +24,13 @@ export interface Task {
     first_name: string;
     last_name: string;
     email: string;
-  };
+  } | null;
   assigned_by_profile?: {
     id: string;
     first_name: string;
     last_name: string;
     email: string;
-  };
+  } | null;
 }
 
 export interface TaskComment {
@@ -58,8 +58,8 @@ export const useTasks = () => {
         .from('tasks')
         .select(`
           *,
-          assigned_to_profile:assigned_to(id, first_name, last_name, email),
-          assigned_by_profile:assigned_by(id, first_name, last_name, email)
+          assigned_to_profile:profiles!tasks_assigned_to_fkey(id, first_name, last_name, email),
+          assigned_by_profile:profiles!tasks_assigned_by_fkey(id, first_name, last_name, email)
         `)
         .order('created_at', { ascending: false });
 
@@ -73,13 +73,19 @@ export const useTasks = () => {
   });
 
   const createTaskMutation = useMutation({
-    mutationFn: async (taskData: Partial<Task>) => {
+    mutationFn: async (taskData: Omit<Task, 'id' | 'created_at' | 'updated_at' | 'completed_at' | 'assigned_to_profile' | 'assigned_by_profile'>) => {
       const { data, error } = await supabase
         .from('tasks')
         .insert({
-          ...taskData,
+          title: taskData.title,
+          description: taskData.description,
+          status: taskData.status,
+          priority: taskData.priority,
+          assigned_to: taskData.assigned_to,
+          due_date: taskData.due_date,
           school_id: userProfile?.school_id,
           assigned_by: userProfile?.id,
+          team_id: taskData.team_id,
         })
         .select()
         .single();
@@ -106,9 +112,21 @@ export const useTasks = () => {
 
   const updateTaskMutation = useMutation({
     mutationFn: async ({ id, ...taskData }: Partial<Task> & { id: string }) => {
+      const updateData: any = {};
+      
+      // Only include fields that exist in the database table
+      if (taskData.title !== undefined) updateData.title = taskData.title;
+      if (taskData.description !== undefined) updateData.description = taskData.description;
+      if (taskData.status !== undefined) updateData.status = taskData.status;
+      if (taskData.priority !== undefined) updateData.priority = taskData.priority;
+      if (taskData.assigned_to !== undefined) updateData.assigned_to = taskData.assigned_to;
+      if (taskData.due_date !== undefined) updateData.due_date = taskData.due_date;
+      if (taskData.team_id !== undefined) updateData.team_id = taskData.team_id;
+      if (taskData.completed_at !== undefined) updateData.completed_at = taskData.completed_at;
+
       const { data, error } = await supabase
         .from('tasks')
-        .update(taskData)
+        .update(updateData)
         .eq('id', id)
         .select()
         .single();
