@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,8 +6,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { MoreHorizontal, Edit, Trash2, Eye, CalendarIcon, Check, X } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Eye, CalendarIcon, Check, X, ChevronDown } from 'lucide-react';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { Checkbox } from '@/components/ui/checkbox';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -51,8 +51,37 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
   const { updateTask, deleteTask } = useTasks();
   const { users } = useSchoolUsers();
   const [editState, setEditState] = useState<EditState>({ taskId: null, field: null, value: null });
+  const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
   const canEdit = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+
+  const handleSelectTask = (taskId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTasks([...selectedTasks, taskId]);
+    } else {
+      setSelectedTasks(selectedTasks.filter(id => id !== taskId));
+    }
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedTasks(tasks.map(task => task.id));
+    } else {
+      setSelectedTasks([]);
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedTasks.length === 0) return;
+    
+    const confirmMessage = `Are you sure you want to delete ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
+    if (confirm(confirmMessage)) {
+      selectedTasks.forEach(taskId => {
+        deleteTask(taskId);
+      });
+      setSelectedTasks([]);
+    }
+  };
 
   const startEdit = (taskId: string, field: string, currentValue: any) => {
     setEditState({ taskId, field, value: currentValue });
@@ -246,9 +275,44 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
 
   return (
     <div className="rounded-md border">
+      <div className="flex items-center justify-between p-4 border-b">
+        <div className="flex items-center gap-2">
+          <Checkbox
+            checked={selectedTasks.length === tasks.length && tasks.length > 0}
+            onCheckedChange={handleSelectAll}
+          />
+          <span className="text-sm text-gray-600">
+            {selectedTasks.length > 0 ? `${selectedTasks.length} selected` : 'Select all'}
+          </span>
+        </div>
+        {selectedTasks.length > 0 && canEdit && (
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm">
+                Actions <ChevronDown className="w-4 h-4 ml-2" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="bg-white">
+              <DropdownMenuItem 
+                onClick={handleBulkDelete}
+                className="text-red-600"
+              >
+                <Trash2 className="w-4 h-4 mr-2" />
+                Delete Selected
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+        )}
+      </div>
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-[50px]">
+              <Checkbox
+                checked={selectedTasks.length === tasks.length && tasks.length > 0}
+                onCheckedChange={handleSelectAll}
+              />
+            </TableHead>
             <TableHead>Task #</TableHead>
             <TableHead>Task Name</TableHead>
             <TableHead>Status</TableHead>
@@ -256,12 +320,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
             <TableHead>Assigned To</TableHead>
             <TableHead>Due Date</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[50px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {tasks.map((task) => (
             <TableRow key={task.id} className="group">
+              <TableCell>
+                <Checkbox
+                  checked={selectedTasks.includes(task.id)}
+                  onCheckedChange={(checked) => handleSelectTask(task.id, checked as boolean)}
+                />
+              </TableCell>
               <TableCell className="font-mono text-sm">
                 {task.task_number || 'N/A'}
               </TableCell>
@@ -327,36 +396,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               </TableCell>
               <TableCell>
                 {format(new Date(task.created_at), 'MMM d, yyyy')}
-              </TableCell>
-              <TableCell>
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="sm">
-                      <MoreHorizontal className="w-4 h-4" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuItem onClick={() => onTaskSelect(task)}>
-                      <Eye className="w-4 h-4 mr-2" />
-                      View Details
-                    </DropdownMenuItem>
-                    {canEditTask(task) && (
-                      <DropdownMenuItem onClick={() => onEditTask(task)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit in Modal
-                      </DropdownMenuItem>
-                    )}
-                    {canEdit && (
-                      <DropdownMenuItem 
-                        onClick={() => handleDelete(task.id)}
-                        className="text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </DropdownMenuItem>
-                    )}
-                  </DropdownMenuContent>
-                </DropdownMenu>
               </TableCell>
             </TableRow>
           ))}
