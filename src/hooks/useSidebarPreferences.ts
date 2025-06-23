@@ -100,16 +100,23 @@ export const useSidebarPreferences = () => {
   };
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
-    if (!userProfile?.id) return;
+    if (!userProfile?.id) {
+      console.error('No user profile found');
+      return false;
+    }
 
     try {
       const menuItemIds = newMenuItems.map(item => item.id);
+      
+      console.log('Saving sidebar preferences for user:', userProfile.id, 'with items:', menuItemIds);
       
       const { error } = await supabase
         .from('user_sidebar_preferences')
         .upsert({
           user_id: userProfile.id,
           menu_items: menuItemIds,
+        }, { 
+          onConflict: 'user_id' 
         });
 
       if (error) {
@@ -117,10 +124,11 @@ export const useSidebarPreferences = () => {
         return false;
       }
 
+      console.log('Successfully saved sidebar preferences');
       setMenuItems(newMenuItems);
       return true;
     } catch (error) {
-      console.error('Error saving sidebar preferences:', error);
+      console.error('Exception while saving sidebar preferences:', error);
       return false;
     }
   };
