@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -109,23 +108,9 @@ const UserAdminPage = () => {
     if (!editingUser) return;
 
     try {
-      // Update user metadata in auth.users table
-      const { error: authError } = await supabase.auth.admin.updateUserById(
-        editingUser.id,
-        {
-          email: editingUser.email,
-          user_metadata: {
-            first_name: editingUser.first_name,
-            last_name: editingUser.last_name,
-            role: editingUser.role,
-            school_id: editingUser.school_id,
-          }
-        }
-      );
-
-      if (authError) throw authError;
-
-      // Update profile in profiles table
+      console.log('Updating user profile:', editingUser);
+      
+      // Update profile in profiles table only
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -141,7 +126,7 @@ const UserAdminPage = () => {
 
       toast({
         title: "Success",
-        description: "User updated successfully",
+        description: "User profile updated successfully",
       });
 
       setEditDialogOpen(false);
@@ -151,7 +136,7 @@ const UserAdminPage = () => {
       console.error('Error updating user:', error);
       toast({
         title: "Error",
-        description: "Failed to update user",
+        description: "Failed to update user profile",
         variant: "destructive",
       });
     }
@@ -161,16 +146,19 @@ const UserAdminPage = () => {
     if (!userToDelete) return;
 
     try {
-      // Delete user from auth.users table (this will cascade to profiles due to foreign key)
-      const { error: authError } = await supabase.auth.admin.deleteUser(
-        userToDelete.id
-      );
+      console.log('Deleting user profile:', userToDelete.id);
+      
+      // Delete user profile from profiles table
+      const { error: profileError } = await supabase
+        .from('profiles')
+        .delete()
+        .eq('id', userToDelete.id);
 
-      if (authError) throw authError;
+      if (profileError) throw profileError;
 
       toast({
         title: "Success",
-        description: "User deleted successfully",
+        description: "User profile deleted successfully. Note: The user's authentication account still exists.",
       });
 
       setDeleteDialogOpen(false);
@@ -180,7 +168,7 @@ const UserAdminPage = () => {
       console.error('Error deleting user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user",
+        description: "Failed to delete user profile",
         variant: "destructive",
       });
     }
@@ -346,7 +334,7 @@ const UserAdminPage = () => {
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Edit User</DialogTitle>
+            <DialogTitle>Edit User Profile</DialogTitle>
           </DialogHeader>
           {editingUser && (
             <form onSubmit={handleEditUser} className="space-y-4">
@@ -440,7 +428,7 @@ const UserAdminPage = () => {
                   Cancel
                 </Button>
                 <Button type="submit">
-                  Update User
+                  Update Profile
                 </Button>
               </div>
             </form>
@@ -452,10 +440,10 @@ const UserAdminPage = () => {
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
         <DialogContent>
           <DialogHeader>
-            <DialogTitle>Delete User</DialogTitle>
+            <DialogTitle>Delete User Profile</DialogTitle>
           </DialogHeader>
           <div className="space-y-4">
-            <p>Are you sure you want to permanently delete this user? This action cannot be undone.</p>
+            <p>Are you sure you want to delete this user's profile? This will remove their profile data but their authentication account will remain.</p>
             {userToDelete && (
               <div className="bg-gray-50 p-3 rounded">
                 <p><strong>Name:</strong> {userToDelete.first_name} {userToDelete.last_name}</p>
@@ -468,7 +456,7 @@ const UserAdminPage = () => {
                 Cancel
               </Button>
               <Button variant="destructive" onClick={handleDeleteUser}>
-                Delete User
+                Delete Profile
               </Button>
             </div>
           </div>
