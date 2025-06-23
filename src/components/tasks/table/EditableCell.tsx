@@ -20,7 +20,7 @@ interface EditableCellProps {
   task: Task;
   field: string;
   value: any;
-  displayValue: string;
+  displayValue: string | React.ReactNode;
   editState: EditState;
   setEditState: (state: EditState) => void;
   onSave: (task: Task) => void;
@@ -90,7 +90,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
           value={editState.value}
           onValueChange={(value) => {
             setEditState({ ...editState, value });
-            setTimeout(() => onSave(task), 100);
+            onSave(task);
           }}
         >
           <SelectTrigger className="h-8">
@@ -113,7 +113,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
           value={editState.value}
           onValueChange={(value) => {
             setEditState({ ...editState, value });
-            setTimeout(() => onSave(task), 100);
+            onSave(task);
           }}
         >
           <SelectTrigger className="h-8">
@@ -138,7 +138,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             const actualValue = value === 'unassigned' ? null : value;
             console.log('Assigned to changed:', value, '-> actualValue:', actualValue);
             setEditState({ ...editState, value: actualValue });
-            setTimeout(() => onSave(task), 100);
+            onSave(task);
           }}
         >
           <SelectTrigger className="h-8">
@@ -172,7 +172,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               onSelect={(date) => {
                 console.log('Due date changed:', date);
                 setEditState({ ...editState, value: date });
-                setTimeout(() => onSave(task), 100);
+                onSave(task);
               }}
               initialFocus
               className="pointer-events-auto"

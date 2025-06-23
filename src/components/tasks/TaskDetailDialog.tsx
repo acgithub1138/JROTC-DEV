@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -15,16 +15,27 @@ import { TaskDetailProps, EditState } from './types/TaskDetailTypes';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
-  const { updateTask } = useTasks();
+  const { updateTask, tasks } = useTasks();
   const { users } = useSchoolUsers();
   const { comments, addComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const [editState, setEditState] = useState<EditState>({ field: null, value: null });
+  const [currentTask, setCurrentTask] = useState(task);
+
+  // Update currentTask when the task prop changes or when tasks are refetched
+  useEffect(() => {
+    const updatedTask = tasks.find(t => t.id === task.id);
+    if (updatedTask) {
+      setCurrentTask(updatedTask);
+    } else {
+      setCurrentTask(task);
+    }
+  }, [task, tasks]);
 
   const canEdit = userProfile?.role === 'instructor' || 
                   userProfile?.role === 'command_staff' || 
-                  task.assigned_to === userProfile?.id;
+                  currentTask.assigned_to === userProfile?.id;
 
   const startEdit = (field: string, currentValue: any) => {
     setEditState({ field, value: currentValue });
@@ -37,7 +48,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const saveEdit = async (field: string) => {
     if (!editState.field) return;
 
-    const updateData: any = { id: task.id };
+    const updateData: any = { id: currentTask.id };
     
     if (field === 'due_date') {
       updateData.due_date = editState.value ? editState.value.toISOString() : null;
@@ -50,20 +61,27 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     try {
       await updateTask(updateData);
       cancelEdit();
-      if (field === 'description') {
-        onEdit({ ...task, [field]: editState.value });
-      }
+      
+      // Update the local task state immediately for better UX
+      const updatedTask = { ...currentTask, [field]: editState.value };
+      setCurrentTask(updatedTask);
+      onEdit(updatedTask);
     } catch (error) {
       console.error('Failed to update task:', error);
     }
   };
 
   const handleQuickUpdate = async (field: string, value: any) => {
-    const updateData: any = { id: task.id };
+    const updateData: any = { id: currentTask.id };
     updateData[field] = value;
 
     try {
       await updateTask(updateData);
+      
+      // Update the local task state immediately
+      const updatedTask = { ...currentTask, [field]: value };
+      setCurrentTask(updatedTask);
+      onEdit(updatedTask);
     } catch (error) {
       console.error('Failed to update task:', error);
     }
@@ -84,8 +102,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           <DialogTitle className="text-xl">
             <EditableField
               field="title"
-              currentValue={task.title}
-              displayValue={task.title}
+              currentValue={currentTask.title}
+              displayValue={currentTask.title}
               canEdit={canEdit}
               editState={editState}
               onStartEdit={startEdit}
@@ -98,7 +116,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
         <div className="space-y-6">
           <TaskOverviewCards
-            task={task}
+            task={currentTask}
             canEdit={canEdit}
             editState={editState}
             statusOptions={statusOptions}
@@ -113,7 +131,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           />
 
           <TaskDescriptionCard
-            task={task}
+            task={currentTask}
             canEdit={canEdit}
             editState={editState}
             onStartEdit={startEdit}

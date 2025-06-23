@@ -92,11 +92,14 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
 
     const updateData: any = { id: task.id };
     
+    // Use the editState.value instead of the original task values
     if (editState.field === 'due_date') {
       updateData.due_date = editState.value ? editState.value.toISOString() : null;
     } else {
       updateData[editState.field] = editState.value;
     }
+
+    console.log('Saving task update:', updateData);
 
     try {
       await updateTask(updateData);
@@ -168,46 +171,30 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
                 />
               </TableCell>
               <TableCell>
-                {editState.taskId === task.id && editState.field === 'status' ? (
-                  <EditableCell
-                    task={task}
-                    field="status"
-                    value={task.status}
-                    displayValue=""
-                    editState={editState}
-                    setEditState={setEditState}
-                    onSave={saveEdit}
-                    onCancel={cancelEdit}
-                    canEdit={canEditTask(task)}
-                  />
-                ) : (
-                  <div onClick={() => canEditTask(task) && setEditState({ taskId: task.id, field: 'status', value: task.status })}>
-                    <Badge className={getStatusColorClass(task.status)}>
-                      {getStatusLabel(task.status)}
-                    </Badge>
-                  </div>
-                )}
+                <EditableCell
+                  task={task}
+                  field="status"
+                  value={task.status}
+                  displayValue={<Badge className={getStatusColorClass(task.status)}>{getStatusLabel(task.status)}</Badge>}
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
               </TableCell>
               <TableCell>
-                {editState.taskId === task.id && editState.field === 'priority' ? (
-                  <EditableCell
-                    task={task}
-                    field="priority"
-                    value={task.priority}
-                    displayValue=""
-                    editState={editState}
-                    setEditState={setEditState}
-                    onSave={saveEdit}
-                    onCancel={cancelEdit}
-                    canEdit={canEditTask(task)}
-                  />
-                ) : (
-                  <div onClick={() => canEditTask(task) && setEditState({ taskId: task.id, field: 'priority', value: task.priority })}>
-                    <Badge className={getPriorityColorClass(task.priority)}>
-                      {getPriorityLabel(task.priority)}
-                    </Badge>
-                  </div>
-                )}
+                <EditableCell
+                  task={task}
+                  field="priority"
+                  value={task.priority}
+                  displayValue={<Badge className={getPriorityColorClass(task.priority)}>{getPriorityLabel(task.priority)}</Badge>}
+                  editState={editState}
+                  setEditState={setEditState}
+                  onSave={saveEdit}
+                  onCancel={cancelEdit}
+                  canEdit={canEditTask(task)}
+                />
               </TableCell>
               <TableCell>
                 {canEdit ? (
