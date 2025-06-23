@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -18,6 +17,7 @@ import {
   FileText,
   Home,
   UserCog,
+  Building2,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -36,6 +36,7 @@ const getMenuItemsForRole = (role: string) => {
       return [
         ...baseItems,
         { id: 'user-admin', label: 'User Management', icon: UserCog },
+        { id: 'school-management', label: 'School Management', icon: Building2 },
         { id: 'cadets', label: 'Cadets', icon: Users },
         { id: 'teams', label: 'Teams', icon: Shield },
         { id: 'tasks', label: 'Tasks', icon: CheckSquare },
