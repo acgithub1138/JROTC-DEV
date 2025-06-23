@@ -652,6 +652,78 @@ export type Database = {
           },
         ]
       }
+      task_priority_options: {
+        Row: {
+          color_class: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          school_id: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          school_id: string
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          school_id?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      task_status_options: {
+        Row: {
+          color_class: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          school_id: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          school_id: string
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          school_id?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       tasks: {
         Row: {
           assigned_by: string | null

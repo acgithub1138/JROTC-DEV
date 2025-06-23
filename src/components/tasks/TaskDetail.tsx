@@ -17,6 +17,7 @@ import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 
 interface TaskDetailProps {
   task: Task;
@@ -24,26 +25,6 @@ interface TaskDetailProps {
   onOpenChange: (open: boolean) => void;
   onEdit: (task: Task) => void;
 }
-
-const priorityColors = {
-  low: 'bg-green-100 text-green-800',
-  medium: 'bg-yellow-100 text-yellow-800',
-  high: 'bg-orange-100 text-orange-800',
-  urgent: 'bg-red-100 text-red-800',
-  critical: 'bg-purple-100 text-purple-800',
-};
-
-const statusColors = {
-  not_started: 'bg-gray-100 text-gray-800',
-  working_on_it: 'bg-blue-100 text-blue-800',
-  stuck: 'bg-red-100 text-red-800',
-  done: 'bg-green-100 text-green-800',
-  pending: 'bg-gray-100 text-gray-800',
-  in_progress: 'bg-blue-100 text-blue-800',
-  completed: 'bg-green-100 text-green-800',
-  overdue: 'bg-red-100 text-red-800',
-  cancelled: 'bg-gray-100 text-gray-800',
-};
 
 interface EditState {
   field: string | null;
@@ -55,6 +36,8 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
   const { updateTask } = useTasks();
   const { users } = useSchoolUsers();
   const { comments, addComment, isAddingComment } = useTaskComments(task.id);
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
   const [newComment, setNewComment] = useState('');
   const [editState, setEditState] = useState<EditState>({ field: null, value: null });
 
@@ -235,21 +218,6 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
     );
   };
 
-  const statusOptions = [
-    { value: 'not_started', label: 'Not Started' },
-    { value: 'working_on_it', label: 'Working On It' },
-    { value: 'stuck', label: 'Stuck' },
-    { value: 'done', label: 'Done' },
-  ];
-
-  const priorityOptions = [
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-    { value: 'urgent', label: 'Urgent' },
-    { value: 'critical', label: 'Critical' },
-  ];
-
   const assigneeOptions = [
     { value: '', label: 'Unassigned' },
     ...users.map(user => ({
@@ -257,6 +225,10 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
       label: `${user.first_name} ${user.last_name}`
     }))
   ];
+
+  // Get the current status and priority options for display
+  const currentStatusOption = statusOptions.find(option => option.value === task.status);
+  const currentPriorityOption = priorityOptions.find(option => option.value === task.priority);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -282,8 +254,8 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                     renderEditableField('priority', task.priority, '', 'select', priorityOptions)
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Badge className={priorityColors[task.priority as keyof typeof priorityColors]}>
-                        {task.priority}
+                      <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {currentPriorityOption?.label || task.priority}
                       </Badge>
                       {canEdit && (
                         <button onClick={() => startEdit('priority', task.priority)}>
@@ -300,8 +272,8 @@ export const TaskDetail: React.FC<TaskDetailProps> = ({ task, open, onOpenChange
                     renderEditableField('status', task.status, '', 'select', statusOptions)
                   ) : (
                     <div className="flex items-center gap-2">
-                      <Badge className={statusColors[task.status as keyof typeof statusColors]}>
-                        {task.status.replace('_', ' ')}
+                      <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {currentStatusOption?.label || task.status.replace('_', ' ')}
                       </Badge>
                       {canEdit && (
                         <button onClick={() => startEdit('status', task.status)}>
