@@ -1,16 +1,32 @@
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
 import { TaskTable } from './TaskTable';
-import { TaskOptionsManagement } from './TaskOptionsManagement';
+import TaskOptionsManagement from './TaskOptionsManagement';
 import { syncTaskOptions } from '@/utils/taskOptionValidator';
+import { useTasks, Task } from '@/hooks/useTasks';
+import { TaskDetailDialog } from './TaskDetailDialog';
 
-export const TaskManagementPage: React.FC = () => {
+const TaskManagementPage: React.FC = () => {
+  const { tasks } = useTasks();
+  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
+  const [editingTask, setEditingTask] = useState<Task | null>(null);
+  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
+
   useEffect(() => {
     // Automatically sync task options when the page loads
     syncTaskOptions().catch(console.error);
   }, []);
+
+  const handleTaskSelect = (task: Task) => {
+    setSelectedTask(task);
+    setIsDetailDialogOpen(true);
+  };
+
+  const handleEditTask = (task: Task) => {
+    setEditingTask(task);
+  };
 
   return (
     <div className="container mx-auto p-6 space-y-6">
@@ -26,17 +42,38 @@ export const TaskManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="table" className="space-y-4">
-          <TaskTable />
+          <TaskTable 
+            tasks={tasks}
+            onTaskSelect={handleTaskSelect}
+            onEditTask={handleEditTask}
+          />
         </TabsContent>
 
         <TabsContent value="list" className="space-y-4">
-          <TaskList />
+          <TaskList 
+            tasks={tasks}
+            onTaskSelect={handleTaskSelect}
+            onEditTask={handleEditTask}
+          />
         </TabsContent>
 
         <TabsContent value="options" className="space-y-4">
           <TaskOptionsManagement />
         </TabsContent>
       </Tabs>
+
+      {selectedTask && (
+        <TaskDetailDialog
+          task={selectedTask}
+          isOpen={isDetailDialogOpen}
+          onClose={() => {
+            setIsDetailDialogOpen(false);
+            setSelectedTask(null);
+          }}
+        />
+      )}
     </div>
   );
 };
+
+export default TaskManagementPage;

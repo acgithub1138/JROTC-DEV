@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -78,8 +77,8 @@ export const useTasks = () => {
     mutationFn: async (taskData: {
       title: string;
       description?: string | null;
-      status: Task['status'];
-      priority: Task['priority'];
+      status: TaskStatus;
+      priority: TaskPriority;
       assigned_to?: string | null;
       due_date?: string | null;
       team_id?: string | null;
