@@ -3,13 +3,15 @@ import React, { useEffect, useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
 import { TaskTable } from './TaskTable';
-import TaskOptionsManagement from './TaskOptionsManagement';
 import { syncTaskOptions } from '@/utils/taskOptionValidator';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { TaskDetailDialog } from './TaskDetailDialog';
+import { useAuth } from '@/contexts/AuthContext';
+import { getMyActiveTasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
 
 const TaskManagementPage: React.FC = () => {
   const { tasks } = useTasks();
+  const { userProfile } = useAuth();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -28,37 +30,46 @@ const TaskManagementPage: React.FC = () => {
     setEditingTask(task);
   };
 
+  // Filter tasks based on tab selection
+  const myActiveTasks = getMyActiveTasks(tasks, userProfile?.id);
+  const allSchoolTasks = getAllSchoolTasks(tasks);
+  const completedTasks = getCompletedTasks(tasks);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Task Management</h1>
       </div>
 
-      <Tabs defaultValue="table" className="w-full">
+      <Tabs defaultValue="mytasks" className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="table">Task Table</TabsTrigger>
-          <TabsTrigger value="list">Task List</TabsTrigger>
-          <TabsTrigger value="options">Options Management</TabsTrigger>
+          <TabsTrigger value="mytasks">My Tasks</TabsTrigger>
+          <TabsTrigger value="alltasks">All Tasks</TabsTrigger>
+          <TabsTrigger value="completed">Completed Tasks</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="table" className="space-y-4">
-          <TaskTable 
-            tasks={tasks}
-            onTaskSelect={handleTaskSelect}
-            onEditTask={handleEditTask}
-          />
-        </TabsContent>
-
-        <TabsContent value="list" className="space-y-4">
+        <TabsContent value="mytasks" className="space-y-4">
           <TaskList 
-            tasks={tasks}
+            tasks={myActiveTasks}
             onTaskSelect={handleTaskSelect}
             onEditTask={handleEditTask}
           />
         </TabsContent>
 
-        <TabsContent value="options" className="space-y-4">
-          <TaskOptionsManagement />
+        <TabsContent value="alltasks" className="space-y-4">
+          <TaskTable 
+            tasks={allSchoolTasks}
+            onTaskSelect={handleTaskSelect}
+            onEditTask={handleEditTask}
+          />
+        </TabsContent>
+
+        <TabsContent value="completed" className="space-y-4">
+          <TaskTable 
+            tasks={completedTasks}
+            onTaskSelect={handleTaskSelect}
+            onEditTask={handleEditTask}
+          />
         </TabsContent>
       </Tabs>
 

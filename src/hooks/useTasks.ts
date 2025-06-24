@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -86,7 +85,7 @@ export const useTasks = () => {
     }) => {
       const { data, error } = await supabase
         .from('tasks')
-        .insert([{
+        .insert({
           title: taskData.title,
           description: taskData.description,
           status: taskData.status,
@@ -96,7 +95,7 @@ export const useTasks = () => {
           school_id: userProfile?.school_id,
           assigned_by: userProfile?.id,
           team_id: taskData.team_id,
-        }])
+        })
         .select()
         .single();
 
