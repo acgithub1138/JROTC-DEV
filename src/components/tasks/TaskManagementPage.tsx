@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Plus } from 'lucide-react';
@@ -9,6 +9,7 @@ import { TaskList } from './TaskList';
 import { TaskForm } from './TaskForm';
 import { TaskDetail } from './TaskDetail';
 import { Task } from '@/hooks/useTasks';
+import { populateTaskOptions } from '@/utils/populateTaskOptions';
 
 const TaskManagementPage = () => {
   const { userProfile } = useAuth();
@@ -18,6 +19,11 @@ const TaskManagementPage = () => {
   const [editingTask, setEditingTask] = useState<Task | null>(null);
 
   const canCreateTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+
+  // Populate task options on component mount
+  useEffect(() => {
+    populateTaskOptions();
+  }, []);
 
   const handleTaskSelect = (task: Task) => {
     setSelectedTask(task);

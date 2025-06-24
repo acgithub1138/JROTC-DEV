@@ -49,6 +49,11 @@ export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> =
             <SelectItem value="working_on_it">Working On It</SelectItem>
             <SelectItem value="stuck">Stuck</SelectItem>
             <SelectItem value="done">Done</SelectItem>
+            <SelectItem value="pending">Pending</SelectItem>
+            <SelectItem value="in_progress">In Progress</SelectItem>
+            <SelectItem value="completed">Completed</SelectItem>
+            <SelectItem value="overdue">Overdue</SelectItem>
+            <SelectItem value="canceled">Canceled</SelectItem>
           </SelectContent>
         </Select>
       </div>
