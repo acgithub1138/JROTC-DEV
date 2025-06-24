@@ -65,11 +65,9 @@ const TaskManagementPage: React.FC = () => {
       {selectedTask && (
         <TaskDetailDialog
           task={selectedTask}
-          isOpen={isDetailDialogOpen}
-          onClose={() => {
-            setIsDetailDialogOpen(false);
-            setSelectedTask(null);
-          }}
+          open={isDetailDialogOpen}
+          onOpenChange={setIsDetailDialogOpen}
+          onEdit={handleEditTask}
         />
       )}
     </div>
