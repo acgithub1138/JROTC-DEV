@@ -41,13 +41,13 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   const isEditing = editState.field === field;
 
   if (!canEdit) {
-    return <div className="flex items-center">{displayValue}</div>;
+    return <span className="inline">{displayValue}</span>;
   }
 
   if (isEditing) {
     if (type === 'text') {
       return (
-        <div className="flex items-center gap-2">
+        <span className="inline-flex items-center gap-2">
           <Input
             value={editState.value || ''}
             onChange={(e) => onEditStateChange({ ...editState, value: e.target.value })}
@@ -55,7 +55,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
               if (e.key === 'Enter') onSaveEdit(field);
               if (e.key === 'Escape') onCancelEdit();
             }}
-            className="h-8"
+            className="h-8 inline-block"
             autoFocus
           />
           <Button size="sm" variant="ghost" onClick={() => onSaveEdit(field)}>
@@ -64,7 +64,7 @@ export const EditableField: React.FC<EditableFieldProps> = ({
           <Button size="sm" variant="ghost" onClick={onCancelEdit}>
             <X className="w-4 h-4" />
           </Button>
-        </div>
+        </span>
       );
     }
 
@@ -122,12 +122,12 @@ export const EditableField: React.FC<EditableFieldProps> = ({
   }
 
   return (
-    <div
-      className="cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 flex items-center gap-2 group"
+    <span
+      className="cursor-pointer hover:bg-gray-50 rounded px-2 py-1 -mx-2 -my-1 inline-flex items-center gap-2 group"
       onClick={() => onStartEdit(field, currentValue)}
     >
-      <div className="flex items-center">{displayValue}</div>
+      <span className="inline">{displayValue}</span>
       <Edit className="w-3 h-3 opacity-0 group-hover:opacity-100" />
-    </div>
+    </span>
   );
 };

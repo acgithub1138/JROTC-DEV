@@ -139,11 +139,23 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     }))
   ];
 
+  const getDialogTitle = () => {
+    if (currentTask.task_number) {
+      return `${currentTask.task_number} - ${currentTask.title}`;
+    }
+    return currentTask.title;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-xl">
+            {currentTask.task_number && (
+              <span className="text-blue-600 font-mono mr-2">
+                {currentTask.task_number} -
+              </span>
+            )}
             <EditableField
               field="title"
               currentValue={currentTask.title}
