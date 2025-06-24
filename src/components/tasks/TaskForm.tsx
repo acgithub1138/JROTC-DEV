@@ -85,7 +85,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     if (task?.task_number) {
       return `${task.task_number} - ${task.title}`;
     }
-    return `${task.task_number} - ${task.title}`;
+    return `Edit Task - ${task.title}`;
   };
 
   return (
