@@ -6,6 +6,7 @@ import { Task } from '@/hooks/useTasks';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
 import { TaskTableRow } from './table/TaskTableRow';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
+import { useTaskComments } from '@/hooks/useTaskComments';
 
 interface TaskTableProps {
   tasks: Task[];
@@ -29,6 +30,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     saveEdit,
     canEditTask,
   } = useTaskTableLogic();
+
+  // Create a system comment handler that can work with any task
+  const handleSystemComment = (taskId: string, commentText: string) => {
+    const { addSystemComment } = useTaskComments(taskId);
+    addSystemComment(commentText);
+  };
+
+  // Enhanced save function that includes system comment handling
+  const handleSaveEdit = (task: Task, field: string, newValue: any) => {
+    saveEdit(task, field, newValue, handleSystemComment);
+  };
 
   return (
     <div className="rounded-md border">
@@ -72,7 +84,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               canEditTask={canEditTask}
               onTaskSelect={onTaskSelect}
               onSelectTask={handleSelectTask}
-              onSave={saveEdit}
+              onSave={handleSaveEdit}
               onCancel={cancelEdit}
             />
           ))}

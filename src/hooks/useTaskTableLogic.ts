@@ -4,8 +4,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useTaskComments } from '@/hooks/useTaskComments';
-import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 
 interface EditState {
   taskId: string | null;
@@ -56,7 +54,7 @@ export const useTaskTableLogic = () => {
     setEditState({ taskId: null, field: null, value: null });
   };
 
-  const saveEdit = async (task: Task, field: string, newValue: any) => {
+  const saveEdit = async (task: Task, field: string, newValue: any, onSystemComment?: (taskId: string, commentText: string) => void) => {
     console.log('Saving task update:', { taskId: task.id, field, newValue });
 
     // Get the old value for comparison
@@ -82,10 +80,10 @@ export const useTaskTableLogic = () => {
     try {
       await updateTask(updateData);
       
-      // Add system comment for tracked fields
+      // Add system comment for tracked fields if callback is provided
       const trackedFields = ['status', 'priority', 'assigned_to'];
-      if (trackedFields.includes(field)) {
-        const { addSystemComment } = useTaskComments(task.id);
+      if (trackedFields.includes(field) && onSystemComment) {
+        const { formatFieldChangeComment } = await import('@/utils/taskCommentUtils');
         const commentText = formatFieldChangeComment(
           field,
           oldValue,
@@ -94,7 +92,7 @@ export const useTaskTableLogic = () => {
           priorityOptions,
           users
         );
-        addSystemComment(commentText);
+        onSystemComment(task.id, commentText);
       }
       
       cancelEdit();
