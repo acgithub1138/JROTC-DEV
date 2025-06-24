@@ -78,12 +78,22 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     setSelectedDate(undefined);
   };
 
+  const getDialogTitle = () => {
+    if (mode === 'create') {
+      return 'Create New Task';
+    }
+    if (task?.task_number) {
+      return `${task.task_number} - ${task.title}`;
+    }
+    return `Edit Task - ${task?.title}`;
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>
-            {mode === 'create' ? 'Create New Task' : 'Edit Task'}
+            {getDialogTitle()}
           </DialogTitle>
           <DialogDescription>
             {mode === 'create' 
