@@ -1,20 +1,10 @@
 
 import { supabase } from '@/integrations/supabase/client';
+import { getStatusOptionsForDatabase, getPriorityOptionsForDatabase } from '@/config/taskOptions';
 
 export const populateTaskOptions = async () => {
-  // Status options to add
-  const statusOptions = [
-    { value: 'pending', label: 'Pending', color_class: 'bg-yellow-100 text-yellow-800', sort_order: 5 },
-    { value: 'in_progress', label: 'In Progress', color_class: 'bg-blue-100 text-blue-800', sort_order: 6 },
-    { value: 'completed', label: 'Completed', color_class: 'bg-green-100 text-green-800', sort_order: 7 },
-    { value: 'overdue', label: 'Overdue', color_class: 'bg-red-100 text-red-800', sort_order: 8 },
-    { value: 'canceled', label: 'Canceled', color_class: 'bg-gray-100 text-gray-800', sort_order: 9 },
-  ];
-
-  // Priority options to add
-  const priorityOptions = [
-    { value: 'urgent', label: 'Urgent', color_class: 'bg-orange-100 text-orange-800', sort_order: 4 },
-  ];
+  const statusOptions = getStatusOptionsForDatabase();
+  const priorityOptions = getPriorityOptionsForDatabase();
 
   try {
     // Check and add missing status options
@@ -28,7 +18,13 @@ export const populateTaskOptions = async () => {
       if (!existing) {
         const { error } = await supabase
           .from('task_status_options')
-          .insert(option);
+          .insert({
+            value: option.value,
+            label: option.label,
+            color_class: option.color_class,
+            sort_order: option.sort_order,
+            is_active: true
+          });
 
         if (error) {
           console.error(`Error adding status option ${option.value}:`, error);
@@ -49,7 +45,13 @@ export const populateTaskOptions = async () => {
       if (!existing) {
         const { error } = await supabase
           .from('task_priority_options')
-          .insert(option);
+          .insert({
+            value: option.value,
+            label: option.label,
+            color_class: option.color_class,
+            sort_order: option.sort_order,
+            is_active: true
+          });
 
         if (error) {
           console.error(`Error adding priority option ${option.value}:`, error);

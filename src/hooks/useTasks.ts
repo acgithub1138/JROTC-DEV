@@ -4,13 +4,14 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { TaskStatus, TaskPriority } from '@/config/taskOptions';
 
 export interface Task {
   id: string;
   title: string;
   description: string | null;
-  status: 'pending' | 'in_progress' | 'completed' | 'overdue' | 'cancelled' | 'not_started' | 'working_on_it' | 'stuck' | 'done';
-  priority: 'low' | 'medium' | 'high' | 'urgent' | 'critical';
+  status: TaskStatus;
+  priority: TaskPriority;
   assigned_to: string | null;
   assigned_by: string | null;
   due_date: string | null;

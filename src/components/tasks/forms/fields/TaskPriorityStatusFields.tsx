@@ -4,6 +4,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
 import { TaskFormData } from '../schemas/taskFormSchema';
+import { TASK_PRIORITY_CONFIG, TASK_STATUS_CONFIG } from '@/config/taskOptions';
 
 interface TaskPriorityStatusFieldsProps {
   form: UseFormReturn<TaskFormData>;
@@ -25,11 +26,13 @@ export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> =
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="low">Low</SelectItem>
-            <SelectItem value="medium">Medium</SelectItem>
-            <SelectItem value="high">High</SelectItem>
-            <SelectItem value="urgent">Urgent</SelectItem>
-            <SelectItem value="critical">Critical</SelectItem>
+            {Object.values(TASK_PRIORITY_CONFIG)
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((priority) => (
+                <SelectItem key={priority.value} value={priority.value}>
+                  {priority.label}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>
@@ -45,15 +48,13 @@ export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> =
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="not_started">Not Started</SelectItem>
-            <SelectItem value="working_on_it">Working On It</SelectItem>
-            <SelectItem value="stuck">Stuck</SelectItem>
-            <SelectItem value="done">Done</SelectItem>
-            <SelectItem value="pending">Pending</SelectItem>
-            <SelectItem value="in_progress">In Progress</SelectItem>
-            <SelectItem value="completed">Completed</SelectItem>
-            <SelectItem value="overdue">Overdue</SelectItem>
-            <SelectItem value="canceled">Canceled</SelectItem>
+            {Object.values(TASK_STATUS_CONFIG)
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((status) => (
+                <SelectItem key={status.value} value={status.value}>
+                  {status.label}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       </div>

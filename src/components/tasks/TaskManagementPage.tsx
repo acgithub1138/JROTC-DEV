@@ -1,138 +1,42 @@
 
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Plus } from 'lucide-react';
-import { useAuth } from '@/contexts/AuthContext';
-import { useTasks } from '@/hooks/useTasks';
+import React, { useEffect } from 'react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { TaskList } from './TaskList';
-import { TaskForm } from './TaskForm';
-import { TaskDetail } from './TaskDetail';
-import { Task } from '@/hooks/useTasks';
-import { populateTaskOptions } from '@/utils/populateTaskOptions';
+import { TaskTable } from './TaskTable';
+import { TaskOptionsManagement } from './TaskOptionsManagement';
+import { syncTaskOptions } from '@/utils/taskOptionValidator';
 
-const TaskManagementPage = () => {
-  const { userProfile } = useAuth();
-  const { tasks, isLoading } = useTasks();
-  const [showCreateForm, setShowCreateForm] = useState(false);
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-
-  const canCreateTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
-
-  // Populate task options on component mount
+export const TaskManagementPage: React.FC = () => {
   useEffect(() => {
-    populateTaskOptions();
+    // Automatically sync task options when the page loads
+    syncTaskOptions().catch(console.error);
   }, []);
 
-  const handleTaskSelect = (task: Task) => {
-    setSelectedTask(task);
-  };
-
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
-    setSelectedTask(null);
-  };
-
-  const handleCloseDetail = () => {
-    setSelectedTask(null);
-  };
-
-  const handleCloseEdit = () => {
-    setEditingTask(null);
-  };
-
-  // Update the onEdit handler to just update local state without opening TaskForm modal
-  const handleTaskUpdate = (updatedTask: Task) => {
-    // Just update the selected task to reflect changes in the detail modal
-    setSelectedTask(updatedTask);
-  };
-
-  if (isLoading) {
-    return (
-      <div className="p-6">
-        <div className="flex items-center space-x-2 mb-6">
-          <div className="h-8 w-8 bg-gray-200 rounded animate-pulse" />
-          <div className="h-6 w-32 bg-gray-200 rounded animate-pulse" />
-        </div>
-        <div className="space-y-4">
-          {[1, 2, 3].map((i) => (
-            <div key={i} className="h-20 bg-gray-200 rounded animate-pulse" />
-          ))}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="p-6 max-w-7xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-3xl font-bold text-gray-900">Task Management</h1>
-          <p className="text-gray-600 mt-1">
-            Manage and track tasks for your organization
-          </p>
-        </div>
-        {canCreateTasks && (
-          <Button onClick={() => setShowCreateForm(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Task
-          </Button>
-        )}
+    <div className="container mx-auto p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <h1 className="text-3xl font-bold">Task Management</h1>
       </div>
 
-      {tasks.length === 0 ? (
-        <Card>
-          <CardHeader>
-            <CardTitle>No Tasks Yet</CardTitle>
-            <CardDescription>
-              {canCreateTasks
-                ? "Get started by creating your first task."
-                : "No tasks have been assigned to you yet."}
-            </CardDescription>
-          </CardHeader>
-          {canCreateTasks && (
-            <CardContent>
-              <Button onClick={() => setShowCreateForm(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Create First Task
-              </Button>
-            </CardContent>
-          )}
-        </Card>
-      ) : (
-        <TaskList
-          tasks={tasks}
-          onTaskSelect={handleTaskSelect}
-          onEditTask={handleEditTask}
-        />
-      )}
+      <Tabs defaultValue="table" className="w-full">
+        <TabsList className="grid w-full grid-cols-3">
+          <TabsTrigger value="table">Task Table</TabsTrigger>
+          <TabsTrigger value="list">Task List</TabsTrigger>
+          <TabsTrigger value="options">Options Management</TabsTrigger>
+        </TabsList>
 
-      <TaskForm
-        open={showCreateForm}
-        onOpenChange={setShowCreateForm}
-        mode="create"
-      />
+        <TabsContent value="table" className="space-y-4">
+          <TaskTable />
+        </TabsContent>
 
-      {editingTask && (
-        <TaskForm
-          open={!!editingTask}
-          onOpenChange={handleCloseEdit}
-          mode="edit"
-          task={editingTask}
-        />
-      )}
+        <TabsContent value="list" className="space-y-4">
+          <TaskList />
+        </TabsContent>
 
-      {selectedTask && (
-        <TaskDetail
-          task={selectedTask}
-          open={!!selectedTask}
-          onOpenChange={handleCloseDetail}
-          onEdit={handleTaskUpdate}
-        />
-      )}
+        <TabsContent value="options" className="space-y-4">
+          <TaskOptionsManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };
-
-export default TaskManagementPage;
