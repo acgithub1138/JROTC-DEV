@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
@@ -12,12 +11,13 @@ import { TaskDescriptionCard } from './components/TaskDescriptionCard';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { EditableField } from './components/EditableField';
 import { TaskDetailProps, EditState } from './types/TaskDetailTypes';
+import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
   const { updateTask, tasks } = useTasks();
   const { users } = useSchoolUsers();
-  const { comments, addComment, isAddingComment } = useTaskComments(task.id);
+  const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const [editState, setEditState] = useState<EditState>({ field: null, value: null });
@@ -48,6 +48,15 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const saveEdit = async (field: string) => {
     if (!editState.field) return;
 
+    const oldValue = currentTask[field as keyof typeof currentTask];
+    const newValue = editState.value;
+
+    // Skip if values are the same
+    if (oldValue === newValue) {
+      cancelEdit();
+      return;
+    }
+
     const updateData: any = { id: currentTask.id };
     
     if (field === 'due_date') {
@@ -60,28 +69,62 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
     try {
       await updateTask(updateData);
+      
+      // Add system comment for tracked fields
+      const trackedFields = ['status', 'priority', 'assigned_to', 'description'];
+      if (trackedFields.includes(field)) {
+        const commentText = formatFieldChangeComment(
+          field,
+          oldValue,
+          newValue,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        addSystemComment(commentText);
+      }
+      
       cancelEdit();
       
       // Update the local task state immediately for better UX
       const updatedTask = { ...currentTask, [field]: editState.value };
       setCurrentTask(updatedTask);
-      // Remove the onEdit call that triggers the TaskForm modal
     } catch (error) {
       console.error('Failed to update task:', error);
     }
   };
 
   const handleQuickUpdate = async (field: string, value: any) => {
+    const oldValue = currentTask[field as keyof typeof currentTask];
+
+    // Skip if values are the same
+    if (oldValue === value) {
+      return;
+    }
+
     const updateData: any = { id: currentTask.id };
     updateData[field] = value;
 
     try {
       await updateTask(updateData);
       
+      // Add system comment for tracked fields
+      const trackedFields = ['status', 'priority', 'assigned_to'];
+      if (trackedFields.includes(field)) {
+        const commentText = formatFieldChangeComment(
+          field,
+          oldValue,
+          value,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        addSystemComment(commentText);
+      }
+      
       // Update the local task state immediately
       const updatedTask = { ...currentTask, [field]: value };
       setCurrentTask(updatedTask);
-      // Remove the onEdit call that triggers the TaskForm modal
     } catch (error) {
       console.error('Failed to update task:', error);
     }
