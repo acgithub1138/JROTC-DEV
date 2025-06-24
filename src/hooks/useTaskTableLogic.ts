@@ -81,7 +81,7 @@ export const useTaskTableLogic = () => {
       await updateTask(updateData);
       
       // Add system comment for tracked fields if callback is provided
-      const trackedFields = ['status', 'priority', 'assigned_to'];
+      const trackedFields = ['status', 'priority', 'assigned_to', 'due_date'];
       if (trackedFields.includes(field) && onSystemComment) {
         const { formatFieldChangeComment } = await import('@/utils/taskCommentUtils');
         const commentText = formatFieldChangeComment(

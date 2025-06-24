@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Separator } from '@/components/ui/separator';
@@ -71,7 +72,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       await updateTask(updateData);
       
       // Add system comment for tracked fields
-      const trackedFields = ['status', 'priority', 'assigned_to', 'description'];
+      const trackedFields = ['status', 'priority', 'assigned_to', 'description', 'due_date'];
       if (trackedFields.includes(field)) {
         const commentText = formatFieldChangeComment(
           field,
@@ -109,7 +110,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       await updateTask(updateData);
       
       // Add system comment for tracked fields
-      const trackedFields = ['status', 'priority', 'assigned_to'];
+      const trackedFields = ['status', 'priority', 'assigned_to', 'due_date'];
       if (trackedFields.includes(field)) {
         const commentText = formatFieldChangeComment(
           field,

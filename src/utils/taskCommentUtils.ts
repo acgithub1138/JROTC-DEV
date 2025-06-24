@@ -1,5 +1,6 @@
 
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
+import { format } from 'date-fns';
 
 export const formatFieldChangeComment = (
   field: string,
@@ -25,6 +26,16 @@ export const formatFieldChangeComment = (
     return user ? `${user.first_name} ${user.last_name}` : 'Unknown User';
   };
 
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return 'No due date';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      return format(dateObj, 'MMM d, yyyy');
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
   switch (field) {
     case 'status':
       return `Status changed from "${getStatusLabel(oldValue)}" to "${getStatusLabel(newValue)}"`;
@@ -34,6 +45,9 @@ export const formatFieldChangeComment = (
     
     case 'assigned_to':
       return `Assignment changed from "${getUserName(oldValue)}" to "${getUserName(newValue)}"`;
+    
+    case 'due_date':
+      return `Due date changed from "${formatDate(oldValue)}" to "${formatDate(newValue)}"`;
     
     case 'description':
       const oldDesc = oldValue || 'No description';
