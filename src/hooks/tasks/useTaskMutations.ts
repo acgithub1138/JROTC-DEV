@@ -15,8 +15,8 @@ export const useTaskMutations = () => {
       const insertData = {
         title: taskData.title,
         description: taskData.description,
-        status: taskData.status,
-        priority: taskData.priority,
+        status: taskData.status as any, // Type assertion to handle enum mismatch
+        priority: taskData.priority as any, // Type assertion to handle enum mismatch
         assigned_to: taskData.assigned_to,
         due_date: taskData.due_date,
         school_id: userProfile?.school_id,

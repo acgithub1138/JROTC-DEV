@@ -22,8 +22,17 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect, onEditT
   const { priorityOptions } = useTaskPriorityOptions();
 
   const filteredTasks = tasks.filter(task => {
-    const matchesSearch = task.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         task.description?.toLowerCase().includes(searchTerm.toLowerCase());
+    // Enhanced search functionality
+    const searchLower = searchTerm.toLowerCase();
+    
+    const matchesSearch = 
+      task.title.toLowerCase().includes(searchLower) ||
+      task.description?.toLowerCase().includes(searchLower) ||
+      task.task_number?.toLowerCase().includes(searchLower) ||
+      task.assigned_to_profile?.first_name?.toLowerCase().includes(searchLower) ||
+      task.assigned_to_profile?.last_name?.toLowerCase().includes(searchLower) ||
+      `${task.assigned_to_profile?.first_name || ''} ${task.assigned_to_profile?.last_name || ''}`.toLowerCase().includes(searchLower);
+    
     const matchesStatus = statusFilter === 'all' || task.status === statusFilter;
     const matchesPriority = priorityFilter === 'all' || task.priority === priorityFilter;
     
@@ -36,7 +45,7 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect, onEditT
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
           <Input
-            placeholder="Search tasks..."
+            placeholder="Search tasks by title, description, task number, or assigned person..."
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             className="pl-10"
