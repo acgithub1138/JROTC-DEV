@@ -23,7 +23,7 @@ interface EditableCellProps {
   displayValue: string | React.ReactNode;
   editState: EditState;
   setEditState: (state: EditState) => void;
-  onSave: (task: Task) => void;
+  onSave: (task: Task, field: string, newValue: any) => void;
   onCancel: () => void;
   canEdit: boolean;
   users?: any[];
@@ -68,13 +68,13 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             value={editState.value}
             onChange={(e) => setEditState({ ...editState, value: e.target.value })}
             onKeyDown={(e) => {
-              if (e.key === 'Enter') onSave(task);
+              if (e.key === 'Enter') onSave(task, field, editState.value);
               if (e.key === 'Escape') onCancel();
             }}
             className="h-8"
             autoFocus
           />
-          <Button size="sm" variant="ghost" onClick={() => onSave(task)}>
+          <Button size="sm" variant="ghost" onClick={() => onSave(task, field, editState.value)}>
             <Check className="w-4 h-4" />
           </Button>
           <Button size="sm" variant="ghost" onClick={onCancel}>
@@ -88,9 +88,9 @@ export const EditableCell: React.FC<EditableCellProps> = ({
       return (
         <Select
           value={editState.value}
-          onValueChange={(value) => {
-            setEditState({ ...editState, value });
-            onSave(task);
+          onValueChange={(newValue) => {
+            console.log('Status changed:', newValue);
+            onSave(task, field, newValue);
           }}
         >
           <SelectTrigger className="h-8">
@@ -111,9 +111,9 @@ export const EditableCell: React.FC<EditableCellProps> = ({
       return (
         <Select
           value={editState.value}
-          onValueChange={(value) => {
-            setEditState({ ...editState, value });
-            onSave(task);
+          onValueChange={(newValue) => {
+            console.log('Priority changed:', newValue);
+            onSave(task, field, newValue);
           }}
         >
           <SelectTrigger className="h-8">
@@ -134,11 +134,10 @@ export const EditableCell: React.FC<EditableCellProps> = ({
       return (
         <Select
           value={editState.value || 'unassigned'}
-          onValueChange={(value) => {
-            const actualValue = value === 'unassigned' ? null : value;
-            console.log('Assigned to changed:', value, '-> actualValue:', actualValue);
-            setEditState({ ...editState, value: actualValue });
-            onSave(task);
+          onValueChange={(newValue) => {
+            const actualValue = newValue === 'unassigned' ? null : newValue;
+            console.log('Assigned to changed:', newValue, '-> actualValue:', actualValue);
+            onSave(task, field, actualValue);
           }}
         >
           <SelectTrigger className="h-8">
@@ -171,8 +170,7 @@ export const EditableCell: React.FC<EditableCellProps> = ({
               selected={editState.value}
               onSelect={(date) => {
                 console.log('Due date changed:', date);
-                setEditState({ ...editState, value: date });
-                onSave(task);
+                onSave(task, field, date);
               }}
               initialFocus
               className="pointer-events-auto"

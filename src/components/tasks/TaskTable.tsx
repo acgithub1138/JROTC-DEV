@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -87,19 +86,19 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     setEditState({ taskId: null, field: null, value: null });
   };
 
-  const saveEdit = async (task: Task) => {
-    if (!editState.taskId || !editState.field) return;
+  const saveEdit = async (task: Task, field: string, newValue: any) => {
+    console.log('Saving task update:', { taskId: task.id, field, newValue });
 
     const updateData: any = { id: task.id };
     
-    // Use the editState.value instead of the original task values
-    if (editState.field === 'due_date') {
-      updateData.due_date = editState.value ? editState.value.toISOString() : null;
+    // Use the newValue parameter directly instead of editState.value
+    if (field === 'due_date') {
+      updateData.due_date = newValue ? newValue.toISOString() : null;
     } else {
-      updateData[editState.field] = editState.value;
+      updateData[field] = newValue;
     }
 
-    console.log('Saving task update:', updateData);
+    console.log('Final update data:', updateData);
 
     try {
       await updateTask(updateData);
