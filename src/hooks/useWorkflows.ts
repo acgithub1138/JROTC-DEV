@@ -19,7 +19,14 @@ export const useWorkflows = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      return data as Workflow[];
+      
+      // Transform the data to match our Workflow interface
+      return (data || []).map(item => ({
+        ...item,
+        workflow_data: typeof item.workflow_data === 'object' && item.workflow_data !== null
+          ? item.workflow_data as { nodes: WorkflowNode[]; edges: WorkflowEdge[] }
+          : { nodes: [], edges: [] }
+      })) as Workflow[];
     },
     enabled: !!userProfile?.school_id,
   });

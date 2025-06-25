@@ -12,6 +12,7 @@ import {
   Edge,
   Node,
   NodeTypes,
+  BackgroundVariant,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { WorkflowNode, WorkflowEdge } from '@/types/workflow';
@@ -84,7 +85,7 @@ export const WorkflowCanvas: React.FC<WorkflowCanvasProps> = ({
       >
         <Controls />
         <MiniMap />
-        <Background variant="dots" gap={12} size={1} />
+        <Background variant={BackgroundVariant.Dots} gap={12} size={1} />
       </ReactFlow>
     </div>
   );
