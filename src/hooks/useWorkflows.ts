@@ -23,9 +23,15 @@ export const useWorkflows = () => {
       // Transform the data to match our Workflow interface
       return (data || []).map(item => ({
         ...item,
-        workflow_data: typeof item.workflow_data === 'object' && item.workflow_data !== null
-          ? item.workflow_data as { nodes: WorkflowNode[]; edges: WorkflowEdge[] }
+        workflow_data: typeof item.workflow_data === 'object' && item.workflow_data !== null && !Array.isArray(item.workflow_data)
+          ? (item.workflow_data as { nodes?: WorkflowNode[]; edges?: WorkflowEdge[] })
           : { nodes: [], edges: [] }
+      })).map(item => ({
+        ...item,
+        workflow_data: {
+          nodes: item.workflow_data.nodes || [],
+          edges: item.workflow_data.edges || []
+        }
       })) as Workflow[];
     },
     enabled: !!userProfile?.school_id,
