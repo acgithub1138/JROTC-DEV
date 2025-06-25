@@ -37,6 +37,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'reports', label: 'Reports', icon: 'BarChart3' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
+        { id: 'workflow', label: 'Workflow', icon: 'Workflow' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
