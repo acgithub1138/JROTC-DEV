@@ -914,6 +914,226 @@ export type Database = {
           },
         ]
       }
+      workflow_connections: {
+        Row: {
+          created_at: string
+          id: string
+          source_handle: string | null
+          source_node_id: string
+          target_handle: string | null
+          target_node_id: string
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          source_handle?: string | null
+          source_node_id: string
+          target_handle?: string | null
+          target_node_id: string
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          source_handle?: string | null
+          source_node_id?: string
+          target_handle?: string | null
+          target_node_id?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_connections_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "workflow_connections_workflow_id_source_node_id_fkey"
+            columns: ["workflow_id", "source_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["workflow_id", "node_id"]
+          },
+          {
+            foreignKeyName: "workflow_connections_workflow_id_target_node_id_fkey"
+            columns: ["workflow_id", "target_node_id"]
+            isOneToOne: false
+            referencedRelation: "workflow_nodes"
+            referencedColumns: ["workflow_id", "node_id"]
+          },
+        ]
+      }
+      workflow_executions: {
+        Row: {
+          completed_at: string | null
+          error_message: string | null
+          execution_log: Json | null
+          id: string
+          started_at: string
+          status: string
+          trigger_data: Json | null
+          trigger_type: string
+          workflow_id: string
+        }
+        Insert: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_log?: Json | null
+          id?: string
+          started_at?: string
+          status?: string
+          trigger_data?: Json | null
+          trigger_type: string
+          workflow_id: string
+        }
+        Update: {
+          completed_at?: string | null
+          error_message?: string | null
+          execution_log?: Json | null
+          id?: string
+          started_at?: string
+          status?: string
+          trigger_data?: Json | null
+          trigger_type?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_executions_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_nodes: {
+        Row: {
+          configuration: Json
+          created_at: string
+          id: string
+          node_id: string
+          node_subtype: string
+          node_type: string
+          position_x: number
+          position_y: number
+          updated_at: string
+          workflow_id: string
+        }
+        Insert: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          node_id: string
+          node_subtype: string
+          node_type: string
+          position_x?: number
+          position_y?: number
+          updated_at?: string
+          workflow_id: string
+        }
+        Update: {
+          configuration?: Json
+          created_at?: string
+          id?: string
+          node_id?: string
+          node_subtype?: string
+          node_type?: string
+          position_x?: number
+          position_y?: number
+          updated_at?: string
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_nodes_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflow_variables: {
+        Row: {
+          created_at: string
+          id: string
+          updated_at: string
+          variable_name: string
+          variable_type: string
+          variable_value: Json | null
+          workflow_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          variable_name: string
+          variable_type?: string
+          variable_value?: Json | null
+          workflow_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          updated_at?: string
+          variable_name?: string
+          variable_type?: string
+          variable_value?: Json | null
+          workflow_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "workflow_variables_workflow_id_fkey"
+            columns: ["workflow_id"]
+            isOneToOne: false
+            referencedRelation: "workflows"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      workflows: {
+        Row: {
+          created_at: string
+          created_by: string
+          description: string | null
+          id: string
+          is_active: boolean
+          name: string
+          school_id: string
+          updated_at: string
+          version: number
+          workflow_data: Json
+        }
+        Insert: {
+          created_at?: string
+          created_by: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          school_id: string
+          updated_at?: string
+          version?: number
+          workflow_data?: Json
+        }
+        Update: {
+          created_at?: string
+          created_by?: string
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          school_id?: string
+          updated_at?: string
+          version?: number
+          workflow_data?: Json
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
