@@ -1,16 +1,25 @@
-
 import React, { useState, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { Save, Play, Settings, Activity } from 'lucide-react';
+import { Save, Play, Settings, Activity, Database, Code, FileText } from 'lucide-react';
 import { WorkflowCanvas } from './WorkflowCanvas';
 import { NodePalette } from './NodePalette';
 import { PropertyPanel } from './PropertyPanel';
 import { WorkflowTester } from './WorkflowTester';
 import { WorkflowExecutionMonitor } from './WorkflowExecutionMonitor';
+import { VariableManager } from './VariableManager';
+import { WorkflowTemplates } from './WorkflowTemplates';
+import { DatabaseIntegrationPanel } from './DatabaseIntegrationPanel';
 import { WorkflowNode, WorkflowEdge, NodeTypeDefinition } from '@/types/workflow';
 import { useToast } from '@/hooks/use-toast';
+
+interface Variable {
+  name: string;
+  type: 'string' | 'number' | 'boolean' | 'object' | 'array';
+  value: any;
+  description?: string;
+}
 
 interface WorkflowBuilderProps {
   workflowId?: string;
@@ -33,6 +42,7 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
   const [nodes, setNodes] = useState<WorkflowNode[]>(initialNodes);
   const [edges, setEdges] = useState<WorkflowEdge[]>(initialEdges);
   const [selectedNode, setSelectedNode] = useState<WorkflowNode | null>(null);
+  const [variables, setVariables] = useState<Variable[]>([]);
   const [activeTab, setActiveTab] = useState('canvas');
   const { toast } = useToast();
 
@@ -51,6 +61,16 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
 
     setNodes(prev => [...prev, newNode]);
   }, []);
+
+  const handleTemplateSelect = useCallback((template: any) => {
+    setNodes(template.nodes);
+    setEdges(template.edges);
+    setWorkflowName(template.name);
+    toast({
+      title: "Template Applied",
+      description: `${template.name} template has been loaded successfully.`,
+    });
+  }, [toast]);
 
   const handleNodesChange = useCallback((newNodes: WorkflowNode[]) => {
     setNodes(newNodes);
@@ -123,10 +143,22 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
         
         <div className="flex-1 flex flex-col">
           <Tabs value={activeTab} onValueChange={setActiveTab} className="flex-1 flex flex-col">
-            <TabsList className="grid w-full grid-cols-3 mx-4 mt-2">
+            <TabsList className="grid w-full grid-cols-6 mx-4 mt-2">
               <TabsTrigger value="canvas" className="flex items-center">
                 <Settings className="w-4 h-4 mr-2" />
                 Canvas
+              </TabsTrigger>
+              <TabsTrigger value="variables" className="flex items-center">
+                <Code className="w-4 h-4 mr-2" />
+                Variables
+              </TabsTrigger>
+              <TabsTrigger value="database" className="flex items-center">
+                <Database className="w-4 h-4 mr-2" />
+                Database
+              </TabsTrigger>
+              <TabsTrigger value="templates" className="flex items-center">
+                <FileText className="w-4 h-4 mr-2" />
+                Templates
               </TabsTrigger>
               <TabsTrigger value="test" className="flex items-center">
                 <Play className="w-4 h-4 mr-2" />
@@ -143,11 +175,37 @@ export const WorkflowBuilder: React.FC<WorkflowBuilderProps> = ({
                 <WorkflowCanvas
                   initialNodes={nodes}
                   initialEdges={edges}
-                  onNodesChange={handleNodesChange}
-                  onEdgesChange={handleEdgesChange}
-                  onNodeSelect={handleNodeSelect}
+                  onNodesChange={setNodes}
+                  onEdgesChange={setEdges}
+                  onNodeSelect={setSelectedNode}
                 />
               </div>
+            </TabsContent>
+
+            <TabsContent value="variables" className="flex-1 p-4">
+              <VariableManager
+                variables={variables}
+                onVariablesChange={setVariables}
+              />
+            </TabsContent>
+
+            <TabsContent value="database" className="flex-1 p-4">
+              {workflowId ? (
+                <DatabaseIntegrationPanel
+                  workflowId={workflowId}
+                  onConnectionsChange={(connections) => {
+                    console.log('Database connections updated:', connections);
+                  }}
+                />
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  Save the workflow first to configure database integrations
+                </div>
+              )}
+            </TabsContent>
+
+            <TabsContent value="templates" className="flex-1 p-4">
+              <WorkflowTemplates onTemplateSelect={handleTemplateSelect} />
             </TabsContent>
             
             <TabsContent value="test" className="flex-1 p-4">

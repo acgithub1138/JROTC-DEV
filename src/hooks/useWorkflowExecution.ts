@@ -64,11 +64,16 @@ export const useWorkflowExecution = () => {
 
       if (workflowError) throw workflowError;
 
+      // Parse workflow_data safely
+      const workflowData = typeof workflow.workflow_data === 'object' && workflow.workflow_data !== null && !Array.isArray(workflow.workflow_data)
+        ? (workflow.workflow_data as { nodes?: WorkflowNode[]; edges?: WorkflowEdge[] })
+        : { nodes: [], edges: [] };
+
       // Execute workflow
       const result = await executeWorkflowNodes(
         execution.id,
-        workflow.workflow_data.nodes || [],
-        workflow.workflow_data.edges || []
+        workflowData.nodes || [],
+        workflowData.edges || []
       );
 
       return { execution, result };
