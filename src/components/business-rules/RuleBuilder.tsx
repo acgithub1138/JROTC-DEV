@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { BusinessRule } from './BusinessRulesPage';
-import { supabase } from '@/integrations/supabase/client';
 
 interface RuleBuilderProps {
   rule?: BusinessRule | null;
@@ -20,6 +19,42 @@ interface TableInfo {
   table_name: string;
   columns: string[];
 }
+
+// Static table schema based on the database structure
+const AVAILABLE_TABLES: TableInfo[] = [
+  {
+    table_name: 'tasks',
+    columns: ['id', 'title', 'description', 'status', 'priority', 'due_date', 'assigned_to', 'assigned_by', 'school_id', 'team_id', 'task_number', 'created_at', 'updated_at', 'completed_at']
+  },
+  {
+    table_name: 'profiles',
+    columns: ['id', 'first_name', 'last_name', 'email', 'phone', 'role', 'rank', 'school_id', 'created_at', 'updated_at']
+  },
+  {
+    table_name: 'cadets',
+    columns: ['id', 'cadet_id', 'profile_id', 'school_id', 'grade_level', 'date_of_birth', 'enlistment_date', 'graduation_date', 'gpa', 'attendance_percentage', 'parent_name', 'parent_email', 'parent_phone', 'emergency_contact_name', 'emergency_contact_phone', 'uniform_size', 'medical_conditions', 'created_at', 'updated_at']
+  },
+  {
+    table_name: 'teams',
+    columns: ['id', 'name', 'description', 'school_id', 'team_lead_id', 'created_at', 'updated_at']
+  },
+  {
+    table_name: 'competitions',
+    columns: ['id', 'name', 'description', 'type', 'competition_date', 'location', 'registration_deadline', 'created_at', 'updated_at']
+  },
+  {
+    table_name: 'budget',
+    columns: ['id', 'name', 'description', 'category', 'fiscal_year', 'allocated_amount', 'spent_amount', 'school_id', 'created_by', 'created_at', 'updated_at']
+  },
+  {
+    table_name: 'expenses',
+    columns: ['id', 'description', 'amount', 'expense_date', 'vendor', 'budget_id', 'school_id', 'created_by', 'approved_by', 'approved_at', 'receipt_url', 'created_at']
+  },
+  {
+    table_name: 'inventory_items',
+    columns: ['id', 'name', 'description', 'category', 'serial_number', 'status', 'condition', 'location', 'purchase_date', 'purchase_price', 'school_id', 'notes', 'created_at', 'updated_at']
+  }
+];
 
 export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   rule,
@@ -38,65 +73,16 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     isActive: rule?.isActive ?? true,
   });
 
-  const [tables, setTables] = useState<TableInfo[]>([]);
   const [selectedTableColumns, setSelectedTableColumns] = useState<string[]>([]);
-  const [loading, setLoading] = useState(true);
-
-  useEffect(() => {
-    fetchTables();
-  }, []);
 
   useEffect(() => {
     if (formData.trigger.table) {
-      const selectedTable = tables.find(t => t.table_name === formData.trigger.table);
+      const selectedTable = AVAILABLE_TABLES.find(t => t.table_name === formData.trigger.table);
       setSelectedTableColumns(selectedTable?.columns || []);
     } else {
       setSelectedTableColumns([]);
     }
-  }, [formData.trigger.table, tables]);
-
-  const fetchTables = async () => {
-    try {
-      setLoading(true);
-      
-      // Get all tables in the public schema
-      const { data: tablesData, error: tablesError } = await supabase
-        .from('information_schema.tables')
-        .select('table_name')
-        .eq('table_schema', 'public');
-
-      if (tablesError) {
-        console.error('Error fetching tables:', tablesError);
-        return;
-      }
-
-      const tableInfoPromises = tablesData.map(async (table) => {
-        const { data: columnsData, error: columnsError } = await supabase
-          .from('information_schema.columns')
-          .select('column_name')
-          .eq('table_schema', 'public')
-          .eq('table_name', table.table_name)
-          .order('ordinal_position');
-
-        if (columnsError) {
-          console.error(`Error fetching columns for ${table.table_name}:`, columnsError);
-          return { table_name: table.table_name, columns: [] };
-        }
-
-        return {
-          table_name: table.table_name,
-          columns: columnsData.map(col => col.column_name)
-        };
-      });
-
-      const tableInfos = await Promise.all(tableInfoPromises);
-      setTables(tableInfos);
-    } catch (error) {
-      console.error('Error in fetchTables:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
+  }, [formData.trigger.table]);
 
   const triggerTypes = [
     { value: 'record_created', label: 'Record Created' },
@@ -203,24 +189,6 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     });
   };
 
-  if (loading) {
-    return (
-      <div className="p-6 space-y-6">
-        <div className="flex items-center gap-4">
-          <Button variant="ghost" onClick={onCancel} className="flex items-center gap-2">
-            <ArrowLeft className="w-4 h-4" />
-            Back to Rules
-          </Button>
-          <h1 className="text-3xl font-bold">Loading...</h1>
-        </div>
-        <div className="animate-pulse space-y-4">
-          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
-          <div className="h-32 bg-gray-200 rounded"></div>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <div className="p-6 space-y-6">
       <div className="flex items-center gap-4">
@@ -300,7 +268,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
                   <SelectValue placeholder="Select table" />
                 </SelectTrigger>
                 <SelectContent>
-                  {tables.map((table) => (
+                  {AVAILABLE_TABLES.map((table) => (
                     <SelectItem key={table.table_name} value={table.table_name}>
                       {table.table_name}
                     </SelectItem>
