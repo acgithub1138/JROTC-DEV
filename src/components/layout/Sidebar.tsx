@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -22,6 +21,7 @@ import {
   UserCog,
   Building2,
   Menu,
+  Workflow,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -46,6 +46,7 @@ const iconMap = {
   FileText,
   UserCog,
   Building2,
+  Workflow,
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {

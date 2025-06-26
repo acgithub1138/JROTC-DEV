@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -20,6 +21,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'user-admin', label: 'User Management', icon: 'UserCog' },
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
+        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -29,6 +31,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'cadets', label: 'Cadets', icon: 'Users' },
         { id: 'teams', label: 'Teams', icon: 'Shield' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
+        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
@@ -46,6 +49,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'cadets', label: 'Cadets', icon: 'Users' },
         { id: 'teams', label: 'Teams', icon: 'Shield' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
+        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },

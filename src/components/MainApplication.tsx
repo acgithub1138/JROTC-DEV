@@ -7,6 +7,7 @@ import UserAdminPage from '@/components/user-management/UserAdminPage';
 import SchoolManagementPage from '@/components/school-management/SchoolManagementPage';
 import TaskManagementPage from '@/components/tasks/TaskManagementPage';
 import TaskOptionsManagement from '@/components/tasks/TaskOptionsManagement';
+import BusinessRulesPage from '@/components/business-rules/BusinessRulesPage';
 import { useAuth } from '@/contexts/AuthContext';
 
 const MainApplication = () => {
@@ -23,6 +24,8 @@ const MainApplication = () => {
         return <SchoolManagementPage />;
       case 'tasks':
         return <TaskManagementPage />;
+      case 'rules':
+        return <BusinessRulesPage />;
       case 'settings':
         return (
           <div className="p-6 space-y-6">
