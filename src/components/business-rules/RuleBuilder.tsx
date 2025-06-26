@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
@@ -8,11 +8,17 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Textarea } from '@/components/ui/textarea';
 import { ArrowLeft, Plus, Trash2 } from 'lucide-react';
 import { BusinessRule } from './BusinessRulesPage';
+import { supabase } from '@/integrations/supabase/client';
 
 interface RuleBuilderProps {
   rule?: BusinessRule | null;
   onSave: (rule: BusinessRule) => void;
   onCancel: () => void;
+}
+
+interface TableInfo {
+  table_name: string;
+  columns: string[];
 }
 
 export const RuleBuilder: React.FC<RuleBuilderProps> = ({
@@ -25,24 +31,84 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     description: rule?.description || '',
     trigger: {
       type: rule?.trigger.type || '',
+      table: rule?.trigger.table || '',
       conditions: rule?.trigger.conditions || [{ field: '', operator: '', value: '' }],
     },
     actions: rule?.actions || [{ type: '', parameters: {} }],
     isActive: rule?.isActive ?? true,
   });
 
+  const [tables, setTables] = useState<TableInfo[]>([]);
+  const [selectedTableColumns, setSelectedTableColumns] = useState<string[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    fetchTables();
+  }, []);
+
+  useEffect(() => {
+    if (formData.trigger.table) {
+      const selectedTable = tables.find(t => t.table_name === formData.trigger.table);
+      setSelectedTableColumns(selectedTable?.columns || []);
+    } else {
+      setSelectedTableColumns([]);
+    }
+  }, [formData.trigger.table, tables]);
+
+  const fetchTables = async () => {
+    try {
+      setLoading(true);
+      
+      // Get all tables in the public schema
+      const { data: tablesData, error: tablesError } = await supabase
+        .from('information_schema.tables')
+        .select('table_name')
+        .eq('table_schema', 'public');
+
+      if (tablesError) {
+        console.error('Error fetching tables:', tablesError);
+        return;
+      }
+
+      const tableInfoPromises = tablesData.map(async (table) => {
+        const { data: columnsData, error: columnsError } = await supabase
+          .from('information_schema.columns')
+          .select('column_name')
+          .eq('table_schema', 'public')
+          .eq('table_name', table.table_name)
+          .order('ordinal_position');
+
+        if (columnsError) {
+          console.error(`Error fetching columns for ${table.table_name}:`, columnsError);
+          return { table_name: table.table_name, columns: [] };
+        }
+
+        return {
+          table_name: table.table_name,
+          columns: columnsData.map(col => col.column_name)
+        };
+      });
+
+      const tableInfos = await Promise.all(tableInfoPromises);
+      setTables(tableInfos);
+    } catch (error) {
+      console.error('Error in fetchTables:', error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const triggerTypes = [
-    { value: 'task_created', label: 'Task Created' },
-    { value: 'task_updated', label: 'Task Updated' },
-    { value: 'task_completed', label: 'Task Completed' },
+    { value: 'record_created', label: 'Record Created' },
+    { value: 'record_updated', label: 'Record Updated' },
+    { value: 'record_deleted', label: 'Record Deleted' },
     { value: 'time_based', label: 'Time-based Trigger' },
-    { value: 'user_action', label: 'User Action' },
   ];
 
   const actionTypes = [
     { value: 'send_notification', label: 'Send Notification' },
-    { value: 'update_task', label: 'Update Task' },
-    { value: 'create_task', label: 'Create Task' },
+    { value: 'update_record', label: 'Update Record' },
+    { value: 'create_record', label: 'Create Record' },
     { value: 'send_email', label: 'Send Email' },
     { value: 'log_event', label: 'Log Event' },
   ];
@@ -53,6 +119,8 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     { value: 'greater_than', label: 'Greater Than' },
     { value: 'less_than', label: 'Less Than' },
     { value: 'contains', label: 'Contains' },
+    { value: 'is_null', label: 'Is Null' },
+    { value: 'is_not_null', label: 'Is Not Null' },
   ];
 
   const handleSave = () => {
@@ -67,6 +135,17 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     };
 
     onSave(newRule);
+  };
+
+  const handleTableChange = (tableName: string) => {
+    setFormData({
+      ...formData,
+      trigger: {
+        ...formData.trigger,
+        table: tableName,
+        conditions: [{ field: '', operator: '', value: '' }], // Reset conditions when table changes
+      },
+    });
   };
 
   const addCondition = () => {
@@ -123,6 +202,24 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
       actions: newActions,
     });
   };
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" onClick={onCancel} className="flex items-center gap-2">
+            <ArrowLeft className="w-4 h-4" />
+            Back to Rules
+          </Button>
+          <h1 className="text-3xl font-bold">Loading...</h1>
+        </div>
+        <div className="animate-pulse space-y-4">
+          <div className="h-4 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-32 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
@@ -193,6 +290,25 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
               </Select>
             </div>
 
+            <div>
+              <Label htmlFor="trigger-table">Table</Label>
+              <Select
+                value={formData.trigger.table}
+                onValueChange={handleTableChange}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select table" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tables.map((table) => (
+                    <SelectItem key={table.table_name} value={table.table_name}>
+                      {table.table_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
             <div className="space-y-3">
               <div className="flex items-center justify-between">
                 <Label>Conditions</Label>
@@ -210,11 +326,21 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
               {formData.trigger.conditions.map((condition, index) => (
                 <div key={index} className="flex gap-2 items-end">
                   <div className="flex-1">
-                    <Input
-                      placeholder="Field"
+                    <Select
                       value={condition.field}
-                      onChange={(e) => updateCondition(index, 'field', e.target.value)}
-                    />
+                      onValueChange={(value) => updateCondition(index, 'field', value)}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select field" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {selectedTableColumns.map((column) => (
+                          <SelectItem key={column} value={column}>
+                            {column}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
                   </div>
                   <div className="flex-1">
                     <Select
@@ -314,7 +440,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
         </Button>
         <Button
           onClick={handleSave}
-          disabled={!formData.name || !formData.trigger.type || formData.actions.some(a => !a.type)}
+          disabled={!formData.name || !formData.trigger.type || !formData.trigger.table || formData.actions.some(a => !a.type)}
         >
           {rule ? 'Update Rule' : 'Create Rule'}
         </Button>

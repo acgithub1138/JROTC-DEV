@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -13,6 +12,7 @@ export interface BusinessRule {
   description: string;
   trigger: {
     type: string;
+    table?: string;
     conditions: any[];
   };
   actions: {
@@ -32,7 +32,8 @@ const BusinessRulesPage = () => {
       description: 'Send notification when a task becomes overdue',
       trigger: {
         type: 'time_based',
-        conditions: [{ field: 'task.due_date', operator: 'less_than', value: 'now()' }]
+        table: 'tasks',
+        conditions: [{ field: 'due_date', operator: 'less_than', value: 'now()' }]
       },
       actions: [
         { type: 'send_notification', parameters: { message: 'Task is overdue', recipient: 'task.assignee' } }

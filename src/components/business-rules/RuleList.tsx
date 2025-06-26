@@ -3,7 +3,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Play, Pause, Trash2, Edit, Clock } from 'lucide-react';
+import { Play, Pause, Trash2, Edit, Clock, Database } from 'lucide-react';
 import { BusinessRule } from './BusinessRulesPage';
 
 interface RuleListProps {
@@ -87,7 +87,15 @@ export const RuleList: React.FC<RuleListProps> = ({
               <div>
                 <h4 className="font-medium text-sm mb-1">Trigger</h4>
                 <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
-                  When {rule.trigger.type === 'time_based' ? 'time condition' : rule.trigger.type} occurs
+                  <div className="flex items-center gap-2 mb-1">
+                    <span>When {rule.trigger.type.replace('_', ' ')} occurs</span>
+                    {rule.trigger.table && (
+                      <div className="flex items-center gap-1 text-blue-600">
+                        <Database className="w-3 h-3" />
+                        <span className="font-mono text-xs">{rule.trigger.table}</span>
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
               <div>
