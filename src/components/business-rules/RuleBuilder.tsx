@@ -335,7 +335,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
         <Card className="lg:col-span-2">
           <CardHeader>
-            <CardTitle>Actions - "THEN THAT"</CardTitle>
+            <CardTitle>Actions - &quot;What to do&quot;</CardTitle>
             <CardDescription>Define what should happen when the trigger conditions are met</CardDescription>
           </CardHeader>
           <CardContent className="space-y-4">
