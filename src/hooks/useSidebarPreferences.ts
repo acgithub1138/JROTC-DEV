@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -37,7 +36,6 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'reports', label: 'Reports', icon: 'BarChart3' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
-        { id: 'workflows', label: 'Workflow', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
