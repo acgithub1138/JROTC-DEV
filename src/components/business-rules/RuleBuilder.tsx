@@ -5,6 +5,8 @@ import { useSchemaTracking } from '@/hooks/useSchemaTracking';
 import { RuleBuilderHeader } from './builder/RuleBuilderHeader';
 import { RuleDetailsCard } from './builder/RuleDetailsCard';
 import { TriggerConfigCard } from './builder/TriggerConfigCard';
+import { TriggerConditionsCard } from './builder/TriggerConditionsCard';
+import { ActionsCard } from './builder/ActionsCard';
 import { RuleBuilderActions } from './builder/RuleBuilderActions';
 
 interface RuleBuilderProps {
@@ -94,6 +96,17 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
           onTriggerTableChange={handleTableChange}
         />
       </div>
+
+      <TriggerConditionsCard
+        triggerTable={formData.trigger_table}
+        triggerConditions={formData.trigger_conditions}
+        onTriggerConditionsChange={(conditions) => setFormData({ ...formData, trigger_conditions: conditions })}
+      />
+
+      <ActionsCard
+        actions={formData.actions}
+        onActionsChange={(actions) => setFormData({ ...formData, actions: actions })}
+      />
 
       <RuleBuilderActions
         rule={rule}
