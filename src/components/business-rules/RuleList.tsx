@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Play, Pause, Trash2, Edit, Clock, Database } from 'lucide-react';
-import { BusinessRule } from './BusinessRulesPage';
+import { BusinessRule } from '@/hooks/useBusinessRules';
 
 interface RuleListProps {
   rules: BusinessRule[];
@@ -43,8 +43,8 @@ export const RuleList: React.FC<RuleListProps> = ({
               <div className="flex-1">
                 <div className="flex items-center gap-2 mb-2">
                   <CardTitle className="text-lg">{rule.name}</CardTitle>
-                  <Badge variant={rule.isActive ? 'default' : 'secondary'}>
-                    {rule.isActive ? 'Active' : 'Inactive'}
+                  <Badge variant={rule.is_active ? 'default' : 'secondary'}>
+                    {rule.is_active ? 'Active' : 'Inactive'}
                   </Badge>
                 </div>
                 <CardDescription>{rule.description}</CardDescription>
@@ -54,9 +54,9 @@ export const RuleList: React.FC<RuleListProps> = ({
                   variant="ghost"
                   size="icon"
                   onClick={() => onToggle(rule.id)}
-                  title={rule.isActive ? 'Pause Rule' : 'Activate Rule'}
+                  title={rule.is_active ? 'Pause Rule' : 'Activate Rule'}
                 >
-                  {rule.isActive ? (
+                  {rule.is_active ? (
                     <Pause className="w-4 h-4" />
                   ) : (
                     <Play className="w-4 h-4" />
@@ -88,11 +88,11 @@ export const RuleList: React.FC<RuleListProps> = ({
                 <h4 className="font-medium text-sm mb-1">Trigger</h4>
                 <div className="text-sm text-gray-600 bg-gray-50 p-2 rounded">
                   <div className="flex items-center gap-2 mb-1">
-                    <span>When {rule.trigger.type.replace('_', ' ')} occurs</span>
-                    {rule.trigger.table && (
+                    <span>When {rule.trigger_type.replace('_', ' ')} occurs</span>
+                    {rule.trigger_table && (
                       <div className="flex items-center gap-1 text-blue-600">
                         <Database className="w-3 h-3" />
-                        <span className="font-mono text-xs">{rule.trigger.table}</span>
+                        <span className="font-mono text-xs">{rule.trigger_table}</span>
                       </div>
                     )}
                   </div>
@@ -108,10 +108,10 @@ export const RuleList: React.FC<RuleListProps> = ({
                   ))}
                 </div>
               </div>
-              {rule.lastExecuted && (
+              {rule.last_executed && (
                 <div className="flex items-center gap-2 text-sm text-gray-500">
                   <Clock className="w-3 h-3" />
-                  Last executed: {new Date(rule.lastExecuted).toLocaleString()}
+                  Last executed: {new Date(rule.last_executed).toLocaleString()}
                 </div>
               )}
             </div>

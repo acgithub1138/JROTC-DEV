@@ -66,6 +66,62 @@ export type Database = {
           },
         ]
       }
+      business_rules: {
+        Row: {
+          actions: Json
+          created_at: string
+          created_by: string | null
+          description: string | null
+          id: string
+          is_active: boolean
+          last_executed: string | null
+          name: string
+          school_id: string
+          trigger_conditions: Json
+          trigger_table: string | null
+          trigger_type: string
+          updated_at: string
+        }
+        Insert: {
+          actions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          name: string
+          school_id: string
+          trigger_conditions?: Json
+          trigger_table?: string | null
+          trigger_type: string
+          updated_at?: string
+        }
+        Update: {
+          actions?: Json
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          id?: string
+          is_active?: boolean
+          last_executed?: string | null
+          name?: string
+          school_id?: string
+          trigger_conditions?: Json
+          trigger_table?: string | null
+          trigger_type?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cadets: {
         Row: {
           attendance_percentage: number | null
@@ -567,6 +623,42 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      schema_tracking: {
+        Row: {
+          column_default: string | null
+          column_name: string
+          created_at: string
+          data_type: string
+          id: string
+          is_active: boolean
+          is_nullable: boolean
+          table_name: string
+          updated_at: string
+        }
+        Insert: {
+          column_default?: string | null
+          column_name: string
+          created_at?: string
+          data_type: string
+          id?: string
+          is_active?: boolean
+          is_nullable?: boolean
+          table_name: string
+          updated_at?: string
+        }
+        Update: {
+          column_default?: string | null
+          column_name?: string
+          created_at?: string
+          data_type?: string
+          id?: string
+          is_active?: boolean
+          is_nullable?: boolean
+          table_name?: string
+          updated_at?: string
+        }
+        Relationships: []
       }
       schools: {
         Row: {

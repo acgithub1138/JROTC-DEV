@@ -1,56 +1,15 @@
+
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Plus, Play, Pause, Trash2, Edit } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { RuleBuilder } from './RuleBuilder';
 import { RuleList } from './RuleList';
-
-export interface BusinessRule {
-  id: string;
-  name: string;
-  description: string;
-  trigger: {
-    type: string;
-    table?: string;
-    conditionGroups: Array<{
-      conditions: Array<{
-        field: string;
-        operator: string;
-        value: string;
-      }>;
-    }>;
-  };
-  actions: {
-    type: string;
-    parameters: any;
-  }[];
-  isActive: boolean;
-  createdAt: string;
-  lastExecuted?: string;
-}
+import { useBusinessRules, BusinessRule } from '@/hooks/useBusinessRules';
+import { Skeleton } from '@/components/ui/skeleton';
 
 const BusinessRulesPage = () => {
-  const [rules, setRules] = useState<BusinessRule[]>([
-    {
-      id: '1',
-      name: 'Task Overdue Notification',
-      description: 'Send notification when a task becomes overdue',
-      trigger: {
-        type: 'time_based',
-        table: 'tasks',
-        conditionGroups: [{
-          conditions: [{ field: 'due_date', operator: 'less_than', value: 'now()' }]
-        }]
-      },
-      actions: [
-        { type: 'send_email', parameters: { emailTemplate: 'notification', sendTo: 'assigned_to' } }
-      ],
-      isActive: true,
-      createdAt: '2024-01-15T10:30:00Z',
-      lastExecuted: '2024-01-16T08:15:00Z'
-    }
-  ]);
+  const { rules, loading, createRule, updateRule, deleteRule, toggleRule } = useBusinessRules();
   const [showBuilder, setShowBuilder] = useState(false);
   const [editingRule, setEditingRule] = useState<BusinessRule | null>(null);
 
@@ -64,24 +23,29 @@ const BusinessRulesPage = () => {
     setShowBuilder(true);
   };
 
-  const handleSaveRule = (rule: BusinessRule) => {
-    if (editingRule) {
-      setRules(rules.map(r => r.id === rule.id ? rule : r));
-    } else {
-      setRules([...rules, { ...rule, id: Date.now().toString() }]);
+  const handleSaveRule = async (ruleData: any) => {
+    try {
+      if (editingRule) {
+        await updateRule(editingRule.id, ruleData);
+      } else {
+        await createRule(ruleData);
+      }
+      setShowBuilder(false);
+      setEditingRule(null);
+    } catch (error) {
+      // Error handling is done in the hook
     }
-    setShowBuilder(false);
-    setEditingRule(null);
   };
 
-  const handleDeleteRule = (id: string) => {
-    setRules(rules.filter(r => r.id !== id));
+  const handleDeleteRule = async (id: string) => {
+    await deleteRule(id);
   };
 
-  const handleToggleRule = (id: string) => {
-    setRules(rules.map(r => 
-      r.id === id ? { ...r, isActive: !r.isActive } : r
-    ));
+  const handleToggleRule = async (id: string) => {
+    const rule = rules.find(r => r.id === id);
+    if (rule) {
+      await toggleRule(id, !rule.is_active);
+    }
   };
 
   if (showBuilder) {
@@ -94,6 +58,45 @@ const BusinessRulesPage = () => {
           setEditingRule(null);
         }}
       />
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <div>
+            <Skeleton className="h-8 w-64 mb-2" />
+            <Skeleton className="h-4 w-96" />
+          </div>
+          <Skeleton className="h-10 w-32" />
+        </div>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+          {[1, 2, 3].map(i => (
+            <Card key={i}>
+              <CardHeader className="pb-2">
+                <Skeleton className="h-5 w-24" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-8 w-12" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+        <div className="space-y-4">
+          {[1, 2, 3].map(i => (
+            <Card key={i}>
+              <CardHeader>
+                <Skeleton className="h-6 w-48 mb-2" />
+                <Skeleton className="h-4 w-96" />
+              </CardHeader>
+              <CardContent>
+                <Skeleton className="h-20 w-full" />
+              </CardContent>
+            </Card>
+          ))}
+        </div>
+      </div>
     );
   }
 
@@ -125,7 +128,7 @@ const BusinessRulesPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-green-600">
-              {rules.filter(r => r.isActive).length}
+              {rules.filter(r => r.is_active).length}
             </div>
           </CardContent>
         </Card>
@@ -135,7 +138,7 @@ const BusinessRulesPage = () => {
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold text-gray-400">
-              {rules.filter(r => !r.isActive).length}
+              {rules.filter(r => !r.is_active).length}
             </div>
           </CardContent>
         </Card>
