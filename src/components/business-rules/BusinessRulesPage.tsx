@@ -13,7 +13,13 @@ export interface BusinessRule {
   trigger: {
     type: string;
     table?: string;
-    conditions: any[];
+    conditionGroups: Array<{
+      conditions: Array<{
+        field: string;
+        operator: string;
+        value: string;
+      }>;
+    }>;
   };
   actions: {
     type: string;
@@ -33,10 +39,12 @@ const BusinessRulesPage = () => {
       trigger: {
         type: 'time_based',
         table: 'tasks',
-        conditions: [{ field: 'due_date', operator: 'less_than', value: 'now()' }]
+        conditionGroups: [{
+          conditions: [{ field: 'due_date', operator: 'less_than', value: 'now()' }]
+        }]
       },
       actions: [
-        { type: 'send_notification', parameters: { message: 'Task is overdue', recipient: 'task.assignee' } }
+        { type: 'send_email', parameters: { emailTemplate: 'notification', sendTo: 'assigned_to' } }
       ],
       isActive: true,
       createdAt: '2024-01-15T10:30:00Z',
