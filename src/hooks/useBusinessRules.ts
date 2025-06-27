@@ -1,7 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/components/ui/use-toast';
+import { useToast } from '@/hooks/use-toast';
 
 export interface BusinessRule {
   id: string;
@@ -32,7 +32,15 @@ export const useBusinessRules = () => {
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setRules(data || []);
+      
+      // Transform the data to match our interface
+      const transformedRules: BusinessRule[] = (data || []).map(rule => ({
+        ...rule,
+        trigger_conditions: Array.isArray(rule.trigger_conditions) ? rule.trigger_conditions : [],
+        actions: Array.isArray(rule.actions) ? rule.actions : []
+      }));
+      
+      setRules(transformedRules);
     } catch (error) {
       console.error('Error fetching business rules:', error);
       toast({
@@ -47,20 +55,41 @@ export const useBusinessRules = () => {
 
   const createRule = async (rule: Omit<BusinessRule, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
     try {
+      const { data: userData } = await supabase.auth.getUser();
+      const { data: profileData } = await supabase
+        .from('profiles')
+        .select('school_id')
+        .eq('id', userData.user?.id)
+        .single();
+
+      if (!profileData?.school_id) {
+        throw new Error('User school not found');
+      }
+
       const { data, error } = await supabase
         .from('business_rules')
-        .insert([rule])
+        .insert([{
+          ...rule,
+          school_id: profileData.school_id,
+          created_by: userData.user?.id
+        }])
         .select()
         .single();
 
       if (error) throw error;
       
-      setRules(prev => [data, ...prev]);
+      const transformedRule: BusinessRule = {
+        ...data,
+        trigger_conditions: Array.isArray(data.trigger_conditions) ? data.trigger_conditions : [],
+        actions: Array.isArray(data.actions) ? data.actions : []
+      };
+      
+      setRules(prev => [transformedRule, ...prev]);
       toast({
         title: 'Success',
         description: 'Business rule created successfully',
       });
-      return data;
+      return transformedRule;
     } catch (error) {
       console.error('Error creating business rule:', error);
       toast({
@@ -83,12 +112,18 @@ export const useBusinessRules = () => {
 
       if (error) throw error;
       
-      setRules(prev => prev.map(rule => rule.id === id ? data : rule));
+      const transformedRule: BusinessRule = {
+        ...data,
+        trigger_conditions: Array.isArray(data.trigger_conditions) ? data.trigger_conditions : [],
+        actions: Array.isArray(data.actions) ? data.actions : []
+      };
+      
+      setRules(prev => prev.map(rule => rule.id === id ? transformedRule : rule));
       toast({
         title: 'Success',
         description: 'Business rule updated successfully',
       });
-      return data;
+      return transformedRule;
     } catch (error) {
       console.error('Error updating business rule:', error);
       toast({

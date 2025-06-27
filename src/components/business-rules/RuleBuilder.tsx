@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
@@ -11,17 +10,13 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { ArrowLeft, Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { BusinessRule } from './BusinessRulesPage';
+import { BusinessRule } from '@/hooks/useBusinessRules';
+import { useSchemaTracking } from '@/hooks/useSchemaTracking';
 
 interface RuleBuilderProps {
   rule?: BusinessRule | null;
-  onSave: (rule: BusinessRule) => void;
+  onSave: (rule: any) => void;
   onCancel: () => void;
-}
-
-interface TableInfo {
-  table_name: string;
-  columns: string[];
 }
 
 interface ConditionGroup {
@@ -32,41 +27,17 @@ interface ConditionGroup {
   }>;
 }
 
-// Static table schema based on the database structure
-const AVAILABLE_TABLES: TableInfo[] = [
-  {
-    table_name: 'tasks',
-    columns: ['id', 'title', 'description', 'status', 'priority', 'due_date', 'assigned_to', 'assigned_by', 'school_id', 'team_id', 'task_number', 'created_at', 'updated_at', 'completed_at']
-  },
-  {
-    table_name: 'profiles',
-    columns: ['id', 'first_name', 'last_name', 'email', 'phone', 'role', 'rank', 'school_id', 'created_at', 'updated_at']
-  },
-  {
-    table_name: 'cadets',
-    columns: ['id', 'cadet_id', 'profile_id', 'school_id', 'grade_level', 'date_of_birth', 'enlistment_date', 'graduation_date', 'gpa', 'attendance_percentage', 'parent_name', 'parent_email', 'parent_phone', 'emergency_contact_name', 'emergency_contact_phone', 'uniform_size', 'medical_conditions', 'created_at', 'updated_at']
-  },
-  {
-    table_name: 'teams',
-    columns: ['id', 'name', 'description', 'school_id', 'team_lead_id', 'created_at', 'updated_at']
-  },
-  {
-    table_name: 'competitions',
-    columns: ['id', 'name', 'description', 'type', 'competition_date', 'location', 'registration_deadline', 'created_at', 'updated_at']
-  },
-  {
-    table_name: 'budget',
-    columns: ['id', 'name', 'description', 'category', 'fiscal_year', 'allocated_amount', 'spent_amount', 'school_id', 'created_by', 'created_at', 'updated_at']
-  },
-  {
-    table_name: 'expenses',
-    columns: ['id', 'description', 'amount', 'expense_date', 'vendor', 'budget_id', 'school_id', 'created_by', 'approved_by', 'approved_at', 'receipt_url', 'created_at']
-  },
-  {
-    table_name: 'inventory_items',
-    columns: ['id', 'name', 'description', 'category', 'serial_number', 'status', 'condition', 'location', 'purchase_date', 'purchase_price', 'school_id', 'notes', 'created_at', 'updated_at']
-  }
-];
+// Get field data types for dynamic input rendering
+const getFieldType = (tableName: string, fieldName: string): string => {
+  const dateFields = ['due_date', 'created_at', 'updated_at', 'completed_at', 'date_of_birth', 'enlistment_date', 'graduation_date', 'competition_date', 'registration_deadline', 'expense_date', 'approved_at', 'purchase_date'];
+  const numberFields = ['grade_level', 'gpa', 'attendance_percentage', 'fiscal_year', 'allocated_amount', 'spent_amount', 'amount', 'purchase_price'];
+  const textFields = ['title', 'description', 'name', 'first_name', 'last_name', 'email', 'phone', 'cadet_id', 'task_number', 'location', 'vendor', 'serial_number', 'condition', 'category', 'notes'];
+  
+  if (dateFields.includes(fieldName)) return 'date';
+  if (numberFields.includes(fieldName)) return 'number';
+  if (textFields.includes(fieldName)) return 'text';
+  return 'text'; // default
+};
 
 // Fields that reference profiles table (contain email addresses)
 const getEmailFields = (tableName: string): string[] => {
@@ -81,54 +52,42 @@ const getEmailFields = (tableName: string): string[] => {
   return emailFieldMappings[tableName] || [];
 };
 
-// Get field data types for dynamic input rendering
-const getFieldType = (tableName: string, fieldName: string): string => {
-  const dateFields = ['due_date', 'created_at', 'updated_at', 'completed_at', 'date_of_birth', 'enlistment_date', 'graduation_date', 'competition_date', 'registration_deadline', 'expense_date', 'approved_at', 'purchase_date'];
-  const numberFields = ['grade_level', 'gpa', 'attendance_percentage', 'fiscal_year', 'allocated_amount', 'spent_amount', 'amount', 'purchase_price'];
-  const textFields = ['title', 'description', 'name', 'first_name', 'last_name', 'email', 'phone', 'cadet_id', 'task_number', 'location', 'vendor', 'serial_number', 'condition', 'category', 'notes'];
-  
-  if (dateFields.includes(fieldName)) return 'date';
-  if (numberFields.includes(fieldName)) return 'number';
-  if (textFields.includes(fieldName)) return 'text';
-  return 'text'; // default
-};
-
 export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   rule,
   onSave,
   onCancel
 }) => {
+  const { tables, getFieldsForTable } = useSchemaTracking();
+  
   const [formData, setFormData] = useState({
     name: rule?.name || '',
     description: rule?.description || '',
-    trigger: {
-      type: rule?.trigger.type || '',
-      table: rule?.trigger.table || '',
-      conditionGroups: rule?.trigger.conditionGroups || [{
-        conditions: [{
-          field: '',
-          operator: '',
-          value: ''
-        }]
-      }] as ConditionGroup[]
-    },
+    trigger_type: rule?.trigger_type || '',
+    trigger_table: rule?.trigger_table || '',
+    trigger_conditions: rule?.trigger_conditions || [{
+      conditions: [{
+        field: '',
+        operator: '',
+        value: ''
+      }]
+    }] as ConditionGroup[],
     actions: rule?.actions || [{
       type: '',
       parameters: {}
     }],
-    isActive: rule?.isActive ?? true
+    is_active: rule?.is_active ?? true
   });
 
   const [selectedTableColumns, setSelectedTableColumns] = useState<string[]>([]);
 
   useEffect(() => {
-    if (formData.trigger.table) {
-      const selectedTable = AVAILABLE_TABLES.find(t => t.table_name === formData.trigger.table);
-      setSelectedTableColumns(selectedTable?.columns || []);
+    if (formData.trigger_table) {
+      const fields = getFieldsForTable(formData.trigger_table);
+      setSelectedTableColumns(fields.map(field => field.column_name));
     } else {
       setSelectedTableColumns([]);
     }
-  }, [formData.trigger.table]);
+  }, [formData.trigger_table, getFieldsForTable]);
 
   const triggerTypes = [
     { value: 'record_created', label: 'Record Created' },
@@ -155,32 +114,29 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   ];
 
   const handleSave = () => {
-    const newRule: BusinessRule = {
-      id: rule?.id || Date.now().toString(),
+    const ruleData = {
       name: formData.name,
       description: formData.description,
-      trigger: formData.trigger,
+      trigger_type: formData.trigger_type,
+      trigger_table: formData.trigger_table,
+      trigger_conditions: formData.trigger_conditions,
       actions: formData.actions,
-      isActive: formData.isActive,
-      createdAt: rule?.createdAt || new Date().toISOString()
+      is_active: formData.is_active
     };
-    onSave(newRule);
+    onSave(ruleData);
   };
 
   const handleTableChange = (tableName: string) => {
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        table: tableName,
-        conditionGroups: [{
-          conditions: [{
-            field: '',
-            operator: '',
-            value: ''
-          }]
+      trigger_table: tableName,
+      trigger_conditions: [{
+        conditions: [{
+          field: '',
+          operator: '',
+          value: ''
         }]
-      }
+      }]
     });
   };
 
@@ -188,34 +144,28 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
   const addConditionGroup = () => {
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        conditionGroups: [
-          ...formData.trigger.conditionGroups,
-          {
-            conditions: [{
-              field: '',
-              operator: '',
-              value: ''
-            }]
-          }
-        ]
-      }
+      trigger_conditions: [
+        ...formData.trigger_conditions,
+        {
+          conditions: [{
+            field: '',
+            operator: '',
+            value: ''
+          }]
+        }
+      ]
     });
   };
 
   const removeConditionGroup = (groupIndex: number) => {
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        conditionGroups: formData.trigger.conditionGroups.filter((_, i) => i !== groupIndex)
-      }
+      trigger_conditions: formData.trigger_conditions.filter((_, i) => i !== groupIndex)
     });
   };
 
   const addCondition = (groupIndex: number) => {
-    const newConditionGroups = [...formData.trigger.conditionGroups];
+    const newConditionGroups = [...formData.trigger_conditions];
     newConditionGroups[groupIndex].conditions.push({
       field: '',
       operator: '',
@@ -223,37 +173,28 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
     });
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        conditionGroups: newConditionGroups
-      }
+      trigger_conditions: newConditionGroups
     });
   };
 
   const removeCondition = (groupIndex: number, conditionIndex: number) => {
-    const newConditionGroups = [...formData.trigger.conditionGroups];
+    const newConditionGroups = [...formData.trigger_conditions];
     newConditionGroups[groupIndex].conditions = newConditionGroups[groupIndex].conditions.filter((_, i) => i !== conditionIndex);
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        conditionGroups: newConditionGroups
-      }
+      trigger_conditions: newConditionGroups
     });
   };
 
   const updateCondition = (groupIndex: number, conditionIndex: number, field: string, value: string) => {
-    const newConditionGroups = [...formData.trigger.conditionGroups];
+    const newConditionGroups = [...formData.trigger_conditions];
     newConditionGroups[groupIndex].conditions[conditionIndex] = {
       ...newConditionGroups[groupIndex].conditions[conditionIndex],
       [field]: value
     };
     setFormData({
       ...formData,
-      trigger: {
-        ...formData.trigger,
-        conditionGroups: newConditionGroups
-      }
+      trigger_conditions: newConditionGroups
     });
   };
 
@@ -302,7 +243,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
   // Render dynamic value input based on field type
   const renderValueInput = (fieldName: string, value: any, onChange: (value: any) => void) => {
-    const fieldType = getFieldType(formData.trigger.table, fieldName);
+    const fieldType = getFieldType(formData.trigger_table, fieldName);
     
     if (fieldType === 'date') {
       return (
@@ -400,10 +341,10 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
             <div>
               <Label htmlFor="trigger-type">Trigger Type</Label>
               <Select 
-                value={formData.trigger.type} 
+                value={formData.trigger_type} 
                 onValueChange={(value) => setFormData({
                   ...formData,
-                  trigger: { ...formData.trigger, type: value }
+                  trigger_type: value
                 })}
               >
                 <SelectTrigger>
@@ -421,284 +362,19 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
 
             <div>
               <Label htmlFor="trigger-table">Table</Label>
-              <Select value={formData.trigger.table} onValueChange={handleTableChange}>
+              <Select value={formData.trigger_table} onValueChange={handleTableChange}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select table" />
                 </SelectTrigger>
                 <SelectContent>
-                  {AVAILABLE_TABLES.map((table) => (
-                    <SelectItem key={table.table_name} value={table.table_name}>
-                      {table.table_name}
+                  {tables.map((table) => (
+                    <SelectItem key={table} value={table}>
+                      {table}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-
-            <div className="space-y-3">
-              <div className="flex items-center justify-between">
-                <Label>Conditions</Label>
-                <Button 
-                  type="button" 
-                  variant="outline" 
-                  size="sm" 
-                  onClick={addConditionGroup} 
-                  className="flex items-center gap-1"
-                >
-                  <Plus className="w-3 h-3" />
-                  Add "OR" Clause
-                </Button>
-              </div>
-              
-              {formData.trigger.conditionGroups.map((group, groupIndex) => (
-                <div key={groupIndex} className="border rounded-lg p-4 space-y-3">
-                  {groupIndex > 0 && (
-                    <div className="flex items-center justify-between">
-                      <div className="text-sm font-medium text-blue-600">OR</div>
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => removeConditionGroup(groupIndex)}
-                        className="text-red-500 hover:text-red-700"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </div>
-                  )}
-                  
-                  {group.conditions.map((condition, conditionIndex) => (
-                    <div key={conditionIndex}>
-                      {conditionIndex > 0 && (
-                        <div className="text-sm font-medium text-gray-500 mb-2">AND</div>
-                      )}
-                      <div className="flex gap-2 items-end">
-                        <div className="flex-1">
-                          <Select 
-                            value={condition.field} 
-                            onValueChange={(value) => updateCondition(groupIndex, conditionIndex, 'field', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select field" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {selectedTableColumns.map((column) => (
-                                <SelectItem key={column} value={column}>
-                                  {column}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex-1">
-                          <Select 
-                            value={condition.operator} 
-                            onValueChange={(value) => updateCondition(groupIndex, conditionIndex, 'operator', value)}
-                          >
-                            <SelectTrigger>
-                              <SelectValue placeholder="Operator" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {operators.map((op) => (
-                                <SelectItem key={op.value} value={op.value}>
-                                  {op.label}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                        <div className="flex-1">
-                          <Input 
-                            placeholder="Value" 
-                            value={condition.value} 
-                            onChange={(e) => updateCondition(groupIndex, conditionIndex, 'value', e.target.value)} 
-                          />
-                        </div>
-                        <Button 
-                          type="button" 
-                          variant="ghost" 
-                          size="icon" 
-                          onClick={() => removeCondition(groupIndex, conditionIndex)}
-                          disabled={group.conditions.length === 1 && formData.trigger.conditionGroups.length === 1}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  <Button 
-                    type="button" 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => addCondition(groupIndex)} 
-                    className="flex items-center gap-1"
-                  >
-                    <Plus className="w-3 h-3" />
-                    Add Condition
-                  </Button>
-                </div>
-              ))}
-            </div>
-          </CardContent>
-        </Card>
-
-        <Card className="lg:col-span-2">
-          <CardHeader>
-            <CardTitle>Actions - "What to do"</CardTitle>
-            <CardDescription>Define what should happen when the trigger conditions are met</CardDescription>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="flex items-center justify-between">
-              <Label>Actions to Execute</Label>
-              <Button 
-                type="button" 
-                variant="outline" 
-                size="sm" 
-                onClick={addAction} 
-                className="flex items-center gap-1"
-              >
-                <Plus className="w-3 h-3" />
-                Add Action
-              </Button>
-            </div>
-            
-            {formData.actions.map((action, index) => (
-              <div key={index} className="border rounded-lg p-4 space-y-4">
-                <div className="flex gap-2 items-center">
-                  <div className="flex-1">
-                    <Select 
-                      value={action.type} 
-                      onValueChange={(value) => updateAction(index, value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select action type" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {actionTypes.map((type) => (
-                          <SelectItem key={type.value} value={type.value}>
-                            {type.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                  <Button 
-                    type="button" 
-                    variant="ghost" 
-                    size="icon" 
-                    onClick={() => removeAction(index)}
-                    disabled={formData.actions.length === 1}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </div>
-
-                {/* Action-specific parameters */}
-                {action.type === 'send_email' && (
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Email Template</Label>
-                      <Select 
-                        value={action.parameters.emailTemplate || ''} 
-                        onValueChange={(value) => updateActionParameter(index, 'emailTemplate', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select email template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="welcome">Welcome Template</SelectItem>
-                          <SelectItem value="notification">Notification Template</SelectItem>
-                          <SelectItem value="reminder">Reminder Template</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Send To</Label>
-                      <Select 
-                        value={action.parameters.sendTo || ''} 
-                        onValueChange={(value) => updateActionParameter(index, 'sendTo', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select recipient field" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {getEmailFields(formData.trigger.table).map((field) => (
-                            <SelectItem key={field} value={field}>
-                              {field}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  </div>
-                )}
-
-                {action.type === 'update_record' && (
-                  <div className="space-y-3">
-                    <div>
-                      <Label>Set Field</Label>
-                      <Select 
-                        value={action.parameters.setField || ''} 
-                        onValueChange={(value) => updateActionParameter(index, 'setField', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select field to update" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {selectedTableColumns.map((column) => (
-                            <SelectItem key={column} value={column}>
-                              {column}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Action</Label>
-                      <Select 
-                        value={action.parameters.updateAction || ''} 
-                        onValueChange={(value) => updateActionParameter(index, 'updateAction', value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select action" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="to">To</SelectItem>
-                          <SelectItem value="same_as">Same as</SelectItem>
-                        </SelectContent>
-                      </Select>
-                    </div>
-                    <div>
-                      <Label>Value</Label>
-                      {action.parameters.updateAction === 'same_as' ? (
-                        <Select 
-                          value={action.parameters.value || ''} 
-                          onValueChange={(value) => updateActionParameter(index, 'value', value)}
-                        >
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select source field" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {selectedTableColumns.map((column) => (
-                              <SelectItem key={column} value={column}>
-                                {column}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      ) : (
-                        renderValueInput(
-                          action.parameters.setField || '',
-                          action.parameters.value,
-                          (value) => updateActionParameter(index, 'value', value)
-                        )
-                      )}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ))}
           </CardContent>
         </Card>
       </div>
@@ -709,7 +385,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
         </Button>
         <Button 
           onClick={handleSave} 
-          disabled={!formData.name || !formData.trigger.type || !formData.trigger.table || formData.actions.some(a => !a.type)}
+          disabled={!formData.name || !formData.trigger_type || !formData.trigger_table || formData.actions.some(a => !a.type)}
         >
           {rule ? 'Update Rule' : 'Create Rule'}
         </Button>
