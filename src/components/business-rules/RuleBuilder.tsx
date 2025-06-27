@@ -106,6 +106,7 @@ export const RuleBuilder: React.FC<RuleBuilderProps> = ({
       <ActionsCard
         actions={formData.actions}
         onActionsChange={(actions) => setFormData({ ...formData, actions: actions })}
+        triggerTable={formData.trigger_table}
       />
 
       <RuleBuilderActions

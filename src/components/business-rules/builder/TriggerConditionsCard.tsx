@@ -5,8 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Plus, Trash2 } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { useSchemaTracking } from '@/hooks/useSchemaTracking';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface ConditionGroup {
   conditions: Array<{
@@ -80,6 +84,85 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
     ]);
   };
 
+  const getFieldType = (fieldName: string) => {
+    const field = tableFields.find(f => f.column_name === fieldName);
+    return field?.data_type || 'text';
+  };
+
+  const renderValueField = (condition: any, groupIndex: number, conditionIndex: number) => {
+    const fieldType = getFieldType(condition.field);
+    
+    // Don't show value field for null checks
+    if (condition.operator === 'is_null' || condition.operator === 'is_not_null') {
+      return null;
+    }
+
+    if (fieldType.includes('date') || fieldType.includes('timestamp')) {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !condition.value && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {condition.value ? format(new Date(condition.value), "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={condition.value ? new Date(condition.value) : undefined}
+              onSelect={(date) => updateCondition(groupIndex, conditionIndex, 'value', date ? date.toISOString().split('T')[0] : '')}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (fieldType.includes('boolean')) {
+      return (
+        <Select 
+          value={condition.value} 
+          onValueChange={(value) => updateCondition(groupIndex, conditionIndex, 'value', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">True</SelectItem>
+            <SelectItem value="false">False</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (fieldType.includes('numeric') || fieldType.includes('integer')) {
+      return (
+        <Input 
+          type="number"
+          value={condition.value} 
+          onChange={(e) => updateCondition(groupIndex, conditionIndex, 'value', e.target.value)}
+          placeholder="Enter number" 
+        />
+      );
+    }
+
+    // Default to text input for other types
+    return (
+      <Input 
+        value={condition.value} 
+        onChange={(e) => updateCondition(groupIndex, conditionIndex, 'value', e.target.value)}
+        placeholder="Enter value" 
+      />
+    );
+  };
+
   return (
     <Card className="col-span-2">
       <CardHeader>
@@ -90,7 +173,9 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
         {triggerConditions.map((group, groupIndex) => (
           <div key={groupIndex} className="border rounded-lg p-4 space-y-3">
             <div className="flex justify-between items-center">
-              <Label className="text-sm font-medium">Condition Group {groupIndex + 1}</Label>
+              <Label className="text-sm font-medium">
+                {groupIndex === 0 ? 'AND Condition Group' : 'OR Condition Group'} {groupIndex + 1}
+              </Label>
               {triggerConditions.length > 1 && (
                 <Button
                   variant="ghost"
@@ -111,7 +196,12 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
                   <Label className="text-xs">Field</Label>
                   <Select 
                     value={condition.field} 
-                    onValueChange={(value) => updateCondition(groupIndex, conditionIndex, 'field', value)}
+                    onValueChange={(value) => {
+                      // Reset operator and value when field changes
+                      updateCondition(groupIndex, conditionIndex, 'field', value);
+                      updateCondition(groupIndex, conditionIndex, 'operator', '');
+                      updateCondition(groupIndex, conditionIndex, 'value', '');
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select field" />
@@ -130,7 +220,13 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
                   <Label className="text-xs">Operator</Label>
                   <Select 
                     value={condition.operator} 
-                    onValueChange={(value) => updateCondition(groupIndex, conditionIndex, 'operator', value)}
+                    onValueChange={(value) => {
+                      updateCondition(groupIndex, conditionIndex, 'operator', value);
+                      // Reset value when operator changes to null checks
+                      if (value === 'is_null' || value === 'is_not_null') {
+                        updateCondition(groupIndex, conditionIndex, 'value', '');
+                      }
+                    }}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select operator" />
@@ -147,11 +243,7 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
                 
                 <div>
                   <Label className="text-xs">Value</Label>
-                  <Input 
-                    value={condition.value} 
-                    onChange={(e) => updateCondition(groupIndex, conditionIndex, 'value', e.target.value)}
-                    placeholder="Enter value" 
-                  />
+                  {renderValueField(condition, groupIndex, conditionIndex)}
                 </div>
                 
                 <div>
@@ -175,7 +267,7 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
               className="flex items-center gap-2"
             >
               <Plus className="w-4 h-4" />
-              Add Condition
+              Add AND Condition
             </Button>
           </div>
         ))}
@@ -186,7 +278,7 @@ export const TriggerConditionsCard: React.FC<TriggerConditionsCardProps> = ({
           className="flex items-center gap-2"
         >
           <Plus className="w-4 h-4" />
-          Add Condition Group
+          Add OR Condition Group
         </Button>
       </CardContent>
     </Card>

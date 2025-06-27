@@ -5,9 +5,12 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, Trash2 } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Plus, Trash2, CalendarIcon } from 'lucide-react';
 import { useSchemaTracking } from '@/hooks/useSchemaTracking';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 interface Action {
   type: string;
@@ -17,22 +20,24 @@ interface Action {
 interface ActionsCardProps {
   actions: Action[];
   onActionsChange: (actions: Action[]) => void;
+  triggerTable?: string;
 }
 
 const actionTypes = [
   { value: 'send_email', label: 'Send Email' },
-  { value: 'create_task', label: 'Create Task' },
   { value: 'update_record', label: 'Update Record' },
-  { value: 'send_notification', label: 'Send Notification' },
+  { value: 'create_task', label: 'Create Task' },
   { value: 'log_event', label: 'Log Event' },
   { value: 'webhook', label: 'Call Webhook' }
 ];
 
 export const ActionsCard: React.FC<ActionsCardProps> = ({
   actions,
-  onActionsChange
+  onActionsChange,
+  triggerTable = ''
 }) => {
-  const { getProfileFields } = useSchemaTracking();
+  const { getFieldsForTable, getProfileFields } = useSchemaTracking();
+  const tableFields = getFieldsForTable(triggerTable);
   const profileFields = getProfileFields();
 
   const addAction = () => {
@@ -66,46 +71,200 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
     onActionsChange(newActions);
   };
 
+  const getFieldType = (fieldName: string) => {
+    const field = tableFields.find(f => f.column_name === fieldName);
+    return field?.data_type || 'text';
+  };
+
+  const renderValueField = (action: Action, index: number, setField: string, actionType: string) => {
+    if (actionType === 'same_as') {
+      return (
+        <Select 
+          value={action.parameters.value || ''} 
+          onValueChange={(value) => updateAction(index, 'value', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select field" />
+          </SelectTrigger>
+          <SelectContent>
+            {tableFields.map((field) => (
+              <SelectItem key={field.id} value={field.column_name}>
+                {field.column_name} ({field.data_type})
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    const fieldType = getFieldType(setField);
+
+    if (fieldType.includes('date') || fieldType.includes('timestamp')) {
+      return (
+        <Popover>
+          <PopoverTrigger asChild>
+            <Button
+              variant="outline"
+              className={cn(
+                "w-full justify-start text-left font-normal",
+                !action.parameters.value && "text-muted-foreground"
+              )}
+            >
+              <CalendarIcon className="mr-2 h-4 w-4" />
+              {action.parameters.value ? format(new Date(action.parameters.value), "PPP") : <span>Pick a date</span>}
+            </Button>
+          </PopoverTrigger>
+          <PopoverContent className="w-auto p-0" align="start">
+            <Calendar
+              mode="single"
+              selected={action.parameters.value ? new Date(action.parameters.value) : undefined}
+              onSelect={(date) => updateAction(index, 'value', date ? date.toISOString().split('T')[0] : '')}
+              initialFocus
+              className="p-3 pointer-events-auto"
+            />
+          </PopoverContent>
+        </Popover>
+      );
+    }
+
+    if (fieldType.includes('boolean')) {
+      return (
+        <Select 
+          value={action.parameters.value || ''} 
+          onValueChange={(value) => updateAction(index, 'value', value)}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select value" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="true">True</SelectItem>
+            <SelectItem value="false">False</SelectItem>
+          </SelectContent>
+        </Select>
+      );
+    }
+
+    if (fieldType.includes('numeric') || fieldType.includes('integer')) {
+      return (
+        <Input 
+          type="number"
+          value={action.parameters.value || ''} 
+          onChange={(e) => updateAction(index, 'value', e.target.value)}
+          placeholder="Enter number" 
+        />
+      );
+    }
+
+    return (
+      <Input 
+        value={action.parameters.value || ''} 
+        onChange={(e) => updateAction(index, 'value', e.target.value)}
+        placeholder="Enter value" 
+      />
+    );
+  };
+
   const renderActionParameters = (action: Action, index: number) => {
     switch (action.type) {
       case 'send_email':
         return (
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <Label>To Email</Label>
+              <Label>Email Template</Label>
               <Select 
-                value={action.parameters.to_field || ''} 
-                onValueChange={(value) => updateAction(index, 'to_field', value)}
+                value={action.parameters.email_template || ''} 
+                onValueChange={(value) => updateAction(index, 'email_template', value)}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select email template" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="welcome_email">Welcome Email</SelectItem>
+                  <SelectItem value="notification_email">Notification Email</SelectItem>
+                  <SelectItem value="reminder_email">Reminder Email</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label>Send To</Label>
+              <Select 
+                value={action.parameters.send_to_field || ''} 
+                onValueChange={(value) => updateAction(index, 'send_to_field', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select email field" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profileFields.map((field) => (
+                  {tableFields
+                    .filter(field => field.column_name.toLowerCase().includes('email') || 
+                                   field.data_type === 'text')
+                    .map((field) => (
                     <SelectItem key={field.id} value={field.column_name}>
-                      {field.column_name}
+                      {field.column_name} ({field.data_type})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+          </div>
+        );
+      
+      case 'update_record':
+        return (
+          <div className="space-y-4">
             <div>
-              <Label>Subject</Label>
-              <Input 
-                value={action.parameters.subject || ''} 
-                onChange={(e) => updateAction(index, 'subject', e.target.value)}
-                placeholder="Email subject" 
-              />
+              <Label>Set Field</Label>
+              <Select 
+                value={action.parameters.set_field || ''} 
+                onValueChange={(value) => {
+                  updateAction(index, 'set_field', value);
+                  // Reset action and value when field changes
+                  updateAction(index, 'action_type', '');
+                  updateAction(index, 'value', '');
+                }}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select field to update" />
+                </SelectTrigger>
+                <SelectContent>
+                  {tableFields.map((field) => (
+                    <SelectItem key={field.id} value={field.column_name}>
+                      {field.column_name} ({field.data_type})
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
-            <div className="col-span-2">
-              <Label>Message</Label>
-              <Textarea 
-                value={action.parameters.message || ''} 
-                onChange={(e) => updateAction(index, 'message', e.target.value)}
-                placeholder="Email message" 
-                rows={3}
-              />
-            </div>
+            
+            {action.parameters.set_field && (
+              <>
+                <div>
+                  <Label>Action</Label>
+                  <Select 
+                    value={action.parameters.action_type || ''} 
+                    onValueChange={(value) => {
+                      updateAction(index, 'action_type', value);
+                      updateAction(index, 'value', '');
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select action" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="to">To</SelectItem>
+                      <SelectItem value="same_as">Same as</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+                
+                {action.parameters.action_type && (
+                  <div>
+                    <Label>Value</Label>
+                    {renderValueField(action, index, action.parameters.set_field, action.parameters.action_type)}
+                  </div>
+                )}
+              </>
+            )}
           </div>
         );
       
@@ -130,38 +289,29 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
                   <SelectValue placeholder="Select user field" />
                 </SelectTrigger>
                 <SelectContent>
-                  {profileFields.map((field) => (
+                  {tableFields
+                    .filter(field => field.column_name.toLowerCase().includes('user') || 
+                                   field.column_name.toLowerCase().includes('assign'))
+                    .map((field) => (
                     <SelectItem key={field.id} value={field.column_name}>
-                      {field.column_name}
+                      {field.column_name} ({field.data_type})
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
-            <div className="col-span-2">
-              <Label>Description</Label>
-              <Textarea 
-                value={action.parameters.description || ''} 
-                onChange={(e) => updateAction(index, 'description', e.target.value)}
-                placeholder="Task description" 
-                rows={2}
-              />
-            </div>
           </div>
         );
       
-      case 'send_notification':
+      case 'log_event':
         return (
-          <div className="space-y-4">
-            <div>
-              <Label>Message</Label>
-              <Textarea 
-                value={action.parameters.message || ''} 
-                onChange={(e) => updateAction(index, 'message', e.target.value)}
-                placeholder="Notification message" 
-                rows={2}
-              />
-            </div>
+          <div>
+            <Label>Log Message</Label>
+            <Input 
+              value={action.parameters.message || ''} 
+              onChange={(e) => updateAction(index, 'message', e.target.value)}
+              placeholder="Log message" 
+            />
           </div>
         );
       
@@ -197,24 +347,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
         );
       
       default:
-        return (
-          <div>
-            <Label>Parameters</Label>
-            <Textarea 
-              value={JSON.stringify(action.parameters, null, 2)} 
-              onChange={(e) => {
-                try {
-                  const params = JSON.parse(e.target.value);
-                  updateAction(index, 'parameters', params);
-                } catch (error) {
-                  // Invalid JSON, ignore
-                }
-              }}
-              placeholder="Enter parameters as JSON" 
-              rows={3}
-            />
-          </div>
-        );
+        return null;
     }
   };
 
