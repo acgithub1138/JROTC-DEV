@@ -22,20 +22,15 @@ export const SortableTableHead: React.FC<SortableTableHeadProps> = ({
   const isActive = currentSort?.key === sortKey;
   const direction = currentSort?.direction || 'asc';
 
-  const handleSort = (e: React.MouseEvent) => {
-    e.preventDefault();
-    e.stopPropagation();
+  const handleClick = () => {
     onSort(sortKey);
   };
 
   return (
     <TableHead className={className}>
-      <Button
-        variant="ghost"
-        size="sm"
-        className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
-        onClick={handleSort}
-        type="button"
+      <div 
+        className="flex items-center cursor-pointer hover:text-foreground font-medium text-muted-foreground"
+        onClick={handleClick}
       >
         <span>{children}</span>
         {isActive ? (
@@ -47,7 +42,7 @@ export const SortableTableHead: React.FC<SortableTableHeadProps> = ({
         ) : (
           <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
         )}
-      </Button>
+      </div>
     </TableHead>
   );
 };

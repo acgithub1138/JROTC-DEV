@@ -58,6 +58,16 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
     const newActions = [...actions];
     if (field === 'type') {
       newActions[index] = { type: value, parameters: {} };
+    } else if (field === 'action_type') {
+      // When action_type changes, preserve set_field but clear value
+      newActions[index] = {
+        ...newActions[index],
+        parameters: {
+          ...newActions[index].parameters,
+          [field]: value,
+          value: '' // Clear value when action type changes
+        }
+      };
     } else {
       newActions[index] = {
         ...newActions[index],
@@ -234,10 +244,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
               <Label>Set Field</Label>
               <Select 
                 value={action.parameters.set_field || ''} 
-                onValueChange={(value) => {
-                  updateAction(index, 'set_field', value);
-                  // Don't reset other values, just clear value if action type changes
-                }}
+                onValueChange={(value) => updateAction(index, 'set_field', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select field to update" />
@@ -258,10 +265,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
                   <Label>Action</Label>
                   <Select 
                     value={action.parameters.action_type || ''} 
-                    onValueChange={(value) => {
-                      updateAction(index, 'action_type', value);
-                      updateAction(index, 'value', '');
-                    }}
+                    onValueChange={(value) => updateAction(index, 'action_type', value)}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select action" />
