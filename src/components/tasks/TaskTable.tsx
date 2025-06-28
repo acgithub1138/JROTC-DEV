@@ -43,8 +43,17 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     canEditTask,
   } = useTaskTableLogic();
 
+  const getNestedValue = (obj: any, path: string) => {
+    if (path === 'assigned_to_name') {
+      return obj.assigned_to_profile 
+        ? `${obj.assigned_to_profile.first_name} ${obj.assigned_to_profile.last_name}`
+        : '';
+    }
+    return obj[path];
+  };
+
   const sortedTasks = useMemo(() => {
-    if (!sortConfig) return tasks;
+    if (!sortConfig || !tasks) return tasks;
 
     return [...tasks].sort((a, b) => {
       const aValue = getNestedValue(a, sortConfig.key);
@@ -63,15 +72,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
       return 0;
     });
   }, [tasks, sortConfig]);
-
-  const getNestedValue = (obj: any, path: string) => {
-    if (path === 'assigned_to_name') {
-      return obj.assigned_to_profile 
-        ? `${obj.assigned_to_profile.first_name} ${obj.assigned_to_profile.last_name}`
-        : '';
-    }
-    return obj[path];
-  };
 
   const handleSort = (key: string) => {
     setSortConfig(current => {

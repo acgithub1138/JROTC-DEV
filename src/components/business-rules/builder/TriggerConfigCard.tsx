@@ -13,9 +13,9 @@ interface TriggerConfigCardProps {
 }
 
 const triggerTypes = [
-  { value: 'record_created', label: 'Record Created' },
-  { value: 'record_updated', label: 'Record Updated' },
-  { value: 'record_deleted', label: 'Record Deleted' },
+  { value: 'INSERT_tasks', label: 'Record Created' },
+  { value: 'UPDATE_tasks', label: 'Record Updated' },
+  { value: 'DELETE_tasks', label: 'Record Deleted' },
   { value: 'time_based', label: 'Time-based Trigger' }
 ];
 
