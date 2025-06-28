@@ -36,9 +36,8 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   onActionsChange,
   triggerTable = ''
 }) => {
-  const { getFieldsForTable, getProfileFields } = useSchemaTracking();
+  const { getFieldsForTable } = useSchemaTracking();
   const tableFields = getFieldsForTable(triggerTable);
-  const profileFields = getProfileFields();
 
   const addAction = () => {
     onActionsChange([
@@ -74,6 +73,17 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   const getFieldType = (fieldName: string) => {
     const field = tableFields.find(f => f.column_name === fieldName);
     return field?.data_type || 'text';
+  };
+
+  // Get fields that could contain email addresses or reference profiles
+  const getEmailFields = () => {
+    return tableFields.filter(field => 
+      field.column_name.toLowerCase().includes('email') || 
+      field.column_name.toLowerCase().includes('assigned_to') ||
+      field.column_name.toLowerCase().includes('created_by') ||
+      field.column_name.toLowerCase().includes('user') ||
+      field.data_type === 'uuid' // Could be a reference to profiles table
+    );
   };
 
   const renderValueField = (action: Action, index: number, setField: string, actionType: string) => {
@@ -192,19 +202,27 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
                 onValueChange={(value) => updateAction(index, 'send_to_field', value)}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select email field" />
+                  <SelectValue placeholder="Select recipient" />
                 </SelectTrigger>
                 <SelectContent>
-                  {tableFields
-                    .filter(field => field.column_name.toLowerCase().includes('email') || 
-                                   field.data_type === 'text')
-                    .map((field) => (
+                  {getEmailFields().map((field) => (
                     <SelectItem key={field.id} value={field.column_name}>
                       {field.column_name} ({field.data_type})
                     </SelectItem>
                   ))}
+                  <SelectItem value="other">Other (Custom Email)</SelectItem>
                 </SelectContent>
               </Select>
+              {action.parameters.send_to_field === 'other' && (
+                <div className="mt-2">
+                  <Input 
+                    value={action.parameters.custom_email || ''} 
+                    onChange={(e) => updateAction(index, 'custom_email', e.target.value)}
+                    placeholder="Enter email address" 
+                    type="email"
+                  />
+                </div>
+              )}
             </div>
           </div>
         );
@@ -218,9 +236,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
                 value={action.parameters.set_field || ''} 
                 onValueChange={(value) => {
                   updateAction(index, 'set_field', value);
-                  // Reset action and value when field changes
-                  updateAction(index, 'action_type', '');
-                  updateAction(index, 'value', '');
+                  // Don't reset other values, just clear value if action type changes
                 }}
               >
                 <SelectTrigger>

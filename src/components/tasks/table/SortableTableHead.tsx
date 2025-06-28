@@ -2,7 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TableHead } from '@/components/ui/table';
-import { ArrowUpAZ, ArrowDownZA } from 'lucide-react';
+import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
 interface SortableTableHeadProps {
   children: React.ReactNode;
@@ -22,23 +22,30 @@ export const SortableTableHead: React.FC<SortableTableHeadProps> = ({
   const isActive = currentSort?.key === sortKey;
   const direction = currentSort?.direction || 'asc';
 
+  const handleSort = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    onSort(sortKey);
+  };
+
   return (
     <TableHead className={className}>
       <Button
         variant="ghost"
         size="sm"
         className="h-auto p-0 font-medium text-muted-foreground hover:text-foreground"
-        onClick={() => onSort(sortKey)}
+        onClick={handleSort}
+        type="button"
       >
         <span>{children}</span>
         {isActive ? (
           direction === 'asc' ? (
-            <ArrowUpAZ className="ml-2 h-4 w-4" />
+            <ArrowUp className="ml-2 h-4 w-4" />
           ) : (
-            <ArrowDownZA className="ml-2 h-4 w-4" />
+            <ArrowDown className="ml-2 h-4 w-4" />
           )
         ) : (
-          <ArrowUpAZ className="ml-2 h-4 w-4 opacity-50" />
+          <ArrowUpDown className="ml-2 h-4 w-4 opacity-50" />
         )}
       </Button>
     </TableHead>
