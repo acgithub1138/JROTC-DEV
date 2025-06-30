@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Routes, Route, useLocation } from 'react-router-dom';
+import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
 import DashboardOverview from './dashboard/DashboardOverview';
@@ -12,6 +12,7 @@ import NotFound from '@/pages/NotFound';
 
 const MainApplication = () => {
   const location = useLocation();
+  const navigate = useNavigate();
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
@@ -36,7 +37,7 @@ const MainApplication = () => {
     
     const route = routes[module];
     if (route) {
-      window.history.pushState({}, '', route);
+      navigate(route);
     }
   };
 
