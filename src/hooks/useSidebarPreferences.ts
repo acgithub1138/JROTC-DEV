@@ -22,7 +22,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
-        { id: 'email', label: 'Email', icon: 'Settings' },
+        { id: 'emails', label: 'Email', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -40,7 +40,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'reports', label: 'Reports', icon: 'BarChart3' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
-        { id: 'email', label: 'Email', icon: 'Settings' },
+        { id: 'emails', label: 'Email', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
