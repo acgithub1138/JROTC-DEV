@@ -39,10 +39,17 @@ export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
   const selectedField = availableFields.find(f => f.value === parameters.field);
 
   const handleFieldChange = (fieldValue: string) => {
+    console.log('Field changing to:', fieldValue);
+    console.log('Current parameters:', parameters);
     onParameterChange('field', fieldValue);
-    // Clear the value when field changes to avoid mismatched data types
-    onParameterChange('value', '');
+    // Only clear the value if we're changing to a different field type
+    if (parameters.field !== fieldValue) {
+      onParameterChange('value', '');
+    }
   };
+
+  console.log('UpdateRecordAction render - parameters.field:', parameters.field);
+  console.log('UpdateRecordAction render - availableFields:', availableFields);
 
   return (
     <div className="space-y-3">
