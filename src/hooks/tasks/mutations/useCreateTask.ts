@@ -19,8 +19,7 @@ export const useCreateTask = () => {
       const validatedStatus = validateTaskStatus(taskData.status);
       const validatedPriority = validateTaskPriority(taskData.priority);
 
-      // Create the insert data - let TypeScript infer types from validated values
-      const insertData = {
+      console.log('Validated insert data:', {
         title: taskData.title,
         description: taskData.description,
         status: validatedStatus,
@@ -30,13 +29,21 @@ export const useCreateTask = () => {
         school_id: userProfile?.school_id,
         assigned_by: userProfile?.id,
         team_id: taskData.team_id,
-      };
-
-      console.log('Validated insert data:', insertData);
+      });
 
       const { data, error } = await supabase
         .from('tasks')
-        .insert(insertData)
+        .insert({
+          title: taskData.title,
+          description: taskData.description,
+          status: validatedStatus,
+          priority: validatedPriority,
+          assigned_to: taskData.assigned_to,
+          due_date: taskData.due_date,
+          school_id: userProfile?.school_id,
+          assigned_by: userProfile?.id,
+          team_id: taskData.team_id,
+        })
         .select()
         .single();
 
