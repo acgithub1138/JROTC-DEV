@@ -22,15 +22,15 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
-        { id: 'email-management', label: 'Email', icon: 'Settings' },
+        { id: 'email-management', label: 'Email', icon: 'Mail' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
     case 'instructor':
       return [
         ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'UserGroup' },
-        { id: 'teams', label: 'Teams', icon: 'Team' },
+        { id: 'cadets', label: 'Cadets', icon: 'Users' },
+        { id: 'teams', label: 'Teams', icon: 'Shield' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
@@ -40,7 +40,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'reports', label: 'Reports', icon: 'BarChart3' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
-        { id: 'email-management', label: 'Email', icon: 'Settings' },
+        { id: 'email-management', label: 'Email', icon: 'Mail' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -48,8 +48,8 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
     case 'cadet':
       return [
         ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'UserGroup' },
-        { id: 'teams', label: 'Teams', icon: 'Team' },
+        { id: 'cadets', label: 'Cadets', icon: 'Users' },
+        { id: 'teams', label: 'Teams', icon: 'Shield' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
