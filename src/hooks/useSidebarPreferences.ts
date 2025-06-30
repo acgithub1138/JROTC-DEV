@@ -29,8 +29,8 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
     case 'instructor':
       return [
         ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'Users' },
-        { id: 'teams', label: 'Teams', icon: 'Shield' },
+        { id: 'cadets', label: 'Cadets', icon: 'UserGroup' },
+        { id: 'teams', label: 'Teams', icon: 'Team' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
@@ -48,8 +48,8 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
     case 'cadet':
       return [
         ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'Users' },
-        { id: 'teams', label: 'Teams', icon: 'Shield' },
+        { id: 'cadets', label: 'Cadets', icon: 'UserGroup' },
+        { id: 'teams', label: 'Teams', icon: 'Team' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
