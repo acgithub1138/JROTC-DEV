@@ -34,7 +34,7 @@ export const useCreateTask = () => {
           school_id: userProfile?.school_id,
           assigned_by: userProfile?.id,
           team_id: taskData.team_id,
-        })
+        } as any)
         .select()
         .single();
 
