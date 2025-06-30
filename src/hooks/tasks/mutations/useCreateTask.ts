@@ -5,6 +5,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CreateTaskData } from '../types';
 import { validateTaskStatus, validateTaskPriority } from '../utils/taskValidation';
+import type { Database } from '@/integrations/supabase/types';
+
+type TaskInsert = Database['public']['Tables']['tasks']['Insert'];
 
 export const useCreateTask = () => {
   const { userProfile } = useAuth();
@@ -21,8 +24,8 @@ export const useCreateTask = () => {
 
       console.log('Validated values:', { validatedStatus, validatedPriority });
 
-      // Build the insert data object with explicit typing
-      const insertData = {
+      // Build the insert data object with proper typing
+      const insertData: TaskInsert = {
         title: taskData.title,
         description: taskData.description,
         status: validatedStatus,

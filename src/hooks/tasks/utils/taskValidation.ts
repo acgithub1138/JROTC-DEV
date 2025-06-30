@@ -1,20 +1,30 @@
 
 import { TaskStatus, TaskPriority, getTaskStatusValues, getTaskPriorityValues } from '@/config/taskOptions';
 
-export const validateTaskStatus = (value: string): TaskStatus => {
+// Type guard for TaskStatus
+export const isValidTaskStatus = (value: string): value is TaskStatus => {
   const validValues = getTaskStatusValues();
-  if (!validValues.includes(value as TaskStatus)) {
-    console.error(`Invalid status value: ${value}. Valid values:`, validValues);
+  return validValues.includes(value as TaskStatus);
+};
+
+// Type guard for TaskPriority  
+export const isValidTaskPriority = (value: string): value is TaskPriority => {
+  const validValues = getTaskPriorityValues();
+  return validValues.includes(value as TaskPriority);
+};
+
+export const validateTaskStatus = (value: string): TaskStatus => {
+  if (!isValidTaskStatus(value)) {
+    console.error(`Invalid status value: ${value}. Valid values:`, getTaskStatusValues());
     throw new Error(`Invalid status value: ${value}`);
   }
-  return value as TaskStatus;
+  return value;
 };
 
 export const validateTaskPriority = (value: string): TaskPriority => {
-  const validValues = getTaskPriorityValues();
-  if (!validValues.includes(value as TaskPriority)) {
-    console.error(`Invalid priority value: ${value}. Valid values:`, validValues);
+  if (!isValidTaskPriority(value)) {
+    console.error(`Invalid priority value: ${value}. Valid values:`, getTaskPriorityValues());
     throw new Error(`Invalid priority value: ${value}`);
   }
-  return value as TaskPriority;
+  return value;
 };

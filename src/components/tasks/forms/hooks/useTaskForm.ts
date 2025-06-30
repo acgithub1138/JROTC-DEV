@@ -4,7 +4,8 @@ import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { taskSchema, TaskFormData } from '../schemas/taskFormSchema';
-import { TaskStatus, TaskPriority, getTaskStatusValues, getTaskPriorityValues } from '@/config/taskOptions';
+import { TaskStatus, TaskPriority } from '@/config/taskOptions';
+import { isValidTaskStatus, isValidTaskPriority } from '@/hooks/tasks/utils/taskValidation';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -32,25 +33,23 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
   const onSubmit = (data: TaskFormData) => {
     console.log('Form submitted with data:', data);
 
-    // Validate that the enum values are valid
-    const validStatusValues = getTaskStatusValues();
-    const validPriorityValues = getTaskPriorityValues();
-
-    if (!validStatusValues.includes(data.status as TaskStatus)) {
+    // Validate that the enum values are valid using type guards
+    if (!isValidTaskStatus(data.status)) {
       console.error('Invalid status value:', data.status);
       return;
     }
 
-    if (!validPriorityValues.includes(data.priority as TaskPriority)) {
+    if (!isValidTaskPriority(data.priority)) {
       console.error('Invalid priority value:', data.priority);
       return;
     }
 
+    // Now TypeScript knows these are the correct literal types
     const taskData = {
       title: data.title,
       description: data.description || null,
-      status: data.status as TaskStatus,
-      priority: data.priority as TaskPriority,
+      status: data.status, // TypeScript now knows this is TaskStatus
+      priority: data.priority, // TypeScript now knows this is TaskPriority
       assigned_to: data.assigned_to || null,
       due_date: selectedDate ? selectedDate.toISOString() : null,
       team_id: null,
