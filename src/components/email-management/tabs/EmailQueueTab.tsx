@@ -4,8 +4,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, RefreshCw, X, Mail, AlertCircle } from 'lucide-react';
+import { Clock, RefreshCw, X, Mail, AlertCircle, Play } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
+import { useEmailProcessor } from '@/hooks/email/useEmailProcessor';
 import { format } from 'date-fns';
 
 const getStatusColor = (status: string) => {
@@ -25,6 +26,7 @@ const getStatusColor = (status: string) => {
 
 export const EmailQueueTab: React.FC = () => {
   const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
+  const { processEmailQueue, isProcessing } = useEmailProcessor();
 
   if (isLoading) {
     return (
@@ -44,15 +46,34 @@ export const EmailQueueTab: React.FC = () => {
     );
   }
 
+  const pendingCount = queueItems.filter(item => item.status === 'pending').length;
+
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Clock className="w-5 h-5" />
-          Email Queue
-          <Badge variant="secondary" className="ml-2">
-            {queueItems.length} items
-          </Badge>
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Clock className="w-5 h-5" />
+            Email Queue
+            <Badge variant="secondary" className="ml-2">
+              {queueItems.length} items
+            </Badge>
+            {pendingCount > 0 && (
+              <Badge variant="outline" className="bg-yellow-50 text-yellow-800">
+                {pendingCount} pending
+              </Badge>
+            )}
+          </div>
+          {pendingCount > 0 && (
+            <Button
+              onClick={() => processEmailQueue()}
+              disabled={isProcessing}
+              className="flex items-center gap-2"
+            >
+              <Play className="w-4 h-4" />
+              {isProcessing ? 'Processing...' : 'Process Queue'}
+            </Button>
+          )}
         </CardTitle>
       </CardHeader>
       <CardContent>

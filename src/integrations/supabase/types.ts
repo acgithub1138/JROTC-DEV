@@ -1210,6 +1210,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      process_email_queue: {
+        Args: { batch_size?: number }
+        Returns: {
+          processed_count: number
+          failed_count: number
+        }[]
+      }
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
