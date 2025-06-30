@@ -38,16 +38,19 @@ export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
 
   const selectedField = availableFields.find(f => f.value === parameters.field);
 
+  const handleFieldChange = (fieldValue: string) => {
+    onParameterChange('field', fieldValue);
+    // Clear the value when field changes to avoid mismatched data types
+    onParameterChange('value', '');
+  };
+
   return (
     <div className="space-y-3">
       <div>
         <Label>Field to Update</Label>
         <Select
           value={parameters.field || ''}
-          onValueChange={(value) => {
-            onParameterChange('field', value);
-            onParameterChange('value', '');
-          }}
+          onValueChange={handleFieldChange}
         >
           <SelectTrigger>
             <SelectValue placeholder="Select field" />
