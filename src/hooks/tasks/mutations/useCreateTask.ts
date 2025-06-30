@@ -19,6 +19,7 @@ export const useCreateTask = () => {
       console.log('Creating task with data:', taskData);
 
       // Validate enum values before sending to database
+      // These functions now return the proper literal types
       const validatedStatus = validateTaskStatus(taskData.status);
       const validatedPriority = validateTaskPriority(taskData.priority);
 
@@ -28,8 +29,8 @@ export const useCreateTask = () => {
       const insertData: TaskInsert = {
         title: taskData.title,
         description: taskData.description,
-        status: validatedStatus,
-        priority: validatedPriority,
+        status: validatedStatus, // Now properly typed as TaskStatus literal
+        priority: validatedPriority, // Now properly typed as TaskPriority literal
         assigned_to: taskData.assigned_to,
         due_date: taskData.due_date,
         school_id: userProfile?.school_id,

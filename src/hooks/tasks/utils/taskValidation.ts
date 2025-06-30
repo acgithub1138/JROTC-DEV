@@ -18,7 +18,8 @@ export const validateTaskStatus = (value: string): TaskStatus => {
     console.error(`Invalid status value: ${value}. Valid values:`, getTaskStatusValues());
     throw new Error(`Invalid status value: ${value}`);
   }
-  return value;
+  // Type assertion is safe here because isValidTaskStatus confirms it's a valid TaskStatus
+  return value as TaskStatus;
 };
 
 export const validateTaskPriority = (value: string): TaskPriority => {
@@ -26,5 +27,6 @@ export const validateTaskPriority = (value: string): TaskPriority => {
     console.error(`Invalid priority value: ${value}. Valid values:`, getTaskPriorityValues());
     throw new Error(`Invalid priority value: ${value}`);
   }
-  return value;
+  // Type assertion is safe here because isValidTaskPriority confirms it's a valid TaskPriority
+  return value as TaskPriority;
 };
