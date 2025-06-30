@@ -7,6 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { SidebarCustomization } from './SidebarCustomization';
 import {
+  User,
   Users,
   CheckSquare,
   DollarSign,
@@ -35,6 +36,7 @@ interface SidebarProps {
 // Icon mapping for dynamic icon resolution
 const iconMap = {
   Home,
+  User,
   Users,
   Shield,
   CheckSquare,
