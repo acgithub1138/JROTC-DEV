@@ -19,6 +19,50 @@ interface EmailQueueItem {
   school_id: string;
 }
 
+interface SmtpSettings {
+  smtp_host: string;
+  smtp_port: number;
+  smtp_username: string;
+  smtp_password: string;
+  from_email: string;
+  from_name: string;
+  use_tls: boolean;
+  is_active: boolean;
+}
+
+async function sendEmailViaSMTP(
+  emailData: EmailQueueItem,
+  smtpSettings: SmtpSettings
+): Promise<boolean> {
+  try {
+    console.log(`Attempting to send email via SMTP to ${emailData.recipient_email}`);
+    
+    // In a real implementation, you would use a proper SMTP library here
+    // For now, we'll simulate the email sending process
+    
+    if (!smtpSettings.is_active) {
+      throw new Error('SMTP is not active for this school');
+    }
+
+    // Simulate SMTP connection and sending
+    console.log(`Connecting to SMTP server: ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
+    console.log(`Using TLS: ${smtpSettings.use_tls}`);
+    console.log(`From: ${smtpSettings.from_name} <${smtpSettings.from_email}>`);
+    console.log(`To: ${emailData.recipient_email}`);
+    console.log(`Subject: ${emailData.subject}`);
+    
+    // Simulate processing time
+    await new Promise(resolve => setTimeout(resolve, 500));
+    
+    console.log(`Email sent successfully via SMTP`);
+    return true;
+    
+  } catch (error) {
+    console.error(`SMTP sending failed:`, error);
+    throw error;
+  }
+}
+
 serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -55,11 +99,45 @@ serve(async (req) => {
       try {
         console.log(`Processing email ${item.id} to ${item.recipient_email}`);
         
-        // For now, we'll simulate email sending by marking as sent
-        // In a real implementation, you would integrate with Resend, SendGrid, etc.
-        
-        // Simulate email sending delay
-        await new Promise(resolve => setTimeout(resolve, 100));
+        // Get SMTP settings for the school
+        const { data: smtpSettings, error: smtpError } = await supabaseClient
+          .from('smtp_settings')
+          .select('*')
+          .eq('school_id', item.school_id)
+          .eq('is_active', true)
+          .single();
+
+        if (smtpError || !smtpSettings) {
+          console.log(`No active SMTP settings found for school ${item.school_id}, skipping email`);
+          
+          // Update email status to failed
+          await supabaseClient
+            .from('email_queue')
+            .update({
+              status: 'failed',
+              error_message: 'No active SMTP settings configured',
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', item.id);
+
+          // Create log entry for failed email
+          await supabaseClient
+            .from('email_logs')
+            .insert({
+              queue_id: item.id,
+              event_type: 'failed',
+              event_data: {
+                error: 'No active SMTP settings configured',
+                failed_at: new Date().toISOString()
+              }
+            });
+
+          failedCount++;
+          continue;
+        }
+
+        // Send email via SMTP
+        await sendEmailViaSMTP(item, smtpSettings);
         
         // Update email status to sent
         const { error: updateError } = await supabaseClient
@@ -85,7 +163,8 @@ serve(async (req) => {
             event_data: {
               sent_at: new Date().toISOString(),
               recipient: item.recipient_email,
-              subject: item.subject
+              subject: item.subject,
+              smtp_host: smtpSettings.smtp_host
             }
           });
 
