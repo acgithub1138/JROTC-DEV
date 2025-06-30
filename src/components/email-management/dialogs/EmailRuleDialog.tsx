@@ -7,26 +7,21 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useEmailRules, EmailRule } from '@/hooks/email/useEmailRules';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useAvailableTables } from '@/hooks/email/useTableColumns';
+import { BasicFieldsSection } from './components/BasicFieldsSection';
+import { TriggerConfigSection } from './components/TriggerConfigSection';
+import { RecipientConfigSection } from './components/RecipientConfigSection';
+import { EmailRuleFormData, RecipientConfig } from './components/types';
 
 interface EmailRuleDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   rule?: EmailRule | null;
   mode: 'create' | 'edit';
-}
-
-interface RecipientConfig {
-  recipient_type: string;
-  recipient_field: string;
-  static_email: string;
 }
 
 export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
@@ -39,17 +34,17 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
   const { templates } = useEmailTemplates();
   const { data: availableTables = [] } = useAvailableTables();
   
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<EmailRuleFormData>({
     name: '',
     template_id: '',
     source_table: '',
-    trigger_event: 'INSERT' as 'INSERT' | 'UPDATE' | 'DELETE',
+    trigger_event: 'INSERT',
     trigger_conditions: {},
     recipient_config: {
       recipient_type: 'field',
       recipient_field: '',
       static_email: '',
-    } as RecipientConfig,
+    },
     is_active: true,
   });
 
@@ -89,7 +84,7 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
     }
   }, [rule, mode, open]);
 
-  const handleFormChange = (updates: Partial<typeof formData>) => {
+  const handleFormChange = (updates: Partial<EmailRuleFormData>) => {
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
@@ -127,122 +122,22 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-6">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="name">Rule Name</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleFormChange({ name: e.target.value })}
-                placeholder="Enter rule name"
-                required
-              />
-            </div>
+          <BasicFieldsSection
+            formData={formData}
+            availableTables={availableTables}
+            onFormChange={handleFormChange}
+          />
 
-            <div className="space-y-2">
-              <Label>Source Table</Label>
-              <Select
-                value={formData.source_table}
-                onValueChange={(value) => handleFormChange({ source_table: value, template_id: '' })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select source table" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTables.map((table) => (
-                    <SelectItem key={table.name} value={table.name}>
-                      {table.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <TriggerConfigSection
+            formData={formData}
+            availableTemplates={availableTemplates}
+            onFormChange={handleFormChange}
+          />
 
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Trigger Event</Label>
-              <Select
-                value={formData.trigger_event}
-                onValueChange={(value) => handleFormChange({ trigger_event: value as any })}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="INSERT">Insert (New Record)</SelectItem>
-                  <SelectItem value="UPDATE">Update (Record Changed)</SelectItem>
-                  <SelectItem value="DELETE">Delete (Record Removed)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="space-y-2">
-              <Label>Email Template</Label>
-              <Select
-                value={formData.template_id}
-                onValueChange={(value) => handleFormChange({ template_id: value })}
-                disabled={!formData.source_table}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {availableTemplates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
-                      {template.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <Card>
-            <CardHeader>
-              <CardTitle className="text-sm">Recipient Configuration</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <div className="space-y-2">
-                <Label>Recipient Type</Label>
-                <Select
-                  value={formData.recipient_config.recipient_type}
-                  onValueChange={(value) => handleRecipientConfigChange({ recipient_type: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="field">From Record Field</SelectItem>
-                    <SelectItem value="static">Static Email Address</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {formData.recipient_config.recipient_type === 'field' ? (
-                <div className="space-y-2">
-                  <Label htmlFor="recipient_field">Email Field Name</Label>
-                  <Input
-                    id="recipient_field"
-                    value={formData.recipient_config.recipient_field}
-                    onChange={(e) => handleRecipientConfigChange({ recipient_field: e.target.value })}
-                    placeholder="e.g., email, assigned_to.email"
-                  />
-                </div>
-              ) : (
-                <div className="space-y-2">
-                  <Label htmlFor="static_email">Static Email Address</Label>
-                  <Input
-                    id="static_email"
-                    type="email"
-                    value={formData.recipient_config.static_email}
-                    onChange={(e) => handleRecipientConfigChange({ static_email: e.target.value })}
-                    placeholder="recipient@example.com"
-                  />
-                </div>
-              )}
-            </CardContent>
-          </Card>
+          <RecipientConfigSection
+            recipientConfig={formData.recipient_config}
+            onRecipientConfigChange={handleRecipientConfigChange}
+          />
 
           <div className="flex items-center space-x-2">
             <Switch
