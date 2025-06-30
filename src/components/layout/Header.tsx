@@ -36,7 +36,9 @@ export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
       calendar: 'Calendar & Events',
       documents: 'Document Management',
       email: 'Email Management',
+      school-management: 'School Management',
       settings: 'System Settings',
+
     };
     return titles[module] || module.charAt(0).toUpperCase() + module.slice(1);
   };
