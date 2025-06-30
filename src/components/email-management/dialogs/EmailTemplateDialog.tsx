@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Dialog,
@@ -14,8 +13,9 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Separator } from '@/components/ui/separator';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useAvailableTables, useTableColumns } from '@/hooks/email/useTableColumns';
+import { useAvailableTables, useTableColumns, useEnhancedVariables } from '@/hooks/email/useTableColumns';
 
 interface EmailTemplateDialogProps {
   open: boolean;
@@ -42,6 +42,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   });
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
+  const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
 
   useEffect(() => {
     if (template && mode === 'edit') {
@@ -106,6 +107,14 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     }));
   };
 
+  const insertVariableIntoSubject = (columnName: string) => {
+    const variable = `{{${columnName}}}`;
+    setFormData(prev => ({
+      ...prev,
+      subject: prev.subject + variable,
+    }));
+  };
+
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
@@ -147,15 +156,54 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="subject">Email Subject</Label>
-            <Input
-              id="subject"
-              value={formData.subject}
-              onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
-              placeholder="Enter email subject (use {{variable}} for dynamic content)"
-              required
-            />
+          <div className="grid grid-cols-4 gap-4">
+            <div className="col-span-2 space-y-2">
+              <Label htmlFor="subject">Email Subject</Label>
+              <Input
+                id="subject"
+                value={formData.subject}
+                onChange={(e) => setFormData(prev => ({ ...prev, subject: e.target.value }))}
+                placeholder="Enter email subject (use {{variable}} for dynamic content)"
+                required
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label>Subject Variables</Label>
+              <Card className="h-32">
+                <CardContent className="p-2 overflow-y-auto">
+                  <div className="space-y-1">
+                    {columns.map((column) => (
+                      <Button
+                        key={`subject-${column.column_name}`}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertVariableIntoSubject(column.column_name)}
+                        className="w-full justify-start text-xs h-7"
+                      >
+                        {column.display_label}
+                      </Button>
+                    ))}
+                    {enhancedVariables.map((variable) => (
+                      <Button
+                        key={`subject-${variable.variable}`}
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => insertVariableIntoSubject(variable.variable)}
+                        className="w-full justify-start text-xs h-7 bg-blue-50 border-blue-200"
+                      >
+                        {variable.label}
+                        <Badge variant="secondary" className="ml-auto text-xs">
+                          Name
+                        </Badge>
+                      </Button>
+                    ))}
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
           </div>
 
           <div className="grid grid-cols-3 gap-4">
@@ -174,24 +222,47 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
             <div className="space-y-2">
               <Label>Available Variables</Label>
               <Card>
-                <CardHeader>
+                <CardHeader className="pb-2">
                   <CardTitle className="text-sm">Table Columns</CardTitle>
                 </CardHeader>
-                <CardContent className="space-y-2">
+                <CardContent className="space-y-2 max-h-64 overflow-y-auto">
                   {columns.map((column) => (
                     <Button
                       key={column.column_name}
+                      type="button"
                       variant="outline"
                       size="sm"
                       onClick={() => insertVariable(column.column_name)}
                       className="w-full justify-start text-xs"
                     >
-                      {column.column_name}
+                      {column.display_label}
                       <Badge variant="secondary" className="ml-2 text-xs">
                         {column.data_type}
                       </Badge>
                     </Button>
                   ))}
+                  
+                  {enhancedVariables.length > 0 && (
+                    <>
+                      <Separator />
+                      <div className="text-xs font-medium text-gray-600 px-1">Profile References</div>
+                      {enhancedVariables.map((variable) => (
+                        <Button
+                          key={variable.variable}
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          onClick={() => insertVariable(variable.variable)}
+                          className="w-full justify-start text-xs bg-blue-50 border-blue-200"
+                        >
+                          {variable.label}
+                          <Badge variant="secondary" className="ml-2 text-xs">
+                            Name
+                          </Badge>
+                        </Button>
+                      ))}
+                    </>
+                  )}
                 </CardContent>
               </Card>
             </div>
