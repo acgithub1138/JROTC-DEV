@@ -1,7 +1,6 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { ChevronRight, ChevronDown } from 'lucide-react';
 import { VariableButton } from './VariableButton';
 
@@ -54,9 +53,6 @@ export const ExpandableVariableButton: React.FC<ExpandableVariableButtonProps> =
           isExpanded ? <ChevronDown className="w-3 h-3 mr-1" /> : <ChevronRight className="w-3 h-3 mr-1" />
         )}
         {label}
-        <Badge variant="secondary" className="ml-auto text-xs">
-          {isUuidField ? 'Reference' : dataType}
-        </Badge>
       </Button>
       
       {isExpanded && isUuidField && (

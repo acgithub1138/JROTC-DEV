@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
@@ -106,11 +105,8 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   const insertVariableAtCursor = (variableName: string) => {
     const variable = `{{${variableName}}}`;
     
-    // Check which field currently has focus
-    const activeElement = document.activeElement;
-    
-    if (activeElement === subjectRef.current) {
-      // Insert into subject field
+    // Check if subject field is focused
+    if (document.activeElement === subjectRef.current) {
       const input = subjectRef.current;
       if (input) {
         const start = input.selectionStart || 0;
@@ -118,14 +114,13 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         const newValue = formData.subject.slice(0, start) + variable + formData.subject.slice(end);
         handleFormChange({ subject: newValue });
         
-        // Set cursor position after the inserted variable
         setTimeout(() => {
           input.focus();
           input.setSelectionRange(start + variable.length, start + variable.length);
         }, 0);
       }
-    } else if (activeElement === bodyRef.current || !activeElement || activeElement === document.body) {
-      // Insert into body field (default)
+    } else {
+      // Default to body field
       const textarea = bodyRef.current;
       if (textarea) {
         const start = textarea.selectionStart || 0;
@@ -133,7 +128,6 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         const newValue = formData.body.slice(0, start) + variable + formData.body.slice(end);
         handleFormChange({ body: newValue });
         
-        // Set cursor position after the inserted variable
         setTimeout(() => {
           textarea.focus();
           textarea.setSelectionRange(start + variable.length, start + variable.length);

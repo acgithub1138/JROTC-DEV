@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 
 interface VariableButtonProps {
   label: string;
@@ -33,9 +32,6 @@ export const VariableButton: React.FC<VariableButtonProps> = ({
       } ${className}`}
     >
       {label}
-      <Badge variant="secondary" className="ml-auto text-xs">
-        {isProfileReference ? 'Name' : dataType}
-      </Badge>
     </Button>
   );
 };
