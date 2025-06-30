@@ -1,5 +1,6 @@
 
 import React, { useState, useEffect, useRef } from 'react';
+import ReactQuill from 'react-quill';
 import {
   Dialog,
   DialogContent,
@@ -11,7 +12,7 @@ import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplate
 import { useAvailableTables, useTableColumns } from '@/hooks/email/useTableColumns';
 import { TemplateBasicFields } from './components/TemplateBasicFields';
 import { SubjectField } from './components/SubjectField';
-import { BodyField } from './components/BodyField';
+import { RichTextBodyField } from './components/RichTextBodyField';
 import { VariablesPanel } from './components/VariablesPanel';
 import { EmailPreviewDialog } from './EmailPreviewDialog';
 import { extractVariables } from '@/utils/templateProcessor';
@@ -41,7 +42,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   });
 
   const subjectRef = useRef<HTMLInputElement>(null);
-  const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const quillRef = useRef<ReactQuill>(null);
   const [showPreview, setShowPreview] = useState(false);
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
@@ -110,18 +111,18 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         }, 0);
       }
     } else {
-      // Default to body field
-      const textarea = bodyRef.current;
-      if (textarea) {
-        const start = textarea.selectionStart || 0;
-        const end = textarea.selectionEnd || 0;
-        const newValue = formData.body.slice(0, start) + variable + formData.body.slice(end);
-        handleFormChange({ body: newValue });
+      // Insert into Quill editor
+      if (quillRef.current) {
+        const quill = quillRef.current.getEditor();
+        const range = quill.getSelection();
+        const position = range ? range.index : quill.getLength();
         
-        setTimeout(() => {
-          textarea.focus();
-          textarea.setSelectionRange(start + variable.length, start + variable.length);
-        }, 0);
+        quill.insertText(position, variable);
+        quill.setSelection(position + variable.length);
+        
+        // Update the form data
+        const newContent = quill.root.innerHTML;
+        handleFormChange({ body: newContent });
       }
     }
   };
@@ -153,10 +154,10 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
                   inputRef={subjectRef}
                 />
 
-                <BodyField
+                <RichTextBodyField
                   value={formData.body}
                   onChange={(body) => handleFormChange({ body })}
-                  textareaRef={bodyRef}
+                  quillRef={quillRef}
                 />
               </div>
 
