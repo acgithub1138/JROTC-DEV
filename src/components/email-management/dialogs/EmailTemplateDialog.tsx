@@ -1,5 +1,5 @@
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -12,6 +12,7 @@ import { useAvailableTables, useTableColumns, useEnhancedVariables } from '@/hoo
 import { TemplateBasicFields } from './components/TemplateBasicFields';
 import { SubjectField } from './components/SubjectField';
 import { BodyField } from './components/BodyField';
+import { VariablesPanel } from './components/VariablesPanel';
 
 interface EmailTemplateDialogProps {
   open: boolean;
@@ -36,6 +37,9 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     source_table: '',
     is_active: true,
   });
+
+  const subjectRef = useRef<HTMLInputElement>(null);
+  const bodyRef = useRef<HTMLTextAreaElement>(null);
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
   const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
@@ -99,25 +103,48 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     return variables;
   };
 
-  const insertVariable = (columnName: string) => {
-    const variable = `{{${columnName}}}`;
-    setFormData(prev => ({
-      ...prev,
-      body: prev.body + variable,
-    }));
-  };
-
-  const insertVariableIntoSubject = (columnName: string) => {
-    const variable = `{{${columnName}}}`;
-    setFormData(prev => ({
-      ...prev,
-      subject: prev.subject + variable,
-    }));
+  const insertVariableAtCursor = (variableName: string) => {
+    const variable = `{{${variableName}}}`;
+    
+    // Check which field currently has focus
+    const activeElement = document.activeElement;
+    
+    if (activeElement === subjectRef.current) {
+      // Insert into subject field
+      const input = subjectRef.current;
+      if (input) {
+        const start = input.selectionStart || 0;
+        const end = input.selectionEnd || 0;
+        const newValue = formData.subject.slice(0, start) + variable + formData.subject.slice(end);
+        handleFormChange({ subject: newValue });
+        
+        // Set cursor position after the inserted variable
+        setTimeout(() => {
+          input.focus();
+          input.setSelectionRange(start + variable.length, start + variable.length);
+        }, 0);
+      }
+    } else if (activeElement === bodyRef.current || !activeElement || activeElement === document.body) {
+      // Insert into body field (default)
+      const textarea = bodyRef.current;
+      if (textarea) {
+        const start = textarea.selectionStart || 0;
+        const end = textarea.selectionEnd || 0;
+        const newValue = formData.body.slice(0, start) + variable + formData.body.slice(end);
+        handleFormChange({ body: newValue });
+        
+        // Set cursor position after the inserted variable
+        setTimeout(() => {
+          textarea.focus();
+          textarea.setSelectionRange(start + variable.length, start + variable.length);
+        }, 0);
+      }
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'edit' ? 'Edit Email Template' : 'Create Email Template'}
@@ -131,21 +158,29 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
             availableTables={availableTables}
           />
 
-          <SubjectField
-            value={formData.subject}
-            onChange={(subject) => handleFormChange({ subject })}
-            columns={columns}
-            enhancedVariables={enhancedVariables}
-            onVariableInsert={insertVariableIntoSubject}
-          />
+          <div className="grid grid-cols-4 gap-6">
+            <div className="col-span-3 space-y-4">
+              <SubjectField
+                value={formData.subject}
+                onChange={(subject) => handleFormChange({ subject })}
+                inputRef={subjectRef}
+              />
 
-          <BodyField
-            value={formData.body}
-            onChange={(body) => handleFormChange({ body })}
-            columns={columns}
-            enhancedVariables={enhancedVariables}
-            onVariableInsert={insertVariable}
-          />
+              <BodyField
+                value={formData.body}
+                onChange={(body) => handleFormChange({ body })}
+                textareaRef={bodyRef}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <VariablesPanel
+                columns={columns}
+                enhancedVariables={enhancedVariables}
+                onVariableInsert={insertVariableAtCursor}
+              />
+            </div>
+          </div>
 
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>

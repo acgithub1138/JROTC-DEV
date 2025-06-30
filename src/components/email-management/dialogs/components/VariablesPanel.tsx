@@ -19,9 +19,10 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   return (
     <Card>
       <CardHeader className="pb-2">
-        <CardTitle className="text-sm">Table Columns</CardTitle>
+        <CardTitle className="text-sm">Available Variables</CardTitle>
+        <p className="text-xs text-gray-500">Click to insert at cursor position</p>
       </CardHeader>
-      <CardContent className="space-y-2 max-h-64 overflow-y-auto">
+      <CardContent className="space-y-2 max-h-96 overflow-y-auto">
         {columns.map((column) => (
           <VariableButton
             key={column.column_name}
