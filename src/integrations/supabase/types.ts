@@ -66,6 +66,72 @@ export type Database = {
           },
         ]
       }
+      business_rule_logs: {
+        Row: {
+          action_details: Json
+          action_type: string
+          after_values: Json | null
+          before_values: Json | null
+          business_rule_id: string
+          error_message: string | null
+          executed_at: string
+          execution_time_ms: number | null
+          id: string
+          school_id: string
+          success: boolean
+          target_record_id: string | null
+          target_table: string
+          trigger_event: string
+        }
+        Insert: {
+          action_details?: Json
+          action_type: string
+          after_values?: Json | null
+          before_values?: Json | null
+          business_rule_id: string
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number | null
+          id?: string
+          school_id: string
+          success?: boolean
+          target_record_id?: string | null
+          target_table: string
+          trigger_event: string
+        }
+        Update: {
+          action_details?: Json
+          action_type?: string
+          after_values?: Json | null
+          before_values?: Json | null
+          business_rule_id?: string
+          error_message?: string | null
+          executed_at?: string
+          execution_time_ms?: number | null
+          id?: string
+          school_id?: string
+          success?: boolean
+          target_record_id?: string | null
+          target_table?: string
+          trigger_event?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "business_rule_logs_business_rule_id_fkey"
+            columns: ["business_rule_id"]
+            isOneToOne: false
+            referencedRelation: "business_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "business_rule_logs_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       business_rules: {
         Row: {
           actions: Json

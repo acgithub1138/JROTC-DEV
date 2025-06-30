@@ -1,114 +1,30 @@
 
-import React, { useState } from 'react';
-import { Sidebar } from '@/components/layout/Sidebar';
-import { Header } from '@/components/layout/Header';
-import DashboardOverview from '@/components/dashboard/DashboardOverview';
-import UserAdminPage from '@/components/user-management/UserAdminPage';
-import SchoolManagementPage from '@/components/school-management/SchoolManagementPage';
-import TaskManagementPage from '@/components/tasks/TaskManagementPage';
-import TaskOptionsManagement from '@/components/tasks/TaskOptionsManagement';
-import BusinessRulesPage from '@/components/business-rules/BusinessRulesPage';
-import { useAuth } from '@/contexts/AuthContext';
+import React from 'react';
+import { Routes, Route } from 'react-router-dom';
+import { Header } from './layout/Header';
+import { Sidebar } from './layout/Sidebar';
+import { DashboardOverview } from './dashboard/DashboardOverview';
+import TaskManagementPage from './tasks/TaskManagementPage';
+import BusinessRulesMainPage from './business-rules/BusinessRulesMainPage';
+import SchoolManagementPage from './school-management/SchoolManagementPage';
+import UserAdminPage from './user-management/UserAdminPage';
+import NotFound from '@/pages/NotFound';
 
 const MainApplication = () => {
-  const [activeModule, setActiveModule] = useState('dashboard');
-  const { userProfile } = useAuth();
-
-  const renderModule = () => {
-    switch (activeModule) {
-      case 'dashboard':
-        return <DashboardOverview />;
-      case 'user-admin':
-        return <UserAdminPage />;
-      case 'school-management':
-        return <SchoolManagementPage />;
-      case 'tasks':
-        return <TaskManagementPage />;
-      case 'rules':
-        return <BusinessRulesPage />;
-      case 'settings':
-        return (
-          <div className="p-6 space-y-6">
-            <div>
-              <h2 className="text-2xl font-bold mb-4">Settings</h2>
-              <p className="text-gray-600 mb-6">Manage application settings and configurations</p>
-            </div>
-            
-            {userProfile?.role === 'admin' && (
-              <TaskOptionsManagement />
-            )}
-            
-            {userProfile?.role !== 'admin' && (
-              <div className="bg-white p-6 rounded-lg shadow">
-                <h3 className="text-lg font-medium mb-2">Settings Access</h3>
-                <p className="text-gray-600">Additional settings are available to administrators.</p>
-              </div>
-            )}
-          </div>
-        );
-      case 'cadets':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Cadet Management</h2>
-            <p className="text-gray-600">Cadet management module coming soon...</p>
-          </div>
-        );
-      case 'teams':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Team Management</h2>
-            <p className="text-gray-600">Team management module coming soon...</p>
-          </div>
-        );
-      case 'budget':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Budget & Finance</h2>
-            <p className="text-gray-600">Budget management module coming soon...</p>
-          </div>
-        );
-      case 'inventory':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Inventory Management</h2>
-            <p className="text-gray-600">Inventory management module coming soon...</p>
-          </div>
-        );
-      case 'contacts':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Contact Management</h2>
-            <p className="text-gray-600">Contact management module coming soon...</p>
-          </div>
-        );
-      case 'competitions':
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">Competition Results</h2>
-            <p className="text-gray-600">Competition management module coming soon...</p>
-          </div>
-        );
-      default:
-        return (
-          <div className="p-6">
-            <h2 className="text-2xl font-bold mb-4">{activeModule}</h2>
-            <p className="text-gray-600">Module coming soon...</p>
-          </div>
-        );
-    }
-  };
-
   return (
-    <div className="h-screen flex bg-gray-50">
-      <Sidebar
-        className="w-64 flex-shrink-0"
-        activeModule={activeModule}
-        onModuleChange={setActiveModule}
-      />
-      <div className="flex-1 flex flex-col overflow-hidden">
-        <Header activeModule={activeModule} />
-        <main className="flex-1 overflow-y-auto bg-gray-50">
-          {renderModule()}
+    <div className="min-h-screen bg-gray-50">
+      <Header />
+      <div className="flex">
+        <Sidebar />
+        <main className="flex-1 ml-64">
+          <Routes>
+            <Route path="/" element={<DashboardOverview />} />
+            <Route path="/tasks" element={<TaskManagementPage />} />
+            <Route path="/business-rules" element={<BusinessRulesMainPage />} />
+            <Route path="/school" element={<SchoolManagementPage />} />
+            <Route path="/users" element={<UserAdminPage />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
         </main>
       </div>
     </div>
