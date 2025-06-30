@@ -8,6 +8,7 @@ import TaskManagementPage from './tasks/TaskManagementPage';
 import BusinessRulesMainPage from './business-rules/BusinessRulesMainPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import UserAdminPage from './user-management/UserAdminPage';
+import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import NotFound from '@/pages/NotFound';
 
 const MainApplication = () => {
@@ -67,16 +68,13 @@ const MainApplication = () => {
   );
 };
 
-// Simple Settings Page component
+// Settings Page component with Task Options Management
 const SettingsPage = () => {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-        <div className="bg-white rounded-lg shadow-sm border p-6">
-          <h2 className="text-xl font-semibold mb-4">System Settings</h2>
-          <p className="text-gray-600">Settings page is under development.</p>
-        </div>
+        <TaskOptionsManagement />
       </div>
     </div>
   );
