@@ -1,0 +1,42 @@
+
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+
+export interface TableColumn {
+  column_name: string;
+  data_type: string;
+}
+
+export const useTableColumns = (tableName: string) => {
+  return useQuery({
+    queryKey: ['table-columns', tableName],
+    queryFn: async () => {
+      if (!tableName) return [];
+      
+      const { data, error } = await supabase
+        .rpc('get_table_columns', { table_name: tableName });
+
+      if (error) throw error;
+      return data as TableColumn[];
+    },
+    enabled: !!tableName,
+  });
+};
+
+export const useAvailableTables = () => {
+  return useQuery({
+    queryKey: ['available-tables'],
+    queryFn: async () => {
+      // Return commonly used tables that users would want to create email templates for
+      return [
+        { name: 'tasks', label: 'Tasks' },
+        { name: 'cadets', label: 'Cadets' },
+        { name: 'profiles', label: 'Profiles' },
+        { name: 'teams', label: 'Teams' },
+        { name: 'competitions', label: 'Competitions' },
+        { name: 'inventory_items', label: 'Inventory Items' },
+        { name: 'expenses', label: 'Expenses' },
+      ];
+    },
+  });
+};

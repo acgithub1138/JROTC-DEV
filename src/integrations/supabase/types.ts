@@ -320,6 +320,238 @@ export type Database = {
           },
         ]
       }
+      email_logs: {
+        Row: {
+          created_at: string
+          event_data: Json | null
+          event_type: Database["public"]["Enums"]["email_log_event"]
+          id: string
+          queue_id: string
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json | null
+          event_type: Database["public"]["Enums"]["email_log_event"]
+          id?: string
+          queue_id: string
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json | null
+          event_type?: Database["public"]["Enums"]["email_log_event"]
+          id?: string
+          queue_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_logs_queue_id_fkey"
+            columns: ["queue_id"]
+            isOneToOne: false
+            referencedRelation: "email_queue"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_queue: {
+        Row: {
+          body: string
+          created_at: string
+          error_message: string | null
+          id: string
+          recipient_email: string
+          record_id: string | null
+          rule_id: string | null
+          scheduled_at: string
+          school_id: string
+          sent_at: string | null
+          source_table: string | null
+          status: Database["public"]["Enums"]["email_queue_status"]
+          subject: string
+          template_id: string | null
+          updated_at: string
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email: string
+          record_id?: string | null
+          rule_id?: string | null
+          scheduled_at?: string
+          school_id: string
+          sent_at?: string | null
+          source_table?: string | null
+          status?: Database["public"]["Enums"]["email_queue_status"]
+          subject: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          recipient_email?: string
+          record_id?: string | null
+          rule_id?: string | null
+          scheduled_at?: string
+          school_id?: string
+          sent_at?: string | null
+          source_table?: string | null
+          status?: Database["public"]["Enums"]["email_queue_status"]
+          subject?: string
+          template_id?: string | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "email_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_queue_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_rules: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          recipient_config: Json
+          school_id: string
+          source_table: string
+          template_id: string
+          trigger_conditions: Json | null
+          trigger_event: Database["public"]["Enums"]["email_trigger_event"]
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          recipient_config: Json
+          school_id: string
+          source_table: string
+          template_id: string
+          trigger_conditions?: Json | null
+          trigger_event: Database["public"]["Enums"]["email_trigger_event"]
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          recipient_config?: Json
+          school_id?: string
+          source_table?: string
+          template_id?: string
+          trigger_conditions?: Json | null
+          trigger_event?: Database["public"]["Enums"]["email_trigger_event"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_rules_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_rules_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_rules_template_id_fkey"
+            columns: ["template_id"]
+            isOneToOne: false
+            referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_templates: {
+        Row: {
+          body: string
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          name: string
+          school_id: string
+          source_table: string
+          subject: string
+          updated_at: string
+          variables_used: Json | null
+        }
+        Insert: {
+          body: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name: string
+          school_id: string
+          source_table: string
+          subject: string
+          updated_at?: string
+          variables_used?: Json | null
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          name?: string
+          school_id?: string
+          source_table?: string
+          subject?: string
+          updated_at?: string
+          variables_used?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_templates_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_templates_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -967,8 +1199,19 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_table_columns: {
+        Args: { table_name: string }
+        Returns: {
+          column_name: string
+          data_type: string
+        }[]
+      }
       get_user_school_id: {
         Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      process_email_template: {
+        Args: { template_content: string; record_data: Json }
         Returns: string
       }
       validate_task_priority: {
@@ -996,6 +1239,9 @@ export type Database = {
         | "leadership"
         | "physical_fitness"
         | "inspection"
+      email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
+      email_queue_status: "pending" | "sent" | "failed" | "cancelled"
+      email_trigger_event: "INSERT" | "UPDATE" | "DELETE"
       inventory_status:
         | "available"
         | "checked_out"
@@ -1163,6 +1409,9 @@ export const Constants = {
         "physical_fitness",
         "inspection",
       ],
+      email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
+      email_queue_status: ["pending", "sent", "failed", "cancelled"],
+      email_trigger_event: ["INSERT", "UPDATE", "DELETE"],
       inventory_status: [
         "available",
         "checked_out",

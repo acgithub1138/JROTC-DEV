@@ -8,6 +8,7 @@ import TaskManagementPage from './tasks/TaskManagementPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
+import EmailManagementPage from './email-management/EmailManagementPage';
 import NotFound from '@/pages/NotFound';
 
 const MainApplication = () => {
@@ -20,6 +21,7 @@ const MainApplication = () => {
     if (path.startsWith('/tasks')) return 'tasks';
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
+    if (path.startsWith('/email')) return 'email-management';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -32,6 +34,7 @@ const MainApplication = () => {
       'tasks': '/tasks',
       'school-management': '/school',
       'user-admin': '/users',
+      'email-management': '/email',
       'settings': '/settings'
     };
     
@@ -55,6 +58,7 @@ const MainApplication = () => {
             <Route path="/tasks" element={<TaskManagementPage />} />
             <Route path="/school" element={<SchoolManagementPage />} />
             <Route path="/users" element={<UserAdminPage />} />
+            <Route path="/email" element={<EmailManagementPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
