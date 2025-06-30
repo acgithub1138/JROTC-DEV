@@ -8,6 +8,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Plus, X } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useSchemaTracking } from '@/hooks/useSchemaTracking';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { DynamicFieldInput } from './DynamicFieldInput';
 
 interface ActionsCardProps {
   actions: Array<{
@@ -25,34 +28,35 @@ const actionTypes = [
   { value: 'log_message', label: 'Log Message' }
 ];
 
-const taskFields = [
-  { value: 'status', label: 'Status' },
-  { value: 'priority', label: 'Priority' },
-  { value: 'assigned_to', label: 'Assigned To' }
-];
-
-const taskStatusOptions = [
-  { value: 'pending', label: 'Pending' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'completed', label: 'Completed' },
-  { value: 'overdue', label: 'Overdue' },
-  { value: 'cancelled', label: 'Cancelled' }
-];
-
-const taskPriorityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'urgent', label: 'Urgent' },
-  { value: 'critical', label: 'Critical' }
-];
-
 export const ActionsCard: React.FC<ActionsCardProps> = ({
   actions,
   onActionsChange,
   triggerTable
 }) => {
   const { users } = useSchoolUsers();
+  const { getFieldsForTable } = useSchemaTracking();
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
+
+  // Get dynamic fields for the selected table
+  const availableFields = React.useMemo(() => {
+    if (!triggerTable) return [];
+    
+    const fields = getFieldsForTable(triggerTable);
+    
+    // Filter out system fields that shouldn't be updated
+    const systemFields = ['id', 'created_at', 'updated_at', 'school_id'];
+    
+    return fields.filter(field => 
+      !systemFields.includes(field.column_name) &&
+      field.is_active
+    ).map(field => ({
+      value: field.column_name,
+      label: field.column_name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase()),
+      dataType: field.data_type,
+      isNullable: field.is_nullable
+    }));
+  }, [triggerTable, getFieldsForTable]);
 
   const addAction = () => {
     const newAction = {
@@ -86,20 +90,26 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   const renderActionParameters = (action: any, index: number) => {
     switch (action.type) {
       case 'update_record':
-        if (triggerTable === 'tasks') {
+        if (triggerTable && availableFields.length > 0) {
+          const selectedField = availableFields.find(f => f.value === action.parameters.field);
+          
           return (
             <div className="space-y-3">
               <div>
                 <Label>Field to Update</Label>
                 <Select
                   value={action.parameters.field || ''}
-                  onValueChange={(value) => updateAction(index, 'field', value)}
+                  onValueChange={(value) => {
+                    // Clear the current value when field changes
+                    updateAction(index, 'field', value);
+                    updateAction(index, 'value', '');
+                  }}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select field" />
                   </SelectTrigger>
                   <SelectContent>
-                    {taskFields.map((field) => (
+                    {availableFields.map((field) => (
                       <SelectItem key={field.value} value={field.value}>
                         {field.label}
                       </SelectItem>
@@ -108,72 +118,25 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
                 </Select>
               </div>
               
-              {action.parameters.field === 'status' && (
-                <div>
-                  <Label>New Status</Label>
-                  <Select
-                    value={action.parameters.value || ''}
-                    onValueChange={(value) => updateAction(index, 'value', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select status" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskStatusOptions.map((status) => (
-                        <SelectItem key={status.value} value={status.value}>
-                          {status.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              
-              {action.parameters.field === 'priority' && (
-                <div>
-                  <Label>New Priority</Label>
-                  <Select
-                    value={action.parameters.value || ''}
-                    onValueChange={(value) => updateAction(index, 'value', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select priority" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {taskPriorityOptions.map((priority) => (
-                        <SelectItem key={priority.value} value={priority.value}>
-                          {priority.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-              
-              {action.parameters.field === 'assigned_to' && (
-                <div>
-                  <Label>Assign To</Label>
-                  <Select
-                    value={action.parameters.value || ''}
-                    onValueChange={(value) => updateAction(index, 'value', value)}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select user" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {users.map((user) => (
-                        <SelectItem key={user.id} value={user.id}>
-                          {user.first_name} {user.last_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
+              {selectedField && (
+                <DynamicFieldInput
+                  field={selectedField}
+                  value={action.parameters.value || ''}
+                  onChange={(value) => updateAction(index, 'value', value)}
+                  triggerTable={triggerTable}
+                  users={users}
+                  statusOptions={statusOptions}
+                  priorityOptions={priorityOptions}
+                />
               )}
             </div>
           );
         }
-        return null;
+        return (
+          <div className="text-sm text-gray-500">
+            Please select a trigger table first to see available fields.
+          </div>
+        );
 
       case 'create_task_comment':
         return (
