@@ -1,0 +1,78 @@
+
+import React from 'react';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { DynamicFieldInput } from '../DynamicFieldInput';
+
+interface UpdateRecordActionProps {
+  parameters: any;
+  onParameterChange: (field: string, value: any) => void;
+  triggerTable: string;
+  availableFields: Array<{
+    value: string;
+    label: string;
+    dataType: string;
+    isNullable: boolean;
+  }>;
+  users: Array<{ id: string; first_name: string; last_name: string; }>;
+  statusOptions: Array<{ value: string; label: string; }>;
+  priorityOptions: Array<{ value: string; label: string; }>;
+}
+
+export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
+  parameters,
+  onParameterChange,
+  triggerTable,
+  availableFields,
+  users,
+  statusOptions,
+  priorityOptions
+}) => {
+  if (!triggerTable || availableFields.length === 0) {
+    return (
+      <div className="text-sm text-gray-500">
+        Please select a trigger table first to see available fields.
+      </div>
+    );
+  }
+
+  const selectedField = availableFields.find(f => f.value === parameters.field);
+
+  return (
+    <div className="space-y-3">
+      <div>
+        <Label>Field to Update</Label>
+        <Select
+          value={parameters.field || ''}
+          onValueChange={(value) => {
+            onParameterChange('field', value);
+            onParameterChange('value', '');
+          }}
+        >
+          <SelectTrigger>
+            <SelectValue placeholder="Select field" />
+          </SelectTrigger>
+          <SelectContent>
+            {availableFields.map((field) => (
+              <SelectItem key={field.value} value={field.value}>
+                {field.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+      
+      {selectedField && (
+        <DynamicFieldInput
+          field={selectedField}
+          value={parameters.value || ''}
+          onChange={(value) => onParameterChange('value', value)}
+          triggerTable={triggerTable}
+          users={users}
+          statusOptions={statusOptions}
+          priorityOptions={priorityOptions}
+        />
+      )}
+    </div>
+  );
+};

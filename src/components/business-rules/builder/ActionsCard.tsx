@@ -2,16 +2,12 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
-import { Plus, X } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchemaTracking } from '@/hooks/useSchemaTracking';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { DynamicFieldInput } from './DynamicFieldInput';
 import { useAuth } from '@/contexts/AuthContext';
+import { ActionItem } from './actions/ActionItem';
 
 interface ActionsCardProps {
   actions: Array<{
@@ -21,13 +17,6 @@ interface ActionsCardProps {
   onActionsChange: (actions: any[]) => void;
   triggerTable: string;
 }
-
-const actionTypes = [
-  { value: 'update_record', label: 'Update Record' },
-  { value: 'create_task_comment', label: 'Create Task Comment' },
-  { value: 'assign_task', label: 'Assign Task' },
-  { value: 'log_message', label: 'Log Message' }
-];
 
 export const ActionsCard: React.FC<ActionsCardProps> = ({
   actions,
@@ -80,123 +69,10 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
     } else {
       updatedActions[index] = {
         ...updatedActions[index],
-        parameters: {
-          ...updatedActions[index].parameters,
-          [field]: value
-        }
+        [field]: value
       };
     }
     onActionsChange(updatedActions);
-  };
-
-  const renderActionParameters = (action: any, index: number) => {
-    if (!userProfile?.school_id) {
-      return (
-        <div className="text-sm text-gray-500">
-          User authentication required to configure actions.
-        </div>
-      );
-    }
-
-    switch (action.type) {
-      case 'update_record':
-        if (triggerTable && availableFields.length > 0) {
-          const selectedField = availableFields.find(f => f.value === action.parameters.field);
-          
-          return (
-            <div className="space-y-3">
-              <div>
-                <Label>Field to Update</Label>
-                <Select
-                  value={action.parameters.field || ''}
-                  onValueChange={(value) => {
-                    // Clear the current value when field changes
-                    updateAction(index, 'field', value);
-                    updateAction(index, 'value', '');
-                  }}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select field" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {availableFields.map((field) => (
-                      <SelectItem key={field.value} value={field.value}>
-                        {field.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              {selectedField && (
-                <DynamicFieldInput
-                  field={selectedField}
-                  value={action.parameters.value || ''}
-                  onChange={(value) => updateAction(index, 'value', value)}
-                  triggerTable={triggerTable}
-                  users={users}
-                  statusOptions={statusOptions}
-                  priorityOptions={priorityOptions}
-                />
-              )}
-            </div>
-          );
-        }
-        return (
-          <div className="text-sm text-gray-500">
-            Please select a trigger table first to see available fields.
-          </div>
-        );
-
-      case 'create_task_comment':
-        return (
-          <div>
-            <Label>Comment Text</Label>
-            <Textarea
-              placeholder="Enter comment text..."
-              value={action.parameters.comment || ''}
-              onChange={(e) => updateAction(index, 'comment', e.target.value)}
-            />
-          </div>
-        );
-
-      case 'assign_task':
-        return (
-          <div>
-            <Label>Assign To</Label>
-            <Select
-              value={action.parameters.user_id || ''}
-              onValueChange={(value) => updateAction(index, 'user_id', value)}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select user" />
-              </SelectTrigger>
-              <SelectContent>
-                {users.map((user) => (
-                  <SelectItem key={user.id} value={user.id}>
-                    {user.first_name} {user.last_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        );
-
-      case 'log_message':
-        return (
-          <div>
-            <Label>Log Message</Label>
-            <Input
-              placeholder="Enter log message..."
-              value={action.parameters.message || ''}
-              onChange={(e) => updateAction(index, 'message', e.target.value)}
-            />
-          </div>
-        );
-
-      default:
-        return null;
-    }
   };
 
   if (!userProfile?.school_id) {
@@ -223,40 +99,18 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
       </CardHeader>
       <CardContent className="space-y-4">
         {actions.map((action, index) => (
-          <div key={index} className="border rounded-lg p-4 space-y-3">
-            <div className="flex items-center justify-between">
-              <h4 className="font-medium">Action {index + 1}</h4>
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={() => removeAction(index)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <X className="w-4 h-4" />
-              </Button>
-            </div>
-            
-            <div>
-              <Label>Action Type</Label>
-              <Select
-                value={action.type}
-                onValueChange={(value) => updateAction(index, 'type', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select action type" />
-                </SelectTrigger>
-                <SelectContent>
-                  {actionTypes.map((type) => (
-                    <SelectItem key={type.value} value={type.value}>
-                      {type.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            {action.type && renderActionParameters(action, index)}
-          </div>
+          <ActionItem
+            key={index}
+            action={action}
+            index={index}
+            onRemove={() => removeAction(index)}
+            onUpdate={(field, value) => updateAction(index, field, value)}
+            triggerTable={triggerTable}
+            availableFields={availableFields}
+            users={users}
+            statusOptions={statusOptions}
+            priorityOptions={priorityOptions}
+          />
         ))}
         
         <Button onClick={addAction} variant="outline" className="w-full">
