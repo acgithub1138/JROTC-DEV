@@ -12,6 +12,7 @@ import { TemplateBasicFields } from './components/TemplateBasicFields';
 import { SubjectField } from './components/SubjectField';
 import { BodyField } from './components/BodyField';
 import { VariablesPanel } from './components/VariablesPanel';
+import { EmailPreviewDialog } from './EmailPreviewDialog';
 
 interface EmailTemplateDialogProps {
   open: boolean;
@@ -39,6 +40,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
   const subjectRef = useRef<HTMLInputElement>(null);
   const bodyRef = useRef<HTMLTextAreaElement>(null);
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
   const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
@@ -136,56 +138,79 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     }
   };
 
+  const canPreview = formData.source_table && (formData.subject || formData.body);
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {mode === 'edit' ? 'Edit Email Template' : 'Create Email Template'}
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {mode === 'edit' ? 'Edit Email Template' : 'Create Email Template'}
+            </DialogTitle>
+          </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="space-y-6">
-          <TemplateBasicFields
-            formData={formData}
-            onFormChange={handleFormChange}
-            availableTables={availableTables}
-          />
+          <form onSubmit={handleSubmit} className="space-y-6">
+            <TemplateBasicFields
+              formData={formData}
+              onFormChange={handleFormChange}
+              availableTables={availableTables}
+            />
 
-          <div className="grid grid-cols-4 gap-6">
-            <div className="col-span-3 space-y-4">
-              <SubjectField
-                value={formData.subject}
-                onChange={(subject) => handleFormChange({ subject })}
-                inputRef={subjectRef}
-              />
+            <div className="grid grid-cols-4 gap-6">
+              <div className="col-span-3 space-y-4">
+                <SubjectField
+                  value={formData.subject}
+                  onChange={(subject) => handleFormChange({ subject })}
+                  inputRef={subjectRef}
+                />
 
-              <BodyField
-                value={formData.body}
-                onChange={(body) => handleFormChange({ body })}
-                textareaRef={bodyRef}
-              />
+                <BodyField
+                  value={formData.body}
+                  onChange={(body) => handleFormChange({ body })}
+                  textareaRef={bodyRef}
+                />
+              </div>
+
+              <div className="space-y-2">
+                <VariablesPanel
+                  columns={columns}
+                  enhancedVariables={enhancedVariables}
+                  onVariableInsert={insertVariableAtCursor}
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <VariablesPanel
-                columns={columns}
-                enhancedVariables={enhancedVariables}
-                onVariableInsert={insertVariableAtCursor}
-              />
+            <div className="flex justify-between">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowPreview(true)}
+                disabled={!canPreview}
+              >
+                Preview Email
+              </Button>
+              
+              <div className="flex space-x-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {mode === 'edit' ? 'Update Template' : 'Create Template'}
+                </Button>
+              </div>
             </div>
-          </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit">
-              {mode === 'edit' ? 'Update Template' : 'Create Template'}
-            </Button>
-          </div>
-        </form>
-      </DialogContent>
-    </Dialog>
+      <EmailPreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        subject={formData.subject}
+        body={formData.body}
+        sourceTable={formData.source_table}
+      />
+    </>
   );
 };
