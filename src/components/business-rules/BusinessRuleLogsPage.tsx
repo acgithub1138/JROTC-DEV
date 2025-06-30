@@ -14,7 +14,8 @@ const BusinessRuleLogsPage: React.FC = () => {
     dateRange: ''
   });
 
-  const { logs, loading, stats } = useBusinessRuleLogs(filters);
+  const { logs, loading, getExecutionStats } = useBusinessRuleLogs();
+  const stats = getExecutionStats();
 
   if (loading) {
     return (
