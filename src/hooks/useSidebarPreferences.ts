@@ -23,6 +23,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
+        { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
