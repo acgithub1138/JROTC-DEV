@@ -38,7 +38,18 @@ export const useTaskMutations = () => {
       const validatedStatus = validateTaskStatus(taskData.status);
       const validatedPriority = validateTaskPriority(taskData.priority);
 
-      const insertData = {
+      // Properly typed insertData object
+      const insertData: {
+        title: string;
+        description: string | null;
+        status: TaskStatus;
+        priority: TaskPriority;
+        assigned_to: string | null;
+        due_date: string | null;
+        school_id: string | undefined;
+        assigned_by: string | undefined;
+        team_id: string | null;
+      } = {
         title: taskData.title,
         description: taskData.description,
         status: validatedStatus,
