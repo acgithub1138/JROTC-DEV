@@ -9,7 +9,7 @@ export const useTableRecords = (tableName: string, limit: number = 20) => {
       if (!tableName) return [];
       
       const { data, error } = await supabase
-        .from(tableName)
+        .from(tableName as any)
         .select('*')
         .limit(limit)
         .order('created_at', { ascending: false });
