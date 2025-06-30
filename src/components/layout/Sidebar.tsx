@@ -22,6 +22,7 @@ import {
   UserCog,
   Building2,
   Menu,
+  Mails,
   Workflow,
 } from 'lucide-react';
 
@@ -47,6 +48,7 @@ const iconMap = {
   FileText,
   UserCog,
   Building2,
+  Mails,
   Workflow,
 };
 
