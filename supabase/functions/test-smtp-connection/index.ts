@@ -1,5 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import nodemailer from "npm:nodemailer@6.9.7";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -22,180 +23,86 @@ async function testSmtpConnection(config: SmtpTestRequest): Promise<{ success: b
   try {
     console.log(`Testing SMTP connection to ${smtp_host}:${smtp_port} with TLS: ${use_tls}`);
     
-    let conn: Deno.Conn;
-    
-    // Determine connection type based on port and TLS setting
-    const isImplicitSSL = smtp_port === 465;
-    const shouldUseStartTLS = use_tls && !isImplicitSSL;
-    
-    if (isImplicitSSL) {
-      // Use TLS connection directly for port 465 (implicit SSL)
-      console.log('Using implicit SSL/TLS connection');
-      conn = await Deno.connectTls({
-        hostname: smtp_host,
-        port: smtp_port,
-      });
-    } else {
-      // Use plain connection first, will upgrade to TLS if needed
-      console.log('Using plain connection' + (shouldUseStartTLS ? ' with STARTTLS' : ''));
-      conn = await Deno.connect({
-        hostname: smtp_host,
-        port: smtp_port,
-      });
-    }
-
-    const decoder = new TextDecoder();
-    const encoder = new TextEncoder();
-    
-    // Helper function to read response from server
-    const readResponse = async (): Promise<string> => {
-      const buffer = new Uint8Array(2048);
-      const bytesRead = await conn.read(buffer);
-      if (bytesRead === null) throw new Error('Connection closed unexpectedly');
-      const response = decoder.decode(buffer.subarray(0, bytesRead));
-      return response;
+    // Configure transporter based on port and TLS settings
+    let transporterConfig: any = {
+      host: smtp_host,
+      port: smtp_port,
+      auth: {
+        user: smtp_username,
+        pass: smtp_password,
+      },
     };
 
-    // Helper function to send command and read response
-    const sendCommand = async (command: string): Promise<string> => {
-      const logCommand = command.startsWith('AUTH PLAIN') || command.includes('PASS') ? 
-        command.split(' ')[0] + ' [HIDDEN]' : command;
-      console.log(`SMTP Command: ${logCommand}`);
-      await conn.write(encoder.encode(command + '\r\n'));
-      const response = await readResponse();
-      console.log(`SMTP Response: ${response.trim()}`);
-      return response;
-    };
-
-    // Set connection timeout
-    const timeout = setTimeout(() => {
-      conn.close();
-      throw new Error('Connection timeout after 15 seconds');
-    }, 15000);
-
-    try {
-      // Read initial server greeting
-      const greeting = await readResponse();
-      console.log(`Server greeting: ${greeting.trim()}`);
-      if (!greeting.startsWith('220')) {
-        throw new Error(`Server greeting failed: ${greeting.trim()}`);
-      }
-
-      // Send EHLO command
-      const ehloResponse = await sendCommand(`EHLO ${smtp_host}`);
-      if (!ehloResponse.startsWith('250')) {
-        throw new Error(`EHLO command failed: ${ehloResponse.trim()}`);
-      }
-
-      // Handle STARTTLS for explicit TLS
-      if (shouldUseStartTLS) {
-        console.log('Initiating STARTTLS...');
-        const startTlsResponse = await sendCommand('STARTTLS');
-        if (!startTlsResponse.startsWith('220')) {
-          throw new Error(`STARTTLS command failed: ${startTlsResponse.trim()}`);
-        }
-        
-        // Close the plain connection and upgrade to TLS
-        conn.close();
-        console.log('Upgrading connection to TLS...');
-        conn = await Deno.connectTls({
-          hostname: smtp_host,
-          port: smtp_port,
-        });
-        
-        // Send EHLO again after TLS upgrade
-        const ehloTlsResponse = await sendCommand(`EHLO ${smtp_host}`);
-        if (!ehloTlsResponse.startsWith('250')) {
-          throw new Error(`EHLO after STARTTLS failed: ${ehloTlsResponse.trim()}`);
-        }
-      }
-
-      // Try AUTH PLAIN first (more widely supported)
-      console.log('Attempting AUTH PLAIN authentication...');
-      const authPlainCredentials = btoa(`\0${smtp_username}\0${smtp_password}`);
-      
-      try {
-        const authPlainResponse = await sendCommand(`AUTH PLAIN ${authPlainCredentials}`);
-        if (!authPlainResponse.startsWith('235')) {
-          throw new Error(`AUTH PLAIN failed: ${authPlainResponse.trim()}`);
-        }
-        console.log('AUTH PLAIN authentication successful');
-      } catch (authPlainError) {
-        console.log('AUTH PLAIN failed, trying AUTH LOGIN...');
-        
-        // Fallback to AUTH LOGIN
-        const authResponse = await sendCommand('AUTH LOGIN');
-        if (!authResponse.startsWith('334')) {
-          throw new Error(`AUTH LOGIN command failed: ${authResponse.trim()}`);
-        }
-
-        // Send username (base64 encoded)
-        const usernameB64 = btoa(smtp_username);
-        const userResponse = await sendCommand(usernameB64);
-        if (!userResponse.startsWith('334')) {
-          throw new Error(`Username authentication failed: ${userResponse.trim()}`);
-        }
-
-        // Send password (base64 encoded)
-        const passwordB64 = btoa(smtp_password);
-        const passResponse = await sendCommand(passwordB64);
-        if (!passResponse.startsWith('235')) {
-          throw new Error(`Password authentication failed: ${passResponse.trim()}`);
-        }
-        console.log('AUTH LOGIN authentication successful');
-      }
-
-      // Test MAIL FROM command
-      const mailFromResponse = await sendCommand(`MAIL FROM:<${config.from_email}>`);
-      if (!mailFromResponse.startsWith('250')) {
-        console.log(`Warning: MAIL FROM test failed: ${mailFromResponse.trim()}`);
-      }
-
-      // Send QUIT to close connection gracefully
-      await sendCommand('QUIT');
-      
-      clearTimeout(timeout);
-      conn.close();
-
-      return {
-        success: true,
-        message: 'SMTP connection, authentication, and configuration test successful',
-        details: {
-          host: smtp_host,
-          port: smtp_port,
-          username: smtp_username,
-          use_tls: use_tls,
-          connection_type: isImplicitSSL ? 'Implicit SSL/TLS' : (shouldUseStartTLS ? 'STARTTLS' : 'Plain'),
-          greeting: greeting.trim(),
-          timestamp: new Date().toISOString()
-        }
+    // Configure TLS/SSL based on port and user preference
+    if (smtp_port === 465) {
+      // Implicit SSL for port 465
+      transporterConfig.secure = true;
+    } else if (use_tls && (smtp_port === 587 || smtp_port === 25)) {
+      // Explicit TLS (STARTTLS) for port 587 or 25
+      transporterConfig.secure = false;
+      transporterConfig.requireTLS = true;
+      transporterConfig.tls = {
+        ciphers: 'SSLv3',
       };
-
-    } catch (error) {
-      clearTimeout(timeout);
-      conn.close();
-      throw error;
+    } else {
+      // No encryption
+      transporterConfig.secure = false;
     }
+
+    // Add connection timeout
+    transporterConfig.connectionTimeout = 15000;
+    transporterConfig.greetingTimeout = 10000;
+    transporterConfig.socketTimeout = 10000;
+
+    console.log('Creating SMTP transporter with config:', {
+      host: smtp_host,
+      port: smtp_port,
+      secure: transporterConfig.secure,
+      requireTLS: transporterConfig.requireTLS,
+    });
+
+    // Create transporter
+    const transporter = nodemailer.createTransporter(transporterConfig);
+
+    // Verify connection
+    console.log('Verifying SMTP connection...');
+    await transporter.verify();
+    
+    console.log('SMTP connection verified successfully');
+
+    // Close the transporter
+    transporter.close();
+
+    return {
+      success: true,
+      message: 'SMTP connection and authentication test successful',
+      details: {
+        host: smtp_host,
+        port: smtp_port,
+        username: smtp_username,
+        use_tls: use_tls,
+        connection_type: smtp_port === 465 ? 'Implicit SSL/TLS' : (use_tls ? 'STARTTLS' : 'Plain'),
+        timestamp: new Date().toISOString()
+      }
+    };
 
   } catch (error) {
     console.error('SMTP connection test failed:', error);
     
     let errorMessage = 'SMTP connection test failed';
     
-    if (error.message.includes('Connection refused') || error.message.includes('ECONNREFUSED')) {
-      errorMessage = `Cannot connect to SMTP server ${smtp_host}:${smtp_port}. Check if the server is running and accessible.`;
-    } else if (error.message.includes('timeout')) {
-      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. Server may be unresponsive or firewall may be blocking the connection.`;
-    } else if (error.message.includes('authentication failed') || error.message.includes('535') || error.message.includes('AUTH')) {
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = `Cannot connect to SMTP server ${smtp_host}:${smtp_port}. The server may be down or the port may be blocked.`;
+    } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. The server may be unresponsive or there may be a firewall blocking the connection.`;
+    } else if (error.code === 'EAUTH' || error.responseCode === 535 || error.message.includes('authentication')) {
       errorMessage = 'SMTP authentication failed. Please verify your username and password are correct.';
-    } else if (error.message.includes('STARTTLS') || error.message.includes('TLS')) {
-      errorMessage = `TLS/SSL connection failed. Server may not support encryption properly on port ${smtp_port}.`;
-    } else if (error.message.includes('greeting')) {
-      errorMessage = `SMTP server did not respond with proper greeting. Server may not be an SMTP server or may be misconfigured.`;
-    } else if (error.message.includes('EHLO')) {
-      errorMessage = `SMTP server rejected EHLO command. Server may not support modern SMTP features.`;
-    } else if (error.message.includes('MAIL FROM')) {
-      errorMessage = `SMTP server rejected the sender email address: ${config.from_email}. Check if the email address is valid and authorized.`;
+    } else if (error.code === 'ESOCKET' || error.message.includes('TLS') || error.message.includes('SSL')) {
+      errorMessage = `TLS/SSL connection failed. Please verify the TLS setting is correct for port ${smtp_port}.`;
+    } else if (error.responseCode === 550) {
+      errorMessage = `SMTP server rejected the connection. The server may not allow connections from this IP address.`;
+    } else if (error.responseCode && error.response) {
+      errorMessage = `SMTP server error (${error.responseCode}): ${error.response}`;
     }
 
     throw new Error(errorMessage);
