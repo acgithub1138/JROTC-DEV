@@ -19,23 +19,22 @@ export const useCreateTask = () => {
       const validatedStatus = validateTaskStatus(taskData.status);
       const validatedPriority = validateTaskPriority(taskData.priority);
 
-      const insertData = {
-        title: taskData.title,
-        description: taskData.description,
-        status: validatedStatus,
-        priority: validatedPriority,
-        assigned_to: taskData.assigned_to,
-        due_date: taskData.due_date,
-        school_id: userProfile?.school_id,
-        assigned_by: userProfile?.id,
-        team_id: taskData.team_id,
-      } as const;
+      console.log('Validated values:', { validatedStatus, validatedPriority });
 
-      console.log('Validated insert data:', insertData);
-
+      // Build the insert data object with proper typing
       const { data, error } = await supabase
         .from('tasks')
-        .insert(insertData)
+        .insert({
+          title: taskData.title,
+          description: taskData.description,
+          status: validatedStatus,
+          priority: validatedPriority,
+          assigned_to: taskData.assigned_to,
+          due_date: taskData.due_date,
+          school_id: userProfile?.school_id,
+          assigned_by: userProfile?.id,
+          team_id: taskData.team_id,
+        })
         .select()
         .single();
 
