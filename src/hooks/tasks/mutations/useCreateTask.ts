@@ -19,7 +19,7 @@ export const useCreateTask = () => {
       const validatedStatus = validateTaskStatus(taskData.status);
       const validatedPriority = validateTaskPriority(taskData.priority);
 
-      // Create the insert data with proper types
+      // Create the insert data - let TypeScript infer types from validated values
       const insertData = {
         title: taskData.title,
         description: taskData.description,
