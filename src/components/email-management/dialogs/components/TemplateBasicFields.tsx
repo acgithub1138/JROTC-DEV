@@ -11,7 +11,11 @@ interface TemplateBasicFieldsProps {
     source_table: string;
     is_active: boolean;
   };
-  onFormChange: (updates: Partial<typeof formData>) => void;
+  onFormChange: (updates: Partial<{
+    name: string;
+    source_table: string;
+    is_active: boolean;
+  }>) => void;
   availableTables: Array<{ name: string; label: string }>;
 }
 
