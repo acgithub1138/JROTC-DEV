@@ -4,10 +4,6 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { CreateTaskData } from '../types';
-import { validateTaskStatus, validateTaskPriority } from '../utils/taskValidation';
-import type { Database } from '@/integrations/supabase/types';
-
-type TaskInsert = Database['public']['Tables']['tasks']['Insert'];
 
 export const useCreateTask = () => {
   const { userProfile } = useAuth();
@@ -18,24 +14,25 @@ export const useCreateTask = () => {
     mutationFn: async (taskData: CreateTaskData) => {
       console.log('Creating task with data:', taskData);
 
-      // Validate enum values dynamically against database
-      const validatedStatus = await validateTaskStatus(taskData.status);
-      const validatedPriority = await validateTaskPriority(taskData.priority);
+      // Validate that we have required data
+      if (!taskData.status || !taskData.priority) {
+        throw new Error('Status and priority are required');
+      }
 
-      console.log('Validated values:', { validatedStatus, validatedPriority });
-
-      // Build the insert data object
-      const insertData: TaskInsert = {
+      // Build the insert data object with proper string values
+      const insertData = {
         title: taskData.title,
         description: taskData.description,
-        status: validatedStatus as any, // Database will validate the actual enum
-        priority: validatedPriority as any, // Database will validate the actual enum
+        status: taskData.status, // Now stored as text
+        priority: taskData.priority, // Now stored as text
         assigned_to: taskData.assigned_to,
         due_date: taskData.due_date,
         school_id: userProfile?.school_id,
         assigned_by: userProfile?.id,
         team_id: taskData.team_id,
       };
+
+      console.log('Insert data:', insertData);
 
       const { data, error } = await supabase
         .from('tasks')
@@ -64,8 +61,8 @@ export const useCreateTask = () => {
       let errorMessage = "Failed to create task. Please try again.";
       
       // Provide more specific error messages based on the error
-      if (error?.code === '42883') {
-        errorMessage = "Database schema error. Please check that the task status and priority values are valid.";
+      if (error?.code === '23514') {
+        errorMessage = "Invalid status or priority value. Please check that the selected options are valid.";
       } else if (error?.code === 'PGRST116') {
         errorMessage = "You don't have permission to create tasks.";
       } else if (error?.message) {

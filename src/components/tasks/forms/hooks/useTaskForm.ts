@@ -5,7 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { createTaskSchema, TaskFormData } from '../schemas/taskFormSchema';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { validateTaskStatusSync, validateTaskPrioritySync } from '@/hooks/tasks/utils/taskValidation';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -57,35 +56,27 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
   const onSubmit = (data: TaskFormData) => {
     console.log('Form submitted with data:', data);
 
-    // Validate that the enum values are valid using cached values
-    try {
-      const validatedStatus = validateTaskStatusSync(data.status, validStatuses);
-      const validatedPriority = validateTaskPrioritySync(data.priority, validPriorities);
+    const taskData = {
+      title: data.title,
+      description: data.description || null,
+      status: data.status,
+      priority: data.priority,
+      assigned_to: data.assigned_to || null,
+      due_date: selectedDate ? selectedDate.toISOString() : null,
+      team_id: null,
+    };
 
-      const taskData = {
-        title: data.title,
-        description: data.description || null,
-        status: validatedStatus,
-        priority: validatedPriority,
-        assigned_to: data.assigned_to || null,
-        due_date: selectedDate ? selectedDate.toISOString() : null,
-        team_id: null,
-      };
+    console.log('Prepared task data for submission:', taskData);
 
-      console.log('Prepared task data for submission:', taskData);
-
-      if (mode === 'create') {
-        createTask(taskData);
-      } else if (task) {
-        updateTask({ id: task.id, ...taskData });
-      }
-      
-      onOpenChange(false);
-      form.reset();
-      setSelectedDate(undefined);
-    } catch (error) {
-      console.error('Validation error:', error);
+    if (mode === 'create') {
+      createTask(taskData);
+    } else if (task) {
+      updateTask({ id: task.id, ...taskData });
     }
+    
+    onOpenChange(false);
+    form.reset();
+    setSelectedDate(undefined);
   };
 
   return {

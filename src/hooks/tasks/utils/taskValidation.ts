@@ -3,25 +3,35 @@ import { supabase } from '@/integrations/supabase/client';
 
 // Dynamic type guards that fetch from database
 export const isValidTaskStatus = async (value: string): Promise<boolean> => {
-  const { data } = await supabase
-    .from('task_status_options')
-    .select('value')
-    .eq('is_active', true)
-    .eq('value', value)
-    .single();
-  
-  return !!data;
+  try {
+    const { data } = await supabase
+      .from('task_status_options')
+      .select('value')
+      .eq('is_active', true)
+      .eq('value', value)
+      .single();
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error validating task status:', error);
+    return false;
+  }
 };
 
 export const isValidTaskPriority = async (value: string): Promise<boolean> => {
-  const { data } = await supabase
-    .from('task_priority_options')
-    .select('value')
-    .eq('is_active', true)
-    .eq('value', value)
-    .single();
-  
-  return !!data;
+  try {
+    const { data } = await supabase
+      .from('task_priority_options')
+      .select('value')
+      .eq('is_active', true)
+      .eq('value', value)
+      .single();
+    
+    return !!data;
+  } catch (error) {
+    console.error('Error validating task priority:', error);
+    return false;
+  }
 };
 
 // Get all valid status values from database

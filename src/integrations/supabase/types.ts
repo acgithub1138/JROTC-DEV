@@ -885,9 +885,9 @@ export type Database = {
           description: string | null
           due_date: string | null
           id: string
-          priority: Database["public"]["Enums"]["task_priority"]
+          priority: string
           school_id: string
-          status: Database["public"]["Enums"]["task_status"]
+          status: string
           task_number: string | null
           team_id: string | null
           title: string
@@ -901,9 +901,9 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
-          priority?: Database["public"]["Enums"]["task_priority"]
+          priority?: string
           school_id: string
-          status?: Database["public"]["Enums"]["task_status"]
+          status?: string
           task_number?: string | null
           team_id?: string | null
           title: string
@@ -917,9 +917,9 @@ export type Database = {
           description?: string | null
           due_date?: string | null
           id?: string
-          priority?: Database["public"]["Enums"]["task_priority"]
+          priority?: string
           school_id?: string
-          status?: Database["public"]["Enums"]["task_status"]
+          status?: string
           task_number?: string | null
           team_id?: string | null
           title?: string
@@ -1092,6 +1092,14 @@ export type Database = {
       get_user_school_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      validate_task_priority: {
+        Args: { priority_value: string }
+        Returns: boolean
+      }
+      validate_task_status: {
+        Args: { status_value: string }
+        Returns: boolean
       }
     }
     Enums: {
