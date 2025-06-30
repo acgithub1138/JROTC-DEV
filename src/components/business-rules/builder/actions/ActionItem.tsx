@@ -35,11 +35,8 @@ export const ActionItem: React.FC<ActionItemProps> = ({
   priorityOptions
 }) => {
   const handleParameterChange = (field: string, value: any) => {
-    const updatedParameters = {
-      ...action.parameters,
-      [field]: value
-    };
-    onUpdate('parameters', updatedParameters);
+    // Pass individual parameter updates instead of the entire parameters object
+    onUpdate('parameters', { [field]: value });
   };
 
   return (
