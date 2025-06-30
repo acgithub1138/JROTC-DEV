@@ -13,6 +13,7 @@ import { SubjectField } from './components/SubjectField';
 import { BodyField } from './components/BodyField';
 import { VariablesPanel } from './components/VariablesPanel';
 import { EmailPreviewDialog } from './EmailPreviewDialog';
+import { extractVariables } from '@/utils/templateProcessor';
 
 interface EmailTemplateDialogProps {
   open: boolean;
@@ -72,6 +73,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Use the new template processor to extract variables
     const variables_used = extractVariables(formData.subject + ' ' + formData.body);
     
     if (mode === 'edit' && template) {
@@ -88,20 +90,6 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     }
     
     onOpenChange(false);
-  };
-
-  const extractVariables = (text: string): string[] => {
-    const variableRegex = /\{\{([^}]+)\}\}/g;
-    const variables: string[] = [];
-    let match;
-    
-    while ((match = variableRegex.exec(text)) !== null) {
-      if (!variables.includes(match[1].trim())) {
-        variables.push(match[1].trim());
-      }
-    }
-    
-    return variables;
   };
 
   const insertVariableAtCursor = (variableName: string) => {

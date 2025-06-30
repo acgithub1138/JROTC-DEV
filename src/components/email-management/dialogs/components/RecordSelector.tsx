@@ -15,7 +15,8 @@ export const RecordSelector: React.FC<RecordSelectorProps> = ({
   selectedRecordId,
   onRecordSelect,
 }) => {
-  const { data: rawRecords = [], isLoading } = useTableRecords(tableName);
+  // Enable relations to get joined data for template processing
+  const { data: rawRecords = [], isLoading } = useTableRecords(tableName, 20, true);
   
   // Type the records as any[] to handle dynamic table queries
   const records: any[] = Array.isArray(rawRecords) ? rawRecords : [];

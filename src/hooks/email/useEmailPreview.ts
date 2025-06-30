@@ -1,6 +1,6 @@
 
 import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import { processTemplate } from '@/utils/templateProcessor';
 
 interface EmailPreviewData {
   subject: string;
@@ -22,29 +22,15 @@ export const useEmailPreview = (subject: string, body: string, recordData: any) 
         };
       }
 
-      // Process subject
-      const { data: processedSubject, error: subjectError } = await supabase
-        .rpc('process_email_template', {
-          template_content: subject,
-          record_data: recordData,
-        });
-
-      if (subjectError) throw subjectError;
-
-      // Process body
-      const { data: processedBody, error: bodyError } = await supabase
-        .rpc('process_email_template', {
-          template_content: body,
-          record_data: recordData,
-        });
-
-      if (bodyError) throw bodyError;
+      // Process templates using client-side processing
+      const processedSubject = processTemplate(subject, recordData);
+      const processedBody = processTemplate(body, recordData);
 
       return {
         subject,
         body,
-        processedSubject: processedSubject || subject,
-        processedBody: processedBody || body,
+        processedSubject,
+        processedBody,
       };
     },
     enabled: !!recordData && (!!subject || !!body),
