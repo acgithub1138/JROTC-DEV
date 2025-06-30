@@ -6,13 +6,23 @@ import { useToast } from '@/hooks/use-toast';
 import { Task, CreateTaskData } from './types';
 import { TaskStatus, TaskPriority, getTaskStatusValues, getTaskPriorityValues } from '@/config/taskOptions';
 
-// Helper function to validate enum values
-const validateEnumValue = <T extends string>(value: T, validValues: readonly T[], enumName: string): T => {
-  if (!validValues.includes(value)) {
-    console.error(`Invalid ${enumName} value: ${value}. Valid values:`, validValues);
-    throw new Error(`Invalid ${enumName} value: ${value}`);
+// Helper function to validate enum values with proper typing
+const validateTaskStatus = (value: string): TaskStatus => {
+  const validValues = getTaskStatusValues();
+  if (!validValues.includes(value as TaskStatus)) {
+    console.error(`Invalid status value: ${value}. Valid values:`, validValues);
+    throw new Error(`Invalid status value: ${value}`);
   }
-  return value;
+  return value as TaskStatus;
+};
+
+const validateTaskPriority = (value: string): TaskPriority => {
+  const validValues = getTaskPriorityValues();
+  if (!validValues.includes(value as TaskPriority)) {
+    console.error(`Invalid priority value: ${value}. Valid values:`, validValues);
+    throw new Error(`Invalid priority value: ${value}`);
+  }
+  return value as TaskPriority;
 };
 
 export const useTaskMutations = () => {
@@ -25,8 +35,8 @@ export const useTaskMutations = () => {
       console.log('Creating task with data:', taskData);
 
       // Validate enum values before sending to database
-      const validatedStatus = validateEnumValue(taskData.status, getTaskStatusValues(), 'status');
-      const validatedPriority = validateEnumValue(taskData.priority, getTaskPriorityValues(), 'priority');
+      const validatedStatus = validateTaskStatus(taskData.status);
+      const validatedPriority = validateTaskPriority(taskData.priority);
 
       const insertData = {
         title: taskData.title,
@@ -97,10 +107,10 @@ export const useTaskMutations = () => {
       
       // Validate enum values if they're being updated
       if (taskData.status !== undefined) {
-        updateData.status = validateEnumValue(taskData.status, getTaskStatusValues(), 'status');
+        updateData.status = validateTaskStatus(taskData.status);
       }
       if (taskData.priority !== undefined) {
-        updateData.priority = validateEnumValue(taskData.priority, getTaskPriorityValues(), 'priority');
+        updateData.priority = validateTaskPriority(taskData.priority);
       }
       
       if (taskData.assigned_to !== undefined) updateData.assigned_to = taskData.assigned_to;
