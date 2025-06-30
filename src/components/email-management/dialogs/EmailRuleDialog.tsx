@@ -23,6 +23,12 @@ interface EmailRuleDialogProps {
   mode: 'create' | 'edit';
 }
 
+interface RecipientConfig {
+  recipient_type: string;
+  recipient_field: string;
+  static_email: string;
+}
+
 export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
   open,
   onOpenChange,
@@ -43,19 +49,27 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
       recipient_type: 'field',
       recipient_field: '',
       static_email: '',
-    },
+    } as RecipientConfig,
     is_active: true,
   });
 
   useEffect(() => {
     if (rule && mode === 'edit') {
+      // Safely convert the recipient_config from the database
+      const dbRecipientConfig = rule.recipient_config as Record<string, any>;
+      const recipientConfig: RecipientConfig = {
+        recipient_type: dbRecipientConfig.recipient_type || 'field',
+        recipient_field: dbRecipientConfig.recipient_field || '',
+        static_email: dbRecipientConfig.static_email || '',
+      };
+
       setFormData({
         name: rule.name,
         template_id: rule.template_id,
         source_table: rule.source_table,
         trigger_event: rule.trigger_event,
         trigger_conditions: rule.trigger_conditions,
-        recipient_config: rule.recipient_config,
+        recipient_config: recipientConfig,
         is_active: rule.is_active,
       });
     } else {
@@ -79,7 +93,7 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
-  const handleRecipientConfigChange = (updates: Partial<typeof formData.recipient_config>) => {
+  const handleRecipientConfigChange = (updates: Partial<RecipientConfig>) => {
     setFormData(prev => ({
       ...prev,
       recipient_config: { ...prev.recipient_config, ...updates }
