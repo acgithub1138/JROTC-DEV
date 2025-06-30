@@ -68,8 +68,17 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
         
         <div>
           <div className="text-sm font-medium text-gray-700 mb-1">Body:</div>
-          <div className="p-3 bg-gray-50 rounded border text-sm whitespace-pre-wrap min-h-[200px]">
-            {previewData.processedBody || '(No body content)'}
+          <div className="p-3 bg-gray-50 rounded border text-sm min-h-[200px]">
+            {previewData.processedBody ? (
+              <div 
+                dangerouslySetInnerHTML={{ 
+                  __html: previewData.processedBody 
+                }}
+                className="prose prose-sm max-w-none"
+              />
+            ) : (
+              '(No body content)'
+            )}
           </div>
         </div>
 
