@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -27,6 +28,8 @@ export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
   statusOptions,
   priorityOptions
 }) => {
+  console.log('UpdateRecordAction render:', { parameters, availableFields });
+  
   if (!triggerTable || availableFields.length === 0) {
     return (
       <div className="text-sm text-gray-500">
@@ -38,9 +41,19 @@ export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
   const selectedField = availableFields.find(f => f.value === parameters.field);
 
   const handleFieldChange = (fieldValue: string) => {
+    console.log('Field changing from', parameters.field, 'to', fieldValue);
+    
+    // Only clear the value if we're changing to a completely different field type
+    const currentField = availableFields.find(f => f.value === parameters.field);
+    const newField = availableFields.find(f => f.value === fieldValue);
+    
+    const shouldClearValue = currentField && newField && 
+      currentField.dataType !== newField.dataType;
+    
     onParameterChange('field', fieldValue);
-    // Only clear the value if we're changing to a different field type
-    if (parameters.field !== fieldValue) {
+    
+    if (shouldClearValue) {
+      console.log('Clearing value due to field type change');
       onParameterChange('value', '');
     }
   };

@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -63,9 +62,12 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   };
 
   const updateAction = (index: number, field: string, value: any) => {
+    console.log('Updating action:', { index, field, value, currentActions: actions });
+    
     const updatedActions = [...actions];
+    
     if (field === 'type') {
-      // Preserve existing parameters if they're compatible with the new action type
+      // When changing action type, preserve compatible parameters
       const existingParams = updatedActions[index].parameters || {};
       let newParams = {};
       
@@ -76,6 +78,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
             field: existingParams.field,
             value: existingParams.value || ''
           };
+          console.log('Preserving field for update_record:', newParams);
         }
       }
       
@@ -84,13 +87,19 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
         parameters: newParams 
       };
     } else if (field === 'parameters') {
-      // Handle parameter updates
+      // Handle parameter updates - merge instead of replace
+      const currentParams = updatedActions[index].parameters || {};
+      const updatedParams = { ...currentParams, ...value };
+      
+      console.log('Updating parameters:', { 
+        current: currentParams, 
+        incoming: value, 
+        result: updatedParams 
+      });
+      
       updatedActions[index] = {
         ...updatedActions[index],
-        parameters: {
-          ...updatedActions[index].parameters,
-          ...value
-        }
+        parameters: updatedParams
       };
     } else {
       updatedActions[index] = {
@@ -98,6 +107,8 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
         [field]: value
       };
     }
+    
+    console.log('Final updated actions:', updatedActions);
     onActionsChange(updatedActions);
   };
 
