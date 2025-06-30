@@ -35,10 +35,11 @@ export const ActionItem: React.FC<ActionItemProps> = ({
   priorityOptions
 }) => {
   const handleParameterChange = (field: string, value: any) => {
-    onUpdate('parameters', {
+    const updatedParameters = {
       ...action.parameters,
       [field]: value
-    });
+    };
+    onUpdate('parameters', updatedParameters);
   };
 
   return (
