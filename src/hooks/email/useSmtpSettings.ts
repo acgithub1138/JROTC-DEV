@@ -5,7 +5,7 @@ import { useToast } from '@/hooks/use-toast';
 
 export interface SmtpSettings {
   id?: string;
-  school_id: string;
+  school_id?: string | null;
   smtp_host: string;
   smtp_port: number;
   smtp_username: string;
@@ -14,6 +14,7 @@ export interface SmtpSettings {
   from_name: string;
   use_tls: boolean;
   is_active: boolean;
+  is_global: boolean;
   created_at?: string;
   updated_at?: string;
 }
@@ -25,33 +26,32 @@ export const useSmtpSettings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['smtp-settings'],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // First try to get global settings
+      const { data: globalSettings, error: globalError } = await supabase
         .from('smtp_settings')
         .select('*')
+        .eq('is_global', true)
         .single();
 
-      if (error && error.code !== 'PGRST116') {
-        throw error;
+      if (globalError && globalError.code !== 'PGRST116') {
+        throw globalError;
       }
-      return data;
+
+      return globalSettings;
     },
   });
 
   const createOrUpdateSettings = useMutation({
-    mutationFn: async (settingsData: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at'>) => {
-      const { data: profile } = await supabase
-        .from('profiles')
-        .select('school_id')
-        .eq('id', (await supabase.auth.getUser()).data.user?.id)
-        .single();
-
-      if (!profile) throw new Error('Profile not found');
-
+    mutationFn: async (settingsData: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at' | 'is_global'>) => {
       if (settings?.id) {
-        // Update existing settings
+        // Update existing global settings
         const { data, error } = await supabase
           .from('smtp_settings')
-          .update(settingsData)
+          .update({
+            ...settingsData,
+            is_global: true,
+            school_id: null
+          })
           .eq('id', settings.id)
           .select()
           .single();
@@ -59,12 +59,13 @@ export const useSmtpSettings = () => {
         if (error) throw error;
         return data;
       } else {
-        // Create new settings
+        // Create new global settings
         const { data, error } = await supabase
           .from('smtp_settings')
           .insert({
             ...settingsData,
-            school_id: profile.school_id,
+            is_global: true,
+            school_id: null
           })
           .select()
           .single();
@@ -76,8 +77,8 @@ export const useSmtpSettings = () => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['smtp-settings'] });
       toast({
-        title: "SMTP settings saved",
-        description: "Your email configuration has been updated successfully.",
+        title: "Global SMTP settings saved",
+        description: "The global email configuration has been updated successfully.",
       });
     },
     onError: (error: any) => {
@@ -91,7 +92,7 @@ export const useSmtpSettings = () => {
   });
 
   const testConnection = useMutation({
-    mutationFn: async (testSettings: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at'>) => {
+    mutationFn: async (testSettings: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at' | 'is_global'>) => {
       const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
         body: testSettings,
       });

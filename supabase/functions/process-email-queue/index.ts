@@ -28,6 +28,7 @@ interface SmtpSettings {
   from_name: string;
   use_tls: boolean;
   is_active: boolean;
+  is_global: boolean;
 }
 
 async function sendEmailViaSMTP(
@@ -35,17 +36,17 @@ async function sendEmailViaSMTP(
   smtpSettings: SmtpSettings
 ): Promise<boolean> {
   try {
-    console.log(`Attempting to send email via SMTP to ${emailData.recipient_email}`);
+    console.log(`Attempting to send email via global SMTP to ${emailData.recipient_email}`);
     
     // In a real implementation, you would use a proper SMTP library here
     // For now, we'll simulate the email sending process
     
     if (!smtpSettings.is_active) {
-      throw new Error('SMTP is not active for this school');
+      throw new Error('Global SMTP is not active');
     }
 
     // Simulate SMTP connection and sending
-    console.log(`Connecting to SMTP server: ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
+    console.log(`Connecting to global SMTP server: ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
     console.log(`Using TLS: ${smtpSettings.use_tls}`);
     console.log(`From: ${smtpSettings.from_name} <${smtpSettings.from_email}>`);
     console.log(`To: ${emailData.recipient_email}`);
@@ -54,11 +55,11 @@ async function sendEmailViaSMTP(
     // Simulate processing time
     await new Promise(resolve => setTimeout(resolve, 500));
     
-    console.log(`Email sent successfully via SMTP`);
+    console.log(`Email sent successfully via global SMTP`);
     return true;
     
   } catch (error) {
-    console.error(`SMTP sending failed:`, error);
+    console.error(`Global SMTP sending failed:`, error);
     throw error;
   }
 }
@@ -91,31 +92,25 @@ serve(async (req) => {
 
     console.log(`Processing ${queueItems?.length || 0} emails from queue`);
 
-    let processedCount = 0;
-    let failedCount = 0;
+    // Get global SMTP settings once for all emails
+    const { data: globalSmtpSettings, error: smtpError } = await supabaseClient
+      .from('smtp_settings')
+      .select('*')
+      .eq('is_global', true)
+      .eq('is_active', true)
+      .single();
 
-    // Process each email
-    for (const item of queueItems || []) {
-      try {
-        console.log(`Processing email ${item.id} to ${item.recipient_email}`);
-        
-        // Get SMTP settings for the school
-        const { data: smtpSettings, error: smtpError } = await supabaseClient
-          .from('smtp_settings')
-          .select('*')
-          .eq('school_id', item.school_id)
-          .eq('is_active', true)
-          .single();
-
-        if (smtpError || !smtpSettings) {
-          console.log(`No active SMTP settings found for school ${item.school_id}, skipping email`);
-          
-          // Update email status to failed
+    if (smtpError || !globalSmtpSettings) {
+      console.log('No active global SMTP settings found, cannot process emails');
+      
+      // Mark all pending emails as failed
+      if (queueItems && queueItems.length > 0) {
+        for (const item of queueItems) {
           await supabaseClient
             .from('email_queue')
             .update({
               status: 'failed',
-              error_message: 'No active SMTP settings configured',
+              error_message: 'No active global SMTP settings configured',
               updated_at: new Date().toISOString()
             })
             .eq('id', item.id);
@@ -127,17 +122,37 @@ serve(async (req) => {
               queue_id: item.id,
               event_type: 'failed',
               event_data: {
-                error: 'No active SMTP settings configured',
+                error: 'No active global SMTP settings configured',
                 failed_at: new Date().toISOString()
               }
             });
-
-          failedCount++;
-          continue;
         }
+      }
 
-        // Send email via SMTP
-        await sendEmailViaSMTP(item, smtpSettings);
+      return new Response(JSON.stringify({
+        success: false,
+        error: 'No active global SMTP settings configured',
+        processed: 0,
+        failed: queueItems?.length || 0,
+        total: queueItems?.length || 0
+      }), {
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
+    }
+
+    let processedCount = 0;
+    let failedCount = 0;
+
+    // Process each email using global SMTP settings
+    for (const item of queueItems || []) {
+      try {
+        console.log(`Processing email ${item.id} to ${item.recipient_email} using global SMTP`);
+        
+        // Send email via global SMTP
+        await sendEmailViaSMTP(item, globalSmtpSettings);
         
         // Update email status to sent
         const { error: updateError } = await supabaseClient
@@ -164,7 +179,8 @@ serve(async (req) => {
               sent_at: new Date().toISOString(),
               recipient: item.recipient_email,
               subject: item.subject,
-              smtp_host: smtpSettings.smtp_host
+              smtp_host: globalSmtpSettings.smtp_host,
+              smtp_type: 'global'
             }
           });
 
@@ -173,7 +189,7 @@ serve(async (req) => {
         }
 
         processedCount++;
-        console.log(`Successfully processed email ${item.id}`);
+        console.log(`Successfully processed email ${item.id} via global SMTP`);
 
       } catch (error) {
         console.error(`Failed to process email ${item.id}:`, error);
@@ -196,7 +212,8 @@ serve(async (req) => {
             event_type: 'failed',
             event_data: {
               error: error.message || 'Unknown error occurred',
-              failed_at: new Date().toISOString()
+              failed_at: new Date().toISOString(),
+              smtp_type: 'global'
             }
           });
 

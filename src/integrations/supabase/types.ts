@@ -885,7 +885,8 @@ export type Database = {
           from_name: string
           id: string
           is_active: boolean
-          school_id: string
+          is_global: boolean
+          school_id: string | null
           smtp_host: string
           smtp_password: string
           smtp_port: number
@@ -899,7 +900,8 @@ export type Database = {
           from_name?: string
           id?: string
           is_active?: boolean
-          school_id: string
+          is_global?: boolean
+          school_id?: string | null
           smtp_host: string
           smtp_password: string
           smtp_port?: number
@@ -913,7 +915,8 @@ export type Database = {
           from_name?: string
           id?: string
           is_active?: boolean
-          school_id?: string
+          is_global?: boolean
+          school_id?: string | null
           smtp_host?: string
           smtp_password?: string
           smtp_port?: number
@@ -925,7 +928,7 @@ export type Database = {
           {
             foreignKeyName: "smtp_settings_school_id_fkey"
             columns: ["school_id"]
-            isOneToOne: true
+            isOneToOne: false
             referencedRelation: "schools"
             referencedColumns: ["id"]
           },

@@ -6,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, TestTube, Save } from 'lucide-react';
+import { Settings, TestTube, Save, Globe } from 'lucide-react';
 import { useSmtpSettings } from '@/hooks/email/useSmtpSettings';
 
 export const SmtpSettingsTab: React.FC = () => {
@@ -56,7 +56,7 @@ export const SmtpSettingsTab: React.FC = () => {
   if (isLoading) {
     return (
       <div className="flex justify-center items-center h-64">
-        <div className="text-muted-foreground">Loading SMTP settings...</div>
+        <div className="text-muted-foreground">Loading global SMTP settings...</div>
       </div>
     );
   }
@@ -64,11 +64,11 @@ export const SmtpSettingsTab: React.FC = () => {
   return (
     <div className="space-y-6">
       <div className="flex items-center gap-3">
-        <Settings className="w-6 h-6 text-blue-600" />
+        <Globe className="w-6 h-6 text-blue-600" />
         <div>
-          <h2 className="text-2xl font-semibold">SMTP Settings</h2>
+          <h2 className="text-2xl font-semibold">Global SMTP Settings</h2>
           <p className="text-muted-foreground">
-            Configure your domain's SMTP server to send emails through your own mail server.
+            Configure the global SMTP server settings used by all schools in the system.
           </p>
         </div>
       </div>
@@ -77,10 +77,10 @@ export const SmtpSettingsTab: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Settings className="w-5 h-5" />
-            SMTP Configuration
+            Global SMTP Configuration
           </CardTitle>
           <CardDescription>
-            Enter your email server details to enable email sending through your domain.
+            These settings will be used by all schools to send emails through the system.
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -178,10 +178,10 @@ export const SmtpSettingsTab: React.FC = () => {
                   checked={formData.is_active}
                   onCheckedChange={(checked) => handleInputChange('is_active', checked)}
                 />
-                <Label htmlFor="is_active">Enable Email Sending</Label>
+                <Label htmlFor="is_active">Enable Global Email Sending</Label>
               </div>
               <p className="text-sm text-muted-foreground">
-                Activate to start sending emails
+                Activate to start sending emails globally
               </p>
             </div>
           </div>
@@ -202,7 +202,7 @@ export const SmtpSettingsTab: React.FC = () => {
               className="flex items-center gap-2"
             >
               <Save className="w-4 h-4" />
-              {isSaving ? 'Saving...' : 'Save Settings'}
+              {isSaving ? 'Saving...' : 'Save Global Settings'}
             </Button>
           </div>
         </CardContent>
