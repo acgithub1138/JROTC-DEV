@@ -70,7 +70,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <div className="p-6">
           <div className="flex items-center space-x-2">
             <Shield className="w-8 h-8 text-blue-400" />
-            <h1 className="text-xl font-bold">JROTC Hub</h1>
+            <h1 className="text-xl font-bold">JROTC CCC</h1>
           </div>
         </div>
         <div className="flex-1 p-3">
@@ -91,7 +91,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
               <Shield className="w-8 h-8 text-blue-400" />
-              <h1 className="text-xl font-bold">JROTC Hub</h1>
+              <h1 className="text-xl font-bold">JROTC CCC</h1>
             </div>
             <Button
               variant="ghost"

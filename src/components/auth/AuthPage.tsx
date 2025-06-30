@@ -29,13 +29,13 @@ const AuthPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">JROTC Corps Hub</h1>
-          <p className="text-blue-200">Manage your corps with precision</p>
+          <h1 className="text-3xl font-bold text-white mb-2">JROTC CCC</h1>
+          <p className="text-blue-200">Command and Control Center</p>
         </div>
 
         <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
           <CardHeader>
-            <CardTitle className="text-center text-gray-800">Sign In to Your Corps</CardTitle>
+            <CardTitle className="text-center text-gray-800">Sign In to Your Command Center</CardTitle>
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSignIn} className="space-y-4">
