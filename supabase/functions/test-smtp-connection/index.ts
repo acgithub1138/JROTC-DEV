@@ -139,16 +139,8 @@ async function testSmtpConnection(config: SmtpTestRequest): Promise<{ success: b
       errorMessage = `SMTP server did not respond with proper greeting. Server may not be an SMTP server.`;
     }
 
-    return {
-      success: false,
-      message: errorMessage,
-      details: {
-        error: error.message,
-        host: smtp_host,
-        port: smtp_port,
-        use_tls: use_tls
-      }
-    };
+    // Return the error details (will be handled with proper status code in the main handler)
+    throw new Error(errorMessage);
   }
 }
 
@@ -163,28 +155,81 @@ serve(async (req) => {
 
     // Basic validation
     if (!config.smtp_host || !config.smtp_username || !config.smtp_password || !config.from_email) {
-      throw new Error('Missing required SMTP configuration fields');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Missing required SMTP configuration fields',
+          details: { error: 'Missing required fields' }
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     // Validate email formats
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(config.from_email)) {
-      throw new Error('Invalid from_email format');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Invalid from_email format',
+          details: { error: 'Invalid email format' }
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     if (!emailRegex.test(config.smtp_username)) {
-      throw new Error('Invalid smtp_username format');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Invalid smtp_username format',
+          details: { error: 'Invalid email format' }
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     // Validate port
     if (config.smtp_port < 1 || config.smtp_port > 65535) {
-      throw new Error('Invalid SMTP port number');
+      return new Response(
+        JSON.stringify({
+          success: false,
+          message: 'Invalid SMTP port number',
+          details: { error: 'Port must be between 1 and 65535' }
+        }),
+        {
+          status: 400,
+          headers: {
+            'Content-Type': 'application/json',
+            ...corsHeaders,
+          },
+        }
+      );
     }
 
     // Perform actual SMTP connection test
     const testResult = await testSmtpConnection(config);
 
     return new Response(JSON.stringify(testResult), {
+      status: 200,
       headers: {
         'Content-Type': 'application/json',
         ...corsHeaders,
@@ -204,7 +249,7 @@ serve(async (req) => {
         }
       }),
       {
-        status: 400,
+        status: 500,
         headers: {
           'Content-Type': 'application/json',
           ...corsHeaders,

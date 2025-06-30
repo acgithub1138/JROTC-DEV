@@ -97,13 +97,21 @@ export const useSmtpSettings = () => {
         body: testSettings,
       });
 
-      if (error) throw error;
+      if (error) {
+        throw new Error(error.message || 'Failed to test SMTP connection');
+      }
+
+      // Check if the response indicates failure even with successful HTTP request
+      if (data && !data.success) {
+        throw new Error(data.message || 'SMTP connection test failed');
+      }
+
       return data;
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       toast({
         title: "Connection successful",
-        description: "SMTP connection test passed successfully.",
+        description: data?.message || "SMTP connection test passed successfully.",
       });
     },
     onError: (error: any) => {
