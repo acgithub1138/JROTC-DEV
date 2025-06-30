@@ -37,32 +37,42 @@ async function testSmtpConnection(config: SmtpTestRequest): Promise<{ success: b
     if (smtp_port === 465) {
       // Implicit SSL for port 465
       transporterConfig.secure = true;
+      transporterConfig.tls = {
+        minVersion: 'TLSv1.2',
+        maxVersion: 'TLSv1.3',
+        rejectUnauthorized: true,
+      };
     } else if (use_tls && (smtp_port === 587 || smtp_port === 25)) {
       // Explicit TLS (STARTTLS) for port 587 or 25
       transporterConfig.secure = false;
       transporterConfig.requireTLS = true;
       transporterConfig.tls = {
-        ciphers: 'SSLv3',
+        minVersion: 'TLSv1.2',
+        maxVersion: 'TLSv1.3',
+        rejectUnauthorized: true,
+        // Network Solutions specific TLS configuration
+        servername: smtp_host,
       };
     } else {
       // No encryption
       transporterConfig.secure = false;
     }
 
-    // Add connection timeout
-    transporterConfig.connectionTimeout = 15000;
-    transporterConfig.greetingTimeout = 10000;
-    transporterConfig.socketTimeout = 10000;
+    // Add connection timeout - Network Solutions specific optimizations
+    transporterConfig.connectionTimeout = 30000; // 30 seconds for Network Solutions
+    transporterConfig.greetingTimeout = 15000;
+    transporterConfig.socketTimeout = 15000;
 
     console.log('Creating SMTP transporter with config:', {
       host: smtp_host,
       port: smtp_port,
       secure: transporterConfig.secure,
       requireTLS: transporterConfig.requireTLS,
+      tlsVersion: transporterConfig.tls?.minVersion,
     });
 
-    // Create transporter
-    const transporter = nodemailer.createTransporter(transporterConfig);
+    // Create transporter - FIXED: Use createTransport instead of createTransporter
+    const transporter = nodemailer.createTransport(transporterConfig);
 
     // Verify connection
     console.log('Verifying SMTP connection...');
@@ -82,6 +92,7 @@ async function testSmtpConnection(config: SmtpTestRequest): Promise<{ success: b
         username: smtp_username,
         use_tls: use_tls,
         connection_type: smtp_port === 465 ? 'Implicit SSL/TLS' : (use_tls ? 'STARTTLS' : 'Plain'),
+        tls_version: transporterConfig.tls?.minVersion || 'Not configured',
         timestamp: new Date().toISOString()
       }
     };
@@ -94,15 +105,17 @@ async function testSmtpConnection(config: SmtpTestRequest): Promise<{ success: b
     if (error.code === 'ECONNREFUSED') {
       errorMessage = `Cannot connect to SMTP server ${smtp_host}:${smtp_port}. The server may be down or the port may be blocked.`;
     } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
-      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. The server may be unresponsive or there may be a firewall blocking the connection.`;
+      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. Network Solutions servers may be slow to respond. Try increasing timeout values.`;
     } else if (error.code === 'EAUTH' || error.responseCode === 535 || error.message.includes('authentication')) {
-      errorMessage = 'SMTP authentication failed. Please verify your username and password are correct.';
+      errorMessage = 'SMTP authentication failed. Please verify your username and password are correct for Network Solutions.';
     } else if (error.code === 'ESOCKET' || error.message.includes('TLS') || error.message.includes('SSL')) {
-      errorMessage = `TLS/SSL connection failed. Please verify the TLS setting is correct for port ${smtp_port}.`;
+      errorMessage = `TLS/SSL connection failed. Network Solutions requires TLS 1.2+. Please verify the TLS setting is correct for port ${smtp_port}.`;
     } else if (error.responseCode === 550) {
-      errorMessage = `SMTP server rejected the connection. The server may not allow connections from this IP address.`;
+      errorMessage = `SMTP server rejected the connection. Network Solutions may not allow connections from this IP address.`;
     } else if (error.responseCode && error.response) {
       errorMessage = `SMTP server error (${error.responseCode}): ${error.response}`;
+    } else if (error.message.includes('certificate')) {
+      errorMessage = `SSL certificate verification failed. Network Solutions certificate may not be trusted.`;
     }
 
     throw new Error(errorMessage);
