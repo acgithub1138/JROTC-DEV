@@ -65,7 +65,22 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   const updateAction = (index: number, field: string, value: any) => {
     const updatedActions = [...actions];
     if (field === 'type') {
-      updatedActions[index] = { type: value, parameters: {} };
+      // Preserve existing parameters if they're compatible with the new action type
+      const existingParams = updatedActions[index].parameters || {};
+      let newParams = {};
+      
+      // For update_record action, preserve field/value if they exist
+      if (value === 'update_record' && existingParams.field) {
+        newParams = {
+          field: existingParams.field,
+          value: existingParams.value || ''
+        };
+      }
+      
+      updatedActions[index] = { 
+        type: value, 
+        parameters: newParams 
+      };
     } else {
       updatedActions[index] = {
         ...updatedActions[index],

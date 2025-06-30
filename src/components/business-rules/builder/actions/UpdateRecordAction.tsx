@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -39,17 +38,12 @@ export const UpdateRecordAction: React.FC<UpdateRecordActionProps> = ({
   const selectedField = availableFields.find(f => f.value === parameters.field);
 
   const handleFieldChange = (fieldValue: string) => {
-    console.log('Field changing to:', fieldValue);
-    console.log('Current parameters:', parameters);
     onParameterChange('field', fieldValue);
     // Only clear the value if we're changing to a different field type
     if (parameters.field !== fieldValue) {
       onParameterChange('value', '');
     }
   };
-
-  console.log('UpdateRecordAction render - parameters.field:', parameters.field);
-  console.log('UpdateRecordAction render - availableFields:', availableFields);
 
   return (
     <div className="space-y-3">
