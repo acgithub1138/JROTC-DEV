@@ -51,7 +51,7 @@ const formatValueForEmail = (value: any, fieldPath: string): any => {
     return value;
   }
   
-  // Check if the field name suggests it's a date field
+  // Enhanced date field detection - matches the database function logic
   const isDateField = fieldPath.toLowerCase().includes('date') || 
                      fieldPath.toLowerCase().includes('_at') ||
                      fieldPath.toLowerCase().includes('_on');
@@ -61,7 +61,7 @@ const formatValueForEmail = (value: any, fieldPath: string): any => {
     const date = new Date(value);
     // Check if it's a valid date
     if (!isNaN(date.getTime())) {
-      // Format as MM/DD/YYYY
+      // Format as MM/DD/YYYY to match the database function
       const month = String(date.getMonth() + 1).padStart(2, '0');
       const day = String(date.getDate()).padStart(2, '0');
       const year = date.getFullYear();
