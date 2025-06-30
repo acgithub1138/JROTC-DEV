@@ -13,6 +13,10 @@ export const useTaskComments = (taskId: string) => {
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['task-comments', taskId],
     queryFn: async () => {
+      if (!userProfile?.school_id) {
+        throw new Error('User school not found');
+      }
+
       const { data, error } = await supabase
         .from('task_comments')
         .select(`
@@ -28,16 +32,20 @@ export const useTaskComments = (taskId: string) => {
       }
       return data as TaskComment[];
     },
-    enabled: !!taskId,
+    enabled: !!taskId && !!userProfile?.school_id,
   });
 
   const addCommentMutation = useMutation({
     mutationFn: async (commentText: string) => {
+      if (!userProfile?.id) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('task_comments')
         .insert({
           task_id: taskId,
-          user_id: userProfile?.id,
+          user_id: userProfile.id,
           comment_text: commentText,
           is_system_comment: false,
         })
@@ -66,11 +74,15 @@ export const useTaskComments = (taskId: string) => {
 
   const addSystemCommentMutation = useMutation({
     mutationFn: async (commentText: string) => {
+      if (!userProfile?.id) {
+        throw new Error('User not authenticated');
+      }
+
       const { data, error } = await supabase
         .from('task_comments')
         .insert({
           task_id: taskId,
-          user_id: userProfile?.id,
+          user_id: userProfile.id,
           comment_text: commentText,
           is_system_comment: true,
         })

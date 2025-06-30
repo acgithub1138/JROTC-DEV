@@ -11,6 +11,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchemaTracking } from '@/hooks/useSchemaTracking';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { DynamicFieldInput } from './DynamicFieldInput';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface ActionsCardProps {
   actions: Array<{
@@ -33,6 +34,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   onActionsChange,
   triggerTable
 }) => {
+  const { userProfile } = useAuth();
   const { users } = useSchoolUsers();
   const { getFieldsForTable } = useSchemaTracking();
   const { statusOptions } = useTaskStatusOptions();
@@ -40,7 +42,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
 
   // Get dynamic fields for the selected table
   const availableFields = React.useMemo(() => {
-    if (!triggerTable) return [];
+    if (!triggerTable || !userProfile?.school_id) return [];
     
     const fields = getFieldsForTable(triggerTable);
     
@@ -56,7 +58,7 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
       dataType: field.data_type,
       isNullable: field.is_nullable
     }));
-  }, [triggerTable, getFieldsForTable]);
+  }, [triggerTable, getFieldsForTable, userProfile?.school_id]);
 
   const addAction = () => {
     const newAction = {
@@ -88,6 +90,14 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
   };
 
   const renderActionParameters = (action: any, index: number) => {
+    if (!userProfile?.school_id) {
+      return (
+        <div className="text-sm text-gray-500">
+          User authentication required to configure actions.
+        </div>
+      );
+    }
+
     switch (action.type) {
       case 'update_record':
         if (triggerTable && availableFields.length > 0) {
@@ -188,6 +198,22 @@ export const ActionsCard: React.FC<ActionsCardProps> = ({
         return null;
     }
   };
+
+  if (!userProfile?.school_id) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Actions - "What to do"</CardTitle>
+          <CardDescription>Authentication required to configure actions</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="text-center py-8 text-gray-500">
+            Please ensure you are properly authenticated to configure business rule actions.
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
 
   return (
     <Card>

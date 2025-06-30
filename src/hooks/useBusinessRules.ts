@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface BusinessRule {
   id: string;
@@ -23,12 +24,21 @@ export const useBusinessRules = () => {
   const [rules, setRules] = useState<BusinessRule[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { userProfile } = useAuth();
 
   const fetchRules = async () => {
     try {
+      if (!userProfile?.school_id) {
+        console.log('No school ID available for user');
+        setRules([]);
+        setLoading(false);
+        return;
+      }
+
       const { data, error } = await supabase
         .from('business_rules')
         .select('*')
+        .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -55,14 +65,7 @@ export const useBusinessRules = () => {
 
   const createRule = async (rule: Omit<BusinessRule, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
     try {
-      const { data: userData } = await supabase.auth.getUser();
-      const { data: profileData } = await supabase
-        .from('profiles')
-        .select('school_id')
-        .eq('id', userData.user?.id)
-        .single();
-
-      if (!profileData?.school_id) {
+      if (!userProfile?.school_id) {
         throw new Error('User school not found');
       }
 
@@ -70,8 +73,8 @@ export const useBusinessRules = () => {
         .from('business_rules')
         .insert([{
           ...rule,
-          school_id: profileData.school_id,
-          created_by: userData.user?.id
+          school_id: userProfile.school_id,
+          created_by: userProfile.id
         }])
         .select()
         .single();
@@ -107,6 +110,7 @@ export const useBusinessRules = () => {
         .from('business_rules')
         .update(updates)
         .eq('id', id)
+        .eq('school_id', userProfile?.school_id) // Ensure school isolation
         .select()
         .single();
 
@@ -140,7 +144,8 @@ export const useBusinessRules = () => {
       const { error } = await supabase
         .from('business_rules')
         .delete()
-        .eq('id', id);
+        .eq('id', id)
+        .eq('school_id', userProfile?.school_id); // Ensure school isolation
 
       if (error) throw error;
       
@@ -165,7 +170,8 @@ export const useBusinessRules = () => {
       const { error } = await supabase
         .from('business_rules')
         .update({ is_active })
-        .eq('id', id);
+        .eq('id', id)
+        .eq('school_id', userProfile?.school_id); // Ensure school isolation
 
       if (error) throw error;
       
@@ -188,8 +194,10 @@ export const useBusinessRules = () => {
   };
 
   useEffect(() => {
-    fetchRules();
-  }, []);
+    if (userProfile?.school_id) {
+      fetchRules();
+    }
+  }, [userProfile?.school_id]);
 
   return {
     rules,

@@ -2,6 +2,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface BusinessRuleLog {
   id: string;
@@ -28,17 +29,26 @@ export const useBusinessRuleLogs = () => {
   const [logs, setLogs] = useState<BusinessRuleLog[]>([]);
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
+  const { userProfile } = useAuth();
 
   const fetchLogs = async (ruleId?: string, limit: number = 100) => {
     try {
       setLoading(true);
       
+      if (!userProfile?.school_id) {
+        console.log('No school ID available for user');
+        setLogs([]);
+        setLoading(false);
+        return;
+      }
+
       let query = supabase
         .from('business_rule_logs')
         .select(`
           *,
           business_rule:business_rules(name, description)
         `)
+        .eq('school_id', userProfile.school_id)
         .order('executed_at', { ascending: false })
         .limit(limit);
 
@@ -80,7 +90,9 @@ export const useBusinessRuleLogs = () => {
     const totalExecutions = logs.length;
     const successfulExecutions = logs.filter(log => log.success).length;
     const failedExecutions = logs.filter(log => !log.success).length;
-    const averageExecutionTime = logs.reduce((sum, log) => sum + (log.execution_time_ms || 0), 0) / logs.length;
+    const averageExecutionTime = logs.length > 0 
+      ? logs.reduce((sum, log) => sum + (log.execution_time_ms || 0), 0) / logs.length 
+      : 0;
 
     return {
       totalExecutions,
@@ -92,8 +104,10 @@ export const useBusinessRuleLogs = () => {
   };
 
   useEffect(() => {
-    fetchLogs();
-  }, []);
+    if (userProfile?.school_id) {
+      fetchLogs();
+    }
+  }, [userProfile?.school_id]);
 
   return {
     logs,
