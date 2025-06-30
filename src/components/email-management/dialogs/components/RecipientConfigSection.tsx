@@ -51,13 +51,16 @@ export const RecipientConfigSection: React.FC<RecipientConfigSectionProps> = ({
 
             {recipientConfig.recipient_type === 'field' ? (
               <div className="space-y-2">
-                <Label htmlFor="recipient_field">Email Field Name</Label>
+                <Label htmlFor="recipient_field">Recipient Field</Label>
                 <Input
                   id="recipient_field"
                   value={recipientConfig.recipient_field}
                   onChange={(e) => onRecipientConfigChange({ recipient_field: e.target.value })}
                   placeholder="e.g., email, assigned_to.email"
                 />
+                <p className="text-xs text-muted-foreground">
+                  Use the same format as template variables (e.g., assigned_to.email)
+                </p>
               </div>
             ) : (
               <div className="space-y-2">
