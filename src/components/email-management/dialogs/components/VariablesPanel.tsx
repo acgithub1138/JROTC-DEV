@@ -3,13 +3,46 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { VariableButton } from './VariableButton';
+import { ExpandableVariableButton } from './ExpandableVariableButton';
 import { TableColumn, EnhancedVariable } from '@/hooks/email/useTableColumns';
+import { useRelatedTableFields } from '@/hooks/email/useRelatedTableFields';
 
 interface VariablesPanelProps {
   columns: TableColumn[];
   enhancedVariables: EnhancedVariable[];
   onVariableInsert: (variableName: string) => void;
 }
+
+const VariableWithRelatedFields: React.FC<{
+  column: TableColumn;
+  onVariableInsert: (variableName: string) => void;
+}> = ({ column, onVariableInsert }) => {
+  const { data: relatedFields = [] } = useRelatedTableFields(
+    column.column_name,
+    column.data_type === 'uuid'
+  );
+
+  if (column.data_type === 'uuid' && relatedFields.length > 0) {
+    return (
+      <ExpandableVariableButton
+        label={column.display_label}
+        variableName={column.column_name}
+        dataType={column.data_type}
+        relatedFields={relatedFields}
+        onClick={onVariableInsert}
+      />
+    );
+  }
+
+  return (
+    <VariableButton
+      label={column.display_label}
+      variableName={column.column_name}
+      dataType={column.data_type}
+      onClick={onVariableInsert}
+    />
+  );
+};
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
@@ -24,12 +57,10 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
       </CardHeader>
       <CardContent className="space-y-2 max-h-96 overflow-y-auto">
         {columns.map((column) => (
-          <VariableButton
+          <VariableWithRelatedFields
             key={column.column_name}
-            label={column.display_label}
-            variableName={column.column_name}
-            dataType={column.data_type}
-            onClick={onVariableInsert}
+            column={column}
+            onVariableInsert={onVariableInsert}
           />
         ))}
         
