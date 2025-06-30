@@ -1,7 +1,7 @@
 
-// Re-export hooks and types for backward compatibility
-export { useTaskStatusOptions, type TaskStatusOption } from './useTaskStatusOptions';
-export { useTaskPriorityOptions, type TaskPriorityOption } from './useTaskPriorityOptions';
+// Re-export hooks for backward compatibility
+export { useTaskStatusOptions } from './useTaskStatusOptions';
+export { useTaskPriorityOptions } from './useTaskPriorityOptions';
 
-// Export the database option types
+// Re-export types from the main types file
 export type { TaskStatusOption, TaskPriorityOption } from './tasks/types';
