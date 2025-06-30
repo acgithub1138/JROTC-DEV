@@ -102,7 +102,8 @@ export class QueueProcessor {
           recipient: item.recipient_email,
           subject: item.subject,
           smtp_host: smtpSettings.smtp_host,
-          smtp_type: 'global'
+          smtp_type: 'global',
+          message_id: 'sent'
         });
 
         processedCount++;
@@ -111,11 +112,15 @@ export class QueueProcessor {
       } catch (error) {
         console.error(`Failed to process email ${item.id}:`, error);
         
-        await this.markEmailAsFailed(item.id, error.message || 'Unknown error occurred');
+        const errorMessage = this.getSmtpErrorMessage(error, smtpSettings.smtp_host, smtpSettings.smtp_port);
+        
+        await this.markEmailAsFailed(item.id, errorMessage);
         await this.createEmailLog(item.id, 'failed', {
-          error: error.message || 'Unknown error occurred',
+          error: errorMessage,
           failed_at: new Date().toISOString(),
-          smtp_type: 'global'
+          smtp_type: 'global',
+          smtp_host: smtpSettings.smtp_host,
+          original_error: error.message || 'Unknown error occurred'
         });
 
         failedCount++;
@@ -123,6 +128,30 @@ export class QueueProcessor {
     }
 
     return { processed: processedCount, failed: failedCount };
+  }
+
+  private getSmtpErrorMessage(error: any, smtp_host: string, smtp_port: number): string {
+    let errorMessage = 'SMTP email sending failed';
+    
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = `Cannot connect to SMTP server ${smtp_host}:${smtp_port}. The server may be down or the port may be blocked.`;
+    } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. Network Solutions servers may be slow to respond.`;
+    } else if (error.code === 'EAUTH' || error.responseCode === 535 || error.message.includes('authentication')) {
+      errorMessage = 'SMTP authentication failed. Please verify your username and password are correct for Network Solutions.';
+    } else if (error.code === 'ESOCKET' || error.message.includes('TLS') || error.message.includes('SSL')) {
+      errorMessage = `TLS/SSL connection failed. Network Solutions requires TLS 1.2+. Please verify the TLS setting is correct for port ${smtp_port}.`;
+    } else if (error.responseCode === 550) {
+      errorMessage = `SMTP server rejected the connection. Network Solutions may not allow connections from this IP address.`;
+    } else if (error.responseCode && error.response) {
+      errorMessage = `SMTP server error (${error.responseCode}): ${error.response}`;
+    } else if (error.message.includes('certificate')) {
+      errorMessage = `SSL certificate verification failed. Network Solutions certificate may not be trusted.`;
+    } else if (error.message) {
+      errorMessage = `SMTP error: ${error.message}`;
+    }
+
+    return errorMessage;
   }
 
   async handleNoSmtpSettings(queueItems: EmailQueueItem[]): Promise<void> {
