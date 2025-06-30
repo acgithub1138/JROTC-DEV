@@ -5,7 +5,6 @@ import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
-import BusinessRulesMainPage from './business-rules/BusinessRulesMainPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
@@ -19,7 +18,6 @@ const MainApplication = () => {
     const path = location.pathname;
     if (path === '/') return 'dashboard';
     if (path.startsWith('/tasks')) return 'tasks';
-    if (path.startsWith('/business-rules')) return 'rules';
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
     if (path.startsWith('/settings')) return 'settings';
@@ -32,7 +30,6 @@ const MainApplication = () => {
     const routes: { [key: string]: string } = {
       'dashboard': '/',
       'tasks': '/tasks',
-      'rules': '/business-rules',
       'school-management': '/school',
       'user-admin': '/users',
       'settings': '/settings'
@@ -56,7 +53,6 @@ const MainApplication = () => {
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
             <Route path="/tasks" element={<TaskManagementPage />} />
-            <Route path="/business-rules" element={<BusinessRulesMainPage />} />
             <Route path="/school" element={<SchoolManagementPage />} />
             <Route path="/users" element={<UserAdminPage />} />
             <Route path="/settings" element={<SettingsPage />} />
