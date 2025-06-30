@@ -15,7 +15,10 @@ export const RecordSelector: React.FC<RecordSelectorProps> = ({
   selectedRecordId,
   onRecordSelect,
 }) => {
-  const { data: records = [], isLoading } = useTableRecords(tableName);
+  const { data: rawRecords = [], isLoading } = useTableRecords(tableName);
+  
+  // Type the records as any[] to handle dynamic table queries
+  const records: any[] = Array.isArray(rawRecords) ? rawRecords : [];
 
   const getRecordDisplayName = (record: any) => {
     // Try to find a meaningful display name
