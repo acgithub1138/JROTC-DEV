@@ -21,6 +21,7 @@ const MainApplication = () => {
     if (path.startsWith('/business-rules')) return 'rules';
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
+    if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
 
@@ -32,7 +33,8 @@ const MainApplication = () => {
       'tasks': '/tasks',
       'rules': '/business-rules',
       'school-management': '/school',
-      'user-admin': '/users'
+      'user-admin': '/users',
+      'settings': '/settings'
     };
     
     const route = routes[module];
@@ -56,9 +58,25 @@ const MainApplication = () => {
             <Route path="/business-rules" element={<BusinessRulesMainPage />} />
             <Route path="/school" element={<SchoolManagementPage />} />
             <Route path="/users" element={<UserAdminPage />} />
+            <Route path="/settings" element={<SettingsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
+      </div>
+    </div>
+  );
+};
+
+// Simple Settings Page component
+const SettingsPage = () => {
+  return (
+    <div className="p-6">
+      <div className="max-w-4xl mx-auto">
+        <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
+        <div className="bg-white rounded-lg shadow-sm border p-6">
+          <h2 className="text-xl font-semibold mb-4">System Settings</h2>
+          <p className="text-gray-600">Settings page is under development.</p>
+        </div>
       </div>
     </div>
   );
