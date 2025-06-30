@@ -1,16 +1,14 @@
 
 import { TaskStatus, TaskPriority, getTaskStatusValues, getTaskPriorityValues } from '@/config/taskOptions';
 
-// Type guard for TaskStatus
+// Type guard for TaskStatus with proper type narrowing
 export const isValidTaskStatus = (value: string): value is TaskStatus => {
-  const validValues = getTaskStatusValues();
-  return validValues.includes(value as TaskStatus);
+  return (getTaskStatusValues() as readonly string[]).includes(value);
 };
 
-// Type guard for TaskPriority  
+// Type guard for TaskPriority with proper type narrowing  
 export const isValidTaskPriority = (value: string): value is TaskPriority => {
-  const validValues = getTaskPriorityValues();
-  return validValues.includes(value as TaskPriority);
+  return (getTaskPriorityValues() as readonly string[]).includes(value);
 };
 
 export const validateTaskStatus = (value: string): TaskStatus => {
@@ -18,8 +16,8 @@ export const validateTaskStatus = (value: string): TaskStatus => {
     console.error(`Invalid status value: ${value}. Valid values:`, getTaskStatusValues());
     throw new Error(`Invalid status value: ${value}`);
   }
-  // Type assertion is safe here because isValidTaskStatus confirms it's a valid TaskStatus
-  return value as TaskStatus;
+  // Now TypeScript knows this is a TaskStatus literal type
+  return value;
 };
 
 export const validateTaskPriority = (value: string): TaskPriority => {
@@ -27,6 +25,6 @@ export const validateTaskPriority = (value: string): TaskPriority => {
     console.error(`Invalid priority value: ${value}. Valid values:`, getTaskPriorityValues());
     throw new Error(`Invalid priority value: ${value}`);
   }
-  // Type assertion is safe here because isValidTaskPriority confirms it's a valid TaskPriority
-  return value as TaskPriority;
+  // Now TypeScript knows this is a TaskPriority literal type
+  return value;
 };
