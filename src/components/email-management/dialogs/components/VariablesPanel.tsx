@@ -1,15 +1,13 @@
 
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
 import { VariableButton } from './VariableButton';
 import { ExpandableVariableButton } from './ExpandableVariableButton';
-import { TableColumn, EnhancedVariable } from '@/hooks/email/useTableColumns';
+import { TableColumn } from '@/hooks/email/useTableColumns';
 import { useRelatedTableFields } from '@/hooks/email/useRelatedTableFields';
 
 interface VariablesPanelProps {
   columns: TableColumn[];
-  enhancedVariables: EnhancedVariable[];
   onVariableInsert: (variableName: string) => void;
 }
 
@@ -46,7 +44,6 @@ const VariableWithRelatedFields: React.FC<{
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
-  enhancedVariables,
   onVariableInsert,
 }) => {
   return (
@@ -63,22 +60,6 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             onVariableInsert={onVariableInsert}
           />
         ))}
-        
-        {enhancedVariables.length > 0 && (
-          <>
-            <Separator />
-            <div className="text-xs font-medium text-gray-600 px-1">Profile References</div>
-            {enhancedVariables.map((variable) => (
-              <VariableButton
-                key={variable.variable}
-                label={variable.label}
-                variableName={variable.variable}
-                isProfileReference={true}
-                onClick={onVariableInsert}
-              />
-            ))}
-          </>
-        )}
       </CardContent>
     </Card>
   );
