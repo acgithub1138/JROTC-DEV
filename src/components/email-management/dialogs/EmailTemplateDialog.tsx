@@ -118,7 +118,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         const position = range ? range.index : quill.getLength();
         
         quill.insertText(position, variable);
-        quill.setSelection(position + variable.length);
+        quill.setSelection({ index: position + variable.length, length: 0 });
         
         // Update the form data
         const newContent = quill.root.innerHTML;
