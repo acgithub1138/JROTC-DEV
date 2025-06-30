@@ -18,19 +18,18 @@ export const useCreateTask = () => {
     mutationFn: async (taskData: CreateTaskData) => {
       console.log('Creating task with data:', taskData);
 
-      // Validate enum values before sending to database
-      // These functions now return the proper literal types
-      const validatedStatus = validateTaskStatus(taskData.status);
-      const validatedPriority = validateTaskPriority(taskData.priority);
+      // Validate enum values dynamically against database
+      const validatedStatus = await validateTaskStatus(taskData.status);
+      const validatedPriority = await validateTaskPriority(taskData.priority);
 
       console.log('Validated values:', { validatedStatus, validatedPriority });
 
-      // Build the insert data object with proper typing
+      // Build the insert data object
       const insertData: TaskInsert = {
         title: taskData.title,
         description: taskData.description,
-        status: validatedStatus, // Now properly typed as TaskStatus literal
-        priority: validatedPriority, // Now properly typed as TaskPriority literal
+        status: validatedStatus as any, // Database will validate the actual enum
+        priority: validatedPriority as any, // Database will validate the actual enum
         assigned_to: taskData.assigned_to,
         due_date: taskData.due_date,
         school_id: userProfile?.school_id,

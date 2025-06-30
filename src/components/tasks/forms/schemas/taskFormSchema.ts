@@ -1,18 +1,24 @@
 
 import { z } from 'zod';
-import { getTaskStatusValues, getTaskPriorityValues } from '@/config/taskOptions';
 
-// Create the enum schema with proper literal types
-const taskStatusSchema = z.enum(getTaskStatusValues() as [string, ...string[]]);
-const taskPrioritySchema = z.enum(getTaskPriorityValues() as [string, ...string[]]);
+// Dynamic schema that will be populated with database values
+export const createTaskSchema = (statusOptions: string[], priorityOptions: string[]) => {
+  return z.object({
+    title: z.string().min(1, 'Task name is required').max(150, 'Task name must be 150 characters or less'),
+    description: z.string().optional(),
+    assigned_to: z.string().optional(),
+    priority: z.enum(priorityOptions as [string, ...string[]]),
+    status: z.enum(statusOptions as [string, ...string[]]),
+    due_date: z.date().optional(),
+  });
+};
 
-export const taskSchema = z.object({
-  title: z.string().min(1, 'Task name is required').max(150, 'Task name must be 150 characters or less'),
-  description: z.string().optional(),
-  assigned_to: z.string().optional(),
-  priority: taskPrioritySchema,
-  status: taskStatusSchema,
-  due_date: z.date().optional(),
-});
-
-export type TaskFormData = z.infer<typeof taskSchema>;
+// Type will be inferred dynamically
+export type TaskFormData = {
+  title: string;
+  description?: string;
+  assigned_to?: string;
+  priority: string;
+  status: string;
+  due_date?: Date;
+};

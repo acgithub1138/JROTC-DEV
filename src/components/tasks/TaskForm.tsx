@@ -20,7 +20,16 @@ interface TaskFormProps {
 
 export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
   const { userProfile } = useAuth();
-  const { form, selectedDate, setSelectedDate, onSubmit, isSubmitting } = useTaskForm({
+  const { 
+    form, 
+    selectedDate, 
+    setSelectedDate, 
+    onSubmit, 
+    isSubmitting, 
+    isLoading, 
+    statusOptions, 
+    priorityOptions 
+  } = useTaskForm({
     mode,
     task,
     onOpenChange,
@@ -38,6 +47,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     }
     return `Edit Task - ${task.title}`;
   };
+
+  if (isLoading) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-2xl">
+          <div className="flex items-center justify-center p-6">
+            <div className="text-center">Loading task options...</div>
+          </div>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -64,7 +85,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
           <TaskPriorityStatusFields 
             form={form} 
             canAssignTasks={canAssignTasks} 
-            isEditingAssignedTask={isEditingAssignedTask} 
+            isEditingAssignedTask={isEditingAssignedTask}
+            statusOptions={statusOptions}
+            priorityOptions={priorityOptions}
           />
           
           <TaskDueDateField 

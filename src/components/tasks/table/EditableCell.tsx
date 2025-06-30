@@ -97,11 +97,14 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {statusOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
+            {statusOptions
+              .filter(option => option.is_active)
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       );
@@ -120,11 +123,14 @@ export const EditableCell: React.FC<EditableCellProps> = ({
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {priorityOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
+            {priorityOptions
+              .filter(option => option.is_active)
+              .sort((a, b) => a.sort_order - b.sort_order)
+              .map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
           </SelectContent>
         </Select>
       );

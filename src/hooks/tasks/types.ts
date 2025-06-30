@@ -1,5 +1,7 @@
 
-import { TaskStatus, TaskPriority } from '@/config/taskOptions';
+// Dynamic types that adapt to database records
+export type TaskStatus = string; // Now dynamic based on database
+export type TaskPriority = string; // Now dynamic based on database
 
 export interface Task {
   id: string;
@@ -51,4 +53,23 @@ export interface CreateTaskData {
   assigned_to?: string | null;
   due_date?: string | null;
   team_id?: string | null;
+}
+
+// Option interfaces for dynamic options
+export interface TaskStatusOption {
+  id: string;
+  value: string;
+  label: string;
+  color_class: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
+export interface TaskPriorityOption {
+  id: string;
+  value: string;
+  label: string;
+  color_class: string;
+  sort_order: number;
+  is_active: boolean;
 }

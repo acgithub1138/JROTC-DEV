@@ -4,29 +4,34 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UseFormReturn } from 'react-hook-form';
 import { TaskFormData } from '../schemas/taskFormSchema';
-import { TASK_PRIORITY_CONFIG, TASK_STATUS_CONFIG } from '@/config/taskOptions';
+import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
 
 interface TaskPriorityStatusFieldsProps {
   form: UseFormReturn<TaskFormData>;
   canAssignTasks: boolean;
   isEditingAssignedTask: boolean;
+  statusOptions: TaskStatusOption[];
+  priorityOptions: TaskPriorityOption[];
 }
 
 export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> = ({ 
   form, 
   canAssignTasks, 
-  isEditingAssignedTask 
+  isEditingAssignedTask,
+  statusOptions,
+  priorityOptions
 }) => {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="space-y-2">
         <Label htmlFor="priority">Priority</Label>
-        <Select value={form.watch('priority')} onValueChange={(value) => form.setValue('priority', value as any)}>
+        <Select value={form.watch('priority')} onValueChange={(value) => form.setValue('priority', value)}>
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(TASK_PRIORITY_CONFIG)
+            {priorityOptions
+              .filter(priority => priority.is_active)
               .sort((a, b) => a.sort_order - b.sort_order)
               .map((priority) => (
                 <SelectItem key={priority.value} value={priority.value}>
@@ -41,14 +46,15 @@ export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> =
         <Label htmlFor="status">Status</Label>
         <Select 
           value={form.watch('status')} 
-          onValueChange={(value) => form.setValue('status', value as any)}
+          onValueChange={(value) => form.setValue('status', value)}
           disabled={!canAssignTasks && !isEditingAssignedTask}
         >
           <SelectTrigger>
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            {Object.values(TASK_STATUS_CONFIG)
+            {statusOptions
+              .filter(status => status.is_active)
               .sort((a, b) => a.sort_order - b.sort_order)
               .map((status) => (
                 <SelectItem key={status.value} value={status.value}>
