@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
@@ -61,7 +62,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
   if (isLoading) {
     return (
-      <div className={cn('bg-gray-900 text-white flex flex-col', className)}>
+      <div className={cn('fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col z-40', className)}>
         <div className="p-6">
           <div className="flex items-center space-x-2">
             <Shield className="w-8 h-8 text-blue-400" />
@@ -81,7 +82,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
   return (
     <>
-      <div className={cn('bg-gray-900 text-white flex flex-col', className)}>
+      <div className={cn('fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col z-40', className)}>
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
