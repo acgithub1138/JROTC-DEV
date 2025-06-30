@@ -2,12 +2,11 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Settings, Clock, BarChart3, Server } from 'lucide-react';
+import { Mail, Settings, Clock, BarChart3 } from 'lucide-react';
 import { EmailTemplatesTab } from './tabs/EmailTemplatesTab';
 import { EmailRulesTab } from './tabs/EmailRulesTab';
 import { EmailQueueTab } from './tabs/EmailQueueTab';
 import { EmailLogsTab } from './tabs/EmailLogsTab';
-import { SmtpSettingsTab } from './tabs/SmtpSettingsTab';
 
 const EmailManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('templates');
@@ -20,7 +19,7 @@ const EmailManagementPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Mail className="w-4 h-4" />
             Templates
@@ -36,10 +35,6 @@ const EmailManagementPage: React.FC = () => {
           <TabsTrigger value="logs" className="flex items-center gap-2">
             <BarChart3 className="w-4 h-4" />
             Logs
-          </TabsTrigger>
-          <TabsTrigger value="smtp" className="flex items-center gap-2">
-            <Server className="w-4 h-4" />
-            SMTP Settings
           </TabsTrigger>
         </TabsList>
 
@@ -57,10 +52,6 @@ const EmailManagementPage: React.FC = () => {
 
         <TabsContent value="logs" className="space-y-4">
           <EmailLogsTab />
-        </TabsContent>
-
-        <TabsContent value="smtp" className="space-y-4">
-          <SmtpSettingsTab />
         </TabsContent>
       </Tabs>
     </div>
