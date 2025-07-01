@@ -30,7 +30,7 @@ const AuthPage = () => {
             <Shield className="w-8 h-8 text-white" />
           </div>
           <h1 className="text-3xl font-bold text-white mb-2">JROTC</h1>
-          <h2 className="text-blue-200">Command and Control Center<h2>
+          <h2 className="text-blue-200">Command and Control Center</h2>
         </div>
 
         <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
