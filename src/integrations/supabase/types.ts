@@ -66,57 +66,6 @@ export type Database = {
           },
         ]
       }
-      cadets: {
-        Row: {
-          created_at: string
-          flight: string | null
-          grade: string | null
-          id: string
-          job_role: string | null
-          profile_id: string
-          rank: string | null
-          school_id: string
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          flight?: string | null
-          grade?: string | null
-          id?: string
-          job_role?: string | null
-          profile_id: string
-          rank?: string | null
-          school_id: string
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          flight?: string | null
-          grade?: string | null
-          id?: string
-          job_role?: string | null
-          profile_id?: string
-          rank?: string | null
-          school_id?: string
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cadets_profile_id_fkey"
-            columns: ["profile_id"]
-            isOneToOne: true
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cadets_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       competition_results: {
         Row: {
           cadet_id: string | null
@@ -156,7 +105,7 @@ export type Database = {
             foreignKeyName: "competition_results_cadet_id_fkey"
             columns: ["cadet_id"]
             isOneToOne: false
-            referencedRelation: "cadets"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -638,7 +587,7 @@ export type Database = {
             foreignKeyName: "inventory_checkout_cadet_id_fkey"
             columns: ["cadet_id"]
             isOneToOne: false
-            referencedRelation: "cadets"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
@@ -746,7 +695,10 @@ export type Database = {
           created_at: string
           email: string
           first_name: string
+          flight: string | null
+          grade: string | null
           id: string
+          job_role: string | null
           last_name: string
           phone: string | null
           rank: Database["public"]["Enums"]["rank_type"] | null
@@ -758,7 +710,10 @@ export type Database = {
           created_at?: string
           email: string
           first_name: string
+          flight?: string | null
+          grade?: string | null
           id: string
+          job_role?: string | null
           last_name: string
           phone?: string | null
           rank?: Database["public"]["Enums"]["rank_type"] | null
@@ -770,7 +725,10 @@ export type Database = {
           created_at?: string
           email?: string
           first_name?: string
+          flight?: string | null
+          grade?: string | null
           id?: string
+          job_role?: string | null
           last_name?: string
           phone?: string | null
           rank?: Database["public"]["Enums"]["rank_type"] | null
@@ -1161,7 +1119,7 @@ export type Database = {
             foreignKeyName: "team_members_cadet_id_fkey"
             columns: ["cadet_id"]
             isOneToOne: false
-            referencedRelation: "cadets"
+            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
