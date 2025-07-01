@@ -1,3 +1,4 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { EmailQueueItem, SmtpSettings } from './types.ts';
 import { sendEmailViaSMTP } from './email-service.ts';
@@ -79,19 +80,54 @@ export class QueueProcessor {
 
       // Only update comments for task-related emails
       if (queueItem.source_table === 'tasks') {
-        const { error: updateError } = await this.supabaseClient
+        // First, try to update existing comment
+        const { data: updatedRows, error: updateError } = await this.supabaseClient
           .from('task_comments')
           .update({
             comment_text: `Email sent to ${queueItem.recipient_email} - [Preview Email](${queueId})`
           })
           .eq('task_id', queueItem.record_id)
           .like('comment_text', `Email queued for sending to ${queueItem.recipient_email}%`)
-          .eq('is_system_comment', true);
+          .eq('is_system_comment', true)
+          .select();
 
         if (updateError) {
           console.error(`Error updating task comment for email ${queueId}:`, updateError);
+          return;
+        }
+
+        // If no rows were updated (comment doesn't exist), create a new one
+        if (!updatedRows || updatedRows.length === 0) {
+          console.log(`No existing comment found for ${queueId}, creating new one`);
+          
+          // Get the task to find a suitable user_id for the comment
+          const { data: taskData, error: taskError } = await this.supabaseClient
+            .from('tasks')
+            .select('assigned_by, assigned_to')
+            .eq('id', queueItem.record_id)
+            .single();
+
+          if (taskError) {
+            console.error(`Error fetching task for comment creation ${queueId}:`, taskError);
+            return;
+          }
+
+          const { error: insertError } = await this.supabaseClient
+            .from('task_comments')
+            .insert({
+              task_id: queueItem.record_id,
+              user_id: taskData.assigned_by || taskData.assigned_to,
+              comment_text: `Email sent to ${queueItem.recipient_email} - [Preview Email](${queueId})`,
+              is_system_comment: true
+            });
+
+          if (insertError) {
+            console.error(`Error creating task comment for email ${queueId}:`, insertError);
+          } else {
+            console.log(`Created new task comment for email ${queueId}`);
+          }
         } else {
-          console.log(`Updated task comment for email ${queueId}`);
+          console.log(`Updated existing task comment for email ${queueId}`);
         }
       }
     } catch (error) {
