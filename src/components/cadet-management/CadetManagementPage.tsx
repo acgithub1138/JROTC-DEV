@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -24,6 +25,7 @@ import {
   Search,
   Plus
 } from 'lucide-react';
+import { useSchoolData } from '@/hooks/useSchoolData';
 
 interface Profile {
   id: string;
@@ -39,17 +41,6 @@ interface Profile {
   updated_at: string;
 }
 
-interface Rank {
-  id: string;
-  rank: string;
-  abbreviation: string;
-}
-
-interface JobRole {
-  id: string;
-  role: string;
-}
-
 interface NewCadet {
   first_name: string;
   last_name: string;
@@ -63,9 +54,9 @@ interface NewCadet {
 const CadetManagementPage = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const { data: schoolData, isLoading: schoolDataLoading, error: schoolDataError } = useSchoolData();
+  
   const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [ranks, setRanks] = useState<Rank[]>([]);
-  const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
@@ -110,69 +101,23 @@ const CadetManagementPage = () => {
     }
   };
 
-  const fetchRanks = async () => {
-    // Get school data first to access jrotc_program
-    if (!userProfile?.school_id) return;
-
-    try {
-      const { data: schoolData, error: schoolError } = await supabase
-        .from('schools')
-        .select('jrotc_program')
-        .eq('id', userProfile.school_id)
-        .single();
-
-      if (schoolError) throw schoolError;
-
-      if (!schoolData?.jrotc_program) return;
-
-      const { data, error } = await supabase
-        .from('ranks')
-        .select('*')
-        .eq('program', schoolData.jrotc_program)
-        .order('rank');
-
-      if (error) throw error;
-      setRanks(data || []);
-    } catch (error) {
-      console.error('Error fetching ranks:', error);
-    }
-  };
-
-  const fetchJobRoles = async () => {
-    // Get school data first to access jrotc_program
-    if (!userProfile?.school_id) return;
-
-    try {
-      const { data: schoolData, error: schoolError } = await supabase
-        .from('schools')
-        .select('jrotc_program')
-        .eq('id', userProfile.school_id)
-        .single();
-
-      if (schoolError) throw schoolError;
-
-      if (!schoolData?.jrotc_program) return;
-
-      const { data, error } = await supabase
-        .from('job_board_roles')
-        .select('*')
-        .eq('program', schoolData.jrotc_program)
-        .order('role');
-
-      if (error) throw error;
-      setJobRoles(data || []);
-    } catch (error) {
-      console.error('Error fetching job roles:', error);
-    }
-  };
-
   useEffect(() => {
     if (userProfile?.school_id) {
       fetchProfiles();
-      fetchRanks();
-      fetchJobRoles();
     }
   }, [userProfile?.school_id]);
+
+  // Show error state for school data
+  useEffect(() => {
+    if (schoolDataError) {
+      console.error('Error fetching school data:', schoolDataError);
+      toast({
+        title: "Error",
+        description: "Failed to load ranks and job roles",
+        variant: "destructive",
+      });
+    }
+  }, [schoolDataError, toast]);
 
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
@@ -295,7 +240,7 @@ const CadetManagementPage = () => {
     setCurrentPage(page);
   };
 
-  if (loading) {
+  if (loading || schoolDataLoading) {
     return (
       <div className="p-6">
         <div className="animate-pulse">
@@ -309,6 +254,9 @@ const CadetManagementPage = () => {
       </div>
     );
   }
+
+  const ranks = schoolData?.ranks || [];
+  const jobRoles = schoolData?.jobRoles || [];
 
   return (
     <div className="p-6 space-y-6">
