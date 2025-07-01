@@ -753,6 +753,24 @@ export type Database = {
           },
         ]
       }
+      job_board_roles: {
+        Row: {
+          id: string
+          program: Database["public"]["Enums"]["jrotc_program"] | null
+          role: string | null
+        }
+        Insert: {
+          id?: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
+          role?: string | null
+        }
+        Update: {
+          id?: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
+          role?: string | null
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           created_at: string
@@ -800,6 +818,27 @@ export type Database = {
           },
         ]
       }
+      ranks: {
+        Row: {
+          abbreviation: string | null
+          id: string
+          program: Database["public"]["Enums"]["jrotc_program"] | null
+          rank: string | null
+        }
+        Insert: {
+          abbreviation?: string | null
+          id?: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
+          rank?: string | null
+        }
+        Update: {
+          abbreviation?: string | null
+          id?: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
+          rank?: string | null
+        }
+        Relationships: []
+      }
       schema_tracking: {
         Row: {
           column_default: string | null
@@ -844,6 +883,7 @@ export type Database = {
           district: string | null
           email: string | null
           id: string
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
           phone: string | null
           state: string | null
@@ -857,6 +897,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           id?: string
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
           phone?: string | null
           state?: string | null
@@ -870,6 +911,7 @@ export type Database = {
           district?: string | null
           email?: string | null
           id?: string
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name?: string
           phone?: string | null
           state?: string | null
@@ -1311,6 +1353,13 @@ export type Database = {
         | "maintenance"
         | "damaged"
         | "lost"
+      jrotc_program:
+        | "air_force"
+        | "army"
+        | "coast_guard"
+        | "navy"
+        | "marine_corps"
+        | "space_force"
       rank_type:
         | "cadet_private"
         | "cadet_private_first_class"
@@ -1327,18 +1376,6 @@ export type Database = {
         | "cadet_major"
         | "cadet_lieutenant_colonel"
         | "cadet_colonel"
-      task_priority: "low" | "medium" | "high" | "urgent" | "critical"
-      task_status:
-        | "pending"
-        | "in_progress"
-        | "completed"
-        | "overdue"
-        | "cancelled"
-        | "not_started"
-        | "working_on_it"
-        | "stuck"
-        | "done"
-        | "canceled"
       user_role: "admin" | "instructor" | "command_staff" | "cadet" | "parent"
     }
     CompositeTypes: {
@@ -1482,6 +1519,14 @@ export const Constants = {
         "damaged",
         "lost",
       ],
+      jrotc_program: [
+        "air_force",
+        "army",
+        "coast_guard",
+        "navy",
+        "marine_corps",
+        "space_force",
+      ],
       rank_type: [
         "cadet_private",
         "cadet_private_first_class",
@@ -1498,19 +1543,6 @@ export const Constants = {
         "cadet_major",
         "cadet_lieutenant_colonel",
         "cadet_colonel",
-      ],
-      task_priority: ["low", "medium", "high", "urgent", "critical"],
-      task_status: [
-        "pending",
-        "in_progress",
-        "completed",
-        "overdue",
-        "cancelled",
-        "not_started",
-        "working_on_it",
-        "stuck",
-        "done",
-        "canceled",
       ],
       user_role: ["admin", "instructor", "command_staff", "cadet", "parent"],
     },

@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
@@ -11,6 +10,7 @@ import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
 import SmtpSettingsPage from './smtp-settings/SmtpSettingsPage';
 import NotFound from '@/pages/NotFound';
+import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -64,6 +64,7 @@ const MainApplication = () => {
             <Route path="/email" element={<EmailManagementPage />} />
             <Route path="/smtp" element={<SmtpSettingsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
+            <Route path="/cadets" element={<CadetManagementPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
