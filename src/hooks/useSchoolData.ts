@@ -57,6 +57,9 @@ export const useSchoolData = () => {
           .order('role')
       ]);
 
+      console.log('useSchoolData: Raw ranks query result:', ranksResult);
+      console.log('useSchoolData: Raw job roles query result:', jobRolesResult);
+
       if (ranksResult.error) {
         console.error('useSchoolData: Ranks fetch error:', ranksResult.error);
         throw ranksResult.error;
@@ -68,6 +71,20 @@ export const useSchoolData = () => {
 
       console.log('useSchoolData: Ranks fetched:', ranksResult.data?.length || 0, 'records');
       console.log('useSchoolData: Job roles fetched:', jobRolesResult.data?.length || 0, 'records');
+
+      // Check if we have data in the database at all
+      const { data: allRanks } = await supabase
+        .from('ranks')
+        .select('*')
+        .limit(5);
+      
+      const { data: allJobRoles } = await supabase
+        .from('job_board_roles')
+        .select('*')
+        .limit(5);
+
+      console.log('useSchoolData: Total ranks in database (sample):', allRanks?.length || 0, allRanks);
+      console.log('useSchoolData: Total job roles in database (sample):', allJobRoles?.length || 0, allJobRoles);
 
       return {
         ranks: ranksResult.data || [],
