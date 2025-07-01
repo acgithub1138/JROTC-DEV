@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -97,13 +96,24 @@ const CadetManagementPage = () => {
   };
 
   const fetchRanks = async () => {
-    if (!userProfile?.schools?.jrotc_program) return;
+    // Get school data first to access jrotc_program
+    if (!userProfile?.school_id) return;
 
     try {
+      const { data: schoolData, error: schoolError } = await supabase
+        .from('schools')
+        .select('jrotc_program')
+        .eq('id', userProfile.school_id)
+        .single();
+
+      if (schoolError) throw schoolError;
+
+      if (!schoolData?.jrotc_program) return;
+
       const { data, error } = await supabase
         .from('ranks')
         .select('*')
-        .eq('program', userProfile.schools.jrotc_program)
+        .eq('program', schoolData.jrotc_program)
         .order('rank');
 
       if (error) throw error;
@@ -114,13 +124,24 @@ const CadetManagementPage = () => {
   };
 
   const fetchJobRoles = async () => {
-    if (!userProfile?.schools?.jrotc_program) return;
+    // Get school data first to access jrotc_program
+    if (!userProfile?.school_id) return;
 
     try {
+      const { data: schoolData, error: schoolError } = await supabase
+        .from('schools')
+        .select('jrotc_program')
+        .eq('id', userProfile.school_id)
+        .single();
+
+      if (schoolError) throw schoolError;
+
+      if (!schoolData?.jrotc_program) return;
+
       const { data, error } = await supabase
         .from('job_board_roles')
         .select('*')
-        .eq('program', userProfile.schools.jrotc_program)
+        .eq('program', schoolData.jrotc_program)
         .order('role');
 
       if (error) throw error;
