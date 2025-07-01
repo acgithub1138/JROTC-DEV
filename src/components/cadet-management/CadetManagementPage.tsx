@@ -21,7 +21,8 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   Users, 
   Edit, 
-  Search 
+  Search,
+  Plus
 } from 'lucide-react';
 
 interface Profile {
@@ -49,6 +50,16 @@ interface JobRole {
   role: string;
 }
 
+interface NewCadet {
+  first_name: string;
+  last_name: string;
+  email: string;
+  grade?: string;
+  rank?: string;
+  flight?: string;
+  job_role?: string;
+}
+
 const CadetManagementPage = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
@@ -60,6 +71,16 @@ const CadetManagementPage = () => {
   const [currentPage, setCurrentPage] = useState(1);
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [newCadet, setNewCadet] = useState<NewCadet>({
+    first_name: '',
+    last_name: '',
+    email: '',
+    grade: '',
+    rank: '',
+    flight: '',
+    job_role: ''
+  });
 
   const RECORDS_PER_PAGE = 25;
 
@@ -163,45 +184,15 @@ const CadetManagementPage = () => {
     if (!editingProfile) return;
 
     try {
-      // Prepare update data with proper types
-      const updateData: any = {
-        grade: editingProfile.grade || null,
-        flight: editingProfile.flight || null,
-        job_role: editingProfile.job_role || null,
-        updated_at: new Date().toISOString(),
-      };
-
-      // Handle rank field - convert string to proper enum value or null
-      if (editingProfile.rank) {
-        // Map common rank names to enum values
-        const rankMapping: { [key: string]: string } = {
-          'Cadet Private': 'cadet_private',
-          'Cadet Private First Class': 'cadet_private_first_class',
-          'Cadet Corporal': 'cadet_corporal',
-          'Cadet Sergeant': 'cadet_sergeant',
-          'Cadet Staff Sergeant': 'cadet_staff_sergeant',
-          'Cadet Sergeant First Class': 'cadet_sergeant_first_class',
-          'Cadet Master Sergeant': 'cadet_master_sergeant',
-          'Cadet First Sergeant': 'cadet_first_sergeant',
-          'Cadet Sergeant Major': 'cadet_sergeant_major',
-          'Cadet Second Lieutenant': 'cadet_second_lieutenant',
-          'Cadet First Lieutenant': 'cadet_first_lieutenant',
-          'Cadet Captain': 'cadet_captain',
-          'Cadet Major': 'cadet_major',
-          'Cadet Lieutenant Colonel': 'cadet_lieutenant_colonel',
-          'Cadet Colonel': 'cadet_colonel'
-        };
-
-        // Try to map the rank, otherwise use the original value if it's already in enum format
-        const mappedRank = rankMapping[editingProfile.rank] || editingProfile.rank;
-        updateData.rank = mappedRank;
-      } else {
-        updateData.rank = null;
-      }
-
       const { error } = await supabase
         .from('profiles')
-        .update(updateData)
+        .update({
+          grade: editingProfile.grade || null,
+          rank: editingProfile.rank || null,
+          flight: editingProfile.flight || null,
+          job_role: editingProfile.job_role || null,
+          updated_at: new Date().toISOString(),
+        })
         .eq('id', editingProfile.id);
 
       if (error) throw error;
@@ -219,6 +210,60 @@ const CadetManagementPage = () => {
       toast({
         title: "Error",
         description: "Failed to update cadet",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleAddCadet = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
+      toast({
+        title: "Error",
+        description: "Please fill in all required fields",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .insert({
+          first_name: newCadet.first_name,
+          last_name: newCadet.last_name,
+          email: newCadet.email,
+          grade: newCadet.grade || null,
+          rank: newCadet.rank || null,
+          flight: newCadet.flight || null,
+          job_role: newCadet.job_role || null,
+          role: 'cadet',
+          school_id: userProfile?.school_id,
+        });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: "Cadet added successfully",
+      });
+
+      setAddDialogOpen(false);
+      setNewCadet({
+        first_name: '',
+        last_name: '',
+        email: '',
+        grade: '',
+        rank: '',
+        flight: '',
+        job_role: ''
+      });
+      fetchProfiles();
+    } catch (error) {
+      console.error('Error adding cadet:', error);
+      toast({
+        title: "Error",
+        description: "Failed to add cadet",
         variant: "destructive",
       });
     }
@@ -272,6 +317,10 @@ const CadetManagementPage = () => {
             Manage cadets and command staff in your school
           </p>
         </div>
+        <Button onClick={() => setAddDialogOpen(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Cadet
+        </Button>
       </div>
 
       <Card>
@@ -385,6 +434,135 @@ const CadetManagementPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Add Cadet Dialog */}
+      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Add New Cadet</DialogTitle>
+          </DialogHeader>
+          <form onSubmit={handleAddCadet} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="first_name">First Name *</Label>
+                <Input
+                  id="first_name"
+                  value={newCadet.first_name}
+                  onChange={(e) => setNewCadet({ ...newCadet, first_name: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="last_name">Last Name *</Label>
+                <Input
+                  id="last_name"
+                  value={newCadet.last_name}
+                  onChange={(e) => setNewCadet({ ...newCadet, last_name: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newCadet.email}
+                onChange={(e) => setNewCadet({ ...newCadet, email: e.target.value })}
+                required
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="grade">Grade</Label>
+                <Select
+                  value={newCadet.grade || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, grade: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gradeOptions.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
+                        {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="flight">Flight</Label>
+                <Select
+                  value={newCadet.flight || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, flight: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select flight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {flightOptions.map((flight) => (
+                      <SelectItem key={flight} value={flight}>
+                        {flight}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="rank">Rank</Label>
+                <Select
+                  value={newCadet.rank || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, rank: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select rank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {ranks.map((rank) => (
+                      <SelectItem key={rank.id} value={rank.rank || ""}>
+                        {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="job_role">Job Role</Label>
+                <Select
+                  value={newCadet.job_role || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, job_role: value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select job role" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {jobRoles.map((role) => (
+                      <SelectItem key={role.id} value={role.role || ""}>
+                        {role.role}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+            
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)}>
+                Cancel
+              </Button>
+              <Button type="submit">
+                Add Cadet
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       {/* Edit Profile Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
