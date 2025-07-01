@@ -11,6 +11,7 @@ interface CreateCadetRequest {
   email: string
   first_name: string
   last_name: string
+  role?: 'cadet' | 'command_staff'
   grade?: string
   rank?: string
   flight?: string
@@ -34,6 +35,7 @@ serve(async (req) => {
       email, 
       first_name, 
       last_name, 
+      role = 'cadet',
       grade, 
       rank, 
       flight, 
@@ -44,7 +46,7 @@ serve(async (req) => {
     // Generate a temporary password
     const tempPassword = Math.random().toString(36).slice(-12) + 'A1!'
 
-    console.log('Creating user for:', email)
+    console.log('Creating user for:', email, 'with role:', role)
 
     // Create auth user with admin client
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -54,7 +56,7 @@ serve(async (req) => {
       user_metadata: {
         first_name,
         last_name,
-        role: 'cadet',
+        role,
         school_id
       }
     })
@@ -64,12 +66,13 @@ serve(async (req) => {
       throw authError
     }
 
-    console.log('Auth user created:', authUser.user?.id)
+    console.log('Auth user created:', authUser.user?.id, 'with role:', role)
 
     // Update the profile that was automatically created by the trigger
     const { error: profileError } = await supabaseAdmin
       .from('profiles')
       .update({
+        role,
         grade: grade || null,
         rank: rank || null,
         flight: flight || null,
@@ -82,13 +85,14 @@ serve(async (req) => {
       throw profileError
     }
 
-    console.log('Profile updated successfully')
+    console.log('Profile updated successfully with role:', role)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         user_id: authUser.user!.id,
-        temp_password: tempPassword
+        temp_password: tempPassword,
+        role: role
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -100,7 +104,7 @@ serve(async (req) => {
     console.error('Function error:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred creating the cadet user' 
+        error: error.message || 'An error occurred creating the user' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },

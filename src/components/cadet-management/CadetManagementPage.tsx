@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -45,6 +44,7 @@ interface NewCadet {
   first_name: string;
   last_name: string;
   email: string;
+  role: 'cadet' | 'command_staff';
   grade?: string;
   rank?: string;
   flight?: string;
@@ -67,6 +67,7 @@ const CadetManagementPage = () => {
     first_name: '',
     last_name: '',
     email: '',
+    role: 'cadet',
     grade: '',
     rank: '',
     flight: '',
@@ -77,6 +78,10 @@ const CadetManagementPage = () => {
 
   const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
   const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
+  const roleOptions = [
+    { value: 'cadet', label: 'Cadet' },
+    { value: 'command_staff', label: 'Command Staff' }
+  ];
 
   const fetchProfiles = async () => {
     try {
@@ -179,6 +184,7 @@ const CadetManagementPage = () => {
           email: newCadet.email,
           first_name: newCadet.first_name,
           last_name: newCadet.last_name,
+          role: newCadet.role,
           grade: newCadet.grade || null,
           rank: newCadet.rank || null,
           flight: newCadet.flight || null,
@@ -191,7 +197,7 @@ const CadetManagementPage = () => {
 
       toast({
         title: "Success",
-        description: `Cadet added successfully. Temporary password: ${data.temp_password}`,
+        description: `User added successfully. Temporary password: ${data.temp_password}`,
         duration: 10000, // Show longer so they can copy the password
       });
 
@@ -200,6 +206,7 @@ const CadetManagementPage = () => {
         first_name: '',
         last_name: '',
         email: '',
+        role: 'cadet',
         grade: '',
         rank: '',
         flight: '',
@@ -210,7 +217,7 @@ const CadetManagementPage = () => {
       console.error('Error adding cadet:', error);
       toast({
         title: "Error",
-        description: "Failed to add cadet",
+        description: "Failed to add user",
         variant: "destructive",
       });
     }
@@ -269,7 +276,7 @@ const CadetManagementPage = () => {
         </div>
         <Button onClick={() => setAddDialogOpen(true)}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Cadet
+          Add User
         </Button>
       </div>
 
@@ -385,11 +392,11 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Add Cadet Dialog */}
+      {/* Add User Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>Add New Cadet</DialogTitle>
+            <DialogTitle>Add New User</DialogTitle>
           </DialogHeader>
           <form onSubmit={handleAddCadet} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -422,6 +429,25 @@ const CadetManagementPage = () => {
                 onChange={(e) => setNewCadet({ ...newCadet, email: e.target.value })}
                 required
               />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="role">Role *</Label>
+              <Select
+                value={newCadet.role}
+                onValueChange={(value: 'cadet' | 'command_staff') => setNewCadet({ ...newCadet, role: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
@@ -469,16 +495,21 @@ const CadetManagementPage = () => {
                 <Select
                   value={newCadet.rank || ""}
                   onValueChange={(value) => setNewCadet({ ...newCadet, rank: value })}
+                  disabled={ranks.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select rank" />
+                    <SelectValue placeholder={ranks.length === 0 ? "Loading ranks..." : "Select rank"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {ranks.map((rank) => (
-                      <SelectItem key={rank.id} value={rank.rank || ""}>
-                        {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                      </SelectItem>
-                    ))}
+                    {ranks.length === 0 ? (
+                      <SelectItem value="" disabled>No ranks available</SelectItem>
+                    ) : (
+                      ranks.map((rank) => (
+                        <SelectItem key={rank.id} value={rank.rank || ""}>
+                          {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -487,16 +518,21 @@ const CadetManagementPage = () => {
                 <Select
                   value={newCadet.job_role || ""}
                   onValueChange={(value) => setNewCadet({ ...newCadet, job_role: value })}
+                  disabled={jobRoles.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder="Select job role" />
+                    <SelectValue placeholder={jobRoles.length === 0 ? "Loading job roles..." : "Select job role"} />
                   </SelectTrigger>
                   <SelectContent>
-                    {jobRoles.map((role) => (
-                      <SelectItem key={role.id} value={role.role || ""}>
-                        {role.role}
-                      </SelectItem>
-                    ))}
+                    {jobRoles.length === 0 ? (
+                      <SelectItem value="" disabled>No job roles available</SelectItem>
+                    ) : (
+                      jobRoles.map((role) => (
+                        <SelectItem key={role.id} value={role.role || ""}>
+                          {role.role}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
@@ -507,7 +543,7 @@ const CadetManagementPage = () => {
                 Cancel
               </Button>
               <Button type="submit">
-                Add Cadet
+                Add User
               </Button>
             </div>
           </form>
