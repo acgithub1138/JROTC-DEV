@@ -701,7 +701,7 @@ export type Database = {
           job_role: string | null
           last_name: string
           phone: string | null
-          rank: Database["public"]["Enums"]["rank_type"] | null
+          rank: string | null
           role: Database["public"]["Enums"]["user_role"]
           school_id: string
           updated_at: string
@@ -716,7 +716,7 @@ export type Database = {
           job_role?: string | null
           last_name: string
           phone?: string | null
-          rank?: Database["public"]["Enums"]["rank_type"] | null
+          rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           school_id: string
           updated_at?: string
@@ -731,7 +731,7 @@ export type Database = {
           job_role?: string | null
           last_name?: string
           phone?: string | null
-          rank?: Database["public"]["Enums"]["rank_type"] | null
+          rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
           school_id?: string
           updated_at?: string

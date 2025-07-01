@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -164,15 +163,45 @@ const CadetManagementPage = () => {
     if (!editingProfile) return;
 
     try {
+      // Prepare update data with proper types
+      const updateData: any = {
+        grade: editingProfile.grade || null,
+        flight: editingProfile.flight || null,
+        job_role: editingProfile.job_role || null,
+        updated_at: new Date().toISOString(),
+      };
+
+      // Handle rank field - convert string to proper enum value or null
+      if (editingProfile.rank) {
+        // Map common rank names to enum values
+        const rankMapping: { [key: string]: string } = {
+          'Cadet Private': 'cadet_private',
+          'Cadet Private First Class': 'cadet_private_first_class',
+          'Cadet Corporal': 'cadet_corporal',
+          'Cadet Sergeant': 'cadet_sergeant',
+          'Cadet Staff Sergeant': 'cadet_staff_sergeant',
+          'Cadet Sergeant First Class': 'cadet_sergeant_first_class',
+          'Cadet Master Sergeant': 'cadet_master_sergeant',
+          'Cadet First Sergeant': 'cadet_first_sergeant',
+          'Cadet Sergeant Major': 'cadet_sergeant_major',
+          'Cadet Second Lieutenant': 'cadet_second_lieutenant',
+          'Cadet First Lieutenant': 'cadet_first_lieutenant',
+          'Cadet Captain': 'cadet_captain',
+          'Cadet Major': 'cadet_major',
+          'Cadet Lieutenant Colonel': 'cadet_lieutenant_colonel',
+          'Cadet Colonel': 'cadet_colonel'
+        };
+
+        // Try to map the rank, otherwise use the original value if it's already in enum format
+        const mappedRank = rankMapping[editingProfile.rank] || editingProfile.rank;
+        updateData.rank = mappedRank;
+      } else {
+        updateData.rank = null;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          grade: editingProfile.grade,
-          rank: editingProfile.rank,
-          flight: editingProfile.flight,
-          job_role: editingProfile.job_role,
-          updated_at: new Date().toISOString(),
-        })
+        .update(updateData)
         .eq('id', editingProfile.id);
 
       if (error) throw error;
