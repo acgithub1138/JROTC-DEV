@@ -237,8 +237,8 @@ const CadetManagementPage = () => {
           rank: newCadet.rank || null,
           flight: newCadet.flight || null,
           job_role: newCadet.job_role || null,
-          role: 'cadet',
-          school_id: userProfile?.school_id,
+          role: 'cadet' as const,
+          school_id: userProfile?.school_id!,
         });
 
       if (error) throw error;
