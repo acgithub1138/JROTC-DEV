@@ -217,6 +217,7 @@ const CadetManagementPage = () => {
 
   const handleAddCadet = async (e: React.FormEvent) => {
     e.preventDefault();
+    
     if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
       toast({
         title: "Error",
@@ -227,25 +228,26 @@ const CadetManagementPage = () => {
     }
 
     try {
-      const { error } = await supabase
-        .from('profiles')
-        .insert({
+      // Call edge function to create cadet user
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
+        body: {
+          email: newCadet.email,
           first_name: newCadet.first_name,
           last_name: newCadet.last_name,
-          email: newCadet.email,
           grade: newCadet.grade || null,
           rank: newCadet.rank || null,
           flight: newCadet.flight || null,
           job_role: newCadet.job_role || null,
-          role: 'cadet' as const,
           school_id: userProfile?.school_id!,
-        });
+        }
+      });
 
       if (error) throw error;
 
       toast({
         title: "Success",
-        description: "Cadet added successfully",
+        description: `Cadet added successfully. Temporary password: ${data.temp_password}`,
+        duration: 10000, // Show longer so they can copy the password
       });
 
       setAddDialogOpen(false);
