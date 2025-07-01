@@ -29,8 +29,8 @@ const AuthPage = () => {
           <div className="inline-flex items-center justify-center w-16 h-16 bg-blue-600 rounded-full mb-4">
             <Shield className="w-8 h-8 text-white" />
           </div>
-          <h1 className="text-3xl font-bold text-white mb-2">JROTC CCC</h1>
-          <p className="text-blue-200">Command and Control Center</p>
+          <h1 className="text-3xl font-bold text-white mb-2">JROTC</h1>
+          <h2 className="text-blue-200">Command and Control Center<h2>
         </div>
 
         <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
