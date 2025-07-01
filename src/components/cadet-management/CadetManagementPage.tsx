@@ -112,17 +112,28 @@ const CadetManagementPage = () => {
     }
   }, [userProfile?.school_id]);
 
-  // Show error state for school data
+  // Show error state for school data with more detailed logging
   useEffect(() => {
     if (schoolDataError) {
       console.error('Error fetching school data:', schoolDataError);
       toast({
         title: "Error",
-        description: "Failed to load ranks and job roles",
+        description: "Failed to load ranks and job roles. Please check your school's JROTC program setting.",
         variant: "destructive",
       });
     }
   }, [schoolDataError, toast]);
+
+  // Log school data status for debugging
+  useEffect(() => {
+    console.log('CadetManagementPage: School data status:', {
+      schoolDataLoading,
+      schoolDataError,
+      schoolData,
+      userProfileSchool: userProfile?.schools,
+      jrotcProgram: userProfile?.schools?.jrotc_program
+    });
+  }, [schoolDataLoading, schoolDataError, schoolData, userProfile]);
 
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
@@ -176,6 +187,8 @@ const CadetManagementPage = () => {
       });
       return;
     }
+
+    console.log('Adding new cadet:', newCadet);
 
     try {
       // Call edge function to create cadet user
@@ -264,6 +277,14 @@ const CadetManagementPage = () => {
 
   const ranks = schoolData?.ranks || [];
   const jobRoles = schoolData?.jobRoles || [];
+
+  // Debug logging for dropdown data
+  console.log('Dropdown data available:', {
+    ranksCount: ranks.length,
+    jobRolesCount: jobRoles.length,
+    ranks: ranks.slice(0, 3), // Log first 3 for debugging
+    jobRoles: jobRoles.slice(0, 3)
+  });
 
   return (
     <div className="p-6 space-y-6">
@@ -392,7 +413,7 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Add User Dialog */}
+      {/* Add User Dialog with improved error handling */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -498,11 +519,23 @@ const CadetManagementPage = () => {
                   disabled={ranks.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={ranks.length === 0 ? "Loading ranks..." : "Select rank"} />
+                    <SelectValue placeholder={
+                      schoolDataLoading 
+                        ? "Loading ranks..." 
+                        : ranks.length === 0 
+                          ? userProfile?.schools?.jrotc_program 
+                            ? "No ranks available" 
+                            : "Set JROTC program first"
+                          : "Select rank"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {ranks.length === 0 ? (
-                      <SelectItem value="" disabled>No ranks available</SelectItem>
+                      <SelectItem value="" disabled>
+                        {userProfile?.schools?.jrotc_program 
+                          ? "No ranks available for this program" 
+                          : "JROTC program not set for school"}
+                      </SelectItem>
                     ) : (
                       ranks.map((rank) => (
                         <SelectItem key={rank.id} value={rank.rank || ""}>
@@ -521,11 +554,23 @@ const CadetManagementPage = () => {
                   disabled={jobRoles.length === 0}
                 >
                   <SelectTrigger>
-                    <SelectValue placeholder={jobRoles.length === 0 ? "Loading job roles..." : "Select job role"} />
+                    <SelectValue placeholder={
+                      schoolDataLoading 
+                        ? "Loading job roles..." 
+                        : jobRoles.length === 0 
+                          ? userProfile?.schools?.jrotc_program 
+                            ? "No job roles available" 
+                            : "Set JROTC program first"
+                          : "Select job role"
+                    } />
                   </SelectTrigger>
                   <SelectContent>
                     {jobRoles.length === 0 ? (
-                      <SelectItem value="" disabled>No job roles available</SelectItem>
+                      <SelectItem value="" disabled>
+                        {userProfile?.schools?.jrotc_program 
+                          ? "No job roles available for this program" 
+                          : "JROTC program not set for school"}
+                      </SelectItem>
                     ) : (
                       jobRoles.map((role) => (
                         <SelectItem key={role.id} value={role.role || ""}>

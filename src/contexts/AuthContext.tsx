@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
@@ -14,6 +13,7 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
+  jrotc_program?: string;
 }
 
 interface Profile {
@@ -72,7 +72,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             state,
             zip_code,
             phone,
-            email
+            email,
+            jrotc_program
           )
         `)
         .eq('id', userId)
@@ -93,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (data) {
         console.log('User profile fetched:', data);
+        console.log('School JROTC Program:', data.schools?.jrotc_program);
         setUserProfile(data);
       } else {
         console.log('No profile found for user:', userId);
