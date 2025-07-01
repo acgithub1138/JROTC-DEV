@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
@@ -24,6 +25,7 @@ const MainApplication = () => {
     if (path.startsWith('/users')) return 'user-admin';
     if (path.startsWith('/email')) return 'email-management';
     if (path.startsWith('/smtp')) return 'smtp-settings';
+    if (path.startsWith('/cadets')) return 'cadets';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -38,6 +40,7 @@ const MainApplication = () => {
       'user-admin': '/users',
       'email-management': '/email',
       'smtp-settings': '/smtp',
+      'cadets': '/cadets',
       'settings': '/settings'
     };
     
