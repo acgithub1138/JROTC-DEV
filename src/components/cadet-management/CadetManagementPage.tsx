@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -5,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { 
@@ -418,6 +419,9 @@ const CadetManagementPage = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Add New User</DialogTitle>
+            <DialogDescription>
+              Create a new cadet or command staff member for your school.
+            </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddCadet} className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
@@ -515,7 +519,7 @@ const CadetManagementPage = () => {
                 <Label htmlFor="rank">Rank</Label>
                 <Select
                   value={newCadet.rank || ""}
-                  onValueChange={(value) => setNewCadet({ ...newCadet, rank: value })}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, rank: value === "none" ? "" : value })}
                   disabled={ranks.length === 0}
                 >
                   <SelectTrigger>
@@ -531,14 +535,14 @@ const CadetManagementPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {ranks.length === 0 ? (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="none" disabled>
                         {userProfile?.schools?.jrotc_program 
                           ? "No ranks available for this program" 
                           : "JROTC program not set for school"}
                       </SelectItem>
                     ) : (
                       ranks.map((rank) => (
-                        <SelectItem key={rank.id} value={rank.rank || ""}>
+                        <SelectItem key={rank.id} value={rank.rank || "none"}>
                           {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                         </SelectItem>
                       ))
@@ -550,7 +554,7 @@ const CadetManagementPage = () => {
                 <Label htmlFor="job_role">Job Role</Label>
                 <Select
                   value={newCadet.job_role || ""}
-                  onValueChange={(value) => setNewCadet({ ...newCadet, job_role: value })}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, job_role: value === "none" ? "" : value })}
                   disabled={jobRoles.length === 0}
                 >
                   <SelectTrigger>
@@ -566,14 +570,14 @@ const CadetManagementPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     {jobRoles.length === 0 ? (
-                      <SelectItem value="" disabled>
+                      <SelectItem value="none" disabled>
                         {userProfile?.schools?.jrotc_program 
                           ? "No job roles available for this program" 
                           : "JROTC program not set for school"}
                       </SelectItem>
                     ) : (
                       jobRoles.map((role) => (
-                        <SelectItem key={role.id} value={role.role || ""}>
+                        <SelectItem key={role.id} value={role.role || "none"}>
                           {role.role}
                         </SelectItem>
                       ))
@@ -600,6 +604,9 @@ const CadetManagementPage = () => {
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Cadet Information</DialogTitle>
+            <DialogDescription>
+              Update the cadet's grade, rank, flight, and job role information.
+            </DialogDescription>
           </DialogHeader>
           {editingProfile && (
             <form onSubmit={handleSaveProfile} className="space-y-4">
@@ -674,15 +681,16 @@ const CadetManagementPage = () => {
                     value={editingProfile.rank || ""}
                     onValueChange={(value) => setEditingProfile({
                       ...editingProfile,
-                      rank: value
+                      rank: value === "none" ? "" : value
                     })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select rank" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No rank</SelectItem>
                       {ranks.map((rank) => (
-                        <SelectItem key={rank.id} value={rank.rank || ""}>
+                        <SelectItem key={rank.id} value={rank.rank || "none"}>
                           {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                         </SelectItem>
                       ))}
@@ -695,15 +703,16 @@ const CadetManagementPage = () => {
                     value={editingProfile.job_role || ""}
                     onValueChange={(value) => setEditingProfile({
                       ...editingProfile,
-                      job_role: value
+                      job_role: value === "none" ? "" : value
                     })}
                   >
                     <SelectTrigger>
                       <SelectValue placeholder="Select job role" />
                     </SelectTrigger>
                     <SelectContent>
+                      <SelectItem value="none">No job role</SelectItem>
                       {jobRoles.map((role) => (
-                        <SelectItem key={role.id} value={role.role || ""}>
+                        <SelectItem key={role.id} value={role.role || "none"}>
                           {role.role}
                         </SelectItem>
                       ))}
