@@ -1,7 +1,8 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
-import { Button } from '@/components/ui/button';
+import { Button } = '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -24,22 +25,18 @@ import {
   Search 
 } from 'lucide-react';
 
-interface Cadet {
+interface Profile {
   id: string;
-  profile_id: string;
-  school_id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role: string;
   grade?: string;
   rank?: string;
   flight?: string;
   job_role?: string;
   created_at: string;
   updated_at: string;
-  profile: {
-    first_name: string;
-    last_name: string;
-    email: string;
-    role: string;
-  };
 }
 
 interface Rank {
@@ -56,13 +53,13 @@ interface JobRole {
 const CadetManagementPage = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
-  const [cadets, setCadets] = useState<Cadet[]>([]);
+  const [profiles, setProfiles] = useState<Profile[]>([]);
   const [ranks, setRanks] = useState<Rank[]>([]);
   const [jobRoles, setJobRoles] = useState<JobRole[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [editingCadet, setEditingCadet] = useState<Cadet | null>(null);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
 
   const RECORDS_PER_PAGE = 25;
@@ -70,21 +67,19 @@ const CadetManagementPage = () => {
   const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
   const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
 
-  const fetchCadets = async () => {
+  const fetchProfiles = async () => {
     try {
       const { data, error } = await supabase
-        .from('cadets')
-        .select(`
-          *,
-          profile:profiles(first_name, last_name, email, role)
-        `)
+        .from('profiles')
+        .select('*')
         .eq('school_id', userProfile?.school_id)
+        .in('role', ['cadet', 'command_staff'])
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setCadets(data || []);
+      setProfiles(data || []);
     } catch (error) {
-      console.error('Error fetching cadets:', error);
+      console.error('Error fetching profiles:', error);
       toast({
         title: "Error",
         description: "Failed to fetch cadets",
@@ -153,32 +148,32 @@ const CadetManagementPage = () => {
 
   useEffect(() => {
     if (userProfile?.school_id) {
-      fetchCadets();
+      fetchProfiles();
       fetchRanks();
       fetchJobRoles();
     }
   }, [userProfile?.school_id]);
 
-  const handleEditCadet = (cadet: Cadet) => {
-    setEditingCadet(cadet);
+  const handleEditProfile = (profile: Profile) => {
+    setEditingProfile(profile);
     setEditDialogOpen(true);
   };
 
-  const handleSaveCadet = async (e: React.FormEvent) => {
+  const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!editingCadet) return;
+    if (!editingProfile) return;
 
     try {
       const { error } = await supabase
-        .from('cadets')
+        .from('profiles')
         .update({
-          grade: editingCadet.grade,
-          rank: editingCadet.rank,
-          flight: editingCadet.flight,
-          job_role: editingCadet.job_role,
+          grade: editingProfile.grade,
+          rank: editingProfile.rank,
+          flight: editingProfile.flight,
+          job_role: editingProfile.job_role,
           updated_at: new Date().toISOString(),
         })
-        .eq('id', editingCadet.id);
+        .eq('id', editingProfile.id);
 
       if (error) throw error;
 
@@ -188,10 +183,10 @@ const CadetManagementPage = () => {
       });
 
       setEditDialogOpen(false);
-      setEditingCadet(null);
-      fetchCadets();
+      setEditingProfile(null);
+      fetchProfiles();
     } catch (error) {
-      console.error('Error updating cadet:', error);
+      console.error('Error updating profile:', error);
       toast({
         title: "Error",
         description: "Failed to update cadet",
@@ -200,20 +195,20 @@ const CadetManagementPage = () => {
     }
   };
 
-  const filteredCadets = cadets.filter(cadet =>
-    cadet.profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.flight?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    cadet.job_role?.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredProfiles = profiles.filter(profile =>
+    profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.flight?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.job_role?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const totalPages = Math.ceil(filteredCadets.length / RECORDS_PER_PAGE);
+  const totalPages = Math.ceil(filteredProfiles.length / RECORDS_PER_PAGE);
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
-  const paginatedCadets = filteredCadets.slice(startIndex, endIndex);
+  const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
 
   // Reset to first page when search term changes
   useEffect(() => {
@@ -254,7 +249,7 @@ const CadetManagementPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Cadets ({filteredCadets.length})
+            Cadets ({filteredProfiles.length})
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -284,22 +279,22 @@ const CadetManagementPage = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedCadets.map((cadet) => (
-                <TableRow key={cadet.id}>
+              {paginatedProfiles.map((profile) => (
+                <TableRow key={profile.id}>
                   <TableCell className="font-medium">
-                    {cadet.profile.first_name} {cadet.profile.last_name}
+                    {profile.first_name} {profile.last_name}
                   </TableCell>
-                  <TableCell>{cadet.profile.email}</TableCell>
-                  <TableCell className="capitalize">{cadet.profile.role.replace('_', ' ')}</TableCell>
-                  <TableCell>{cadet.grade || '-'}</TableCell>
-                  <TableCell>{cadet.rank || '-'}</TableCell>
-                  <TableCell>{cadet.flight || '-'}</TableCell>
-                  <TableCell>{cadet.job_role || '-'}</TableCell>
+                  <TableCell>{profile.email}</TableCell>
+                  <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
+                  <TableCell>{profile.grade || '-'}</TableCell>
+                  <TableCell>{profile.rank || '-'}</TableCell>
+                  <TableCell>{profile.flight || '-'}</TableCell>
+                  <TableCell>{profile.job_role || '-'}</TableCell>
                   <TableCell className="text-right">
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => handleEditCadet(cadet)}
+                      onClick={() => handleEditProfile(profile)}
                     >
                       <Edit className="w-4 h-4" />
                     </Button>
@@ -309,7 +304,7 @@ const CadetManagementPage = () => {
             </TableBody>
           </Table>
 
-          {filteredCadets.length === 0 && (
+          {filteredProfiles.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
               No cadets found
             </div>
@@ -362,19 +357,19 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Edit Cadet Dialog */}
+      {/* Edit Profile Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit Cadet Information</DialogTitle>
           </DialogHeader>
-          {editingCadet && (
-            <form onSubmit={handleSaveCadet} className="space-y-4">
+          {editingProfile && (
+            <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
                   <Input
-                    value={`${editingCadet.profile.first_name} ${editingCadet.profile.last_name}`}
+                    value={`${editingProfile.first_name} ${editingProfile.last_name}`}
                     disabled
                     className="bg-gray-50"
                   />
@@ -382,7 +377,7 @@ const CadetManagementPage = () => {
                 <div className="space-y-2">
                   <Label>Email</Label>
                   <Input
-                    value={editingCadet.profile.email}
+                    value={editingProfile.email}
                     disabled
                     className="bg-gray-50"
                   />
@@ -393,9 +388,9 @@ const CadetManagementPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="grade">Grade</Label>
                   <Select
-                    value={editingCadet.grade || ""}
-                    onValueChange={(value) => setEditingCadet({
-                      ...editingCadet,
+                    value={editingProfile.grade || ""}
+                    onValueChange={(value) => setEditingProfile({
+                      ...editingProfile,
                       grade: value
                     })}
                   >
@@ -414,9 +409,9 @@ const CadetManagementPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="flight">Flight</Label>
                   <Select
-                    value={editingCadet.flight || ""}
-                    onValueChange={(value) => setEditingCadet({
-                      ...editingCadet,
+                    value={editingProfile.flight || ""}
+                    onValueChange={(value) => setEditingProfile({
+                      ...editingProfile,
                       flight: value
                     })}
                   >
@@ -438,9 +433,9 @@ const CadetManagementPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="rank">Rank</Label>
                   <Select
-                    value={editingCadet.rank || ""}
-                    onValueChange={(value) => setEditingCadet({
-                      ...editingCadet,
+                    value={editingProfile.rank || ""}
+                    onValueChange={(value) => setEditingProfile({
+                      ...editingProfile,
                       rank: value
                     })}
                   >
@@ -459,9 +454,9 @@ const CadetManagementPage = () => {
                 <div className="space-y-2">
                   <Label htmlFor="job_role">Job Role</Label>
                   <Select
-                    value={editingCadet.job_role || ""}
-                    onValueChange={(value) => setEditingCadet({
-                      ...editingCadet,
+                    value={editingProfile.job_role || ""}
+                    onValueChange={(value) => setEditingProfile({
+                      ...editingProfile,
                       job_role: value
                     })}
                   >

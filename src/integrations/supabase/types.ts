@@ -68,73 +68,43 @@ export type Database = {
       }
       cadets: {
         Row: {
-          attendance_percentage: number | null
-          cadet_id: string
           created_at: string
-          date_of_birth: string | null
-          emergency_contact_name: string | null
-          emergency_contact_phone: string | null
-          enlistment_date: string | null
-          gpa: number | null
-          grade_level: number | null
-          graduation_date: string | null
+          flight: string | null
+          grade: string | null
           id: string
-          medical_conditions: string | null
-          parent_email: string | null
-          parent_name: string | null
-          parent_phone: string | null
+          job_role: string | null
           profile_id: string
+          rank: string | null
           school_id: string
-          uniform_size: string | null
           updated_at: string
         }
         Insert: {
-          attendance_percentage?: number | null
-          cadet_id: string
           created_at?: string
-          date_of_birth?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          enlistment_date?: string | null
-          gpa?: number | null
-          grade_level?: number | null
-          graduation_date?: string | null
+          flight?: string | null
+          grade?: string | null
           id?: string
-          medical_conditions?: string | null
-          parent_email?: string | null
-          parent_name?: string | null
-          parent_phone?: string | null
+          job_role?: string | null
           profile_id: string
+          rank?: string | null
           school_id: string
-          uniform_size?: string | null
           updated_at?: string
         }
         Update: {
-          attendance_percentage?: number | null
-          cadet_id?: string
           created_at?: string
-          date_of_birth?: string | null
-          emergency_contact_name?: string | null
-          emergency_contact_phone?: string | null
-          enlistment_date?: string | null
-          gpa?: number | null
-          grade_level?: number | null
-          graduation_date?: string | null
+          flight?: string | null
+          grade?: string | null
           id?: string
-          medical_conditions?: string | null
-          parent_email?: string | null
-          parent_name?: string | null
-          parent_phone?: string | null
+          job_role?: string | null
           profile_id?: string
+          rank?: string | null
           school_id?: string
-          uniform_size?: string | null
           updated_at?: string
         }
         Relationships: [
           {
             foreignKeyName: "cadets_profile_id_fkey"
             columns: ["profile_id"]
-            isOneToOne: false
+            isOneToOne: true
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
