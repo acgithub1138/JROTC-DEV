@@ -1,4 +1,3 @@
-
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { EmailQueueItem, SmtpSettings } from './types.ts';
 import { sendEmailViaSMTP } from './email-service.ts';
@@ -58,6 +57,45 @@ export class QueueProcessor {
     if (updateError) {
       console.error(`Error updating email ${itemId}:`, updateError);
       throw updateError;
+    }
+
+    // Update task comment if this email is related to a task
+    await this.updateTaskComment(itemId);
+  }
+
+  async updateTaskComment(queueId: string): Promise<void> {
+    try {
+      // First get the email queue item to check if it's task-related
+      const { data: queueItem, error: queueError } = await this.supabaseClient
+        .from('email_queue')
+        .select('source_table, record_id, recipient_email')
+        .eq('id', queueId)
+        .single();
+
+      if (queueError || !queueItem) {
+        console.error('Error fetching queue item for comment update:', queueError);
+        return;
+      }
+
+      // Only update comments for task-related emails
+      if (queueItem.source_table === 'tasks') {
+        const { error: updateError } = await this.supabaseClient
+          .from('task_comments')
+          .update({
+            comment_text: `Email sent to ${queueItem.recipient_email} - [Preview Email](${queueId})`
+          })
+          .eq('task_id', queueItem.record_id)
+          .like('comment_text', `Email queued for sending to ${queueItem.recipient_email}%`)
+          .eq('is_system_comment', true);
+
+        if (updateError) {
+          console.error(`Error updating task comment for email ${queueId}:`, updateError);
+        } else {
+          console.log(`Updated task comment for email ${queueId}`);
+        }
+      }
+    } catch (error) {
+      console.error(`Error in updateTaskComment for ${queueId}:`, error);
     }
   }
 
