@@ -111,7 +111,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
                     className="h-9 border-0 bg-transparent focus:ring-0"
                     autoFocus
                   />
-                  <CommandList className="max-h-[300px]">
+                  <CommandList className="max-h-[300px] overflow-y-auto scrollbar-thin">
                     <CommandEmpty>
                       {isLoading ? "Loading cadets..." : "No cadet found."}
                     </CommandEmpty>
