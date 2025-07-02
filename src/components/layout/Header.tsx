@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { 
   DropdownMenu, 
@@ -10,10 +9,8 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import { Bell, Search, User, LogOut, Settings } from 'lucide-react';
-import CreateUserDialog from '@/components/user-management/CreateUserDialog';
-
-type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+import { User, LogOut, Settings } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 
 interface HeaderProps {
   activeModule: string;
@@ -52,19 +49,6 @@ export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
     }
   };
 
-  const getAllowedRoles = (): UserRole[] => {
-    switch (userProfile?.role) {
-      case 'admin':
-        return ['instructor'];
-      case 'instructor':
-        return ['command_staff', 'cadet'];
-      default:
-        return [];
-    }
-  };
-
-  const canCreateUsers = ['admin', 'instructor'].includes(userProfile?.role);
-
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
@@ -75,34 +59,7 @@ export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
           )}
         </div>
         
-        <div className="flex items-center space-x-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="w-4 h-4 absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400" />
-            <input
-              type="text"
-              placeholder="Search..."
-              className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
-            />
-          </div>
-          
-          {/* Create User Button */}
-          {canCreateUsers && (
-            <CreateUserDialog 
-              allowedRoles={getAllowedRoles()}
-              trigger={
-                <Button variant="outline" size="sm">
-                  Create User
-                </Button>
-              }
-            />
-          )}
-          
-          {/* Notifications */}
-          <Button variant="ghost" size="sm">
-            <Bell className="w-5 h-5" />
-          </Button>
-          
+        <div className="flex items-center">
           {/* User Menu */}
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
