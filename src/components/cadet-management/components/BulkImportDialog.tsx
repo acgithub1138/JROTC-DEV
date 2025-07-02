@@ -13,6 +13,7 @@ import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { parseCSV, validateCadetData } from '../utils/csvProcessor';
 import { NewCadet } from '../types';
 import { gradeOptions, flightOptions, roleOptions } from '../constants';
+import { getGradeColor } from '@/utils/gradeColors';
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -299,7 +300,11 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
                               ))}
                             </SelectContent>
                           </Select>
-                        ) : cadet.grade}
+                        ) : cadet.grade ? (
+                          <Badge className={`text-xs ${getGradeColor(cadet.grade)}`}>
+                            {cadet.grade}
+                          </Badge>
+                        ) : '-'}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? (

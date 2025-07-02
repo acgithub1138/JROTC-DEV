@@ -2,9 +2,11 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
 import { Profile } from '../types';
+import { getGradeColor } from '@/utils/gradeColors';
 
 interface CadetTableProps {
   profiles: Profile[];
@@ -68,7 +70,15 @@ export const CadetTable = ({
             </TableCell>
             <TableCell>{profile.email}</TableCell>
             <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
-            <TableCell>{profile.grade || '-'}</TableCell>
+            <TableCell>
+              {profile.grade ? (
+                <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
+                  {profile.grade}
+                </Badge>
+              ) : (
+                '-'
+              )}
+            </TableCell>
             <TableCell>{profile.rank || '-'}</TableCell>
             <TableCell>{profile.flight || '-'}</TableCell>
             <TableCell className="text-right">
