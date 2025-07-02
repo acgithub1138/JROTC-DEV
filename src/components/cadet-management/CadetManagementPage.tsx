@@ -1,276 +1,69 @@
-import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
+
+import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { Users, Edit, Search, Plus, Trash2, CheckCircle } from 'lucide-react';
-import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
+import { Users, Search, Plus } from 'lucide-react';
 
-interface Profile {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: string;
-  grade?: string;
-  rank?: string;
-  flight?: string;
-  active: boolean;
-  created_at: string;
-  updated_at: string;
-}
-
-interface NewCadet {
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: 'cadet' | 'command_staff';
-  grade?: string;
-  rank?: string;
-  flight?: string;
-}
+import { useCadetManagement } from './hooks/useCadetManagement';
+import { CadetTable } from './components/CadetTable';
+import { AddCadetDialog } from './components/AddCadetDialog';
+import { EditCadetDialog } from './components/EditCadetDialog';
+import { StatusConfirmationDialog } from './components/StatusConfirmationDialog';
+import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
+import { Profile } from './types';
 
 const CadetManagementPage = () => {
-  const { userProfile } = useAuth();
-  const { toast } = useToast();
-  
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
-  const [searchTerm, setSearchTerm] = useState('');
-  const [currentPage, setCurrentPage] = useState(1);
+  const {
+    profiles,
+    loading,
+    searchTerm,
+    setSearchTerm,
+    currentPage,
+    setCurrentPage,
+    activeTab,
+    setActiveTab,
+    statusLoading,
+    newCadet,
+    setNewCadet,
+    handleToggleUserStatus,
+    handleAddCadet,
+    handleSaveProfile
+  } = useCadetManagement();
+
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
-  const [statusLoading, setStatusLoading] = useState(false);
-  const [activeTab, setActiveTab] = useState('active');
-  const [newCadet, setNewCadet] = useState<NewCadet>({
-    first_name: '',
-    last_name: '',
-    email: '',
-    role: 'cadet',
-    grade: '',
-    rank: '',
-    flight: ''
-  });
-
-  const RECORDS_PER_PAGE = 25;
-  const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
-  const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
-  const roleOptions = [
-    { value: 'cadet', label: 'Cadet' },
-    { value: 'command_staff', label: 'Command Staff' }
-  ];
-
-  // Get ranks based on school's JROTC program
-  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
-
-  const fetchProfiles = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .eq('school_id', userProfile?.school_id)
-        .in('role', ['cadet', 'command_staff'])
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setProfiles(data || []);
-    } catch (error) {
-      console.error('Error fetching profiles:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch cadets",
-        variant: "destructive"
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  useEffect(() => {
-    if (userProfile?.school_id) {
-      fetchProfiles();
-    }
-  }, [userProfile?.school_id]);
-
-  const handleToggleUserStatus = async () => {
-    if (!profileToToggle) return;
-
-    setStatusLoading(true);
-    try {
-      const { error } = await supabase.functions.invoke('toggle-user-status', {
-        body: {
-          userId: profileToToggle.id,
-          active: !profileToToggle.active
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Cadet ${profileToToggle.active ? 'deactivated' : 'activated'} successfully`
-      });
-
-      setStatusDialogOpen(false);
-      setProfileToToggle(null);
-      fetchProfiles();
-    } catch (error) {
-      console.error('Error toggling user status:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update cadet status",
-        variant: "destructive"
-      });
-    } finally {
-      setStatusLoading(false);
-    }
-  };
 
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
     setEditDialogOpen(true);
   };
 
-  const handleSaveProfile = async (e: React.FormEvent) => {
+  const handleSaveProfileWrapper = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProfile) return;
 
-    try {
-      const { error } = await supabase
-        .from('profiles')
-        .update({
-          grade: editingProfile.grade || null,
-          rank: editingProfile.rank || null,
-          flight: editingProfile.flight || null,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingProfile.id);
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Cadet updated successfully"
-      });
-
-      setEditDialogOpen(false);
-      setEditingProfile(null);
-      fetchProfiles();
-    } catch (error) {
-      console.error('Error updating profile:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update cadet",
-        variant: "destructive"
-      });
-    }
+    await handleSaveProfile(editingProfile);
+    setEditDialogOpen(false);
+    setEditingProfile(null);
   };
 
-  const handleAddCadet = async (e: React.FormEvent) => {
-    e.preventDefault();
-
-    if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
-      toast({
-        title: "Error",
-        description: "Please fill in all required fields",
-        variant: "destructive"
-      });
-      return;
-    }
-
-    console.log('Adding new cadet:', newCadet);
-
-    try {
-      // Call edge function to invite cadet user
-      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
-        body: {
-          email: newCadet.email,
-          first_name: newCadet.first_name,
-          last_name: newCadet.last_name,
-          role: newCadet.role,
-          grade: newCadet.grade || null,
-          rank: newCadet.rank || null,
-          flight: newCadet.flight || null,
-          school_id: userProfile?.school_id!
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Invitation email sent to ${newCadet.email}. They will receive an email to set up their account.`,
-        duration: 8000
-      });
-
-      setAddDialogOpen(false);
-      setNewCadet({
-        first_name: '',
-        last_name: '',
-        email: '',
-        role: 'cadet',
-        grade: '',
-        rank: '',
-        flight: ''
-      });
-      fetchProfiles();
-    } catch (error) {
-      console.error('Error inviting cadet:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send invitation",
-        variant: "destructive"
-      });
-    }
+  const handleToggleStatusWrapper = async () => {
+    if (!profileToToggle) return;
+    
+    await handleToggleUserStatus(profileToToggle);
+    setStatusDialogOpen(false);
+    setProfileToToggle(null);
   };
 
-  // Filter profiles based on active tab and search term
-  const getFilteredProfiles = () => {
-    const isActive = activeTab === 'active';
-    return profiles.filter(profile => {
-      const matchesActiveStatus = profile.active === isActive;
-      const matchesSearch = profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        profile.flight?.toLowerCase().includes(searchTerm.toLowerCase());
-      
-      return matchesActiveStatus && matchesSearch;
-    });
-  };
-
-  const filteredProfiles = getFilteredProfiles();
-  const totalPages = Math.ceil(filteredProfiles.length / RECORDS_PER_PAGE);
-  const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
-  const endIndex = startIndex + RECORDS_PER_PAGE;
-  const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
-
-  // Reset to first page when search term or tab changes
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [searchTerm, activeTab]);
+  const filteredProfiles = getFilteredProfiles(profiles, activeTab, searchTerm);
+  const totalPages = getTotalPages(filteredProfiles.length);
+  const paginatedProfiles = getPaginatedProfiles(filteredProfiles, currentPage);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -337,97 +130,27 @@ const CadetManagementPage = () => {
             </TabsList>
             
             <TabsContent value="active" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Rank</TableHead>
-                    <TableHead>Flight</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedProfiles.map((profile) => (
-                    <TableRow key={profile.id}>
-                      <TableCell className="font-medium">
-                        {profile.first_name} {profile.last_name}
-                      </TableCell>
-                      <TableCell>{profile.email}</TableCell>
-                      <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
-                      <TableCell>{profile.grade || '-'}</TableCell>
-                      <TableCell>{profile.rank || '-'}</TableCell>
-                      <TableCell>{profile.flight || '-'}</TableCell>
-                      <TableCell className="text-right">
-                        <div className="flex items-center justify-end gap-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => handleEditProfile(profile)}
-                          >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => {
-                              setProfileToToggle(profile);
-                              setStatusDialogOpen(true);
-                            }}
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <CadetTable
+                profiles={paginatedProfiles}
+                activeTab={activeTab}
+                onEditProfile={handleEditProfile}
+                onToggleStatus={(profile) => {
+                  setProfileToToggle(profile);
+                  setStatusDialogOpen(true);
+                }}
+              />
             </TabsContent>
 
             <TabsContent value="inactive" className="mt-4">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>Grade</TableHead>
-                    <TableHead>Rank</TableHead>
-                    <TableHead>Flight</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedProfiles.map((profile) => (
-                    <TableRow key={profile.id} className="opacity-60">
-                      <TableCell className="font-medium">
-                        {profile.first_name} {profile.last_name}
-                      </TableCell>
-                      <TableCell>{profile.email}</TableCell>
-                      <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
-                      <TableCell>{profile.grade || '-'}</TableCell>
-                      <TableCell>{profile.rank || '-'}</TableCell>
-                      <TableCell>{profile.flight || '-'}</TableCell>
-                      <TableCell className="text-right">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setProfileToToggle(profile);
-                            setStatusDialogOpen(true);
-                          }}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Activate
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <CadetTable
+                profiles={paginatedProfiles}
+                activeTab={activeTab}
+                onEditProfile={handleEditProfile}
+                onToggleStatus={(profile) => {
+                  setProfileToToggle(profile);
+                  setStatusDialogOpen(true);
+                }}
+              />
             </TabsContent>
           </Tabs>
 
@@ -484,282 +207,29 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Status Toggle Confirmation Dialog */}
-      <AlertDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {profileToToggle?.active ? 'Deactivate' : 'Activate'} Cadet
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              {profileToToggle?.active 
-                ? `Are you sure you want to deactivate ${profileToToggle.first_name} ${profileToToggle.last_name}? They will be unable to log in.`
-                : `Are you sure you want to reactivate ${profileToToggle?.first_name} ${profileToToggle?.last_name}? They will be able to log in again.`
-              }
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleToggleUserStatus}
-              disabled={statusLoading}
-              className={profileToToggle?.active ? "bg-red-600 hover:bg-red-700" : ""}
-            >
-              {statusLoading ? 'Processing...' : (profileToToggle?.active ? 'Deactivate' : 'Activate')}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <StatusConfirmationDialog
+        open={statusDialogOpen}
+        onOpenChange={setStatusDialogOpen}
+        profileToToggle={profileToToggle}
+        onConfirm={handleToggleStatusWrapper}
+        loading={statusLoading}
+      />
 
-      {/* Add User Dialog */}
-      <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Add New Cadet</DialogTitle>
-            <DialogDescription>
-              Create a new cadet or command staff member for your school. They will receive an invitation email to set up their account.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleAddCadet} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="first_name">First Name *</Label>
-                <Input
-                  id="first_name"
-                  value={newCadet.first_name}
-                  onChange={(e) => setNewCadet({ ...newCadet, first_name: e.target.value })}
-                  required
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="last_name">Last Name *</Label>
-                <Input
-                  id="last_name"
-                  value={newCadet.last_name}
-                  onChange={(e) => setNewCadet({ ...newCadet, last_name: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
+      <AddCadetDialog
+        open={addDialogOpen}
+        onOpenChange={setAddDialogOpen}
+        newCadet={newCadet}
+        setNewCadet={setNewCadet}
+        onSubmit={handleAddCadet}
+      />
 
-            <div className="space-y-2">
-              <Label htmlFor="email">Email *</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newCadet.email}
-                onChange={(e) => setNewCadet({ ...newCadet, email: e.target.value })}
-                required
-              />
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="role">Role *</Label>
-              <Select
-                value={newCadet.role}
-                onValueChange={(value: 'cadet' | 'command_staff') => setNewCadet({ ...newCadet, role: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {roleOptions.map((role) => (
-                    <SelectItem key={role.value} value={role.value}>
-                      {role.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="grade">Grade</Label>
-                <Select
-                  value={newCadet.grade || ""}
-                  onValueChange={(value) => setNewCadet({ ...newCadet, grade: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {gradeOptions.map((grade) => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="flight">Flight</Label>
-                <Select
-                  value={newCadet.flight || ""}
-                  onValueChange={(value) => setNewCadet({ ...newCadet, flight: value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select flight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {flightOptions.map((flight) => (
-                      <SelectItem key={flight} value={flight}>
-                        {flight}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <Label htmlFor="rank">Rank</Label>
-              <Select
-                value={newCadet.rank || ""}
-                onValueChange={(value) => setNewCadet({ ...newCadet, rank: value === "none" ? "" : value })}
-                disabled={ranks.length === 0}
-              >
-                <SelectTrigger>
-                  <SelectValue
-                    placeholder={
-                      ranks.length === 0
-                        ? userProfile?.schools?.jrotc_program
-                          ? "No ranks available"
-                          : "Set JROTC program first"
-                        : "Select rank"
-                    }
-                  />
-                </SelectTrigger>
-                <SelectContent>
-                  {ranks.length === 0 ? (
-                    <SelectItem value="none" disabled>
-                      {userProfile?.schools?.jrotc_program
-                        ? "No ranks available for this program"
-                        : "JROTC program not set for school"}
-                    </SelectItem>
-                  ) : (
-                    ranks.map((rank) => (
-                      <SelectItem key={rank.id} value={rank.rank || "none"}>
-                        {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-            </div>
-            
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => setAddDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button type="submit">
-                Send Invitation
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
-
-      {/* Edit Profile Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit Cadet Information</DialogTitle>
-            <DialogDescription>
-              Update the cadet's grade, rank, and flight information.
-            </DialogDescription>
-          </DialogHeader>
-          {editingProfile && (
-            <form onSubmit={handleSaveProfile} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label>Name</Label>
-                  <Input
-                    value={`${editingProfile.first_name} ${editingProfile.last_name}`}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label>Email</Label>
-                  <Input
-                    value={editingProfile.email}
-                    disabled
-                    className="bg-gray-50"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="grade">Grade</Label>
-                  <Select
-                    value={editingProfile.grade || ""}
-                    onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select grade" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {gradeOptions.map((grade) => (
-                        <SelectItem key={grade} value={grade}>
-                          {grade}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="flight">Flight</Label>
-                  <Select
-                    value={editingProfile.flight || ""}
-                    onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select flight" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {flightOptions.map((flight) => (
-                        <SelectItem key={flight} value={flight}>
-                          {flight}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="rank">Rank</Label>
-                <Select
-                  value={editingProfile.rank || ""}
-                  onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select rank" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No rank</SelectItem>
-                    {ranks.map((rank) => (
-                      <SelectItem key={rank.id} value={rank.rank || "none"}>
-                        {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  Update Cadet
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
+      <EditCadetDialog
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        editingProfile={editingProfile}
+        setEditingProfile={setEditingProfile}
+        onSubmit={handleSaveProfileWrapper}
+      />
     </div>
   );
 };
