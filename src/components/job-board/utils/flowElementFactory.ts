@@ -14,6 +14,7 @@ export const createFlowNodes = (
       id: job.id,
       type: 'jobRole',
       position,
+      draggable: true,
       data: {
         job,
         role: job.role,

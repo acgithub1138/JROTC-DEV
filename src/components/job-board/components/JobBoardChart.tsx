@@ -1,6 +1,6 @@
 
 import React, { useMemo } from 'react';
-import { ReactFlow, Background, Controls } from '@xyflow/react';
+import { ReactFlow, Background, Controls, useNodesState, useEdgesState } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { RefreshCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -20,7 +20,7 @@ const nodeTypes = {
 };
 
 export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
-  const { nodes, edges } = useMemo(() => {
+  const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
       return { nodes: [], edges: [] };
     }
@@ -43,6 +43,9 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
       edges: flowEdges,
     };
   }, [jobs]);
+
+  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
+  const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
 
   if (jobs.length === 0) {
     return (
@@ -69,6 +72,8 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
       <ReactFlow
         nodes={nodes}
         edges={edges}
+        onNodesChange={onNodesChange}
+        onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView
         fitViewOptions={{ padding: 0.2 }}
