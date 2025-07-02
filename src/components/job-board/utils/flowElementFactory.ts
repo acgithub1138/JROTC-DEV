@@ -27,13 +27,29 @@ export const createFlowNodes = (
 };
 
 export const createFlowEdges = (hierarchyResult: HierarchyResult): Edge[] => {
-  return hierarchyResult.edges.map((edge) => ({
-    id: edge.id,
-    source: edge.source,
-    target: edge.target,
-    sourceHandle: 'right-source',
-    targetHandle: 'left-target',
-    type: 'smoothstep',
-    animated: false,
-  }));
+  return hierarchyResult.edges.map((edge) => {
+    if (edge.type === 'assistant') {
+      // Assistant relationships: right-to-left connections
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        sourceHandle: 'right-source',
+        targetHandle: 'left-target',
+        type: 'smoothstep',
+        animated: false,
+      };
+    } else {
+      // Reports_to relationships: bottom-to-top connections
+      return {
+        id: edge.id,
+        source: edge.source,
+        target: edge.target,
+        sourceHandle: 'bottom-source',
+        targetHandle: 'top-target',
+        type: 'smoothstep',
+        animated: false,
+      };
+    }
+  });
 };

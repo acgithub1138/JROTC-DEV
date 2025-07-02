@@ -7,17 +7,24 @@ export interface HierarchyNode {
   children: string[];
 }
 
+export interface HierarchyEdge {
+  id: string;
+  source: string;
+  target: string;
+  type: 'reports_to' | 'assistant';
+}
+
 export interface HierarchyResult {
   nodes: Map<string, HierarchyNode>;
   rootNodes: string[];
-  edges: Array<{ id: string; source: string; target: string }>;
+  edges: HierarchyEdge[];
 }
 
 export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult => {
   console.log('Building hierarchy with jobs:', jobs);
   
   const hierarchyNodes = new Map<string, HierarchyNode>();
-  const edges: Array<{ id: string; source: string; target: string }> = [];
+  const edges: HierarchyEdge[] = [];
   
   // Initialize hierarchy nodes
   jobs.forEach((job) => {
@@ -72,11 +79,12 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
         subordinateNode.level = level + 1;
       }
       
-      // Create edge from supervisor to subordinate
+      // Create edge from supervisor to subordinate (reports_to relationship)
       edges.push({
         id: `${nodeId}-${subordinate.id}`,
         source: nodeId,
         target: subordinate.id,
+        type: 'reports_to',
       });
       
       console.log(`Created edge: ${currentJob.role} -> ${subordinate.role}`);
@@ -90,6 +98,23 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
     const rootJob = jobs.find(j => j.id === rootId);
     console.log(`Starting hierarchy build from root: ${rootJob?.role}`);
     buildHierarchy(rootId, 0);
+  });
+
+  // Handle assistant relationships separately
+  jobs.forEach((job) => {
+    if (job.assistant) {
+      // Find the assistant job
+      const assistantJob = jobs.find(j => j.role === job.assistant);
+      if (assistantJob) {
+        console.log(`Found assistant relationship: ${job.role} has assistant ${assistantJob.role}`);
+        edges.push({
+          id: `${job.id}-assistant-${assistantJob.id}`,
+          source: job.id,
+          target: assistantJob.id,
+          type: 'assistant',
+        });
+      }
+    }
   });
 
   console.log('Hierarchy nodes:', Array.from(hierarchyNodes.entries()));
