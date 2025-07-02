@@ -36,6 +36,9 @@ export const useInventoryItems = () => {
     mutationFn: async (item: Omit<InventoryItemInsert, 'school_id'>) => {
       if (!userProfile?.school_id) throw new Error('No school ID');
 
+      // Validate required fields
+      if (!item.item) throw new Error('Item name is required');
+
       const { data, error } = await supabase
         .from('inventory_items')
         .insert({ ...item, school_id: userProfile.school_id })
@@ -52,6 +55,14 @@ export const useInventoryItems = () => {
 
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: InventoryItemUpdate & { id: string }) => {
+      // Validate quantities
+      if (updates.qty_total !== undefined && updates.qty_total < 0) {
+        throw new Error('Total quantity cannot be negative');
+      }
+      if (updates.qty_issued !== undefined && updates.qty_issued < 0) {
+        throw new Error('Issued quantity cannot be negative');
+      }
+
       const { data, error } = await supabase
         .from('inventory_items')
         .update(updates)

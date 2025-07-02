@@ -2,7 +2,8 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2 } from 'lucide-react';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -11,6 +12,8 @@ type InventoryItem = Tables<'inventory_items'>;
 interface InventoryTableProps {
   items: InventoryItem[];
   isLoading: boolean;
+  selectedItems: string[];
+  onSelectionChange: (selectedIds: string[]) => void;
   onEdit: (item: any) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
 }
@@ -18,6 +21,8 @@ interface InventoryTableProps {
 export const InventoryTable: React.FC<InventoryTableProps> = ({
   items,
   isLoading,
+  selectedItems,
+  onSelectionChange,
   onEdit,
   onDelete,
 }) => {
@@ -30,6 +35,22 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const handleEditSubmit = async (updatedItem: any) => {
     await onEdit(updatedItem);
     setEditingItem(null);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      onSelectionChange(items.map(item => item.id));
+    } else {
+      onSelectionChange([]);
+    }
+  };
+
+  const handleSelectItem = (itemId: string, checked: boolean) => {
+    if (checked) {
+      onSelectionChange([...selectedItems, itemId]);
+    } else {
+      onSelectionChange(selectedItems.filter(id => id !== itemId));
+    }
   };
 
   const getGenderBadge = (gender: string | null) => {
@@ -50,9 +71,26 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     );
   };
 
+  const getAvailabilityStatus = (item: InventoryItem) => {
+    const available = item.qty_available || 0;
+    const total = item.qty_total || 0;
+    
+    if (available === 0) {
+      return <Badge variant="destructive" className="text-xs">Out of Stock</Badge>;
+    } else if (available <= total * 0.2) {
+      return <Badge variant="secondary" className="text-xs bg-yellow-100 text-yellow-800">Low Stock</Badge>;
+    } else {
+      return <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">In Stock</Badge>;
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="space-y-4">
+        <div className="flex items-center justify-center py-12">
+          <Package className="w-8 h-8 text-gray-400 animate-pulse" />
+          <span className="ml-2 text-gray-500">Loading inventory...</span>
+        </div>
         {[...Array(5)].map((_, i) => (
           <div key={i} className="h-16 bg-gray-100 rounded animate-pulse" />
         ))}
@@ -66,6 +104,12 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         <Table>
           <TableHeader>
             <TableRow>
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={selectedItems.length === items.length && items.length > 0}
+                  onCheckedChange={handleSelectAll}
+                />
+              </TableHead>
               <TableHead>Item ID</TableHead>
               <TableHead>Item</TableHead>
               <TableHead>Category</TableHead>
@@ -75,6 +119,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               <TableHead>Total Qty</TableHead>
               <TableHead>Issued Qty</TableHead>
               <TableHead>Available Qty</TableHead>
+              <TableHead>Status</TableHead>
               <TableHead>Stock Number</TableHead>
               <TableHead>Unit</TableHead>
               <TableHead>Actions</TableHead>
@@ -83,15 +128,25 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           <TableBody>
             {items.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={12} className="text-center py-8 text-gray-500">
-                  No inventory items found
+                <TableCell colSpan={14} className="text-center py-12">
+                  <div className="flex flex-col items-center text-gray-500">
+                    <Package className="w-12 h-12 mb-2" />
+                    <span className="text-lg font-medium">No inventory items found</span>
+                    <span className="text-sm">Start by adding your first inventory item</span>
+                  </div>
                 </TableCell>
               </TableRow>
             ) : (
               items.map((item) => (
-                <TableRow key={item.id}>
+                <TableRow key={item.id} className="hover:bg-gray-50">
+                  <TableCell>
+                    <Checkbox
+                      checked={selectedItems.includes(item.id)}
+                      onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
+                    />
+                  </TableCell>
                   <TableCell className="font-medium">{item.item_id}</TableCell>
-                  <TableCell>{item.item}</TableCell>
+                  <TableCell className="font-medium">{item.item}</TableCell>
                   <TableCell>{item.category}</TableCell>
                   <TableCell>{item.sub_category}</TableCell>
                   <TableCell>{item.size}</TableCell>
@@ -99,6 +154,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   <TableCell>{item.qty_total}</TableCell>
                   <TableCell>{item.qty_issued}</TableCell>
                   <TableCell className="font-medium">{item.qty_available}</TableCell>
+                  <TableCell>{getAvailabilityStatus(item)}</TableCell>
                   <TableCell>{item.stock_number}</TableCell>
                   <TableCell>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
                   <TableCell>
@@ -107,6 +163,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => handleEdit(item)}
+                        title="Edit item"
                       >
                         <Edit className="w-4 h-4" />
                       </Button>
@@ -114,6 +171,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                         variant="ghost"
                         size="sm"
                         onClick={() => onDelete(item.id)}
+                        title="Delete item"
+                        className="hover:text-red-600"
                       >
                         <Trash2 className="w-4 h-4" />
                       </Button>
