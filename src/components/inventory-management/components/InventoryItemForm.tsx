@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,6 +7,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { MultiSelectProfiles } from './MultiSelectProfiles';
+import { CategoryCombobox } from './CategoryCombobox';
+import { useInventoryCategories } from '../hooks/useInventoryCategories';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface InventoryItemFormData {
@@ -43,6 +45,9 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { categories, subCategories, isCategoriesLoading, isSubCategoriesLoading, getSubCategoriesForCategory } = useInventoryCategories();
+  const [filteredSubCategories, setFilteredSubCategories] = useState<string[]>([]);
+
   const {
     register,
     handleSubmit,
@@ -87,6 +92,26 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
 
   const watchedValues = watch();
 
+  // Update filtered subcategories when category changes
+  useEffect(() => {
+    const updateSubCategories = async () => {
+      if (watchedValues.category) {
+        const subCats = await getSubCategoriesForCategory(watchedValues.category);
+        setFilteredSubCategories(subCats);
+      } else {
+        setFilteredSubCategories(subCategories);
+      }
+    };
+    
+    updateSubCategories();
+  }, [watchedValues.category, subCategories, getSubCategoriesForCategory]);
+
+  const handleCategoryChange = (category: string) => {
+    setValue('category', category);
+    // Clear sub_category when category changes
+    setValue('sub_category', '');
+  };
+
   const handleFormSubmit = async (data: InventoryItemFormData) => {
     await onSubmit(data);
   };
@@ -116,20 +141,26 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="category">Category</Label>
-          <Input
-            id="category"
-            {...register('category')}
-            placeholder="Enter category"
+          <Label htmlFor="category">Category *</Label>
+          <CategoryCombobox
+            value={watchedValues.category}
+            onValueChange={handleCategoryChange}
+            options={categories}
+            placeholder="Select or enter category"
+            isLoading={isCategoriesLoading}
+            allowNewValues={true}
           />
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="sub_category">Sub Category</Label>
-          <Input
-            id="sub_category"
-            {...register('sub_category')}
-            placeholder="Enter sub category"
+          <Label htmlFor="sub_category">Sub Category *</Label>
+          <CategoryCombobox
+            value={watchedValues.sub_category}
+            onValueChange={(value) => setValue('sub_category', value)}
+            options={filteredSubCategories}
+            placeholder="Select or enter sub category"
+            isLoading={isSubCategoriesLoading}
+            allowNewValues={true}
           />
         </div>
 
