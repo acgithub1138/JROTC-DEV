@@ -1,8 +1,9 @@
 
 import React, { useMemo, useCallback, useEffect } from 'react';
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, NodeChange } from '@xyflow/react';
+import { ReactFlow, Background, Controls, useNodesState, useEdgesState, NodeChange, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { RefreshCcw, RotateCcw, Printer } from 'lucide-react';
+import { RefreshCcw, RotateCcw, Download } from 'lucide-react';
+import { toPng } from 'html-to-image';
 import { Button } from '@/components/ui/button';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
@@ -25,6 +26,7 @@ const nodeTypes = {
 
 export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+  const { getNodes } = useReactFlow();
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
@@ -71,123 +73,47 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
     setEdges(initialNodesAndEdges.edges);
   }, [initialNodesAndEdges, setNodes, setEdges]);
 
-  const handlePrint = useCallback(() => {
-    const printStyles = `
-      <style>
-        @page { 
-          size: landscape; 
-          margin: 0.5in; 
-        }
-        @media print {
-          .react-flow { 
-            width: 100% !important; 
-            height: 100% !important; 
-          }
-          .react-flow__controls,
-          .react-flow__background {
-            display: none !important;
-          }
-          /* Preserve card styling */
-          .react-flow__node {
-            background: white !important;
-            border: 2px solid #d1d5db !important;
-            border-radius: 8px !important;
-            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
-            padding: 16px !important;
-            min-width: 280px !important;
-          }
-          /* Preserve text styling */
-          .font-bold {
-            font-weight: bold !important;
-          }
-          .text-lg {
-            font-size: 1.125rem !important;
-          }
-          .text-xs {
-            font-size: 0.75rem !important;
-          }
-          .text-center {
-            text-align: center !important;
-          }
-          .border-b {
-            border-bottom: 1px solid #e5e7eb !important;
-          }
-          .pb-2 {
-            padding-bottom: 0.5rem !important;
-          }
-          .pt-2 {
-            padding-top: 0.5rem !important;
-          }
-          /* Badge styling */
-          .badge {
-            display: inline-flex !important;
-            align-items: center !important;
-            border-radius: 9999px !important;
-            border: 1px solid #e5e7eb !important;
-            padding: 0.125rem 0.625rem !important;
-            font-size: 0.75rem !important;
-            font-weight: 500 !important;
-          }
-          /* Grade colors */
-          .bg-red-500 { background-color: #ef4444 !important; color: white !important; }
-          .bg-green-500 { background-color: #22c55e !important; color: white !important; }
-          .bg-blue-500 { background-color: #3b82f6 !important; color: white !important; }
-          .bg-black { background-color: #000000 !important; color: white !important; }
-          .bg-gray-500 { background-color: #6b7280 !important; color: white !important; }
-          /* Layout helpers */
-          .flex { display: flex !important; }
-          .justify-between { justify-content: space-between !important; }
-          .items-center { align-items: center !important; }
-          .space-y-2 > * + * { margin-top: 0.5rem !important; }
-          /* Hide handles for printing */
-          .react-flow__handle {
-            display: none !important;
-          }
-        }
-      </style>
-    `;
+  const handleDownloadImage = useCallback(() => {
+    const nodesBounds = getNodesBounds(getNodes());
+    const imageWidth = 1920;
+    const imageHeight = 1080;
+    const viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0.5);
+
+    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
     
-    const printWindow = window.open('', '_blank');
-    if (printWindow) {
-      const chartElement = document.querySelector('.react-flow');
-      if (chartElement) {
-        // Clone the element to avoid modifying the original
-        const clonedChart = chartElement.cloneNode(true) as HTMLElement;
-        
-        printWindow.document.write(`
-          <html>
-            <head>
-              <title>Job Board Organizational Chart</title>
-              ${printStyles}
-              <style>
-                body { 
-                  margin: 0; 
-                  font-family: system-ui, -apple-system, sans-serif; 
-                  background: white;
-                }
-                .chart-container { 
-                  width: 100vw; 
-                  height: 100vh; 
-                  background: white;
-                }
-              </style>
-            </head>
-            <body>
-              <div class="chart-container">
-                ${clonedChart.outerHTML}
-              </div>
-            </body>
-          </html>
-        `);
-        printWindow.document.close();
-        printWindow.focus();
-        setTimeout(() => {
-          printWindow.print();
-          printWindow.close();
-        }, 500);
-      }
+    if (reactFlowElement) {
+      toPng(reactFlowElement, {
+        backgroundColor: '#ffffff',
+        width: imageWidth,
+        height: imageHeight,
+        style: {
+          width: imageWidth.toString(),
+          height: imageHeight.toString(),
+          transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+        },
+        filter: (node) => {
+          // Hide handles and controls in the exported image
+          if (
+            node?.classList?.contains('react-flow__handle') ||
+            node?.classList?.contains('react-flow__controls') ||
+            node?.classList?.contains('react-flow__panel')
+          ) {
+            return false;
+          }
+          return true;
+        },
+      })
+        .then((dataUrl) => {
+          const link = document.createElement('a');
+          link.download = 'job-board-chart.png';
+          link.href = dataUrl;
+          link.click();
+        })
+        .catch((error) => {
+          console.error('Error downloading image:', error);
+        });
     }
-  }, []);
+  }, [getNodes]);
 
   if (jobs.length === 0) {
     return (
@@ -232,11 +158,11 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
         <Button
           variant="outline"
           size="sm"
-          onClick={handlePrint}
+          onClick={handleDownloadImage}
           className="bg-white/90 backdrop-blur-sm"
-          title="Print organizational chart"
+          title="Download as image"
         >
-          <Printer className="w-4 h-4" />
+          <Download className="w-4 h-4" />
         </Button>
       </div>
       
