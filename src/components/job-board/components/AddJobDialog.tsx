@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +26,18 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
   const { roles } = useJobBoardRoles();
+
+  // Reset form when dialog opens
+  useEffect(() => {
+    if (open) {
+      setFormData({
+        cadet_id: '',
+        role: '',
+        reports_to: '',
+        assistant: '',
+      });
+    }
+  }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
