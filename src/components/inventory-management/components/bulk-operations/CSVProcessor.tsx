@@ -7,6 +7,11 @@ export interface ParsedItem {
   rowNumber: number;
 }
 
+export interface FieldMapping {
+  csvColumn: string;
+  dbField: string | null;
+}
+
 export class CSVProcessor {
   private static headerMapping: Record<string, string> = {
     'item_id': 'item_id',
@@ -59,7 +64,7 @@ export class CSVProcessor {
     'pending write offs': 'pending_write_offs',
   };
 
-  static async parseCSV(file: File): Promise<{ parsedItems: ParsedItem[], unmatchedHeaders: string[] }> {
+  static async parseCSV(file: File, fieldMappings?: FieldMapping[]): Promise<{ parsedItems: ParsedItem[], unmatchedHeaders: string[], csvHeaders: string[] }> {
     const text = await file.text();
     const lines = text.split('\n').filter(line => line.trim());
     
@@ -67,16 +72,21 @@ export class CSVProcessor {
       throw new Error('CSV file must contain headers and at least one data row');
     }
 
-    const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+    const csvHeaders = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
     
-    // Map CSV headers to database fields
+    // If no field mappings provided, return headers for mapping
+    if (!fieldMappings) {
+      return { parsedItems: [], unmatchedHeaders: [], csvHeaders };
+    }
+
+    // Create column mapping from provided field mappings
     const columnMapping: Record<number, string> = {};
     const unmatchedHeaders: string[] = [];
     
-    headers.forEach((header, index) => {
-      const dbField = this.headerMapping[header];
-      if (dbField) {
-        columnMapping[index] = dbField;
+    csvHeaders.forEach((header, index) => {
+      const mapping = fieldMappings.find(m => m.csvColumn === header);
+      if (mapping?.dbField) {
+        columnMapping[index] = mapping.dbField;
       } else {
         unmatchedHeaders.push(header);
       }
@@ -87,7 +97,7 @@ export class CSVProcessor {
     for (let i = 1; i < lines.length; i++) {
       const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
       
-      if (values.length < headers.length || !values.some(v => v)) {
+      if (values.length < csvHeaders.length || !values.some(v => v)) {
         continue; // Skip empty rows
       }
 
@@ -117,7 +127,15 @@ export class CSVProcessor {
       });
     }
 
-    return { parsedItems, unmatchedHeaders };
+    return { parsedItems, unmatchedHeaders, csvHeaders };
+  }
+
+  static generateAutoMapping(csvHeaders: string[]): FieldMapping[] {
+    return csvHeaders.map(header => {
+      const normalizedHeader = header.toLowerCase().trim();
+      const dbField = this.headerMapping[normalizedHeader] || null;
+      return { csvColumn: header, dbField };
+    });
   }
 
   private static processFieldValue(fieldName: string, value: string): any {

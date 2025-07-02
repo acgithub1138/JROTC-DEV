@@ -8,7 +8,8 @@ import { useToast } from '@/hooks/use-toast';
 import { CSVUploadSection } from './bulk-operations/CSVUploadSection';
 import { DataPreviewTable } from './bulk-operations/DataPreviewTable';
 import { TemplateDownloadSection } from './bulk-operations/TemplateDownloadSection';
-import { CSVProcessor, ParsedItem } from './bulk-operations/CSVProcessor';
+import { FieldMappingSection } from './bulk-operations/FieldMappingSection';
+import { CSVProcessor, ParsedItem, FieldMapping } from './bulk-operations/CSVProcessor';
 
 interface BulkOperationsDialogProps {
   open: boolean;
@@ -25,6 +26,9 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   const [isProcessing, setIsProcessing] = useState(false);
   const [parsedData, setParsedData] = useState<ParsedItem[]>([]);
   const [showPreview, setShowPreview] = useState(false);
+  const [showMapping, setShowMapping] = useState(false);
+  const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
+  const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
   const { toast } = useToast();
 
   const downloadTemplate = () => {
@@ -49,6 +53,9 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       setImportFile(file);
       setParsedData([]);
       setShowPreview(false);
+      setShowMapping(false);
+      setCsvHeaders([]);
+      setFieldMappings([]);
     } else {
       toast({
         title: "Invalid File",
@@ -58,13 +65,52 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
     }
   };
 
-  const parseCSVData = async () => {
+  const parseCSVHeaders = async () => {
     if (!importFile) return;
 
     try {
-      const { parsedItems, unmatchedHeaders } = await CSVProcessor.parseCSV(importFile);
+      const { csvHeaders } = await CSVProcessor.parseCSV(importFile);
+      setCsvHeaders(csvHeaders);
+      
+      // Generate auto mapping
+      const autoMapping = CSVProcessor.generateAutoMapping(csvHeaders);
+      setFieldMappings(autoMapping);
+      setShowMapping(true);
+
+      toast({
+        title: "CSV Headers Loaded",
+        description: `Found ${csvHeaders.length} columns. Please review the field mapping.`,
+      });
+    } catch (error) {
+      toast({
+        title: "Parse Failed",
+        description: error instanceof Error ? error.message : "Failed to parse CSV file. Please check the format.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleMappingChange = (csvColumn: string, dbField: string | null) => {
+    setFieldMappings(prev => prev.map(mapping => 
+      mapping.csvColumn === csvColumn 
+        ? { ...mapping, dbField }
+        : mapping
+    ));
+  };
+
+  const handleAutoMap = () => {
+    const autoMapping = CSVProcessor.generateAutoMapping(csvHeaders);
+    setFieldMappings(autoMapping);
+  };
+
+  const parseCSVData = async () => {
+    if (!importFile || !fieldMappings.length) return;
+
+    try {
+      const { parsedItems, unmatchedHeaders } = await CSVProcessor.parseCSV(importFile, fieldMappings);
       
       setParsedData(parsedItems);
+      setShowMapping(false);
       setShowPreview(true);
 
       const validCount = parsedItems.filter(item => item.isValid).length;
@@ -129,6 +175,9 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         setImportFile(null);
         setParsedData([]);
         setShowPreview(false);
+        setShowMapping(false);
+        setCsvHeaders([]);
+        setFieldMappings([]);
       }
 
     } catch (error) {
@@ -159,12 +208,21 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
           </TabsList>
           
           <TabsContent value="import" className="space-y-4 h-full">
-            {!showPreview ? (
+            {!showMapping && !showPreview ? (
               <CSVUploadSection
                 importFile={importFile}
                 onFileChange={handleFileChange}
                 onDownloadTemplate={downloadTemplate}
-                onPreviewData={parseCSVData}
+                onPreviewData={parseCSVHeaders}
+              />
+            ) : showMapping ? (
+              <FieldMappingSection
+                csvHeaders={csvHeaders}
+                fieldMappings={fieldMappings}
+                onMappingChange={handleMappingChange}
+                onAutoMap={handleAutoMap}
+                onProceed={parseCSVData}
+                onBack={() => setShowMapping(false)}
               />
             ) : (
               <div className="space-y-4 h-full flex flex-col">
@@ -185,8 +243,11 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                     </div>
                   </div>
                   <div className="flex space-x-2">
-                    <Button variant="outline" onClick={() => setShowPreview(false)}>
-                      Back to Upload
+                    <Button variant="outline" onClick={() => {
+                      setShowPreview(false);
+                      setShowMapping(true);
+                    }}>
+                      Back to Mapping
                     </Button>
                     <Button 
                       onClick={processCSVImport}
