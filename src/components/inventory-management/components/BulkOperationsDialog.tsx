@@ -15,7 +15,7 @@ import { CSVProcessor, ParsedItem, FieldMapping } from './bulk-operations/CSVPro
 interface BulkOperationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (items: any[]) => Promise<void>;
+  onImport: (item: any) => Promise<void>;
 }
 
 export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
@@ -158,6 +158,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       // Import valid items one by one to handle errors gracefully
       let successCount = 0;
       let errorCount = 0;
+      const errorDetails: string[] = [];
 
       for (let i = 0; i < validItems.length; i++) {
         const item = validItems[i];
@@ -170,29 +171,39 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         
         try {
           console.log('Importing item:', item);
-          await onImport([item]);
+          // FIX: Pass single item instead of array
+          await onImport(item);
           successCount++;
           console.log(`Successfully imported item ${i + 1}/${validItems.length}`);
         } catch (error) {
           console.error('Import error for item:', item, 'Error:', error);
           errorCount++;
-          
-          // Show individual error details in toast for debugging
-          toast({
-            title: `Import Error - Item ${i + 1}`,
-            description: error instanceof Error ? error.message : "Unknown error occurred",
-            variant: "destructive",
-          });
+          const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
+          errorDetails.push(`Row ${parsedData.find(p => p.data === item)?.rowNumber || i + 1}: ${errorMsg}`);
         }
       }
       
       // Final progress update
       setImportProgress({ current: validItems.length, total: validItems.length });
 
+      // Show summary toast with longer duration
       toast({
         title: "Import Complete",
         description: `${successCount} items imported successfully. ${errorCount} failed.`,
+        duration: errorCount > 0 ? 8000 : 5000, // Longer duration if there are errors
       });
+
+      // Show error details if any failed
+      if (errorCount > 0 && errorDetails.length > 0) {
+        setTimeout(() => {
+          toast({
+            title: "Import Errors",
+            description: errorDetails.slice(0, 5).join('\n') + (errorDetails.length > 5 ? `\n... and ${errorDetails.length - 5} more errors` : ''),
+            variant: "destructive",
+            duration: 10000, // Show errors for 10 seconds
+          });
+        }, 1000); // Delay to avoid overlapping toasts
+      }
 
       if (errorCount === 0) {
         onOpenChange(false);
@@ -209,6 +220,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         title: "Import Failed",
         description: "Failed to import items. Please try again.",
         variant: "destructive",
+        duration: 8000,
       });
     } finally {
       setIsProcessing(false);
