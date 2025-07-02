@@ -25,7 +25,7 @@ const DATABASE_FIELDS = [
   { value: 'item_id', label: 'Item ID', required: false },
   { value: 'item', label: 'Item Name *', required: true },
   { value: 'category', label: 'Category *', required: true },
-  { value: 'sub_category', label: 'Sub Category *', required: true },
+  { value: 'sub_category', label: 'Sub Category', required: false },
   { value: 'size', label: 'Size', required: false },
   { value: 'gender', label: 'Gender', required: false },
   { value: 'qty_total', label: 'Total Quantity', required: false },
