@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -34,6 +34,12 @@ export const ConnectionEditModal = ({
 }: ConnectionEditModalProps) => {
   const [sourceHandle, setSourceHandle] = useState(currentSourceHandle.split('-')[0]);
   const [targetHandle, setTargetHandle] = useState(currentTargetHandle.split('-')[0]);
+
+  // Update state when props change
+  useEffect(() => {
+    setSourceHandle(currentSourceHandle.split('-')[0]);
+    setTargetHandle(currentTargetHandle.split('-')[0]);
+  }, [currentSourceHandle, currentTargetHandle]);
 
   const handleSave = () => {
     const newSourceHandle = `${sourceHandle}-source`;
