@@ -13,7 +13,7 @@ interface JobBoardTableProps {
 
 export const JobBoardTable = ({ jobs, onEditJob, onDeleteJob }: JobBoardTableProps) => {
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
-    return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
+    return `${cadet.last_name}, ${cadet.first_name}`;
   };
 
   return (
