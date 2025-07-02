@@ -28,9 +28,8 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
     assistant: '',
   });
   const [cadetPopoverOpen, setCadetPopoverOpen] = useState(false);
-  const [searchValue, setSearchValue] = useState('');
 
-  const { users: cadets } = useSchoolUsers(true); // Only active cadets
+  const { users: cadets, isLoading } = useSchoolUsers(true); // Only active cadets
   const { roles } = useJobBoardRoles();
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -89,28 +88,24 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
                 align="start"
                 side="bottom"
                 sideOffset={4}
+                avoidCollisions={false}
               >
-                <Command shouldFilter={false}>
+                <Command>
                   <CommandInput 
                     placeholder="Search cadets..." 
                     className="h-9"
-                    value={searchValue}
-                    onValueChange={setSearchValue}
                   />
                   <CommandList className="max-h-[300px]">
-                    <CommandEmpty>No cadet found.</CommandEmpty>
+                    <CommandEmpty>
+                      {isLoading ? "Loading cadets..." : "No cadet found."}
+                    </CommandEmpty>
                     <CommandGroup>
-                      {activeCadets
-                        .filter((cadet) => {
-                          const cadetName = formatCadetName(cadet).toLowerCase();
-                          return cadetName.includes(searchValue.toLowerCase());
-                        })
-                        .map((cadet) => (
+                      {activeCadets.map((cadet) => (
                         <CommandItem
                           key={cadet.id}
-                          value={cadet.id}
-                          onSelect={(currentValue) => {
-                            setFormData(prev => ({ ...prev, cadet_id: currentValue }));
+                          value={formatCadetName(cadet)}
+                          onSelect={() => {
+                            setFormData(prev => ({ ...prev, cadet_id: cadet.id }));
                             setCadetPopoverOpen(false);
                           }}
                           className="cursor-pointer"
