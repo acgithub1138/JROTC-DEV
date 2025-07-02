@@ -1,8 +1,7 @@
 
-import React, { useCallback } from 'react';
-import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
+import React, { useCallback, useState } from 'react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { toPng } from 'html-to-image';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
@@ -11,6 +10,7 @@ import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
 import { ConnectionEditingOverlay } from './ConnectionEditingOverlay';
 import { JobBoardToolbar } from './JobBoardToolbar';
 import { JobBoardDragPreview } from './JobBoardDragPreview';
+import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
@@ -24,76 +24,7 @@ const nodeTypes = {
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
-  const { getNodes } = useReactFlow();
-
-  const handleDownloadImage = useCallback(() => {
-    const nodes = getNodes();
-    if (nodes.length === 0) return;
-
-    const nodesBounds = getNodesBounds(nodes);
-    const imageWidth = 1920;
-    const imageHeight = 1080;
-    
-    // Calculate padding similar to fitView (20% of smaller dimension)
-    const paddingPercent = 0.2;
-    const padding = Math.min(imageWidth, imageHeight) * paddingPercent;
-    
-    // Calculate the content dimensions with padding
-    const contentWidth = nodesBounds.width + padding * 2;
-    const contentHeight = nodesBounds.height + padding * 2;
-    
-    // Calculate scale to fit content in image while maintaining aspect ratio
-    const scaleX = imageWidth / contentWidth;
-    const scaleY = imageHeight / contentHeight;
-    const scale = Math.min(scaleX, scaleY, 2); // Cap at 2x zoom for readability
-    
-    // Calculate position to center the content in the image
-    const scaledContentWidth = contentWidth * scale;
-    const scaledContentHeight = contentHeight * scale;
-    
-    // Center the scaled content in the image
-    const centerX = (imageWidth - scaledContentWidth) / 2;
-    const centerY = (imageHeight - scaledContentHeight) / 2;
-    
-    // Calculate the offset to position the content bounds at the center
-    const offsetX = centerX - (nodesBounds.x - padding) * scale;
-    const offsetY = centerY - (nodesBounds.y - padding) * scale;
-
-    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
-    
-    if (reactFlowElement) {
-      toPng(reactFlowElement, {
-        backgroundColor: '#ffffff',
-        width: imageWidth,
-        height: imageHeight,
-        style: {
-          width: imageWidth.toString(),
-          height: imageHeight.toString(),
-          transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
-        },
-        filter: (node) => {
-          // Hide handles and controls in the exported image
-          if (
-            node?.classList?.contains('react-flow__handle') ||
-            node?.classList?.contains('react-flow__controls') ||
-            node?.classList?.contains('react-flow__panel')
-          ) {
-            return false;
-          }
-          return true;
-        },
-      })
-        .then((dataUrl) => {
-          const link = document.createElement('a');
-          link.download = 'job-board-chart.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch((error) => {
-          console.error('Error downloading image:', error);
-        });
-    }
-  }, [getNodes]);
+  const [isFullscreen, setIsFullscreen] = useState(false);
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
@@ -110,9 +41,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     editState
   });
 
-  return (
+  const chartContent = (
     <div 
-      className="relative h-96 w-full border rounded-lg"
+      className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-96 w-full'} border rounded-lg`}
       onMouseMove={updateDragPosition}
       onMouseUp={cancelConnectionEdit}
     >
@@ -124,8 +55,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
       <JobBoardToolbar
         onRefresh={onRefresh}
         onResetLayout={resetLayout}
-        onDownloadImage={handleDownloadImage}
+        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
         isResetting={isResetting}
+        isFullscreen={isFullscreen}
       />
       
       <JobBoardDragPreview
@@ -149,6 +81,17 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         <Controls />
       </ReactFlow>
     </div>
+  );
+
+  return (
+    <>
+      {!isFullscreen && chartContent}
+      <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
+        <DialogContent className="max-w-none h-screen w-screen p-0 m-0">
+          {chartContent}
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

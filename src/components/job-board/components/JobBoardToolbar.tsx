@@ -1,19 +1,21 @@
 import React from 'react';
-import { RefreshCcw, RotateCcw, Download } from 'lucide-react';
+import { RefreshCcw, RotateCcw, Expand, Minimize } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface JobBoardToolbarProps {
   onRefresh?: () => void;
   onResetLayout: () => void;
-  onDownloadImage: () => void;
+  onToggleFullscreen: () => void;
   isResetting: boolean;
+  isFullscreen: boolean;
 }
 
 export const JobBoardToolbar = ({ 
   onRefresh, 
   onResetLayout, 
-  onDownloadImage, 
-  isResetting 
+  onToggleFullscreen, 
+  isResetting,
+  isFullscreen
 }: JobBoardToolbarProps) => {
   return (
     <div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -40,11 +42,11 @@ export const JobBoardToolbar = ({
       <Button
         variant="outline"
         size="sm"
-        onClick={onDownloadImage}
+        onClick={onToggleFullscreen}
         className="bg-white/90 backdrop-blur-sm"
-        title="Download as image"
+        title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
       >
-        <Download className="w-4 h-4" />
+        {isFullscreen ? <Minimize className="w-4 h-4" /> : <Expand className="w-4 h-4" />}
       </Button>
     </div>
   );
