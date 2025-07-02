@@ -167,6 +167,7 @@ const JobBoardPage = () => {
             }, {
               onSuccess: () => {
                 setConnectionSettingsJob(null);
+                refetch();
               }
             });
           }}
