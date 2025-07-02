@@ -47,12 +47,13 @@ export const calculateNodePositions = (
       let xPosition = startX + index * (config.nodeWidth + config.nodeSpacing);
       
       // If this is an assistant role, position it next to its supervisor
-      if (isAssistant) {
+      if (isAssistant && isAssistant !== 'NA') {
         const supervisorJob = jobs.find(j => j.role === job.reports_to);
         if (supervisorJob) {
           const supervisorPosition = positions.get(supervisorJob.id);
           if (supervisorPosition) {
-            xPosition = supervisorPosition.x + config.nodeWidth + 20;
+            // Position assistant to the right of supervisor
+            xPosition = supervisorPosition.x + config.nodeWidth + config.nodeSpacing;
           }
         }
       }
