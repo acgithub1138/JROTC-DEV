@@ -12,6 +12,7 @@ import EmailManagementPage from './email-management/EmailManagementPage';
 import SmtpSettingsPage from './smtp-settings/SmtpSettingsPage';
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
+import JobBoardPage from '@/components/job-board/JobBoardPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -26,6 +27,7 @@ const MainApplication = () => {
     if (path.startsWith('/email')) return 'email-management';
     if (path.startsWith('/smtp')) return 'smtp-settings';
     if (path.startsWith('/cadets')) return 'cadets';
+    if (path.startsWith('/job-board')) return 'job-board';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -41,6 +43,7 @@ const MainApplication = () => {
       'email-management': '/email',
       'smtp-settings': '/smtp',
       'cadets': '/cadets',
+      'job-board': '/job-board',
       'settings': '/settings'
     };
     
@@ -68,6 +71,7 @@ const MainApplication = () => {
             <Route path="/smtp" element={<SmtpSettingsPage />} />
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/cadets" element={<CadetManagementPage />} />
+            <Route path="/job-board" element={<JobBoardPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

@@ -25,6 +25,7 @@ import {
   Menu,
   Mails,
   Workflow,
+  Briefcase,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -52,6 +53,7 @@ const iconMap = {
   Building2,
   Mails,
   Workflow,
+  Briefcase,
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {

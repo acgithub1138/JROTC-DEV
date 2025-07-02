@@ -672,6 +672,54 @@ export type Database = {
           },
         ]
       }
+      job_board: {
+        Row: {
+          assistant: string | null
+          cadet_id: string
+          created_at: string
+          id: string
+          reports_to: string | null
+          role: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          assistant?: string | null
+          cadet_id: string
+          created_at?: string
+          id?: string
+          reports_to?: string | null
+          role: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          assistant?: string | null
+          cadet_id?: string
+          created_at?: string
+          id?: string
+          reports_to?: string | null
+          role?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_board_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "job_board_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       profiles: {
         Row: {
           active: boolean
