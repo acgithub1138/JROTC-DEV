@@ -99,6 +99,41 @@ export const useCadetMassOperations = () => {
     }
   };
 
+  const handleBulkUpdateFlight = async (flight: string) => {
+    if (selectedCadets.length === 0) return;
+
+    setMassOperationLoading(true);
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          flight: flight || null,
+          updated_at: new Date().toISOString()
+        })
+        .in('id', selectedCadets);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Updated flight for ${selectedCadets.length} cadet(s)`
+      });
+
+      clearSelection();
+      return true;
+    } catch (error) {
+      console.error('Error updating flights:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update flights",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setMassOperationLoading(false);
+    }
+  };
+
   const handleBulkDeactivate = async () => {
     if (selectedCadets.length === 0) return;
 
@@ -141,6 +176,7 @@ export const useCadetMassOperations = () => {
     clearSelection,
     handleBulkUpdateGrade,
     handleBulkUpdateRank,
+    handleBulkUpdateFlight,
     handleBulkDeactivate
   };
 };
