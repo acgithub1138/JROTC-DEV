@@ -109,14 +109,14 @@ export const AddTeamDialog = ({
           <div>
             <Label htmlFor="team_lead">Team Lead</Label>
             <Select
-              value={newTeam.team_lead_id}
-              onValueChange={(value) => setNewTeam({ ...newTeam, team_lead_id: value })}
+              value={newTeam.team_lead_id || "none"}
+              onValueChange={(value) => setNewTeam({ ...newTeam, team_lead_id: value === "none" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select team lead (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No team lead</SelectItem>
+                <SelectItem value="none">No team lead</SelectItem>
                 {users
                   .filter(user => !newTeam.member_ids.includes(user.id))
                   .map((user) => (

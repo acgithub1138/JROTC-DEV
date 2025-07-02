@@ -127,14 +127,14 @@ export const EditTeamDialog = ({
           <div>
             <Label htmlFor="team_lead">Team Lead</Label>
             <Select
-              value={formData.team_lead_id}
-              onValueChange={(value) => setFormData({ ...formData, team_lead_id: value })}
+              value={formData.team_lead_id || "none"}
+              onValueChange={(value) => setFormData({ ...formData, team_lead_id: value === "none" ? "" : value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select team lead (optional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">No team lead</SelectItem>
+                <SelectItem value="none">No team lead</SelectItem>
                 {users
                   .filter(user => !formData.member_ids.includes(user.id))
                   .map((user) => (
