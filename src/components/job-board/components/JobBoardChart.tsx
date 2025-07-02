@@ -25,10 +25,11 @@ const nodeTypes = {
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
-  const [isVisible, setIsVisible] = useState(true);
+  const [isVisible, setIsVisible] = useState(false);
+  const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const { fitView } = useReactFlow();
   
-  console.log('JobBoardChartInner render - jobs count:', jobs.length, 'isFullscreen:', isFullscreen);
+  console.log('JobBoardChartInner render - jobs count:', jobs.length, 'isFullscreen:', isFullscreen, 'isVisible:', isVisible, 'isReactFlowInitialized:', isReactFlowInitialized);
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
@@ -47,6 +48,23 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
 
   console.log('Nodes and edges:', { nodesCount: nodes.length, edgesCount: edges.length });
 
+  // Consolidated fitView function that only calls when both initialized and visible
+  const triggerFitView = useCallback(() => {
+    if (isReactFlowInitialized && isVisible && nodes.length > 0) {
+      console.log('Triggering fitView - conditions met:', { isReactFlowInitialized, isVisible, nodesCount: nodes.length });
+      setTimeout(() => {
+        fitView({ padding: 0.2, duration: 300 });
+      }, 100);
+    }
+  }, [isReactFlowInitialized, isVisible, nodes.length, fitView]);
+
+  // Reset states when tab changes or fullscreen toggles
+  useEffect(() => {
+    console.log('Resetting visibility state due to fullscreen change');
+    setIsVisible(false);
+    setIsReactFlowInitialized(false);
+  }, [isFullscreen]);
+
   // Use intersection observer to detect when component becomes visible
   useEffect(() => {
     const element = document.querySelector('[data-testid="job-board-chart"]');
@@ -55,14 +73,10 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        console.log('Intersection observer - isIntersecting:', entry.isIntersecting);
+        console.log('Intersection observer - isIntersecting:', entry.isIntersecting, 'current isVisible:', isVisible);
         if (entry.isIntersecting && !isVisible) {
+          console.log('Setting isVisible to true');
           setIsVisible(true);
-          // Delay fitView to ensure the component is properly rendered
-          setTimeout(() => {
-            console.log('Calling fitView from intersection observer');
-            fitView({ padding: 0.2, duration: 300 });
-          }, 150);
         }
       },
       { threshold: 0.1 }
@@ -70,19 +84,12 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [fitView, isVisible]);
+  }, [isVisible]);
 
-  // Handle fullscreen changes
+  // Trigger fitView when both conditions are met
   useEffect(() => {
-    if (!isFullscreen) {
-      // When exiting fullscreen, wait a bit then trigger fitView
-      const timer = setTimeout(() => {
-        console.log('Calling fitView after fullscreen exit');
-        fitView({ padding: 0.2, duration: 300 });
-      }, 200);
-      return () => clearTimeout(timer);
-    }
-  }, [isFullscreen, fitView]);
+    triggerFitView();
+  }, [triggerFitView]);
 
   const handleToggleFullscreen = () => {
     console.log('Toggling fullscreen:', !isFullscreen);
@@ -125,11 +132,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
         onInit={() => {
-          console.log('ReactFlow onInit called');
-          setTimeout(() => {
-            console.log('Calling fitView from onInit');
-            fitView({ padding: 0.2, duration: 300 });
-          }, 100);
+          console.log('ReactFlow onInit called - setting isReactFlowInitialized to true');
+          setIsReactFlowInitialized(true);
         }}
         key={`reactflow-${isFullscreen ? 'fullscreen' : 'normal'}-${jobs.length}`}
       >
