@@ -6,7 +6,7 @@ import { HierarchyResult } from './hierarchyBuilder';
 export const createFlowNodes = (
   jobs: JobBoardWithCadet[],
   positions: Map<string, { x: number; y: number }>,
-  onConnectionSettings?: (job: JobBoardWithCadet) => void
+  onHandleClick?: (handleId: string, job: JobBoardWithCadet) => void
 ): Node[] => {
   return jobs.map((job) => {
     const position = positions.get(job.id) || { x: 0, y: 0 };
@@ -22,7 +22,7 @@ export const createFlowNodes = (
         cadetName: `${job.cadet.last_name}, ${job.cadet.first_name}`,
         rank: job.cadet.rank || '',
         grade: job.cadet.grade || '',
-        onConnectionSettings,
+        onHandleClick,
       },
     };
   });

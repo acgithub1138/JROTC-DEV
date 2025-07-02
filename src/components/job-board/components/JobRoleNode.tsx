@@ -1,9 +1,7 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Settings } from 'lucide-react';
 
 interface JobRoleNodeData {
   job: any;
@@ -11,7 +9,7 @@ interface JobRoleNodeData {
   cadetName: string;
   rank: string;
   grade: string;
-  onConnectionSettings?: (job: any) => void;
+  onHandleClick?: (handleId: string, job: any) => void;
 }
 
 interface JobRoleNodeProps {
@@ -45,29 +43,88 @@ const getGradeColor = (grade: string): string => {
   }
 };
 
+const InteractiveHandle = ({ 
+  id, 
+  type, 
+  position, 
+  isActive, 
+  onClick 
+}: {
+  id: string;
+  type: 'source' | 'target';
+  position: Position;
+  isActive: boolean;
+  onClick: () => void;
+}) => (
+  <Handle
+    id={id}
+    type={type}
+    position={position}
+    className={`transition-all duration-200 cursor-pointer ${
+      isActive 
+        ? 'w-4 h-4 bg-blue-500 border-2 border-white shadow-lg' 
+        : 'w-3 h-3 hover:w-4 hover:h-4 hover:bg-blue-400'
+    }`}
+    onClick={(e) => {
+      e.stopPropagation();
+      onClick();
+    }}
+  />
+);
+
 export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
-  const { job, role, cadetName, rank, grade, onConnectionSettings } = data;
+  const { job, role, cadetName, rank, grade, onHandleClick } = data;
+  const [activeHandle, setActiveHandle] = useState<string | null>(null);
+
+  const handleClick = (handleId: string) => {
+    setActiveHandle(handleId);
+    onHandleClick?.(handleId, job);
+  };
 
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[280px] hover:shadow-lg transition-shadow relative group">
-      <Handle id="top-target" type="target" position={Position.Top} className="w-3 h-3" />
-      <Handle id="top-source" type="source" position={Position.Top} className="w-3 h-3" />
-      <Handle id="left-target" type="target" position={Position.Left} className="w-3 h-3" />
-      <Handle id="left-source" type="source" position={Position.Left} className="w-3 h-3" />
-      <Handle id="right-target" type="target" position={Position.Right} className="w-3 h-3" />
-      <Handle id="right-source" type="source" position={Position.Right} className="w-3 h-3" />
-      
-      {onConnectionSettings && (job?.reports_to || job?.assistant) && (
-        <Button
-          variant="outline"
-          size="sm"
-          className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white border shadow-sm"
-          onClick={() => onConnectionSettings(job)}
-          title="Connection Settings"
-        >
-          <Settings className="h-3 w-3" />
-        </Button>
-      )}
+      <InteractiveHandle
+        id="top-target"
+        type="target"
+        position={Position.Top}
+        isActive={activeHandle === 'top-target'}
+        onClick={() => handleClick('top-target')}
+      />
+      <InteractiveHandle
+        id="top-source"
+        type="source"
+        position={Position.Top}
+        isActive={activeHandle === 'top-source'}
+        onClick={() => handleClick('top-source')}
+      />
+      <InteractiveHandle
+        id="left-target"
+        type="target"
+        position={Position.Left}
+        isActive={activeHandle === 'left-target'}
+        onClick={() => handleClick('left-target')}
+      />
+      <InteractiveHandle
+        id="left-source"
+        type="source"
+        position={Position.Left}
+        isActive={activeHandle === 'left-source'}
+        onClick={() => handleClick('left-source')}
+      />
+      <InteractiveHandle
+        id="right-target"
+        type="target"
+        position={Position.Right}
+        isActive={activeHandle === 'right-target'}
+        onClick={() => handleClick('right-target')}
+      />
+      <InteractiveHandle
+        id="right-source"
+        type="source"
+        position={Position.Right}
+        isActive={activeHandle === 'right-source'}
+        onClick={() => handleClick('right-source')}
+      />
       
       <div className="space-y-2">
         {/* Role Name */}
@@ -95,8 +152,20 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         </div>
       </div>
       
-      <Handle id="bottom-target" type="target" position={Position.Bottom} className="w-3 h-3" />
-      <Handle id="bottom-source" type="source" position={Position.Bottom} className="w-3 h-3" />
+      <InteractiveHandle
+        id="bottom-target"
+        type="target"
+        position={Position.Bottom}
+        isActive={activeHandle === 'bottom-target'}
+        onClick={() => handleClick('bottom-target')}
+      />
+      <InteractiveHandle
+        id="bottom-source"
+        type="source"
+        position={Position.Bottom}
+        isActive={activeHandle === 'bottom-source'}
+        onClick={() => handleClick('bottom-source')}
+      />
     </div>
   );
 };

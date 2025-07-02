@@ -10,19 +10,25 @@ import { buildJobHierarchy } from '../utils/hierarchyBuilder';
 import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePositioning';
 import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
+import { useConnectionEditor } from '../hooks/useConnectionEditor';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
   onRefresh?: () => void;
-  onConnectionSettings?: (job: JobBoardWithCadet) => void;
+  onUpdateJob?: (jobId: string, updates: Partial<JobBoardWithCadet>) => void;
 }
 
 const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-export const JobBoardChart = ({ jobs, onRefresh, onConnectionSettings }: JobBoardChartProps) => {
+export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+  
+  const { editState, startConnectionEdit, completeConnectionEdit, cancelConnectionEdit, isValidTarget } = useConnectionEditor(
+    jobs,
+    onUpdateJob || (() => {})
+  );
 
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
@@ -37,7 +43,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onConnectionSettings }: JobBoar
     const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions, onConnectionSettings);
+    const flowNodes = createFlowNodes(jobs, positions, startConnectionEdit);
     const flowEdges = createFlowEdges(hierarchyResult, jobs);
 
     console.log('Final nodes:', flowNodes.length);
@@ -47,7 +53,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onConnectionSettings }: JobBoar
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, getSavedPositions, onConnectionSettings]);
+  }, [jobs, getSavedPositions, startConnectionEdit]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
