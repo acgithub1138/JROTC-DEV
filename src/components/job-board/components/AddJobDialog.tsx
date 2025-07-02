@@ -52,8 +52,10 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
     return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
-  // Filter for active cadets only
-  const activeCadets = cadets.filter(cadet => cadet.active);
+  // Filter for active cadets only and sort by last name
+  const activeCadets = cadets
+    .filter(cadet => cadet.active)
+    .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
   return (
     <Dialog open={open} onOpenChange={handleClose}>
