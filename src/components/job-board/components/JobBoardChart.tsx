@@ -2,7 +2,7 @@
 import React, { useMemo, useCallback, useEffect } from 'react';
 import { ReactFlow, Background, Controls, useNodesState, useEdgesState, NodeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { RefreshCcw, RotateCcw } from 'lucide-react';
+import { RefreshCcw, RotateCcw, Printer } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
@@ -71,6 +71,58 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
     setEdges(initialNodesAndEdges.edges);
   }, [initialNodesAndEdges, setNodes, setEdges]);
 
+  const handlePrint = useCallback(() => {
+    const printStyles = `
+      <style>
+        @page { 
+          size: landscape; 
+          margin: 0.5in; 
+        }
+        @media print {
+          .react-flow { 
+            width: 100% !important; 
+            height: 100% !important; 
+          }
+          .react-flow__controls,
+          .react-flow__background {
+            display: none !important;
+          }
+        }
+      </style>
+    `;
+    
+    const printWindow = window.open('', '_blank');
+    if (printWindow) {
+      const chartElement = document.querySelector('.react-flow');
+      if (chartElement) {
+        printWindow.document.write(`
+          <html>
+            <head>
+              <title>Job Board Organizational Chart</title>
+              ${printStyles}
+              <link rel="stylesheet" href="${window.location.origin}/node_modules/@xyflow/react/dist/style.css">
+              <style>
+                body { margin: 0; font-family: system-ui, sans-serif; }
+                .chart-container { width: 100vw; height: 100vh; }
+              </style>
+            </head>
+            <body>
+              <div class="chart-container">
+                ${chartElement.outerHTML}
+              </div>
+            </body>
+          </html>
+        `);
+        printWindow.document.close();
+        printWindow.focus();
+        setTimeout(() => {
+          printWindow.print();
+          printWindow.close();
+        }, 500);
+      }
+    }
+  }, []);
+
   if (jobs.length === 0) {
     return (
       <div className="flex items-center justify-center h-96 text-gray-500">
@@ -110,6 +162,15 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
           title="Reset layout to default"
         >
           <RotateCcw className="w-4 h-4" />
+        </Button>
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={handlePrint}
+          className="bg-white/90 backdrop-blur-sm"
+          title="Print organizational chart"
+        >
+          <Printer className="w-4 h-4" />
         </Button>
       </div>
       
