@@ -47,10 +47,10 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
     const rootNodes: string[] = [];
     const levelMap = new Map<string, number>();
     
-    // Find root nodes (no reports_to)
+    // Find root nodes (no reports_to or reports_to is 'NA')
     jobs.forEach((job) => {
       console.log(`Job ${job.role} reports to: ${job.reports_to || 'none'}`);
-      if (!job.reports_to) {
+      if (!job.reports_to || job.reports_to === 'NA') {
         rootNodes.push(job.id);
         levelMap.set(job.id, 0);
       }
