@@ -1,6 +1,6 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
@@ -130,6 +130,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         minZoom={0.1}
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        connectionMode={ConnectionMode.Loose}
+        connectOnClick={false}
+        onConnect={() => {}}
         onInit={() => {
           console.log('ReactFlow onInit called - setting isReactFlowInitialized to true');
           setIsReactFlowInitialized(true);
