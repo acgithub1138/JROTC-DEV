@@ -615,51 +615,102 @@ export type Database = {
       }
       inventory_items: {
         Row: {
+          accountable: boolean | null
           category: string | null
           condition: string | null
           created_at: string
           description: string | null
+          gender: string | null
+          has_serial_number: boolean | null
           id: string
+          issued_to: string[] | null
+          item: string
+          item_id: string | null
           location: string | null
-          name: string
+          model_number: string | null
           notes: string | null
+          pending_issue_changes: number | null
+          pending_updates: number | null
+          pending_write_offs: number | null
           purchase_date: string | null
           purchase_price: number | null
+          qty_available: number | null
+          qty_issued: number | null
+          qty_total: number | null
+          returnable: boolean | null
           school_id: string
           serial_number: string | null
+          size: string | null
           status: Database["public"]["Enums"]["inventory_status"]
+          stock_number: string | null
+          sub_category: string | null
+          unit_of_measure: string | null
           updated_at: string
         }
         Insert: {
+          accountable?: boolean | null
           category?: string | null
           condition?: string | null
           created_at?: string
           description?: string | null
+          gender?: string | null
+          has_serial_number?: boolean | null
           id?: string
+          issued_to?: string[] | null
+          item: string
+          item_id?: string | null
           location?: string | null
-          name: string
+          model_number?: string | null
           notes?: string | null
+          pending_issue_changes?: number | null
+          pending_updates?: number | null
+          pending_write_offs?: number | null
           purchase_date?: string | null
           purchase_price?: number | null
+          qty_available?: number | null
+          qty_issued?: number | null
+          qty_total?: number | null
+          returnable?: boolean | null
           school_id: string
           serial_number?: string | null
+          size?: string | null
           status?: Database["public"]["Enums"]["inventory_status"]
+          stock_number?: string | null
+          sub_category?: string | null
+          unit_of_measure?: string | null
           updated_at?: string
         }
         Update: {
+          accountable?: boolean | null
           category?: string | null
           condition?: string | null
           created_at?: string
           description?: string | null
+          gender?: string | null
+          has_serial_number?: boolean | null
           id?: string
+          issued_to?: string[] | null
+          item?: string
+          item_id?: string | null
           location?: string | null
-          name?: string
+          model_number?: string | null
           notes?: string | null
+          pending_issue_changes?: number | null
+          pending_updates?: number | null
+          pending_write_offs?: number | null
           purchase_date?: string | null
           purchase_price?: number | null
+          qty_available?: number | null
+          qty_issued?: number | null
+          qty_total?: number | null
+          returnable?: boolean | null
           school_id?: string
           serial_number?: string | null
+          size?: string | null
           status?: Database["public"]["Enums"]["inventory_status"]
+          stock_number?: string | null
+          sub_category?: string | null
+          unit_of_measure?: string | null
           updated_at?: string
         }
         Relationships: [

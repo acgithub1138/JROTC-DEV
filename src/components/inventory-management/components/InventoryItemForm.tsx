@@ -1,0 +1,354 @@
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Textarea } from '@/components/ui/textarea';
+import { MultiSelectProfiles } from './MultiSelectProfiles';
+import type { Tables } from '@/integrations/supabase/types';
+
+interface InventoryItemFormData {
+  item_id?: string;
+  item: string;
+  category?: string;
+  sub_category?: string;
+  size?: string;
+  gender?: 'M' | 'F' | null;
+  qty_total: number;
+  qty_issued: number;
+  issued_to?: string[];
+  stock_number?: string;
+  unit_of_measure?: 'EA' | 'PR' | null;
+  has_serial_number: boolean;
+  model_number?: string;
+  returnable: boolean;
+  accountable: boolean;
+  pending_updates: number;
+  pending_issue_changes: number;
+  pending_write_offs: number;
+  description?: string;
+  condition?: string;
+  location?: string;
+  notes?: string;
+}
+
+interface InventoryItemFormProps {
+  initialData?: Tables<'inventory_items'> | null;
+  onSubmit: (data: InventoryItemFormData) => Promise<void>;
+  onCancel: () => void;
+}
+
+export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
+  initialData,
+  onSubmit,
+  onCancel,
+}) => {
+  const {
+    register,
+    handleSubmit,
+    setValue,
+    watch,
+    formState: { errors, isSubmitting },
+  } = useForm<InventoryItemFormData>({
+    defaultValues: initialData ? {
+      item_id: initialData.item_id || '',
+      item: initialData.item || '',
+      category: initialData.category || '',
+      sub_category: initialData.sub_category || '',
+      size: initialData.size || '',
+      gender: (initialData.gender as 'M' | 'F') || null,
+      qty_total: initialData.qty_total || 0,
+      qty_issued: initialData.qty_issued || 0,
+      issued_to: initialData.issued_to || [],
+      stock_number: initialData.stock_number || '',
+      unit_of_measure: (initialData.unit_of_measure as 'EA' | 'PR') || null,
+      has_serial_number: initialData.has_serial_number || false,
+      model_number: initialData.model_number || '',
+      returnable: initialData.returnable || false,
+      accountable: initialData.accountable || false,
+      pending_updates: initialData.pending_updates || 0,
+      pending_issue_changes: initialData.pending_issue_changes || 0,
+      pending_write_offs: initialData.pending_write_offs || 0,
+      description: initialData.description || '',
+      condition: initialData.condition || '',
+      location: initialData.location || '',
+      notes: initialData.notes || '',
+    } : {
+      item: '',
+      qty_total: 0,
+      qty_issued: 0,
+      has_serial_number: false,
+      returnable: false,
+      accountable: false,
+      pending_updates: 0,
+      pending_issue_changes: 0,
+      pending_write_offs: 0,
+      issued_to: [],
+    },
+  });
+
+  const watchedValues = watch();
+
+  const handleFormSubmit = async (data: InventoryItemFormData) => {
+    await onSubmit(data);
+  };
+
+  return (
+    <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="item_id">Item ID</Label>
+          <Input
+            id="item_id"
+            {...register('item_id')}
+            placeholder="Enter item ID"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="item">Item *</Label>
+          <Input
+            id="item"
+            {...register('item', { required: 'Item name is required' })}
+            placeholder="Enter item name"
+          />
+          {errors.item && (
+            <span className="text-sm text-red-500">{errors.item.message}</span>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="category">Category</Label>
+          <Input
+            id="category"
+            {...register('category')}
+            placeholder="Enter category"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="sub_category">Sub Category</Label>
+          <Input
+            id="sub_category"
+            {...register('sub_category')}
+            placeholder="Enter sub category"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="size">Size</Label>
+          <Input
+            id="size"
+            {...register('size')}
+            placeholder="Enter size"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="gender">Gender</Label>
+          <Select
+            value={watchedValues.gender || ''}
+            onValueChange={(value) => setValue('gender', value === '' ? null : value as 'M' | 'F')}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select gender" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">None</SelectItem>
+              <SelectItem value="M">Male</SelectItem>
+              <SelectItem value="F">Female</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="qty_total">Total Quantity *</Label>
+          <Input
+            id="qty_total"
+            type="number"
+            {...register('qty_total', { 
+              required: 'Total quantity is required',
+              min: { value: 0, message: 'Quantity must be non-negative' }
+            })}
+            placeholder="0"
+          />
+          {errors.qty_total && (
+            <span className="text-sm text-red-500">{errors.qty_total.message}</span>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="qty_issued">Issued Quantity *</Label>
+          <Input
+            id="qty_issued"
+            type="number"
+            {...register('qty_issued', { 
+              required: 'Issued quantity is required',
+              min: { value: 0, message: 'Quantity must be non-negative' }
+            })}
+            placeholder="0"
+          />
+          {errors.qty_issued && (
+            <span className="text-sm text-red-500">{errors.qty_issued.message}</span>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="stock_number">Stock Number</Label>
+          <Input
+            id="stock_number"
+            {...register('stock_number')}
+            placeholder="Enter stock number"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="unit_of_measure">Unit of Measure</Label>
+          <Select
+            value={watchedValues.unit_of_measure || ''}
+            onValueChange={(value) => setValue('unit_of_measure', value === '' ? null : value as 'EA' | 'PR')}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select unit" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="">None</SelectItem>
+              <SelectItem value="EA">Each (EA)</SelectItem>
+              <SelectItem value="PR">Pair (PR)</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="model_number">Model Number</Label>
+          <Input
+            id="model_number"
+            {...register('model_number')}
+            placeholder="Enter model number"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="location">Location</Label>
+          <Input
+            id="location"
+            {...register('location')}
+            placeholder="Enter location"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label>Issued To</Label>
+          <MultiSelectProfiles
+            value={watchedValues.issued_to || []}
+            onChange={(value) => setValue('issued_to', value)}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="description">Description</Label>
+          <Textarea
+            id="description"
+            {...register('description')}
+            placeholder="Enter description"
+            rows={3}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="condition">Condition</Label>
+          <Textarea
+            id="condition"
+            {...register('condition')}
+            placeholder="Enter condition"
+            rows={2}
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="notes">Notes</Label>
+          <Textarea
+            id="notes"
+            {...register('notes')}
+            placeholder="Enter notes"
+            rows={2}
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="has_serial_number"
+            checked={watchedValues.has_serial_number}
+            onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
+          />
+          <Label htmlFor="has_serial_number">Has Serial Number</Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="returnable"
+            checked={watchedValues.returnable}
+            onCheckedChange={(checked) => setValue('returnable', !!checked)}
+          />
+          <Label htmlFor="returnable">Returnable</Label>
+        </div>
+
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="accountable"
+            checked={watchedValues.accountable}
+            onCheckedChange={(checked) => setValue('accountable', !!checked)}
+          />
+          <Label htmlFor="accountable">Accountable</Label>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="pending_updates">Pending Updates</Label>
+          <Input
+            id="pending_updates"
+            type="number"
+            {...register('pending_updates', { min: 0 })}
+            placeholder="0"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pending_issue_changes">Pending Issue Changes</Label>
+          <Input
+            id="pending_issue_changes"
+            type="number"
+            {...register('pending_issue_changes', { min: 0 })}
+            placeholder="0"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="pending_write_offs">Pending Write-offs</Label>
+          <Input
+            id="pending_write_offs"
+            type="number"
+            {...register('pending_write_offs', { min: 0 })}
+            placeholder="0"
+          />
+        </div>
+      </div>
+
+      <div className="flex justify-end space-x-2 pt-4">
+        <Button type="button" variant="outline" onClick={onCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Saving...' : initialData ? 'Update Item' : 'Add Item'}
+        </Button>
+      </div>
+    </form>
+  );
+};
