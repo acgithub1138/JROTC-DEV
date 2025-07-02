@@ -72,7 +72,7 @@ export class CSVProcessor {
       throw new Error('CSV file must contain headers and at least one data row');
     }
 
-    const csvHeaders = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+    const csvHeaders = this.parseCSVLine(lines[0]);
     
     // If no field mappings provided, return headers for mapping
     if (!fieldMappings) {
@@ -95,7 +95,7 @@ export class CSVProcessor {
     const parsedItems: ParsedItem[] = [];
     
     for (let i = 1; i < lines.length; i++) {
-      const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
+      const values = this.parseCSVLine(lines[i]);
       
       if (values.length < csvHeaders.length || !values.some(v => v)) {
         continue; // Skip empty rows
@@ -128,6 +128,38 @@ export class CSVProcessor {
     }
 
     return { parsedItems, unmatchedHeaders, csvHeaders };
+  }
+
+  private static parseCSVLine(line: string): string[] {
+    const result: string[] = [];
+    let current = '';
+    let inQuotes = false;
+    
+    for (let i = 0; i < line.length; i++) {
+      const char = line[i];
+      
+      if (char === '"') {
+        if (inQuotes && line[i + 1] === '"') {
+          // Handle escaped quotes
+          current += '"';
+          i++; // Skip next quote
+        } else {
+          // Toggle quote state
+          inQuotes = !inQuotes;
+        }
+      } else if (char === ',' && !inQuotes) {
+        // Field separator found outside quotes
+        result.push(current.trim());
+        current = '';
+      } else {
+        current += char;
+      }
+    }
+    
+    // Add the last field
+    result.push(current.trim());
+    
+    return result;
   }
 
   static generateAutoMapping(csvHeaders: string[]): FieldMapping[] {
