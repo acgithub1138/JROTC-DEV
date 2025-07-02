@@ -1,14 +1,15 @@
 
-import React, { useMemo } from 'react';
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState } from '@xyflow/react';
+import React, { useMemo, useCallback, useEffect } from 'react';
+import { ReactFlow, Background, Controls, useNodesState, useEdgesState, NodeChange } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { RefreshCcw } from 'lucide-react';
+import { RefreshCcw, RotateCcw } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
 import { buildJobHierarchy } from '../utils/hierarchyBuilder';
 import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePositioning';
 import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
+import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
@@ -20,6 +21,8 @@ const nodeTypes = {
 };
 
 export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
+  const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
       return { nodes: [], edges: [] };
@@ -28,8 +31,9 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
     // Build the hierarchy
     const hierarchyResult = buildJobHierarchy(jobs);
     
-    // Calculate node positions
-    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG);
+    // Get saved positions and merge with automatic layout
+    const savedPositions = getSavedPositions();
+    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
     const flowNodes = createFlowNodes(jobs, positions);
@@ -42,10 +46,22 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs]);
+  }, [jobs, getSavedPositions]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
+
+  // Handle node changes with position persistence
+  const handleNodeChange = useCallback((changes: NodeChange[]) => {
+    onNodesChange(changes);
+    handleNodesChange(changes, nodes);
+  }, [onNodesChange, handleNodesChange, nodes]);
+
+  // Update nodes when initialNodesAndEdges changes (for saved positions)
+  useEffect(() => {
+    setNodes(initialNodesAndEdges.nodes);
+    setEdges(initialNodesAndEdges.edges);
+  }, [initialNodesAndEdges, setNodes, setEdges]);
 
   if (jobs.length === 0) {
     return (
@@ -57,8 +73,8 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
 
   return (
     <div className="relative h-96 w-full border rounded-lg">
-      {onRefresh && (
-        <div className="absolute top-2 right-2 z-10">
+      <div className="absolute top-2 right-2 z-10 flex gap-2">
+        {onRefresh && (
           <Button
             variant="outline"
             size="sm"
@@ -67,12 +83,22 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
           >
             <RefreshCcw className="w-4 h-4" />
           </Button>
-        </div>
-      )}
+        )}
+        <Button
+          variant="outline"
+          size="sm"
+          onClick={resetLayout}
+          disabled={isResetting}
+          className="bg-white/90 backdrop-blur-sm"
+          title="Reset layout to default"
+        >
+          <RotateCcw className="w-4 h-4" />
+        </Button>
+      </div>
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={onNodesChange}
+        onNodesChange={handleNodeChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
         fitView

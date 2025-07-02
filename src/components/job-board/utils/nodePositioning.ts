@@ -20,7 +20,8 @@ export const DEFAULT_POSITION_CONFIG: NodePositionConfig = {
 export const calculateNodePositions = (
   jobs: JobBoardWithCadet[],
   hierarchyNodes: Map<string, HierarchyNode>,
-  config: NodePositionConfig = DEFAULT_POSITION_CONFIG
+  config: NodePositionConfig = DEFAULT_POSITION_CONFIG,
+  savedPositions?: Map<string, { x: number; y: number }>
 ): Map<string, { x: number; y: number }> => {
   const positions = new Map<string, { x: number; y: number }>();
   
@@ -58,7 +59,9 @@ export const calculateNodePositions = (
         }
       }
       
-      const position = {
+      // Use saved position if available, otherwise use calculated position
+      const savedPosition = savedPositions?.get(nodeId);
+      const position = savedPosition || {
         x: xPosition,
         y: level * config.levelHeight,
       };
