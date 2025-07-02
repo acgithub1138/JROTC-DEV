@@ -9,20 +9,12 @@ interface UseJobBoardNodesProps {
   jobs: JobBoardWithCadet[];
   getSavedPositions: () => Map<string, { x: number; y: number }>;
   handleNodesChange: (changes: NodeChange[], nodes: any[]) => void;
-  startConnectionDrag: (handleId: string, job: JobBoardWithCadet, event: React.MouseEvent) => void;
-  completeConnectionDrop: (targetJobId: string, targetHandle: string) => void;
-  isValidDropTarget: (jobId: string, handleId: string) => boolean;
-  editState: any;
 }
 
 export const useJobBoardNodes = ({
   jobs,
   getSavedPositions,
-  handleNodesChange,
-  startConnectionDrag,
-  completeConnectionDrop,
-  isValidDropTarget,
-  editState
+  handleNodesChange
 }: UseJobBoardNodesProps) => {
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
@@ -37,14 +29,14 @@ export const useJobBoardNodes = ({
     const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState);
+    const flowNodes = createFlowNodes(jobs, positions);
     const flowEdges = createFlowEdges(hierarchyResult, jobs);
 
     return {
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, getSavedPositions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState]);
+  }, [jobs, getSavedPositions]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);

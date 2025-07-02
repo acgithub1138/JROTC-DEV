@@ -1,15 +1,13 @@
 
 import React, { useCallback, useState, useEffect } from 'react';
-import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
-import { useConnectionEditor } from '../hooks/useConnectionEditor';
 import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
-import { ConnectionEditingOverlay } from './ConnectionEditingOverlay';
 import { JobBoardToolbar } from './JobBoardToolbar';
-import { JobBoardDragPreview } from './JobBoardDragPreview';
+import { ConnectionEditModal } from './ConnectionEditModal';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 interface JobBoardChartProps {
@@ -27,23 +25,29 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
+  const [connectionEditModal, setConnectionEditModal] = useState<{
+    isOpen: boolean;
+    sourceJob: JobBoardWithCadet | null;
+    targetJob: JobBoardWithCadet | null;
+    connectionType: 'reports_to' | 'assistant' | null;
+    currentSourceHandle: string;
+    currentTargetHandle: string;
+  }>({
+    isOpen: false,
+    sourceJob: null,
+    targetJob: null,
+    connectionType: null,
+    currentSourceHandle: '',
+    currentTargetHandle: '',
+  });
   const { fitView } = useReactFlow();
   
   console.log('JobBoardChartInner render - jobs count:', jobs.length, 'isFullscreen:', isFullscreen, 'isVisible:', isVisible, 'isReactFlowInitialized:', isReactFlowInitialized);
-  
-  const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
-    jobs,
-    onUpdateJob || (() => {})
-  );
 
   const { nodes, edges, handleNodeChange, onEdgesChange } = useJobBoardNodes({
     jobs,
     getSavedPositions,
-    handleNodesChange,
-    startConnectionDrag,
-    completeConnectionDrop,
-    isValidDropTarget,
-    editState
+    handleNodesChange
   });
 
   console.log('Nodes and edges:', { nodesCount: nodes.length, edgesCount: edges.length });
@@ -95,18 +99,58 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     setIsFullscreen(!isFullscreen);
   };
 
+  const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    event.stopPropagation();
+    
+    // Find the source and target jobs
+    const sourceJob = jobs.find(job => job.id === edge.source);
+    const targetJob = jobs.find(job => job.id === edge.target);
+    
+    if (!sourceJob || !targetJob) return;
+
+    // Determine connection type based on the edge
+    let connectionType: 'reports_to' | 'assistant' | null = null;
+    if (sourceJob.reports_to === targetJob.role) {
+      connectionType = 'reports_to';
+    } else if (sourceJob.assistant === targetJob.role) {
+      connectionType = 'assistant';
+    }
+
+    if (!connectionType) return;
+
+    setConnectionEditModal({
+      isOpen: true,
+      sourceJob,
+      targetJob,
+      connectionType,
+      currentSourceHandle: edge.sourceHandle || 'bottom-source',
+      currentTargetHandle: edge.targetHandle || 'top-target',
+    });
+  }, [jobs]);
+
+  const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
+    if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
+      return;
+    }
+
+    const updates: Partial<JobBoardWithCadet> = {};
+    
+    if (connectionEditModal.connectionType === 'reports_to') {
+      updates.reports_to_source_handle = sourceHandle;
+      updates.reports_to_target_handle = targetHandle;
+    } else {
+      updates.assistant_source_handle = sourceHandle;
+      updates.assistant_target_handle = targetHandle;
+    }
+
+    onUpdateJob(connectionEditModal.sourceJob.id, updates);
+  }, [connectionEditModal, onUpdateJob]);
+
   const chartContent = (
     <div 
       className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-96 w-full'} border rounded-lg`}
-      onMouseMove={updateDragPosition}
-      onMouseUp={cancelConnectionEdit}
       data-testid="job-board-chart"
     >
-      <ConnectionEditingOverlay 
-        isVisible={editState.isDragging}
-        onCancel={cancelConnectionEdit}
-      />
-      
       <JobBoardToolbar
         onRefresh={onRefresh}
         onResetLayout={resetLayout}
@@ -115,22 +159,18 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         isFullscreen={isFullscreen}
       />
       
-      <JobBoardDragPreview
-        isVisible={editState.isDragging}
-        mousePosition={editState.dragPreview?.mousePosition}
-      />
-      
       <ReactFlow
         nodes={nodes}
         edges={edges}
         onNodesChange={handleNodeChange}
         onEdgesChange={onEdgesChange}
+        onEdgeDoubleClick={handleEdgeDoubleClick}
         nodeTypes={nodeTypes}
         fitView={false}
         minZoom={0.1}
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-        connectionMode={ConnectionMode.Loose}
+        connectionMode={ConnectionMode.Strict}
         connectOnClick={false}
         onConnect={() => {}}
         onInit={() => {
@@ -142,6 +182,19 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         <Background />
         <Controls />
       </ReactFlow>
+      
+      {connectionEditModal.sourceJob && connectionEditModal.targetJob && (
+        <ConnectionEditModal
+          isOpen={connectionEditModal.isOpen}
+          onClose={() => setConnectionEditModal(prev => ({ ...prev, isOpen: false }))}
+          sourceJob={connectionEditModal.sourceJob}
+          targetJob={connectionEditModal.targetJob}
+          connectionType={connectionEditModal.connectionType!}
+          currentSourceHandle={connectionEditModal.currentSourceHandle}
+          currentTargetHandle={connectionEditModal.currentTargetHandle}
+          onSave={handleConnectionSave}
+        />
+      )}
     </div>
   );
 

@@ -33,11 +33,7 @@ const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithC
 
 export const createFlowNodes = (
   jobs: JobBoardWithCadet[],
-  positions: Map<string, { x: number; y: number }>,
-  onHandleDragStart?: (handleId: string, job: JobBoardWithCadet, event: React.MouseEvent) => void,
-  onHandleDrop?: (targetJobId: string, targetHandle: string) => void,
-  isValidDropTarget?: (jobId: string, handleId: string) => boolean,
-  editState?: any
+  positions: Map<string, { x: number; y: number }>
 ): Node[] => {
   return jobs.map((job) => {
     const position = positions.get(job.id) || { x: 0, y: 0 };
@@ -55,10 +51,6 @@ export const createFlowNodes = (
         rank: job.cadet.rank || '',
         grade: job.cadet.grade || '',
         occupiedHandles,
-        onHandleDragStart,
-        onHandleDrop,
-        isValidDropTarget,
-        editState,
       },
     };
   });
