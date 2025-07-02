@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { Badge } from '@/components/ui/badge';
 import { ArrowRight, RotateCcw } from 'lucide-react';
 
@@ -58,8 +59,8 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
   const canProceed = missingRequiredFields.length === 0;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-6 h-full flex flex-col">
+      <div className="flex items-center justify-between shrink-0">
         <div>
           <h3 className="text-lg font-medium">Map CSV Fields</h3>
           <p className="text-sm text-muted-foreground">
@@ -75,7 +76,7 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
       </div>
 
       {missingRequiredFields.length > 0 && (
-        <Card className="border-destructive bg-destructive/5">
+        <Card className="border-destructive bg-destructive/5 shrink-0">
           <CardHeader className="pb-3">
             <CardTitle className="text-sm text-destructive">Missing Required Fields</CardTitle>
             <CardDescription>
@@ -94,7 +95,8 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
         </Card>
       )}
 
-      <div className="grid gap-4">
+      <ScrollArea className="flex-1 pr-4">
+        <div className="grid gap-4">
         {csvHeaders.map((header, index) => {
           const mapping = fieldMappings.find(m => m.csvColumn === header);
           const selectedField = DATABASE_FIELDS.find(f => f.value === mapping?.dbField);
@@ -146,9 +148,10 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
             </Card>
           );
         })}
-      </div>
+        </div>
+      </ScrollArea>
 
-      <div className="flex justify-between">
+      <div className="flex justify-between shrink-0">
         <Button variant="outline" onClick={onBack}>
           Back to Upload
         </Button>
