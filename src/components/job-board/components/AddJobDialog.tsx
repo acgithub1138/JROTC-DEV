@@ -29,7 +29,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.cadet_id || !formData.role) return;
+    if (!formData.cadet_id || !formData.role || !formData.reports_to || !formData.assistant) return;
     
     onSubmit({
       ...formData,
@@ -93,7 +93,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="reports_to">Reports To</Label>
+            <Label htmlFor="reports_to">Reports To *</Label>
             <Select
               value={formData.reports_to}
               onValueChange={(value) => setFormData(prev => ({ ...prev, reports_to: value }))}
@@ -113,7 +113,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="assistant">Assistant</Label>
+            <Label htmlFor="assistant">Assistant *</Label>
             <Select
               value={formData.assistant}
               onValueChange={(value) => setFormData(prev => ({ ...prev, assistant: value }))}
@@ -138,7 +138,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !formData.cadet_id || !formData.role}
+              disabled={loading || !formData.cadet_id || !formData.role || !formData.reports_to || !formData.assistant}
             >
               {loading ? 'Adding...' : 'Add Job'}
             </Button>
