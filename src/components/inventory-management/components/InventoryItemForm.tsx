@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { MultiSelectProfiles } from './MultiSelectProfiles';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface InventoryItemFormData {
@@ -18,7 +18,7 @@ interface InventoryItemFormData {
   gender?: 'M' | 'F' | null;
   qty_total: number;
   qty_issued: number;
-  issued_to?: string;
+  issued_to?: string[];
   stock_number?: string;
   unit_of_measure?: 'EA' | 'PR' | null;
   has_serial_number: boolean;
@@ -28,7 +28,6 @@ interface InventoryItemFormData {
   pending_updates: number;
   pending_issue_changes: number;
   pending_write_offs: number;
-  description?: string;
   condition?: string;
   location?: string;
   notes?: string;
@@ -45,8 +44,6 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
-  const { users } = useSchoolUsers();
-  
   const {
     register,
     handleSubmit,
@@ -63,7 +60,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       gender: (initialData.gender as 'M' | 'F') || null,
       qty_total: initialData.qty_total || 0,
       qty_issued: initialData.qty_issued || 0,
-      issued_to: initialData.issued_to?.[0] || null,
+      issued_to: initialData.issued_to || [],
       stock_number: initialData.stock_number || '',
       unit_of_measure: (initialData.unit_of_measure as 'EA' | 'PR') || null,
       has_serial_number: initialData.has_serial_number || false,
@@ -73,7 +70,6 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       pending_updates: initialData.pending_updates || 0,
       pending_issue_changes: initialData.pending_issue_changes || 0,
       pending_write_offs: initialData.pending_write_offs || 0,
-      description: initialData.description || '',
       condition: initialData.condition || '',
       location: initialData.location || '',
       notes: initialData.notes || '',
@@ -87,25 +83,15 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       pending_updates: 0,
       pending_issue_changes: 0,
       pending_write_offs: 0,
-      issued_to: null,
+      issued_to: [],
     },
   });
 
   const watchedValues = watch();
 
   const handleFormSubmit = async (data: InventoryItemFormData) => {
-    // Convert single issued_to back to array format for database
-    const submissionData = {
-      ...data,
-      issued_to: data.issued_to ? [data.issued_to] : []
-    };
-    await onSubmit(submissionData);
+    await onSubmit(data);
   };
-
-  // Sort users by last name for dropdown
-  const sortedUsers = users?.sort((a, b) => 
-    (a.last_name || '').localeCompare(b.last_name || '')
-  ) || [];
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -234,15 +220,6 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="model_number">Model Number</Label>
-          <Input
-            id="model_number"
-            {...register('model_number')}
-            placeholder="Enter model number"
-          />
-        </div>
-
-        <div className="space-y-2">
           <Label htmlFor="location">Location</Label>
           <Input
             id="location"
@@ -250,36 +227,36 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             placeholder="Enter location"
           />
         </div>
+
+        <div className="flex items-center space-x-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="has_serial_number"
+              checked={watchedValues.has_serial_number}
+              onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
+            />
+            <Label htmlFor="has_serial_number">Has Serial Number</Label>
+          </div>
+        </div>
+
+        {watchedValues.has_serial_number && (
+          <div className="space-y-2">
+            <Label htmlFor="model_number">Model Number</Label>
+            <Input
+              id="model_number"
+              {...register('model_number')}
+              placeholder="Enter model number"
+            />
+          </div>
+        )}
       </div>
 
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Issued To</Label>
-          <Select
-            value={watchedValues.issued_to || 'none'}
-            onValueChange={(value) => setValue('issued_to', value === 'none' ? null : value)}
-          >
-            <SelectTrigger>
-              <SelectValue placeholder="Select user" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="none">Not Assigned</SelectItem>
-              {sortedUsers.map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.last_name}, {user.first_name}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="description">Description</Label>
-          <Textarea
-            id="description"
-            {...register('description')}
-            placeholder="Enter description"
-            rows={3}
+          <MultiSelectProfiles
+            value={watchedValues.issued_to || []}
+            onChange={(value) => setValue('issued_to', value)}
           />
         </div>
 
@@ -292,28 +269,9 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             rows={2}
           />
         </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="notes">Notes</Label>
-          <Textarea
-            id="notes"
-            {...register('notes')}
-            placeholder="Enter notes"
-            rows={2}
-          />
-        </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-        <div className="flex items-center space-x-2">
-          <Checkbox
-            id="has_serial_number"
-            checked={watchedValues.has_serial_number}
-            onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
-          />
-          <Label htmlFor="has_serial_number">Has Serial Number</Label>
-        </div>
-
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="flex items-center space-x-2">
           <Checkbox
             id="returnable"
@@ -363,6 +321,16 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             placeholder="0"
           />
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="notes">Notes</Label>
+        <Textarea
+          id="notes"
+          {...register('notes')}
+          placeholder="Enter notes"
+          rows={2}
+        />
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
