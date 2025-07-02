@@ -5,7 +5,8 @@ import { HierarchyResult } from './hierarchyBuilder';
 
 export const createFlowNodes = (
   jobs: JobBoardWithCadet[],
-  positions: Map<string, { x: number; y: number }>
+  positions: Map<string, { x: number; y: number }>,
+  onConnectionSettings?: (job: JobBoardWithCadet) => void
 ): Node[] => {
   return jobs.map((job) => {
     const position = positions.get(job.id) || { x: 0, y: 0 };
@@ -21,32 +22,47 @@ export const createFlowNodes = (
         cadetName: `${job.cadet.last_name}, ${job.cadet.first_name}`,
         rank: job.cadet.rank || '',
         grade: job.cadet.grade || '',
+        onConnectionSettings,
       },
     };
   });
 };
 
-export const createFlowEdges = (hierarchyResult: HierarchyResult): Edge[] => {
+export const createFlowEdges = (
+  hierarchyResult: HierarchyResult,
+  jobs: JobBoardWithCadet[]
+): Edge[] => {
+  // Create a map for quick job lookup
+  const jobMap = new Map(jobs.map(job => [job.id, job]));
+  
   return hierarchyResult.edges.map((edge) => {
+    const sourceJob = jobMap.get(edge.source);
+    
     if (edge.type === 'assistant') {
-      // Assistant relationships: source right connector to target left connector
+      // Assistant relationships: use stored handle preferences or defaults
+      const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
+      const targetHandle = sourceJob?.assistant_target_handle || 'left-target';
+      
       return {
         id: edge.id,
         source: edge.source,
         target: edge.target,
-        sourceHandle: 'right-source',
-        targetHandle: 'left-target',
+        sourceHandle,
+        targetHandle,
         type: 'smoothstep',
         animated: false,
       };
     } else {
-      // Reports_to relationships: bottom-to-top connections
+      // Reports_to relationships: use stored handle preferences or defaults
+      const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
+      const targetHandle = sourceJob?.reports_to_target_handle || 'top-target';
+      
       return {
         id: edge.id,
         source: edge.source,
         target: edge.target,
-        sourceHandle: 'bottom-source',
-        targetHandle: 'top-target',
+        sourceHandle,
+        targetHandle,
         type: 'smoothstep',
         animated: false,
       };

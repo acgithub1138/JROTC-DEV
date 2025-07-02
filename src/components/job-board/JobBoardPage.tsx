@@ -10,6 +10,7 @@ import { JobBoardChart } from './components/JobBoardChart';
 import { AddJobDialog } from './components/AddJobDialog';
 import { EditJobDialog } from './components/EditJobDialog';
 import { DeleteJobDialog } from './components/DeleteJobDialog';
+import { ConnectionSettingsDialog } from './components/ConnectionSettingsDialog';
 import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
@@ -19,6 +20,7 @@ const JobBoardPage = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingJob, setEditingJob] = useState<JobBoardWithCadet | null>(null);
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
+  const [connectionSettingsJob, setConnectionSettingsJob] = useState<JobBoardWithCadet | null>(null);
   const [activeTab, setActiveTab] = useState('table');
 
   const {
@@ -122,6 +124,7 @@ const JobBoardPage = () => {
                 <JobBoardChart
                   jobs={filteredJobs}
                   onRefresh={handleRefresh}
+                  onConnectionSettings={setConnectionSettingsJob}
                 />
               </TabsContent>
             </Tabs>
@@ -151,6 +154,23 @@ const JobBoardPage = () => {
           job={deletingJob}
           onConfirm={handleDeleteJob}
           loading={deleteJob.isPending}
+        />
+
+        <ConnectionSettingsDialog
+          open={!!connectionSettingsJob}
+          onOpenChange={(open) => !open && setConnectionSettingsJob(null)}
+          job={connectionSettingsJob}
+          onSave={(jobId, updates) => {
+            updateJob.mutate({
+              id: jobId,
+              updates
+            }, {
+              onSuccess: () => {
+                setConnectionSettingsJob(null);
+              }
+            });
+          }}
+          loading={updateJob.isPending}
         />
       </div>
     </div>

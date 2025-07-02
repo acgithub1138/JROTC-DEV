@@ -2,12 +2,16 @@
 import React from 'react';
 import { Handle, Position } from '@xyflow/react';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { Settings } from 'lucide-react';
 
 interface JobRoleNodeData {
+  job: any;
   role: string;
   cadetName: string;
   rank: string;
   grade: string;
+  onConnectionSettings?: (job: any) => void;
 }
 
 interface JobRoleNodeProps {
@@ -42,16 +46,28 @@ const getGradeColor = (grade: string): string => {
 };
 
 export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
-  const { role, cadetName, rank, grade } = data;
+  const { job, role, cadetName, rank, grade, onConnectionSettings } = data;
 
   return (
-    <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[280px] hover:shadow-lg transition-shadow">
+    <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[280px] hover:shadow-lg transition-shadow relative group">
       <Handle id="top-target" type="target" position={Position.Top} className="w-3 h-3" />
       <Handle id="top-source" type="source" position={Position.Top} className="w-3 h-3" />
       <Handle id="left-target" type="target" position={Position.Left} className="w-3 h-3" />
       <Handle id="left-source" type="source" position={Position.Left} className="w-3 h-3" />
       <Handle id="right-target" type="target" position={Position.Right} className="w-3 h-3" />
       <Handle id="right-source" type="source" position={Position.Right} className="w-3 h-3" />
+      
+      {onConnectionSettings && (job?.reports_to || job?.assistant) && (
+        <Button
+          variant="outline"
+          size="sm"
+          className="absolute -top-2 -right-2 h-6 w-6 p-0 opacity-0 group-hover:opacity-100 transition-opacity bg-white border shadow-sm"
+          onClick={() => onConnectionSettings(job)}
+          title="Connection Settings"
+        >
+          <Settings className="h-3 w-3" />
+        </Button>
+      )}
       
       <div className="space-y-2">
         {/* Role Name */}

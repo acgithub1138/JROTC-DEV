@@ -5,6 +5,10 @@ export interface JobBoard {
   role: string;
   reports_to?: string;
   assistant?: string;
+  reports_to_source_handle?: string;
+  reports_to_target_handle?: string;
+  assistant_source_handle?: string;
+  assistant_target_handle?: string;
   school_id: string;
   created_at: string;
   updated_at: string;
@@ -25,4 +29,8 @@ export interface NewJobBoard {
   role: string;
   reports_to?: string;
   assistant?: string;
+  reports_to_source_handle?: string;
+  reports_to_target_handle?: string;
+  assistant_source_handle?: string;
+  assistant_target_handle?: string;
 }

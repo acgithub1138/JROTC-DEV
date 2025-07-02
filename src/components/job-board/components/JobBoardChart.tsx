@@ -14,13 +14,14 @@ import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
   onRefresh?: () => void;
+  onConnectionSettings?: (job: JobBoardWithCadet) => void;
 }
 
 const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
+export const JobBoardChart = ({ jobs, onRefresh, onConnectionSettings }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
 
   const initialNodesAndEdges = useMemo(() => {
@@ -36,8 +37,8 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
     const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions);
-    const flowEdges = createFlowEdges(hierarchyResult);
+    const flowNodes = createFlowNodes(jobs, positions, onConnectionSettings);
+    const flowEdges = createFlowEdges(hierarchyResult, jobs);
 
     console.log('Final nodes:', flowNodes.length);
     console.log('Final edges:', flowEdges.length);
@@ -46,7 +47,7 @@ export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, getSavedPositions]);
+  }, [jobs, getSavedPositions, onConnectionSettings]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);

@@ -675,30 +675,42 @@ export type Database = {
       job_board: {
         Row: {
           assistant: string | null
+          assistant_source_handle: string | null
+          assistant_target_handle: string | null
           cadet_id: string
           created_at: string
           id: string
           reports_to: string | null
+          reports_to_source_handle: string | null
+          reports_to_target_handle: string | null
           role: string
           school_id: string
           updated_at: string
         }
         Insert: {
           assistant?: string | null
+          assistant_source_handle?: string | null
+          assistant_target_handle?: string | null
           cadet_id: string
           created_at?: string
           id?: string
           reports_to?: string | null
+          reports_to_source_handle?: string | null
+          reports_to_target_handle?: string | null
           role: string
           school_id: string
           updated_at?: string
         }
         Update: {
           assistant?: string | null
+          assistant_source_handle?: string | null
+          assistant_target_handle?: string | null
           cadet_id?: string
           created_at?: string
           id?: string
           reports_to?: string | null
+          reports_to_source_handle?: string | null
+          reports_to_target_handle?: string | null
           role?: string
           school_id?: string
           updated_at?: string
