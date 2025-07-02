@@ -14,6 +14,7 @@ const AuthPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
+  const [magicLinkLoading, setMagicLinkLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: '',
     password: '',
@@ -66,6 +67,49 @@ const AuthPage = () => {
     }
   };
 
+  const handleMagicLink = async () => {
+    if (!formData.email) {
+      toast({
+        title: "Email Required",
+        description: "Please enter your email address first.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setMagicLinkLoading(true);
+    
+    try {
+      const { error } = await supabase.auth.signInWithOtp({
+        email: formData.email,
+        options: {
+          emailRedirectTo: `${window.location.origin}/`,
+        }
+      });
+
+      if (error) {
+        toast({
+          title: "Magic Link Failed",
+          description: error.message,
+          variant: "destructive",
+        });
+      } else {
+        toast({
+          title: "Magic Link Sent",
+          description: "Check your email for a magic link to sign in.",
+        });
+      }
+    } catch (error: any) {
+      toast({
+        title: "Error",
+        description: "Failed to send magic link. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setMagicLinkLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-900 via-blue-800 to-blue-900 flex items-center justify-center p-4">
       <div className="w-full max-w-md">
@@ -110,14 +154,23 @@ const AuthPage = () => {
               </Button>
             </form>
 
-            <div className="mt-4 text-center">
+            <div className="mt-4 text-center space-y-2">
               <button
                 type="button"
                 onClick={handleForgotPassword}
                 disabled={resetLoading}
-                className="text-blue-600 hover:text-blue-800 text-sm underline disabled:opacity-50"
+                className="text-blue-600 hover:text-blue-800 text-sm underline disabled:opacity-50 block"
               >
                 {resetLoading ? 'Sending...' : 'Forgot your password?'}
+              </button>
+              
+              <button
+                type="button"
+                onClick={handleMagicLink}
+                disabled={magicLinkLoading}
+                className="text-blue-600 hover:text-blue-800 text-sm underline disabled:opacity-50 block"
+              >
+                {magicLinkLoading ? 'Sending...' : 'Send Magic Link'}
               </button>
             </div>
             
