@@ -10,12 +10,18 @@ export const getFilteredProfiles = (
   const isActive = activeTab === 'active';
   return profiles.filter(profile => {
     const matchesActiveStatus = profile.active === isActive;
-    const matchesSearch = profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      profile.flight?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    if (!searchTerm) return matchesActiveStatus;
+    
+    const searchLower = searchTerm.toLowerCase();
+    const matchesSearch = 
+      profile.first_name.toLowerCase().includes(searchLower) ||
+      profile.last_name.toLowerCase().includes(searchLower) ||
+      profile.email.toLowerCase().includes(searchLower) ||
+      profile.role.toLowerCase().includes(searchLower) ||
+      profile.grade?.toLowerCase().includes(searchLower) ||
+      profile.rank?.toLowerCase().includes(searchLower) ||
+      profile.flight?.toLowerCase().includes(searchLower);
     
     return matchesActiveStatus && matchesSearch;
   });
