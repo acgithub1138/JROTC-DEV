@@ -188,12 +188,11 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="qty_total">Total Quantity *</Label>
+          <Label htmlFor="qty_total">Total Quantity</Label>
           <Input
             id="qty_total"
             type="number"
             {...register('qty_total', { 
-              required: 'Total quantity is required',
               min: { value: 0, message: 'Quantity must be non-negative' }
             })}
             placeholder="0"
@@ -204,12 +203,11 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="qty_issued">Issued Quantity *</Label>
+          <Label htmlFor="qty_issued">Issued Quantity</Label>
           <Input
             id="qty_issued"
             type="number"
             {...register('qty_issued', { 
-              required: 'Issued quantity is required',
               min: { value: 0, message: 'Quantity must be non-negative' }
             })}
             placeholder="0"
