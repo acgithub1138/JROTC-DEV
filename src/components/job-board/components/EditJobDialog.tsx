@@ -5,10 +5,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useJobBoardRoles } from '../hooks/useJobBoardRoles';
 import { JobBoardWithCadet, NewJobBoard } from '../types';
@@ -28,9 +24,8 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
     reports_to: '',
     assistant: '',
   });
-  const [cadetPopoverOpen, setCadetPopoverOpen] = useState(false);
 
-  const { users: cadets, isLoading } = useSchoolUsers(true); // Only active cadets
+  const { users: cadets } = useSchoolUsers(true); // Only active cadets
   const { roles } = useJobBoardRoles();
 
   useEffect(() => {
@@ -60,7 +55,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
   };
 
   const formatCadetName = (cadet: any) => {
-    return `${cadet.last_name}, ${cadet.first_name}`;
+    return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
   // Filter for active cadets only
@@ -77,69 +72,21 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="cadet">Cadet *</Label>
-            <Popover open={cadetPopoverOpen} onOpenChange={setCadetPopoverOpen}>
-              <PopoverTrigger asChild>
-                <Button
-                  variant="outline"
-                  role="combobox"
-                  aria-expanded={cadetPopoverOpen}
-                  className="w-full justify-between"
-                >
-                  {formData.cadet_id
-                    ? formatCadetName(activeCadets.find((cadet) => cadet.id === formData.cadet_id))
-                    : "Select cadet..."}
-                  <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-                </Button>
-              </PopoverTrigger>
-              <PopoverContent 
-                className="w-[400px] p-0 z-[99999] bg-popover border shadow-md pointer-events-auto" 
-                align="start"
-                side="bottom"
-                sideOffset={4}
-                avoidCollisions={false}
-                onOpenAutoFocus={(e) => {
-                  e.preventDefault();
-                  const input = (e.currentTarget as HTMLElement).querySelector('input');
-                  if (input) {
-                    setTimeout(() => input.focus(), 100);
-                  }
-                }}
-              >
-                <Command className="bg-popover">
-                  <CommandInput 
-                    placeholder="Search cadets..." 
-                    className="h-9 border-0 bg-transparent focus:ring-0"
-                    autoFocus
-                  />
-                  <CommandList className="max-h-[300px] overflow-y-auto scrollbar-thin">
-                    <CommandEmpty>
-                      {isLoading ? "Loading cadets..." : "No cadet found."}
-                    </CommandEmpty>
-                    <CommandGroup>
-                      {activeCadets.map((cadet) => (
-                        <CommandItem
-                          key={cadet.id}
-                          value={formatCadetName(cadet)}
-                          onSelect={() => {
-                            setFormData(prev => ({ ...prev, cadet_id: cadet.id }));
-                            setCadetPopoverOpen(false);
-                          }}
-                          className="cursor-pointer"
-                        >
-                          <Check
-                            className={cn(
-                              "mr-2 h-4 w-4",
-                              formData.cadet_id === cadet.id ? "opacity-100" : "opacity-0"
-                            )}
-                          />
-                          {formatCadetName(cadet)}
-                        </CommandItem>
-                      ))}
-                    </CommandGroup>
-                  </CommandList>
-                </Command>
-              </PopoverContent>
-            </Popover>
+            <Select
+              value={formData.cadet_id}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, cadet_id: value }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select cadet..." />
+              </SelectTrigger>
+              <SelectContent>
+                {activeCadets.map((cadet) => (
+                  <SelectItem key={cadet.id} value={cadet.id}>
+                    {formatCadetName(cadet)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
