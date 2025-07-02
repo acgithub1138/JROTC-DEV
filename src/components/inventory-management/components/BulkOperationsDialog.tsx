@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Progress } from '@/components/ui/progress';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AlertTriangle, CheckCircle } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
@@ -29,6 +30,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   const [showMapping, setShowMapping] = useState(false);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
+  const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
   const { toast } = useToast();
 
   const downloadTemplate = () => {
@@ -150,12 +152,15 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
     }
 
     setIsProcessing(true);
+    setImportProgress({ current: 0, total: validItems.length });
+    
     try {
       // Import valid items one by one to handle errors gracefully
       let successCount = 0;
       let errorCount = 0;
 
-      for (const item of validItems) {
+      for (let i = 0; i < validItems.length; i++) {
+        const item = validItems[i];
         try {
           await onImport([item]);
           successCount++;
@@ -163,6 +168,9 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
           console.error('Import error:', error);
           errorCount++;
         }
+        
+        // Update progress
+        setImportProgress({ current: i + 1, total: validItems.length });
       }
 
       toast({
@@ -257,6 +265,21 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                     </Button>
                   </div>
                 </div>
+
+                {isProcessing && (
+                  <div className="space-y-2 bg-muted/50 p-4 rounded-lg">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="font-medium">Importing items...</span>
+                      <span className="text-muted-foreground">
+                        Imported {importProgress.current} of {importProgress.total} items
+                      </span>
+                    </div>
+                    <Progress 
+                      value={(importProgress.current / importProgress.total) * 100} 
+                      className="w-full"
+                    />
+                  </div>
+                )}
 
                 <DataPreviewTable parsedData={parsedData} />
               </div>
