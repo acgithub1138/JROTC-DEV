@@ -9,6 +9,7 @@ import { TeamsTable } from './components/TeamsTable';
 import { AddTeamDialog } from './components/AddTeamDialog';
 import { EditTeamDialog } from './components/EditTeamDialog';
 import { SendEmailDialog } from './components/SendEmailDialog';
+import { ViewTeamMembersDialog } from './components/ViewTeamMembersDialog';
 import { TeamWithMembers, NewTeam } from './types';
 
 const TeamsManagementPage = () => {
@@ -18,8 +19,10 @@ const TeamsManagementPage = () => {
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
+  const [viewMembersDialogOpen, setViewMembersDialogOpen] = useState(false);
   const [editingTeam, setEditingTeam] = useState<TeamWithMembers | null>(null);
   const [emailTeam, setEmailTeam] = useState<TeamWithMembers | null>(null);
+  const [viewingTeam, setViewingTeam] = useState<TeamWithMembers | null>(null);
 
   const [newTeam, setNewTeam] = useState<NewTeam>({
     name: '',
@@ -73,6 +76,11 @@ const TeamsManagementPage = () => {
     setSendEmailDialogOpen(true);
   };
 
+  const handleViewMembers = (team: TeamWithMembers) => {
+    setViewingTeam(team);
+    setViewMembersDialogOpen(true);
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -105,6 +113,7 @@ const TeamsManagementPage = () => {
             onEditTeam={handleEditTeam}
             onDeleteTeam={handleDeleteTeam}
             onSendEmail={handleSendEmail}
+            onViewMembers={handleViewMembers}
           />
 
           {teams.length === 0 && (
@@ -134,6 +143,12 @@ const TeamsManagementPage = () => {
         open={sendEmailDialogOpen}
         onOpenChange={setSendEmailDialogOpen}
         team={emailTeam}
+      />
+
+      <ViewTeamMembersDialog
+        open={viewMembersDialogOpen}
+        onOpenChange={setViewMembersDialogOpen}
+        team={viewingTeam}
       />
     </div>
   );

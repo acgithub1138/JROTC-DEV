@@ -24,7 +24,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Edit, Trash2, Mail } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Mail, Eye } from 'lucide-react';
 import { TeamWithMembers } from '../types';
 
 interface TeamsTableProps {
@@ -32,9 +32,10 @@ interface TeamsTableProps {
   onEditTeam: (team: TeamWithMembers) => void;
   onDeleteTeam: (teamId: string) => Promise<boolean>;
   onSendEmail: (team: TeamWithMembers) => void;
+  onViewMembers: (team: TeamWithMembers) => void;
 }
 
-export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail }: TeamsTableProps) => {
+export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onViewMembers }: TeamsTableProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState<TeamWithMembers | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -85,20 +86,28 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail }: Tea
               </TableCell>
               <TableCell>
                 {team.team_lead ? (
-                  <div>
-                    <div className="font-medium">
-                      {team.team_lead.first_name} {team.team_lead.last_name}
-                    </div>
-                    <div className="text-sm text-muted-foreground">
-                      {team.team_lead.email}
-                    </div>
-                  </div>
+                  <span className="font-medium">
+                    {team.team_lead.last_name}, {team.team_lead.first_name}
+                  </span>
                 ) : (
                   <span className="text-muted-foreground">No team lead assigned</span>
                 )}
               </TableCell>
               <TableCell>
-                <span className="font-medium">{team.member_count}</span> members
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">{team.member_count}</span> members
+                  {team.member_count > 0 && (
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewMembers(team)}
+                      className="h-7 px-2"
+                    >
+                      <Eye className="w-3 h-3 mr-1" />
+                      View
+                    </Button>
+                  )}
+                </div>
               </TableCell>
               <TableCell>
                 {new Date(team.created_at).toLocaleDateString()}
