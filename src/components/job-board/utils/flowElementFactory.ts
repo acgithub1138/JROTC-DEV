@@ -6,7 +6,10 @@ import { HierarchyResult } from './hierarchyBuilder';
 export const createFlowNodes = (
   jobs: JobBoardWithCadet[],
   positions: Map<string, { x: number; y: number }>,
-  onHandleClick?: (handleId: string, job: JobBoardWithCadet) => void
+  onHandleDragStart?: (handleId: string, job: JobBoardWithCadet, event: React.MouseEvent) => void,
+  onHandleDrop?: (targetJobId: string, targetHandle: string) => void,
+  isValidDropTarget?: (jobId: string, handleId: string) => boolean,
+  editState?: any
 ): Node[] => {
   return jobs.map((job) => {
     const position = positions.get(job.id) || { x: 0, y: 0 };
@@ -22,7 +25,10 @@ export const createFlowNodes = (
         cadetName: `${job.cadet.last_name}, ${job.cadet.first_name}`,
         rank: job.cadet.rank || '',
         grade: job.cadet.grade || '',
-        onHandleClick,
+        onHandleDragStart,
+        onHandleDrop,
+        isValidDropTarget,
+        editState,
       },
     };
   });

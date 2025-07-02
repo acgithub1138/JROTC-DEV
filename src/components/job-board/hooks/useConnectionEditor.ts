@@ -9,6 +9,12 @@ interface ConnectionEditState {
   targetJobId: string | null;
   targetHandle: string | null;
   connectionType: 'reports_to' | 'assistant' | null;
+  isDragging: boolean;
+  dragPreview: {
+    sourceJobId: string;
+    sourceHandle: string;
+    mousePosition?: { x: number; y: number };
+  } | null;
 }
 
 export const useConnectionEditor = (
@@ -22,48 +28,72 @@ export const useConnectionEditor = (
     targetJobId: null,
     targetHandle: null,
     connectionType: null,
+    isDragging: false,
+    dragPreview: null,
   });
 
-  const startConnectionEdit = useCallback((handleId: string, job: JobBoardWithCadet) => {
-    // Determine connection type based on existing connections
-    let connectionType: 'reports_to' | 'assistant' | null = null;
+  const startConnectionDrag = useCallback((handleId: string, job: JobBoardWithCadet, event: React.MouseEvent) => {
+    event.preventDefault();
     
-    if (job.reports_to) {
-      connectionType = 'reports_to';
-    } else if (job.assistant) {
-      connectionType = 'assistant';
-    }
-
     setEditState({
       isEditing: true,
       sourceJobId: job.id,
       sourceHandle: handleId,
       targetJobId: null,
       targetHandle: null,
-      connectionType,
+      connectionType: null,
+      isDragging: true,
+      dragPreview: {
+        sourceJobId: job.id,
+        sourceHandle: handleId,
+        mousePosition: { x: event.clientX, y: event.clientY }
+      }
     });
   }, []);
 
-  const completeConnectionEdit = useCallback((targetHandle: string) => {
-    if (!editState.isEditing || !editState.sourceJobId || !editState.connectionType) {
+  const updateDragPosition = useCallback((event: React.MouseEvent) => {
+    if (editState.isDragging && editState.dragPreview) {
+      setEditState(prev => ({
+        ...prev,
+        dragPreview: prev.dragPreview ? {
+          ...prev.dragPreview,
+          mousePosition: { x: event.clientX, y: event.clientY }
+        } : null
+      }));
+    }
+  }, [editState.isDragging, editState.dragPreview]);
+
+  const completeConnectionDrop = useCallback((targetJobId: string, targetHandle: string) => {
+    if (!editState.isDragging || !editState.sourceJobId || !editState.sourceHandle) {
       return;
     }
 
     const sourceJob = jobs.find(j => j.id === editState.sourceJobId);
-    if (!sourceJob) return;
-
-    // Update the connection handles based on the edit
-    const updates: Partial<JobBoardWithCadet> = {};
+    const targetJob = jobs.find(j => j.id === targetJobId);
     
-    if (editState.connectionType === 'reports_to') {
-      updates.reports_to_source_handle = editState.sourceHandle;
-      updates.reports_to_target_handle = targetHandle;
-    } else if (editState.connectionType === 'assistant') {
-      updates.assistant_source_handle = editState.sourceHandle;
-      updates.assistant_target_handle = targetHandle;
+    if (!sourceJob || !targetJob || editState.sourceJobId === targetJobId) {
+      cancelConnectionEdit();
+      return;
     }
 
-    onUpdateConnection(editState.sourceJobId, updates);
+    // Determine connection type based on handle positions
+    const isVerticalConnection = editState.sourceHandle.includes('bottom') || editState.sourceHandle.includes('top');
+    const connectionType = isVerticalConnection ? 'reports_to' : 'assistant';
+    
+    // Create updates for source job
+    const sourceUpdates: Partial<JobBoardWithCadet> = {};
+    if (connectionType === 'reports_to') {
+      sourceUpdates.reports_to = targetJob.role;
+      sourceUpdates.reports_to_source_handle = editState.sourceHandle;
+      sourceUpdates.reports_to_target_handle = targetHandle;
+    } else {
+      sourceUpdates.assistant = targetJob.role;
+      sourceUpdates.assistant_source_handle = editState.sourceHandle;
+      sourceUpdates.assistant_target_handle = targetHandle;
+    }
+
+    // Apply updates to source job
+    onUpdateConnection(editState.sourceJobId, sourceUpdates);
     
     setEditState({
       isEditing: false,
@@ -72,6 +102,8 @@ export const useConnectionEditor = (
       targetJobId: null,
       targetHandle: null,
       connectionType: null,
+      isDragging: false,
+      dragPreview: null,
     });
   }, [editState, jobs, onUpdateConnection]);
 
@@ -83,23 +115,37 @@ export const useConnectionEditor = (
       targetJobId: null,
       targetHandle: null,
       connectionType: null,
+      isDragging: false,
+      dragPreview: null,
     });
   }, []);
 
-  const isValidTarget = useCallback((handleId: string, jobId: string) => {
-    if (!editState.isEditing || editState.sourceJobId !== jobId) {
+  const isValidDropTarget = useCallback((jobId: string, handleId: string) => {
+    if (!editState.isDragging || !editState.sourceJobId || editState.sourceJobId === jobId) {
       return false;
     }
     
-    // Allow only handles on the same card
+    // Validate based on handle compatibility
+    const sourceHandle = editState.sourceHandle || '';
+    const isVerticalSource = sourceHandle.includes('bottom') || sourceHandle.includes('top');
+    const isHorizontalSource = sourceHandle.includes('left') || sourceHandle.includes('right');
+    const isVerticalTarget = handleId.includes('bottom') || handleId.includes('top');
+    const isHorizontalTarget = handleId.includes('left') || handleId.includes('right');
+    
+    // Prevent connecting same-direction handles
+    if ((isVerticalSource && isVerticalTarget) || (isHorizontalSource && isHorizontalTarget)) {
+      return false;
+    }
+    
     return true;
   }, [editState]);
 
   return {
     editState,
-    startConnectionEdit,
-    completeConnectionEdit,
+    startConnectionDrag,
+    completeConnectionDrop,
+    updateDragPosition,
     cancelConnectionEdit,
-    isValidTarget,
+    isValidDropTarget,
   };
 };

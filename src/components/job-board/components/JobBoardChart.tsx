@@ -11,6 +11,7 @@ import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePo
 import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 import { useConnectionEditor } from '../hooks/useConnectionEditor';
+import { ConnectionEditingOverlay } from './ConnectionEditingOverlay';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
@@ -25,7 +26,7 @@ const nodeTypes = {
 export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   
-  const { editState, startConnectionEdit, completeConnectionEdit, cancelConnectionEdit, isValidTarget } = useConnectionEditor(
+  const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
     onUpdateJob || (() => {})
   );
@@ -43,7 +44,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
     const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions, startConnectionEdit);
+    const flowNodes = createFlowNodes(jobs, positions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState);
     const flowEdges = createFlowEdges(hierarchyResult, jobs);
 
     console.log('Final nodes:', flowNodes.length);
@@ -53,7 +54,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, getSavedPositions, startConnectionEdit]);
+  }, [jobs, getSavedPositions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
@@ -79,7 +80,16 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
   }
 
   return (
-    <div className="relative h-96 w-full border rounded-lg">
+    <div 
+      className="relative h-96 w-full border rounded-lg"
+      onMouseMove={updateDragPosition}
+      onMouseUp={cancelConnectionEdit}
+    >
+      <ConnectionEditingOverlay 
+        isVisible={editState.isDragging}
+        onCancel={cancelConnectionEdit}
+      />
+      
       <div className="absolute top-2 right-2 z-10 flex gap-2">
         {onRefresh && (
           <Button
@@ -102,6 +112,22 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
           <RotateCcw className="w-4 h-4" />
         </Button>
       </div>
+      
+      {/* Drag Preview Line */}
+      {editState.isDragging && editState.dragPreview?.mousePosition && (
+        <svg className="absolute inset-0 pointer-events-none z-20">
+          <line
+            x1={editState.dragPreview.mousePosition.x}
+            y1={editState.dragPreview.mousePosition.y}
+            x2={editState.dragPreview.mousePosition.x + 50}
+            y2={editState.dragPreview.mousePosition.y}
+            stroke="hsl(var(--primary))"
+            strokeWidth="2"
+            strokeDasharray="5,5"
+          />
+        </svg>
+      )}
+      
       <ReactFlow
         nodes={nodes}
         edges={edges}
