@@ -58,12 +58,16 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     }
   }, [isReactFlowInitialized, isVisible, nodes.length, fitView]);
 
-  // Reset states when tab changes or fullscreen toggles
+  // Handle fullscreen exit - just trigger fitView without resetting states
   useEffect(() => {
-    console.log('Resetting visibility state due to fullscreen change');
-    setIsVisible(false);
-    setIsReactFlowInitialized(false);
-  }, [isFullscreen]);
+    if (!isFullscreen && isReactFlowInitialized) {
+      // When exiting fullscreen, trigger fitView to adjust to new container size
+      setTimeout(() => {
+        console.log('Calling fitView after fullscreen exit');
+        fitView({ padding: 0.2, duration: 300 });
+      }, 200);
+    }
+  }, [isFullscreen, isReactFlowInitialized, fitView]);
 
   // Use intersection observer to detect when component becomes visible
   useEffect(() => {
