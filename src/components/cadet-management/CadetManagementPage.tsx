@@ -8,10 +8,15 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Users, Search, Plus } from 'lucide-react';
 
 import { useCadetManagement } from './hooks/useCadetManagement';
+import { useCadetMassOperations } from './hooks/useCadetMassOperations';
 import { CadetTable } from './components/CadetTable';
 import { AddCadetDialog } from './components/AddCadetDialog';
 import { EditCadetDialog } from './components/EditCadetDialog';
 import { StatusConfirmationDialog } from './components/StatusConfirmationDialog';
+import { MassUpdateToolbar } from './components/MassUpdateToolbar';
+import { MassUpdateGradeDialog } from './components/MassUpdateGradeDialog';
+import { MassUpdateRankDialog } from './components/MassUpdateRankDialog';
+import { MassDeactivateDialog } from './components/MassDeactivateDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 
@@ -30,14 +35,31 @@ const CadetManagementPage = () => {
     setNewCadet,
     handleToggleUserStatus,
     handleAddCadet,
-    handleSaveProfile
+    handleSaveProfile,
+    fetchProfiles
   } = useCadetManagement();
+
+  const {
+    selectedCadets,
+    massOperationLoading,
+    handleSelectCadet,
+    handleSelectAll,
+    clearSelection,
+    handleBulkUpdateGrade,
+    handleBulkUpdateRank,
+    handleBulkDeactivate
+  } = useCadetMassOperations();
 
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
+
+  // Mass operation dialog states
+  const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
+  const [rankDialogOpen, setRankDialogOpen] = useState(false);
+  const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
@@ -61,6 +83,30 @@ const CadetManagementPage = () => {
     setProfileToToggle(null);
   };
 
+  const handleMassUpdateGrade = async (grade: string) => {
+    const success = await handleBulkUpdateGrade(grade);
+    if (success) {
+      fetchProfiles();
+    }
+    return success;
+  };
+
+  const handleMassUpdateRank = async (rank: string) => {
+    const success = await handleBulkUpdateRank(rank);
+    if (success) {
+      fetchProfiles();
+    }
+    return success;
+  };
+
+  const handleMassDeactivate = async () => {
+    const success = await handleBulkDeactivate();
+    if (success) {
+      fetchProfiles();
+    }
+    return success;
+  };
+
   const filteredProfiles = getFilteredProfiles(profiles, activeTab, searchTerm);
   const totalPages = getTotalPages(filteredProfiles.length);
   const paginatedProfiles = getPaginatedProfiles(filteredProfiles, currentPage);
@@ -68,6 +114,11 @@ const CadetManagementPage = () => {
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
+
+  // Clear selection when changing tabs or search
+  React.useEffect(() => {
+    clearSelection();
+  }, [activeTab, searchTerm]);
 
   if (loading) {
     return (
@@ -130,6 +181,13 @@ const CadetManagementPage = () => {
             </TabsList>
             
             <TabsContent value="active" className="mt-4">
+              <MassUpdateToolbar
+                selectedCount={selectedCadets.length}
+                onUpdateGrade={() => setGradeDialogOpen(true)}
+                onUpdateRank={() => setRankDialogOpen(true)}
+                onDeactivate={() => setDeactivateDialogOpen(true)}
+                loading={massOperationLoading}
+              />
               <CadetTable
                 profiles={paginatedProfiles}
                 activeTab={activeTab}
@@ -138,6 +196,9 @@ const CadetManagementPage = () => {
                   setProfileToToggle(profile);
                   setStatusDialogOpen(true);
                 }}
+                selectedCadets={selectedCadets}
+                onSelectCadet={handleSelectCadet}
+                onSelectAll={(checked) => handleSelectAll(checked, paginatedProfiles)}
               />
             </TabsContent>
 
@@ -150,6 +211,9 @@ const CadetManagementPage = () => {
                   setProfileToToggle(profile);
                   setStatusDialogOpen(true);
                 }}
+                selectedCadets={selectedCadets}
+                onSelectCadet={handleSelectCadet}
+                onSelectAll={(checked) => handleSelectAll(checked, paginatedProfiles)}
               />
             </TabsContent>
           </Tabs>
@@ -229,6 +293,30 @@ const CadetManagementPage = () => {
         editingProfile={editingProfile}
         setEditingProfile={setEditingProfile}
         onSubmit={handleSaveProfileWrapper}
+      />
+
+      <MassUpdateGradeDialog
+        open={gradeDialogOpen}
+        onOpenChange={setGradeDialogOpen}
+        onSubmit={handleMassUpdateGrade}
+        selectedCount={selectedCadets.length}
+        loading={massOperationLoading}
+      />
+
+      <MassUpdateRankDialog
+        open={rankDialogOpen}
+        onOpenChange={setRankDialogOpen}
+        onSubmit={handleMassUpdateRank}
+        selectedCount={selectedCadets.length}
+        loading={massOperationLoading}
+      />
+
+      <MassDeactivateDialog
+        open={deactivateDialogOpen}
+        onOpenChange={setDeactivateDialogOpen}
+        onConfirm={handleMassDeactivate}
+        selectedCount={selectedCadets.length}
+        loading={massOperationLoading}
       />
     </div>
   );

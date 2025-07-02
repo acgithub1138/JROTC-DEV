@@ -2,6 +2,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
 import { Profile } from '../types';
 
@@ -10,13 +11,36 @@ interface CadetTableProps {
   activeTab: string;
   onEditProfile: (profile: Profile) => void;
   onToggleStatus: (profile: Profile) => void;
+  selectedCadets: string[];
+  onSelectCadet: (cadetId: string, checked: boolean) => void;
+  onSelectAll: (checked: boolean) => void;
 }
 
-export const CadetTable = ({ profiles, activeTab, onEditProfile, onToggleStatus }: CadetTableProps) => {
+export const CadetTable = ({ 
+  profiles, 
+  activeTab, 
+  onEditProfile, 
+  onToggleStatus,
+  selectedCadets,
+  onSelectCadet,
+  onSelectAll
+}: CadetTableProps) => {
+  const allSelected = profiles.length > 0 && selectedCadets.length === profiles.length;
+  const someSelected = selectedCadets.length > 0 && selectedCadets.length < profiles.length;
+
   return (
     <Table>
       <TableHeader>
         <TableRow>
+          <TableHead className="w-12">
+            <Checkbox
+              checked={allSelected}
+              onCheckedChange={(checked) => onSelectAll(checked as boolean)}
+              ref={(ref) => {
+                if (ref) ref.indeterminate = someSelected;
+              }}
+            />
+          </TableHead>
           <TableHead>Name</TableHead>
           <TableHead>Email</TableHead>
           <TableHead>Role</TableHead>
@@ -28,9 +52,21 @@ export const CadetTable = ({ profiles, activeTab, onEditProfile, onToggleStatus 
       </TableHeader>
       <TableBody>
         {profiles.map((profile) => (
-          <TableRow key={profile.id} className={activeTab === 'inactive' ? "opacity-60" : ""}>
+          <TableRow 
+            key={profile.id} 
+            className={`
+              ${activeTab === 'inactive' ? "opacity-60" : ""}
+              ${selectedCadets.includes(profile.id) ? "bg-blue-50" : ""}
+            `}
+          >
+            <TableCell>
+              <Checkbox
+                checked={selectedCadets.includes(profile.id)}
+                onCheckedChange={(checked) => onSelectCadet(profile.id, checked as boolean)}
+              />
+            </TableCell>
             <TableCell className="font-medium">
-              {profile.first_name} {profile.last_name}
+              {profile.last_name}, {profile.first_name}
             </TableCell>
             <TableCell>{profile.email}</TableCell>
             <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
