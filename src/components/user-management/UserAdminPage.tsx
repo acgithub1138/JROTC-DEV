@@ -10,6 +10,17 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Separator } from '@/components/ui/separator';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { 
   UserPlus, 
@@ -18,7 +29,10 @@ import {
   Search, 
   Users, 
   Shield, 
-  GraduationCap 
+  GraduationCap,
+  Eye,
+  EyeOff,
+  Key
 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
 
@@ -53,6 +67,12 @@ const UserAdminPage = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  
+  // Password reset states
+  const [newPassword, setNewPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
+  const [passwordResetConfirmOpen, setPasswordResetConfirmOpen] = useState(false);
 
   const RECORDS_PER_PAGE = 25;
 
@@ -142,6 +162,50 @@ const UserAdminPage = () => {
         variant: "destructive",
       });
     }
+  };
+
+  const handleResetPassword = async () => {
+    if (!editingUser || !newPassword) return;
+
+    setPasswordResetLoading(true);
+
+    try {
+      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+        body: {
+          userId: editingUser.id,
+          newPassword: newPassword
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Password reset successfully for ${editingUser.first_name} ${editingUser.last_name}`,
+      });
+
+      setNewPassword('');
+      setPasswordResetConfirmOpen(false);
+      setShowPassword(false);
+    } catch (error) {
+      console.error('Error resetting password:', error);
+      toast({
+        title: "Error",
+        description: "Failed to reset password",
+        variant: "destructive",
+      });
+    } finally {
+      setPasswordResetLoading(false);
+    }
+  };
+
+  const generateRandomPassword = () => {
+    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
+    let password = '';
+    for (let i = 0; i < 12; i++) {
+      password += chars.charAt(Math.floor(Math.random() * chars.length));
+    }
+    setNewPassword(password);
   };
 
   const handleDeleteUser = async () => {
@@ -256,6 +320,11 @@ const UserAdminPage = () => {
         user.role !== 'admin' && user.role !== 'instructor') return true;
     
     return false;
+  };
+
+  const canResetPassword = (user: User) => {
+    // Only admins can reset passwords, and not their own
+    return userProfile?.role === 'admin' && user.id !== userProfile.id;
   };
 
   const filteredUsers = users.filter(user => {
@@ -395,6 +464,9 @@ const UserAdminPage = () => {
                           onClick={() => {
                             setEditingUser(user);
                             setEditDialogOpen(true);
+                            // Reset password form state
+                            setNewPassword('');
+                            setShowPassword(false);
                           }}
                         >
                           <Edit className="w-4 h-4" />
@@ -474,12 +546,12 @@ const UserAdminPage = () => {
 
       {/* Edit User Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent>
+        <DialogContent className="max-w-2xl">
           <DialogHeader>
             <DialogTitle>Edit User Profile</DialogTitle>
           </DialogHeader>
           {editingUser && (
-            <form onSubmit={handleEditUser} className="space-y-4">
+            <form onSubmit={handleEditUser} className="space-y-6">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="edit-firstName">First Name</Label>
@@ -566,6 +638,69 @@ const UserAdminPage = () => {
                   </Select>
                 </div>
               )}
+
+              {/* Password Reset Section - Only for Admins */}
+              {canResetPassword(editingUser) && (
+                <>
+                  <Separator className="my-6" />
+                  <div className="space-y-4">
+                    <div className="flex items-center gap-2 text-sm font-medium text-orange-600">
+                      <Key className="w-4 h-4" />
+                      Password Reset
+                    </div>
+                    <p className="text-sm text-muted-foreground">
+                      Reset the user's password. They will need to use the new password to sign in.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="new-password">New Password</Label>
+                      <div className="flex gap-2">
+                        <div className="relative flex-1">
+                          <Input
+                            id="new-password"
+                            type={showPassword ? "text" : "password"}
+                            value={newPassword}
+                            onChange={(e) => setNewPassword(e.target.value)}
+                            placeholder="Enter new password (min 6 characters)"
+                            minLength={6}
+                          />
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="sm"
+                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                            onClick={() => setShowPassword(!showPassword)}
+                          >
+                            {showPassword ? (
+                              <EyeOff className="h-4 w-4" />
+                            ) : (
+                              <Eye className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </div>
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={generateRandomPassword}
+                        >
+                          Generate
+                        </Button>
+                      </div>
+                    </div>
+
+                    {newPassword && (
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={() => setPasswordResetConfirmOpen(true)}
+                        className="w-full"
+                      >
+                        Reset Password
+                      </Button>
+                    )}
+                  </div>
+                </>
+              )}
               
               <div className="flex justify-end space-x-2">
                 <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
@@ -579,6 +714,30 @@ const UserAdminPage = () => {
           )}
         </DialogContent>
       </Dialog>
+
+      {/* Password Reset Confirmation Dialog */}
+      <AlertDialog open={passwordResetConfirmOpen} onOpenChange={setPasswordResetConfirmOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Reset User Password</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to reset the password for {editingUser?.first_name} {editingUser?.last_name}?
+              <br /><br />
+              <strong>The user will need to use the new password to sign in.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleResetPassword}
+              disabled={passwordResetLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Delete User Dialog */}
       <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
