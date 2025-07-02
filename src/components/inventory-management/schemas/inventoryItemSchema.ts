@@ -4,7 +4,7 @@ export const inventoryItemSchema = z.object({
   item_id: z.string().min(1, 'Item ID is required'),
   item: z.string().min(1, 'Item name is required'),
   category: z.string().min(1, 'Category is required'),
-  sub_category: z.string().min(1, 'Sub Category is required'),
+  sub_category: z.string().optional().nullable(),
   size: z.string().optional().nullable(),
   gender: z.enum(['M', 'F']).nullable().optional(),
   qty_total: z.number().min(0, 'Total quantity must be non-negative').optional().default(0),

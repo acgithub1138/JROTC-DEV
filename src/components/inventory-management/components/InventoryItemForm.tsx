@@ -152,7 +152,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="sub_category">Sub Category *</Label>
+          <Label htmlFor="sub_category">Sub Category</Label>
           <CategorySelect
             value={watchedValues.sub_category}
             onValueChange={(value) => setValue('sub_category', value)}
