@@ -169,11 +169,20 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         await new Promise(resolve => setTimeout(resolve, 10));
         
         try {
+          console.log('Importing item:', item);
           await onImport([item]);
           successCount++;
+          console.log(`Successfully imported item ${i + 1}/${validItems.length}`);
         } catch (error) {
-          console.error('Import error:', error);
+          console.error('Import error for item:', item, 'Error:', error);
           errorCount++;
+          
+          // Show individual error details in toast for debugging
+          toast({
+            title: `Import Error - Item ${i + 1}`,
+            description: error instanceof Error ? error.message : "Unknown error occurred",
+            variant: "destructive",
+          });
         }
       }
       
