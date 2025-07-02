@@ -196,18 +196,18 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl max-h-[90vh] overflow-hidden">
+      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Bulk Operations</DialogTitle>
         </DialogHeader>
         
-        <Tabs defaultValue="import" className="w-full h-full">
+        <Tabs defaultValue="import" className="w-full flex flex-col flex-1">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="import">Import Data</TabsTrigger>
             <TabsTrigger value="export">Export Template</TabsTrigger>
           </TabsList>
           
-          <TabsContent value="import" className="space-y-4 h-full">
+          <TabsContent value="import" className="space-y-4 flex-1 flex flex-col">
             {!showMapping && !showPreview ? (
               <CSVUploadSection
                 importFile={importFile}
