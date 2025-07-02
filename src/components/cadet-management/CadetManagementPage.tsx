@@ -11,7 +11,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Edit, Search, Plus } from 'lucide-react';
-import { getRanksForProgram } from '@/utils/jrotcRanks';
+import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 
 interface Profile {
   id: string;
@@ -66,7 +66,7 @@ const CadetManagementPage = () => {
   ];
 
   // Get ranks based on school's JROTC program
-  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program);
+  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
 
   const fetchProfiles = async () => {
     try {
