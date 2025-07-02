@@ -1,18 +1,16 @@
 
-import React, { useMemo, useCallback, useEffect } from 'react';
-import { ReactFlow, Background, Controls, useNodesState, useEdgesState, NodeChange, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
+import React from 'react';
+import { ReactFlow, Background, Controls } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { RefreshCcw, RotateCcw, Download } from 'lucide-react';
-import { toPng } from 'html-to-image';
-import { Button } from '@/components/ui/button';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
-import { buildJobHierarchy } from '../utils/hierarchyBuilder';
-import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePositioning';
-import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 import { useConnectionEditor } from '../hooks/useConnectionEditor';
+import { useImageDownload } from '../hooks/useImageDownload';
+import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
 import { ConnectionEditingOverlay } from './ConnectionEditingOverlay';
+import { JobBoardToolbar } from './JobBoardToolbar';
+import { JobBoardDragPreview } from './JobBoardDragPreview';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
@@ -26,94 +24,22 @@ const nodeTypes = {
 
 export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
-  const { getNodes } = useReactFlow();
+  const { downloadImage } = useImageDownload();
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
     onUpdateJob || (() => {})
   );
 
-  const initialNodesAndEdges = useMemo(() => {
-    if (jobs.length === 0) {
-      return { nodes: [], edges: [] };
-    }
-
-    // Build the hierarchy
-    const hierarchyResult = buildJobHierarchy(jobs);
-    
-    // Get saved positions and merge with automatic layout
-    const savedPositions = getSavedPositions();
-    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
-    
-    // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState);
-    const flowEdges = createFlowEdges(hierarchyResult, jobs);
-
-    console.log('Final nodes:', flowNodes.length);
-    console.log('Final edges:', flowEdges.length);
-
-    return {
-      nodes: flowNodes,
-      edges: flowEdges,
-    };
-  }, [jobs, getSavedPositions, startConnectionDrag, completeConnectionDrop, isValidDropTarget, editState]);
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
-
-  // Handle node changes with position persistence
-  const handleNodeChange = useCallback((changes: NodeChange[]) => {
-    onNodesChange(changes);
-    handleNodesChange(changes, nodes);
-  }, [onNodesChange, handleNodesChange, nodes]);
-
-  // Update nodes when initialNodesAndEdges changes (for saved positions)
-  useEffect(() => {
-    setNodes(initialNodesAndEdges.nodes);
-    setEdges(initialNodesAndEdges.edges);
-  }, [initialNodesAndEdges, setNodes, setEdges]);
-
-  const handleDownloadImage = useCallback(() => {
-    const nodesBounds = getNodesBounds(getNodes());
-    const imageWidth = 1920;
-    const imageHeight = 1080;
-    const viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0.5);
-
-    const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
-    
-    if (reactFlowElement) {
-      toPng(reactFlowElement, {
-        backgroundColor: '#ffffff',
-        width: imageWidth,
-        height: imageHeight,
-        style: {
-          width: imageWidth.toString(),
-          height: imageHeight.toString(),
-          transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
-        },
-        filter: (node) => {
-          // Hide handles and controls in the exported image
-          if (
-            node?.classList?.contains('react-flow__handle') ||
-            node?.classList?.contains('react-flow__controls') ||
-            node?.classList?.contains('react-flow__panel')
-          ) {
-            return false;
-          }
-          return true;
-        },
-      })
-        .then((dataUrl) => {
-          const link = document.createElement('a');
-          link.download = 'job-board-chart.png';
-          link.href = dataUrl;
-          link.click();
-        })
-        .catch((error) => {
-          console.error('Error downloading image:', error);
-        });
-    }
-  }, [getNodes]);
+  const { nodes, edges, handleNodeChange, onEdgesChange } = useJobBoardNodes({
+    jobs,
+    getSavedPositions,
+    handleNodesChange,
+    startConnectionDrag,
+    completeConnectionDrop,
+    isValidDropTarget,
+    editState
+  });
 
   if (jobs.length === 0) {
     return (
@@ -134,52 +60,17 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
         onCancel={cancelConnectionEdit}
       />
       
-      <div className="absolute top-2 right-2 z-10 flex gap-2">
-        {onRefresh && (
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onRefresh}
-            className="bg-white/90 backdrop-blur-sm"
-          >
-            <RefreshCcw className="w-4 h-4" />
-          </Button>
-        )}
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={resetLayout}
-          disabled={isResetting}
-          className="bg-white/90 backdrop-blur-sm"
-          title="Reset layout to default"
-        >
-          <RotateCcw className="w-4 h-4" />
-        </Button>
-        <Button
-          variant="outline"
-          size="sm"
-          onClick={handleDownloadImage}
-          className="bg-white/90 backdrop-blur-sm"
-          title="Download as image"
-        >
-          <Download className="w-4 h-4" />
-        </Button>
-      </div>
+      <JobBoardToolbar
+        onRefresh={onRefresh}
+        onResetLayout={resetLayout}
+        onDownloadImage={downloadImage}
+        isResetting={isResetting}
+      />
       
-      {/* Drag Preview Line */}
-      {editState.isDragging && editState.dragPreview?.mousePosition && (
-        <svg className="absolute inset-0 pointer-events-none z-20">
-          <line
-            x1={editState.dragPreview.mousePosition.x}
-            y1={editState.dragPreview.mousePosition.y}
-            x2={editState.dragPreview.mousePosition.x + 50}
-            y2={editState.dragPreview.mousePosition.y}
-            stroke="hsl(var(--primary))"
-            strokeWidth="2"
-            strokeDasharray="5,5"
-          />
-        </svg>
-      )}
+      <JobBoardDragPreview
+        isVisible={editState.isDragging}
+        mousePosition={editState.dragPreview?.mousePosition}
+      />
       
       <ReactFlow
         nodes={nodes}
