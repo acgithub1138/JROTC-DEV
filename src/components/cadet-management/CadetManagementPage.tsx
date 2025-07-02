@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -16,6 +15,7 @@ import { StatusConfirmationDialog } from './components/StatusConfirmationDialog'
 import { MassUpdateToolbar } from './components/MassUpdateToolbar';
 import { MassUpdateGradeDialog } from './components/MassUpdateGradeDialog';
 import { MassUpdateRankDialog } from './components/MassUpdateRankDialog';
+import { MassUpdateFlightDialog } from './components/MassUpdateFlightDialog';
 import { MassDeactivateDialog } from './components/MassDeactivateDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
@@ -47,6 +47,7 @@ const CadetManagementPage = () => {
     clearSelection,
     handleBulkUpdateGrade,
     handleBulkUpdateRank,
+    handleBulkUpdateFlight,
     handleBulkDeactivate
   } = useCadetMassOperations();
 
@@ -59,6 +60,7 @@ const CadetManagementPage = () => {
   // Mass operation dialog states
   const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
   const [rankDialogOpen, setRankDialogOpen] = useState(false);
+  const [flightDialogOpen, setFlightDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
 
   const handleEditProfile = (profile: Profile) => {
@@ -93,6 +95,14 @@ const CadetManagementPage = () => {
 
   const handleMassUpdateRank = async (rank: string) => {
     const success = await handleBulkUpdateRank(rank);
+    if (success) {
+      fetchProfiles();
+    }
+    return success;
+  };
+
+  const handleMassUpdateFlight = async (flight: string) => {
+    const success = await handleBulkUpdateFlight(flight);
     if (success) {
       fetchProfiles();
     }
@@ -185,6 +195,7 @@ const CadetManagementPage = () => {
                 selectedCount={selectedCadets.length}
                 onUpdateGrade={() => setGradeDialogOpen(true)}
                 onUpdateRank={() => setRankDialogOpen(true)}
+                onUpdateFlight={() => setFlightDialogOpen(true)}
                 onDeactivate={() => setDeactivateDialogOpen(true)}
                 loading={massOperationLoading}
               />
@@ -307,6 +318,14 @@ const CadetManagementPage = () => {
         open={rankDialogOpen}
         onOpenChange={setRankDialogOpen}
         onSubmit={handleMassUpdateRank}
+        selectedCount={selectedCadets.length}
+        loading={massOperationLoading}
+      />
+
+      <MassUpdateFlightDialog
+        open={flightDialogOpen}
+        onOpenChange={setFlightDialogOpen}
+        onSubmit={handleMassUpdateFlight}
         selectedCount={selectedCadets.length}
         loading={massOperationLoading}
       />
