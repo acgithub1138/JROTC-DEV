@@ -7,7 +7,8 @@ import { MassUpdateGradeDialog } from './MassUpdateGradeDialog';
 import { MassUpdateRankDialog } from './MassUpdateRankDialog';
 import { MassUpdateFlightDialog } from './MassUpdateFlightDialog';
 import { MassDeactivateDialog } from './MassDeactivateDialog';
-import { Profile } from '../types';
+import { BulkImportDialog } from './BulkImportDialog';
+import { Profile, NewCadet } from '../types';
 
 interface CadetDialogsProps {
   // Add Dialog
@@ -30,6 +31,11 @@ interface CadetDialogsProps {
   profileToToggle: Profile | null;
   onToggleStatus: () => void;
   statusLoading: boolean;
+  
+  // Bulk Import Dialog
+  bulkImportDialogOpen: boolean;
+  setBulkImportDialogOpen: (open: boolean) => void;
+  onBulkImport: (cadets: NewCadet[]) => Promise<{ success: number; failed: number; errors: string[] }>;
   
   // Mass Update Dialogs
   gradeDialogOpen: boolean;
@@ -106,6 +112,12 @@ export const CadetDialogs = (props: CadetDialogsProps) => {
         onConfirm={props.onMassDeactivate}
         selectedCount={props.selectedCount}
         loading={props.massOperationLoading}
+      />
+
+      <BulkImportDialog
+        open={props.bulkImportDialogOpen}
+        onOpenChange={props.setBulkImportDialogOpen}
+        onBulkImport={props.onBulkImport}
       />
     </>
   );

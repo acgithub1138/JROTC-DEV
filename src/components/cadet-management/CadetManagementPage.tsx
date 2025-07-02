@@ -28,6 +28,7 @@ const CadetManagementPage = () => {
     setNewCadet,
     handleToggleUserStatus,
     handleAddCadet,
+    handleBulkImport,
     handleSaveProfile,
     fetchProfiles
   } = useCadetManagement();
@@ -47,6 +48,7 @@ const CadetManagementPage = () => {
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [bulkImportDialogOpen, setBulkImportDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
 
@@ -140,7 +142,10 @@ const CadetManagementPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} />
+      <CadetPageHeader 
+        onAddCadet={() => setAddDialogOpen(true)}
+        onBulkImport={() => setBulkImportDialogOpen(true)}
+      />
 
       <Card>
         <CardHeader>
@@ -205,6 +210,9 @@ const CadetManagementPage = () => {
         profileToToggle={profileToToggle}
         onToggleStatus={handleToggleStatusWrapper}
         statusLoading={statusLoading}
+        bulkImportDialogOpen={bulkImportDialogOpen}
+        setBulkImportDialogOpen={setBulkImportDialogOpen}
+        onBulkImport={handleBulkImport}
         gradeDialogOpen={gradeDialogOpen}
         setGradeDialogOpen={setGradeDialogOpen}
         rankDialogOpen={rankDialogOpen}

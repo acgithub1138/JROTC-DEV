@@ -134,6 +134,48 @@ export const useCadetManagement = () => {
     }
   };
 
+  const handleBulkImport = async (cadets: NewCadet[]) => {
+    let successCount = 0;
+    let failedCount = 0;
+    const errors: string[] = [];
+
+    for (let i = 0; i < cadets.length; i++) {
+      const cadet = cadets[i];
+      try {
+        const { error } = await supabase.functions.invoke('create-cadet-user', {
+          body: {
+            email: cadet.email,
+            first_name: cadet.first_name,
+            last_name: cadet.last_name,
+            role: cadet.role,
+            grade: cadet.grade || null,
+            rank: cadet.rank || null,
+            flight: cadet.flight || null,
+            school_id: userProfile?.school_id!
+          }
+        });
+
+        if (error) throw error;
+        successCount++;
+      } catch (error) {
+        console.error(`Error creating cadet ${cadet.email}:`, error);
+        failedCount++;
+        errors.push(`Failed to create ${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
+      }
+    }
+
+    if (successCount > 0) {
+      toast({
+        title: "Bulk Import Complete",
+        description: `Successfully created ${successCount} cadets${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
+        duration: 8000
+      });
+      fetchProfiles();
+    }
+
+    return { success: successCount, failed: failedCount, errors };
+  };
+
   const handleSaveProfile = async (editingProfile: Profile) => {
     try {
       const { error } = await supabase
@@ -189,6 +231,7 @@ export const useCadetManagement = () => {
     setNewCadet,
     handleToggleUserStatus,
     handleAddCadet,
+    handleBulkImport,
     handleSaveProfile,
     fetchProfiles
   };
