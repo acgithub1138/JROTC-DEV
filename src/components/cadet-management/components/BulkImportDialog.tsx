@@ -8,8 +8,11 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Upload, FileText, Edit2, Trash2, AlertCircle, CheckCircle, Users } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { parseCSV, validateCadetData } from '../utils/csvProcessor';
 import { NewCadet } from '../types';
+import { gradeOptions, flightOptions, roleOptions } from '../constants';
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -26,6 +29,9 @@ interface ParsedCadet extends NewCadet {
 type ImportStep = 'upload' | 'preview' | 'import' | 'complete';
 
 export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImportDialogProps) => {
+  const { userProfile } = useAuth();
+  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+  
   const [step, setStep] = useState<ImportStep>('upload');
   const [file, setFile] = useState<File | null>(null);
   const [parsedCadets, setParsedCadets] = useState<ParsedCadet[]>([]);
@@ -265,37 +271,87 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
                               <SelectValue />
                             </SelectTrigger>
                             <SelectContent>
-                              <SelectItem value="cadet">Cadet</SelectItem>
-                              <SelectItem value="command_staff">Command Staff</SelectItem>
+                              {roleOptions.map((role) => (
+                                <SelectItem key={role.value} value={role.value}>
+                                  {role.label}
+                                </SelectItem>
+                              ))}
                             </SelectContent>
                           </Select>
-                        ) : cadet.role}
+                        ) : (cadet.role === 'command_staff' ? 'Command Staff' : 'Cadet')}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? (
-                          <Input 
-                            value={cadet.grade || ''}
-                            onChange={(e) => updateCadet(cadet.id, 'grade', e.target.value)}
-                            className="h-8"
-                          />
+                          <Select 
+                            value={cadet.grade || ''} 
+                            onValueChange={(value) => updateCadet(cadet.id, 'grade', value)}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Select grade" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {gradeOptions.map((grade) => (
+                                <SelectItem key={grade} value={grade}>
+                                  {grade}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ) : cadet.grade}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? (
-                          <Input 
-                            value={cadet.rank || ''}
-                            onChange={(e) => updateCadet(cadet.id, 'rank', e.target.value)}
-                            className="h-8"
-                          />
+                          <Select 
+                            value={cadet.rank || ''} 
+                            onValueChange={(value) => updateCadet(cadet.id, 'rank', value === "none" ? "" : value)}
+                            disabled={ranks.length === 0}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue
+                                placeholder={
+                                  ranks.length === 0
+                                    ? userProfile?.schools?.jrotc_program
+                                      ? "No ranks available"
+                                      : "Set JROTC program first"
+                                    : "Select rank"
+                                }
+                              />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {ranks.length === 0 ? (
+                                <SelectItem value="none" disabled>
+                                  {userProfile?.schools?.jrotc_program
+                                    ? "No ranks available for this program"
+                                    : "JROTC program not set for school"}
+                                </SelectItem>
+                              ) : (
+                                ranks.map((rank) => (
+                                  <SelectItem key={rank.id} value={rank.rank || "none"}>
+                                    {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
                         ) : cadet.rank}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? (
-                          <Input 
-                            value={cadet.flight || ''}
-                            onChange={(e) => updateCadet(cadet.id, 'flight', e.target.value)}
-                            className="h-8"
-                          />
+                          <Select 
+                            value={cadet.flight || ''} 
+                            onValueChange={(value) => updateCadet(cadet.id, 'flight', value)}
+                          >
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Select flight" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {flightOptions.map((flight) => (
+                                <SelectItem key={flight} value={flight}>
+                                  {flight}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
                         ) : cadet.flight}
                       </TableCell>
                       <TableCell>
