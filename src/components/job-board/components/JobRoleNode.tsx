@@ -10,6 +10,7 @@ interface JobRoleNodeData {
   cadetName: string;
   rank: string;
   grade: string;
+  occupiedHandles: Set<string>;
   onHandleDragStart?: (handleId: string, job: any, event: React.MouseEvent) => void;
   onHandleDrop?: (targetJobId: string, targetHandle: string) => void;
   isValidDropTarget?: (jobId: string, handleId: string) => boolean;
@@ -28,6 +29,7 @@ const InteractiveHandle = ({
   isActive,
   isValidDropTarget,
   isDragMode,
+  hasConnection,
   onMouseDown,
   onMouseUp
 }: {
@@ -37,35 +39,54 @@ const InteractiveHandle = ({
   isActive: boolean;
   isValidDropTarget: boolean;
   isDragMode: boolean;
+  hasConnection: boolean;
   onMouseDown: (e: React.MouseEvent) => void;
   onMouseUp: (e: React.MouseEvent) => void;
-}) => (
-  <Handle
-    id={id}
-    type={type}
-    position={position}
-    className={`transition-all duration-200 cursor-pointer ${
-      isActive 
-        ? 'w-4 h-4 bg-primary border-2 border-white shadow-lg' 
-        : isDragMode && isValidDropTarget
-        ? 'w-4 h-4 bg-green-500 border-2 border-white shadow-lg'
-        : isDragMode
-        ? 'w-3 h-3 bg-red-500 opacity-50'
-        : 'w-3 h-3 hover:w-4 hover:h-4 hover:bg-primary/60'
-    }`}
-    onMouseDown={(e) => {
+}) => {
+  const handleMouseDown = (e: React.MouseEvent) => {
+    // Only allow interaction if this handle has an existing connection
+    if (!hasConnection) {
+      e.preventDefault();
       e.stopPropagation();
-      onMouseDown(e);
-    }}
-    onMouseUp={(e) => {
-      e.stopPropagation();
-      onMouseUp(e);
-    }}
-  />
-);
+      return;
+    }
+    e.stopPropagation();
+    onMouseDown(e);
+  };
+
+  const handleMouseUp = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onMouseUp(e);
+  };
+
+  return (
+    <Handle
+      id={id}
+      type={type}
+      position={position}
+      className={`transition-all duration-200 ${
+        hasConnection 
+          ? 'cursor-pointer' 
+          : 'cursor-default pointer-events-none opacity-30'
+      } ${
+        isActive 
+          ? 'w-4 h-4 bg-primary border-2 border-white shadow-lg' 
+          : isDragMode && isValidDropTarget
+          ? 'w-4 h-4 bg-green-500 border-2 border-white shadow-lg'
+          : isDragMode
+          ? 'w-3 h-3 bg-red-500 opacity-50'
+          : hasConnection
+          ? 'w-4 h-4 bg-primary/80 border-2 border-white shadow hover:bg-primary'
+          : 'w-2 h-2 bg-gray-300 border border-gray-400'
+      }`}
+      onMouseDown={handleMouseDown}
+      onMouseUp={handleMouseUp}
+    />
+  );
+};
 
 export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
-  const { job, role, cadetName, rank, grade, onHandleDragStart, onHandleDrop, isValidDropTarget, editState } = data;
+  const { job, role, cadetName, rank, grade, occupiedHandles, onHandleDragStart, onHandleDrop, isValidDropTarget, editState } = data;
   const [activeHandle, setActiveHandle] = useState<string | null>(null);
 
   const handleMouseDown = (handleId: string, event: React.MouseEvent) => {
@@ -91,6 +112,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'top-target'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'top-target') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('top-target')}
         onMouseDown={(e) => handleMouseDown('top-target', e)}
         onMouseUp={(e) => handleMouseUp('top-target', e)}
       />
@@ -101,6 +123,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'top-source'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'top-source') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('top-source')}
         onMouseDown={(e) => handleMouseDown('top-source', e)}
         onMouseUp={(e) => handleMouseUp('top-source', e)}
       />
@@ -111,6 +134,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'left-target'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'left-target') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('left-target')}
         onMouseDown={(e) => handleMouseDown('left-target', e)}
         onMouseUp={(e) => handleMouseUp('left-target', e)}
       />
@@ -121,6 +145,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'left-source'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'left-source') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('left-source')}
         onMouseDown={(e) => handleMouseDown('left-source', e)}
         onMouseUp={(e) => handleMouseUp('left-source', e)}
       />
@@ -131,6 +156,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'right-target'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'right-target') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('right-target')}
         onMouseDown={(e) => handleMouseDown('right-target', e)}
         onMouseUp={(e) => handleMouseUp('right-target', e)}
       />
@@ -141,6 +167,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'right-source'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'right-source') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('right-source')}
         onMouseDown={(e) => handleMouseDown('right-source', e)}
         onMouseUp={(e) => handleMouseUp('right-source', e)}
       />
@@ -178,6 +205,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'bottom-target'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'bottom-target') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('bottom-target')}
         onMouseDown={(e) => handleMouseDown('bottom-target', e)}
         onMouseUp={(e) => handleMouseUp('bottom-target', e)}
       />
@@ -188,6 +216,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         isActive={activeHandle === 'bottom-source'}
         isValidDropTarget={isValidDropTarget?.(job.id, 'bottom-source') || false}
         isDragMode={editState?.isDragging || false}
+        hasConnection={occupiedHandles.has('bottom-source')}
         onMouseDown={(e) => handleMouseDown('bottom-source', e)}
         onMouseUp={(e) => handleMouseUp('bottom-source', e)}
       />

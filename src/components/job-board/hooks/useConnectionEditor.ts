@@ -82,11 +82,15 @@ export const useConnectionEditor = (
     
     // Create updates for source job
     const sourceUpdates: Partial<JobBoardWithCadet> = {};
+    
+    // First, clear the old connection if we're moving an existing one
     if (connectionType === 'reports_to') {
+      // Clear any existing reports_to connection
       sourceUpdates.reports_to = targetJob.role;
       sourceUpdates.reports_to_source_handle = editState.sourceHandle;
       sourceUpdates.reports_to_target_handle = targetHandle;
     } else {
+      // Clear any existing assistant connection  
       sourceUpdates.assistant = targetJob.role;
       sourceUpdates.assistant_source_handle = editState.sourceHandle;
       sourceUpdates.assistant_target_handle = targetHandle;
