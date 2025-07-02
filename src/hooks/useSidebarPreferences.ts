@@ -31,6 +31,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
       return [
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
+        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
@@ -50,6 +51,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
       return [
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
+        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },        
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
