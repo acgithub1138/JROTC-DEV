@@ -87,6 +87,62 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
           .react-flow__background {
             display: none !important;
           }
+          /* Preserve card styling */
+          .react-flow__node {
+            background: white !important;
+            border: 2px solid #d1d5db !important;
+            border-radius: 8px !important;
+            box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1) !important;
+            padding: 16px !important;
+            min-width: 280px !important;
+          }
+          /* Preserve text styling */
+          .font-bold {
+            font-weight: bold !important;
+          }
+          .text-lg {
+            font-size: 1.125rem !important;
+          }
+          .text-xs {
+            font-size: 0.75rem !important;
+          }
+          .text-center {
+            text-align: center !important;
+          }
+          .border-b {
+            border-bottom: 1px solid #e5e7eb !important;
+          }
+          .pb-2 {
+            padding-bottom: 0.5rem !important;
+          }
+          .pt-2 {
+            padding-top: 0.5rem !important;
+          }
+          /* Badge styling */
+          .badge {
+            display: inline-flex !important;
+            align-items: center !important;
+            border-radius: 9999px !important;
+            border: 1px solid #e5e7eb !important;
+            padding: 0.125rem 0.625rem !important;
+            font-size: 0.75rem !important;
+            font-weight: 500 !important;
+          }
+          /* Grade colors */
+          .bg-red-500 { background-color: #ef4444 !important; color: white !important; }
+          .bg-green-500 { background-color: #22c55e !important; color: white !important; }
+          .bg-blue-500 { background-color: #3b82f6 !important; color: white !important; }
+          .bg-black { background-color: #000000 !important; color: white !important; }
+          .bg-gray-500 { background-color: #6b7280 !important; color: white !important; }
+          /* Layout helpers */
+          .flex { display: flex !important; }
+          .justify-between { justify-content: space-between !important; }
+          .items-center { align-items: center !important; }
+          .space-y-2 > * + * { margin-top: 0.5rem !important; }
+          /* Hide handles for printing */
+          .react-flow__handle {
+            display: none !important;
+          }
         }
       </style>
     `;
@@ -95,20 +151,30 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
     if (printWindow) {
       const chartElement = document.querySelector('.react-flow');
       if (chartElement) {
+        // Clone the element to avoid modifying the original
+        const clonedChart = chartElement.cloneNode(true) as HTMLElement;
+        
         printWindow.document.write(`
           <html>
             <head>
               <title>Job Board Organizational Chart</title>
               ${printStyles}
-              <link rel="stylesheet" href="${window.location.origin}/node_modules/@xyflow/react/dist/style.css">
               <style>
-                body { margin: 0; font-family: system-ui, sans-serif; }
-                .chart-container { width: 100vw; height: 100vh; }
+                body { 
+                  margin: 0; 
+                  font-family: system-ui, -apple-system, sans-serif; 
+                  background: white;
+                }
+                .chart-container { 
+                  width: 100vw; 
+                  height: 100vh; 
+                  background: white;
+                }
               </style>
             </head>
             <body>
               <div class="chart-container">
-                ${chartElement.outerHTML}
+                ${clonedChart.outerHTML}
               </div>
             </body>
           </html>
