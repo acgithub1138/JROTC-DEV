@@ -163,12 +163,14 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
                 className="hidden"
                 id="csv-upload"
               />
-              <label htmlFor="csv-upload">
-                <Button variant="outline" className="cursor-pointer">
-                  <FileText className="w-4 h-4 mr-2" />
-                  Choose File
-                </Button>
-              </label>
+              <Button 
+                variant="outline" 
+                onClick={() => document.getElementById('csv-upload')?.click()}
+                className="cursor-pointer"
+              >
+                <FileText className="w-4 h-4 mr-2" />
+                Choose File
+              </Button>
               
               <div className="mt-6 text-sm text-muted-foreground">
                 <h4 className="font-medium mb-2">Required CSV columns:</h4>
