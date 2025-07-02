@@ -27,10 +27,28 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
   const { getNodes } = useReactFlow();
 
   const handleDownloadImage = useCallback(() => {
-    const nodesBounds = getNodesBounds(getNodes());
+    const nodes = getNodes();
+    if (nodes.length === 0) return;
+
+    const nodesBounds = getNodesBounds(nodes);
+    const padding = 50;
     const imageWidth = 1920;
     const imageHeight = 1080;
-    const viewport = getViewportForBounds(nodesBounds, imageWidth, imageHeight, 0.5, 2, 0.5);
+    
+    // Calculate the content dimensions with padding
+    const contentWidth = nodesBounds.width + padding * 2;
+    const contentHeight = nodesBounds.height + padding * 2;
+    
+    // Calculate scale to fit content in image while maintaining aspect ratio
+    const scaleX = imageWidth / contentWidth;
+    const scaleY = imageHeight / contentHeight;
+    const scale = Math.min(scaleX, scaleY, 2); // Cap at 2x zoom for readability
+    
+    // Calculate position to center the content
+    const scaledContentWidth = contentWidth * scale;
+    const scaledContentHeight = contentHeight * scale;
+    const offsetX = (imageWidth - scaledContentWidth) / 2 - (nodesBounds.x - padding) * scale;
+    const offsetY = (imageHeight - scaledContentHeight) / 2 - (nodesBounds.y - padding) * scale;
 
     const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
     
@@ -42,7 +60,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         style: {
           width: imageWidth.toString(),
           height: imageHeight.toString(),
-          transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+          transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
         },
         filter: (node) => {
           // Hide handles and controls in the exported image
