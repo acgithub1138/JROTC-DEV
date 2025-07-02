@@ -11,17 +11,15 @@ import { DataPreviewTable } from './bulk-operations/DataPreviewTable';
 import { TemplateDownloadSection } from './bulk-operations/TemplateDownloadSection';
 import { FieldMappingSection } from './bulk-operations/FieldMappingSection';
 import { CSVProcessor, ParsedItem, FieldMapping } from './bulk-operations/CSVProcessor';
-
 interface BulkOperationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onImport: (item: any) => Promise<void>;
 }
-
 export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   open,
   onOpenChange,
-  onImport,
+  onImport
 }) => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
@@ -31,25 +29,29 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   const [showMapping, setShowMapping] = useState(false);
   const [csvHeaders, setCsvHeaders] = useState<string[]>([]);
   const [fieldMappings, setFieldMappings] = useState<FieldMapping[]>([]);
-  const [importProgress, setImportProgress] = useState({ current: 0, total: 0 });
-  const { toast } = useToast();
-
+  const [importProgress, setImportProgress] = useState({
+    current: 0,
+    total: 0
+  });
+  const {
+    toast
+  } = useToast();
   const downloadTemplate = () => {
     const csvContent = CSVProcessor.generateTemplate();
-    const blob = new Blob([csvContent], { type: 'text/csv' });
+    const blob = new Blob([csvContent], {
+      type: 'text/csv'
+    });
     const url = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = url;
     a.download = 'inventory-import-template.csv';
     a.click();
     URL.revokeObjectURL(url);
-
     toast({
       title: "Template Downloaded",
-      description: "Use this template to format your inventory data",
+      description: "Use this template to format your inventory data"
     });
   };
-
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file && file.type === 'text/csv') {
@@ -63,119 +65,109 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       toast({
         title: "Invalid File",
         description: "Please select a CSV file",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const parseCSVHeaders = async () => {
     if (!importFile) return;
-
     try {
-      const { csvHeaders } = await CSVProcessor.parseCSV(importFile);
+      const {
+        csvHeaders
+      } = await CSVProcessor.parseCSV(importFile);
       setCsvHeaders(csvHeaders);
-      
+
       // Generate auto mapping
       const autoMapping = CSVProcessor.generateAutoMapping(csvHeaders);
       setFieldMappings(autoMapping);
       setShowMapping(true);
-
       toast({
         title: "CSV Headers Loaded",
-        description: `Found ${csvHeaders.length} columns. Please review the field mapping.`,
+        description: `Found ${csvHeaders.length} columns. Please review the field mapping.`
       });
     } catch (error) {
       toast({
         title: "Parse Failed",
         description: error instanceof Error ? error.message : "Failed to parse CSV file. Please check the format.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const handleMappingChange = (csvColumn: string, dbField: string | null) => {
-    setFieldMappings(prev => prev.map(mapping => 
-      mapping.csvColumn === csvColumn 
-        ? { ...mapping, dbField }
-        : mapping
-    ));
+    setFieldMappings(prev => prev.map(mapping => mapping.csvColumn === csvColumn ? {
+      ...mapping,
+      dbField
+    } : mapping));
   };
-
   const handleAutoMap = () => {
     const autoMapping = CSVProcessor.generateAutoMapping(csvHeaders);
     setFieldMappings(autoMapping);
   };
-
   const parseCSVData = async () => {
     if (!importFile || !fieldMappings.length) return;
-
     try {
-      const { parsedItems, unmatchedHeaders } = await CSVProcessor.parseCSV(importFile, fieldMappings);
-      
+      const {
+        parsedItems,
+        unmatchedHeaders
+      } = await CSVProcessor.parseCSV(importFile, fieldMappings);
       setParsedData(parsedItems);
       setShowMapping(false);
       setShowPreview(true);
-
       const validCount = parsedItems.filter(item => item.isValid).length;
       const totalCount = parsedItems.length;
-
       let message = `${validCount}/${totalCount} rows are valid and ready to import`;
       if (unmatchedHeaders.length > 0) {
         message += `\nNote: ${unmatchedHeaders.length} column(s) were not recognized and will be ignored`;
       }
-
       toast({
         title: "CSV Parsed",
-        description: message,
+        description: message
       });
-
     } catch (error) {
       toast({
         title: "Parse Failed",
         description: error instanceof Error ? error.message : "Failed to parse CSV file. Please check the format.",
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
-
   const processCSVImport = async () => {
     if (!parsedData.length) return;
-
     const validItems = parsedData.filter(item => item.isValid).map(item => item.data);
-    
     if (validItems.length === 0) {
       toast({
         title: "No Valid Items",
         description: "Please fix the validation errors before importing",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsProcessing(true);
     setIsCancelled(false);
-    setImportProgress({ current: 0, total: validItems.length });
-    
+    setImportProgress({
+      current: 0,
+      total: validItems.length
+    });
     try {
       // Import valid items one by one to handle errors gracefully
       let successCount = 0;
       let errorCount = 0;
       const errorDetails: string[] = [];
-
       for (let i = 0; i < validItems.length; i++) {
         // Check if import was cancelled
         if (isCancelled) {
           break;
         }
-
         const item = validItems[i];
-        
+
         // Update progress before importing each item
-        setImportProgress({ current: i, total: validItems.length });
-        
+        setImportProgress({
+          current: i,
+          total: validItems.length
+        });
+
         // Allow UI to update by yielding control
         await new Promise(resolve => setTimeout(resolve, 10));
-        
         try {
           console.log('Importing item:', item);
           // FIX: Pass single item instead of array
@@ -189,22 +181,22 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
           errorDetails.push(`Row ${parsedData.find(p => p.data === item)?.rowNumber || i + 1}: ${errorMsg}`);
         }
       }
-      
+
       // Final progress update (only if not cancelled)
       if (!isCancelled) {
-        setImportProgress({ current: validItems.length, total: validItems.length });
+        setImportProgress({
+          current: validItems.length,
+          total: validItems.length
+        });
       }
 
       // Show summary toast with longer duration
       const titleText = isCancelled ? "Import Cancelled" : "Import Complete";
-      const descriptionText = isCancelled 
-        ? `Import cancelled. ${successCount} items were imported before cancellation.`
-        : `${successCount} items imported successfully. ${errorCount} failed.`;
-      
+      const descriptionText = isCancelled ? `Import cancelled. ${successCount} items were imported before cancellation.` : `${successCount} items imported successfully. ${errorCount} failed.`;
       toast({
         title: titleText,
         description: descriptionText,
-        duration: errorCount > 0 ? 8000 : 5000, // Longer duration if there are errors
+        duration: errorCount > 0 ? 8000 : 5000 // Longer duration if there are errors
       });
 
       // Show error details if any failed
@@ -214,11 +206,10 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
             title: "Import Errors",
             description: errorDetails.slice(0, 5).join('\n') + (errorDetails.length > 5 ? `\n... and ${errorDetails.length - 5} more errors` : ''),
             variant: "destructive",
-            duration: 10000, // Show errors for 10 seconds
+            duration: 10000 // Show errors for 10 seconds
           });
         }, 1000); // Delay to avoid overlapping toasts
       }
-
       if (errorCount === 0 && !isCancelled) {
         onOpenChange(false);
         setImportFile(null);
@@ -228,32 +219,27 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         setCsvHeaders([]);
         setFieldMappings([]);
       }
-
     } catch (error) {
       toast({
         title: "Import Failed",
         description: "Failed to import items. Please try again.",
         variant: "destructive",
-        duration: 8000,
+        duration: 8000
       });
     } finally {
       setIsProcessing(false);
     }
   };
-
   const handleCancelImport = () => {
     setIsCancelled(true);
     toast({
       title: "Cancelling Import",
-      description: "Import will stop after the current item finishes processing.",
+      description: "Import will stop after the current item finishes processing."
     });
   };
-
   const validItemsCount = parsedData.filter(item => item.isValid).length;
   const invalidItemsCount = parsedData.length - validItemsCount;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
         <DialogHeader>
           <DialogTitle>Bulk Operations</DialogTitle>
@@ -262,28 +248,11 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         <Tabs defaultValue="import" className="w-full flex flex-col flex-1">
           <TabsList className="grid w-full grid-cols-2">
             <TabsTrigger value="import">Import Data</TabsTrigger>
-            <TabsTrigger value="export">Export Template</TabsTrigger>
+            <TabsTrigger value="export">Import Template Download</TabsTrigger>
           </TabsList>
           
           <TabsContent value="import" className="space-y-4 flex-1 flex flex-col">
-            {!showMapping && !showPreview ? (
-              <CSVUploadSection
-                importFile={importFile}
-                onFileChange={handleFileChange}
-                onDownloadTemplate={downloadTemplate}
-                onPreviewData={parseCSVHeaders}
-              />
-            ) : showMapping ? (
-              <FieldMappingSection
-                csvHeaders={csvHeaders}
-                fieldMappings={fieldMappings}
-                onMappingChange={handleMappingChange}
-                onAutoMap={handleAutoMap}
-                onProceed={parseCSVData}
-                onBack={() => setShowMapping(false)}
-              />
-            ) : (
-              <div className="space-y-4 h-full flex flex-col">
+            {!showMapping && !showPreview ? <CSVUploadSection importFile={importFile} onFileChange={handleFileChange} onDownloadTemplate={downloadTemplate} onPreviewData={parseCSVHeaders} /> : showMapping ? <FieldMappingSection csvHeaders={csvHeaders} fieldMappings={fieldMappings} onMappingChange={handleMappingChange} onAutoMap={handleAutoMap} onProceed={parseCSVData} onBack={() => setShowMapping(false)} /> : <div className="space-y-4 h-full flex flex-col">
                 <div className="flex items-center justify-between">
                   <div className="flex items-center space-x-4">
                     <h3 className="text-lg font-medium">Data Preview</h3>
@@ -292,32 +261,26 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                         <CheckCircle className="w-3 h-3 mr-1" />
                         {validItemsCount} Valid
                       </Badge>
-                      {invalidItemsCount > 0 && (
-                        <Badge variant="destructive">
+                      {invalidItemsCount > 0 && <Badge variant="destructive">
                           <AlertTriangle className="w-3 h-3 mr-1" />
                           {invalidItemsCount} Invalid
-                        </Badge>
-                      )}
+                        </Badge>}
                     </div>
                   </div>
                   <div className="flex space-x-2">
                     <Button variant="outline" onClick={() => {
-                      setShowPreview(false);
-                      setShowMapping(true);
-                    }}>
+                  setShowPreview(false);
+                  setShowMapping(true);
+                }}>
                       Back to Mapping
                     </Button>
-                    <Button 
-                      onClick={processCSVImport}
-                      disabled={validItemsCount === 0 || isProcessing}
-                    >
+                    <Button onClick={processCSVImport} disabled={validItemsCount === 0 || isProcessing}>
                       {isProcessing ? 'Importing...' : `Import ${validItemsCount} Items`}
                     </Button>
                   </div>
                 </div>
 
-                {isProcessing && (
-                  <div className="space-y-2 bg-muted/50 p-4 rounded-lg">
+                {isProcessing && <div className="space-y-2 bg-muted/50 p-4 rounded-lg">
                     <div className="flex items-center justify-between text-sm">
                       <span className="font-medium">
                         {isCancelled ? 'Cancelling import...' : 'Importing items...'}
@@ -327,27 +290,15 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <Progress 
-                        value={(importProgress.current / importProgress.total) * 100} 
-                        className="flex-1"
-                      />
-                      {!isCancelled && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={handleCancelImport}
-                          className="text-red-600 hover:text-red-700"
-                        >
+                      <Progress value={importProgress.current / importProgress.total * 100} className="flex-1" />
+                      {!isCancelled && <Button variant="outline" size="sm" onClick={handleCancelImport} className="text-red-600 hover:text-red-700">
                           Cancel
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
-                  </div>
-                )}
+                  </div>}
 
                 <DataPreviewTable parsedData={parsedData} />
-              </div>
-            )}
+              </div>}
           </TabsContent>
           
           <TabsContent value="export" className="space-y-4">
@@ -355,6 +306,5 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
           </TabsContent>
         </Tabs>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
