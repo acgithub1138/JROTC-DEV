@@ -672,24 +672,6 @@ export type Database = {
           },
         ]
       }
-      job_board_roles: {
-        Row: {
-          id: string
-          program: Database["public"]["Enums"]["jrotc_program"] | null
-          role: string | null
-        }
-        Insert: {
-          id?: string
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          role?: string | null
-        }
-        Update: {
-          id?: string
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          role?: string | null
-        }
-        Relationships: []
-      }
       profiles: {
         Row: {
           created_at: string
@@ -698,7 +680,6 @@ export type Database = {
           flight: string | null
           grade: string | null
           id: string
-          job_role: string | null
           last_name: string
           phone: string | null
           rank: string | null
@@ -713,7 +694,6 @@ export type Database = {
           flight?: string | null
           grade?: string | null
           id: string
-          job_role?: string | null
           last_name: string
           phone?: string | null
           rank?: string | null
@@ -728,7 +708,6 @@ export type Database = {
           flight?: string | null
           grade?: string | null
           id?: string
-          job_role?: string | null
           last_name?: string
           phone?: string | null
           rank?: string | null
@@ -745,27 +724,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      ranks: {
-        Row: {
-          abbreviation: string | null
-          id: string
-          program: Database["public"]["Enums"]["jrotc_program"] | null
-          rank: string | null
-        }
-        Insert: {
-          abbreviation?: string | null
-          id?: string
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          rank?: string | null
-        }
-        Update: {
-          abbreviation?: string | null
-          id?: string
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          rank?: string | null
-        }
-        Relationships: []
       }
       schema_tracking: {
         Row: {

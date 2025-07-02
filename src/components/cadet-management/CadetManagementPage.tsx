@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -11,7 +12,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
 import { Users, Edit, Search, Plus } from 'lucide-react';
-import { useSchoolData } from '@/hooks/useSchoolData';
+import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
+
 interface Profile {
   id: string;
   first_name: string;
@@ -21,10 +23,10 @@ interface Profile {
   grade?: string;
   rank?: string;
   flight?: string;
-  job_role?: string;
   created_at: string;
   updated_at: string;
 }
+
 interface NewCadet {
   first_name: string;
   last_name: string;
@@ -33,20 +35,11 @@ interface NewCadet {
   grade?: string;
   rank?: string;
   flight?: string;
-  job_role?: string;
 }
+
 const CadetManagementPage = () => {
-  const {
-    userProfile
-  } = useAuth();
-  const {
-    toast
-  } = useToast();
-  const {
-    data: schoolData,
-    isLoading: schoolDataLoading,
-    error: schoolDataError
-  } = useSchoolData();
+  const { userProfile } = useAuth();
+  const { toast } = useToast();
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -61,27 +54,29 @@ const CadetManagementPage = () => {
     role: 'cadet',
     grade: '',
     rank: '',
-    flight: '',
-    job_role: ''
+    flight: ''
   });
+
   const RECORDS_PER_PAGE = 25;
   const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
   const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
-  const roleOptions = [{
-    value: 'cadet',
-    label: 'Cadet'
-  }, {
-    value: 'command_staff',
-    label: 'Command Staff'
-  }];
+  const roleOptions = [
+    { value: 'cadet', label: 'Cadet' },
+    { value: 'command_staff', label: 'Command Staff' }
+  ];
+
+  // Get ranks based on school's JROTC program
+  const availableRanks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+
   const fetchProfiles = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('profiles').select('*').eq('school_id', userProfile?.school_id).in('role', ['cadet', 'command_staff']).order('created_at', {
-        ascending: false
-      });
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('*')
+        .eq('school_id', userProfile?.school_id)
+        .in('role', ['cadet', 'command_staff'])
+        .order('created_at', { ascending: false });
+
       if (error) throw error;
       setProfiles(data || []);
     } catch (error) {
@@ -95,52 +90,35 @@ const CadetManagementPage = () => {
       setLoading(false);
     }
   };
+
   useEffect(() => {
     if (userProfile?.school_id) {
       fetchProfiles();
     }
   }, [userProfile?.school_id]);
 
-  // Show error state for school data with more detailed logging
-  useEffect(() => {
-    if (schoolDataError) {
-      console.error('Error fetching school data:', schoolDataError);
-      toast({
-        title: "Error",
-        description: "Failed to load ranks and job roles. Please check your school's JROTC program setting.",
-        variant: "destructive"
-      });
-    }
-  }, [schoolDataError, toast]);
-
-  // Log school data status for debugging
-  useEffect(() => {
-    console.log('CadetManagementPage: School data status:', {
-      schoolDataLoading,
-      schoolDataError,
-      schoolData,
-      userProfileSchool: userProfile?.schools,
-      jrotcProgram: userProfile?.schools?.jrotc_program
-    });
-  }, [schoolDataLoading, schoolDataError, schoolData, userProfile]);
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
     setEditDialogOpen(true);
   };
+
   const handleSaveProfile = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingProfile) return;
+
     try {
-      const {
-        error
-      } = await supabase.from('profiles').update({
-        grade: editingProfile.grade || null,
-        rank: editingProfile.rank || null,
-        flight: editingProfile.flight || null,
-        job_role: editingProfile.job_role || null,
-        updated_at: new Date().toISOString()
-      }).eq('id', editingProfile.id);
+      const { error } = await supabase
+        .from('profiles')
+        .update({
+          grade: editingProfile.grade || null,
+          rank: editingProfile.rank || null,
+          flight: editingProfile.flight || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingProfile.id);
+
       if (error) throw error;
+
       toast({
         title: "Success",
         description: "Cadet updated successfully"
@@ -157,6 +135,7 @@ const CadetManagementPage = () => {
       });
     }
   };
+
   const handleAddCadet = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
@@ -167,13 +146,11 @@ const CadetManagementPage = () => {
       });
       return;
     }
+
     console.log('Adding new cadet:', newCadet);
     try {
       // Call edge function to create cadet user
-      const {
-        data,
-        error
-      } = await supabase.functions.invoke('create-cadet-user', {
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
         body: {
           email: newCadet.email,
           first_name: newCadet.first_name,
@@ -182,15 +159,16 @@ const CadetManagementPage = () => {
           grade: newCadet.grade || null,
           rank: newCadet.rank || null,
           flight: newCadet.flight || null,
-          job_role: newCadet.job_role || null,
           school_id: userProfile?.school_id!
         }
       });
+
       if (error) throw error;
+
       toast({
         title: "Success",
         description: `User added successfully. Temporary password: ${data.temp_password}`,
-        duration: 10000 // Show longer so they can copy the password
+        duration: 10000
       });
       setAddDialogOpen(false);
       setNewCadet({
@@ -200,8 +178,7 @@ const CadetManagementPage = () => {
         role: 'cadet',
         grade: '',
         rank: '',
-        flight: '',
-        job_role: ''
+        flight: ''
       });
       fetchProfiles();
     } catch (error) {
@@ -213,7 +190,16 @@ const CadetManagementPage = () => {
       });
     }
   };
-  const filteredProfiles = profiles.filter(profile => profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) || profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) || profile.email.toLowerCase().includes(searchTerm.toLowerCase()) || profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) || profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) || profile.flight?.toLowerCase().includes(searchTerm.toLowerCase()) || profile.job_role?.toLowerCase().includes(searchTerm.toLowerCase()));
+
+  const filteredProfiles = profiles.filter(profile =>
+    profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    profile.flight?.toLowerCase().includes(searchTerm.toLowerCase())
+  );
+
   const totalPages = Math.ceil(filteredProfiles.length / RECORDS_PER_PAGE);
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
@@ -223,31 +209,30 @@ const CadetManagementPage = () => {
   useEffect(() => {
     setCurrentPage(1);
   }, [searchTerm]);
+
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
   };
-  if (loading || schoolDataLoading) {
-    return <div className="p-6">
+
+  if (loading) {
+    return (
+      <div className="p-6">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-64 mb-6"></div>
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-200 rounded"></div>)}
+            {[...Array(5)].map((_, i) => (
+              <div key={i} className="h-16 bg-gray-200 rounded"></div>
+            ))}
           </div>
         </div>
-      </div>;
+      </div>
+    );
   }
-  const ranks = schoolData?.ranks || [];
-  const jobRoles = schoolData?.jobRoles || [];
 
-  // Debug logging for dropdown data
-  console.log('Dropdown data available:', {
-    ranksCount: ranks.length,
-    jobRolesCount: jobRoles.length,
-    ranks: ranks.slice(0, 3),
-    // Log first 3 for debugging
-    jobRoles: jobRoles.slice(0, 3)
-  });
-  return <div className="p-6 space-y-6">
+  console.log('Available ranks for program:', userProfile?.schools?.jrotc_program, availableRanks);
+
+  return (
+    <div className="p-6 space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h2 className="text-3xl font-bold tracking-tight">Cadet Management</h2>
@@ -272,7 +257,12 @@ const CadetManagementPage = () => {
           <div className="flex items-center space-x-2 mb-4">
             <div className="relative flex-1">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input placeholder="Search cadets..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+              <Input
+                placeholder="Search cadets..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="pl-10"
+              />
             </div>
           </div>
 
@@ -285,12 +275,12 @@ const CadetManagementPage = () => {
                 <TableHead>Grade</TableHead>
                 <TableHead>Rank</TableHead>
                 <TableHead>Flight</TableHead>
-                <TableHead>Job Role</TableHead>
                 <TableHead className="text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
-              {paginatedProfiles.map(profile => <TableRow key={profile.id}>
+              {paginatedProfiles.map((profile) => (
+                <TableRow key={profile.id}>
                   <TableCell className="font-medium">
                     {profile.first_name} {profile.last_name}
                   </TableCell>
@@ -299,54 +289,74 @@ const CadetManagementPage = () => {
                   <TableCell>{profile.grade || '-'}</TableCell>
                   <TableCell>{profile.rank || '-'}</TableCell>
                   <TableCell>{profile.flight || '-'}</TableCell>
-                  <TableCell>{profile.job_role || '-'}</TableCell>
                   <TableCell className="text-right">
-                    <Button variant="outline" size="sm" onClick={() => handleEditProfile(profile)}>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleEditProfile(profile)}
+                    >
                       <Edit className="w-4 h-4" />
                     </Button>
                   </TableCell>
-                </TableRow>)}
+                </TableRow>
+              ))}
             </TableBody>
           </Table>
 
-          {filteredProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
+          {filteredProfiles.length === 0 && (
+            <div className="text-center py-8 text-muted-foreground">
               No cadets found
-            </div>}
+            </div>
+          )}
 
-          {totalPages > 1 && <div className="flex justify-center mt-6">
+          {totalPages > 1 && (
+            <div className="flex justify-center mt-6">
               <Pagination>
                 <PaginationContent>
                   <PaginationItem>
-                    <PaginationPrevious onClick={() => handlePageChange(Math.max(1, currentPage - 1))} className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+                    <PaginationPrevious
+                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
                   </PaginationItem>
                   
-                  {Array.from({
-                length: totalPages
-              }, (_, i) => i + 1).map(page => {
-                if (totalPages <= 7 || page === 1 || page === totalPages || page >= currentPage - 1 && page <= currentPage + 1) {
-                  return <PaginationItem key={page}>
-                          <PaginationLink onClick={() => handlePageChange(page)} isActive={currentPage === page} className="cursor-pointer">
+                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                    if (totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                      return (
+                        <PaginationItem key={page}>
+                          <PaginationLink
+                            onClick={() => handlePageChange(page)}
+                            isActive={currentPage === page}
+                            className="cursor-pointer"
+                          >
                             {page}
                           </PaginationLink>
-                        </PaginationItem>;
-                } else if (page === currentPage - 2 || page === currentPage + 2) {
-                  return <PaginationItem key={page}>
+                        </PaginationItem>
+                      );
+                    } else if (page === currentPage - 2 || page === currentPage + 2) {
+                      return (
+                        <PaginationItem key={page}>
                           <PaginationEllipsis />
-                        </PaginationItem>;
-                }
-                return null;
-              })}
+                        </PaginationItem>
+                      );
+                    }
+                    return null;
+                  })}
                   
                   <PaginationItem>
-                    <PaginationNext onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))} className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"} />
+                    <PaginationNext
+                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                    />
                   </PaginationItem>
                 </PaginationContent>
               </Pagination>
-            </div>}
+            </div>
+          )}
         </CardContent>
       </Card>
 
-      {/* Add User Dialog with improved error handling */}
+      {/* Add User Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
@@ -359,41 +369,50 @@ const CadetManagementPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="first_name">First Name *</Label>
-                <Input id="first_name" value={newCadet.first_name} onChange={e => setNewCadet({
-                ...newCadet,
-                first_name: e.target.value
-              })} required />
+                <Input
+                  id="first_name"
+                  value={newCadet.first_name}
+                  onChange={(e) => setNewCadet({ ...newCadet, first_name: e.target.value })}
+                  required
+                />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="last_name">Last Name *</Label>
-                <Input id="last_name" value={newCadet.last_name} onChange={e => setNewCadet({
-                ...newCadet,
-                last_name: e.target.value
-              })} required />
+                <Input
+                  id="last_name"
+                  value={newCadet.last_name}
+                  onChange={(e) => setNewCadet({ ...newCadet, last_name: e.target.value })}
+                  required
+                />
               </div>
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="email">Email *</Label>
-              <Input id="email" type="email" value={newCadet.email} onChange={e => setNewCadet({
-              ...newCadet,
-              email: e.target.value
-            })} required />
+              <Input
+                id="email"
+                type="email"
+                value={newCadet.email}
+                onChange={(e) => setNewCadet({ ...newCadet, email: e.target.value })}
+                required
+              />
             </div>
 
             <div className="space-y-2">
               <Label htmlFor="role">Role *</Label>
-              <Select value={newCadet.role} onValueChange={(value: 'cadet' | 'command_staff') => setNewCadet({
-              ...newCadet,
-              role: value
-            })}>
+              <Select
+                value={newCadet.role}
+                onValueChange={(value: 'cadet' | 'command_staff') => setNewCadet({ ...newCadet, role: value })}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {roleOptions.map(role => <SelectItem key={role.value} value={role.value}>
+                  {roleOptions.map((role) => (
+                    <SelectItem key={role.value} value={role.value}>
                       {role.label}
-                    </SelectItem>)}
+                    </SelectItem>
+                  ))}
                 </SelectContent>
               </Select>
             </div>
@@ -401,75 +420,76 @@ const CadetManagementPage = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="grade">Grade</Label>
-                <Select value={newCadet.grade || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                grade: value
-              })}>
+                <Select
+                  value={newCadet.grade || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, grade: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent>
-                    {gradeOptions.map(grade => <SelectItem key={grade} value={grade}>
+                    {gradeOptions.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
                         {grade}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
               <div className="space-y-2">
                 <Label htmlFor="flight">Flight</Label>
-                <Select value={newCadet.flight || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                flight: value
-              })}>
+                <Select
+                  value={newCadet.flight || ""}
+                  onValueChange={(value) => setNewCadet({ ...newCadet, flight: value })}
+                >
                   <SelectTrigger>
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
                   <SelectContent>
-                    {flightOptions.map(flight => <SelectItem key={flight} value={flight}>
+                    {flightOptions.map((flight) => (
+                      <SelectItem key={flight} value={flight}>
                         {flight}
-                      </SelectItem>)}
+                      </SelectItem>
+                    ))}
                   </SelectContent>
                 </Select>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="rank">Rank</Label>
-                <Select value={newCadet.rank || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                rank: value === "none" ? "" : value
-              })} disabled={ranks.length === 0}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={schoolDataLoading ? "Loading ranks..." : ranks.length === 0 ? userProfile?.schools?.jrotc_program ? "No ranks available" : "Set JROTC program first" : "Select rank"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {ranks.length === 0 ? <SelectItem value="none" disabled>
-                        {userProfile?.schools?.jrotc_program ? "No ranks available for this program" : "JROTC program not set for school"}
-                      </SelectItem> : ranks.map(rank => <SelectItem key={rank.id} value={rank.rank || "none"}>
-                          {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                        </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="job_role">Job Role</Label>
-                <Select value={newCadet.job_role || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                job_role: value === "none" ? "" : value
-              })} disabled={jobRoles.length === 0}>
-                  <SelectTrigger>
-                    <SelectValue placeholder={schoolDataLoading ? "Loading job roles..." : jobRoles.length === 0 ? userProfile?.schools?.jrotc_program ? "No job roles available" : "Set JROTC program first" : "Select job role"} />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {jobRoles.length === 0 ? <SelectItem value="none" disabled>
-                        {userProfile?.schools?.jrotc_program ? "No job roles available for this program" : "JROTC program not set for school"}
-                      </SelectItem> : jobRoles.map(role => <SelectItem key={role.id} value={role.role || "none"}>
-                          {role.role}
-                        </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="rank">Rank</Label>
+              <Select
+                value={newCadet.rank || ""}
+                onValueChange={(value) => setNewCadet({ ...newCadet, rank: value === "none" ? "" : value })}
+                disabled={availableRanks.length === 0}
+              >
+                <SelectTrigger>
+                  <SelectValue 
+                    placeholder={
+                      availableRanks.length === 0 
+                        ? userProfile?.schools?.jrotc_program 
+                          ? "No ranks available" 
+                          : "Set JROTC program first" 
+                        : "Select rank"
+                    } 
+                  />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableRanks.length === 0 ? (
+                    <SelectItem value="none" disabled>
+                      {userProfile?.schools?.jrotc_program 
+                        ? "No ranks available for this program" 
+                        : "JROTC program not set for school"}
+                    </SelectItem>
+                  ) : (
+                    availableRanks.map((rank) => (
+                      <SelectItem key={rank.id} value={rank.rank}>
+                        {rank.rank} ({rank.abbreviation})
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
             
             <div className="flex justify-end space-x-2">
@@ -490,91 +510,87 @@ const CadetManagementPage = () => {
           <DialogHeader>
             <DialogTitle>Edit Cadet Information</DialogTitle>
             <DialogDescription>
-              Update the cadet's grade, rank, flight, and job role information.
+              Update the cadet's grade, rank, and flight information.
             </DialogDescription>
           </DialogHeader>
-          {editingProfile && <form onSubmit={handleSaveProfile} className="space-y-4">
+          {editingProfile && (
+            <form onSubmit={handleSaveProfile} className="space-y-4">
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
-                  <Input value={`${editingProfile.first_name} ${editingProfile.last_name}`} disabled className="bg-gray-50" />
+                  <Input
+                    value={`${editingProfile.first_name} ${editingProfile.last_name}`}
+                    disabled
+                    className="bg-gray-50"
+                  />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input value={editingProfile.email} disabled className="bg-gray-50" />
+                  <Input
+                    value={editingProfile.email}
+                    disabled
+                    className="bg-gray-50"
+                  />
                 </div>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="grade">Grade</Label>
-                  <Select value={editingProfile.grade || ""} onValueChange={value => setEditingProfile({
-                ...editingProfile,
-                grade: value
-              })}>
+                  <Select
+                    value={editingProfile.grade || ""}
+                    onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select grade" />
                     </SelectTrigger>
                     <SelectContent>
-                      {gradeOptions.map(grade => <SelectItem key={grade} value={grade}>
+                      {gradeOptions.map((grade) => (
+                        <SelectItem key={grade} value={grade}>
                           {grade}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="flight">Flight</Label>
-                  <Select value={editingProfile.flight || ""} onValueChange={value => setEditingProfile({
-                ...editingProfile,
-                flight: value
-              })}>
+                  <Select
+                    value={editingProfile.flight || ""}
+                    onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
+                  >
                     <SelectTrigger>
                       <SelectValue placeholder="Select flight" />
                     </SelectTrigger>
                     <SelectContent>
-                      {flightOptions.map(flight => <SelectItem key={flight} value={flight}>
+                      {flightOptions.map((flight) => (
+                        <SelectItem key={flight} value={flight}>
                           {flight}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
               </div>
 
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="rank">Rank</Label>
-                  <Select value={editingProfile.rank || ""} onValueChange={value => setEditingProfile({
-                ...editingProfile,
-                rank: value === "none" ? "" : value
-              })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select rank" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No rank</SelectItem>
-                      {ranks.map(rank => <SelectItem key={rank.id} value={rank.rank || "none"}>
-                          {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="job_role">Job Role</Label>
-                  <Select value={editingProfile.job_role || ""} onValueChange={value => setEditingProfile({
-                ...editingProfile,
-                job_role: value === "none" ? "" : value
-              })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select job role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="none">No job role</SelectItem>
-                      {jobRoles.map(role => <SelectItem key={role.id} value={role.role || "none"}>
-                          {role.role}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>
+              <div className="space-y-2">
+                <Label htmlFor="rank">Rank</Label>
+                <Select
+                  value={editingProfile.rank || ""}
+                  onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select rank" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="none">No rank</SelectItem>
+                    {availableRanks.map((rank) => (
+                      <SelectItem key={rank.id} value={rank.rank}>
+                        {rank.rank} ({rank.abbreviation})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="flex justify-end space-x-2">
@@ -585,9 +601,12 @@ const CadetManagementPage = () => {
                   Update Cadet
                 </Button>
               </div>
-            </form>}
+            </form>
+          )}
         </DialogContent>
       </Dialog>
-    </div>;
+    </div>
+  );
 };
+
 export default CadetManagementPage;
