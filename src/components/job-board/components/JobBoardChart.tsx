@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useState, useEffect } from 'react';
 import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
@@ -25,6 +25,7 @@ const nodeTypes = {
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const { fitView } = useReactFlow();
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
@@ -41,6 +42,18 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     editState
   });
 
+  // Trigger fitView when component becomes visible or exits fullscreen
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      fitView({ padding: 0.2, duration: 200 });
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [fitView, isFullscreen]);
+
+  const handleToggleFullscreen = () => {
+    setIsFullscreen(!isFullscreen);
+  };
+
   const chartContent = (
     <div 
       className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-96 w-full'} border rounded-lg`}
@@ -55,7 +68,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
       <JobBoardToolbar
         onRefresh={onRefresh}
         onResetLayout={resetLayout}
-        onToggleFullscreen={() => setIsFullscreen(!isFullscreen)}
+        onToggleFullscreen={handleToggleFullscreen}
         isResetting={isResetting}
         isFullscreen={isFullscreen}
       />
@@ -76,6 +89,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         minZoom={0.1}
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
+        key={`reactflow-${isFullscreen ? 'fullscreen' : 'normal'}`}
       >
         <Background />
         <Controls />
@@ -105,7 +119,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
   }
 
   return (
-    <ReactFlowProvider>
+    <ReactFlowProvider key={`chart-${jobs.length}`}>
       <JobBoardChartInner 
         jobs={jobs}
         onRefresh={onRefresh}
