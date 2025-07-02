@@ -25,7 +25,10 @@ const nodeTypes = {
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isVisible, setIsVisible] = useState(true);
   const { fitView } = useReactFlow();
+  
+  console.log('JobBoardChartInner render - jobs count:', jobs.length, 'isFullscreen:', isFullscreen);
   
   const { editState, startConnectionDrag, completeConnectionDrop, updateDragPosition, cancelConnectionEdit, isValidDropTarget } = useConnectionEditor(
     jobs,
@@ -42,15 +45,47 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     editState
   });
 
-  // Trigger fitView when component becomes visible or exits fullscreen
+  console.log('Nodes and edges:', { nodesCount: nodes.length, edgesCount: edges.length });
+
+  // Use intersection observer to detect when component becomes visible
   useEffect(() => {
-    const timer = setTimeout(() => {
-      fitView({ padding: 0.2, duration: 200 });
-    }, 100);
-    return () => clearTimeout(timer);
-  }, [fitView, isFullscreen]);
+    const element = document.querySelector('[data-testid="job-board-chart"]');
+    if (!element) return;
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        console.log('Intersection observer - isIntersecting:', entry.isIntersecting);
+        if (entry.isIntersecting && !isVisible) {
+          setIsVisible(true);
+          // Delay fitView to ensure the component is properly rendered
+          setTimeout(() => {
+            console.log('Calling fitView from intersection observer');
+            fitView({ padding: 0.2, duration: 300 });
+          }, 150);
+        }
+      },
+      { threshold: 0.1 }
+    );
+
+    observer.observe(element);
+    return () => observer.disconnect();
+  }, [fitView, isVisible]);
+
+  // Handle fullscreen changes
+  useEffect(() => {
+    if (!isFullscreen) {
+      // When exiting fullscreen, wait a bit then trigger fitView
+      const timer = setTimeout(() => {
+        console.log('Calling fitView after fullscreen exit');
+        fitView({ padding: 0.2, duration: 300 });
+      }, 200);
+      return () => clearTimeout(timer);
+    }
+  }, [isFullscreen, fitView]);
 
   const handleToggleFullscreen = () => {
+    console.log('Toggling fullscreen:', !isFullscreen);
     setIsFullscreen(!isFullscreen);
   };
 
@@ -59,6 +94,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
       className={`relative ${isFullscreen ? 'h-screen w-screen' : 'h-96 w-full'} border rounded-lg`}
       onMouseMove={updateDragPosition}
       onMouseUp={cancelConnectionEdit}
+      data-testid="job-board-chart"
     >
       <ConnectionEditingOverlay 
         isVisible={editState.isDragging}
@@ -84,12 +120,18 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         onNodesChange={handleNodeChange}
         onEdgesChange={onEdgesChange}
         nodeTypes={nodeTypes}
-        fitView
-        fitViewOptions={{ padding: 0.2 }}
+        fitView={false}
         minZoom={0.1}
         maxZoom={2}
         defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-        key={`reactflow-${isFullscreen ? 'fullscreen' : 'normal'}`}
+        onInit={() => {
+          console.log('ReactFlow onInit called');
+          setTimeout(() => {
+            console.log('Calling fitView from onInit');
+            fitView({ padding: 0.2, duration: 300 });
+          }, 100);
+        }}
+        key={`reactflow-${isFullscreen ? 'fullscreen' : 'normal'}-${jobs.length}`}
       >
         <Background />
         <Controls />
