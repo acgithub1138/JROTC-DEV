@@ -100,13 +100,19 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    console.log('Edge double-clicked:', edge);
     event.stopPropagation();
     
     // Find the source and target jobs
     const sourceJob = jobs.find(job => job.id === edge.source);
     const targetJob = jobs.find(job => job.id === edge.target);
     
-    if (!sourceJob || !targetJob) return;
+    console.log('Source job:', sourceJob, 'Target job:', targetJob);
+    
+    if (!sourceJob || !targetJob) {
+      console.log('Missing source or target job');
+      return;
+    }
 
     // Determine connection type based on the edge
     let connectionType: 'reports_to' | 'assistant' | null = null;
@@ -116,8 +122,14 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
       connectionType = 'assistant';
     }
 
-    if (!connectionType) return;
+    console.log('Connection type determined:', connectionType);
 
+    if (!connectionType) {
+      console.log('No connection type found');
+      return;
+    }
+
+    console.log('Opening connection edit modal');
     setConnectionEditModal({
       isOpen: true,
       sourceJob,
