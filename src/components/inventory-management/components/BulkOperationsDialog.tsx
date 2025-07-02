@@ -25,6 +25,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
 }) => {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
+  const [isCancelled, setIsCancelled] = useState(false);
   const [parsedData, setParsedData] = useState<ParsedItem[]>([]);
   const [showPreview, setShowPreview] = useState(false);
   const [showMapping, setShowMapping] = useState(false);
@@ -152,6 +153,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
     }
 
     setIsProcessing(true);
+    setIsCancelled(false);
     setImportProgress({ current: 0, total: validItems.length });
     
     try {
@@ -161,6 +163,11 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       const errorDetails: string[] = [];
 
       for (let i = 0; i < validItems.length; i++) {
+        // Check if import was cancelled
+        if (isCancelled) {
+          break;
+        }
+
         const item = validItems[i];
         
         // Update progress before importing each item
@@ -183,13 +190,20 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         }
       }
       
-      // Final progress update
-      setImportProgress({ current: validItems.length, total: validItems.length });
+      // Final progress update (only if not cancelled)
+      if (!isCancelled) {
+        setImportProgress({ current: validItems.length, total: validItems.length });
+      }
 
       // Show summary toast with longer duration
+      const titleText = isCancelled ? "Import Cancelled" : "Import Complete";
+      const descriptionText = isCancelled 
+        ? `Import cancelled. ${successCount} items were imported before cancellation.`
+        : `${successCount} items imported successfully. ${errorCount} failed.`;
+      
       toast({
-        title: "Import Complete",
-        description: `${successCount} items imported successfully. ${errorCount} failed.`,
+        title: titleText,
+        description: descriptionText,
         duration: errorCount > 0 ? 8000 : 5000, // Longer duration if there are errors
       });
 
@@ -205,7 +219,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         }, 1000); // Delay to avoid overlapping toasts
       }
 
-      if (errorCount === 0) {
+      if (errorCount === 0 && !isCancelled) {
         onOpenChange(false);
         setImportFile(null);
         setParsedData([]);
@@ -225,6 +239,14 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
     } finally {
       setIsProcessing(false);
     }
+  };
+
+  const handleCancelImport = () => {
+    setIsCancelled(true);
+    toast({
+      title: "Cancelling Import",
+      description: "Import will stop after the current item finishes processing.",
+    });
   };
 
   const validItemsCount = parsedData.filter(item => item.isValid).length;
@@ -297,15 +319,29 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                 {isProcessing && (
                   <div className="space-y-2 bg-muted/50 p-4 rounded-lg">
                     <div className="flex items-center justify-between text-sm">
-                      <span className="font-medium">Importing items...</span>
+                      <span className="font-medium">
+                        {isCancelled ? 'Cancelling import...' : 'Importing items...'}
+                      </span>
                       <span className="text-muted-foreground">
                         Imported {importProgress.current} of {importProgress.total} items
                       </span>
                     </div>
-                    <Progress 
-                      value={(importProgress.current / importProgress.total) * 100} 
-                      className="w-full"
-                    />
+                    <div className="flex items-center gap-2">
+                      <Progress 
+                        value={(importProgress.current / importProgress.total) * 100} 
+                        className="flex-1"
+                      />
+                      {!isCancelled && (
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={handleCancelImport}
+                          className="text-red-600 hover:text-red-700"
+                        >
+                          Cancel
+                        </Button>
+                      )}
+                    </div>
                   </div>
                 )}
 
