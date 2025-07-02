@@ -116,9 +116,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
 
     // Determine connection type based on the edge
     let connectionType: 'reports_to' | 'assistant' | null = null;
-    if (sourceJob.reports_to === targetJob.role) {
+    if (targetJob.reports_to === sourceJob.role) {
       connectionType = 'reports_to';
-    } else if (sourceJob.assistant === targetJob.role) {
+    } else if (targetJob.assistant === sourceJob.role) {
       connectionType = 'assistant';
     }
 
