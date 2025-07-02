@@ -102,6 +102,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="NA">NA</SelectItem>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
@@ -121,6 +122,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="NA">NA</SelectItem>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}

@@ -110,6 +110,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="NA">NA</SelectItem>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
@@ -129,6 +130,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="NA">NA</SelectItem>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
