@@ -9,6 +9,7 @@ export interface SchoolUser {
   last_name: string;
   email: string;
   role: string;
+  grade: string | null;
   active: boolean;
 }
 
@@ -20,7 +21,7 @@ export const useSchoolUsers = (activeOnly?: boolean) => {
     queryFn: async () => {
       let query = supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, role, active')
+        .select('id, first_name, last_name, email, role, grade, active')
         .eq('school_id', userProfile?.school_id)
         .order('first_name');
 

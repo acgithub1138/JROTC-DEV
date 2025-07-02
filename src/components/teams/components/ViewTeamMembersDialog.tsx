@@ -5,8 +5,10 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
 import { TeamWithMembers } from '../types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { getGradeColor } from '@/utils/gradeColors';
 
 interface ViewTeamMembersDialogProps {
   open: boolean;
@@ -28,7 +30,7 @@ export const ViewTeamMembersDialog = ({ open, onOpenChange, team }: ViewTeamMemb
           lastName: user.last_name,
           firstName: user.first_name,
           role: user.role,
-          email: user.email
+          grade: user.grade
         } : null;
       })
       .filter(member => member !== null)
@@ -51,22 +53,24 @@ export const ViewTeamMembersDialog = ({ open, onOpenChange, team }: ViewTeamMemb
         <div className="space-y-3">
           {members.length > 0 ? (
             members.map((member) => (
-              <div key={member!.id} className="flex justify-between items-center p-3 bg-gray-50 rounded-lg">
+              <div key={member!.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
                 <div>
                   <div className="font-medium">
                     {member!.lastName}, {member!.firstName}
                   </div>
-                  <div className="text-sm text-gray-500 capitalize">
+                  <div className="text-sm text-muted-foreground capitalize">
                     {member!.role}
                   </div>
                 </div>
-                <div className="text-sm text-gray-400">
-                  {member!.email}
-                </div>
+                {member!.grade && (
+                  <Badge className={`text-xs ${getGradeColor(member!.grade)}`}>
+                    {member!.grade}
+                  </Badge>
+                )}
               </div>
             ))
           ) : (
-            <div className="text-center py-8 text-gray-500">
+            <div className="text-center py-8 text-muted-foreground">
               No team members assigned
             </div>
           )}
