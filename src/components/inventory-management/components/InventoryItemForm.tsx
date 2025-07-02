@@ -149,14 +149,14 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="gender">Gender</Label>
           <Select
-            value={watchedValues.gender || ''}
-            onValueChange={(value) => setValue('gender', value === '' ? null : value as 'M' | 'F')}
+            value={watchedValues.gender || 'none'}
+            onValueChange={(value) => setValue('gender', value === 'none' ? null : value as 'M' | 'F')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               <SelectItem value="M">Male</SelectItem>
               <SelectItem value="F">Female</SelectItem>
             </SelectContent>
@@ -207,14 +207,14 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="unit_of_measure">Unit of Measure</Label>
           <Select
-            value={watchedValues.unit_of_measure || ''}
-            onValueChange={(value) => setValue('unit_of_measure', value === '' ? null : value as 'EA' | 'PR')}
+            value={watchedValues.unit_of_measure || 'none'}
+            onValueChange={(value) => setValue('unit_of_measure', value === 'none' ? null : value as 'EA' | 'PR')}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select unit" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               <SelectItem value="EA">Each (EA)</SelectItem>
               <SelectItem value="PR">Pair (PR)</SelectItem>
             </SelectContent>
