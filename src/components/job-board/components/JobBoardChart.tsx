@@ -1,6 +1,6 @@
 
 import React, { useCallback } from 'react';
-import { ReactFlow, Background, Controls, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
+import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { toPng } from 'html-to-image';
 import { JobBoardWithCadet } from '../types';
@@ -22,7 +22,7 @@ const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
+const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const { getNodes } = useReactFlow();
 
@@ -83,14 +83,6 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
     editState
   });
 
-  if (jobs.length === 0) {
-    return (
-      <div className="flex items-center justify-center h-96 text-gray-500">
-        <p>No job assignments to display in the organizational chart.</p>
-      </div>
-    );
-  }
-
   return (
     <div 
       className="relative h-96 w-full border rounded-lg"
@@ -130,5 +122,25 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
         <Controls />
       </ReactFlow>
     </div>
+  );
+};
+
+export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
+  if (jobs.length === 0) {
+    return (
+      <div className="flex items-center justify-center h-96 text-gray-500">
+        <p>No job assignments to display in the organizational chart.</p>
+      </div>
+    );
+  }
+
+  return (
+    <ReactFlowProvider>
+      <JobBoardChartInner 
+        jobs={jobs}
+        onRefresh={onRefresh}
+        onUpdateJob={onUpdateJob}
+      />
+    </ReactFlowProvider>
   );
 };
