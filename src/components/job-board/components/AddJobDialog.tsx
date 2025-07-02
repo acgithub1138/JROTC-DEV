@@ -8,6 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useJobBoardRoles } from '../hooks/useJobBoardRoles';
 import { NewJobBoard } from '../types';
+import { useQueryClient } from '@tanstack/react-query';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface AddJobDialogProps {
   open: boolean;
@@ -26,8 +28,10 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
   const { roles } = useJobBoardRoles();
+  const queryClient = useQueryClient();
+  const { userProfile } = useAuth();
 
-  // Reset form when dialog opens
+  // Reset form and refetch roles when dialog opens
   useEffect(() => {
     if (open) {
       setFormData({
@@ -36,8 +40,10 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
         reports_to: '',
         assistant: '',
       });
+      // Invalidate roles query to refetch latest roles
+      queryClient.invalidateQueries({ queryKey: ['job-board-roles', userProfile?.school_id] });
     }
-  }, [open]);
+  }, [open, queryClient, userProfile?.school_id]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
