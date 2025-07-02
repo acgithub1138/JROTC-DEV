@@ -28,6 +28,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
     assistant: '',
   });
   const [cadetPopoverOpen, setCadetPopoverOpen] = useState(false);
+  const [searchValue, setSearchValue] = useState('');
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
   const { roles } = useJobBoardRoles();
@@ -54,7 +55,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
   };
 
   const formatCadetName = (cadet: any) => {
-    return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
+    return `${cadet.last_name}, ${cadet.first_name}`;
   };
 
   // Filter for active cadets only
@@ -83,20 +84,36 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
                   <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                 </Button>
               </PopoverTrigger>
-              <PopoverContent className="w-[400px] p-0 z-50" align="start">
-                <Command>
-                  <CommandInput placeholder="Search cadets..." />
-                  <CommandList>
+              <PopoverContent 
+                className="w-[400px] p-0 z-[9999] bg-popover border shadow-md" 
+                align="start"
+                side="bottom"
+                sideOffset={4}
+              >
+                <Command shouldFilter={false}>
+                  <CommandInput 
+                    placeholder="Search cadets..." 
+                    className="h-9"
+                    value={searchValue}
+                    onValueChange={setSearchValue}
+                  />
+                  <CommandList className="max-h-[300px]">
                     <CommandEmpty>No cadet found.</CommandEmpty>
                     <CommandGroup>
-                      {activeCadets.map((cadet) => (
+                      {activeCadets
+                        .filter((cadet) => {
+                          const cadetName = formatCadetName(cadet).toLowerCase();
+                          return cadetName.includes(searchValue.toLowerCase());
+                        })
+                        .map((cadet) => (
                         <CommandItem
                           key={cadet.id}
-                          value={formatCadetName(cadet)}
-                          onSelect={() => {
-                            setFormData(prev => ({ ...prev, cadet_id: cadet.id }));
+                          value={cadet.id}
+                          onSelect={(currentValue) => {
+                            setFormData(prev => ({ ...prev, cadet_id: currentValue }));
                             setCadetPopoverOpen(false);
                           }}
+                          className="cursor-pointer"
                         >
                           <Check
                             className={cn(
