@@ -113,14 +113,14 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
                   <div className="flex-1">
                     <Label className="text-sm font-medium">Database Field</Label>
                     <Select
-                      value={mapping?.dbField || ''}
-                      onValueChange={(value) => onMappingChange(header, value || null)}
+                      value={mapping?.dbField || 'none'}
+                      onValueChange={(value) => onMappingChange(header, value === 'none' ? null : value)}
                     >
                       <SelectTrigger className="mt-1">
                         <SelectValue placeholder="Select field..." />
                       </SelectTrigger>
                       <SelectContent>
-                        <SelectItem value="">Don't map</SelectItem>
+                        <SelectItem value="none">Don't map</SelectItem>
                         {DATABASE_FIELDS.map((field) => {
                           const isAlreadyMapped = mappedFields.includes(field.value) && field.value !== mapping?.dbField;
                           return (
