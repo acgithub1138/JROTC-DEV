@@ -36,9 +36,7 @@ export const CadetTable = ({
             <Checkbox
               checked={allSelected}
               onCheckedChange={(checked) => onSelectAll(checked as boolean)}
-              ref={(ref) => {
-                if (ref) ref.indeterminate = someSelected;
-              }}
+              aria-label={someSelected ? "Some selected" : allSelected ? "All selected" : "None selected"}
             />
           </TableHead>
           <TableHead>Name</TableHead>
