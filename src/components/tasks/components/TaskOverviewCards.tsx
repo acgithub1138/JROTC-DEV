@@ -125,7 +125,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
                 currentValue={task.assigned_to || 'unassigned'}
                 displayValue={
                   task.assigned_to_profile 
-                    ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}` 
+                    ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}` 
                     : 'Unassigned'
                 }
                 type="select"
@@ -141,7 +141,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
             ) : (
               <span className="text-sm font-medium">
                 {task.assigned_to_profile 
-                  ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}` 
+                  ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}` 
                   : 'Unassigned'}
               </span>
             )}
@@ -151,7 +151,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
               <User className="w-4 h-4 text-gray-500" />
               <span className="text-sm text-gray-600">Created by:</span>
               <span className="text-sm font-medium">
-                {task.assigned_by_profile.first_name} {task.assigned_by_profile.last_name}
+                {task.assigned_by_profile.last_name}, {task.assigned_by_profile.first_name}
               </span>
             </div>
           )}

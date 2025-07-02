@@ -23,7 +23,7 @@ export const formatFieldChangeComment = (
   const getUserName = (userId: string | null) => {
     if (!userId) return 'Unassigned';
     const user = users.find(u => u.id === userId);
-    return user ? `${user.first_name} ${user.last_name}` : 'Unknown User';
+    return user ? `${user.last_name}, ${user.first_name}` : 'Unknown User';
   };
 
   const formatDate = (date: string | Date | null) => {

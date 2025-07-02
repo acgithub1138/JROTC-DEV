@@ -135,7 +135,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     { value: 'unassigned', label: 'Unassigned' },
     ...users.map(user => ({
       value: user.id,
-      label: `${user.first_name} ${user.last_name}`
+      label: `${user.last_name}, ${user.first_name}`
     }))
   ];
 

@@ -126,7 +126,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
               value={task.assigned_to}
               displayValue={
                 task.assigned_to_profile
-                  ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}`
+                  ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
                   : 'Unassigned'
               }
               editState={editState}
@@ -139,7 +139,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           ) : (
             <span>
               {task.assigned_to_profile
-                ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}`
+                ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
                 : 'Unassigned'}
             </span>
           )}

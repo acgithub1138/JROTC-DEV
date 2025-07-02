@@ -46,7 +46,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
   const getNestedValue = (obj: any, path: string) => {
     if (path === 'assigned_to_name') {
       return obj.assigned_to_profile 
-        ? `${obj.assigned_to_profile.first_name} ${obj.assigned_to_profile.last_name}`
+        ? `${obj.assigned_to_profile.last_name}, ${obj.assigned_to_profile.first_name}`
         : '';
     }
     return obj[path];
