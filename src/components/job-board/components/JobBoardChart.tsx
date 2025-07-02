@@ -34,15 +34,30 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     const imageWidth = 1920;
     const imageHeight = 1080;
     
-    // Use the same logic as fitView with padding
-    const viewport = getViewportForBounds(
-      nodesBounds, 
-      imageWidth, 
-      imageHeight, 
-      0.2, // Same padding as fitView
-      2,   // Max zoom
-      0.1  // Min zoom
-    );
+    // Calculate padding similar to fitView (20% of smaller dimension)
+    const paddingPercent = 0.2;
+    const padding = Math.min(imageWidth, imageHeight) * paddingPercent;
+    
+    // Calculate the content dimensions with padding
+    const contentWidth = nodesBounds.width + padding * 2;
+    const contentHeight = nodesBounds.height + padding * 2;
+    
+    // Calculate scale to fit content in image while maintaining aspect ratio
+    const scaleX = imageWidth / contentWidth;
+    const scaleY = imageHeight / contentHeight;
+    const scale = Math.min(scaleX, scaleY, 2); // Cap at 2x zoom for readability
+    
+    // Calculate position to center the content in the image
+    const scaledContentWidth = contentWidth * scale;
+    const scaledContentHeight = contentHeight * scale;
+    
+    // Center the scaled content in the image
+    const centerX = (imageWidth - scaledContentWidth) / 2;
+    const centerY = (imageHeight - scaledContentHeight) / 2;
+    
+    // Calculate the offset to position the content bounds at the center
+    const offsetX = centerX - (nodesBounds.x - padding) * scale;
+    const offsetY = centerY - (nodesBounds.y - padding) * scale;
 
     const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
     
@@ -54,7 +69,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
         style: {
           width: imageWidth.toString(),
           height: imageHeight.toString(),
-          transform: `translate(${viewport.x}px, ${viewport.y}px) scale(${viewport.zoom})`,
+          transform: `translate(${offsetX}px, ${offsetY}px) scale(${scale})`,
         },
         filter: (node) => {
           // Hide handles and controls in the exported image
