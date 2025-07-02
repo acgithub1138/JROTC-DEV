@@ -401,7 +401,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
                   </div>
                 </div>
 
-                <ScrollArea className="flex-1 border rounded-lg">
+                <ScrollArea className="flex-1 border rounded-lg h-96">
                   <Table>
                     <TableHeader>
                       <TableRow>
