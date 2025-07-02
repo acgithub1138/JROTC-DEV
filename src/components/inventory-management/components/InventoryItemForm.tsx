@@ -145,7 +145,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="gender">Gender</Label>
           <Select
-            value={watchedValues.gender || ''}
+            value={watchedValues.gender || undefined}
             onValueChange={(value) => setValue('gender', value as 'M' | 'F')}
           >
             <SelectTrigger>
@@ -202,7 +202,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
         <div className="space-y-2">
           <Label htmlFor="unit_of_measure">Unit of Measure</Label>
           <Select
-            value={watchedValues.unit_of_measure || ''}
+            value={watchedValues.unit_of_measure || undefined}
             onValueChange={(value) => setValue('unit_of_measure', value as 'EA' | 'PR')}
           >
             <SelectTrigger>
