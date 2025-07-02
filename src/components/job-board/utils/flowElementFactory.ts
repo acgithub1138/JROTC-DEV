@@ -22,8 +22,6 @@ export const createFlowNodes = (
         rank: job.cadet.rank || '',
         grade: job.cadet.grade || '',
       },
-      sourcePosition: Position.Bottom,
-      targetPosition: Position.Top,
     };
   });
 };
