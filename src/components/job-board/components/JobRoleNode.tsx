@@ -46,12 +46,12 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
 
   return (
     <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[280px] hover:shadow-lg transition-shadow">
-      <Handle type="target" position={Position.Top} className="w-3 h-3" />
-      <Handle type="source" position={Position.Top} className="w-3 h-3" />
-      <Handle type="target" position={Position.Left} className="w-3 h-3" />
-      <Handle type="source" position={Position.Left} className="w-3 h-3" />
-      <Handle type="target" position={Position.Right} className="w-3 h-3" />
-      <Handle type="source" position={Position.Right} className="w-3 h-3" />
+      <Handle id="top-target" type="target" position={Position.Top} className="w-3 h-3" />
+      <Handle id="top-source" type="source" position={Position.Top} className="w-3 h-3" />
+      <Handle id="left-target" type="target" position={Position.Left} className="w-3 h-3" />
+      <Handle id="left-source" type="source" position={Position.Left} className="w-3 h-3" />
+      <Handle id="right-target" type="target" position={Position.Right} className="w-3 h-3" />
+      <Handle id="right-source" type="source" position={Position.Right} className="w-3 h-3" />
       
       <div className="space-y-2">
         {/* Role Name */}
@@ -79,8 +79,8 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         </div>
       </div>
       
-      <Handle type="target" position={Position.Bottom} className="w-3 h-3" />
-      <Handle type="source" position={Position.Bottom} className="w-3 h-3" />
+      <Handle id="bottom-target" type="target" position={Position.Bottom} className="w-3 h-3" />
+      <Handle id="bottom-source" type="source" position={Position.Bottom} className="w-3 h-3" />
     </div>
   );
 };

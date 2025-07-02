@@ -31,6 +31,8 @@ export const createFlowEdges = (hierarchyResult: HierarchyResult): Edge[] => {
     id: edge.id,
     source: edge.source,
     target: edge.target,
+    sourceHandle: 'right-source',
+    targetHandle: 'left-target',
     type: 'smoothstep',
     animated: false,
   }));
