@@ -161,6 +161,13 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
 
       for (let i = 0; i < validItems.length; i++) {
         const item = validItems[i];
+        
+        // Update progress before importing each item
+        setImportProgress({ current: i, total: validItems.length });
+        
+        // Allow UI to update by yielding control
+        await new Promise(resolve => setTimeout(resolve, 10));
+        
         try {
           await onImport([item]);
           successCount++;
@@ -168,10 +175,10 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
           console.error('Import error:', error);
           errorCount++;
         }
-        
-        // Update progress
-        setImportProgress({ current: i + 1, total: validItems.length });
       }
+      
+      // Final progress update
+      setImportProgress({ current: validItems.length, total: validItems.length });
 
       toast({
         title: "Import Complete",
