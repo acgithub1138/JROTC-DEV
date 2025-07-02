@@ -16,6 +16,7 @@ export interface JobBoardWithCadet extends JobBoard {
     first_name: string;
     last_name: string;
     rank?: string;
+    grade?: string;
   };
 }
 

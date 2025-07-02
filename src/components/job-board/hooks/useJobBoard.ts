@@ -21,7 +21,8 @@ export const useJobBoard = () => {
             id,
             first_name,
             last_name,
-            rank
+            rank,
+            grade
           )
         `)
         .eq('school_id', userProfile?.school_id)
