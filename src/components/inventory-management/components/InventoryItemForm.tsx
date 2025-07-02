@@ -7,7 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
 import { MultiSelectProfiles } from './MultiSelectProfiles';
-import { CategoryCombobox } from './CategoryCombobox';
+import { CategorySelect } from './CategorySelect';
 import { useInventoryCategories } from '../hooks/useInventoryCategories';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -142,25 +142,23 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
 
         <div className="space-y-2">
           <Label htmlFor="category">Category *</Label>
-          <CategoryCombobox
+          <CategorySelect
             value={watchedValues.category}
             onValueChange={handleCategoryChange}
             options={categories}
-            placeholder="Select or enter category"
+            placeholder="Select category"
             isLoading={isCategoriesLoading}
-            allowNewValues={true}
           />
         </div>
 
         <div className="space-y-2">
           <Label htmlFor="sub_category">Sub Category *</Label>
-          <CategoryCombobox
+          <CategorySelect
             value={watchedValues.sub_category}
             onValueChange={(value) => setValue('sub_category', value)}
             options={filteredSubCategories}
-            placeholder="Select or enter sub category"
+            placeholder="Select sub category"
             isLoading={isSubCategoriesLoading}
-            allowNewValues={true}
           />
         </div>
 
