@@ -95,7 +95,7 @@ export const FieldMappingSection: React.FC<FieldMappingSectionProps> = ({
         </Card>
       )}
 
-      <ScrollArea className="flex-1 min-h-0 max-h-96 pr-4">
+      <ScrollArea className="h-96 pr-4">
         <div className="grid gap-4">
         {csvHeaders.map((header, index) => {
           const mapping = fieldMappings.find(m => m.csvColumn === header);
