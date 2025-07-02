@@ -24,16 +24,17 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { MoreHorizontal, Edit, Trash2, Mail } from 'lucide-react';
 import { TeamWithMembers } from '../types';
 
 interface TeamsTableProps {
   teams: TeamWithMembers[];
   onEditTeam: (team: TeamWithMembers) => void;
   onDeleteTeam: (teamId: string) => Promise<boolean>;
+  onSendEmail: (team: TeamWithMembers) => void;
 }
 
-export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam }: TeamsTableProps) => {
+export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail }: TeamsTableProps) => {
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [teamToDelete, setTeamToDelete] = useState<TeamWithMembers | null>(null);
   const [deleteLoading, setDeleteLoading] = useState(false);
@@ -110,6 +111,10 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam }: TeamsTableProps)
                     </Button>
                   </DropdownMenuTrigger>
                   <DropdownMenuContent align="end">
+                    <DropdownMenuItem onClick={() => onSendEmail(team)}>
+                      <Mail className="mr-2 h-4 w-4" />
+                      Send Email
+                    </DropdownMenuItem>
                     <DropdownMenuItem onClick={() => onEditTeam(team)}>
                       <Edit className="mr-2 h-4 w-4" />
                       Edit
