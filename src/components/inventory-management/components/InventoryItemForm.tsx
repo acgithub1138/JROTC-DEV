@@ -152,8 +152,8 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               <SelectValue placeholder="Select gender" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="M">Male</SelectItem>
-              <SelectItem value="F">Female</SelectItem>
+              <SelectItem value="M">M</SelectItem>
+              <SelectItem value="F">F</SelectItem>
             </SelectContent>
           </Select>
         </div>
@@ -209,8 +209,8 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               <SelectValue placeholder="Select unit" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="EA">Each (EA)</SelectItem>
-              <SelectItem value="PR">Pair (PR)</SelectItem>
+              <SelectItem value="EA">EA</SelectItem>
+              <SelectItem value="PR">PR</SelectItem>
             </SelectContent>
           </Select>
         </div>
