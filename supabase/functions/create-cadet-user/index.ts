@@ -1,4 +1,5 @@
 
+
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
@@ -41,17 +42,11 @@ serve(async (req) => {
       school_id 
     }: CreateCadetRequest = await req.json()
 
-    // Generate a temporary password
-    const tempPassword = Math.random().toString(36).slice(-12) + 'A1!'
+    console.log('Inviting user:', email, 'with role:', role)
 
-    console.log('Creating user for:', email, 'with role:', role)
-
-    // Create auth user with admin client
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
-      email,
-      password: tempPassword,
-      email_confirm: true, // Auto-confirm email
-      user_metadata: {
+    // Send invitation email using admin client
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
+      data: {
         first_name,
         last_name,
         role,
@@ -60,35 +55,37 @@ serve(async (req) => {
     })
 
     if (authError) {
-      console.error('Auth creation error:', authError)
+      console.error('Auth invitation error:', authError)
       throw authError
     }
 
-    console.log('Auth user created:', authUser.user?.id, 'with role:', role)
+    console.log('Invitation sent to:', email, 'user id:', authUser.user?.id, 'with role:', role)
 
-    // Update the profile that was automatically created by the trigger
-    const { error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .update({
-        role,
-        grade: grade || null,
-        rank: rank || null,
-        flight: flight || null,
-      })
-      .eq('id', authUser.user!.id)
+    // Update the profile that will be automatically created by the trigger
+    // Note: We need to wait a moment for the trigger to create the profile
+    setTimeout(async () => {
+      const { error: profileError } = await supabaseAdmin
+        .from('profiles')
+        .update({
+          role,
+          grade: grade || null,
+          rank: rank || null,
+          flight: flight || null,
+        })
+        .eq('id', authUser.user!.id)
 
-    if (profileError) {
-      console.error('Profile update error:', profileError)
-      throw profileError
-    }
-
-    console.log('Profile updated successfully with role:', role)
+      if (profileError) {
+        console.error('Profile update error:', profileError)
+      } else {
+        console.log('Profile updated successfully with role:', role)
+      }
+    }, 1000)
 
     return new Response(
       JSON.stringify({ 
         success: true, 
         user_id: authUser.user!.id,
-        temp_password: tempPassword,
+        email_sent: true,
         role: role
       }),
       {
@@ -101,7 +98,7 @@ serve(async (req) => {
     console.error('Function error:', error)
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred creating the user' 
+        error: error.message || 'An error occurred sending the invitation' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -110,3 +107,4 @@ serve(async (req) => {
     )
   }
 })
+

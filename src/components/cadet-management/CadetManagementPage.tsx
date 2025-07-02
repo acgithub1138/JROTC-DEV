@@ -152,7 +152,7 @@ const CadetManagementPage = () => {
     console.log('Adding new cadet:', newCadet);
 
     try {
-      // Call edge function to create cadet user
+      // Call edge function to invite cadet user
       const { data, error } = await supabase.functions.invoke('create-cadet-user', {
         body: {
           email: newCadet.email,
@@ -170,8 +170,8 @@ const CadetManagementPage = () => {
 
       toast({
         title: "Success",
-        description: `User added successfully. Temporary password: ${data.temp_password}`,
-        duration: 10000 // Show longer so they can copy the password
+        description: `Invitation email sent to ${newCadet.email}. They will receive an email to set up their account.`,
+        duration: 8000
       });
 
       setAddDialogOpen(false);
@@ -186,10 +186,10 @@ const CadetManagementPage = () => {
       });
       fetchProfiles();
     } catch (error) {
-      console.error('Error adding cadet:', error);
+      console.error('Error inviting cadet:', error);
       toast({
         title: "Error",
-        description: "Failed to add user",
+        description: "Failed to send invitation",
         variant: "destructive"
       });
     }
@@ -364,7 +364,7 @@ const CadetManagementPage = () => {
           <DialogHeader>
             <DialogTitle>Add New Cadet</DialogTitle>
             <DialogDescription>
-              Create a new cadet or command staff member for your school.
+              Create a new cadet or command staff member for your school. They will receive an invitation email to set up their account.
             </DialogDescription>
           </DialogHeader>
           <form onSubmit={handleAddCadet} className="space-y-4">
@@ -499,7 +499,7 @@ const CadetManagementPage = () => {
                 Cancel
               </Button>
               <Button type="submit">
-                Add User
+                Send Invitation
               </Button>
             </div>
           </form>
