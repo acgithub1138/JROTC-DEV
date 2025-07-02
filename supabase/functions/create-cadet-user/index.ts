@@ -15,7 +15,6 @@ interface CreateCadetRequest {
   grade?: string
   rank?: string
   flight?: string
-  job_role?: string
   school_id: string
 }
 
@@ -39,7 +38,6 @@ serve(async (req) => {
       grade, 
       rank, 
       flight, 
-      job_role, 
       school_id 
     }: CreateCadetRequest = await req.json()
 
@@ -76,7 +74,6 @@ serve(async (req) => {
         grade: grade || null,
         rank: rank || null,
         flight: flight || null,
-        job_role: job_role || null,
       })
       .eq('id', authUser.user!.id)
 
