@@ -84,16 +84,24 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
                 </Button>
               </PopoverTrigger>
               <PopoverContent 
-                className="w-[400px] p-0 z-[9999] bg-popover border shadow-md" 
+                className="w-[400px] p-0 z-[99999] bg-popover border shadow-md pointer-events-auto" 
                 align="start"
                 side="bottom"
                 sideOffset={4}
                 avoidCollisions={false}
+                onOpenAutoFocus={(e) => {
+                  e.preventDefault();
+                  const input = (e.currentTarget as HTMLElement).querySelector('input');
+                  if (input) {
+                    setTimeout(() => input.focus(), 100);
+                  }
+                }}
               >
-                <Command>
+                <Command className="bg-popover">
                   <CommandInput 
                     placeholder="Search cadets..." 
-                    className="h-9"
+                    className="h-9 border-0 bg-transparent focus:ring-0"
+                    autoFocus
                   />
                   <CommandList className="max-h-[300px]">
                     <CommandEmpty>
