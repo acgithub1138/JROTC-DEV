@@ -14,7 +14,7 @@ import { CSVProcessor, ParsedItem, FieldMapping } from './bulk-operations/CSVPro
 interface BulkOperationsDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onImport: (item: any) => Promise<void>;
+  onImport: (items: any[]) => Promise<void>;
 }
 export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   open,
@@ -148,81 +148,34 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       current: 0,
       total: validItems.length
     });
+    
     try {
-      // Import valid items one by one to handle errors gracefully
-      let successCount = 0;
-      let errorCount = 0;
-      const errorDetails: string[] = [];
-      for (let i = 0; i < validItems.length; i++) {
-        // Check if import was cancelled
-        if (isCancelled) {
-          break;
-        }
-        const item = validItems[i];
-
-        // Update progress before importing each item
-        setImportProgress({
-          current: i,
-          total: validItems.length
-        });
-
-        // Allow UI to update by yielding control
-        await new Promise(resolve => setTimeout(resolve, 10));
-        try {
-          console.log('Importing item:', item);
-          // FIX: Pass single item instead of array
-          await onImport(item);
-          successCount++;
-          console.log(`Successfully imported item ${i + 1}/${validItems.length}`);
-        } catch (error) {
-          console.error('Import error for item:', item, 'Error:', error);
-          errorCount++;
-          const errorMsg = error instanceof Error ? error.message : "Unknown error occurred";
-          errorDetails.push(`Row ${parsedData.find(p => p.data === item)?.rowNumber || i + 1}: ${errorMsg}`);
-        }
-      }
-
-      // Final progress update (only if not cancelled)
-      if (!isCancelled) {
-        setImportProgress({
-          current: validItems.length,
-          total: validItems.length
-        });
-      }
-
-      // Show summary toast with longer duration
-      const titleText = isCancelled ? "Import Cancelled" : "Import Complete";
-      const descriptionText = isCancelled ? `Import cancelled. ${successCount} items were imported before cancellation.` : `${successCount} items imported successfully. ${errorCount} failed.`;
-      toast({
-        title: titleText,
-        description: descriptionText,
-        duration: errorCount > 0 ? 8000 : 5000 // Longer duration if there are errors
+      console.log('Starting bulk import of', validItems.length, 'items');
+      setImportProgress({
+        current: validItems.length,
+        total: validItems.length
       });
-
-      // Show error details if any failed
-      if (errorCount > 0 && errorDetails.length > 0) {
-        setTimeout(() => {
-          toast({
-            title: "Import Errors",
-            description: errorDetails.slice(0, 5).join('\n') + (errorDetails.length > 5 ? `\n... and ${errorDetails.length - 5} more errors` : ''),
-            variant: "destructive",
-            duration: 10000 // Show errors for 10 seconds
-          });
-        }, 1000); // Delay to avoid overlapping toasts
-      }
-      if (errorCount === 0 && !isCancelled) {
-        onOpenChange(false);
-        setImportFile(null);
-        setParsedData([]);
-        setShowPreview(false);
-        setShowMapping(false);
-        setCsvHeaders([]);
-        setFieldMappings([]);
-      }
+      
+      // Import all items at once for much better performance
+      await onImport(validItems);
+      
+      toast({
+        title: "Import Complete",
+        description: `${validItems.length} items imported successfully`,
+        duration: 5000
+      });
+      
+      onOpenChange(false);
+      setImportFile(null);
+      setParsedData([]);
+      setShowPreview(false);
+      setShowMapping(false);
+      setCsvHeaders([]);
+      setFieldMappings([]);
     } catch (error) {
       toast({
         title: "Import Failed",
-        description: "Failed to import items. Please try again.",
+        description: error instanceof Error ? error.message : "Failed to import items. Please try again.",
         variant: "destructive",
         duration: 8000
       });

@@ -53,6 +53,29 @@ export const useInventoryItems = () => {
     },
   });
 
+  const bulkCreateMutation = useMutation({
+    mutationFn: async (items: Omit<InventoryItemInsert, 'school_id'>[]) => {
+      if (!userProfile?.school_id) throw new Error('No school ID');
+
+      // Add school_id to all items
+      const itemsWithSchool = items.map(item => ({
+        ...item,
+        school_id: userProfile.school_id
+      }));
+
+      const { data, error } = await supabase
+        .from('inventory_items')
+        .insert(itemsWithSchool)
+        .select();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['inventory-items'] });
+    },
+  });
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, ...updates }: InventoryItemUpdate & { id: string }) => {
       // Validate quantities
@@ -97,6 +120,7 @@ export const useInventoryItems = () => {
     isLoading,
     error,
     createItem: createMutation.mutateAsync,
+    bulkCreateItems: bulkCreateMutation.mutateAsync,
     updateItem: updateMutation.mutateAsync,
     deleteItem: deleteMutation.mutateAsync,
   };

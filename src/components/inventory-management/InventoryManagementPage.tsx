@@ -21,6 +21,7 @@ const InventoryManagementPage = () => {
     isLoading,
     error,
     createItem,
+    bulkCreateItems,
     updateItem,
     deleteItem
   } = useInventoryItems();
@@ -90,9 +91,9 @@ const InventoryManagementPage = () => {
     }
   };
 
-  const handleBulkImport = async (item: any) => {
-    // Import item without showing individual success toast
-    await createItem(item);
+  const handleBulkImport = async (items: any[]) => {
+    // Import items in bulk for better performance
+    await bulkCreateItems(items);
   };
 
   const exportToCSV = () => {
