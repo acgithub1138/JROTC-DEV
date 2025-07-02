@@ -48,26 +48,21 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
 
   console.log('Nodes and edges:', { nodesCount: nodes.length, edgesCount: edges.length });
 
-  // Consolidated fitView function that only calls when both initialized and visible
+  // Consolidated fitView function that handles all scenarios
   const triggerFitView = useCallback(() => {
     if (isReactFlowInitialized && isVisible && nodes.length > 0) {
       console.log('Triggering fitView - conditions met:', { isReactFlowInitialized, isVisible, nodesCount: nodes.length });
       setTimeout(() => {
         fitView({ padding: 0.2, duration: 300 });
       }, 100);
-    }
-  }, [isReactFlowInitialized, isVisible, nodes.length, fitView]);
-
-  // Handle fullscreen exit - just trigger fitView without resetting states
-  useEffect(() => {
-    if (!isFullscreen && isReactFlowInitialized) {
-      // When exiting fullscreen, trigger fitView to adjust to new container size
+    } else if (isReactFlowInitialized && !isFullscreen && nodes.length > 0) {
+      // Handle fullscreen exit case
+      console.log('Triggering fitView after fullscreen exit');
       setTimeout(() => {
-        console.log('Calling fitView after fullscreen exit');
         fitView({ padding: 0.2, duration: 300 });
       }, 200);
     }
-  }, [isFullscreen, isReactFlowInitialized, fitView]);
+  }, [isReactFlowInitialized, isVisible, isFullscreen, nodes.length, fitView]);
 
   // Use intersection observer to detect when component becomes visible
   useEffect(() => {
@@ -77,8 +72,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
-        console.log('Intersection observer - isIntersecting:', entry.isIntersecting, 'current isVisible:', isVisible);
-        if (entry.isIntersecting && !isVisible) {
+        console.log('Intersection observer - isIntersecting:', entry.isIntersecting);
+        if (entry.isIntersecting) {
           console.log('Setting isVisible to true');
           setIsVisible(true);
         }
@@ -88,7 +83,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
 
     observer.observe(element);
     return () => observer.disconnect();
-  }, [isVisible]);
+  }, []); // Remove isVisible dependency to prevent re-runs
 
   // Trigger fitView when both conditions are met
   useEffect(() => {
@@ -139,7 +134,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
           console.log('ReactFlow onInit called - setting isReactFlowInitialized to true');
           setIsReactFlowInitialized(true);
         }}
-        key={`reactflow-${isFullscreen ? 'fullscreen' : 'normal'}-${jobs.length}`}
+        key={`reactflow-${jobs.length}`}
       >
         <Background />
         <Controls />
