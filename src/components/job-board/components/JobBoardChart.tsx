@@ -15,6 +15,8 @@ const nodeTypes = {
 
 export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
   const { nodes, edges } = useMemo(() => {
+    console.log('Building hierarchy with jobs:', jobs);
+    
     const nodeMap = new Map<string, Node>();
     const edgeList: Edge[] = [];
     
@@ -44,15 +46,32 @@ export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
     
     // Find root nodes (no reports_to)
     jobs.forEach((job) => {
+      console.log(`Job ${job.role} reports to: ${job.reports_to || 'none'}`);
       if (!job.reports_to) {
         rootNodes.push(job.id);
         levelMap.set(job.id, 0);
       }
     });
 
+    console.log('Root nodes:', rootNodes);
+
     // Build hierarchy levels
     const buildHierarchy = (nodeId: string, level: number) => {
-      const subordinates = jobs.filter(job => job.reports_to === jobs.find(j => j.id === nodeId)?.role);
+      const currentJob = jobs.find(j => j.id === nodeId);
+      if (!currentJob) return;
+      
+      console.log(`Building hierarchy for ${currentJob.role} at level ${level}`);
+      
+      // Find subordinates - those who report to this person's role
+      const subordinates = jobs.filter(job => {
+        const reportsToMatch = job.reports_to === currentJob.role;
+        if (reportsToMatch) {
+          console.log(`Found subordinate: ${job.role} reports to ${currentJob.role}`);
+        }
+        return reportsToMatch;
+      });
+      
+      console.log(`${currentJob.role} has ${subordinates.length} subordinates:`, subordinates.map(s => s.role));
       
       subordinates.forEach((subordinate) => {
         levelMap.set(subordinate.id, level + 1);
@@ -66,12 +85,20 @@ export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
           animated: false,
         });
         
+        console.log(`Created edge: ${currentJob.role} -> ${subordinate.role}`);
+        
         buildHierarchy(subordinate.id, level + 1);
       });
     };
 
     // Build hierarchy for each root node
-    rootNodes.forEach(rootId => buildHierarchy(rootId, 0));
+    rootNodes.forEach(rootId => {
+      console.log(`Starting hierarchy build from root: ${jobs.find(j => j.id === rootId)?.role}`);
+      buildHierarchy(rootId, 0);
+    });
+
+    console.log('Level map:', Array.from(levelMap.entries()));
+    console.log('Edges:', edgeList);
 
     // Position nodes
     const levelGroups = new Map<number, string[]>();
@@ -83,6 +110,8 @@ export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
       }
       levelGroups.get(level)!.push(nodeId);
     });
+
+    console.log('Level groups:', Array.from(levelGroups.entries()));
 
     // Position nodes within their levels
     const nodeWidth = 300;
@@ -118,12 +147,18 @@ export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
             x: xPosition,
             y: level * levelHeight,
           };
+          
+          console.log(`Positioned ${job?.role} at (${xPosition}, ${level * levelHeight})`);
         }
       });
     });
 
+    const finalNodes = Array.from(nodeMap.values());
+    console.log('Final nodes:', finalNodes.length);
+    console.log('Final edges:', edgeList.length);
+
     return {
-      nodes: Array.from(nodeMap.values()),
+      nodes: finalNodes,
       edges: edgeList,
     };
   }, [jobs]);
