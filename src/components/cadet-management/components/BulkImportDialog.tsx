@@ -111,7 +111,7 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
 
     setIsImporting(true);
     setStep('import');
-    setProgress(0);
+    setProgress(50); // Start at 50% since we're doing bulk operation
 
     const results = await onBulkImport(validCadets);
     

@@ -139,9 +139,9 @@ export const useCadetManagement = () => {
     let failedCount = 0;
     const errors: string[] = [];
 
-    for (let i = 0; i < cadets.length; i++) {
-      const cadet = cadets[i];
-      try {
+    try {
+      // Create all cadet invitations in bulk using Promise.all for much better performance
+      const promises = cadets.map(async (cadet) => {
         const { error } = await supabase.functions.invoke('create-cadet-user', {
           body: {
             email: cadet.email,
@@ -155,25 +155,35 @@ export const useCadetManagement = () => {
           }
         });
 
-        if (error) throw error;
-        successCount++;
-      } catch (error) {
-        console.error(`Error creating cadet ${cadet.email}:`, error);
-        failedCount++;
-        errors.push(`Failed to create ${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
-      }
-    }
-
-    if (successCount > 0) {
-      toast({
-        title: "Bulk Import Complete",
-        description: `Successfully created ${successCount} cadets${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
-        duration: 8000
+        if (error) throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
+        return cadet;
       });
-      fetchProfiles();
-    }
 
-    return { success: successCount, failed: failedCount, errors };
+      const results = await Promise.allSettled(promises);
+      
+      results.forEach((result, index) => {
+        if (result.status === 'fulfilled') {
+          successCount++;
+        } else {
+          failedCount++;
+          errors.push(`Failed to create ${result.reason.message}`);
+        }
+      });
+
+      if (successCount > 0) {
+        toast({
+          title: "Bulk Import Complete",
+          description: `Successfully created ${successCount} cadets${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
+          duration: 8000
+        });
+        fetchProfiles();
+      }
+
+      return { success: successCount, failed: failedCount, errors };
+    } catch (error) {
+      console.error('Bulk import error:', error);
+      return { success: 0, failed: cadets.length, errors: ['Bulk import failed completely'] };
+    }
   };
 
   const handleSaveProfile = async (editingProfile: Profile) => {
