@@ -68,7 +68,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
           )}
           {grade && (
             <Badge className={`text-xs ${getGradeColor(grade)}`}>
-              Grade {grade}
+              {grade}
             </Badge>
           )}
         </div>

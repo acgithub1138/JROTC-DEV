@@ -10,7 +10,7 @@ export const useJobBoard = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const { data: jobs = [], isLoading, error } = useQuery({
+  const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['job-board', userProfile?.school_id],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -143,6 +143,7 @@ export const useJobBoard = () => {
     jobs,
     isLoading,
     error,
+    refetch,
     createJob,
     updateJob,
     deleteJob,

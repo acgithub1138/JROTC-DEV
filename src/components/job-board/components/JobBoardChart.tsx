@@ -2,18 +2,21 @@
 import React, { useMemo } from 'react';
 import { ReactFlow, Node, Edge, Background, Controls, Position } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import { RefreshCcw } from 'lucide-react';
+import { Button } from '@/components/ui/button';
 import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
+  onRefresh?: () => void;
 }
 
 const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
+export const JobBoardChart = ({ jobs, onRefresh }: JobBoardChartProps) => {
   const { nodes, edges } = useMemo(() => {
     console.log('Building hierarchy with jobs:', jobs);
     
@@ -172,7 +175,19 @@ export const JobBoardChart = ({ jobs }: JobBoardChartProps) => {
   }
 
   return (
-    <div className="h-96 w-full border rounded-lg">
+    <div className="relative h-96 w-full border rounded-lg">
+      {onRefresh && (
+        <div className="absolute top-2 right-2 z-10">
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            className="bg-white/90 backdrop-blur-sm"
+          >
+            <RefreshCcw className="w-4 h-4" />
+          </Button>
+        </div>
+      )}
       <ReactFlow
         nodes={nodes}
         edges={edges}
