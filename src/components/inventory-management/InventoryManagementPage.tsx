@@ -90,6 +90,11 @@ const InventoryManagementPage = () => {
     }
   };
 
+  const handleBulkImport = async (item: any) => {
+    // Import item without showing individual success toast
+    await createItem(item);
+  };
+
   const exportToCSV = () => {
     if (!filteredItems.length) {
       toast({
@@ -211,7 +216,7 @@ const InventoryManagementPage = () => {
       <BulkOperationsDialog
         open={isBulkDialogOpen}
         onOpenChange={setIsBulkDialogOpen}
-        onImport={handleCreateItem}
+        onImport={handleBulkImport}
       />
     </div>
   );
