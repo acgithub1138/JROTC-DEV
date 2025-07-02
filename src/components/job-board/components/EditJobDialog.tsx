@@ -15,9 +15,10 @@ interface EditJobDialogProps {
   job: JobBoardWithCadet | null;
   onSubmit: (id: string, updates: Partial<NewJobBoard>) => void;
   loading: boolean;
+  jobs: any[]; // Add jobs prop to get assigned cadets
 }
 
-export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: EditJobDialogProps) => {
+export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs }: EditJobDialogProps) => {
   const [formData, setFormData] = useState<NewJobBoard>({
     cadet_id: '',
     role: '',
@@ -58,9 +59,14 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading }: Ed
     return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
-  // Filter for active cadets only and sort by last name
+  // Get assigned cadet IDs, excluding the current job's cadet
+  const assignedCadetIds = new Set(
+    jobs.filter(j => j.id !== job?.id).map(j => j.cadet_id)
+  );
+  
+  // Filter for active cadets only, exclude already assigned (except current), and sort by last name
   const activeCadets = cadets
-    .filter(cadet => cadet.active)
+    .filter(cadet => cadet.active && !assignedCadetIds.has(cadet.id))
     .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
   if (!job) return null;

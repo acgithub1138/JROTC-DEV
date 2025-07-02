@@ -133,6 +133,7 @@ const JobBoardPage = () => {
           onOpenChange={setShowAddDialog}
           onSubmit={handleAddJob}
           loading={createJob.isPending}
+          jobs={jobs}
         />
 
         <EditJobDialog
@@ -141,6 +142,7 @@ const JobBoardPage = () => {
           job={editingJob}
           onSubmit={handleEditJob}
           loading={updateJob.isPending}
+          jobs={jobs}
         />
 
         <DeleteJobDialog

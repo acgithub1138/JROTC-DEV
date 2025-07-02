@@ -16,9 +16,10 @@ interface AddJobDialogProps {
   onOpenChange: (open: boolean) => void;
   onSubmit: (job: NewJobBoard) => void;
   loading: boolean;
+  jobs: any[]; // Add jobs prop to get assigned cadets
 }
 
-export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDialogProps) => {
+export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: AddJobDialogProps) => {
   const [formData, setFormData] = useState<NewJobBoard>({
     cadet_id: '',
     role: '',
@@ -70,9 +71,12 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading }: AddJobDi
     return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
-  // Filter for active cadets only and sort by last name
+  // Get assigned cadet IDs
+  const assignedCadetIds = new Set(jobs.map(job => job.cadet_id));
+  
+  // Filter for active cadets only, exclude already assigned, and sort by last name
   const activeCadets = cadets
-    .filter(cadet => cadet.active)
+    .filter(cadet => cadet.active && !assignedCadetIds.has(cadet.id))
     .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
   return (
