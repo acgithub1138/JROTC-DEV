@@ -6,7 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
-import { MultiSelectProfiles } from './MultiSelectProfiles';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface InventoryItemFormData {
@@ -18,7 +18,7 @@ interface InventoryItemFormData {
   gender?: 'M' | 'F' | null;
   qty_total: number;
   qty_issued: number;
-  issued_to?: string[];
+  issued_to?: string;
   stock_number?: string;
   unit_of_measure?: 'EA' | 'PR' | null;
   has_serial_number: boolean;
@@ -36,7 +36,7 @@ interface InventoryItemFormData {
 
 interface InventoryItemFormProps {
   initialData?: Tables<'inventory_items'> | null;
-  onSubmit: (data: InventoryItemFormData) => Promise<void>;
+  onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }
 
@@ -45,6 +45,8 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   onSubmit,
   onCancel,
 }) => {
+  const { users } = useSchoolUsers();
+  
   const {
     register,
     handleSubmit,
@@ -61,7 +63,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       gender: (initialData.gender as 'M' | 'F') || null,
       qty_total: initialData.qty_total || 0,
       qty_issued: initialData.qty_issued || 0,
-      issued_to: initialData.issued_to || [],
+      issued_to: initialData.issued_to?.[0] || null,
       stock_number: initialData.stock_number || '',
       unit_of_measure: (initialData.unit_of_measure as 'EA' | 'PR') || null,
       has_serial_number: initialData.has_serial_number || false,
@@ -85,15 +87,25 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       pending_updates: 0,
       pending_issue_changes: 0,
       pending_write_offs: 0,
-      issued_to: [],
+      issued_to: null,
     },
   });
 
   const watchedValues = watch();
 
   const handleFormSubmit = async (data: InventoryItemFormData) => {
-    await onSubmit(data);
+    // Convert single issued_to back to array format for database
+    const submissionData = {
+      ...data,
+      issued_to: data.issued_to ? [data.issued_to] : []
+    };
+    await onSubmit(submissionData);
   };
+
+  // Sort users by last name for dropdown
+  const sortedUsers = users?.sort((a, b) => 
+    (a.last_name || '').localeCompare(b.last_name || '')
+  ) || [];
 
   return (
     <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-6">
@@ -243,10 +255,22 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       <div className="space-y-4">
         <div className="space-y-2">
           <Label>Issued To</Label>
-          <MultiSelectProfiles
-            value={watchedValues.issued_to || []}
-            onChange={(value) => setValue('issued_to', value)}
-          />
+          <Select
+            value={watchedValues.issued_to || 'none'}
+            onValueChange={(value) => setValue('issued_to', value === 'none' ? null : value)}
+          >
+            <SelectTrigger>
+              <SelectValue placeholder="Select user" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="none">Not Assigned</SelectItem>
+              {sortedUsers.map((user) => (
+                <SelectItem key={user.id} value={user.id}>
+                  {user.last_name}, {user.first_name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
