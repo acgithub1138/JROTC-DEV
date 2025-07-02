@@ -9,19 +9,26 @@ export interface SchoolUser {
   last_name: string;
   email: string;
   role: string;
+  active: boolean;
 }
 
-export const useSchoolUsers = () => {
+export const useSchoolUsers = (activeOnly?: boolean) => {
   const { userProfile } = useAuth();
 
   const { data: users = [], isLoading } = useQuery({
-    queryKey: ['school-users', userProfile?.school_id],
+    queryKey: ['school-users', userProfile?.school_id, activeOnly],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, role')
+        .select('id, first_name, last_name, email, role, active')
         .eq('school_id', userProfile?.school_id)
         .order('first_name');
+
+      if (activeOnly !== undefined) {
+        query = query.eq('active', activeOnly);
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error('Error fetching school users:', error);

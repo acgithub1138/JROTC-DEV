@@ -9,8 +9,19 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { 
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 import { useToast } from '@/hooks/use-toast';
-import { Users, Edit, Search, Plus } from 'lucide-react';
+import { Users, Edit, Search, Plus, Trash2, CheckCircle } from 'lucide-react';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 
 interface Profile {
@@ -22,6 +33,7 @@ interface Profile {
   grade?: string;
   rank?: string;
   flight?: string;
+  active: boolean;
   created_at: string;
   updated_at: string;
 }
@@ -47,6 +59,10 @@ const CadetManagementPage = () => {
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
+  const [statusDialogOpen, setStatusDialogOpen] = useState(false);
+  const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
+  const [statusLoading, setStatusLoading] = useState(false);
+  const [activeTab, setActiveTab] = useState('active');
   const [newCadet, setNewCadet] = useState<NewCadet>({
     first_name: '',
     last_name: '',
@@ -96,6 +112,40 @@ const CadetManagementPage = () => {
       fetchProfiles();
     }
   }, [userProfile?.school_id]);
+
+  const handleToggleUserStatus = async () => {
+    if (!profileToToggle) return;
+
+    setStatusLoading(true);
+    try {
+      const { error } = await supabase.functions.invoke('toggle-user-status', {
+        body: {
+          userId: profileToToggle.id,
+          active: !profileToToggle.active
+        }
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Cadet ${profileToToggle.active ? 'deactivated' : 'activated'} successfully`
+      });
+
+      setStatusDialogOpen(false);
+      setProfileToToggle(null);
+      fetchProfiles();
+    } catch (error) {
+      console.error('Error toggling user status:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update cadet status",
+        variant: "destructive"
+      });
+    } finally {
+      setStatusLoading(false);
+    }
+  };
 
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
@@ -195,24 +245,32 @@ const CadetManagementPage = () => {
     }
   };
 
-  const filteredProfiles = profiles.filter(profile =>
-    profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    profile.flight?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter profiles based on active tab and search term
+  const getFilteredProfiles = () => {
+    const isActive = activeTab === 'active';
+    return profiles.filter(profile => {
+      const matchesActiveStatus = profile.active === isActive;
+      const matchesSearch = profile.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.grade?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.rank?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        profile.flight?.toLowerCase().includes(searchTerm.toLowerCase());
+      
+      return matchesActiveStatus && matchesSearch;
+    });
+  };
 
+  const filteredProfiles = getFilteredProfiles();
   const totalPages = Math.ceil(filteredProfiles.length / RECORDS_PER_PAGE);
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
   const paginatedProfiles = filteredProfiles.slice(startIndex, endIndex);
 
-  // Reset to first page when search term changes
+  // Reset to first page when search term or tab changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm]);
+  }, [searchTerm, activeTab]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -252,7 +310,7 @@ const CadetManagementPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Cadets ({filteredProfiles.length})
+            Cadets
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -268,42 +326,110 @@ const CadetManagementPage = () => {
             </div>
           </div>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>Grade</TableHead>
-                <TableHead>Rank</TableHead>
-                <TableHead>Flight</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedProfiles.map((profile) => (
-                <TableRow key={profile.id}>
-                  <TableCell className="font-medium">
-                    {profile.first_name} {profile.last_name}
-                  </TableCell>
-                  <TableCell>{profile.email}</TableCell>
-                  <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
-                  <TableCell>{profile.grade || '-'}</TableCell>
-                  <TableCell>{profile.rank || '-'}</TableCell>
-                  <TableCell>{profile.flight || '-'}</TableCell>
-                  <TableCell className="text-right">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => handleEditProfile(profile)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active">
+                Active ({profiles.filter(p => p.active).length})
+              </TabsTrigger>
+              <TabsTrigger value="inactive">
+                Non-Active ({profiles.filter(p => !p.active).length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active" className="mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Rank</TableHead>
+                    <TableHead>Flight</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedProfiles.map((profile) => (
+                    <TableRow key={profile.id}>
+                      <TableCell className="font-medium">
+                        {profile.first_name} {profile.last_name}
+                      </TableCell>
+                      <TableCell>{profile.email}</TableCell>
+                      <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
+                      <TableCell>{profile.grade || '-'}</TableCell>
+                      <TableCell>{profile.rank || '-'}</TableCell>
+                      <TableCell>{profile.flight || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex items-center justify-end gap-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEditProfile(profile)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => {
+                              setProfileToToggle(profile);
+                              setStatusDialogOpen(true);
+                            }}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
+
+            <TabsContent value="inactive" className="mt-4">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>Grade</TableHead>
+                    <TableHead>Rank</TableHead>
+                    <TableHead>Flight</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedProfiles.map((profile) => (
+                    <TableRow key={profile.id} className="opacity-60">
+                      <TableCell className="font-medium">
+                        {profile.first_name} {profile.last_name}
+                      </TableCell>
+                      <TableCell>{profile.email}</TableCell>
+                      <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
+                      <TableCell>{profile.grade || '-'}</TableCell>
+                      <TableCell>{profile.rank || '-'}</TableCell>
+                      <TableCell>{profile.flight || '-'}</TableCell>
+                      <TableCell className="text-right">
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setProfileToToggle(profile);
+                            setStatusDialogOpen(true);
+                          }}
+                        >
+                          <CheckCircle className="w-4 h-4 mr-1" />
+                          Activate
+                        </Button>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
+          </Tabs>
 
           {filteredProfiles.length === 0 && (
             <div className="text-center py-8 text-muted-foreground">
@@ -357,6 +483,33 @@ const CadetManagementPage = () => {
           )}
         </CardContent>
       </Card>
+
+      {/* Status Toggle Confirmation Dialog */}
+      <AlertDialog open={statusDialogOpen} onOpenChange={setStatusDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>
+              {profileToToggle?.active ? 'Deactivate' : 'Activate'} Cadet
+            </AlertDialogTitle>
+            <AlertDialogDescription>
+              {profileToToggle?.active 
+                ? `Are you sure you want to deactivate ${profileToToggle.first_name} ${profileToToggle.last_name}? They will be unable to log in.`
+                : `Are you sure you want to reactivate ${profileToToggle?.first_name} ${profileToToggle?.last_name}? They will be able to log in again.`
+              }
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleToggleUserStatus}
+              disabled={statusLoading}
+              className={profileToToggle?.active ? "bg-red-600 hover:bg-red-700" : ""}
+            >
+              {statusLoading ? 'Processing...' : (profileToToggle?.active ? 'Deactivate' : 'Activate')}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Add User Dialog */}
       <Dialog open={addDialogOpen} onOpenChange={setAddDialogOpen}>
