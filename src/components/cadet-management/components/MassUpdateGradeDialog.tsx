@@ -2,8 +2,9 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { gradeOptions } from '../constants';
 
 interface MassUpdateGradeDialogProps {
   open: boolean;
@@ -24,6 +25,8 @@ export const MassUpdateGradeDialog = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!grade) return;
+    
     const success = await onSubmit(grade);
     if (success) {
       setGrade('');
@@ -45,18 +48,24 @@ export const MassUpdateGradeDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="grade">Grade</Label>
-            <Input
-              id="grade"
-              value={grade}
-              onChange={(e) => setGrade(e.target.value)}
-              placeholder="Enter grade (e.g., 9, 10, 11, 12)"
-            />
+            <Select value={grade} onValueChange={setGrade}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select grade..." />
+              </SelectTrigger>
+              <SelectContent>
+                {gradeOptions.map((gradeOption) => (
+                  <SelectItem key={gradeOption} value={gradeOption}>
+                    {gradeOption}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
           <DialogFooter>
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading || !grade}>
               {loading ? 'Updating...' : 'Update Grade'}
             </Button>
           </DialogFooter>

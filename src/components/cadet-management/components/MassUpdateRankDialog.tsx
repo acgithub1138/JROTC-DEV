@@ -4,7 +4,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { getAllRankOptions } from '@/utils/jrotcRanks';
+import { useAuth } from '@/contexts/AuthContext';
+import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 
 interface MassUpdateRankDialogProps {
   open: boolean;
@@ -22,7 +23,8 @@ export const MassUpdateRankDialog = ({
   loading
 }: MassUpdateRankDialogProps) => {
   const [rank, setRank] = useState('');
-  const rankOptions = getAllRankOptions();
+  const { userProfile } = useAuth();
+  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,16 +51,36 @@ export const MassUpdateRankDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="rank">Rank</Label>
-            <Select value={rank} onValueChange={setRank}>
+            <Select 
+              value={rank} 
+              onValueChange={setRank}
+              disabled={ranks.length === 0}
+            >
               <SelectTrigger>
-                <SelectValue placeholder="Select rank..." />
+                <SelectValue
+                  placeholder={
+                    ranks.length === 0
+                      ? userProfile?.schools?.jrotc_program
+                        ? "No ranks available"
+                        : "Set JROTC program first"
+                      : "Select rank..."
+                  }
+                />
               </SelectTrigger>
               <SelectContent>
-                {rankOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
+                {ranks.length === 0 ? (
+                  <SelectItem value="none" disabled>
+                    {userProfile?.schools?.jrotc_program
+                      ? "No ranks available for this program"
+                      : "JROTC program not set for school"}
                   </SelectItem>
-                ))}
+                ) : (
+                  ranks.map((rankOption) => (
+                    <SelectItem key={rankOption.id} value={rankOption.rank || "none"}>
+                      {rankOption.rank} {rankOption.abbreviation && `(${rankOption.abbreviation})`}
+                    </SelectItem>
+                  ))
+                )}
               </SelectContent>
             </Select>
           </div>
@@ -66,7 +88,7 @@ export const MassUpdateRankDialog = ({
             <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
-            <Button type="submit" disabled={loading || !rank}>
+            <Button type="submit" disabled={loading || !rank || ranks.length === 0}>
               {loading ? 'Updating...' : 'Update Rank'}
             </Button>
           </DialogFooter>
