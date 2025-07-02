@@ -101,40 +101,114 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
         return;
       }
 
-      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, ''));
+      const headers = lines[0].split(',').map(h => h.trim().replace(/"/g, '').toLowerCase());
+      
+      // Create a mapping of possible header variations to database fields
+      const headerMapping: Record<string, string> = {
+        'item_id': 'item_id',
+        'itemid': 'item_id',
+        'id': 'item_id',
+        'item id': 'item_id',
+        'item': 'item',
+        'item name': 'item',
+        'name': 'item',
+        'category': 'category',
+        'sub_category': 'sub_category',
+        'subcategory': 'sub_category',
+        'sub category': 'sub_category',
+        'size': 'size',
+        'gender': 'gender',
+        'qty_total': 'qty_total',
+        'quantity total': 'qty_total',
+        'total quantity': 'qty_total',
+        'total qty': 'qty_total',
+        'qty total': 'qty_total',
+        'qty_issued': 'qty_issued',
+        'quantity issued': 'qty_issued',
+        'issued quantity': 'qty_issued',
+        'issued qty': 'qty_issued',
+        'qty issued': 'qty_issued',
+        'stock_number': 'stock_number',
+        'stock number': 'stock_number',
+        'stock': 'stock_number',
+        'unit_of_measure': 'unit_of_measure',
+        'unit of measure': 'unit_of_measure',
+        'unit': 'unit_of_measure',
+        'uom': 'unit_of_measure',
+        'has_serial_number': 'has_serial_number',
+        'has serial number': 'has_serial_number',
+        'serial': 'has_serial_number',
+        'model_number': 'model_number',
+        'model number': 'model_number',
+        'model': 'model_number',
+        'returnable': 'returnable',
+        'accountable': 'accountable',
+        'description': 'description',
+        'condition': 'condition',
+        'location': 'location',
+        'notes': 'notes',
+        'pending_updates': 'pending_updates',
+        'pending updates': 'pending_updates',
+        'pending_issue_changes': 'pending_issue_changes',
+        'pending issue changes': 'pending_issue_changes',
+        'pending_write_offs': 'pending_write_offs',
+        'pending write offs': 'pending_write_offs',
+      };
+
+      // Map CSV headers to database fields
+      const columnMapping: Record<number, string> = {};
+      const unmatchedHeaders: string[] = [];
+      
+      headers.forEach((header, index) => {
+        const dbField = headerMapping[header];
+        if (dbField) {
+          columnMapping[index] = dbField;
+        } else {
+          unmatchedHeaders.push(header);
+        }
+      });
+
+      // Show warning for unmatched headers
+      if (unmatchedHeaders.length > 0) {
+        console.warn('Unmatched headers:', unmatchedHeaders);
+      }
+
       const parsedItems: ParsedItem[] = [];
       
       for (let i = 1; i < lines.length; i++) {
         const values = lines[i].split(',').map(v => v.trim().replace(/"/g, ''));
         
-        if (values.length < headers.length || !values[0]) {
-          continue; // Skip empty or incomplete rows
+        if (values.length < headers.length || !values.some(v => v)) {
+          continue; // Skip empty rows
         }
 
         const item: any = {};
-        headers.forEach((header, index) => {
-          const value = values[index];
-          switch (header) {
+        
+        // Map values based on column mapping
+        Object.entries(columnMapping).forEach(([columnIndex, dbField]) => {
+          const value = values[parseInt(columnIndex)];
+          
+          switch (dbField) {
             case 'qty_total':
             case 'qty_issued':
             case 'pending_updates':
             case 'pending_issue_changes':
             case 'pending_write_offs':
-              item[header] = value ? parseInt(value) : 0;
+              item[dbField] = value ? parseInt(value) : 0;
               break;
             case 'has_serial_number':
             case 'returnable':
             case 'accountable':
-              item[header] = value?.toLowerCase() === 'true';
+              item[dbField] = value?.toLowerCase() === 'true' || value === '1' || value?.toLowerCase() === 'yes';
               break;
             case 'gender':
-              item[header] = value === 'M' || value === 'F' ? value : null;
+              item[dbField] = value?.toUpperCase() === 'M' || value?.toUpperCase() === 'F' ? value.toUpperCase() : null;
               break;
             case 'unit_of_measure':
-              item[header] = value === 'EA' || value === 'PR' ? value : null;
+              item[dbField] = value?.toUpperCase() === 'EA' || value?.toUpperCase() === 'PR' ? value.toUpperCase() : null;
               break;
             default:
-              item[header] = value || null;
+              item[dbField] = value || null;
           }
         });
 
@@ -162,9 +236,14 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       const validCount = parsedItems.filter(item => item.isValid).length;
       const totalCount = parsedItems.length;
 
+      let message = `${validCount}/${totalCount} rows are valid and ready to import`;
+      if (unmatchedHeaders.length > 0) {
+        message += `\nNote: ${unmatchedHeaders.length} column(s) were not recognized and will be ignored`;
+      }
+
       toast({
         title: "CSV Parsed",
-        description: `${validCount}/${totalCount} rows are valid and ready to import`,
+        description: message,
       });
 
     } catch (error) {
