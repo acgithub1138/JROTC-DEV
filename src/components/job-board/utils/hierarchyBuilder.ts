@@ -102,15 +102,16 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
 
   // Handle assistant relationships separately
   jobs.forEach((job) => {
-    if (job.assistant) {
-      // Find the assistant job
-      const assistantJob = jobs.find(j => j.role === job.assistant);
-      if (assistantJob) {
-        console.log(`Found assistant relationship: ${job.role} has assistant ${assistantJob.role}`);
+    if (job.assistant && job.assistant !== 'NA') {
+      // Find the person this job is assistant TO
+      const supervisorJob = jobs.find(j => j.role === job.assistant);
+      if (supervisorJob) {
+        console.log(`Found assistant relationship: ${job.role} is assistant to ${supervisorJob.role}`);
+        // Create edge from supervisor to assistant (supervisor right -> assistant left)
         edges.push({
-          id: `${job.id}-assistant-${assistantJob.id}`,
-          source: job.id,
-          target: assistantJob.id,
+          id: `${supervisorJob.id}-assistant-${job.id}`,
+          source: supervisorJob.id,
+          target: job.id,
           type: 'assistant',
         });
       }

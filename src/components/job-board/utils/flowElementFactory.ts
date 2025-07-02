@@ -29,7 +29,7 @@ export const createFlowNodes = (
 export const createFlowEdges = (hierarchyResult: HierarchyResult): Edge[] => {
   return hierarchyResult.edges.map((edge) => {
     if (edge.type === 'assistant') {
-      // Assistant relationships: right-to-left connections
+      // Assistant relationships: source right connector to target left connector
       return {
         id: edge.id,
         source: edge.source,
