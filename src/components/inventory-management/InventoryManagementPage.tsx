@@ -5,7 +5,7 @@ import { Plus, Search, Download, Upload } from 'lucide-react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
-import { InventoryStats } from './components/InventoryStats';
+
 import { useInventoryItems } from './hooks/useInventoryItems';
 import { useToast } from '@/hooks/use-toast';
 
@@ -151,6 +151,7 @@ const InventoryManagementPage = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
+          <h1 className="text-3xl font-bold">Inventory Management</h1>
           <p className="text-gray-600">Manage school inventory items and assignments</p>
         </div>
         <div className="flex gap-2">
@@ -168,8 +169,6 @@ const InventoryManagementPage = () => {
           </Button>
         </div>
       </div>
-
-      <InventoryStats items={filteredItems} isLoading={isLoading} />
 
       <div className="flex items-center justify-between">
         <div className="relative flex-1 max-w-md">

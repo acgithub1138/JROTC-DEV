@@ -28,7 +28,6 @@ interface InventoryItemFormData {
   pending_updates: number;
   pending_issue_changes: number;
   pending_write_offs: number;
-  condition?: string;
   location?: string;
   notes?: string;
 }
@@ -70,7 +69,6 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       pending_updates: initialData.pending_updates || 0,
       pending_issue_changes: initialData.pending_issue_changes || 0,
       pending_write_offs: initialData.pending_write_offs || 0,
-      condition: initialData.condition || '',
       location: initialData.location || '',
       notes: initialData.notes || '',
     } : {
@@ -228,15 +226,13 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           />
         </div>
 
-        <div className="flex items-center space-x-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox
-              id="has_serial_number"
-              checked={watchedValues.has_serial_number}
-              onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
-            />
-            <Label htmlFor="has_serial_number">Has Serial Number</Label>
-          </div>
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="has_serial_number"
+            checked={watchedValues.has_serial_number}
+            onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
+          />
+          <Label htmlFor="has_serial_number">Has Serial Number</Label>
         </div>
 
         {watchedValues.has_serial_number && (
@@ -257,16 +253,6 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <MultiSelectProfiles
             value={watchedValues.issued_to || []}
             onChange={(value) => setValue('issued_to', value)}
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="condition">Condition</Label>
-          <Textarea
-            id="condition"
-            {...register('condition')}
-            placeholder="Enter condition"
-            rows={2}
           />
         </div>
       </div>
