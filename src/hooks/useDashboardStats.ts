@@ -15,7 +15,7 @@ export const useDashboardStats = () => {
         supabase
           .from('profiles')
           .select('id', { count: 'exact' })
-          .eq('role', 'cadet')
+          .in('role', ['cadet', 'command_staff'])
           .eq('active', true),
         
         // Active tasks count and overdue count
