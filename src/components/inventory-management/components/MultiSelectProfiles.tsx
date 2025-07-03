@@ -91,6 +91,7 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
                     <Checkbox
                       checked={value.includes(user.id)}
                       onCheckedChange={() => handleToggleUser(user.id)}
+                      onClick={(e) => e.stopPropagation()}
                     />
                     <span className="text-sm">
                       {user.last_name}, {user.first_name}
