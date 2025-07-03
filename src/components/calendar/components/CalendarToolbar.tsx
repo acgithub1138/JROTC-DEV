@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react';
 import { format, addDays, addWeeks, addMonths, startOfWeek, startOfMonth, startOfDay } from 'date-fns';
+import { useEventTypes } from '../hooks/useEventTypes';
 
 export type CalendarViewType = 'month' | 'week' | 'day' | 'agenda';
 
@@ -12,6 +13,8 @@ interface CalendarToolbarProps {
   onDateChange: (date: Date) => void;
   onViewChange: (view: CalendarViewType) => void;
   onCreateEvent: () => void;
+  selectedEventType?: string;
+  onEventTypeChange: (eventType: string) => void;
 }
 
 export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
@@ -20,7 +23,10 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onDateChange,
   onViewChange,
   onCreateEvent,
+  selectedEventType,
+  onEventTypeChange,
 }) => {
+  const { eventTypes } = useEventTypes();
   const handlePrevious = () => {
     switch (viewType) {
       case 'day':
@@ -120,6 +126,19 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
       </div>
 
       <div className="flex items-center gap-2">
+        <Select value={selectedEventType} onValueChange={onEventTypeChange}>
+          <SelectTrigger className="w-40">
+            <SelectValue placeholder="Event Type" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Types</SelectItem>
+            {eventTypes.map(type => (
+              <SelectItem key={type.id} value={type.value}>
+                {type.label}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <Button onClick={onCreateEvent} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           New Event

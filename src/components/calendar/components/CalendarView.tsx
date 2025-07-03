@@ -27,6 +27,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewType, setViewType] = useState<CalendarViewType>('month');
+  const [selectedEventType, setSelectedEventType] = useState<string>('all');
   const isMobile = useIsMobile();
 
   // Mobile view - simplified agenda view
@@ -39,6 +40,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           onDateChange={setCurrentDate}
           onViewChange={() => {}} // No view switching on mobile
           onCreateEvent={onCreateEvent}
+          selectedEventType={selectedEventType}
+          onEventTypeChange={setSelectedEventType}
         />
         
         <AgendaView
@@ -96,6 +99,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         onDateChange={setCurrentDate}
         onViewChange={handleViewChange}
         onCreateEvent={onCreateEvent}
+        selectedEventType={selectedEventType}
+        onEventTypeChange={setSelectedEventType}
       />
 
       <div className="calendar-content">
