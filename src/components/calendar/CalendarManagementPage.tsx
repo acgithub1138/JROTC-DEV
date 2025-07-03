@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CalendarView } from './components/CalendarView';
 import { EventDialog } from './components/EventDialog';
+import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -25,7 +26,10 @@ const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [eventTypeFilter, setEventTypeFilter] = useState('all');
+  const [filters, setFilters] = useState({
+    eventType: '',
+    assignedTo: '',
+  });
   const isMobile = useIsMobile();
 
   const {
@@ -34,21 +38,7 @@ const CalendarManagementPage = () => {
     createEvent,
     updateEvent,
     deleteEvent,
-  } = useEvents({ eventType: eventTypeFilter === 'all' ? '' : eventTypeFilter, assignedTo: '' });
-
-  // Show loading state if events are loading
-  if (isLoading) {
-    return (
-      <div className="p-6 space-y-6">
-        <div className="flex justify-between items-center">
-          <h1 className="text-3xl font-bold">Calendar</h1>
-        </div>
-        <div className="flex justify-center items-center h-64">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        </div>
-      </div>
-    );
-  }
+  } = useEvents(filters);
 
   const handleCreateEvent = () => {
     setEditingEvent(null);
@@ -84,6 +74,11 @@ const CalendarManagementPage = () => {
         <h1 className="text-3xl font-bold">Calendar</h1>
       </div>
 
+      <EventFilters 
+        filters={filters} 
+        onFiltersChange={setFilters} 
+      />
+
       <CalendarView
         events={events}
         isLoading={isLoading}
@@ -91,8 +86,6 @@ const CalendarManagementPage = () => {
         onEventDelete={deleteEvent}
         onDateSelect={handleDateSelect}
         onCreateEvent={handleCreateEvent}
-        selectedEventType={eventTypeFilter}
-        onEventTypeChange={setEventTypeFilter}
       />
 
       <EventDialog
