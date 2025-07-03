@@ -38,6 +38,7 @@ const CadetManagementPage = () => {
     handleBulkUpdateGrade,
     handleBulkUpdateRank,
     handleBulkUpdateFlight,
+    handleBulkUpdateRole,
     handleBulkDeactivate
   } = useCadetMassOperations();
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
@@ -51,6 +52,7 @@ const CadetManagementPage = () => {
   const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
   const [rankDialogOpen, setRankDialogOpen] = useState(false);
   const [flightDialogOpen, setFlightDialogOpen] = useState(false);
+  const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
@@ -85,6 +87,13 @@ const CadetManagementPage = () => {
   };
   const handleMassUpdateFlight = async (flight: string) => {
     const success = await handleBulkUpdateFlight(flight);
+    if (success) {
+      fetchProfiles();
+    }
+    return success;
+  };
+  const handleMassUpdateRole = async (role: string) => {
+    const success = await handleBulkUpdateRole(role);
     if (success) {
       fetchProfiles();
     }
@@ -131,7 +140,7 @@ const CadetManagementPage = () => {
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onToggleStatus={profile => {
           setProfileToToggle(profile);
           setStatusDialogOpen(true);
-        }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onUpdateGrade={() => setGradeDialogOpen(true)} onUpdateRank={() => setRankDialogOpen(true)} onUpdateFlight={() => setFlightDialogOpen(true)} onDeactivate={() => setDeactivateDialogOpen(true)} />
+        }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onUpdateGrade={() => setGradeDialogOpen(true)} onUpdateRank={() => setRankDialogOpen(true)} onUpdateFlight={() => setFlightDialogOpen(true)} onUpdateRole={() => setRoleDialogOpen(true)} onDeactivate={() => setDeactivateDialogOpen(true)} />
 
           {filteredProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No cadets found
@@ -141,7 +150,7 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadet} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassDeactivate={handleMassDeactivate} />
+      <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadet} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
     </div>;
 };
 export default CadetManagementPage;

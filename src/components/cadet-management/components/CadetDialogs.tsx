@@ -6,6 +6,7 @@ import { StatusConfirmationDialog } from './StatusConfirmationDialog';
 import { MassUpdateGradeDialog } from './MassUpdateGradeDialog';
 import { MassUpdateRankDialog } from './MassUpdateRankDialog';
 import { MassUpdateFlightDialog } from './MassUpdateFlightDialog';
+import { MassUpdateRoleDialog } from './MassUpdateRoleDialog';
 import { MassDeactivateDialog } from './MassDeactivateDialog';
 import { BulkImportDialog } from './BulkImportDialog';
 import { Profile, NewCadet } from '../types';
@@ -44,6 +45,8 @@ interface CadetDialogsProps {
   setRankDialogOpen: (open: boolean) => void;
   flightDialogOpen: boolean;
   setFlightDialogOpen: (open: boolean) => void;
+  roleDialogOpen: boolean;
+  setRoleDialogOpen: (open: boolean) => void;
   deactivateDialogOpen: boolean;
   setDeactivateDialogOpen: (open: boolean) => void;
   
@@ -52,6 +55,7 @@ interface CadetDialogsProps {
   onMassUpdateGrade: (grade: string) => Promise<boolean>;
   onMassUpdateRank: (rank: string) => Promise<boolean>;
   onMassUpdateFlight: (flight: string) => Promise<boolean>;
+  onMassUpdateRole: (role: string) => Promise<boolean>;
   onMassDeactivate: () => Promise<boolean>;
 }
 
@@ -102,6 +106,14 @@ export const CadetDialogs = (props: CadetDialogsProps) => {
         open={props.flightDialogOpen}
         onOpenChange={props.setFlightDialogOpen}
         onSubmit={props.onMassUpdateFlight}
+        selectedCount={props.selectedCount}
+        loading={props.massOperationLoading}
+      />
+
+      <MassUpdateRoleDialog
+        open={props.roleDialogOpen}
+        onOpenChange={props.setRoleDialogOpen}
+        onSubmit={props.onMassUpdateRole}
         selectedCount={props.selectedCount}
         loading={props.massOperationLoading}
       />

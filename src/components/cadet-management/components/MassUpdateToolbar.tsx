@@ -2,13 +2,14 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { Users, GraduationCap, Award, Plane, UserX } from 'lucide-react';
+import { Users, GraduationCap, Award, Plane, UserX, Shield } from 'lucide-react';
 
 interface MassUpdateToolbarProps {
   selectedCount: number;
   onUpdateGrade: () => void;
   onUpdateRank: () => void;
   onUpdateFlight: () => void;
+  onUpdateRole: () => void;
   onDeactivate: () => void;
   loading: boolean;
 }
@@ -18,6 +19,7 @@ export const MassUpdateToolbar = ({
   onUpdateGrade,
   onUpdateRank,
   onUpdateFlight,
+  onUpdateRole,
   onDeactivate,
   loading
 }: MassUpdateToolbarProps) => {
@@ -58,6 +60,15 @@ export const MassUpdateToolbar = ({
             >
               <Plane className="w-4 h-4 mr-1" />
               Update Flight
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onUpdateRole}
+              disabled={loading}
+            >
+              <Shield className="w-4 h-4 mr-1" />
+              Update Role
             </Button>
             <Button
               variant="outline"

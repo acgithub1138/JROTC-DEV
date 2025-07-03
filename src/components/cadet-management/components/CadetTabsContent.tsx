@@ -19,6 +19,7 @@ interface CadetTabsContentProps {
   onUpdateGrade: () => void;
   onUpdateRank: () => void;
   onUpdateFlight: () => void;
+  onUpdateRole: () => void;
   onDeactivate: () => void;
 }
 
@@ -36,6 +37,7 @@ export const CadetTabsContent = ({
   onUpdateGrade,
   onUpdateRank,
   onUpdateFlight,
+  onUpdateRole,
   onDeactivate
 }: CadetTabsContentProps) => {
   return (
@@ -55,6 +57,7 @@ export const CadetTabsContent = ({
           onUpdateGrade={onUpdateGrade}
           onUpdateRank={onUpdateRank}
           onUpdateFlight={onUpdateFlight}
+          onUpdateRole={onUpdateRole}
           onDeactivate={onDeactivate}
           loading={massOperationLoading}
         />
