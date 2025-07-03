@@ -19,6 +19,7 @@ import InventoryManagementPage from '@/components/inventory-management/Inventory
 import BudgetManagementPage from '@/components/budget-management/BudgetManagementPage';
 import ContactManagementPage from '@/components/contact-management/ContactManagementPage';
 import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
+import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -40,6 +41,7 @@ const MainApplication = () => {
     if (path.startsWith('/budget')) return 'budget';
     if (path.startsWith('/contacts')) return 'contacts';
     if (path.startsWith('/calendar')) return 'calendar';
+    if (path.startsWith('/competitions')) return 'competitions';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -61,6 +63,7 @@ const MainApplication = () => {
       'budget': '/budget',
       'contacts': '/contacts',
       'calendar': '/calendar',
+      'competitions': '/competitions',
       'settings': '/settings'
     };
     
@@ -100,6 +103,7 @@ const MainApplication = () => {
             <Route path="/budget" element={<BudgetManagementPage />} />
             <Route path="/contacts" element={<ContactManagementPage />} />
             <Route path="/calendar" element={<CalendarManagementPage />} />
+            <Route path="/competitions" element={<CompetitionManagementPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

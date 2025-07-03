@@ -78,6 +78,64 @@ export type Database = {
           },
         ]
       }
+      competition_events: {
+        Row: {
+          cadet_id: string
+          competition_id: string
+          created_at: string
+          event: Database["public"]["Enums"]["comp_event_type"]
+          id: string
+          school_id: string
+          score_sheet: Json
+          total_points: number | null
+          updated_at: string
+        }
+        Insert: {
+          cadet_id: string
+          competition_id: string
+          created_at?: string
+          event: Database["public"]["Enums"]["comp_event_type"]
+          id?: string
+          school_id: string
+          score_sheet?: Json
+          total_points?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cadet_id?: string
+          competition_id?: string
+          created_at?: string
+          event?: Database["public"]["Enums"]["comp_event_type"]
+          id?: string
+          school_id?: string
+          score_sheet?: Json
+          total_points?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_events_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "competition_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_results: {
         Row: {
           cadet_id: string | null
@@ -143,8 +201,52 @@ export type Database = {
           },
         ]
       }
+      competition_templates: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          event: Database["public"]["Enums"]["comp_event_type"]
+          id: string
+          is_active: boolean
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          scores: Json
+          template_name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          event: Database["public"]["Enums"]["comp_event_type"]
+          id?: string
+          is_active?: boolean
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          scores?: Json
+          template_name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          event?: Database["public"]["Enums"]["comp_event_type"]
+          id?: string
+          is_active?: boolean
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"]
+          scores?: Json
+          template_name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       competitions: {
         Row: {
+          armed_color_guard:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_exhibition: Database["public"]["Enums"]["comp_placement"] | null
+          armed_inspection: Database["public"]["Enums"]["comp_placement"] | null
+          armed_regulation: Database["public"]["Enums"]["comp_placement"] | null
+          cadets: string[] | null
+          comp_type: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at: string
           description: string | null
@@ -152,10 +254,38 @@ export type Database = {
           location: string | null
           name: string
           registration_deadline: string | null
+          school_id: string | null
+          teams: string[] | null
           type: Database["public"]["Enums"]["competition_type"]
+          unarmed_color_guard:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_exhibition:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_inspection:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_regulation:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           updated_at: string
         }
         Insert: {
+          armed_color_guard?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_exhibition?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_inspection?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_regulation?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          cadets?: string[] | null
+          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at?: string
           description?: string | null
@@ -163,10 +293,38 @@ export type Database = {
           location?: string | null
           name: string
           registration_deadline?: string | null
+          school_id?: string | null
+          teams?: string[] | null
           type: Database["public"]["Enums"]["competition_type"]
+          unarmed_color_guard?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_exhibition?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_inspection?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_regulation?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           updated_at?: string
         }
         Update: {
+          armed_color_guard?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_exhibition?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_inspection?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          armed_regulation?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          cadets?: string[] | null
+          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date?: string
           created_at?: string
           description?: string | null
@@ -174,10 +332,32 @@ export type Database = {
           location?: string | null
           name?: string
           registration_deadline?: string | null
+          school_id?: string | null
+          teams?: string[] | null
           type?: Database["public"]["Enums"]["competition_type"]
+          unarmed_color_guard?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_exhibition?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_inspection?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          unarmed_regulation?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "competitions_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       contacts: {
         Row: {

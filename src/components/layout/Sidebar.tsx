@@ -44,7 +44,6 @@ const iconMap = {
   DollarSign,
   Package,
   Contact,
-  Trophy,
   Settings,
   BarChart3,
   Calendar,
@@ -54,6 +53,7 @@ const iconMap = {
   Mails,
   Workflow,
   Briefcase,
+  Trophy,
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
