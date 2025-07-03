@@ -24,7 +24,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   const { templates } = useCompetitionTemplates();
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
-    description: template?.description || '',
+    description: (template as any)?.description || '',
     event: template?.event || 'Armed Regulation',
     jrotc_program: template?.jrotc_program || 'air_force',
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
