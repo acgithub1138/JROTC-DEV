@@ -3,23 +3,15 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Eye, Mail, Users } from 'lucide-react';
-
-interface Team {
-  id: string;
-  name: string;
-  description?: string;
-  team_type: string;
-  member_count?: number;
-  created_at: string;
-}
+import { TeamWithMembers } from '../types';
 
 interface TeamCardsProps {
-  teams: Team[];
+  teams: TeamWithMembers[];
   isLoading: boolean;
-  onEdit: (team: Team) => void;
+  onEdit: (team: TeamWithMembers) => void;
   onDelete: (id: string) => void;
-  onViewMembers: (team: Team) => void;
-  onSendEmail: (team: Team) => void;
+  onViewMembers: (team: TeamWithMembers) => void;
+  onSendEmail: (team: TeamWithMembers) => void;
 }
 
 export const TeamCards: React.FC<TeamCardsProps> = ({
@@ -30,7 +22,9 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   onViewMembers,
   onSendEmail,
 }) => {
-  const getTypeColor = (type: string) => {
+  const getTypeColor = (type?: string) => {
+    if (!type) return 'bg-gray-100 text-gray-800';
+    
     switch (type.toLowerCase()) {
       case 'flight': return 'bg-blue-100 text-blue-800';
       case 'squad': return 'bg-green-100 text-green-800';
@@ -78,16 +72,14 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
             <div className="flex items-start justify-between">
               <div>
                 <CardTitle className="text-lg">{team.name}</CardTitle>
-                <Badge className={getTypeColor(team.team_type)}>
-                  {team.team_type}
+                <Badge className={getTypeColor('team')}>
+                  Team
                 </Badge>
               </div>
-              {team.member_count !== undefined && (
-                <div className="flex items-center space-x-1 text-sm text-gray-500">
-                  <Users className="w-4 h-4" />
-                  <span>{team.member_count}</span>
-                </div>
-              )}
+              <div className="flex items-center space-x-1 text-sm text-gray-500">
+                <Users className="w-4 h-4" />
+                <span>{team.member_count || 0}</span>
+              </div>
             </div>
           </CardHeader>
           

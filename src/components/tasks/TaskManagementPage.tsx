@@ -6,7 +6,9 @@ import { Plus, Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { TaskList } from './TaskList';
 import { TaskTable } from './TaskTable';
+import { TaskCards } from './components/TaskCards';
 import { TaskForm } from './TaskForm';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { syncTaskOptions } from '@/utils/taskOptionValidator';
 import { useTasks, Task } from '@/hooks/useTasks';
@@ -18,6 +20,7 @@ import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 const TaskManagementPage: React.FC = () => {
   const { tasks } = useTasks();
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -115,11 +118,20 @@ const TaskManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="mytasks" className="space-y-4">
-          <TaskTable 
-            tasks={paginatedMyTasks}
-            onTaskSelect={handleTaskSelect}
-            onEditTask={handleEditTask}
-          />
+          {isMobile ? (
+            <TaskCards 
+              tasks={paginatedMyTasks}
+              onView={handleTaskSelect}
+              onEdit={handleEditTask}
+              onDelete={() => {}}
+            />
+          ) : (
+            <TaskTable 
+              tasks={paginatedMyTasks}
+              onTaskSelect={handleTaskSelect}
+              onEditTask={handleEditTask}
+            />
+          )}
           <TablePagination
             currentPage={currentPageMyTasks}
             totalPages={myTasksPages}
@@ -129,11 +141,20 @@ const TaskManagementPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="alltasks" className="space-y-4">
-          <TaskTable 
-            tasks={paginatedAllTasks}
-            onTaskSelect={handleTaskSelect}
-            onEditTask={handleEditTask}
-          />
+          {isMobile ? (
+            <TaskCards 
+              tasks={paginatedAllTasks}
+              onView={handleTaskSelect}
+              onEdit={handleEditTask}
+              onDelete={() => {}}
+            />
+          ) : (
+            <TaskTable 
+              tasks={paginatedAllTasks}
+              onTaskSelect={handleTaskSelect}
+              onEditTask={handleEditTask}
+            />
+          )}
           <TablePagination
             currentPage={currentPageAllTasks}
             totalPages={allTasksPages}
@@ -143,11 +164,20 @@ const TaskManagementPage: React.FC = () => {
         </TabsContent>
 
         <TabsContent value="completed" className="space-y-4">
-          <TaskTable 
-            tasks={paginatedCompletedTasks}
-            onTaskSelect={handleTaskSelect}
-            onEditTask={handleEditTask}
-          />
+          {isMobile ? (
+            <TaskCards 
+              tasks={paginatedCompletedTasks}
+              onView={handleTaskSelect}
+              onEdit={handleEditTask}
+              onDelete={() => {}}
+            />
+          ) : (
+            <TaskTable 
+              tasks={paginatedCompletedTasks}
+              onTaskSelect={handleTaskSelect}
+              onEditTask={handleEditTask}
+            />
+          )}
           <TablePagination
             currentPage={currentPageCompleted}
             totalPages={completedTasksPages}
