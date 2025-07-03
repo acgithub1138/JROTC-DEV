@@ -78,6 +78,85 @@ const UserNames: React.FC<{ uuids: string }> = ({ uuids }) => {
   );
 };
 
+// Helper function to analyze issued_to changes
+const analyzeIssuedToChanges = (oldValue: string | null, newValue: string | null) => {
+  const getIds = (value: string | null) => 
+    value && value !== 'null' && value !== 'empty' 
+      ? value.split(', ').filter(id => id.trim()) 
+      : [];
+
+  const oldIds = getIds(oldValue);
+  const newIds = getIds(newValue);
+
+  const addedIds = newIds.filter(id => !oldIds.includes(id));
+  const removedIds = oldIds.filter(id => !newIds.includes(id));
+
+  return { addedIds, removedIds };
+};
+
+// Component for displaying issued_to changes
+const IssuedToChanges: React.FC<{ oldValue: string | null; newValue: string | null }> = ({ oldValue, newValue }) => {
+  const { addedIds, removedIds } = analyzeIssuedToChanges(oldValue, newValue);
+  
+  const { data: addedUsers } = useQuery({
+    queryKey: ['added-users', addedIds],
+    queryFn: async () => {
+      if (addedIds.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', addedIds);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: addedIds.length > 0,
+  });
+
+  const { data: removedUsers } = useQuery({
+    queryKey: ['removed-users', removedIds],
+    queryFn: async () => {
+      if (removedIds.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', removedIds);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: removedIds.length > 0,
+  });
+
+  const changes = [];
+  
+  if (addedUsers && addedUsers.length > 0) {
+    const userNames = addedUsers.map(user => `${user.last_name}, ${user.first_name}`).join(', ');
+    changes.push(`Added User ${userNames}`);
+  }
+  
+  if (removedUsers && removedUsers.length > 0) {
+    const userNames = removedUsers.map(user => `${user.last_name}, ${user.first_name}`).join(', ');
+    changes.push(`Removed User ${userNames}`);
+  }
+
+  if (changes.length === 0) {
+    return <span className="text-muted-foreground">No changes</span>;
+  }
+
+  return (
+    <div className="space-y-1">
+      {changes.map((change, index) => (
+        <div key={index} className="text-sm">
+          {change}
+        </div>
+      ))}
+    </div>
+  );
+};
+
 export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
   item,
   open,
@@ -126,24 +205,20 @@ export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
                     )}
                   </div>
                   
-                  <div className="flex items-center gap-2 text-sm">
-                    <span className="text-muted-foreground">Changed from:</span>
-                    <code className="bg-muted px-2 py-1 rounded text-xs">
-                      {entry.field_name === 'issued_to' ? (
-                        <UserNames uuids={entry.old_value || 'empty'} />
-                      ) : (
-                        entry.old_value || 'empty'
-                      )}
-                    </code>
-                    <span className="text-muted-foreground">to:</span>
-                    <code className="bg-muted px-2 py-1 rounded text-xs">
-                      {entry.field_name === 'issued_to' ? (
-                        <UserNames uuids={entry.new_value || 'empty'} />
-                      ) : (
-                        entry.new_value || 'empty'
-                      )}
-                    </code>
-                  </div>
+                  {entry.field_name === 'issued_to' ? (
+                    <IssuedToChanges oldValue={entry.old_value} newValue={entry.new_value} />
+                  ) : (
+                    <div className="flex items-center gap-2 text-sm">
+                      <span className="text-muted-foreground">Changed from:</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">
+                        {entry.old_value || 'empty'}
+                      </code>
+                      <span className="text-muted-foreground">to:</span>
+                      <code className="bg-muted px-2 py-1 rounded text-xs">
+                        {entry.new_value || 'empty'}
+                      </code>
+                    </div>
+                  )}
                 </div>
               ))}
             </div>
