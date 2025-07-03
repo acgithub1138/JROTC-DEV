@@ -30,6 +30,14 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     overall_placement: competition?.armed_regulation || 'NA',
     overall_armed_placement: competition?.armed_exhibition || 'NA',
     overall_unarmed_placement: competition?.armed_color_guard || 'NA',
+    armed_regulation: competition?.armed_regulation || 'NA',
+    armed_exhibition: competition?.armed_exhibition || 'NA',
+    armed_color_guard: competition?.armed_color_guard || 'NA',
+    armed_inspection: competition?.armed_inspection || 'NA',
+    unarmed_regulation: competition?.unarmed_regulation || 'NA',
+    unarmed_exhibition: competition?.unarmed_exhibition || 'NA',
+    unarmed_color_guard: competition?.unarmed_color_guard || 'NA',
+    unarmed_inspection: competition?.unarmed_inspection || 'NA',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -185,6 +193,58 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
               </SelectContent>
             </Select>
           </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Armed Events</h3>
+          
+          {(['armed_regulation', 'armed_exhibition', 'armed_color_guard', 'armed_inspection'] as const).map((event) => (
+            <div key={event} className="space-y-2">
+              <Label>{event.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Label>
+              <Select 
+                value={formData[event]} 
+                onValueChange={(value) => updateFormData(event, value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {placementOptions.map((placement) => (
+                    <SelectItem key={placement} value={placement}>
+                      {placement}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
+        </div>
+
+        <div className="space-y-4">
+          <h3 className="text-lg font-semibold">Unarmed Events</h3>
+          
+          {(['unarmed_regulation', 'unarmed_exhibition', 'unarmed_color_guard', 'unarmed_inspection'] as const).map((event) => (
+            <div key={event} className="space-y-2">
+              <Label>{event.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Label>
+              <Select 
+                value={formData[event]} 
+                onValueChange={(value) => updateFormData(event, value)}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  {placementOptions.map((placement) => (
+                    <SelectItem key={placement} value={placement}>
+                      {placement}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          ))}
         </div>
       </div>
 
