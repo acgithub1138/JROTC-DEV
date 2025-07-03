@@ -30,12 +30,12 @@ export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFilters
 
         <div>
           <Label htmlFor="category">Category</Label>
-          <Select value={filters.category} onValueChange={(value) => updateFilter('category', value)}>
+          <Select value={filters.category} onValueChange={(value) => updateFilter('category', value === 'all' ? '' : value)}>
             <SelectTrigger>
               <SelectValue placeholder="All Categories" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Categories</SelectItem>
+              <SelectItem value="all">All Categories</SelectItem>
               <SelectItem value="income">Income</SelectItem>
               <SelectItem value="expense">Expense</SelectItem>
             </SelectContent>
@@ -44,12 +44,12 @@ export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFilters
 
         <div>
           <Label htmlFor="type">Type</Label>
-          <Select value={filters.type} onValueChange={(value) => updateFilter('type', value)}>
+          <Select value={filters.type} onValueChange={(value) => updateFilter('type', value === 'all' ? '' : value)}>
             <SelectTrigger>
               <SelectValue placeholder="All Types" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Types</SelectItem>
+              <SelectItem value="all">All Types</SelectItem>
               {filters.category === 'expense' ? (
                 <>
                   <SelectItem value="equipment">Equipment</SelectItem>
@@ -81,12 +81,12 @@ export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFilters
 
         <div>
           <Label htmlFor="payment-method">Payment Method</Label>
-          <Select value={filters.paymentMethod} onValueChange={(value) => updateFilter('paymentMethod', value)}>
+          <Select value={filters.paymentMethod} onValueChange={(value) => updateFilter('paymentMethod', value === 'all' ? '' : value)}>
             <SelectTrigger>
               <SelectValue placeholder="All Methods" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Methods</SelectItem>
+              <SelectItem value="all">All Methods</SelectItem>
               <SelectItem value="cash">Cash</SelectItem>
               <SelectItem value="check">Check</SelectItem>
               <SelectItem value="debit_card">Debit Card</SelectItem>
@@ -98,12 +98,12 @@ export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFilters
 
         <div>
           <Label htmlFor="status">Status</Label>
-          <Select value={filters.status} onValueChange={(value) => updateFilter('status', value)}>
+          <Select value={filters.status} onValueChange={(value) => updateFilter('status', value === 'all' ? '' : value)}>
             <SelectTrigger>
               <SelectValue placeholder="All Statuses" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">All Statuses</SelectItem>
+              <SelectItem value="all">All Statuses</SelectItem>
               <SelectItem value="pending">Pending</SelectItem>
               <SelectItem value="paid">Paid</SelectItem>
               <SelectItem value="not_paid">Not Paid</SelectItem>
