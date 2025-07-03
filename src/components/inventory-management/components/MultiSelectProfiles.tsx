@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Input } from '@/components/ui/input';
-import { Command, CommandEmpty, CommandGroup, CommandInput, CommandItem, CommandList } from '@/components/ui/command';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, ChevronsUpDown, X } from 'lucide-react';
-import { cn } from '@/lib/utils';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
+import { X, Search } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 interface MultiSelectProfilesProps {
@@ -17,13 +15,17 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
   value,
   onChange,
 }) => {
-  const [open, setOpen] = useState(false);
+  const [searchTerm, setSearchTerm] = useState('');
   const { users, isLoading } = useSchoolUsers();
 
   const selectedUsers = users?.filter(user => value.includes(user.id)) || [];
-  const availableUsers = users?.filter(user => !value.includes(user.id)) || [];
+  
+  const filteredUsers = users?.filter(user => {
+    const fullName = `${user.first_name} ${user.last_name}`.toLowerCase();
+    return fullName.includes(searchTerm.toLowerCase());
+  }) || [];
 
-  const handleSelect = (userId: string) => {
+  const handleToggleUser = (userId: string) => {
     if (value.includes(userId)) {
       onChange(value.filter(id => id !== userId));
     } else {
@@ -36,66 +38,70 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
   };
 
   return (
-    <div className="space-y-2">
-      <Popover open={open} onOpenChange={setOpen}>
-        <PopoverTrigger asChild>
-          <Button
-            variant="outline"
-            role="combobox"
-            aria-expanded={open}
-            className="w-full justify-between"
-          >
-            {selectedUsers.length > 0
-              ? `${selectedUsers.length} user(s) selected`
-              : "Select users..."}
-            <ChevronsUpDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-          </Button>
-        </PopoverTrigger>
-        <PopoverContent className="w-full p-0">
-          <Command>
-            <CommandInput placeholder="Search users..." />
-            <CommandList>
-              <CommandEmpty>
-                {isLoading ? "Loading users..." : "No users found."}
-              </CommandEmpty>
-              <CommandGroup>
-                {availableUsers.map((user) => (
-                  <CommandItem
-                    key={user.id}
-                    value={`${user.last_name}, ${user.first_name}`}
-                    onSelect={() => handleSelect(user.id)}
-                  >
-                    <Check
-                      className={cn(
-                        "mr-2 h-4 w-4",
-                        value.includes(user.id) ? "opacity-100" : "opacity-0"
-                      )}
-                    />
-                    {user.last_name}, {user.first_name}
-                  </CommandItem>
-                ))}
-              </CommandGroup>
-            </CommandList>
-          </Command>
-        </PopoverContent>
-      </Popover>
-
+    <div className="space-y-3">
+      {/* Selected users display */}
       {selectedUsers.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedUsers.map((user) => (
-            <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-              {user.last_name}, {user.first_name}
-              <button
-                type="button"
-                onClick={() => handleRemove(user.id)}
-                className="ml-1 hover:bg-red-100 rounded-full p-0.5"
-              >
-                <X className="h-3 w-3" />
-              </button>
-            </Badge>
-          ))}
+        <div className="space-y-2">
+          <span className="text-sm font-medium">Selected Users ({selectedUsers.length})</span>
+          <div className="flex flex-wrap gap-2">
+            {selectedUsers.map((user) => (
+              <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
+                {user.last_name}, {user.first_name}
+                <button
+                  type="button"
+                  onClick={() => handleRemove(user.id)}
+                  className="ml-1 hover:bg-red-100 rounded-full p-0.5"
+                >
+                  <X className="h-3 w-3" />
+                </button>
+              </Badge>
+            ))}
+          </div>
         </div>
       )}
+
+      {/* Search and user list */}
+      <div className="border rounded-md">
+        <div className="p-3 border-b">
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+            <Input
+              placeholder="Search users..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-10"
+            />
+          </div>
+        </div>
+        
+        <ScrollArea className="h-48">
+          <div className="p-2">
+            {isLoading ? (
+              <div className="text-sm text-gray-500 p-2">Loading users...</div>
+            ) : filteredUsers.length === 0 ? (
+              <div className="text-sm text-gray-500 p-2">No users found.</div>
+            ) : (
+              <div className="space-y-2">
+                {filteredUsers.map((user) => (
+                  <div
+                    key={user.id}
+                    className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
+                    onClick={() => handleToggleUser(user.id)}
+                  >
+                    <Checkbox
+                      checked={value.includes(user.id)}
+                      onCheckedChange={() => handleToggleUser(user.id)}
+                    />
+                    <span className="text-sm">
+                      {user.last_name}, {user.first_name}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </ScrollArea>
+      </div>
     </div>
   );
 };
