@@ -20,10 +20,10 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
 
   return (
     <div className="space-y-2">
-      <Label htmlFor="assigned_to">Assigned To</Label>
+      <Label htmlFor="assigned_to">Assigned To *</Label>
       <Select value={form.watch('assigned_to')} onValueChange={(value) => form.setValue('assigned_to', value)}>
         <SelectTrigger>
-          <SelectValue placeholder="Select assignee (optional)" />
+          <SelectValue placeholder="Select assignee" />
         </SelectTrigger>
         <SelectContent>
           {users.map((user) => (
@@ -33,6 +33,9 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
           ))}
         </SelectContent>
       </Select>
+      {form.formState.errors.assigned_to && (
+        <p className="text-sm text-red-600">{form.formState.errors.assigned_to.message}</p>
+      )}
     </div>
   );
 };

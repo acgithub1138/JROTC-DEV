@@ -93,7 +93,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="item"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Item</FormLabel>
+                  <FormLabel>Item *</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter item name" {...field} />
                   </FormControl>
@@ -107,7 +107,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel>Type *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -132,7 +132,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date</FormLabel>
+                  <FormLabel>Date *</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -146,7 +146,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>Amount *</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
@@ -166,7 +166,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="payment_method"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Payment Method</FormLabel>
+                  <FormLabel>Payment Method *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -191,7 +191,7 @@ export const AddExpenseDialog: React.FC<AddExpenseDialogProps> = ({
               name="status"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Status</FormLabel>
+                  <FormLabel>Status *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>

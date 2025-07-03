@@ -87,7 +87,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
               name="item"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Item</FormLabel>
+                  <FormLabel>Item *</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter item name" {...field} />
                   </FormControl>
@@ -101,7 +101,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
               name="type"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Type</FormLabel>
+                  <FormLabel>Type *</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
@@ -124,7 +124,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
               name="date"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Date</FormLabel>
+                  <FormLabel>Date *</FormLabel>
                   <FormControl>
                     <Input type="date" {...field} />
                   </FormControl>
@@ -138,7 +138,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
               name="amount"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Amount</FormLabel>
+                  <FormLabel>Amount *</FormLabel>
                   <FormControl>
                     <Input
                       type="number"
