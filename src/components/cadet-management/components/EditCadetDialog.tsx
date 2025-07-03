@@ -93,6 +93,24 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
           </div>
 
           <div className="space-y-2">
+            <Label htmlFor="role">Role</Label>
+            <Select
+              value={editingProfile.role || ""}
+              onValueChange={(value) => setEditingProfile({ ...editingProfile, role: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select role" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="cadet">Cadet</SelectItem>
+                <SelectItem value="command_staff">Command Staff</SelectItem>
+                <SelectItem value="instructor">Instructor</SelectItem>
+                <SelectItem value="admin">Admin</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
             <Label htmlFor="rank">Rank</Label>
             <Select
               value={editingProfile.rank || ""}
