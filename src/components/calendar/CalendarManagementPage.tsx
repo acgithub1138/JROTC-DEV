@@ -52,8 +52,6 @@ const CalendarManagementPage = () => {
 
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
-    setEditingEvent(null);
-    setShowEventDialog(true);
   };
 
   const handleCloseDialog = () => {

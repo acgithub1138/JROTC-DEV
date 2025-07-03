@@ -156,18 +156,15 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   }
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div className="lg:col-span-2">
-        <Card>
-          <CardHeader>
-            <CardTitle>Calendar</CardTitle>
-          </CardHeader>
-          <CardContent>
+    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
+      <div className="lg:col-span-3">
+        <Card className="h-full">
+          <CardContent className="p-6">
             <Calendar
               mode="single"
               selected={selectedDate}
               onSelect={handleDateSelect}
-              className="w-full"
+              className="w-full h-full"
               modifiers={{
                 hasEvents: (date) => getEventsForDate(date).length > 0
               }}
@@ -179,8 +176,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         </Card>
       </div>
 
-      <div>
-        <Card>
+      <div className="lg:col-span-1">
+        <Card className="h-full">
           <CardHeader>
             <CardTitle>
               Events - {format(selectedDate, 'MMM d, yyyy')}
