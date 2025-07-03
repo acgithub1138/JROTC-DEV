@@ -24,10 +24,10 @@ export const useDashboardStats = () => {
           .select('id, status, due_date', { count: 'exact' })
           .neq('status', 'completed'),
         
-        // Budget transactions for current year (non-archived only)
+        // Budget transactions (non-archived only)
         supabase
           .from('budget_transactions')
-          .select('amount, type')
+          .select('amount, category')
           .eq('archive', false),
         
         // Inventory items count and issued count
@@ -44,9 +44,9 @@ export const useDashboardStats = () => {
 
       // Calculate budget - using same calculation as budget page
       console.log('Budget data from query:', budgetResult.data);
-      const totalIncome = budgetResult.data?.filter(t => t.type === 'income')
+      const totalIncome = budgetResult.data?.filter(t => t.category === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
-      const totalExpenses = budgetResult.data?.filter(t => t.type === 'expense')
+      const totalExpenses = budgetResult.data?.filter(t => t.category === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       
       console.log('Dashboard budget calculation:', { totalIncome, totalExpenses, netBudget: totalIncome - totalExpenses });
