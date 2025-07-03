@@ -34,7 +34,7 @@ export const useCompetitionTemplates = () => {
     try {
       const { data, error } = await supabase
         .from('competition_templates')
-        .insert(templateData)
+        .insert({ ...templateData, created_by: (await supabase.auth.getUser()).data.user?.id })
         .select()
         .single();
 

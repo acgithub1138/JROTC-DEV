@@ -22,7 +22,7 @@ export const TemplatesTab = () => {
     deleteTemplate
   } = useCompetitionTemplates();
 
-  const canManageTemplates = userProfile?.role === 'admin';
+  const canManageTemplates = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
 
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
