@@ -24,11 +24,11 @@ export const useDashboardStats = () => {
           .select('id, status, due_date', { count: 'exact' })
           .neq('status', 'completed'),
         
-        // Budget transactions for current year
+        // Budget transactions for current year (non-archived only)
         supabase
           .from('budget_transactions')
           .select('amount, type')
-          .eq('budget_year', new Date().getFullYear().toString()),
+          .eq('archive', false),
         
         // Inventory items count and issued count
         supabase
