@@ -182,59 +182,72 @@ export type Database = {
       contacts: {
         Row: {
           address: string | null
+          cadet_id: string | null
           city: string | null
           created_at: string
           created_by: string | null
           email: string | null
-          first_name: string
           id: string
-          last_name: string
+          name: string
           notes: string | null
           organization: string | null
           phone: string | null
           school_id: string
           state: string | null
+          status: Database["public"]["Enums"]["contact_status"] | null
           title: string | null
+          type: Database["public"]["Enums"]["contact_type"] | null
           updated_at: string
           zip_code: string | null
         }
         Insert: {
           address?: string | null
+          cadet_id?: string | null
           city?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
-          first_name: string
           id?: string
-          last_name: string
+          name: string
           notes?: string | null
           organization?: string | null
           phone?: string | null
           school_id: string
           state?: string | null
+          status?: Database["public"]["Enums"]["contact_status"] | null
           title?: string | null
+          type?: Database["public"]["Enums"]["contact_type"] | null
           updated_at?: string
           zip_code?: string | null
         }
         Update: {
           address?: string | null
+          cadet_id?: string | null
           city?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
-          first_name?: string
           id?: string
-          last_name?: string
+          name?: string
           notes?: string | null
           organization?: string | null
           phone?: string | null
           school_id?: string
           state?: string | null
+          status?: Database["public"]["Enums"]["contact_status"] | null
           title?: string | null
+          type?: Database["public"]["Enums"]["contact_type"] | null
           updated_at?: string
           zip_code?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "contacts_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "contacts_created_by_fkey"
             columns: ["created_by"]
@@ -1471,6 +1484,8 @@ export type Database = {
         | "leadership"
         | "physical_fitness"
         | "inspection"
+      contact_status: "active" | "semi_active" | "not_active"
+      contact_type: "parent" | "relative" | "friend"
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
       email_queue_status: "pending" | "sent" | "failed" | "cancelled"
       email_trigger_event: "INSERT" | "UPDATE" | "DELETE"
@@ -1641,6 +1656,8 @@ export const Constants = {
         "physical_fitness",
         "inspection",
       ],
+      contact_status: ["active", "semi_active", "not_active"],
+      contact_type: ["parent", "relative", "friend"],
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
       email_queue_status: ["pending", "sent", "failed", "cancelled"],
       email_trigger_event: ["INSERT", "UPDATE", "DELETE"],
