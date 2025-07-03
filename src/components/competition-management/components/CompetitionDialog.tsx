@@ -29,12 +29,11 @@ export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
             {competition ? 'Edit Competition' : 'Create Competition'}
           </DialogTitle>
         </DialogHeader>
-        <div className="p-4">
-          <p>Competition form will be implemented here.</p>
-          <div className="flex gap-2 mt-4">
-            <button onClick={() => onOpenChange(false)} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-          </div>
-        </div>
+        <CompetitionForm
+          competition={competition}
+          onSubmit={handleSubmit}
+          onCancel={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );

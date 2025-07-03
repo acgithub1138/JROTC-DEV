@@ -29,12 +29,11 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
             {template ? 'Edit Template' : 'Create Template'}
           </DialogTitle>
         </DialogHeader>
-        <div className="p-4">
-          <p>Template form will be implemented here.</p>
-          <div className="flex gap-2 mt-4">
-            <button onClick={() => onOpenChange(false)} className="px-4 py-2 bg-gray-200 rounded">Cancel</button>
-          </div>
-        </div>
+        <TemplateForm
+          template={template}
+          onSubmit={handleSubmit}
+          onCancel={() => onOpenChange(false)}
+        />
       </DialogContent>
     </Dialog>
   );

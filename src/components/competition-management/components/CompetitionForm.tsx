@@ -7,12 +7,13 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
 import { MultiSelectProfiles } from '@/components/inventory-management/components/MultiSelectProfiles';
 import { useTeams } from '@/components/teams/hooks/useTeams';
+import { Competition } from '../types';
 import type { Database } from '@/integrations/supabase/types';
 
-type Competition = Database['public']['Tables']['competitions']['Row'];
+type DatabaseCompetition = Database['public']['Tables']['competitions']['Row'];
 
 interface CompetitionFormProps {
-  competition?: Competition | null;
+  competition?: Competition | DatabaseCompetition | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
 }
