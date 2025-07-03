@@ -1,15 +1,9 @@
 import React from 'react';
-import { MoreHorizontal, Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu';
 import { Contact } from '../ContactManagementPage';
 
 interface ContactTableProps {
@@ -103,7 +97,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
           <TableHead>Status</TableHead>
           <TableHead>Phone</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead className="w-[50px]">Actions</TableHead>
+          <TableHead className="w-[100px]">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>
       <StandardTableBody
@@ -118,27 +112,26 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell>{contact.phone || '-'}</TableCell>
             <TableCell>{contact.email || '-'}</TableCell>
             <TableCell>
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" className="h-8 w-8 p-0">
-                    <span className="sr-only">Open menu</span>
-                    <MoreHorizontal className="h-4 w-4" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent align="end" className="bg-background border shadow-md">
-                  <DropdownMenuItem onClick={() => onEdit(contact)}>
-                    <Edit className="mr-2 h-4 w-4" />
-                    Edit
-                  </DropdownMenuItem>
-                  <DropdownMenuItem
-                    onClick={() => onDelete(contact.id)}
-                    className="text-red-600"
-                  >
-                    <Trash2 className="mr-2 h-4 w-4" />
-                    Delete
-                  </DropdownMenuItem>
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <div className="flex items-center gap-2">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onEdit(contact)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Edit className="h-4 w-4" />
+                  <span className="sr-only">Edit contact</span>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => onDelete(contact.id)}
+                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="h-4 w-4" />
+                  <span className="sr-only">Delete contact</span>
+                </Button>
+              </div>
             </TableCell>
           </TableRow>
         ))}
