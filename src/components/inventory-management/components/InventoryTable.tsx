@@ -57,13 +57,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     
     const updatedItem = { 
       id: itemId, 
-      [field]: numValue,
-      // Calculate qty_available when qty_total or qty_issued changes
-      ...(field === 'qty_total' || field === 'qty_issued' ? {
-        qty_available: field === 'qty_total' 
-          ? numValue - (items.find(item => item.id === itemId)?.qty_issued || 0)
-          : (items.find(item => item.id === itemId)?.qty_total || 0) - numValue
-      } : {})
+      [field]: numValue
     };
     onEdit(updatedItem);
   };
