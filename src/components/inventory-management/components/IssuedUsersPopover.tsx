@@ -17,8 +17,9 @@ export const IssuedUsersPopover: React.FC<IssuedUsersPopoverProps> = ({ issuedTo
       
       const { data, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email')
-        .in('id', issuedTo);
+        .select('id, first_name, last_name')
+        .in('id', issuedTo)
+        .order('last_name', { ascending: true });
       
       if (error) throw error;
       return data;
@@ -42,8 +43,7 @@ export const IssuedUsersPopover: React.FC<IssuedUsersPopoverProps> = ({ issuedTo
             <div className="space-y-1">
               {users.map((user) => (
                 <div key={user.id} className="text-sm">
-                  <div className="font-medium">{user.first_name} {user.last_name}</div>
-                  <div className="text-muted-foreground text-xs">{user.email}</div>
+                  <div className="font-medium">{user.last_name}, {user.first_name}</div>
                 </div>
               ))}
             </div>

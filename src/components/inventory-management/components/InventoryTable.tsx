@@ -36,7 +36,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const { getPaddingClass } = useTableSettings();
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
-    data: items
+    data: items,
+    defaultSort: { key: 'category', direction: 'asc' }
   });
 
   const handleEdit = (item: InventoryItem) => {
