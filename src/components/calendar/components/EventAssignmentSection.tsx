@@ -276,6 +276,7 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
             />
 
             <Button 
+              type="button"
               onClick={addAssignment}
               disabled={!newAssignment.assigneeId}
               size="sm"

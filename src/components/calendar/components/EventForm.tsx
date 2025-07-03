@@ -264,6 +264,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         </div>
       )}
 
+      {/* Show Event Assignments for existing events or when editing */}
       {event && (
         <EventAssignmentSection eventId={event.id} />
       )}
