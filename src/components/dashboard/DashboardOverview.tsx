@@ -2,9 +2,9 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Plus, Trophy, AlertTriangle, Package } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useDashboardActivity } from '@/hooks/useDashboardActivity';
+import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -15,7 +15,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { data: recentActivity, isLoading: activityLoading } = useDashboardActivity();
+  const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
   
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
@@ -94,18 +94,18 @@ const DashboardOverview = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Recent Activity */}
+        {/* Upcoming Events */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
-              <AlertTriangle className="w-5 h-5 mr-2 text-blue-600" />
-              Recent Activity
+              <Calendar className="w-5 h-5 mr-2 text-blue-600" />
+              Upcoming Events
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {activityLoading ? (
-                [...Array(4)].map((_, index) => (
+              {eventsLoading ? (
+                [...Array(3)].map((_, index) => (
                   <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
                     <div className="w-2 h-2 bg-gray-300 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
                     <div className="flex-1 min-w-0 space-y-2">
@@ -115,20 +115,32 @@ const DashboardOverview = () => {
                     </div>
                   </div>
                 ))
-              ) : recentActivity && recentActivity.length > 0 ? (
-                recentActivity.map((activity, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                      <p className="text-sm text-gray-500">{activity.details}</p>
-                      <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+              ) : events && events.length > 0 ? (
+                events
+                  .filter(event => new Date(event.start_date) >= new Date())
+                  .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+                  .slice(0, 5)
+                  .map((event, index) => (
+                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                        <p className="text-sm text-gray-500">{event.event_type} • {event.location || 'No location'}</p>
+                        <p className="text-xs text-gray-400 mt-1">
+                          {new Date(event.start_date).toLocaleDateString('en-US', {
+                            month: 'short',
+                            day: 'numeric',
+                            year: 'numeric',
+                            hour: event.is_all_day ? undefined : 'numeric',
+                            minute: event.is_all_day ? undefined : '2-digit',
+                          })}
+                        </p>
+                      </div>
                     </div>
-                  </div>
-                ))
+                  ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">No recent activity</p>
+                  <p className="text-sm">No upcoming events</p>
                 </div>
               )}
             </div>
