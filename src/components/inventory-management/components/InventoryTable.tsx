@@ -1,9 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
+import { useSortableTable } from '@/hooks/useSortableTable';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -27,6 +29,10 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onDelete,
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  
+  const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
+    data: items
+  });
 
   const handleEdit = (item: InventoryItem) => {
     setEditingItem(item);
@@ -39,7 +45,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      onSelectionChange(items.map(item => item.id));
+      onSelectionChange(sortedItems.map(item => item.id));
     } else {
       onSelectionChange([]);
     }
@@ -106,27 +112,49 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             <TableRow>
               <TableHead className="w-12">
                 <Checkbox
-                  checked={selectedItems.length === items.length && items.length > 0}
+                  checked={selectedItems.length === sortedItems.length && sortedItems.length > 0}
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <TableHead>Item ID</TableHead>
-              <TableHead>Item</TableHead>
-              <TableHead>Category</TableHead>
-              <TableHead>Sub Category</TableHead>
-              <TableHead>Size</TableHead>
-              <TableHead>Gender</TableHead>
-              <TableHead>Total Qty</TableHead>
-              <TableHead>Issued Qty</TableHead>
-              <TableHead>Available Qty</TableHead>
+              <SortableTableHead sortKey="item_id" currentSort={sortConfig} onSort={handleSort}>
+                Item ID
+              </SortableTableHead>
+              <SortableTableHead sortKey="item" currentSort={sortConfig} onSort={handleSort}>
+                Item
+              </SortableTableHead>
+              <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>
+                Category
+              </SortableTableHead>
+              <SortableTableHead sortKey="sub_category" currentSort={sortConfig} onSort={handleSort}>
+                Sub Category
+              </SortableTableHead>
+              <SortableTableHead sortKey="size" currentSort={sortConfig} onSort={handleSort}>
+                Size
+              </SortableTableHead>
+              <SortableTableHead sortKey="gender" currentSort={sortConfig} onSort={handleSort}>
+                Gender
+              </SortableTableHead>
+              <SortableTableHead sortKey="qty_total" currentSort={sortConfig} onSort={handleSort}>
+                Total Qty
+              </SortableTableHead>
+              <SortableTableHead sortKey="qty_issued" currentSort={sortConfig} onSort={handleSort}>
+                Issued Qty
+              </SortableTableHead>
+              <SortableTableHead sortKey="qty_available" currentSort={sortConfig} onSort={handleSort}>
+                Available Qty
+              </SortableTableHead>
               <TableHead>Status</TableHead>
-              <TableHead>Stock Number</TableHead>
-              <TableHead>Unit</TableHead>
+              <SortableTableHead sortKey="stock_number" currentSort={sortConfig} onSort={handleSort}>
+                Stock Number
+              </SortableTableHead>
+              <SortableTableHead sortKey="unit_of_measure" currentSort={sortConfig} onSort={handleSort}>
+                Unit
+              </SortableTableHead>
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {items.length === 0 ? (
+            {sortedItems.length === 0 ? (
               <TableRow>
                 <TableCell colSpan={14} className="text-center py-12">
                   <div className="flex flex-col items-center text-gray-500">
@@ -137,7 +165,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 </TableCell>
               </TableRow>
             ) : (
-              items.map((item) => (
+              sortedItems.map((item) => (
                 <TableRow key={item.id} className="hover:bg-gray-50">
                   <TableCell>
                     <Checkbox

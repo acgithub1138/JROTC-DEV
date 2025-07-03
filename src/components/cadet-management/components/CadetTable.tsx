@@ -1,10 +1,12 @@
 
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, CheckCircle } from 'lucide-react';
+import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
 
@@ -25,8 +27,12 @@ export const CadetTable = ({
   onToggleStatus,
   selectedCadets,
   onSelectCadet,
-  onSelectAll
+onSelectAll
 }: CadetTableProps) => {
+  const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
+    data: profiles
+  });
+  
   const allSelected = profiles.length > 0 && selectedCadets.length === profiles.length;
   const someSelected = selectedCadets.length > 0 && selectedCadets.length < profiles.length;
 
@@ -41,17 +47,29 @@ export const CadetTable = ({
               aria-label={someSelected ? "Some selected" : allSelected ? "All selected" : "None selected"}
             />
           </TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Email</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>Grade</TableHead>
-          <TableHead>Rank</TableHead>
-          <TableHead>Flight</TableHead>
+          <SortableTableHead sortKey="first_name" currentSort={sortConfig} onSort={handleSort}>
+            Name
+          </SortableTableHead>
+          <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>
+            Email
+          </SortableTableHead>
+          <SortableTableHead sortKey="role" currentSort={sortConfig} onSort={handleSort}>
+            Role
+          </SortableTableHead>
+          <SortableTableHead sortKey="grade" currentSort={sortConfig} onSort={handleSort}>
+            Grade
+          </SortableTableHead>
+          <SortableTableHead sortKey="rank" currentSort={sortConfig} onSort={handleSort}>
+            Rank
+          </SortableTableHead>
+          <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={handleSort}>
+            Flight
+          </SortableTableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {profiles.map((profile) => (
+        {sortedProfiles.map((profile) => (
           <TableRow 
             key={profile.id} 
             className={`

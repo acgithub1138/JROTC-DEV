@@ -1,13 +1,17 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { TableHead } from '@/components/ui/table';
 import { ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 
+export interface SortConfig {
+  key: string;
+  direction: 'asc' | 'desc';
+}
+
 interface SortableTableHeadProps {
   children: React.ReactNode;
   sortKey: string;
-  currentSort: { key: string; direction: 'asc' | 'desc' } | null;
+  currentSort: SortConfig | null;
   onSort: (key: string) => void;
   className?: string;
 }
@@ -29,7 +33,7 @@ export const SortableTableHead: React.FC<SortableTableHeadProps> = ({
   return (
     <TableHead className={className}>
       <div 
-        className="flex items-center cursor-pointer hover:text-foreground font-medium text-muted-foreground"
+        className="flex items-center cursor-pointer hover:text-foreground font-medium text-muted-foreground transition-colors"
         onClick={handleClick}
       >
         <span>{children}</span>

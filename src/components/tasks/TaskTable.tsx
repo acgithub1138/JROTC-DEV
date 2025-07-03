@@ -1,12 +1,13 @@
 
-import React, { useState, useMemo } from 'react';
+import React from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { SortableTableHead, SortConfig } from '@/components/ui/sortable-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task } from '@/hooks/useTasks';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
-import { SortableTableHead } from './table/SortableTableHead';
 import { TaskTableRow } from './table/TaskTableRow';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
+import { useSortableTable } from '@/hooks/useSortableTable';
 import { useQueryClient } from '@tanstack/react-query';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
@@ -17,16 +18,42 @@ interface TaskTableProps {
   onEditTask: (task: Task) => void;
 }
 
-type SortConfig = {
-  key: string;
-  direction: 'asc' | 'desc';
-} | null;
-
 export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEditTask }) => {
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
-  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
   
+  // Custom sort function for tasks that handles nested values
+  const customSortFn = (a: Task, b: Task, sortConfig: SortConfig) => {
+    const getTaskValue = (task: Task, key: string) => {
+      if (key === 'assigned_to_name') {
+        return task.assigned_to_profile 
+          ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
+          : '';
+      }
+      return task[key as keyof Task];
+    };
+
+    const aValue = getTaskValue(a, sortConfig.key);
+    const bValue = getTaskValue(b, sortConfig.key);
+
+    if (aValue === null || aValue === undefined) return 1;
+    if (bValue === null || bValue === undefined) return -1;
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      const comparison = aValue.localeCompare(bValue);
+      return sortConfig.direction === 'asc' ? comparison : -comparison;
+    }
+
+    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+    return 0;
+  };
+
+  const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
+    data: tasks,
+    customSortFn
+  });
+
   const {
     editState,
     setEditState,
@@ -42,49 +69,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
     saveEdit,
     canEditTask,
   } = useTaskTableLogic();
-
-  const getNestedValue = (obj: any, path: string) => {
-    if (path === 'assigned_to_name') {
-      return obj.assigned_to_profile 
-        ? `${obj.assigned_to_profile.last_name}, ${obj.assigned_to_profile.first_name}`
-        : '';
-    }
-    return obj[path];
-  };
-
-  const sortedTasks = useMemo(() => {
-    if (!sortConfig || !tasks) return tasks;
-
-    return [...tasks].sort((a, b) => {
-      const aValue = getNestedValue(a, sortConfig.key);
-      const bValue = getNestedValue(b, sortConfig.key);
-
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        const comparison = aValue.localeCompare(bValue);
-        return sortConfig.direction === 'asc' ? comparison : -comparison;
-      }
-
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
-    });
-  }, [tasks, sortConfig]);
-
-  const handleSort = (key: string) => {
-    setSortConfig(current => {
-      if (current?.key === key) {
-        return current.direction === 'asc'
-          ? { key, direction: 'desc' }
-          : null;
-      }
-      return { key, direction: 'asc' };
-    });
-  };
-
-  // Create a system comment handler using direct Supabase call
   const handleSystemComment = async (taskId: string, commentText: string) => {
     try {
       const { error } = await supabase
