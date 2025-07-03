@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionTemplate } from '../types';
+import { JsonFieldBuilder } from './JsonFieldBuilder';
 import type { Database } from '@/integrations/supabase/types';
 
 type DatabaseCompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
@@ -24,13 +25,13 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     template_name: template?.template_name || '',
     event: template?.event || 'Armed Regulation',
     jrotc_program: template?.jrotc_program || 'air_force',
-    scores: template?.scores || {},
+    scores: (typeof template?.scores === 'object' && template?.scores !== null) 
+      ? template.scores as Record<string, any>
+      : {} as Record<string, any>,
     is_active: template?.is_active ?? true,
   });
 
-  const [scoresJson, setScoresJson] = useState(
-    JSON.stringify(template?.scores || {}, null, 2)
-  );
+  const [useBuilder, setUseBuilder] = useState(true);
 
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -64,17 +65,9 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     try {
       setIsSubmitting(true);
       
-      // Parse JSON scores
-      let parsedScores = {};
-      try {
-        parsedScores = JSON.parse(scoresJson);
-      } catch (error) {
-        throw new Error('Invalid JSON format in scores field');
-      }
-
       await onSubmit({
         ...formData,
-        scores: parsedScores
+        scores: formData.scores
       });
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -133,33 +126,54 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="scores">Score Sheet Structure (JSON) *</Label>
-        <Textarea
-          id="scores"
-          value={scoresJson}
-          onChange={(e) => setScoresJson(e.target.value)}
-          rows={10}
-          className="font-mono text-sm"
-          placeholder={`{
+      <div className="space-y-4">
+        <div className="flex items-center justify-between">
+          <Label>Score Sheet Structure *</Label>
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={() => setUseBuilder(!useBuilder)}
+          >
+            {useBuilder ? 'Manual JSON' : 'Field Builder'}
+          </Button>
+        </div>
+        
+        {useBuilder ? (
+          <JsonFieldBuilder
+            value={formData.scores}
+            onChange={(scores) => updateFormData('scores', scores)}
+          />
+        ) : (
+          <div className="space-y-2">
+            <Textarea
+              value={JSON.stringify(formData.scores, null, 2)}
+              onChange={(e) => {
+                try {
+                  const parsed = JSON.parse(e.target.value);
+                  updateFormData('scores', parsed);
+                } catch {
+                  // Invalid JSON, don't update
+                }
+              }}
+              rows={10}
+              className="font-mono text-sm"
+              placeholder={`{
   "criteria": [
     {
       "name": "Uniform Inspection",
-      "maxPoints": 100,
-      "subCriteria": [
-        {"name": "Overall Appearance", "maxPoints": 25},
-        {"name": "Grooming Standards", "maxPoints": 25},
-        {"name": "Uniform Completeness", "maxPoints": 25},
-        {"name": "Uniform Condition", "maxPoints": 25}
-      ]
+      "type": "text",
+      "maxLength": 100,
+      "penalty": false
     }
   ]
 }`}
-          required
-        />
-        <p className="text-sm text-muted-foreground">
-          Define the JSON structure for this score sheet template. This will be used to generate dynamic scoring forms.
-        </p>
+            />
+            <p className="text-sm text-muted-foreground">
+              Define the JSON structure for this score sheet template.
+            </p>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-end gap-2 pt-4">
