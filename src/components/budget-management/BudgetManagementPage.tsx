@@ -8,7 +8,6 @@ import { AddIncomeDialog } from './components/AddIncomeDialog';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
-
 export interface BudgetTransaction {
   id: string;
   school_id: string;
@@ -26,7 +25,6 @@ export interface BudgetTransaction {
   updated_at: string;
   created_by?: string;
 }
-
 export interface BudgetFilters {
   search: string;
   category: string;
@@ -35,7 +33,6 @@ export interface BudgetFilters {
   status: string;
   showArchived: boolean;
 }
-
 const BudgetManagementPage = () => {
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
@@ -46,49 +43,34 @@ const BudgetManagementPage = () => {
     type: '',
     paymentMethod: '',
     status: '',
-    showArchived: false,
+    showArchived: false
   });
-
   const {
     transactions,
     isLoading,
     createTransaction,
     updateTransaction,
     deleteTransaction,
-    archiveAllTransactions,
+    archiveAllTransactions
   } = useBudgetTransactions(filters);
-
   const handleArchiveAll = async () => {
     const currentYear = new Date().getFullYear();
     const budgetYear = `${currentYear - 1} - ${currentYear}`;
     await archiveAllTransactions(budgetYear);
   };
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold text-foreground">Budget Management</h1>
         <div className="flex gap-2">
-          <Button
-            onClick={() => setShowAddIncome(true)}
-            className="bg-green-600 hover:bg-green-700 text-white"
-          >
+          <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
             <Plus className="w-4 h-4 mr-2" />
             Add Income
           </Button>
-          <Button
-            onClick={() => setShowAddExpense(true)}
-            className="bg-red-600 hover:bg-red-700 text-white"
-          >
+          <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
             <Plus className="w-4 h-4 mr-2" />
             Add Expense
           </Button>
-          <Button
-            onClick={handleArchiveAll}
-            variant="outline"
-          >
-            Archive Budget Year
-          </Button>
+          <Button onClick={handleArchiveAll} variant="outline">Archive Expenses</Button>
         </div>
       </div>
 
@@ -96,35 +78,13 @@ const BudgetManagementPage = () => {
 
       <BudgetFilters filters={filters} onFiltersChange={setFilters} />
 
-      <BudgetTable
-        transactions={transactions}
-        isLoading={isLoading}
-        onEdit={setEditingItem}
-        onDelete={deleteTransaction}
-      />
+      <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
 
-      <AddIncomeDialog
-        open={showAddIncome}
-        onOpenChange={setShowAddIncome}
-        onSubmit={createTransaction}
-      />
+      <AddIncomeDialog open={showAddIncome} onOpenChange={setShowAddIncome} onSubmit={createTransaction} />
 
-      <AddExpenseDialog
-        open={showAddExpense}
-        onOpenChange={setShowAddExpense}
-        onSubmit={createTransaction}
-      />
+      <AddExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} onSubmit={createTransaction} />
 
-      {editingItem && (
-        <EditBudgetItemDialog
-          open={!!editingItem}
-          onOpenChange={() => setEditingItem(null)}
-          item={editingItem}
-          onSubmit={updateTransaction}
-        />
-      )}
-    </div>
-  );
+      {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
+    </div>;
 };
-
 export default BudgetManagementPage;
