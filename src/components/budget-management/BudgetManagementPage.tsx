@@ -71,7 +71,7 @@ const BudgetManagementPage = () => {
           <h1 className="text-3xl font-bold">Budget Management</h1>
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-col md:flex-row">
           <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
             <Plus className="w-4 h-4 mr-2" />
             Add Income
@@ -80,7 +80,7 @@ const BudgetManagementPage = () => {
             <Plus className="w-4 h-4 mr-2" />
             Add Expense
           </Button>
-          <Button onClick={handleArchiveAll} variant="outline">Archive Expenses</Button>
+          <Button onClick={handleArchiveAll} variant="outline" className="hidden md:flex">Archive Expenses</Button>
         </div>
       </div>
 
