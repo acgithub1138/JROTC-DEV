@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
+import { useTableSettings } from '@/hooks/useTableSettings';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -31,6 +32,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onDelete,
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const { getPaddingClass } = useTableSettings();
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
     data: items
@@ -194,50 +196,50 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               </TableRow>
             ) : (
               sortedItems.map((item) => (
-                <TableRow key={item.id} className="hover:bg-gray-50">
-                  <TableCell className="py-2">
+                 <TableRow key={item.id} className="hover:bg-gray-50">
+                   <TableCell className={getPaddingClass()}>
                     <Checkbox
                       checked={selectedItems.includes(item.id)}
                       onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
                   />
                   </TableCell>
-                  {isColumnVisible('item_id') && (
-                    <TableCell className="font-medium py-2">{item.item_id}</TableCell>
-                  )}
-                  {isColumnVisible('item') && (
-                    <TableCell className="font-medium py-2">{item.item}</TableCell>
-                  )}
-                  {isColumnVisible('category') && (
-                    <TableCell className="py-2">{item.category}</TableCell>
-                  )}
-                  {isColumnVisible('sub_category') && (
-                    <TableCell className="py-2">{item.sub_category}</TableCell>
-                  )}
-                  {isColumnVisible('size') && (
-                    <TableCell className="py-2">{item.size}</TableCell>
-                  )}
-                  {isColumnVisible('gender') && (
-                    <TableCell className="py-2">{getGenderBadge(item.gender)}</TableCell>
-                  )}
-                  {isColumnVisible('qty_total') && (
-                    <TableCell className="py-2">{item.qty_total}</TableCell>
-                  )}
-                  {isColumnVisible('qty_issued') && (
-                    <TableCell className="py-2">{item.qty_issued}</TableCell>
-                  )}
-                  {isColumnVisible('qty_available') && (
-                    <TableCell className="font-medium py-2">{item.qty_available}</TableCell>
-                  )}
-                  {isColumnVisible('status') && (
-                    <TableCell className="py-2">{getAvailabilityStatus(item)}</TableCell>
-                  )}
-                  {isColumnVisible('stock_number') && (
-                    <TableCell className="py-2">{item.stock_number}</TableCell>
-                  )}
-                  {isColumnVisible('unit_of_measure') && (
-                    <TableCell className="py-2">{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
-                  )}
-                  <TableCell className="py-2">
+                   {isColumnVisible('item_id') && (
+                     <TableCell className={`font-medium ${getPaddingClass()}`}>{item.item_id}</TableCell>
+                   )}
+                   {isColumnVisible('item') && (
+                     <TableCell className={`font-medium ${getPaddingClass()}`}>{item.item}</TableCell>
+                   )}
+                   {isColumnVisible('category') && (
+                     <TableCell className={getPaddingClass()}>{item.category}</TableCell>
+                   )}
+                   {isColumnVisible('sub_category') && (
+                     <TableCell className={getPaddingClass()}>{item.sub_category}</TableCell>
+                   )}
+                   {isColumnVisible('size') && (
+                     <TableCell className={getPaddingClass()}>{item.size}</TableCell>
+                   )}
+                   {isColumnVisible('gender') && (
+                     <TableCell className={getPaddingClass()}>{getGenderBadge(item.gender)}</TableCell>
+                   )}
+                   {isColumnVisible('qty_total') && (
+                     <TableCell className={getPaddingClass()}>{item.qty_total}</TableCell>
+                   )}
+                   {isColumnVisible('qty_issued') && (
+                     <TableCell className={getPaddingClass()}>{item.qty_issued}</TableCell>
+                   )}
+                   {isColumnVisible('qty_available') && (
+                     <TableCell className={`font-medium ${getPaddingClass()}`}>{item.qty_available}</TableCell>
+                   )}
+                   {isColumnVisible('status') && (
+                     <TableCell className={getPaddingClass()}>{getAvailabilityStatus(item)}</TableCell>
+                   )}
+                   {isColumnVisible('stock_number') && (
+                     <TableCell className={getPaddingClass()}>{item.stock_number}</TableCell>
+                   )}
+                   {isColumnVisible('unit_of_measure') && (
+                     <TableCell className={getPaddingClass()}>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
+                   )}
+                   <TableCell className={getPaddingClass()}>
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="ghost"

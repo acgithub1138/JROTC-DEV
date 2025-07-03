@@ -9,6 +9,7 @@ import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { ColumnSelector } from '@/components/ui/column-selector';
+import { TableSettings } from '@/components/ui/table-settings';
 import { useInventoryItems } from './hooks/useInventoryItems';
 import { useToast } from '@/hooks/use-toast';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
@@ -226,6 +227,7 @@ const InventoryManagementPage = () => {
           </div>
           
           <ColumnSelector columns={columns} onToggleColumn={toggleColumn} isLoading={columnsLoading} />
+          <TableSettings />
           {selectedItems.length > 0 && <>
               <span className="text-sm text-gray-600">
                 {selectedItems.length} selected
