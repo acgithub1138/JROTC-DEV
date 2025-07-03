@@ -516,6 +516,44 @@ export type Database = {
           },
         ]
       }
+      event_types: {
+        Row: {
+          created_at: string
+          id: string
+          is_default: boolean
+          label: string
+          school_id: string
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label: string
+          school_id: string
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          is_default?: boolean
+          label?: string
+          school_id?: string
+          updated_at?: string
+          value?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_types_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       events: {
         Row: {
           created_at: string

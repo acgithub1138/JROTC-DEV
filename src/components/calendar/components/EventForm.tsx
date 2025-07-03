@@ -5,9 +5,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { EventAssignmentSection } from './EventAssignmentSection';
+import { useEventTypes } from '../hooks/useEventTypes';
 
 interface EventFormProps {
   event?: Event | null;
@@ -32,10 +35,13 @@ export const EventForm: React.FC<EventFormProps> = ({
     end_time_hour: '10',
     end_time_minute: '00',
     location: '',
-    event_type: 'other' as 'training' | 'competition' | 'ceremony' | 'meeting' | 'drill' | 'other',
+    event_type: 'other',
     is_all_day: false,
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showAddEventTypeDialog, setShowAddEventTypeDialog] = useState(false);
+  const [newEventTypeName, setNewEventTypeName] = useState('');
+  const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
 
   useEffect(() => {
     if (event) {
@@ -91,6 +97,17 @@ export const EventForm: React.FC<EventFormProps> = ({
     }
   };
 
+  const handleAddEventType = async () => {
+    if (!newEventTypeName.trim()) return;
+
+    const newEventType = await createEventType(newEventTypeName.trim());
+    if (newEventType) {
+      setFormData(prev => ({ ...prev, event_type: newEventType.value }));
+      setNewEventTypeName('');
+      setShowAddEventTypeDialog(false);
+    }
+  };
+
   const handleChange = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -125,19 +142,59 @@ export const EventForm: React.FC<EventFormProps> = ({
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <Label htmlFor="event_type">Event Type</Label>
-          <Select value={formData.event_type} onValueChange={(value) => handleChange('event_type', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="training">Training</SelectItem>
-              <SelectItem value="competition">Competition</SelectItem>
-              <SelectItem value="ceremony">Ceremony</SelectItem>
-              <SelectItem value="meeting">Meeting</SelectItem>
-              <SelectItem value="drill">Drill</SelectItem>
-              <SelectItem value="other">Other</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="flex gap-2">
+            <Select value={formData.event_type} onValueChange={(value) => handleChange('event_type', value)}>
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {eventTypes.map(type => (
+                  <SelectItem key={type.id} value={type.value}>
+                    {type.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Dialog open={showAddEventTypeDialog} onOpenChange={setShowAddEventTypeDialog}>
+              <DialogTrigger asChild>
+                <Button type="button" variant="outline" size="sm">
+                  <Plus className="w-4 h-4" />
+                </Button>
+              </DialogTrigger>
+              <DialogContent className="max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Add New Event Type</DialogTitle>
+                </DialogHeader>
+                <div className="space-y-4">
+                  <div>
+                    <Label htmlFor="new_event_type">Event Type Name</Label>
+                    <Input
+                      id="new_event_type"
+                      value={newEventTypeName}
+                      onChange={(e) => setNewEventTypeName(e.target.value)}
+                      placeholder="Enter event type name"
+                    />
+                  </div>
+                  <div className="flex justify-end gap-2">
+                    <Button 
+                      type="button" 
+                      variant="outline" 
+                      onClick={() => setShowAddEventTypeDialog(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button 
+                      type="button" 
+                      onClick={handleAddEventType}
+                      disabled={!newEventTypeName.trim()}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                </div>
+              </DialogContent>
+            </Dialog>
+          </div>
         </div>
 
         <div>
