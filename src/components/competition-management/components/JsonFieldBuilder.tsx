@@ -12,8 +12,9 @@ interface JsonField {
   id: string;
   name: string;
   type: 'text' | 'dropdown' | 'number';
+  textType?: 'short' | 'notes'; // For text fields
   values?: string[];
-  length?: number;
+  maxValue?: number; // For number fields
   penalty: boolean;
 }
 interface JsonFieldBuilderProps {
@@ -29,8 +30,9 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
   const [currentField, setCurrentField] = useState<Partial<JsonField>>({
     name: '',
     type: 'text',
+    textType: 'short',
     values: [],
-    length: 50,
+    maxValue: 100,
     penalty: false
   });
   const [dropdownValues, setDropdownValues] = useState('');
@@ -40,7 +42,8 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       id: Date.now().toString(),
       name: currentField.name,
       type: currentField.type || 'text',
-      length: currentField.length || 50,
+      textType: currentField.textType || 'short',
+      maxValue: currentField.maxValue || 100,
       penalty: currentField.penalty || false,
       ...(currentField.type === 'dropdown' && {
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)
@@ -54,8 +57,9 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
     setCurrentField({
       name: '',
       type: 'text',
+      textType: 'short',
       values: [],
-      length: 50,
+      maxValue: 100,
       penalty: false
     });
     setDropdownValues('');
@@ -70,7 +74,8 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       criteria: fieldList.map(field => ({
         name: field.name,
         type: field.type,
-        maxLength: field.length,
+        maxLength: field.type === 'text' ? (field.textType === 'notes' ? 2500 : 75) : undefined,
+        maxValue: field.type === 'number' ? field.maxValue : undefined,
         penalty: field.penalty,
         ...(field.values && {
           options: field.values
@@ -112,15 +117,28 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
               </Select>
             </div>
 
+            {currentField.type === 'text' && <div className="space-y-2">
+                <Label htmlFor="textType">Text Field Type</Label>
+                <Select value={currentField.textType} onValueChange={value => updateCurrentField('textType', value as 'short' | 'notes')}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="short">Short Text (75 chars)</SelectItem>
+                    <SelectItem value="notes">Notes (2500 chars)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>}
+
             {currentField.type === 'dropdown' && <div className="space-y-2 md:col-span-2">
                 <Label htmlFor="dropdownValues">Dropdown Values (comma-separated)</Label>
                 <Input id="dropdownValues" value={dropdownValues} onChange={e => setDropdownValues(e.target.value)} placeholder="e.g., Excellent, Good, Fair, Poor" />
               </div>}
 
-            <div className="space-y-2">
-              <Label htmlFor="fieldLength">Max Length</Label>
-              <Input id="fieldLength" type="number" value={currentField.length || 50} onChange={e => updateCurrentField('length', parseInt(e.target.value))} />
-            </div>
+            {currentField.type === 'number' && <div className="space-y-2">
+                <Label htmlFor="maxValue">Max Value</Label>
+                <Input id="maxValue" type="number" value={currentField.maxValue || 100} onChange={e => updateCurrentField('maxValue', parseInt(e.target.value))} />
+              </div>}
 
             <div className="flex items-center space-x-2">
               <Switch id="penalty" checked={currentField.penalty || false} onCheckedChange={checked => updateCurrentField('penalty', checked)} />
@@ -146,6 +164,8 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
                     <span className="font-medium">{field.name}</span>
                     <span className="text-sm text-muted-foreground ml-2">
                       ({field.type}
+                      {field.type === 'text' && `, ${field.textType === 'notes' ? '2500' : '75'} chars`}
+                      {field.type === 'number' && `, max: ${field.maxValue}`}
                       {field.penalty && ', penalty'}
                       {field.values && `, ${field.values.length} options`})
                     </span>
