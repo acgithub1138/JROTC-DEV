@@ -36,6 +36,20 @@ const CalendarManagementPage = () => {
     deleteEvent,
   } = useEvents({ eventType: eventTypeFilter === 'all' ? '' : eventTypeFilter, assignedTo: '' });
 
+  // Show loading state if events are loading
+  if (isLoading) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Calendar</h1>
+        </div>
+        <div className="flex justify-center items-center h-64">
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+        </div>
+      </div>
+    );
+  }
+
   const handleCreateEvent = () => {
     setEditingEvent(null);
     setShowEventDialog(true);
