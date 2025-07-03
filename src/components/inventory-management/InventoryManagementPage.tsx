@@ -6,10 +6,12 @@ import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
+import { ColumnSelector } from '@/components/ui/column-selector';
 
 import { useInventoryItems } from './hooks/useInventoryItems';
 import { useToast } from '@/hooks/use-toast';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
+import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 
 const InventoryManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -18,6 +20,27 @@ const InventoryManagementPage = () => {
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const { toast } = useToast();
+
+  // Define available columns for the inventory table
+  const availableColumns = [
+    { key: 'item_id', label: 'Item ID', enabled: true },
+    { key: 'item', label: 'Item', enabled: true },
+    { key: 'category', label: 'Category', enabled: true },
+    { key: 'sub_category', label: 'Sub Category', enabled: true },
+    { key: 'size', label: 'Size', enabled: false },
+    { key: 'gender', label: 'Gender', enabled: false },
+    { key: 'qty_total', label: 'Total Qty', enabled: true },
+    { key: 'qty_issued', label: 'Issued Qty', enabled: false },
+    { key: 'qty_available', label: 'Available Qty', enabled: true },
+    { key: 'status', label: 'Status', enabled: true },
+    { key: 'stock_number', label: 'Stock Number', enabled: false },
+    { key: 'unit_of_measure', label: 'Unit', enabled: false },
+  ];
+
+  const { columns, enabledColumns, toggleColumn, isLoading: columnsLoading } = useColumnPreferences(
+    'inventory',
+    availableColumns
+  );
   
   const {
     inventoryItems,
@@ -202,22 +225,30 @@ const InventoryManagementPage = () => {
           />
         </div>
         
-        {selectedItems.length > 0 && (
-          <div className="flex items-center gap-2 ml-4">
-            <span className="text-sm text-gray-600">
-              {selectedItems.length} selected
-            </span>
-            <Button size="sm" variant="outline">
-              Bulk Edit
-            </Button>
-          </div>
-        )}
+        <div className="flex items-center gap-2 ml-4">
+          <ColumnSelector
+            columns={columns}
+            onToggleColumn={toggleColumn}
+            isLoading={columnsLoading}
+          />
+          {selectedItems.length > 0 && (
+            <>
+              <span className="text-sm text-gray-600">
+                {selectedItems.length} selected
+              </span>
+              <Button size="sm" variant="outline">
+                Bulk Edit
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <InventoryTable
         items={paginatedItems}
         isLoading={isLoading}
         selectedItems={selectedItems}
+        visibleColumns={enabledColumns.map(col => col.key)}
         onSelectionChange={setSelectedItems}
         onEdit={handleUpdateItem}
         onDelete={handleDeleteItem}

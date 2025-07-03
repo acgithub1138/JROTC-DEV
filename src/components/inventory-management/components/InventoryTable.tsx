@@ -15,6 +15,7 @@ interface InventoryTableProps {
   items: InventoryItem[];
   isLoading: boolean;
   selectedItems: string[];
+  visibleColumns: string[];
   onSelectionChange: (selectedIds: string[]) => void;
   onEdit: (item: any) => Promise<void>;
   onDelete: (id: string) => Promise<void>;
@@ -24,6 +25,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   items,
   isLoading,
   selectedItems,
+  visibleColumns,
   onSelectionChange,
   onEdit,
   onDelete,
@@ -90,6 +92,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     }
   };
 
+  const isColumnVisible = (columnKey: string) => visibleColumns.includes(columnKey);
+
   if (isLoading) {
     return (
       <div className="space-y-4">
@@ -116,47 +120,71 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   onCheckedChange={handleSelectAll}
                 />
               </TableHead>
-              <SortableTableHead sortKey="item_id" currentSort={sortConfig} onSort={handleSort}>
-                Item ID
-              </SortableTableHead>
-              <SortableTableHead sortKey="item" currentSort={sortConfig} onSort={handleSort}>
-                Item
-              </SortableTableHead>
-              <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>
-                Category
-              </SortableTableHead>
-              <SortableTableHead sortKey="sub_category" currentSort={sortConfig} onSort={handleSort}>
-                Sub Category
-              </SortableTableHead>
-              <SortableTableHead sortKey="size" currentSort={sortConfig} onSort={handleSort}>
-                Size
-              </SortableTableHead>
-              <SortableTableHead sortKey="gender" currentSort={sortConfig} onSort={handleSort}>
-                Gender
-              </SortableTableHead>
-              <SortableTableHead sortKey="qty_total" currentSort={sortConfig} onSort={handleSort}>
-                Total Qty
-              </SortableTableHead>
-              <SortableTableHead sortKey="qty_issued" currentSort={sortConfig} onSort={handleSort}>
-                Issued Qty
-              </SortableTableHead>
-              <SortableTableHead sortKey="qty_available" currentSort={sortConfig} onSort={handleSort}>
-                Available Qty
-              </SortableTableHead>
-              <TableHead>Status</TableHead>
-              <SortableTableHead sortKey="stock_number" currentSort={sortConfig} onSort={handleSort}>
-                Stock Number
-              </SortableTableHead>
-              <SortableTableHead sortKey="unit_of_measure" currentSort={sortConfig} onSort={handleSort}>
-                Unit
-              </SortableTableHead>
+              {isColumnVisible('item_id') && (
+                <SortableTableHead sortKey="item_id" currentSort={sortConfig} onSort={handleSort}>
+                  Item ID
+                </SortableTableHead>
+              )}
+              {isColumnVisible('item') && (
+                <SortableTableHead sortKey="item" currentSort={sortConfig} onSort={handleSort}>
+                  Item
+                </SortableTableHead>
+              )}
+              {isColumnVisible('category') && (
+                <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>
+                  Category
+                </SortableTableHead>
+              )}
+              {isColumnVisible('sub_category') && (
+                <SortableTableHead sortKey="sub_category" currentSort={sortConfig} onSort={handleSort}>
+                  Sub Category
+                </SortableTableHead>
+              )}
+              {isColumnVisible('size') && (
+                <SortableTableHead sortKey="size" currentSort={sortConfig} onSort={handleSort}>
+                  Size
+                </SortableTableHead>
+              )}
+              {isColumnVisible('gender') && (
+                <SortableTableHead sortKey="gender" currentSort={sortConfig} onSort={handleSort}>
+                  Gender
+                </SortableTableHead>
+              )}
+              {isColumnVisible('qty_total') && (
+                <SortableTableHead sortKey="qty_total" currentSort={sortConfig} onSort={handleSort}>
+                  Total Qty
+                </SortableTableHead>
+              )}
+              {isColumnVisible('qty_issued') && (
+                <SortableTableHead sortKey="qty_issued" currentSort={sortConfig} onSort={handleSort}>
+                  Issued Qty
+                </SortableTableHead>
+              )}
+              {isColumnVisible('qty_available') && (
+                <SortableTableHead sortKey="qty_available" currentSort={sortConfig} onSort={handleSort}>
+                  Available Qty
+                </SortableTableHead>
+              )}
+              {isColumnVisible('status') && (
+                <TableHead>Status</TableHead>
+              )}
+              {isColumnVisible('stock_number') && (
+                <SortableTableHead sortKey="stock_number" currentSort={sortConfig} onSort={handleSort}>
+                  Stock Number
+                </SortableTableHead>
+              )}
+              {isColumnVisible('unit_of_measure') && (
+                <SortableTableHead sortKey="unit_of_measure" currentSort={sortConfig} onSort={handleSort}>
+                  Unit
+                </SortableTableHead>
+              )}
               <TableHead>Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {sortedItems.length === 0 ? (
               <TableRow>
-                <TableCell colSpan={14} className="text-center py-12">
+                <TableCell colSpan={visibleColumns.length + 2} className="text-center py-12">
                   <div className="flex flex-col items-center text-gray-500">
                     <Package className="w-12 h-12 mb-2" />
                     <span className="text-lg font-medium">No inventory items found</span>
@@ -171,20 +199,44 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                     <Checkbox
                       checked={selectedItems.includes(item.id)}
                       onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
-                    />
+                  />
                   </TableCell>
-                  <TableCell className="font-medium">{item.item_id}</TableCell>
-                  <TableCell className="font-medium">{item.item}</TableCell>
-                  <TableCell>{item.category}</TableCell>
-                  <TableCell>{item.sub_category}</TableCell>
-                  <TableCell>{item.size}</TableCell>
-                  <TableCell>{getGenderBadge(item.gender)}</TableCell>
-                  <TableCell>{item.qty_total}</TableCell>
-                  <TableCell>{item.qty_issued}</TableCell>
-                  <TableCell className="font-medium">{item.qty_available}</TableCell>
-                  <TableCell>{getAvailabilityStatus(item)}</TableCell>
-                  <TableCell>{item.stock_number}</TableCell>
-                  <TableCell>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
+                  {isColumnVisible('item_id') && (
+                    <TableCell className="font-medium">{item.item_id}</TableCell>
+                  )}
+                  {isColumnVisible('item') && (
+                    <TableCell className="font-medium">{item.item}</TableCell>
+                  )}
+                  {isColumnVisible('category') && (
+                    <TableCell>{item.category}</TableCell>
+                  )}
+                  {isColumnVisible('sub_category') && (
+                    <TableCell>{item.sub_category}</TableCell>
+                  )}
+                  {isColumnVisible('size') && (
+                    <TableCell>{item.size}</TableCell>
+                  )}
+                  {isColumnVisible('gender') && (
+                    <TableCell>{getGenderBadge(item.gender)}</TableCell>
+                  )}
+                  {isColumnVisible('qty_total') && (
+                    <TableCell>{item.qty_total}</TableCell>
+                  )}
+                  {isColumnVisible('qty_issued') && (
+                    <TableCell>{item.qty_issued}</TableCell>
+                  )}
+                  {isColumnVisible('qty_available') && (
+                    <TableCell className="font-medium">{item.qty_available}</TableCell>
+                  )}
+                  {isColumnVisible('status') && (
+                    <TableCell>{getAvailabilityStatus(item)}</TableCell>
+                  )}
+                  {isColumnVisible('stock_number') && (
+                    <TableCell>{item.stock_number}</TableCell>
+                  )}
+                  {isColumnVisible('unit_of_measure') && (
+                    <TableCell>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
+                  )}
                   <TableCell>
                     <div className="flex items-center space-x-2">
                       <Button
