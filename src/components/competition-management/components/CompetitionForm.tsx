@@ -5,8 +5,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
-import { MultiSelectProfiles } from '@/components/inventory-management/components/MultiSelectProfiles';
-import { useTeams } from '@/components/teams/hooks/useTeams';
 import { Competition } from '../types';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -23,25 +21,15 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
   onSubmit,
   onCancel
 }) => {
-  const { teams } = useTeams();
   const [formData, setFormData] = useState({
     name: competition?.name || '',
     description: competition?.description || '',
     location: competition?.location || '',
     competition_date: competition?.competition_date || '',
-    registration_deadline: competition?.registration_deadline || '',
-    type: competition?.type || 'individual',
     comp_type: competition?.comp_type || 'air_force',
-    teams: competition?.teams || [],
-    cadets: competition?.cadets || [],
-    armed_regulation: competition?.armed_regulation || 'NA',
-    armed_exhibition: competition?.armed_exhibition || 'NA',
-    armed_color_guard: competition?.armed_color_guard || 'NA',
-    armed_inspection: competition?.armed_inspection || 'NA',
-    unarmed_regulation: competition?.unarmed_regulation || 'NA',
-    unarmed_exhibition: competition?.unarmed_exhibition || 'NA',
-    unarmed_color_guard: competition?.unarmed_color_guard || 'NA',
-    unarmed_inspection: competition?.unarmed_inspection || 'NA',
+    overall_placement: competition?.armed_regulation || 'NA',
+    overall_armed_placement: competition?.armed_exhibition || 'NA',
+    overall_unarmed_placement: competition?.armed_color_guard || 'NA',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -56,11 +44,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     { value: 'space_force', label: 'Space Force' }
   ];
 
-  const typeOptions = [
-    { value: 'individual', label: 'Individual' },
-    { value: 'team', label: 'Team' },
-    { value: 'mixed', label: 'Mixed' }
-  ];
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -104,21 +87,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="type">Type</Label>
-          <Select value={formData.type} onValueChange={(value) => updateFormData('type', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {typeOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
         <div className="space-y-2">
           <Label htmlFor="comp_type">JROTC Program</Label>
@@ -136,23 +104,14 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
           </Select>
         </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="registration_deadline">Registration Deadline</Label>
-          <Input
-            id="registration_deadline"
-            type="date"
-            value={formData.registration_deadline || ''}
-            onChange={(e) => updateFormData('registration_deadline', e.target.value)}
-          />
-        </div>
       </div>
 
       <div className="space-y-2">
         <Label htmlFor="location">Location</Label>
-        <Input
+        <AddressLookupField
           value={formData.location}
-          onChange={(e) => updateFormData('location', e.target.value)}
-          placeholder="Enter competition location"
+          onValueChange={(value) => updateFormData('location', value)}
+          placeholder="Enter location or search address"
         />
       </div>
 
@@ -166,55 +125,66 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Armed Events</h3>
-          
-          {(['armed_regulation', 'armed_exhibition', 'armed_color_guard', 'armed_inspection'] as const).map((event) => (
-            <div key={event} className="space-y-2">
-              <Label>{event.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Label>
-              <Select 
-                value={formData[event]} 
-                onValueChange={(value) => updateFormData(event, value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {placementOptions.map((placement) => (
-                    <SelectItem key={placement} value={placement}>
-                      {placement}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
-        </div>
+      <div className="space-y-4">
+        <h3 className="text-lg font-semibold border-b pb-2">Awards</h3>
+        
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+          <div className="space-y-2">
+            <Label htmlFor="overall_placement">Overall Placement</Label>
+            <Select 
+              value={formData.overall_placement} 
+              onValueChange={(value) => updateFormData('overall_placement', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {placementOptions.map((placement) => (
+                  <SelectItem key={placement} value={placement}>
+                    {placement}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
 
-        <div className="space-y-4">
-          <h3 className="text-lg font-semibold">Unarmed Events</h3>
-          
-          {(['unarmed_regulation', 'unarmed_exhibition', 'unarmed_color_guard', 'unarmed_inspection'] as const).map((event) => (
-            <div key={event} className="space-y-2">
-              <Label>{event.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}</Label>
-              <Select 
-                value={formData[event]} 
-                onValueChange={(value) => updateFormData(event, value)}
-              >
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {placementOptions.map((placement) => (
-                    <SelectItem key={placement} value={placement}>
-                      {placement}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          ))}
+          <div className="space-y-2">
+            <Label htmlFor="overall_armed_placement">Overall Armed Placement</Label>
+            <Select 
+              value={formData.overall_armed_placement} 
+              onValueChange={(value) => updateFormData('overall_armed_placement', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {placementOptions.map((placement) => (
+                  <SelectItem key={placement} value={placement}>
+                    {placement}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="overall_unarmed_placement">Overall Unarmed Placement</Label>
+            <Select 
+              value={formData.overall_unarmed_placement} 
+              onValueChange={(value) => updateFormData('overall_unarmed_placement', value)}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                {placementOptions.map((placement) => (
+                  <SelectItem key={placement} value={placement}>
+                    {placement}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
         </div>
       </div>
 
