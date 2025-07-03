@@ -98,7 +98,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
   };
 
   return (
-    <div className="rounded-md border">
+    <div className="bg-card rounded-lg border">
       <TaskTableHeader
         selectedTasks={selectedTasks}
         totalTasks={sortedTasks.length}
