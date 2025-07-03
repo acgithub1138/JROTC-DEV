@@ -182,7 +182,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   Unit
                 </SortableTableHead>
               )}
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
