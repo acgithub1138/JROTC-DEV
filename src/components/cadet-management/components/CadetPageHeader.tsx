@@ -18,7 +18,7 @@ export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderPro
         </p>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onBulkImport}>
+        <Button variant="outline" onClick={onBulkImport} className="hidden md:flex">
           <Upload className="w-4 h-4 mr-2" />
           Bulk Import
         </Button>
