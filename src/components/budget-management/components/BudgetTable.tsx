@@ -1,15 +1,13 @@
-import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import React, { useState } from 'react';
+import { Edit, Trash2, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
+import { TableCell, TableHead, TableRow } from '@/components/ui/table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
+import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
+import { useSortableTable } from '@/hooks/useSortableTable';
+import { useTableSettings } from '@/hooks/useTableSettings';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -25,6 +23,12 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
+  const { getPaddingClass } = useTableSettings();
+  
+  const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
+    data: transactions
+  });
   const formatCurrency = (amount: number) => {
     return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
   };
@@ -57,6 +61,34 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     );
   };
 
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      setSelectedTransactions(sortedTransactions.map(t => t.id));
+    } else {
+      setSelectedTransactions([]);
+    }
+  };
+
+  const handleSelectTransaction = (transactionId: string, checked: boolean) => {
+    if (checked) {
+      setSelectedTransactions([...selectedTransactions, transactionId]);
+    } else {
+      setSelectedTransactions(selectedTransactions.filter(id => id !== transactionId));
+    }
+  };
+
+  const handleBulkDelete = () => {
+    if (selectedTransactions.length === 0) return;
+    
+    const confirmMessage = `Are you sure you want to delete ${selectedTransactions.length} transaction${selectedTransactions.length > 1 ? 's' : ''}?`;
+    if (confirm(confirmMessage)) {
+      selectedTransactions.forEach(transactionId => {
+        onDelete(transactionId);
+      });
+      setSelectedTransactions([]);
+    }
+  };
+
   if (isLoading) {
     return (
       <div className="w-full p-8 text-center">
@@ -66,70 +98,90 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   }
 
   return (
-    <div className="border rounded-lg">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Item</TableHead>
-            <TableHead>Category</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Date</TableHead>
-            <TableHead>Amount</TableHead>
-            <TableHead>Payment Method</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Description</TableHead>
-            <TableHead>Actions</TableHead>
+    <StandardTable>
+      <StandardTableHeader>
+        <TableRow>
+          <TableHead className="w-12">
+            <Checkbox
+              checked={selectedTransactions.length === sortedTransactions.length && sortedTransactions.length > 0}
+              onCheckedChange={handleSelectAll}
+            />
+          </TableHead>
+          <SortableTableHead sortKey="item" currentSort={sortConfig} onSort={handleSort}>
+            Item
+          </SortableTableHead>
+          <SortableTableHead sortKey="category" currentSort={sortConfig} onSort={handleSort}>
+            Category
+          </SortableTableHead>
+          <SortableTableHead sortKey="type" currentSort={sortConfig} onSort={handleSort}>
+            Type
+          </SortableTableHead>
+          <SortableTableHead sortKey="date" currentSort={sortConfig} onSort={handleSort}>
+            Date
+          </SortableTableHead>
+          <SortableTableHead sortKey="amount" currentSort={sortConfig} onSort={handleSort}>
+            Amount
+          </SortableTableHead>
+          <SortableTableHead sortKey="payment_method" currentSort={sortConfig} onSort={handleSort}>
+            Payment Method
+          </SortableTableHead>
+          <SortableTableHead sortKey="status" currentSort={sortConfig} onSort={handleSort}>
+            Status
+          </SortableTableHead>
+          <TableHead>Description</TableHead>
+          <TableHead>Actions</TableHead>
+        </TableRow>
+      </StandardTableHeader>
+      <StandardTableBody
+        emptyMessage="No transactions found"
+        emptyIcon={<DollarSign className="w-12 h-12" />}
+        colSpan={10}
+      >
+        {sortedTransactions.map((transaction) => (
+          <TableRow key={transaction.id} className="hover:bg-muted/50">
+            <TableCell className={getPaddingClass()}>
+              <Checkbox
+                checked={selectedTransactions.includes(transaction.id)}
+                onCheckedChange={(checked) => handleSelectTransaction(transaction.id, !!checked)}
+              />
+            </TableCell>
+            <TableCell className={`font-medium ${getPaddingClass()}`}>{transaction.item}</TableCell>
+            <TableCell className={getPaddingClass()}>{getCategoryBadge(transaction.category)}</TableCell>
+            <TableCell className={`capitalize ${getPaddingClass()}`}>{transaction.type}</TableCell>
+            <TableCell className={getPaddingClass()}>{formatDate(transaction.date)}</TableCell>
+            <TableCell className={`${transaction.category === 'income' ? 'text-green-600' : 'text-red-600'} ${getPaddingClass()}`}>
+              {formatCurrency(transaction.amount)}
+            </TableCell>
+            <TableCell className={`capitalize ${getPaddingClass()}`}>
+              {transaction.payment_method?.replace('_', ' ') || '-'}
+            </TableCell>
+            <TableCell className={getPaddingClass()}>
+              {getStatusBadge(transaction.status) || '-'}
+            </TableCell>
+            <TableCell className={`max-w-xs truncate ${getPaddingClass()}`}>
+              {transaction.description || '-'}
+            </TableCell>
+            <TableCell className={getPaddingClass()}>
+              <div className="flex gap-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onEdit(transaction)}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={() => onDelete(transaction.id)}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
+            </TableCell>
           </TableRow>
-        </TableHeader>
-        <TableBody>
-          {transactions.length === 0 ? (
-            <TableRow>
-              <TableCell colSpan={9} className="text-center py-8 text-muted-foreground">
-                No transactions found
-              </TableCell>
-            </TableRow>
-          ) : (
-            transactions.map((transaction) => (
-              <TableRow key={transaction.id}>
-                <TableCell className="font-medium">{transaction.item}</TableCell>
-                <TableCell>{getCategoryBadge(transaction.category)}</TableCell>
-                <TableCell className="capitalize">{transaction.type}</TableCell>
-                <TableCell>{formatDate(transaction.date)}</TableCell>
-                <TableCell className={transaction.category === 'income' ? 'text-green-600' : 'text-red-600'}>
-                  {formatCurrency(transaction.amount)}
-                </TableCell>
-                <TableCell className="capitalize">
-                  {transaction.payment_method?.replace('_', ' ') || '-'}
-                </TableCell>
-                <TableCell>
-                  {getStatusBadge(transaction.status) || '-'}
-                </TableCell>
-                <TableCell className="max-w-xs truncate">
-                  {transaction.description || '-'}
-                </TableCell>
-                <TableCell>
-                  <div className="flex gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(transaction)}
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(transaction.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))
-          )}
-        </TableBody>
-      </Table>
-    </div>
+        ))}
+      </StandardTableBody>
+    </StandardTable>
   );
 };

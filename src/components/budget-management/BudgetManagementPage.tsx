@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { BudgetSummaryCards } from './components/BudgetSummaryCards';
 import { BudgetTable } from './components/BudgetTable';
 import { BudgetFilters } from './components/BudgetFilters';
@@ -61,26 +62,32 @@ const BudgetManagementPage = () => {
     await archiveAllTransactions(budgetYear);
   };
   return <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold text-foreground">Budget Management</h1>
-        <div className="flex gap-2">
-          <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Income
-          </Button>
-          <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Expense
-          </Button>
-          <Button onClick={handleArchiveAll} variant="outline">Archive Expenses</Button>
-        </div>
-      </div>
-
       <BudgetSummaryCards transactions={transactions} />
 
       <BudgetFilters filters={filters} onFiltersChange={setFilters} />
 
-      <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
+      <StandardTableWrapper
+        title="Budget Management"
+        description="Manage school budget transactions and expenses"
+        searchValue={filters.search}
+        onSearchChange={(value) => setFilters(prev => ({ ...prev, search: value }))}
+        searchPlaceholder="Search transactions by item, type, or description..."
+        actions={
+          <>
+            <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Income
+            </Button>
+            <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Expense
+            </Button>
+            <Button onClick={handleArchiveAll} variant="outline">Archive Expenses</Button>
+          </>
+        }
+      >
+        <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
+      </StandardTableWrapper>
 
       <AddIncomeDialog open={showAddIncome} onOpenChange={setShowAddIncome} onSubmit={createTransaction} />
 

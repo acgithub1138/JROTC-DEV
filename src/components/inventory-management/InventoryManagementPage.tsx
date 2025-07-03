@@ -9,6 +9,7 @@ import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { ColumnSelector } from '@/components/ui/column-selector';
+import { StandardTableWrapper } from '@/components/ui/standard-table';
 
 import { useInventoryItems } from './hooks/useInventoryItems';
 import { useToast } from '@/hooks/use-toast';
@@ -193,52 +194,45 @@ const InventoryManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h1 className="text-3xl font-bold">Inventory Management</h1>
-          <p className="text-gray-600">Manage school inventory items and assignments</p>
-        </div>
-        <div className="flex gap-2">
-          <Button variant="outline" onClick={exportToCSV}>
-            <Download className="w-4 h-4 mr-2" />
-            Export CSV
-          </Button>
-          <Button variant="outline" onClick={() => setIsBulkDialogOpen(true)}>
-            <Upload className="w-4 h-4 mr-2" />
-            Bulk Operations
-          </Button>
-          <Button onClick={() => setIsAddDialogOpen(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Item
-          </Button>
-        </div>
-      </div>
-
-      <div className="flex items-center justify-between">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-          <Input placeholder="Search by item, category, item ID, size, or stock number..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
-        </div>
-        
-        <div className="flex items-center gap-4 ml-4">
-          <div className="flex items-center gap-2">
-            <Switch checked={showOutOfStockOnly} onCheckedChange={setShowOutOfStockOnly} id="out-of-stock-toggle" />
-            <Label htmlFor="out-of-stock-toggle" className="text-sm">Show Out of Stock Items</Label>
+      <StandardTableWrapper
+        title="Inventory Management"
+        description="Manage school inventory items and assignments"
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search by item, category, item ID, size, or stock number..."
+        selectedCount={selectedItems.length}
+        columns={columns}
+        visibleColumns={enabledColumns.map(col => col.key)}
+        onToggleColumn={toggleColumn}
+        columnsLoading={columnsLoading}
+        actions={
+          <>
+            <Button variant="outline" onClick={exportToCSV}>
+              <Download className="w-4 h-4 mr-2" />
+              Export CSV
+            </Button>
+            <Button variant="outline" onClick={() => setIsBulkDialogOpen(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Bulk Operations
+            </Button>
+            <Button onClick={() => setIsAddDialogOpen(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Item
+            </Button>
+          </>
+        }
+      >
+        <div className="space-y-4">
+          <div className="flex items-center gap-4 px-6 py-3 border-b">
+            <div className="flex items-center gap-2">
+              <Switch checked={showOutOfStockOnly} onCheckedChange={setShowOutOfStockOnly} id="out-of-stock-toggle" />
+              <Label htmlFor="out-of-stock-toggle" className="text-sm">Show Out of Stock Items Only</Label>
+            </div>
           </div>
           
-          <ColumnSelector columns={columns} onToggleColumn={toggleColumn} isLoading={columnsLoading} />
-          {selectedItems.length > 0 && <>
-              <span className="text-sm text-gray-600">
-                {selectedItems.length} selected
-              </span>
-              <Button size="sm" variant="outline">
-                Bulk Edit
-              </Button>
-            </>}
+          <InventoryTable items={paginatedItems} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onDelete={handleDeleteItem} />
         </div>
-      </div>
-
-      <InventoryTable items={paginatedItems} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onDelete={handleDeleteItem} />
+      </StandardTableWrapper>
 
       <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredItems.length} onPageChange={handlePageChange} />
 
