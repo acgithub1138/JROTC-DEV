@@ -15,11 +15,18 @@ export const useEvents = (filters: EventFilters) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
 
-  const fetchEvents = async () => {
-    if (!userProfile?.school_id) return;
+  const fetchEvents = async (retryCount = 0) => {
+    console.log('🔍 Fetching events - userProfile?.school_id:', userProfile?.school_id, 'isLoading:', isLoading);
+    
+    if (!userProfile?.school_id) {
+      console.log('❌ No school_id found, skipping event fetch');
+      setIsLoading(false);
+      return;
+    }
 
     setIsLoading(true);
     try {
+      console.log('📡 Making Supabase query for school:', userProfile.school_id);
       let query = supabase
         .from('events')
         .select('*')
@@ -33,12 +40,23 @@ export const useEvents = (filters: EventFilters) => {
       const { data, error } = await query;
 
       if (error) throw error;
+      
+      console.log('✅ Events fetched successfully:', data?.length || 0, 'events');
       setEvents(data || []);
     } catch (error) {
-      console.error('Error fetching events:', error);
+      console.error('❌ Error fetching events (attempt', retryCount + 1, '):', error);
+      
+      // Retry up to 2 times on failure
+      if (retryCount < 2) {
+        console.log('🔄 Retrying event fetch in 1 second...');
+        setTimeout(() => fetchEvents(retryCount + 1), 1000);
+        return;
+      }
+      
+      // Only show toast on final failure
       toast({
         title: 'Error',
-        description: 'Failed to load events',
+        description: 'Failed to load events after multiple attempts',
         variant: 'destructive',
       });
     } finally {

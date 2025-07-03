@@ -18,6 +18,8 @@ const DashboardOverview = () => {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
   
+  console.log('📊 Dashboard - events:', events?.length, 'eventsLoading:', eventsLoading);
+  
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
@@ -118,17 +120,21 @@ const DashboardOverview = () => {
                   </div>
                 ))
               ) : events && events.length > 0 ? (
-                events
-                  .filter(event => {
-                    const eventDate = new Date(event.start_date);
-                    const today = new Date();
-                    today.setHours(0, 0, 0, 0);
-                    return eventDate >= today;
-                  })
-                  .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-                  .slice(0, 5)
-                  .map((event, index) => (
-                    <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                (() => {
+                  const upcomingEvents = events
+                    .filter(event => {
+                      const eventDate = new Date(event.start_date);
+                      const today = new Date();
+                      today.setHours(0, 0, 0, 0);
+                      return eventDate >= today;
+                    })
+                    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+                    .slice(0, 5);
+                  
+                  console.log('📅 Upcoming events filtered:', upcomingEvents.length);
+                  
+                  return upcomingEvents.length > 0 ? upcomingEvents.map((event, index) => (
+                    <div key={event.id || index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
                       <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
                         <p className="text-sm font-medium text-gray-900">{event.title}</p>
@@ -144,10 +150,17 @@ const DashboardOverview = () => {
                         </p>
                       </div>
                     </div>
-                  ))
+                  )) : (
+                    <div className="text-center py-8 text-gray-500">
+                      <p className="text-sm">No upcoming events</p>
+                    </div>
+                  );
+                })()
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">No upcoming events</p>
+                  <p className="text-sm">
+                    {eventsLoading ? 'Loading events...' : 'No upcoming events'}
+                  </p>
                 </div>
               )}
             </div>
