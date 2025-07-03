@@ -18,6 +18,7 @@ import TeamsManagementPage from '@/components/teams/TeamsManagementPage';
 import InventoryManagementPage from '@/components/inventory-management/InventoryManagementPage';
 import BudgetManagementPage from '@/components/budget-management/BudgetManagementPage';
 import ContactManagementPage from '@/components/contact-management/ContactManagementPage';
+import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -38,6 +39,7 @@ const MainApplication = () => {
     if (path.startsWith('/inventory')) return 'inventory';
     if (path.startsWith('/budget')) return 'budget';
     if (path.startsWith('/contacts')) return 'contacts';
+    if (path.startsWith('/calendar')) return 'calendar';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -58,6 +60,7 @@ const MainApplication = () => {
       'inventory': '/inventory',
       'budget': '/budget',
       'contacts': '/contacts',
+      'calendar': '/calendar',
       'settings': '/settings'
     };
     
@@ -96,6 +99,7 @@ const MainApplication = () => {
             <Route path="/inventory" element={<InventoryManagementPage />} />
             <Route path="/budget" element={<BudgetManagementPage />} />
             <Route path="/contacts" element={<ContactManagementPage />} />
+            <Route path="/calendar" element={<CalendarManagementPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

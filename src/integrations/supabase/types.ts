@@ -478,6 +478,104 @@ export type Database = {
           },
         ]
       }
+      event_assignments: {
+        Row: {
+          assignee_id: string
+          assignee_type: Database["public"]["Enums"]["assignee_type"]
+          created_at: string
+          event_id: string
+          id: string
+          role: string | null
+          status: Database["public"]["Enums"]["assignment_status"]
+        }
+        Insert: {
+          assignee_id: string
+          assignee_type: Database["public"]["Enums"]["assignee_type"]
+          created_at?: string
+          event_id: string
+          id?: string
+          role?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"]
+        }
+        Update: {
+          assignee_id?: string
+          assignee_type?: Database["public"]["Enums"]["assignee_type"]
+          created_at?: string
+          event_id?: string
+          id?: string
+          role?: string | null
+          status?: Database["public"]["Enums"]["assignment_status"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "event_assignments_event_id_fkey"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      events: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          description: string | null
+          end_date: string | null
+          event_type: Database["public"]["Enums"]["event_type"]
+          id: string
+          is_all_day: boolean
+          location: string | null
+          school_id: string
+          start_date: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_all_day?: boolean
+          location?: string | null
+          school_id: string
+          start_date: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          description?: string | null
+          end_date?: string | null
+          event_type?: Database["public"]["Enums"]["event_type"]
+          id?: string
+          is_all_day?: boolean
+          location?: string | null
+          school_id?: string
+          start_date?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "events_created_by_fkey"
+            columns: ["created_by"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       expenses: {
         Row: {
           amount: number
@@ -1450,6 +1548,8 @@ export type Database = {
       }
     }
     Enums: {
+      assignee_type: "team" | "cadet"
+      assignment_status: "assigned" | "confirmed" | "declined" | "completed"
       budget_category:
         | "equipment"
         | "uniforms"
@@ -1471,6 +1571,13 @@ export type Database = {
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
       email_queue_status: "pending" | "sent" | "failed" | "cancelled"
       email_trigger_event: "INSERT" | "UPDATE" | "DELETE"
+      event_type:
+        | "training"
+        | "competition"
+        | "ceremony"
+        | "meeting"
+        | "drill"
+        | "other"
       expense_status: "pending" | "paid" | "not_paid"
       expense_type: "equipment" | "travel" | "meals" | "supplies" | "other"
       income_type: "fundraiser" | "donation" | "other"
@@ -1620,6 +1727,8 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
+      assignee_type: ["team", "cadet"],
+      assignment_status: ["assigned", "confirmed", "declined", "completed"],
       budget_category: [
         "equipment",
         "uniforms",
@@ -1643,6 +1752,14 @@ export const Constants = {
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
       email_queue_status: ["pending", "sent", "failed", "cancelled"],
       email_trigger_event: ["INSERT", "UPDATE", "DELETE"],
+      event_type: [
+        "training",
+        "competition",
+        "ceremony",
+        "meeting",
+        "drill",
+        "other",
+      ],
       expense_status: ["pending", "paid", "not_paid"],
       expense_type: ["equipment", "travel", "meals", "supplies", "other"],
       income_type: ["fundraiser", "donation", "other"],
