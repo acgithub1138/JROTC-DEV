@@ -181,64 +181,46 @@ export type Database = {
       }
       contacts: {
         Row: {
-          address: string | null
           cadet_id: string | null
-          city: string | null
           created_at: string
           created_by: string | null
           email: string | null
           id: string
           name: string
           notes: string | null
-          organization: string | null
           phone: string | null
           school_id: string
-          state: string | null
           status: Database["public"]["Enums"]["contact_status"] | null
-          title: string | null
           type: Database["public"]["Enums"]["contact_type"] | null
           updated_at: string
-          zip_code: string | null
         }
         Insert: {
-          address?: string | null
           cadet_id?: string | null
-          city?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
           name: string
           notes?: string | null
-          organization?: string | null
           phone?: string | null
           school_id: string
-          state?: string | null
           status?: Database["public"]["Enums"]["contact_status"] | null
-          title?: string | null
           type?: Database["public"]["Enums"]["contact_type"] | null
           updated_at?: string
-          zip_code?: string | null
         }
         Update: {
-          address?: string | null
           cadet_id?: string | null
-          city?: string | null
           created_at?: string
           created_by?: string | null
           email?: string | null
           id?: string
           name?: string
           notes?: string | null
-          organization?: string | null
           phone?: string | null
           school_id?: string
-          state?: string | null
           status?: Database["public"]["Enums"]["contact_status"] | null
-          title?: string | null
           type?: Database["public"]["Enums"]["contact_type"] | null
           updated_at?: string
-          zip_code?: string | null
         }
         Relationships: [
           {
