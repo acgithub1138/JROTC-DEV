@@ -72,10 +72,6 @@ const CalendarManagementPage = () => {
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Calendar</h1>
-        <Button onClick={handleCreateEvent} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Create Event
-        </Button>
       </div>
 
       <EventFilters 

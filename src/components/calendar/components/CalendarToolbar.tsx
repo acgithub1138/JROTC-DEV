@@ -87,6 +87,20 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   return (
     <div className="flex items-center justify-between mb-6 bg-card p-4 rounded-lg border">
       <div className="flex items-center gap-4">
+        <div className="flex items-center gap-2">
+          <Select value={viewType} onValueChange={onViewChange}>
+            <SelectTrigger className="w-32">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="month">Month</SelectItem>
+              <SelectItem value="week">Week</SelectItem>
+              <SelectItem value="day">Day</SelectItem>
+              <SelectItem value="agenda">Agenda</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+        
         <Button onClick={onCreateEvent} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           New Event
@@ -108,20 +122,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           <CalendarIcon className="w-4 h-4 text-muted-foreground" />
           <span className="font-semibold text-lg">{getDateDisplayText()}</span>
         </div>
-      </div>
-
-      <div className="flex items-center gap-2">
-        <Select value={viewType} onValueChange={onViewChange}>
-          <SelectTrigger className="w-32">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="month">Month</SelectItem>
-            <SelectItem value="week">Week</SelectItem>
-            <SelectItem value="day">Day</SelectItem>
-            <SelectItem value="agenda">Agenda</SelectItem>
-          </SelectContent>
-        </Select>
       </div>
     </div>
   );
