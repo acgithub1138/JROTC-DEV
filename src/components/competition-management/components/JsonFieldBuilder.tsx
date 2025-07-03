@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -49,6 +49,25 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
     penalty: false
   });
   const [dropdownValues, setDropdownValues] = useState('');
+  // Initialize fields from existing template data
+  useEffect(() => {
+    if (value?.criteria && Array.isArray(value.criteria) && fields.length === 0) {
+      const initialFields: JsonField[] = value.criteria.map((criterion: any, index: number) => ({
+        id: (index + 1).toString(),
+        name: criterion.name,
+        type: criterion.type,
+        textType: criterion.maxLength > 75 ? 'notes' : 'short',
+        values: criterion.options,
+        maxValue: criterion.maxValue,
+        pointValue: criterion.pointValue,
+        penaltyValue: criterion.penaltyValue,
+        scaleRanges: criterion.scaleRanges,
+        penalty: criterion.penalty || false
+      }));
+      setFields(initialFields);
+    }
+  }, [value, fields.length]);
+
   const [showPreview, setShowPreview] = useState(false);
 
   const loadPreset = (presetName: string) => {
