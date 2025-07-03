@@ -74,7 +74,11 @@ export const EventForm: React.FC<EventFormProps> = ({
       const endDateTime = formData.end_date ? `${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00` : null;
       
       const eventData = {
-        ...formData,
+        title: formData.title,
+        description: formData.description,
+        location: formData.location,
+        event_type: formData.event_type,
+        is_all_day: formData.is_all_day,
         start_date: new Date(startDateTime).toISOString(),
         end_date: endDateTime ? new Date(endDateTime).toISOString() : null,
       };
