@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Textarea } from '@/components/ui/textarea';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronRight, Users } from 'lucide-react';
 import { MultiSelectProfiles } from './MultiSelectProfiles';
 import { CategorySelect } from './CategorySelect';
 import { useInventoryCategories } from '../hooks/useInventoryCategories';
@@ -47,6 +49,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
 }) => {
   const { categories, subCategories, isCategoriesLoading, isSubCategoriesLoading, getSubCategoriesForCategory } = useInventoryCategories();
   const [filteredSubCategories, setFilteredSubCategories] = useState<string[]>([]);
+  const [isIssuedToOpen, setIsIssuedToOpen] = useState(false);
 
   const {
     register,
@@ -273,13 +276,28 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
       </div>
 
       <div className="space-y-4">
-        <div className="space-y-2">
-          <Label>Issued To</Label>
-          <MultiSelectProfiles
-            value={watchedValues.issued_to || []}
-            onChange={(value) => setValue('issued_to', value)}
-          />
-        </div>
+        <Collapsible open={isIssuedToOpen} onOpenChange={setIsIssuedToOpen}>
+          <CollapsibleTrigger asChild>
+            <Button variant="ghost" className="w-full justify-between p-0 h-auto">
+              <div className="flex items-center gap-2">
+                <Users className="w-4 h-4" />
+                <Label className="cursor-pointer">Issued To</Label>
+                {watchedValues.issued_to && watchedValues.issued_to.length > 0 && (
+                  <span className="text-sm text-muted-foreground">
+                    ({watchedValues.issued_to.length} selected)
+                  </span>
+                )}
+              </div>
+              {isIssuedToOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+            </Button>
+          </CollapsibleTrigger>
+          <CollapsibleContent className="space-y-2 pt-2">
+            <MultiSelectProfiles
+              value={watchedValues.issued_to || []}
+              onChange={(value) => setValue('issued_to', value)}
+            />
+          </CollapsibleContent>
+        </Collapsible>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
