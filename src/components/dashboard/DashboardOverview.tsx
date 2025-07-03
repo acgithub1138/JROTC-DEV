@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -15,6 +16,23 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
+
+  // Filter and sort upcoming events
+  const upcomingEvents = useMemo(() => {
+    if (!events || events.length === 0) return [];
+    
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Set to start of today
+    
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.start_date);
+        return eventDate >= today;
+      })
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+      .slice(0, 5);
+  }, [events]);
   
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
@@ -93,8 +111,57 @@ const DashboardOverview = () => {
         })}
       </div>
 
-      {/* Quick Actions */}
-      <div className="grid grid-cols-1 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Upcoming Events */}
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center">
+              <Calendar className="w-5 h-5 mr-2 text-primary" />
+              Upcoming Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-4">
+              {eventsLoading ? (
+                [...Array(3)].map((_, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
+                    <div className="w-2 h-2 bg-muted rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-4 bg-muted rounded animate-pulse"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
+                      <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
+                    </div>
+                  </div>
+                ))
+              ) : upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-muted/50 transition-colors">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-foreground">{event.title}</p>
+                      <p className="text-sm text-muted-foreground capitalize">{event.event_type.replace('_', ' ')} • {event.location || 'No location'}</p>
+                      <p className="text-xs text-muted-foreground mt-1">
+                        {new Date(event.start_date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: event.is_all_day ? undefined : 'numeric',
+                          minute: event.is_all_day ? undefined : '2-digit',
+                        })}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-muted-foreground">
+                  <p className="text-sm">No upcoming events</p>
+                </div>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+
+        {/* Quick Actions */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
