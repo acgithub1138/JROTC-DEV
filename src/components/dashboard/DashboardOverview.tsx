@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
-import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
 import { TaskForm } from '@/components/tasks/TaskForm';
@@ -16,22 +15,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
-
-  // Filter and sort upcoming events
-  const upcomingEvents = useMemo(() => {
-    if (!events || events.length === 0) return [];
-    
-    const today = new Date().toISOString().split('T')[0]; // Get today as YYYY-MM-DD
-    
-    return events
-      .filter(event => {
-        const eventDate = event.start_date.split('T')[0]; // Get event date as YYYY-MM-DD
-        return eventDate >= today;
-      })
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-      .slice(0, 5);
-  }, [events]);
   
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
@@ -110,57 +93,8 @@ const DashboardOverview = () => {
         })}
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Upcoming Events */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-blue-600" />
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {eventsLoading ? (
-                [...Array(3)].map((_, index) => (
-                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
-                    <div className="w-2 h-2 bg-gray-300 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
-                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
-                    </div>
-                  </div>
-                ))
-              ) : upcomingEvents.length > 0 ? (
-                upcomingEvents.map((event) => (
-                  <div key={event.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                      <p className="text-sm text-gray-500">{event.event_type} • {event.location || 'No location'}</p>
-                      <p className="text-xs text-gray-400 mt-1">
-                        {new Date(event.start_date).toLocaleDateString('en-US', {
-                          month: 'short',
-                          day: 'numeric',
-                          year: 'numeric',
-                          hour: event.is_all_day ? undefined : 'numeric',
-                          minute: event.is_all_day ? undefined : '2-digit',
-                        })}
-                      </p>
-                    </div>
-                  </div>
-                ))
-              ) : (
-                <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">No upcoming events</p>
-                </div>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Quick Actions */}
+      {/* Quick Actions */}
+      <div className="grid grid-cols-1 gap-6">
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
