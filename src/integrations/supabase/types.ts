@@ -1597,6 +1597,30 @@ export type Database = {
         | "administrative"
         | "other"
       budget_transaction_category: "expense" | "income"
+      comp_event_type:
+        | "Armed Inspection"
+        | "Armed Color Guard"
+        | "Armed Exhibition"
+        | "Armed Dual Exhibition"
+        | "Armed Regulation"
+        | "Armed Solo Exhibition"
+        | "Unarmed Inspection"
+        | "Unarmed Color Guard"
+        | "Unarmed Exhibition"
+        | "Unarmed Dual Exhibition"
+        | "Unarmed Regulation"
+      comp_placement:
+        | "NA"
+        | "1st"
+        | "2nd"
+        | "3rd"
+        | "4th"
+        | "5th"
+        | "6th"
+        | "7th"
+        | "8th"
+        | "9th"
+        | "10th"
       competition_type:
         | "drill"
         | "marksmanship"
@@ -1777,6 +1801,32 @@ export const Constants = {
         "other",
       ],
       budget_transaction_category: ["expense", "income"],
+      comp_event_type: [
+        "Armed Inspection",
+        "Armed Color Guard",
+        "Armed Exhibition",
+        "Armed Dual Exhibition",
+        "Armed Regulation",
+        "Armed Solo Exhibition",
+        "Unarmed Inspection",
+        "Unarmed Color Guard",
+        "Unarmed Exhibition",
+        "Unarmed Dual Exhibition",
+        "Unarmed Regulation",
+      ],
+      comp_placement: [
+        "NA",
+        "1st",
+        "2nd",
+        "3rd",
+        "4th",
+        "5th",
+        "6th",
+        "7th",
+        "8th",
+        "9th",
+        "10th",
+      ],
       competition_type: [
         "drill",
         "marksmanship",
