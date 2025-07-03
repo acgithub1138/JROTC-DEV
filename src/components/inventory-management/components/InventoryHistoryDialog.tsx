@@ -4,7 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, User, Package } from 'lucide-react';
 import { useInventoryHistory } from '../hooks/useInventoryHistory';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
@@ -115,7 +115,7 @@ export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
                         {getFieldDisplayName(entry.field_name)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {formatDistanceToNow(new Date(entry.created_at), { addSuffix: true })}
+                        {format(new Date(entry.created_at), 'MM/dd/yyyy HH:mm:ss')}
                       </span>
                     </div>
                     {entry.profiles && (
