@@ -182,7 +182,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   Unit
                 </SortableTableHead>
               )}
-              <TableHead>Actions</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
@@ -242,7 +242,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                      <TableCell className={getPaddingClass()}>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
                    )}
                    <TableCell className={getPaddingClass()}>
-                     <div className="flex items-center space-x-1">
+                     <div className="flex items-center justify-end space-x-1">
                        {item.issued_to && item.issued_to.length > 0 && (
                          <IssuedUsersPopover issuedTo={item.issued_to} />
                        )}
