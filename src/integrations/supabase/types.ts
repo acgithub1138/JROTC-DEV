@@ -246,7 +246,6 @@ export type Database = {
           armed_inspection: Database["public"]["Enums"]["comp_placement"] | null
           armed_regulation: Database["public"]["Enums"]["comp_placement"] | null
           cadets: string[] | null
-          comp_type: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at: string
           description: string | null
@@ -294,7 +293,6 @@ export type Database = {
             | Database["public"]["Enums"]["comp_placement"]
             | null
           cadets?: string[] | null
-          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at?: string
           description?: string | null
@@ -342,7 +340,6 @@ export type Database = {
             | Database["public"]["Enums"]["comp_placement"]
             | null
           cadets?: string[] | null
-          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date?: string
           created_at?: string
           description?: string | null

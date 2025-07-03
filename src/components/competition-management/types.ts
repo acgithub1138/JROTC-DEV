@@ -6,8 +6,7 @@ export interface Competition {
   location?: string;
   competition_date: string;
   registration_deadline?: string;
-  type: 'individual' | 'team' | 'mixed';
-  comp_type?: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
+  type: 'drill' | 'marksmanship' | 'academic' | 'leadership' | 'physical_fitness' | 'inspection';
   teams?: string[];
   cadets?: string[];
   overall_placement?: CompetitionPlacement;
@@ -78,7 +77,6 @@ export type CompetitionPlacement =
 export interface CompetitionFilters {
   search: string;
   type: string;
-  comp_type: string;
   startDate?: string;
   endDate?: string;
 }

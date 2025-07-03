@@ -45,7 +45,6 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
             <TableHead>Date</TableHead>
             <TableHead>Location</TableHead>
             <TableHead>Type</TableHead>
-            <TableHead>Program</TableHead>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>
@@ -61,13 +60,6 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
                 <Badge variant="outline">
                   {competition.type?.replace('_', ' ') || '-'}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {competition.comp_type ? (
-                  <Badge variant="secondary">
-                    {competition.comp_type.replace('_', ' ').toUpperCase()}
-                  </Badge>
-                ) : '-'}
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">

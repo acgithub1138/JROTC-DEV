@@ -26,7 +26,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     description: competition?.description || '',
     location: competition?.location || '',
     competition_date: competition?.competition_date || '',
-    comp_type: competition?.comp_type || 'air_force',
     overall_placement: competition?.overall_placement || 'NA',
     overall_armed_placement: competition?.overall_armed_placement || 'NA',
     overall_unarmed_placement: competition?.overall_unarmed_placement || 'NA',
@@ -43,14 +42,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const placementOptions = ['NA', '1st', '2nd', '3rd', '4th', '5th', '6th', '7th', '8th', '9th', '10th'];
-  const programOptions = [
-    { value: 'air_force', label: 'Air Force' },
-    { value: 'army', label: 'Army' },
-    { value: 'navy', label: 'Navy' },
-    { value: 'marine_corps', label: 'Marine Corps' },
-    { value: 'coast_guard', label: 'Coast Guard' },
-    { value: 'space_force', label: 'Space Force' }
-  ];
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -66,8 +57,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         description: formData.description,
         location: formData.location,
         competition_date: formData.competition_date,
-        comp_type: formData.comp_type,
-        type: 'drill' as const, // Use valid enum value instead of 'individual'
+        type: 'drill' as const, // Use valid enum value
         // New overall placement fields
         overall_placement: formData.overall_placement,
         overall_armed_placement: formData.overall_armed_placement, 
@@ -120,21 +110,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         </div>
 
 
-        <div className="space-y-2">
-          <Label htmlFor="comp_type">JROTC Program</Label>
-          <Select value={formData.comp_type} onValueChange={(value) => updateFormData('comp_type', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {programOptions.map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
 
       </div>
 
