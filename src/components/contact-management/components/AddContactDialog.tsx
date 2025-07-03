@@ -74,7 +74,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
       name: '',
       type: 'parent',
       status: 'active',
-      cadet_id: '',
+      cadet_id: 'none',
       phone: '',
       email: '',
       organization: '',
@@ -111,7 +111,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
       name: data.name,
       type: data.type,
       status: data.status,
-      cadet_id: data.cadet_id || null,
+      cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
       phone: data.phone || null,
       email: data.email || null,
       organization: data.organization || null,
@@ -208,7 +208,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No cadet selected</SelectItem>
+                        <SelectItem value="none">No cadet selected</SelectItem>
                         {cadets.map((cadet) => (
                           <SelectItem key={cadet.id} value={cadet.id}>
                             {cadet.last_name}, {cadet.first_name}

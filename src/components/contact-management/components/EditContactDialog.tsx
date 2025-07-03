@@ -76,7 +76,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       name: contact.name,
       type: contact.type,
       status: contact.status,
-      cadet_id: contact.cadet_id || '',
+        cadet_id: contact.cadet_id || 'none',
       phone: contact.phone || '',
       email: contact.email || '',
       organization: contact.organization || '',
@@ -110,7 +110,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
         name: contact.name,
         type: contact.type,
         status: contact.status,
-        cadet_id: contact.cadet_id || '',
+        cadet_id: contact.cadet_id || 'none',
         phone: contact.phone || '',
         email: contact.email || '',
         organization: contact.organization || '',
@@ -129,7 +129,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       name: data.name,
       type: data.type,
       status: data.status,
-      cadet_id: data.cadet_id || null,
+      cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
       phone: data.phone || null,
       email: data.email || null,
       organization: data.organization || null,
@@ -225,7 +225,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No cadet selected</SelectItem>
+                        <SelectItem value="none">No cadet selected</SelectItem>
                         {cadets.map((cadet) => (
                           <SelectItem key={cadet.id} value={cadet.id}>
                             {cadet.last_name}, {cadet.first_name}
