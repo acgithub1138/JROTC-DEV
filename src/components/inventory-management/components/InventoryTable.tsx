@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
+import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
@@ -240,24 +241,27 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                      <TableCell className={getPaddingClass()}>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
                    )}
                    <TableCell className={getPaddingClass()}>
-                    <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEdit(item)}
-                        title="Edit item"
-                      >
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(item.id)}
-                        title="Delete item"
-                        className="hover:text-red-600"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
+                     <div className="flex items-center space-x-1">
+                       {item.issued_to && item.issued_to.length > 0 && (
+                         <IssuedUsersPopover issuedTo={item.issued_to} />
+                       )}
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => handleEdit(item)}
+                         title="Edit item"
+                       >
+                         <Edit className="w-4 h-4" />
+                       </Button>
+                       <Button
+                         variant="ghost"
+                         size="sm"
+                         onClick={() => onDelete(item.id)}
+                         title="Delete item"
+                         className="hover:text-red-600"
+                       >
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
                     </div>
                   </TableCell>
                 </TableRow>
