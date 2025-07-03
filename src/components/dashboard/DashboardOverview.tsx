@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package } from 'lucide-react';
@@ -17,8 +17,21 @@ const DashboardOverview = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
-  
-  console.log('📊 Dashboard - events:', events?.length, 'eventsLoading:', eventsLoading);
+
+  // Filter and sort upcoming events
+  const upcomingEvents = useMemo(() => {
+    if (!events || events.length === 0) return [];
+    
+    const today = new Date().toISOString().split('T')[0]; // Get today as YYYY-MM-DD
+    
+    return events
+      .filter(event => {
+        const eventDate = event.start_date.split('T')[0]; // Get event date as YYYY-MM-DD
+        return eventDate >= today;
+      })
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+      .slice(0, 5);
+  }, [events]);
   
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
@@ -119,48 +132,28 @@ const DashboardOverview = () => {
                     </div>
                   </div>
                 ))
-              ) : events && events.length > 0 ? (
-                (() => {
-                  const upcomingEvents = events
-                    .filter(event => {
-                      const eventDate = new Date(event.start_date);
-                      const today = new Date();
-                      today.setHours(0, 0, 0, 0);
-                      return eventDate >= today;
-                    })
-                    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-                    .slice(0, 5);
-                  
-                  console.log('📅 Upcoming events filtered:', upcomingEvents.length);
-                  
-                  return upcomingEvents.length > 0 ? upcomingEvents.map((event, index) => (
-                    <div key={event.id || index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                      <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                      <div className="flex-1 min-w-0">
-                        <p className="text-sm font-medium text-gray-900">{event.title}</p>
-                        <p className="text-sm text-gray-500">{event.event_type} • {event.location || 'No location'}</p>
-                        <p className="text-xs text-gray-400 mt-1">
-                          {new Date(event.start_date).toLocaleDateString('en-US', {
-                            month: 'short',
-                            day: 'numeric',
-                            year: 'numeric',
-                            hour: event.is_all_day ? undefined : 'numeric',
-                            minute: event.is_all_day ? undefined : '2-digit',
-                          })}
-                        </p>
-                      </div>
+              ) : upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{event.title}</p>
+                      <p className="text-sm text-gray-500">{event.event_type} • {event.location || 'No location'}</p>
+                      <p className="text-xs text-gray-400 mt-1">
+                        {new Date(event.start_date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: event.is_all_day ? undefined : 'numeric',
+                          minute: event.is_all_day ? undefined : '2-digit',
+                        })}
+                      </p>
                     </div>
-                  )) : (
-                    <div className="text-center py-8 text-gray-500">
-                      <p className="text-sm">No upcoming events</p>
-                    </div>
-                  );
-                })()
+                  </div>
+                ))
               ) : (
                 <div className="text-center py-8 text-gray-500">
-                  <p className="text-sm">
-                    {eventsLoading ? 'Loading events...' : 'No upcoming events'}
-                  </p>
+                  <p className="text-sm">No upcoming events</p>
                 </div>
               )}
             </div>
