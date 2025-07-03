@@ -21,7 +21,6 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'user-admin', label: 'User Management', icon: 'UserCog' },
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
-        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
@@ -34,7 +33,6 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
-        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
@@ -43,7 +41,6 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
     case 'command_staff':
@@ -54,10 +51,9 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },        
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
-        { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
-        { id: 'email-management', label: 'Email', icon: 'Mails' },        
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
+        { id: 'email-management', label: 'Email', icon: 'Mails' },        
       ];
     
     default:
