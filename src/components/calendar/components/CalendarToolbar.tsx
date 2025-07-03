@@ -101,11 +101,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           </Select>
         </div>
         
-        <Button onClick={onCreateEvent} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          New Event
-        </Button>
-        
         <div className="flex items-center gap-2">
           <Button variant="outline" size="sm" onClick={handlePrevious}>
             <ChevronLeft className="w-4 h-4" />
@@ -122,6 +117,13 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
           <CalendarIcon className="w-4 h-4 text-muted-foreground" />
           <span className="font-semibold text-lg">{getDateDisplayText()}</span>
         </div>
+      </div>
+
+      <div className="flex items-center gap-2">
+        <Button onClick={onCreateEvent} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          New Event
+        </Button>
       </div>
     </div>
   );
