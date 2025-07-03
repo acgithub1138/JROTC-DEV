@@ -82,15 +82,31 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      <div className="space-y-2">
+        <Label htmlFor="template_name">Template Name *</Label>
+        <Input
+          id="template_name"
+          value={formData.template_name}
+          onChange={(e) => updateFormData('template_name', e.target.value)}
+          required
+        />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="template_name">Template Name *</Label>
-          <Input
-            id="template_name"
-            value={formData.template_name}
-            onChange={(e) => updateFormData('template_name', e.target.value)}
-            required
-          />
+          <Label htmlFor="jrotc_program">JROTC Program *</Label>
+          <Select value={formData.jrotc_program} onValueChange={(value) => updateFormData('jrotc_program', value)}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {programOptions.map((program) => (
+                <SelectItem key={program.value} value={program.value}>
+                  {program.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-2">
@@ -103,22 +119,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
               {eventOptions.map((event) => (
                 <SelectItem key={event} value={event}>
                   {event}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="jrotc_program">JROTC Program *</Label>
-          <Select value={formData.jrotc_program} onValueChange={(value) => updateFormData('jrotc_program', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {programOptions.map((program) => (
-                <SelectItem key={program.value} value={program.value}>
-                  {program.label}
                 </SelectItem>
               ))}
             </SelectContent>
