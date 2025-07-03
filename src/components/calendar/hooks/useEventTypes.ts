@@ -7,7 +7,7 @@ export interface EventType {
   id: string;
   value: string;
   label: string;
-  school_id: string;
+  school_id: string | null; // Now nullable for global defaults
   is_default: boolean;
 }
 
@@ -25,8 +25,8 @@ export const useEventTypes = () => {
       const { data, error } = await supabase
         .from('event_types')
         .select('*')
-        .eq('school_id', userProfile.school_id)
-        .order('label');
+        .or(`school_id.is.null,school_id.eq.${userProfile.school_id}`)
+        .order('is_default.desc,label.asc'); // Show defaults first, then custom types
 
       if (error) throw error;
       setEventTypes(data || []);
@@ -76,7 +76,13 @@ export const useEventTypes = () => {
         throw error;
       }
 
-      setEventTypes(prev => [...prev, data].sort((a, b) => a.label.localeCompare(b.label)));
+      setEventTypes(prev => [...prev, data].sort((a, b) => {
+        // Sort by is_default first (defaults first), then by label
+        if (a.is_default !== b.is_default) {
+          return b.is_default ? 1 : -1;
+        }
+        return a.label.localeCompare(b.label);
+      }));
       toast({
         title: 'Success',
         description: 'Event type created successfully',
@@ -95,6 +101,17 @@ export const useEventTypes = () => {
   };
 
   const deleteEventType = async (id: string) => {
+    // Find the event type to check if it's a default (global) type
+    const eventType = eventTypes.find(type => type.id === id);
+    if (eventType?.is_default) {
+      toast({
+        title: 'Error',
+        description: 'Cannot delete global default event types',
+        variant: 'destructive',
+      });
+      return;
+    }
+
     try {
       const { error } = await supabase
         .from('event_types')

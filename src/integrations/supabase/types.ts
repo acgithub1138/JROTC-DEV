@@ -522,7 +522,7 @@ export type Database = {
           id: string
           is_default: boolean
           label: string
-          school_id: string
+          school_id: string | null
           updated_at: string
           value: string
         }
@@ -531,7 +531,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           label: string
-          school_id: string
+          school_id?: string | null
           updated_at?: string
           value: string
         }
@@ -540,7 +540,7 @@ export type Database = {
           id?: string
           is_default?: boolean
           label?: string
-          school_id?: string
+          school_id?: string | null
           updated_at?: string
           value?: string
         }
