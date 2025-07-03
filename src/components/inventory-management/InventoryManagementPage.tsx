@@ -1,6 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Plus, Search, Download, Upload } from 'lucide-react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
@@ -19,6 +21,7 @@ const InventoryManagementPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [showOutOfStockOnly, setShowOutOfStockOnly] = useState(false);
   const { toast } = useToast();
 
   // Define available columns for the inventory table
@@ -54,7 +57,7 @@ const InventoryManagementPage = () => {
 
   const filteredItems = inventoryItems?.filter(item => {
     const searchLower = searchTerm.toLowerCase();
-    return (
+    const matchesSearch = (
       item.item?.toLowerCase().includes(searchLower) ||
       item.category?.toLowerCase().includes(searchLower) ||
       item.sub_category?.toLowerCase().includes(searchLower) ||
@@ -62,6 +65,10 @@ const InventoryManagementPage = () => {
       item.size?.toLowerCase().includes(searchLower) ||
       item.stock_number?.toLowerCase().includes(searchLower)
     );
+    
+    const matchesOutOfStock = showOutOfStockOnly ? (item.qty_available || 0) <= 0 : true;
+    
+    return matchesSearch && matchesOutOfStock;
   }) || [];
 
   const totalPages = getTotalPages(filteredItems.length);
@@ -225,7 +232,18 @@ const InventoryManagementPage = () => {
           />
         </div>
         
-        <div className="flex items-center gap-2 ml-4">
+        <div className="flex items-center gap-4 ml-4">
+          <div className="flex items-center gap-2">
+            <Switch
+              checked={showOutOfStockOnly}
+              onCheckedChange={setShowOutOfStockOnly}
+              id="out-of-stock-toggle"
+            />
+            <Label htmlFor="out-of-stock-toggle" className="text-sm">
+              Show Out of Stock Only
+            </Label>
+          </div>
+          
           <ColumnSelector
             columns={columns}
             onToggleColumn={toggleColumn}
