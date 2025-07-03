@@ -144,10 +144,10 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
         <CardHeader>
           <CardTitle>Score Sheet Builder</CardTitle>
           <div className="flex gap-2 mt-2">
-            <Button variant="outline" size="sm" onClick={() => loadPreset('air_force_inspection')}>
+            <Button type="button" variant="outline" size="sm" onClick={() => loadPreset('air_force_inspection')}>
               Load Air Force Preset
             </Button>
-            <Button variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
+            <Button type="button" variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
               <Eye className="w-4 h-4 mr-2" />
               {showPreview ? 'Hide' : 'Show'} Preview
             </Button>
@@ -244,7 +244,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
             </div>
           </div>
 
-          <Button onClick={addField} className="w-full" disabled={!currentField.name}>
+          <Button type="button" onClick={addField} className="w-full" disabled={!currentField.name}>
             <Plus className="w-4 h-4 mr-2" />
             Add Field
           </Button>
@@ -271,7 +271,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
                       {field.values && `, ${field.values.length} options`})
                     </div>
                   </div>
-                  <Button variant="outline" size="sm" onClick={() => removeField(field.id)}>
+                  <Button type="button" variant="outline" size="sm" onClick={() => removeField(field.id)}>
                     <Trash2 className="w-4 h-4" />
                   </Button>
                 </div>)}
@@ -338,7 +338,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
         <CardHeader>
           <Collapsible open={isExpanded} onOpenChange={setIsExpanded}>
             <CollapsibleTrigger asChild>
-              <Button variant="ghost" className="w-full justify-between">
+              <Button type="button" variant="ghost" className="w-full justify-between">
                 <span>JSON Preview</span>
                 {isExpanded ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
               </Button>
