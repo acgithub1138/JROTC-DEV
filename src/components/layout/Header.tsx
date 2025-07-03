@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
 import { 
@@ -9,15 +9,27 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator 
 } from '@/components/ui/dropdown-menu';
-import { User, LogOut, Settings } from 'lucide-react';
+import { 
+  Sheet, 
+  SheetContent, 
+  SheetHeader, 
+  SheetTitle, 
+  SheetTrigger 
+} from '@/components/ui/sheet';
+import { User, LogOut, Settings, Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 
 interface HeaderProps {
   activeModule: string;
+  onModuleChange?: (module: string) => void;
+  isMobile?: boolean;
 }
 
-export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
+export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, isMobile }) => {
   const { signOut, userProfile } = useAuth();
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const { menuItems } = useSidebarPreferences();
 
   const getModuleTitle = (module: string) => {
     const titles: { [key: string]: string } = {
@@ -52,10 +64,47 @@ export const Header: React.FC<HeaderProps> = ({ activeModule }) => {
   return (
     <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
-        <div>
-          {userProfile?.schools && (
-            <p className="text-sm text-gray-600">{userProfile.schools.name}</p>
+        <div className="flex items-center space-x-4">
+          {/* Mobile Menu Button */}
+          {isMobile && onModuleChange && (
+            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+              <SheetTrigger asChild>
+                <Button variant="ghost" size="icon">
+                  <Menu className="w-5 h-5" />
+                  <span className="sr-only">Open menu</span>
+                </Button>
+              </SheetTrigger>
+              <SheetContent side="left" className="w-64">
+                <SheetHeader>
+                  <SheetTitle className="flex items-center space-x-2">
+                    <Shield className="w-6 h-6 text-blue-400" />
+                    <span>JROTC CCC</span>
+                  </SheetTitle>
+                </SheetHeader>
+                <div className="mt-6 space-y-2">
+                  {menuItems.map((item) => (
+                    <Button
+                      key={item.id}
+                      variant={activeModule === item.id ? 'secondary' : 'ghost'}
+                      className="w-full justify-start"
+                      onClick={() => {
+                        onModuleChange(item.id);
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      {item.label}
+                    </Button>
+                  ))}
+                </div>
+              </SheetContent>
+            </Sheet>
           )}
+          
+          <div>
+            {userProfile?.schools && (
+              <p className="text-sm text-gray-600">{userProfile.schools.name}</p>
+            )}
+          </div>
         </div>
         
         <div className="flex items-center">

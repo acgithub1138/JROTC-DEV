@@ -3,9 +3,11 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { ContactTable } from './components/ContactTable';
+import { ContactCards } from './components/ContactCards';
 import { AddContactDialog } from './components/AddContactDialog';
 import { EditContactDialog } from './components/EditContactDialog';
 import { useContacts } from './hooks/useContacts';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 export interface Contact {
   id: string;
@@ -26,6 +28,7 @@ const ContactManagementPage = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
+  const isMobile = useIsMobile();
 
   const {
     contacts,
@@ -50,12 +53,21 @@ const ContactManagementPage = () => {
           </Button>
         }
       >
-        <ContactTable
-          contacts={contacts}
-          isLoading={isLoading}
-          onEdit={setEditingContact}
-          onDelete={deleteContact}
-        />
+        {isMobile ? (
+          <ContactCards
+            contacts={contacts}
+            isLoading={isLoading}
+            onEdit={setEditingContact}
+            onDelete={deleteContact}
+          />
+        ) : (
+          <ContactTable
+            contacts={contacts}
+            isLoading={isLoading}
+            onEdit={setEditingContact}
+            onDelete={deleteContact}
+          />
+        )}
       </StandardTableWrapper>
 
       <AddContactDialog

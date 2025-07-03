@@ -2,8 +2,10 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CadetTable } from './CadetTable';
+import { CadetCards } from './CadetCards';
 import { MassUpdateToolbar } from './MassUpdateToolbar';
 import { Profile } from '../types';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CadetTabsContentProps {
   activeTab: string;
@@ -40,6 +42,35 @@ export const CadetTabsContent = ({
   onUpdateRole,
   onDeactivate
 }: CadetTabsContentProps) => {
+  const isMobile = useIsMobile();
+  
+  const renderCadetDisplay = () => {
+    if (isMobile) {
+      return (
+        <CadetCards
+          profiles={paginatedProfiles}
+          activeTab={activeTab}
+          onEditProfile={onEditProfile}
+          onToggleStatus={onToggleStatus}
+          selectedCadets={selectedCadets}
+          onSelectCadet={onSelectCadet}
+        />
+      );
+    }
+    
+    return (
+      <CadetTable
+        profiles={paginatedProfiles}
+        activeTab={activeTab}
+        onEditProfile={onEditProfile}
+        onToggleStatus={onToggleStatus}
+        selectedCadets={selectedCadets}
+        onSelectCadet={onSelectCadet}
+        onSelectAll={(checked) => onSelectAll(checked)}
+      />
+    );
+  };
+
   return (
     <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
@@ -52,36 +83,22 @@ export const CadetTabsContent = ({
       </TabsList>
       
       <TabsContent value="active" className="mt-4">
-        <MassUpdateToolbar
-          selectedCount={selectedCadets.length}
-          onUpdateGrade={onUpdateGrade}
-          onUpdateRank={onUpdateRank}
-          onUpdateFlight={onUpdateFlight}
-          onUpdateRole={onUpdateRole}
-          onDeactivate={onDeactivate}
-          loading={massOperationLoading}
-        />
-        <CadetTable
-          profiles={paginatedProfiles}
-          activeTab={activeTab}
-          onEditProfile={onEditProfile}
-          onToggleStatus={onToggleStatus}
-          selectedCadets={selectedCadets}
-          onSelectCadet={onSelectCadet}
-          onSelectAll={(checked) => onSelectAll(checked)}
-        />
+        {!isMobile && (
+          <MassUpdateToolbar
+            selectedCount={selectedCadets.length}
+            onUpdateGrade={onUpdateGrade}
+            onUpdateRank={onUpdateRank}
+            onUpdateFlight={onUpdateFlight}
+            onUpdateRole={onUpdateRole}
+            onDeactivate={onDeactivate}
+            loading={massOperationLoading}
+          />
+        )}
+        {renderCadetDisplay()}
       </TabsContent>
 
       <TabsContent value="inactive" className="mt-4">
-        <CadetTable
-          profiles={paginatedProfiles}
-          activeTab={activeTab}
-          onEditProfile={onEditProfile}
-          onToggleStatus={onToggleStatus}
-          selectedCadets={selectedCadets}
-          onSelectCadet={onSelectCadet}
-          onSelectAll={(checked) => onSelectAll(checked)}
-        />
+        {renderCadetDisplay()}
       </TabsContent>
     </Tabs>
   );

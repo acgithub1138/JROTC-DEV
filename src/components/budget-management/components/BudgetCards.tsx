@@ -1,0 +1,132 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { Edit, Trash2, DollarSign, Calendar, CreditCard } from 'lucide-react';
+import { BudgetTransaction } from '../BudgetManagementPage';
+
+interface BudgetCardsProps {
+  transactions: BudgetTransaction[];
+  onEdit: (transaction: BudgetTransaction) => void;
+  onDelete: (id: string) => void;
+}
+
+export const BudgetCards: React.FC<BudgetCardsProps> = ({
+  transactions,
+  onEdit,
+  onDelete,
+}) => {
+  const getCategoryColor = (category: string) => {
+    switch (category) {
+      case 'income': return 'bg-green-100 text-green-800';
+      case 'expense': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const getStatusColor = (status?: string) => {
+    switch (status) {
+      case 'paid': return 'bg-green-100 text-green-800';
+      case 'pending': return 'bg-yellow-100 text-yellow-800';
+      case 'not_paid': return 'bg-red-100 text-red-800';
+      default: return 'bg-gray-100 text-gray-800';
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString();
+  };
+
+  const formatAmount = (amount: number, category: string) => {
+    const prefix = category === 'income' ? '+' : '-';
+    return `${prefix}$${amount.toFixed(2)}`;
+  };
+
+  if (transactions.length === 0) {
+    return (
+      <div className="text-center py-8 text-gray-500">
+        No transactions found
+      </div>
+    );
+  }
+
+  return (
+    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+      {transactions.map((transaction) => (
+        <Card key={transaction.id} className="hover:shadow-md transition-shadow">
+          <CardHeader className="pb-3">
+            <div className="flex items-start justify-between">
+              <div>
+                <CardTitle className="text-lg">{transaction.item}</CardTitle>
+                <p className="text-sm text-muted-foreground capitalize">
+                  {transaction.type.replace('_', ' ')}
+                </p>
+              </div>
+              <div className="flex flex-col space-y-1">
+                <Badge className={getCategoryColor(transaction.category)}>
+                  {transaction.category}
+                </Badge>
+                {transaction.status && (
+                  <Badge className={getStatusColor(transaction.status)}>
+                    {transaction.status.replace('_', ' ')}
+                  </Badge>
+                )}
+              </div>
+            </div>
+          </CardHeader>
+          
+          <CardContent className="space-y-3">
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center space-x-2">
+                  <DollarSign className="w-4 h-4 text-gray-400" />
+                  <span className="text-lg font-semibold">
+                    {formatAmount(transaction.amount, transaction.category)}
+                  </span>
+                </div>
+              </div>
+              
+              <div className="flex items-center space-x-2">
+                <Calendar className="w-4 h-4 text-gray-400" />
+                <span className="text-sm">{formatDate(transaction.date)}</span>
+              </div>
+
+              {transaction.payment_method && (
+                <div className="flex items-center space-x-2">
+                  <CreditCard className="w-4 h-4 text-gray-400" />
+                  <span className="text-sm capitalize">
+                    {transaction.payment_method.replace('_', ' ')}
+                  </span>
+                </div>
+              )}
+
+              {transaction.description && (
+                <div className="text-sm text-gray-600">
+                  <p className="line-clamp-2">{transaction.description}</p>
+                </div>
+              )}
+            </div>
+            
+            <div className="flex justify-end space-x-2 pt-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onEdit(transaction)}
+              >
+                <Edit className="w-4 h-4" />
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => onDelete(transaction.id)}
+                className="text-red-600 hover:text-red-700"
+              >
+                <Trash2 className="w-4 h-4" />
+              </Button>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};

@@ -5,7 +5,9 @@ import { useTeams } from './hooks/useTeams';
 import { useTeamMutations } from './hooks/useTeamMutations';
 import { TeamsPageHeader } from './components/TeamsPageHeader';
 import { TeamsTable } from './components/TeamsTable';
+import { TeamCards } from './components/TeamCards';
 import { AddTeamDialog } from './components/AddTeamDialog';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { EditTeamDialog } from './components/EditTeamDialog';
 import { SendEmailDialog } from './components/SendEmailDialog';
 import { ViewTeamMembersDialog } from './components/ViewTeamMembersDialog';
@@ -21,6 +23,7 @@ const TeamsManagementPage = () => {
     updateTeam,
     deleteTeam
   } = useTeamMutations();
+  const isMobile = useIsMobile();
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
@@ -93,7 +96,11 @@ const TeamsManagementPage = () => {
       <Card>
         
         <CardContent>
-          <TeamsTable teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteTeam} onSendEmail={handleSendEmail} onViewMembers={handleViewMembers} />
+          {isMobile ? (
+            <TeamCards teams={teams} isLoading={loading} onEdit={handleEditTeam} onDelete={handleDeleteTeam} onViewMembers={handleViewMembers} onSendEmail={handleSendEmail} />
+          ) : (
+            <TeamsTable teams={teams} onEditTeam={handleEditTeam} onDeleteTeam={handleDeleteTeam} onSendEmail={handleSendEmail} onViewMembers={handleViewMembers} />
+          )}
 
           {teams.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No teams found. Create your first team to get started.

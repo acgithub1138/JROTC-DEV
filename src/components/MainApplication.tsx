@@ -3,6 +3,7 @@ import React, { useState } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
+import { useIsMobile } from '@/hooks/use-mobile';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
@@ -21,6 +22,7 @@ import ContactManagementPage from '@/components/contact-management/ContactManage
 const MainApplication = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
@@ -67,13 +69,19 @@ const MainApplication = () => {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <Header activeModule={activeModule} />
+      <Header 
+        activeModule={activeModule} 
+        onModuleChange={handleModuleChange}
+        isMobile={isMobile}
+      />
       <div className="flex">
-        <Sidebar 
-          activeModule={activeModule} 
-          onModuleChange={handleModuleChange}
-        />
-        <main className="flex-1 ml-64">
+        {!isMobile && (
+          <Sidebar 
+            activeModule={activeModule} 
+            onModuleChange={handleModuleChange}
+          />
+        )}
+        <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
             <Route path="/tasks" element={<TaskManagementPage />} />

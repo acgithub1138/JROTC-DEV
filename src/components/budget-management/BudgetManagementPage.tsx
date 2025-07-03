@@ -8,7 +8,9 @@ import { BudgetFilters } from './components/BudgetFilters';
 import { AddIncomeDialog } from './components/AddIncomeDialog';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
+import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
+import { useIsMobile } from '@/hooks/use-mobile';
 export interface BudgetTransaction {
   id: string;
   school_id: string;
@@ -56,6 +58,8 @@ const BudgetManagementPage = () => {
     deleteTransaction,
     archiveAllTransactions
   } = useBudgetTransactions(filters);
+  const isMobile = useIsMobile();
+  
   const handleArchiveAll = async () => {
     const currentYear = new Date().getFullYear();
     const budgetYear = `${currentYear - 1} - ${currentYear}`;
@@ -85,7 +89,11 @@ const BudgetManagementPage = () => {
       <BudgetFilters filters={filters} onFiltersChange={setFilters} />
 
       <div className="rounded-lg border bg-card">
-        <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
+        {isMobile ? (
+          <BudgetCards transactions={transactions} onEdit={setEditingItem} onDelete={deleteTransaction} />
+        ) : (
+          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
+        )}
       </div>
 
       <AddIncomeDialog open={showAddIncome} onOpenChange={setShowAddIncome} onSubmit={createTransaction} />
