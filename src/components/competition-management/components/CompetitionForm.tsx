@@ -59,7 +59,28 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
 
     try {
       setIsSubmitting(true);
-      await onSubmit(formData);
+      
+      // Map form data to database structure
+      const submissionData = {
+        name: formData.name,
+        description: formData.description,
+        location: formData.location,
+        competition_date: formData.competition_date,
+        comp_type: formData.comp_type,
+        type: 'individual' as const, // Default type since we removed it from form
+        // Map overall placements to existing columns (using first available columns)
+        armed_regulation: formData.overall_placement,
+        armed_exhibition: formData.overall_armed_placement, 
+        armed_color_guard: formData.overall_unarmed_placement,
+        // Keep the existing individual event placements
+        armed_inspection: formData.armed_inspection,
+        unarmed_regulation: formData.unarmed_regulation,
+        unarmed_exhibition: formData.unarmed_exhibition,
+        unarmed_color_guard: formData.unarmed_color_guard,
+        unarmed_inspection: formData.unarmed_inspection,
+      };
+      
+      await onSubmit(submissionData);
     } catch (error) {
       console.error('Error submitting form:', error);
     } finally {
