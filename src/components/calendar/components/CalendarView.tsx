@@ -15,6 +15,11 @@ interface CalendarViewProps {
   onEventDelete: (id: string) => void;
   onDateSelect: (date: Date) => void;
   onCreateEvent: () => void;
+  filters: {
+    eventType: string;
+    assignedTo: string;
+  };
+  onFiltersChange: (filters: { eventType: string; assignedTo: string }) => void;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -24,10 +29,11 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onEventDelete,
   onDateSelect,
   onCreateEvent,
+  filters,
+  onFiltersChange,
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewType, setViewType] = useState<CalendarViewType>('month');
-  const [selectedEventType, setSelectedEventType] = useState<string>('all');
   const isMobile = useIsMobile();
 
   // Mobile view - simplified agenda view
@@ -40,8 +46,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           onDateChange={setCurrentDate}
           onViewChange={() => {}} // No view switching on mobile
           onCreateEvent={onCreateEvent}
-          selectedEventType={selectedEventType}
-          onEventTypeChange={setSelectedEventType}
+          selectedEventType={filters.eventType || 'all'}
+          onEventTypeChange={(eventType) => onFiltersChange({ ...filters, eventType: eventType === 'all' ? '' : eventType })}
         />
         
         <AgendaView
@@ -99,8 +105,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         onDateChange={setCurrentDate}
         onViewChange={handleViewChange}
         onCreateEvent={onCreateEvent}
-        selectedEventType={selectedEventType}
-        onEventTypeChange={setSelectedEventType}
+        selectedEventType={filters.eventType || 'all'}
+        onEventTypeChange={(eventType) => onFiltersChange({ ...filters, eventType: eventType === 'all' ? '' : eventType })}
       />
 
       <div className="calendar-content">

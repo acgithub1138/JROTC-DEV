@@ -74,11 +74,6 @@ const CalendarManagementPage = () => {
         <h1 className="text-3xl font-bold">Calendar</h1>
       </div>
 
-      <EventFilters 
-        filters={filters} 
-        onFiltersChange={setFilters} 
-      />
-
       <CalendarView
         events={events}
         isLoading={isLoading}
@@ -86,6 +81,8 @@ const CalendarManagementPage = () => {
         onEventDelete={deleteEvent}
         onDateSelect={handleDateSelect}
         onCreateEvent={handleCreateEvent}
+        filters={filters}
+        onFiltersChange={setFilters}
       />
 
       <EventDialog
