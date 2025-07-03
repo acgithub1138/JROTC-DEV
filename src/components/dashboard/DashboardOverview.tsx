@@ -16,7 +16,10 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
-  const { events, isLoading: eventsLoading } = useEvents({ eventType: '', assignedTo: '' });
+  
+  // Memoize filters to prevent infinite re-renders
+  const eventFilters = useMemo(() => ({ eventType: '', assignedTo: '' }), []);
+  const { events, isLoading: eventsLoading } = useEvents(eventFilters);
 
   // Filter and sort upcoming events
   const upcomingEvents = useMemo(() => {
