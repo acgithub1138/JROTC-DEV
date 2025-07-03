@@ -47,7 +47,7 @@ onSelectAll
               aria-label={someSelected ? "Some selected" : allSelected ? "All selected" : "None selected"}
             />
           </TableHead>
-          <SortableTableHead sortKey="first_name" currentSort={sortConfig} onSort={handleSort}>
+          <SortableTableHead sortKey="last_name" currentSort={sortConfig} onSort={handleSort}>
             Name
           </SortableTableHead>
           <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>
