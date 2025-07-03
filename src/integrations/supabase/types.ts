@@ -253,6 +253,15 @@ export type Database = {
           id: string
           location: string | null
           name: string
+          overall_armed_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_unarmed_placement:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           registration_deadline: string | null
           school_id: string | null
           teams: string[] | null
@@ -292,6 +301,15 @@ export type Database = {
           id?: string
           location?: string | null
           name: string
+          overall_armed_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_unarmed_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           registration_deadline?: string | null
           school_id?: string | null
           teams?: string[] | null
@@ -331,6 +349,15 @@ export type Database = {
           id?: string
           location?: string | null
           name?: string
+          overall_armed_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
+          overall_unarmed_placement?:
+            | Database["public"]["Enums"]["comp_placement"]
+            | null
           registration_deadline?: string | null
           school_id?: string | null
           teams?: string[] | null

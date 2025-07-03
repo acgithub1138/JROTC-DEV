@@ -27,9 +27,9 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     location: competition?.location || '',
     competition_date: competition?.competition_date || '',
     comp_type: competition?.comp_type || 'air_force',
-    overall_placement: competition?.armed_regulation || 'NA',
-    overall_armed_placement: competition?.armed_exhibition || 'NA',
-    overall_unarmed_placement: competition?.armed_color_guard || 'NA',
+    overall_placement: competition?.overall_placement || 'NA',
+    overall_armed_placement: competition?.overall_armed_placement || 'NA',
+    overall_unarmed_placement: competition?.overall_unarmed_placement || 'NA',
     armed_regulation: competition?.armed_regulation || 'NA',
     armed_exhibition: competition?.armed_exhibition || 'NA',
     armed_color_guard: competition?.armed_color_guard || 'NA',
@@ -60,7 +60,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     try {
       setIsSubmitting(true);
       
-      // Map form data to database structure
+      // Map form data to database structure with correct field mappings
       const submissionData = {
         name: formData.name,
         description: formData.description,
@@ -68,11 +68,14 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         competition_date: formData.competition_date,
         comp_type: formData.comp_type,
         type: 'individual' as const, // Default type since we removed it from form
-        // Map overall placements to existing columns (using first available columns)
-        armed_regulation: formData.overall_placement,
-        armed_exhibition: formData.overall_armed_placement, 
-        armed_color_guard: formData.overall_unarmed_placement,
-        // Keep the existing individual event placements
+        // New overall placement fields
+        overall_placement: formData.overall_placement,
+        overall_armed_placement: formData.overall_armed_placement, 
+        overall_unarmed_placement: formData.overall_unarmed_placement,
+        // Existing individual event placements mapped correctly
+        armed_regulation: formData.armed_regulation,
+        armed_exhibition: formData.armed_exhibition,
+        armed_color_guard: formData.armed_color_guard,
         armed_inspection: formData.armed_inspection,
         unarmed_regulation: formData.unarmed_regulation,
         unarmed_exhibition: formData.unarmed_exhibition,
