@@ -4,6 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Input } from '@/components/ui/input';
 import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
@@ -33,6 +34,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onDelete,
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const { getPaddingClass } = useTableSettings();
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
@@ -47,6 +49,32 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const handleEditSubmit = async (updatedItem: any) => {
     await onEdit(updatedItem);
     setEditingItem(null);
+  };
+
+  const handleQtyEdit = (itemId: string, field: 'qty_total' | 'qty_issued', value: string) => {
+    const numValue = parseInt(value) || 0;
+    if (numValue < 0) return;
+    
+    const updatedItem = { 
+      id: itemId, 
+      [field]: numValue,
+      // Calculate qty_available when qty_total or qty_issued changes
+      ...(field === 'qty_total' || field === 'qty_issued' ? {
+        qty_available: field === 'qty_total' 
+          ? numValue - (items.find(item => item.id === itemId)?.qty_issued || 0)
+          : (items.find(item => item.id === itemId)?.qty_total || 0) - numValue
+      } : {})
+    };
+    onEdit(updatedItem);
+  };
+
+  const handleQtyKeyPress = (e: React.KeyboardEvent, itemId: string, field: 'qty_total' | 'qty_issued') => {
+    if (e.key === 'Enter') {
+      setEditingQty(null);
+    }
+    if (e.key === 'Escape') {
+      setEditingQty(null);
+    }
   };
 
   const handleSelectAll = (checked: boolean) => {
@@ -156,17 +184,17 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
               )}
               {isColumnVisible('qty_total') && (
                 <SortableTableHead sortKey="qty_total" currentSort={sortConfig} onSort={handleSort} className="w-20">
-                  Total Qty
+                  Total
                 </SortableTableHead>
               )}
               {isColumnVisible('qty_issued') && (
                 <SortableTableHead sortKey="qty_issued" currentSort={sortConfig} onSort={handleSort} className="w-20">
-                  Issued Qty
+                  Issued
                 </SortableTableHead>
               )}
               {isColumnVisible('qty_available') && (
                 <SortableTableHead sortKey="qty_available" currentSort={sortConfig} onSort={handleSort} className="w-20">
-                  Available Qty
+                  Available
                 </SortableTableHead>
               )}
               {isColumnVisible('status') && (
@@ -223,12 +251,54 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                    {isColumnVisible('gender') && (
                      <TableCell className={getPaddingClass()}>{getGenderBadge(item.gender)}</TableCell>
                    )}
-                   {isColumnVisible('qty_total') && (
-                     <TableCell className={getPaddingClass()}>{item.qty_total}</TableCell>
-                   )}
-                   {isColumnVisible('qty_issued') && (
-                     <TableCell className={getPaddingClass()}>{item.qty_issued}</TableCell>
-                   )}
+                    {isColumnVisible('qty_total') && (
+                      <TableCell className={getPaddingClass()}>
+                        {editingQty?.itemId === item.id && editingQty?.field === 'qty_total' ? (
+                          <Input
+                            type="number"
+                            defaultValue={item.qty_total?.toString() || '0'}
+                            className="w-16 h-8 text-sm"
+                            onBlur={(e) => {
+                              handleQtyEdit(item.id, 'qty_total', e.target.value);
+                              setEditingQty(null);
+                            }}
+                            onKeyDown={(e) => handleQtyKeyPress(e, item.id, 'qty_total')}
+                            autoFocus
+                          />
+                        ) : (
+                          <div 
+                            className="cursor-pointer hover:bg-gray-100 p-1 rounded"
+                            onClick={() => setEditingQty({itemId: item.id, field: 'qty_total'})}
+                          >
+                            {item.qty_total || 0}
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
+                    {isColumnVisible('qty_issued') && (
+                      <TableCell className={getPaddingClass()}>
+                        {editingQty?.itemId === item.id && editingQty?.field === 'qty_issued' ? (
+                          <Input
+                            type="number"
+                            defaultValue={item.qty_issued?.toString() || '0'}
+                            className="w-16 h-8 text-sm"
+                            onBlur={(e) => {
+                              handleQtyEdit(item.id, 'qty_issued', e.target.value);
+                              setEditingQty(null);
+                            }}
+                            onKeyDown={(e) => handleQtyKeyPress(e, item.id, 'qty_issued')}
+                            autoFocus
+                          />
+                        ) : (
+                          <div 
+                            className="cursor-pointer hover:bg-gray-100 p-1 rounded"
+                            onClick={() => setEditingQty({itemId: item.id, field: 'qty_issued'})}
+                          >
+                            {item.qty_issued || 0}
+                          </div>
+                        )}
+                      </TableCell>
+                    )}
                    {isColumnVisible('qty_available') && (
                      <TableCell className={`font-medium ${getPaddingClass()}`}>{item.qty_available}</TableCell>
                    )}
