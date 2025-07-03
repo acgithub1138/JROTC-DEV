@@ -78,13 +78,13 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
         <TableBody>
           {teams.map((team) => (
             <TableRow key={team.id}>
-              <TableCell className="font-medium">{team.name}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium py-2">{team.name}</TableCell>
+              <TableCell className="py-2">
                 {team.description || (
                   <span className="text-muted-foreground">No description</span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 {team.team_lead ? (
                   <span className="font-medium">
                     {team.team_lead.last_name}, {team.team_lead.first_name}
@@ -93,7 +93,7 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                   <span className="text-muted-foreground">No team lead assigned</span>
                 )}
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{team.member_count}</span> members
                   {team.member_count > 0 && (
@@ -109,10 +109,10 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                   )}
                 </div>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 {new Date(team.created_at).toLocaleDateString()}
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 <DropdownMenu>
                   <DropdownMenuTrigger asChild>
                     <Button variant="ghost" className="h-8 w-8 p-0">

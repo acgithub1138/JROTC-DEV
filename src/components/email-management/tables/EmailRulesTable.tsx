@@ -85,21 +85,21 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
             <TableBody>
               {rules.map((rule) => (
                 <TableRow key={rule.id}>
-                  <TableCell className="font-medium">{rule.name}</TableCell>
-                  <TableCell>
+                  <TableCell className="font-medium py-2">{rule.name}</TableCell>
+                  <TableCell className="py-2">
                     <Badge variant="outline">{rule.source_table}</Badge>
                   </TableCell>
-                  <TableCell>{getTriggerEventLabel(rule.trigger_event)}</TableCell>
-                  <TableCell>{rule.email_templates?.name || 'Unknown'}</TableCell>
-                  <TableCell className="max-w-48 truncate">
+                  <TableCell className="py-2">{getTriggerEventLabel(rule.trigger_event)}</TableCell>
+                  <TableCell className="py-2">{rule.email_templates?.name || 'Unknown'}</TableCell>
+                  <TableCell className="max-w-48 truncate py-2">
                     {getRecipientDisplay(rule.recipient_config)}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Badge variant={rule.is_active ? 'default' : 'secondary'}>
                       {rule.is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="ghost"

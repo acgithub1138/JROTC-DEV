@@ -54,13 +54,13 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   return (
     <>
       <TableRow key={task.id} className="group">
-        <TableCell>
+        <TableCell className="py-2">
           <Checkbox
             checked={isSelected}
             onCheckedChange={(checked) => onSelectTask(task.id, checked as boolean)}
           />
         </TableCell>
-        <TableCell className="font-mono text-sm">
+        <TableCell className="font-mono text-sm py-2">
           <button
             onClick={() => onTaskSelect(task)}
             className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
@@ -68,7 +68,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             {task.task_number || 'N/A'}
           </button>
         </TableCell>
-        <TableCell className="font-medium">
+        <TableCell className="font-medium py-2">
           <EditableCell
             task={task}
             field="title"
@@ -81,7 +81,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             canEdit={canEditTask(task)}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           <Button
             variant="outline"
             size="sm"
@@ -92,7 +92,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             View
           </Button>
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           <EditableCell
             task={task}
             field="status"
@@ -105,7 +105,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             canEdit={canEditTask(task)}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           <EditableCell
             task={task}
             field="priority"
@@ -118,7 +118,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             canEdit={canEditTask(task)}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           {canEdit ? (
             <EditableCell
               task={task}
@@ -144,7 +144,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             </span>
           )}
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           <EditableCell
             task={task}
             field="due_date"
@@ -157,7 +157,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             canEdit={canEditTask(task)}
           />
         </TableCell>
-        <TableCell>
+        <TableCell className="py-2">
           {format(new Date(task.created_at), 'MMM d, yyyy')}
         </TableCell>
       </TableRow>

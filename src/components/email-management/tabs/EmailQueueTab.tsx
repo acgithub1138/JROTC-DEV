@@ -110,13 +110,13 @@ export const EmailQueueTab: React.FC = () => {
                 <TableBody>
                   {queueItems.map((item) => (
                     <TableRow key={item.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium py-2">
                         {item.recipient_email}
                       </TableCell>
-                      <TableCell className="max-w-xs truncate">
+                      <TableCell className="max-w-xs truncate py-2">
                         {item.subject}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2">
                         <Badge className={getStatusColor(item.status)}>
                           {item.status}
                         </Badge>
@@ -127,7 +127,7 @@ export const EmailQueueTab: React.FC = () => {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm text-muted-foreground">
+                      <TableCell className="text-sm text-muted-foreground py-2">
                         {format(new Date(item.scheduled_at), 'MMM dd, yyyy HH:mm')}
                         {item.sent_at && (
                           <div className="text-green-600">
@@ -135,10 +135,10 @@ export const EmailQueueTab: React.FC = () => {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="text-sm">
+                      <TableCell className="text-sm py-2">
                         {item.email_templates?.name || item.email_rules?.name || 'Manual'}
                       </TableCell>
-                      <TableCell>
+                      <TableCell className="py-2">
                         <div className="flex gap-2">
                           <Button
                             size="sm"

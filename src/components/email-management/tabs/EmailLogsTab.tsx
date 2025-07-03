@@ -97,7 +97,7 @@ export const EmailLogsTab: React.FC = () => {
               <TableBody>
                 {logs.map((log) => (
                   <TableRow key={log.id}>
-                    <TableCell>
+                    <TableCell className="py-2">
                       <div className="flex items-center gap-2">
                         {getEventIcon(log.event_type)}
                         <Badge className={getEventColor(log.event_type)}>
@@ -105,16 +105,16 @@ export const EmailLogsTab: React.FC = () => {
                         </Badge>
                       </div>
                     </TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium py-2">
                       {log.email_queue.recipient_email}
                     </TableCell>
-                    <TableCell className="max-w-xs truncate">
+                    <TableCell className="max-w-xs truncate py-2">
                       {log.email_queue.subject}
                     </TableCell>
-                    <TableCell className="text-sm text-muted-foreground">
+                    <TableCell className="text-sm text-muted-foreground py-2">
                       {format(new Date(log.created_at), 'MMM dd, yyyy HH:mm:ss')}
                     </TableCell>
-                    <TableCell className="text-sm">
+                    <TableCell className="text-sm py-2">
                       {log.event_data && Object.keys(log.event_data).length > 0 && (
                         <div className="max-w-xs">
                           <code className="text-xs bg-gray-100 px-2 py-1 rounded">

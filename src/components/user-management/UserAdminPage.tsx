@@ -439,23 +439,23 @@ const UserAdminPage = () => {
             <TableBody>
               {paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
-                  <TableCell className="font-medium">
+                  <TableCell className="font-medium py-2">
                     {user.first_name} {user.last_name}
                   </TableCell>
-                  <TableCell>{user.email}</TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">{user.email}</TableCell>
+                  <TableCell className="py-2">
                     <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
                       {getRoleIcon(user.role)}
                       {user.role.replace('_', ' ').toUpperCase()}
                     </Badge>
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     {user.schools?.name || 'No school assigned'}
                   </TableCell>
-                  <TableCell>
+                  <TableCell className="py-2">
                     {new Date(user.created_at).toLocaleDateString()}
                   </TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="text-right py-2">
                     <div className="flex items-center justify-end gap-2">
                       {canEditUser(user) && (
                         <Button

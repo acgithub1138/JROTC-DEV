@@ -77,18 +77,18 @@ onSelectAll
               ${selectedCadets.includes(profile.id) ? "bg-blue-50" : ""}
             `}
           >
-            <TableCell>
+            <TableCell className="py-2">
               <Checkbox
                 checked={selectedCadets.includes(profile.id)}
                 onCheckedChange={(checked) => onSelectCadet(profile.id, checked as boolean)}
               />
             </TableCell>
-            <TableCell className="font-medium">
+            <TableCell className="font-medium py-2">
               {profile.last_name}, {profile.first_name}
             </TableCell>
-            <TableCell>{profile.email}</TableCell>
-            <TableCell className="capitalize">{profile.role.replace('_', ' ')}</TableCell>
-            <TableCell>
+            <TableCell className="py-2">{profile.email}</TableCell>
+            <TableCell className="capitalize py-2">{profile.role.replace('_', ' ')}</TableCell>
+            <TableCell className="py-2">
               {profile.grade ? (
                 <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
                   {profile.grade}
@@ -97,9 +97,9 @@ onSelectAll
                 '-'
               )}
             </TableCell>
-            <TableCell>{profile.rank || '-'}</TableCell>
-            <TableCell>{profile.flight || '-'}</TableCell>
-            <TableCell className="text-right">
+            <TableCell className="py-2">{profile.rank || '-'}</TableCell>
+            <TableCell className="py-2">{profile.flight || '-'}</TableCell>
+            <TableCell className="text-right py-2">
               {activeTab === 'active' ? (
                 <div className="flex items-center justify-end gap-2">
                   <Button

@@ -53,20 +53,20 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
         <TableBody>
           {templates.map((template) => (
             <TableRow key={template.id}>
-              <TableCell className="font-medium">{template.name}</TableCell>
-              <TableCell>{template.subject}</TableCell>
-              <TableCell>
+              <TableCell className="font-medium py-2">{template.name}</TableCell>
+              <TableCell className="py-2">{template.subject}</TableCell>
+              <TableCell className="py-2">
                 <Badge variant="outline">{template.source_table}</Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 <Badge variant={template.is_active ? 'default' : 'secondary'}>
                   {template.is_active ? 'Active' : 'Inactive'}
                 </Badge>
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 {format(new Date(template.created_at), 'MMM dd, yyyy')}
               </TableCell>
-              <TableCell>
+              <TableCell className="py-2">
                 <div className="flex items-center gap-2">
                   <Button
                     variant="ghost"

@@ -274,12 +274,12 @@ const SchoolManagementPage = () => {
             <TableBody>
               {paginatedSchools.map((school) => (
                 <TableRow key={school.id}>
-                  <TableCell className="font-medium">{school.name}</TableCell>
-                  <TableCell>{school.district}</TableCell>
-                  <TableCell>{school.city}</TableCell>
-                  <TableCell>{school.phone}</TableCell>
-                  <TableCell>{school.email}</TableCell>
-                  <TableCell className="text-right">
+                  <TableCell className="font-medium py-2">{school.name}</TableCell>
+                  <TableCell className="py-2">{school.district}</TableCell>
+                  <TableCell className="py-2">{school.city}</TableCell>
+                  <TableCell className="py-2">{school.phone}</TableCell>
+                  <TableCell className="py-2">{school.email}</TableCell>
+                  <TableCell className="text-right py-2">
                     <div className="flex items-center justify-end gap-2">
                       <Button
                         variant="outline"
