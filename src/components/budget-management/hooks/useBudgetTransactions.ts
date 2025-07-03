@@ -5,6 +5,32 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { BudgetTransaction, BudgetFilters } from '../BudgetManagementPage';
 
+export const useBudgetYears = () => {
+  const { userProfile } = useAuth();
+  
+  return useQuery({
+    queryKey: ['budget-years', userProfile?.school_id],
+    queryFn: async () => {
+      if (!userProfile?.school_id) return [];
+
+      const { data, error } = await supabase
+        .from('budget_transactions')
+        .select('budget_year')
+        .eq('school_id', userProfile.school_id)
+        .eq('archive', true)
+        .not('budget_year', 'is', null)
+        .order('budget_year', { ascending: false });
+
+      if (error) throw error;
+      
+      // Get unique budget years
+      const uniqueYears = [...new Set(data.map(item => item.budget_year))].filter(Boolean);
+      return uniqueYears as string[];
+    },
+    enabled: !!userProfile?.school_id,
+  });
+};
+
 export const useBudgetTransactions = (filters: BudgetFilters) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
@@ -39,6 +65,10 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
 
       if (filters.status) {
         query = query.eq('status', filters.status as any);
+      }
+
+      if (filters.budgetYear) {
+        query = query.eq('budget_year', filters.budgetYear);
       }
 
       // Apply search filter

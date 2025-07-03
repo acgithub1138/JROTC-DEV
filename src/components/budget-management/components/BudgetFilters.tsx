@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { BudgetFilters as BudgetFiltersType } from '../BudgetManagementPage';
+import { useBudgetYears } from '../hooks/useBudgetTransactions';
 
 interface BudgetFiltersProps {
   filters: BudgetFiltersType;
@@ -11,13 +12,15 @@ interface BudgetFiltersProps {
 }
 
 export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFiltersChange }) => {
+  const { data: budgetYears = [] } = useBudgetYears();
+  
   const updateFilter = (key: keyof BudgetFiltersType, value: any) => {
     onFiltersChange({ ...filters, [key]: value });
   };
 
   return (
     <div className="bg-card p-4 rounded-lg border space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-6 gap-4">
+      <div className={`grid grid-cols-1 gap-4 ${filters.showArchived ? 'md:grid-cols-7' : 'md:grid-cols-6'}`}>
         <div>
           <Label htmlFor="search">Search</Label>
           <Input
@@ -110,6 +113,23 @@ export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFilters
             </SelectContent>
           </Select>
         </div>
+
+        {filters.showArchived && (
+          <div>
+            <Label htmlFor="budget-year">Budget Year</Label>
+            <Select value={filters.budgetYear} onValueChange={(value) => updateFilter('budgetYear', value === 'all' ? '' : value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="All Years" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All Years</SelectItem>
+                {budgetYears.map((year) => (
+                  <SelectItem key={year} value={year}>{year}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        )}
 
         <div className="flex items-center space-x-2 pt-6">
           <Checkbox

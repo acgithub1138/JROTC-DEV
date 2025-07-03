@@ -32,6 +32,7 @@ export interface BudgetFilters {
   paymentMethod: string;
   status: string;
   showArchived: boolean;
+  budgetYear: string;
 }
 const BudgetManagementPage = () => {
   const [showAddIncome, setShowAddIncome] = useState(false);
@@ -43,7 +44,8 @@ const BudgetManagementPage = () => {
     type: '',
     paymentMethod: '',
     status: '',
-    showArchived: false
+    showArchived: false,
+    budgetYear: ''
   });
   const {
     transactions,
