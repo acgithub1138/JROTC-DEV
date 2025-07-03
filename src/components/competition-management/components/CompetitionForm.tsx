@@ -67,7 +67,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         location: formData.location,
         competition_date: formData.competition_date,
         comp_type: formData.comp_type,
-        type: 'individual' as const, // Default type since we removed it from form
+        type: 'drill' as const, // Use valid enum value instead of 'individual'
         // New overall placement fields
         overall_placement: formData.overall_placement,
         overall_armed_placement: formData.overall_armed_placement, 
