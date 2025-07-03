@@ -26,7 +26,8 @@ export const useEventTypes = () => {
         .from('event_types')
         .select('*')
         .or(`school_id.is.null,school_id.eq.${userProfile.school_id}`)
-        .order('is_default.desc,label.asc'); // Show defaults first, then custom types
+        .order('is_default', { ascending: false })
+        .order('label', { ascending: true }); // Show defaults first, then custom types alphabetically
 
       if (error) throw error;
       setEventTypes(data || []);
