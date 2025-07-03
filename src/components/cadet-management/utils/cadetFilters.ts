@@ -8,7 +8,7 @@ export const getFilteredProfiles = (
   searchTerm: string
 ): Profile[] => {
   const isActive = activeTab === 'active';
-  const filtered = profiles.filter(profile => {
+  return profiles.filter(profile => {
     const matchesActiveStatus = profile.active === isActive;
     
     if (!searchTerm) return matchesActiveStatus;
@@ -17,7 +17,6 @@ export const getFilteredProfiles = (
     const matchesSearch = 
       profile.first_name.toLowerCase().includes(searchLower) ||
       profile.last_name.toLowerCase().includes(searchLower) ||
-      profile.email.toLowerCase().includes(searchLower) ||
       profile.role.toLowerCase().includes(searchLower) ||
       (profile.grade?.toLowerCase() || '').includes(searchLower) ||
       (profile.rank?.toLowerCase() || '').includes(searchLower) ||
@@ -25,13 +24,6 @@ export const getFilteredProfiles = (
     
     return matchesActiveStatus && matchesSearch;
   });
-  
-  console.log('Search term:', searchTerm);
-  console.log('Total profiles:', profiles.length);
-  console.log('Filtered profiles:', filtered.length);
-  console.log('Active tab:', activeTab);
-  
-  return filtered;
 };
 
 export const getPaginatedProfiles = (
