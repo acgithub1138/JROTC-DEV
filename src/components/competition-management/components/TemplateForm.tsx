@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -6,6 +6,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionTemplate } from '../types';
 import { JsonFieldBuilder } from './JsonFieldBuilder';
+import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import type { Database } from '@/integrations/supabase/types';
 type DatabaseCompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
 interface TemplateFormProps {
@@ -20,8 +21,10 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   onCancel,
   useBuilder
 }) => {
+  const { templates } = useCompetitionTemplates();
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
+    description: template?.description || '',
     event: template?.event || 'Armed Regulation',
     jrotc_program: template?.jrotc_program || 'air_force',
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
@@ -63,6 +66,45 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       setIsSubmitting(false);
     }
   };
+  // Auto-generate template name based on program and event
+  const generateTemplateName = (program: string, event: string): string => {
+    const programLabel = programOptions.find(p => p.value === program)?.label || program;
+    const baseName = `${programLabel} - ${event}`;
+    
+    // Check if this exact name exists
+    const existingTemplates = templates.filter(t => 
+      t.template_name.startsWith(baseName) && 
+      (!template || t.id !== template.id) // Exclude current template when editing
+    );
+    
+    if (existingTemplates.length === 0) {
+      return baseName;
+    }
+    
+    // Find the highest number suffix
+    let maxNumber = 0;
+    existingTemplates.forEach(t => {
+      const match = t.template_name.match(new RegExp(`^${baseName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}(?: (\\d+))?$`));
+      if (match) {
+        const num = match[1] ? parseInt(match[1]) : 1;
+        maxNumber = Math.max(maxNumber, num);
+      }
+    });
+    
+    return `${baseName} ${maxNumber + 1}`;
+  };
+
+  useEffect(() => {
+    // Auto-generate template name when program or event changes (but not when editing existing template)
+    if (!template && formData.jrotc_program && formData.event) {
+      const newName = generateTemplateName(formData.jrotc_program, formData.event);
+      setFormData(prev => ({
+        ...prev,
+        template_name: newName
+      }));
+    }
+  }, [formData.jrotc_program, formData.event, templates, template]);
+
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({
       ...prev,
@@ -70,11 +112,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     }));
   };
   return <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="space-y-2">
-        <Label htmlFor="template_name">Template Name *</Label>
-        <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
-      </div>
-
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label htmlFor="jrotc_program">JROTC Program *</Label>
@@ -103,6 +140,22 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
             </SelectContent>
           </Select>
         </div>
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="template_name">Template Name *</Label>
+        <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
+      </div>
+
+      <div className="space-y-2">
+        <Label htmlFor="description">Description</Label>
+        <Textarea 
+          id="description" 
+          value={formData.description} 
+          onChange={e => updateFormData('description', e.target.value)} 
+          placeholder="Describe what this template is for..."
+          rows={3}
+        />
       </div>
 
       <div className="space-y-4">        
