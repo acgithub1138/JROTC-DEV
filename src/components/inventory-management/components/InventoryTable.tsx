@@ -207,7 +207,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                      <TableCell className={`font-medium ${getPaddingClass()}`}>{item.item_id}</TableCell>
                    )}
                    {isColumnVisible('item') && (
-                     <TableCell className={`font-medium ${getPaddingClass()}`}>{item.item}</TableCell>
+                     <TableCell className={getPaddingClass()}>{item.item}</TableCell>
                    )}
                    {isColumnVisible('category') && (
                      <TableCell className={getPaddingClass()}>{item.category}</TableCell>
