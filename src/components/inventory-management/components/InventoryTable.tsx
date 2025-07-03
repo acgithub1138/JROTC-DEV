@@ -195,49 +195,49 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             ) : (
               sortedItems.map((item) => (
                 <TableRow key={item.id} className="hover:bg-gray-50">
-                  <TableCell>
+                  <TableCell className="py-2">
                     <Checkbox
                       checked={selectedItems.includes(item.id)}
                       onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
                   />
                   </TableCell>
                   {isColumnVisible('item_id') && (
-                    <TableCell className="font-medium">{item.item_id}</TableCell>
+                    <TableCell className="font-medium py-2">{item.item_id}</TableCell>
                   )}
                   {isColumnVisible('item') && (
-                    <TableCell className="font-medium">{item.item}</TableCell>
+                    <TableCell className="font-medium py-2">{item.item}</TableCell>
                   )}
                   {isColumnVisible('category') && (
-                    <TableCell>{item.category}</TableCell>
+                    <TableCell className="py-2">{item.category}</TableCell>
                   )}
                   {isColumnVisible('sub_category') && (
-                    <TableCell>{item.sub_category}</TableCell>
+                    <TableCell className="py-2">{item.sub_category}</TableCell>
                   )}
                   {isColumnVisible('size') && (
-                    <TableCell>{item.size}</TableCell>
+                    <TableCell className="py-2">{item.size}</TableCell>
                   )}
                   {isColumnVisible('gender') && (
-                    <TableCell>{getGenderBadge(item.gender)}</TableCell>
+                    <TableCell className="py-2">{getGenderBadge(item.gender)}</TableCell>
                   )}
                   {isColumnVisible('qty_total') && (
-                    <TableCell>{item.qty_total}</TableCell>
+                    <TableCell className="py-2">{item.qty_total}</TableCell>
                   )}
                   {isColumnVisible('qty_issued') && (
-                    <TableCell>{item.qty_issued}</TableCell>
+                    <TableCell className="py-2">{item.qty_issued}</TableCell>
                   )}
                   {isColumnVisible('qty_available') && (
-                    <TableCell className="font-medium">{item.qty_available}</TableCell>
+                    <TableCell className="font-medium py-2">{item.qty_available}</TableCell>
                   )}
                   {isColumnVisible('status') && (
-                    <TableCell>{getAvailabilityStatus(item)}</TableCell>
+                    <TableCell className="py-2">{getAvailabilityStatus(item)}</TableCell>
                   )}
                   {isColumnVisible('stock_number') && (
-                    <TableCell>{item.stock_number}</TableCell>
+                    <TableCell className="py-2">{item.stock_number}</TableCell>
                   )}
                   {isColumnVisible('unit_of_measure') && (
-                    <TableCell>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
+                    <TableCell className="py-2">{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
                   )}
-                  <TableCell>
+                  <TableCell className="py-2">
                     <div className="flex items-center space-x-2">
                       <Button
                         variant="ghost"
