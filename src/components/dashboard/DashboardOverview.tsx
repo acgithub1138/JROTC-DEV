@@ -20,19 +20,31 @@ const DashboardOverview = () => {
 
   // Filter and sort upcoming events
   const upcomingEvents = useMemo(() => {
-    if (!events || events.length === 0) return [];
+    console.log('Processing events for upcoming events widget:', events);
+    console.log('Events loading status:', eventsLoading);
+    
+    if (!events || events.length === 0) {
+      console.log('No events found or events array is empty');
+      return [];
+    }
     
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Set to start of today
+    console.log('Today date for filtering:', today);
     
-    return events
+    const filtered = events
       .filter(event => {
         const eventDate = new Date(event.start_date);
-        return eventDate >= today;
+        const isUpcoming = eventDate >= today;
+        console.log(`Event "${event.title}" on ${event.start_date} is upcoming:`, isUpcoming);
+        return isUpcoming;
       })
       .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
       .slice(0, 5);
-  }, [events]);
+      
+    console.log('Filtered upcoming events:', filtered);
+    return filtered;
+  }, [events, eventsLoading]);
   
   const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);

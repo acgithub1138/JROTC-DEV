@@ -17,10 +17,12 @@ export const useEvents = (filters: EventFilters) => {
 
   const fetchEvents = async (retryCount = 0) => {
     if (!userProfile?.school_id) {
+      console.log('No school_id found, user profile:', userProfile);
       setIsLoading(false);
       return;
     }
 
+    console.log('Fetching events for school:', userProfile.school_id, 'with filters:', filters);
     setIsLoading(true);
     try {
       let query = supabase
@@ -35,8 +37,12 @@ export const useEvents = (filters: EventFilters) => {
 
       const { data, error } = await query;
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error fetching events:', error);
+        throw error;
+      }
       
+      console.log('Events fetched successfully:', data);
       setEvents(data || []);
     } catch (error) {
       console.error('Error fetching events:', error);
