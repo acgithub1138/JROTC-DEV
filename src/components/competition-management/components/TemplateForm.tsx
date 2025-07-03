@@ -12,11 +12,13 @@ interface TemplateFormProps {
   template?: CompetitionTemplate | DatabaseCompetitionTemplate | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  useBuilder: boolean;
 }
 export const TemplateForm: React.FC<TemplateFormProps> = ({
   template,
   onSubmit,
-  onCancel
+  onCancel,
+  useBuilder
 }) => {
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
@@ -25,7 +27,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
     is_active: template?.is_active ?? true
   });
-  const [useBuilder, setUseBuilder] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const eventOptions = ['Armed Inspection', 'Armed Color Guard', 'Armed Exhibition', 'Armed Dual Exhibition', 'Armed Regulation', 'Armed Solo Exhibition', 'Unarmed Inspection', 'Unarmed Color Guard', 'Unarmed Exhibition', 'Unarmed Dual Exhibition', 'Unarmed Regulation'];
   const programOptions = [{
@@ -104,14 +105,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          
-          <Button type="button" variant="outline" size="sm" onClick={() => setUseBuilder(!useBuilder)}>
-            {useBuilder ? 'Manual JSON' : 'Field Builder'}
-          </Button>
-        </div>
-        
+      <div className="space-y-4">        
         {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-2">
             <Textarea value={JSON.stringify(formData.scores, null, 2)} onChange={e => {
           try {
