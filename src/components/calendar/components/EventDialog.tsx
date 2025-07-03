@@ -37,6 +37,17 @@ export const EventDialog: React.FC<EventDialogProps> = ({
           onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
         />
+        <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
+          Location search powered by{' '}
+          <a 
+            href="https://www.openstreetmap.org/" 
+            target="_blank" 
+            rel="noopener noreferrer" 
+            className="underline hover:text-foreground"
+          >
+            OpenStreetMap
+          </a>
+        </div>
       </DialogContent>
     </Dialog>
   );
