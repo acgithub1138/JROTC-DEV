@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { Profile } from '../types';
-import { gradeOptions, flightOptions } from '../constants';
+import { gradeOptions, flightOptions, roleOptions } from '../constants';
 
 interface EditCadetDialogProps {
   open: boolean;
@@ -102,10 +102,11 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="cadet">Cadet</SelectItem>
-                <SelectItem value="command_staff">Command Staff</SelectItem>
-                <SelectItem value="instructor">Instructor</SelectItem>
-                <SelectItem value="admin">Admin</SelectItem>
+                {roleOptions.map((roleOption) => (
+                  <SelectItem key={roleOption.value} value={roleOption.value}>
+                    {roleOption.label}
+                  </SelectItem>
+                ))}
               </SelectContent>
             </Select>
           </div>

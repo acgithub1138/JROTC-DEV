@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { roleOptions } from '../constants';
 
 interface MassUpdateRoleDialogProps {
   open: boolean;
@@ -12,12 +13,6 @@ interface MassUpdateRoleDialogProps {
   loading: boolean;
 }
 
-const roleOptions = [
-  { value: 'cadet', label: 'Cadet' },
-  { value: 'command_staff', label: 'Command Staff' },
-  { value: 'instructor', label: 'Instructor' },
-  { value: 'admin', label: 'Admin' }
-];
 
 export const MassUpdateRoleDialog = ({
   open,

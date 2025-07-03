@@ -194,6 +194,7 @@ export const useCadetManagement = () => {
           grade: editingProfile.grade || null,
           rank: editingProfile.rank || null,
           flight: editingProfile.flight || null,
+          role: editingProfile.role as 'cadet' | 'command_staff' | 'instructor' | 'admin',
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProfile.id);
