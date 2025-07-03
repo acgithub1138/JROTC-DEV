@@ -35,7 +35,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'rules', label: 'Business Rules', icon: 'Workflow' },
-        { id: 'budget', label: 'Budget', icon: 'DollarSign' },
+        { id: 'budget', label: 'Budget Management', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },

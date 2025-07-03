@@ -15,6 +15,7 @@ import CadetManagementPage from '@/components/cadet-management/CadetManagementPa
 import JobBoardPage from '@/components/job-board/JobBoardPage';
 import TeamsManagementPage from '@/components/teams/TeamsManagementPage';
 import InventoryManagementPage from '@/components/inventory-management/InventoryManagementPage';
+import BudgetManagementPage from '@/components/budget-management/BudgetManagementPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -32,6 +33,7 @@ const MainApplication = () => {
     if (path.startsWith('/job-board')) return 'job-board';
     if (path.startsWith('/teams')) return 'teams';
     if (path.startsWith('/inventory')) return 'inventory';
+    if (path.startsWith('/budget')) return 'budget';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -50,6 +52,7 @@ const MainApplication = () => {
       'job-board': '/job-board',
       'teams': '/teams',
       'inventory': '/inventory',
+      'budget': '/budget',
       'settings': '/settings'
     };
     
@@ -80,6 +83,7 @@ const MainApplication = () => {
             <Route path="/job-board" element={<JobBoardPage />} />
             <Route path="/teams" element={<TeamsManagementPage />} />
             <Route path="/inventory" element={<InventoryManagementPage />} />
+            <Route path="/budget" element={<BudgetManagementPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

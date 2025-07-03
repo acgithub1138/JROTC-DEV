@@ -9,56 +9,68 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      budget: {
+      budget_transactions: {
         Row: {
-          allocated_amount: number
-          category: Database["public"]["Enums"]["budget_category"]
+          amount: number
+          archive: boolean
+          budget_year: string | null
+          category: Database["public"]["Enums"]["budget_transaction_category"]
           created_at: string
           created_by: string | null
+          date: string
           description: string | null
-          fiscal_year: number
           id: string
-          name: string
+          item: string
+          payment_method: Database["public"]["Enums"]["payment_method"] | null
           school_id: string
-          spent_amount: number
+          status: Database["public"]["Enums"]["expense_status"] | null
+          type: string
           updated_at: string
         }
         Insert: {
-          allocated_amount?: number
-          category: Database["public"]["Enums"]["budget_category"]
+          amount: number
+          archive?: boolean
+          budget_year?: string | null
+          category: Database["public"]["Enums"]["budget_transaction_category"]
           created_at?: string
           created_by?: string | null
+          date: string
           description?: string | null
-          fiscal_year: number
           id?: string
-          name: string
+          item: string
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           school_id: string
-          spent_amount?: number
+          status?: Database["public"]["Enums"]["expense_status"] | null
+          type: string
           updated_at?: string
         }
         Update: {
-          allocated_amount?: number
-          category?: Database["public"]["Enums"]["budget_category"]
+          amount?: number
+          archive?: boolean
+          budget_year?: string | null
+          category?: Database["public"]["Enums"]["budget_transaction_category"]
           created_at?: string
           created_by?: string | null
+          date?: string
           description?: string | null
-          fiscal_year?: number
           id?: string
-          name?: string
+          item?: string
+          payment_method?: Database["public"]["Enums"]["payment_method"] | null
           school_id?: string
-          spent_amount?: number
+          status?: Database["public"]["Enums"]["expense_status"] | null
+          type?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "budget_created_by_fkey"
+            foreignKeyName: "budget_transactions_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "budget_school_id_fkey"
+            foreignKeyName: "budget_transactions_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -520,13 +532,6 @@ export type Database = {
             columns: ["approved_by"]
             isOneToOne: false
             referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "expenses_budget_id_fkey"
-            columns: ["budget_id"]
-            isOneToOne: false
-            referencedRelation: "budget"
             referencedColumns: ["id"]
           },
           {
@@ -1458,6 +1463,7 @@ export type Database = {
         | "training"
         | "administrative"
         | "other"
+      budget_transaction_category: "expense" | "income"
       competition_type:
         | "drill"
         | "marksmanship"
@@ -1468,6 +1474,9 @@ export type Database = {
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
       email_queue_status: "pending" | "sent" | "failed" | "cancelled"
       email_trigger_event: "INSERT" | "UPDATE" | "DELETE"
+      expense_status: "pending" | "paid" | "not_paid"
+      expense_type: "equipment" | "travel" | "meals" | "supplies" | "other"
+      income_type: "fundraiser" | "donation" | "other"
       inventory_status:
         | "available"
         | "checked_out"
@@ -1481,6 +1490,7 @@ export type Database = {
         | "navy"
         | "marine_corps"
         | "space_force"
+      payment_method: "cash" | "check" | "debit_card" | "credit_card" | "other"
       rank_type:
         | "cadet_private"
         | "cadet_private_first_class"
@@ -1622,6 +1632,7 @@ export const Constants = {
         "administrative",
         "other",
       ],
+      budget_transaction_category: ["expense", "income"],
       competition_type: [
         "drill",
         "marksmanship",
@@ -1633,6 +1644,9 @@ export const Constants = {
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
       email_queue_status: ["pending", "sent", "failed", "cancelled"],
       email_trigger_event: ["INSERT", "UPDATE", "DELETE"],
+      expense_status: ["pending", "paid", "not_paid"],
+      expense_type: ["equipment", "travel", "meals", "supplies", "other"],
+      income_type: ["fundraiser", "donation", "other"],
       inventory_status: [
         "available",
         "checked_out",
@@ -1648,6 +1662,7 @@ export const Constants = {
         "marine_corps",
         "space_force",
       ],
+      payment_method: ["cash", "check", "debit_card", "credit_card", "other"],
       rank_type: [
         "cadet_private",
         "cadet_private_first_class",
