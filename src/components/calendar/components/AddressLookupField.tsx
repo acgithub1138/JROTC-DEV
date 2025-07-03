@@ -1,20 +1,14 @@
-import React, { useState, useEffect, useCallback } from 'react';
-import { MapPin, Check, ChevronDown } from 'lucide-react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
+import { MapPin } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import {
   Command,
   CommandEmpty,
   CommandGroup,
-  CommandInput,
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '@/components/ui/popover';
 
 interface AddressSuggestion {
   display_name: string;
@@ -33,10 +27,12 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   onValueChange,
   placeholder = "Enter location...",
 }) => {
-  const [open, setOpen] = useState(false);
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [showSuggestions, setShowSuggestions] = useState(false);
+  const containerRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     setInputValue(value || '');
@@ -57,6 +53,7 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
       if (response.ok) {
         const data = await response.json();
         setSuggestions(data || []);
+        setShowSuggestions(true);
       } else {
         setSuggestions([]);
       }
@@ -71,105 +68,103 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   // Debounce the search
   useEffect(() => {
     const timeoutId = setTimeout(() => {
-      if (open && inputValue) {
+      if (inputValue && inputValue.length >= 3) {
         searchAddresses(inputValue);
+      } else {
+        setSuggestions([]);
+        setShowSuggestions(false);
       }
     }, 300);
 
     return () => clearTimeout(timeoutId);
-  }, [inputValue, open, searchAddresses]);
+  }, [inputValue, searchAddresses]);
 
-  const handleSelect = (selectedValue: string) => {
-    onValueChange(selectedValue);
-    setInputValue(selectedValue);
-    setOpen(false);
-  };
+  // Close suggestions when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (containerRef.current && !containerRef.current.contains(event.target as Node)) {
+        setShowSuggestions(false);
+      }
+    };
 
-  const handleInputChange = (newValue: string) => {
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const newValue = e.target.value;
     setInputValue(newValue);
     onValueChange(newValue);
   };
 
+  const handleSelect = (selectedValue: string) => {
+    onValueChange(selectedValue);
+    setInputValue(selectedValue);
+    setShowSuggestions(false);
+  };
+
+  const handleInputFocus = () => {
+    if (suggestions.length > 0) {
+      setShowSuggestions(true);
+    }
+  };
+
   const formatAddress = (suggestion: AddressSuggestion) => {
-    // Use the name if available, otherwise use display_name
     return suggestion.name || suggestion.display_name;
   };
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
-      <PopoverTrigger asChild>
-        <Button
-          variant="outline"
-          role="combobox"
-          aria-expanded={open}
-          className="w-full justify-between"
-        >
-          <div className="flex items-center">
-            <MapPin className="mr-2 h-4 w-4 text-muted-foreground" />
-            <span className="truncate">
-              {value || placeholder}
-            </span>
-          </div>
-          <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
-        </Button>
-      </PopoverTrigger>
-      <PopoverContent className="w-full p-0" align="start">
-        <Command>
-          <CommandInput
-            placeholder="Search for an address or place..."
-            value={inputValue}
-            onValueChange={handleInputChange}
-          />
-          <CommandList>
-            {isLoading ? (
-              <CommandEmpty>Searching...</CommandEmpty>
-            ) : suggestions.length === 0 && inputValue.length >= 3 ? (
-              <CommandEmpty>No addresses found. Type to enter manually.</CommandEmpty>
-            ) : inputValue.length < 3 && inputValue.length > 0 ? (
-              <CommandEmpty>Type at least 3 characters to search...</CommandEmpty>
-            ) : (
-              <>
-                {suggestions.length > 0 && (
-                  <CommandGroup heading="Address Suggestions">
-                    {suggestions.map((suggestion, index) => (
-                      <CommandItem
-                        key={`${suggestion.display_name}-${index}`}
-                        value={suggestion.display_name}
-                        onSelect={() => handleSelect(suggestion.display_name)}
-                        className="flex items-start"
-                      >
-                        <MapPin className="mr-2 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
-                        <div className="flex-1 min-w-0">
-                          <div className="font-medium truncate">
-                            {formatAddress(suggestion)}
+    <div ref={containerRef} className="relative">
+      <div className="relative">
+        <MapPin className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <Input
+          ref={inputRef}
+          value={inputValue}
+          onChange={handleInputChange}
+          onFocus={handleInputFocus}
+          placeholder={placeholder}
+          className="pl-10"
+        />
+      </div>
+      
+      {showSuggestions && (suggestions.length > 0 || isLoading || inputValue.length >= 3) && (
+        <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg">
+          <Command>
+            <CommandList className="max-h-[200px]">
+              {isLoading ? (
+                <CommandEmpty>Searching...</CommandEmpty>
+              ) : suggestions.length === 0 && inputValue.length >= 3 ? (
+                <CommandEmpty>No addresses found.</CommandEmpty>
+              ) : (
+                <>
+                  {suggestions.length > 0 && (
+                    <CommandGroup>
+                      {suggestions.map((suggestion, index) => (
+                        <CommandItem
+                          key={`${suggestion.display_name}-${index}`}
+                          value={suggestion.display_name}
+                          onSelect={() => handleSelect(suggestion.display_name)}
+                          className="flex items-start cursor-pointer"
+                        >
+                          <MapPin className="mr-2 h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                          <div className="flex-1 min-w-0">
+                            <div className="font-medium truncate">
+                              {formatAddress(suggestion)}
+                            </div>
+                            <div className="text-sm text-muted-foreground truncate">
+                              {suggestion.display_name}
+                            </div>
                           </div>
-                          <div className="text-sm text-muted-foreground truncate">
-                            {suggestion.display_name}
-                          </div>
-                        </div>
-                      </CommandItem>
-                    ))}
-                  </CommandGroup>
-                )}
-                
-                {inputValue && !suggestions.some(s => s.display_name === inputValue) && (
-                  <CommandGroup>
-                    <CommandItem
-                      value={inputValue}
-                      onSelect={() => handleSelect(inputValue)}
-                    >
-                      <span className="mr-2 h-4 w-4 flex items-center justify-center text-xs bg-primary text-primary-foreground rounded">
-                        +
-                      </span>
-                      Use "{inputValue}"
-                    </CommandItem>
-                  </CommandGroup>
-                )}
-              </>
-            )}
-          </CommandList>
-        </Command>
-      </PopoverContent>
-    </Popover>
+                        </CommandItem>
+                      ))}
+                    </CommandGroup>
+                  )}
+                </>
+              )}
+            </CommandList>
+          </Command>
+        </div>
+      )}
+    </div>
   );
 };
