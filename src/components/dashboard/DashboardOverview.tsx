@@ -6,6 +6,7 @@ import { Users, CheckSquare, DollarSign, Plus, Trophy, AlertTriangle, Package } 
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useDashboardActivity } from '@/hooks/useDashboardActivity';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
+import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
@@ -16,13 +17,10 @@ const DashboardOverview = () => {
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: recentActivity, isLoading: activityLoading } = useDashboardActivity();
   
+  const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
-
-  const handleAddCadet = () => {
-    navigate('/cadets');
-  };
 
   const handleCreateTransaction = (data: any) => {
     // This will be handled by the individual dialogs
@@ -148,7 +146,7 @@ const DashboardOverview = () => {
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
               <button 
-                onClick={handleAddCadet}
+                onClick={() => setIsAddCadetOpen(true)}
                 className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
               >
                 <Users className="w-6 h-6 text-blue-600 mb-2" />
@@ -185,7 +183,23 @@ const DashboardOverview = () => {
       </div>
 
       {/* Modals */}
-      <TaskForm 
+      <AddCadetDialog 
+        open={isAddCadetOpen} 
+        onOpenChange={setIsAddCadetOpen}
+        newCadet={{
+          first_name: '',
+          last_name: '',
+          email: '',
+          grade: '',
+          rank: '',
+          flight: '',
+          role: 'cadet'
+        }}
+        setNewCadet={() => {}}
+        onSubmit={() => {}}
+      />
+
+      <TaskForm
         open={isCreateTaskOpen} 
         onOpenChange={setIsCreateTaskOpen}
         mode="create"
