@@ -26,15 +26,24 @@ export const useSmtpSettings = () => {
   const { data: settings, isLoading } = useQuery({
     queryKey: ['smtp-settings'],
     queryFn: async () => {
-      // First try to get global settings
+      // First try to get global settings with decrypted password
       const { data: globalSettings, error: globalError } = await supabase
         .from('smtp_settings')
-        .select('*')
+        .select(`
+          *,
+          decrypted_password:decrypt_smtp_password(smtp_password)
+        `)
         .eq('is_global', true)
         .single();
 
       if (globalError && globalError.code !== 'PGRST116') {
         throw globalError;
+      }
+
+      if (globalSettings) {
+        // Replace encrypted password with decrypted one for frontend use
+        globalSettings.smtp_password = globalSettings.decrypted_password;
+        delete globalSettings.decrypted_password;
       }
 
       return globalSettings;

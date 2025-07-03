@@ -1398,6 +1398,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      decrypt_smtp_password: {
+        Args: { encrypted_password: string }
+        Returns: string
+      }
+      encrypt_smtp_password: {
+        Args: { password_text: string }
+        Returns: string
+      }
       generate_task_number: {
         Args: Record<PropertyKey, never>
         Returns: string

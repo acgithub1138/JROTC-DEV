@@ -33,13 +33,22 @@ export class QueueProcessor {
   async getGlobalSmtpSettings(): Promise<SmtpSettings | null> {
     const { data: globalSmtpSettings, error: smtpError } = await this.supabaseClient
       .from('smtp_settings')
-      .select('*')
+      .select(`
+        *,
+        decrypted_password:decrypt_smtp_password(smtp_password)
+      `)
       .eq('is_global', true)
       .eq('is_active', true)
       .single();
 
     if (smtpError && smtpError.code !== 'PGRST116') {
       throw smtpError;
+    }
+
+    if (globalSmtpSettings) {
+      // Replace encrypted password with decrypted one
+      globalSmtpSettings.smtp_password = globalSmtpSettings.decrypted_password;
+      delete globalSmtpSettings.decrypted_password;
     }
 
     return globalSmtpSettings;
