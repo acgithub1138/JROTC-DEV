@@ -223,7 +223,7 @@ const InventoryManagementPage = () => {
         }
       >
         <div className="space-y-4">
-          <div className="flex items-center gap-4 px-6 py-3 border-b">
+          <div className="flex items-center justify-end gap-4 px-6 py-3 border-b">
             <div className="flex items-center gap-2">
               <Switch checked={showOutOfStockOnly} onCheckedChange={setShowOutOfStockOnly} id="out-of-stock-toggle" />
               <Label htmlFor="out-of-stock-toggle" className="text-sm">Show Out of Stock Items Only</Label>
