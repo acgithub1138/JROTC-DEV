@@ -5,11 +5,12 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Edit, Trash2, Package, AlertTriangle } from 'lucide-react';
+import { Edit, Trash2, Package, AlertTriangle, History } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
+import { InventoryHistoryDialog } from './InventoryHistoryDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type InventoryItem = Tables<'inventory_items'>;
@@ -35,6 +36,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
+  const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
@@ -309,24 +311,32 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                      <div className="flex items-center justify-end space-x-1">
                        {item.issued_to && item.issued_to.length > 0 && (
                          <IssuedUsersPopover issuedTo={item.issued_to} />
-                       )}
-                       <Button
-                         variant="ghost"
-                         size="sm"
-                         onClick={() => handleEdit(item)}
-                         title="Edit item"
-                       >
-                         <Edit className="w-4 h-4" />
-                       </Button>
-                       <Button
-                         variant="ghost"
-                         size="sm"
-                         onClick={() => onDelete(item.id)}
-                         title="Delete item"
-                         className="hover:text-red-600"
-                       >
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
+                        )}
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setHistoryItem(item)}
+                          title="View history"
+                        >
+                          <History className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleEdit(item)}
+                          title="Edit item"
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDelete(item.id)}
+                          title="Delete item"
+                          className="hover:text-red-600"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -344,6 +354,12 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
           onSubmit={handleEditSubmit}
         />
       )}
+
+      <InventoryHistoryDialog
+        item={historyItem}
+        open={!!historyItem}
+        onOpenChange={(open) => !open && setHistoryItem(null)}
+      />
     </>
   );
 };
