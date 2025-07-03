@@ -29,7 +29,13 @@ const DashboardOverview = () => {
     {
       title: 'Net Budget',
       value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
-      change: statsLoading ? '...' : `$${(stats?.budget.totalIncome || 0).toLocaleString()} income - $${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
+      change: statsLoading ? '...' : (
+        <>
+          ${(stats?.budget.totalIncome || 0).toLocaleString()} income
+          <br />
+          ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses
+        </>
+      ),
       icon: DollarSign,
       color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
       bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100',
