@@ -5,6 +5,8 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Clock, User, Package } from 'lucide-react';
 import { useInventoryHistory } from '../hooks/useInventoryHistory';
 import { formatDistanceToNow } from 'date-fns';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 
 type InventoryItem = Tables<'inventory_items'>;
@@ -39,6 +41,41 @@ const getFieldBadgeColor = (fieldName: string) => {
     default:
       return 'bg-gray-100 text-gray-800';
   }
+};
+
+// Helper component to resolve UUIDs to user names
+const UserNames: React.FC<{ uuids: string }> = ({ uuids }) => {
+  const userIds = uuids && uuids !== 'null' && uuids !== 'empty' 
+    ? uuids.split(', ').filter(id => id.trim()) 
+    : [];
+
+  const { data: users } = useQuery({
+    queryKey: ['history-users', userIds],
+    queryFn: async () => {
+      if (userIds.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', userIds);
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: userIds.length > 0,
+  });
+
+  if (userIds.length === 0) return <span>empty</span>;
+  
+  if (!users) return <span>Loading...</span>;
+  
+  if (users.length === 0) return <span>{uuids}</span>;
+  
+  return (
+    <span>
+      {users.map(user => `${user.last_name}, ${user.first_name}`).join(', ')}
+    </span>
+  );
 };
 
 export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
@@ -92,11 +129,19 @@ export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
                   <div className="flex items-center gap-2 text-sm">
                     <span className="text-muted-foreground">Changed from:</span>
                     <code className="bg-muted px-2 py-1 rounded text-xs">
-                      {entry.old_value || 'empty'}
+                      {entry.field_name === 'issued_to' ? (
+                        <UserNames uuids={entry.old_value || 'empty'} />
+                      ) : (
+                        entry.old_value || 'empty'
+                      )}
                     </code>
                     <span className="text-muted-foreground">to:</span>
                     <code className="bg-muted px-2 py-1 rounded text-xs">
-                      {entry.new_value || 'empty'}
+                      {entry.field_name === 'issued_to' ? (
+                        <UserNames uuids={entry.new_value || 'empty'} />
+                      ) : (
+                        entry.new_value || 'empty'
+                      )}
                     </code>
                   </div>
                 </div>
