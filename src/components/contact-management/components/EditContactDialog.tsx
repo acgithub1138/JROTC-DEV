@@ -34,7 +34,7 @@ const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
   type: z.enum(['parent', 'relative', 'friend']),
   status: z.enum(['active', 'semi_active', 'not_active']),
-  cadet_id: z.string().optional(),
+  cadet_id: z.string().min(1),
   phone: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   organization: z.string().optional(),
