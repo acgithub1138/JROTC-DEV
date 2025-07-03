@@ -1,6 +1,6 @@
 
 import { Profile } from '../types';
-import { RECORDS_PER_PAGE } from '../constants';
+import { ITEMS_PER_PAGE } from '@/constants/pagination';
 
 export const getFilteredProfiles = (
   profiles: Profile[], 
@@ -31,11 +31,11 @@ export const getPaginatedProfiles = (
   profiles: Profile[], 
   currentPage: number
 ): Profile[] => {
-  const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
-  const endIndex = startIndex + RECORDS_PER_PAGE;
+  const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+  const endIndex = startIndex + ITEMS_PER_PAGE;
   return profiles.slice(startIndex, endIndex);
 };
 
 export const getTotalPages = (profilesLength: number): number => {
-  return Math.ceil(profilesLength / RECORDS_PER_PAGE);
+  return Math.ceil(profilesLength / ITEMS_PER_PAGE);
 };

@@ -5,12 +5,15 @@ import { Plus, Search, Download, Upload } from 'lucide-react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
+import { TablePagination } from '@/components/ui/table-pagination';
 
 import { useInventoryItems } from './hooks/useInventoryItems';
 import { useToast } from '@/hooks/use-toast';
+import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 
 const InventoryManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
@@ -37,6 +40,18 @@ const InventoryManagementPage = () => {
       item.stock_number?.toLowerCase().includes(searchLower)
     );
   }) || [];
+
+  const totalPages = getTotalPages(filteredItems.length);
+  const paginatedItems = getPaginatedItems(filteredItems, currentPage);
+
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+
+  // Reset to first page when search changes
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchTerm]);
 
   const handleCreateItem = async (item: any) => {
     try {
@@ -200,12 +215,19 @@ const InventoryManagementPage = () => {
       </div>
 
       <InventoryTable
-        items={filteredItems}
+        items={paginatedItems}
         isLoading={isLoading}
         selectedItems={selectedItems}
         onSelectionChange={setSelectedItems}
         onEdit={handleUpdateItem}
         onDelete={handleDeleteItem}
+      />
+
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredItems.length}
+        onPageChange={handlePageChange}
       />
 
       <AddInventoryItemDialog

@@ -1,5 +1,5 @@
 
-export const RECORDS_PER_PAGE = 25;
+export const RECORDS_PER_PAGE = 75;
 
 export const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Graduate'];
 

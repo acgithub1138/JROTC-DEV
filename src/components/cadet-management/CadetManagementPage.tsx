@@ -8,7 +8,7 @@ import { useCadetMassOperations } from './hooks/useCadetMassOperations';
 import { CadetPageHeader } from './components/CadetPageHeader';
 import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
-import { CadetPagination } from './components/CadetPagination';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
@@ -186,9 +186,10 @@ const CadetManagementPage = () => {
             </div>
           )}
 
-          <CadetPagination
+          <TablePagination
             currentPage={currentPage}
             totalPages={totalPages}
+            totalItems={filteredProfiles.length}
             onPageChange={handlePageChange}
           />
         </CardContent>

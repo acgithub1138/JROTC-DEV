@@ -7,11 +7,13 @@ import { Input } from '@/components/ui/input';
 import { TaskList } from './TaskList';
 import { TaskTable } from './TaskTable';
 import { TaskForm } from './TaskForm';
+import { TablePagination } from '@/components/ui/table-pagination';
 import { syncTaskOptions } from '@/utils/taskOptionValidator';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { TaskDetailDialog } from './TaskDetailDialog';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMyActiveTasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
+import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 
 const TaskManagementPage: React.FC = () => {
   const { tasks } = useTasks();
@@ -21,6 +23,9 @@ const TaskManagementPage: React.FC = () => {
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [currentPageMyTasks, setCurrentPageMyTasks] = useState(1);
+  const [currentPageAllTasks, setCurrentPageAllTasks] = useState(1);
+  const [currentPageCompleted, setCurrentPageCompleted] = useState(1);
 
   useEffect(() => {
     // Automatically sync task options when the page loads
@@ -66,6 +71,22 @@ const TaskManagementPage: React.FC = () => {
   const allSchoolTasks = filterTasks(getAllSchoolTasks(tasks));
   const completedTasks = filterTasks(getCompletedTasks(tasks));
 
+  // Pagination logic for each tab
+  const myTasksPages = getTotalPages(myActiveTasks.length);
+  const allTasksPages = getTotalPages(allSchoolTasks.length);
+  const completedTasksPages = getTotalPages(completedTasks.length);
+
+  const paginatedMyTasks = getPaginatedItems(myActiveTasks, currentPageMyTasks);
+  const paginatedAllTasks = getPaginatedItems(allSchoolTasks, currentPageAllTasks);
+  const paginatedCompletedTasks = getPaginatedItems(completedTasks, currentPageCompleted);
+
+  // Reset pagination when search changes
+  React.useEffect(() => {
+    setCurrentPageMyTasks(1);
+    setCurrentPageAllTasks(1);
+    setCurrentPageCompleted(1);
+  }, [searchTerm]);
+
   return (
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -95,25 +116,43 @@ const TaskManagementPage: React.FC = () => {
 
         <TabsContent value="mytasks" className="space-y-4">
           <TaskTable 
-            tasks={myActiveTasks}
+            tasks={paginatedMyTasks}
             onTaskSelect={handleTaskSelect}
             onEditTask={handleEditTask}
+          />
+          <TablePagination
+            currentPage={currentPageMyTasks}
+            totalPages={myTasksPages}
+            totalItems={myActiveTasks.length}
+            onPageChange={setCurrentPageMyTasks}
           />
         </TabsContent>
 
         <TabsContent value="alltasks" className="space-y-4">
           <TaskTable 
-            tasks={allSchoolTasks}
+            tasks={paginatedAllTasks}
             onTaskSelect={handleTaskSelect}
             onEditTask={handleEditTask}
+          />
+          <TablePagination
+            currentPage={currentPageAllTasks}
+            totalPages={allTasksPages}
+            totalItems={allSchoolTasks.length}
+            onPageChange={setCurrentPageAllTasks}
           />
         </TabsContent>
 
         <TabsContent value="completed" className="space-y-4">
           <TaskTable 
-            tasks={completedTasks}
+            tasks={paginatedCompletedTasks}
             onTaskSelect={handleTaskSelect}
             onEditTask={handleEditTask}
+          />
+          <TablePagination
+            currentPage={currentPageCompleted}
+            totalPages={completedTasksPages}
+            totalItems={completedTasks.length}
+            onPageChange={setCurrentPageCompleted}
           />
         </TabsContent>
       </Tabs>
