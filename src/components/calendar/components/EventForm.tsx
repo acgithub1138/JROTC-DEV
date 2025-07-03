@@ -26,7 +26,11 @@ export const EventForm: React.FC<EventFormProps> = ({
     title: '',
     description: '',
     start_date: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
     end_date: '',
+    end_time_hour: '10',
+    end_time_minute: '00',
     location: '',
     event_type: 'other' as 'training' | 'competition' | 'ceremony' | 'meeting' | 'drill' | 'other',
     is_all_day: false,
@@ -35,11 +39,18 @@ export const EventForm: React.FC<EventFormProps> = ({
 
   useEffect(() => {
     if (event) {
+      const startDate = new Date(event.start_date);
+      const endDate = event.end_date ? new Date(event.end_date) : null;
+      
       setFormData({
         title: event.title,
         description: event.description || '',
-        start_date: event.start_date.slice(0, 16), // Format for datetime-local input
-        end_date: event.end_date ? event.end_date.slice(0, 16) : '',
+        start_date: format(startDate, 'yyyy-MM-dd'),
+        start_time_hour: format(startDate, 'HH'),
+        start_time_minute: format(startDate, 'mm'),
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
+        end_time_hour: endDate ? format(endDate, 'HH') : '10',
+        end_time_minute: endDate ? format(endDate, 'mm') : '00',
         location: event.location || '',
         event_type: event.event_type,
         is_all_day: event.is_all_day,
@@ -48,8 +59,8 @@ export const EventForm: React.FC<EventFormProps> = ({
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       setFormData(prev => ({
         ...prev,
-        start_date: `${dateStr}T09:00`,
-        end_date: `${dateStr}T10:00`,
+        start_date: dateStr,
+        end_date: dateStr,
       }));
     }
   }, [event, selectedDate]);
@@ -59,10 +70,13 @@ export const EventForm: React.FC<EventFormProps> = ({
     setIsSubmitting(true);
 
     try {
+      const startDateTime = `${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`;
+      const endDateTime = formData.end_date ? `${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00` : null;
+      
       const eventData = {
         ...formData,
-        start_date: new Date(formData.start_date).toISOString(),
-        end_date: formData.end_date ? new Date(formData.end_date).toISOString() : null,
+        start_date: new Date(startDateTime).toISOString(),
+        end_date: endDateTime ? new Date(endDateTime).toISOString() : null,
       };
       
       await onSubmit(eventData);
@@ -143,26 +157,88 @@ export const EventForm: React.FC<EventFormProps> = ({
       </div>
 
       {!formData.is_all_day && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-4">
           <div>
-            <Label htmlFor="start_date">Start Date & Time *</Label>
-            <Input
-              id="start_date"
-              type="datetime-local"
-              value={formData.start_date}
-              onChange={(e) => handleChange('start_date', e.target.value)}
-              required
-            />
+            <Label>Start Date & Time *</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => handleChange('start_date', e.target.value)}
+                  required
+                />
+              </div>
+              <div>
+                <Select value={formData.start_time_hour} onValueChange={(value) => handleChange('start_time_hour', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Select value={formData.start_time_minute} onValueChange={(value) => handleChange('start_time_minute', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 60 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
 
           <div>
-            <Label htmlFor="end_date">End Date & Time</Label>
-            <Input
-              id="end_date"
-              type="datetime-local"
-              value={formData.end_date}
-              onChange={(e) => handleChange('end_date', e.target.value)}
-            />
+            <Label>End Date & Time</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => handleChange('end_date', e.target.value)}
+                />
+              </div>
+              <div>
+                <Select value={formData.end_time_hour} onValueChange={(value) => handleChange('end_time_hour', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Select value={formData.end_time_minute} onValueChange={(value) => handleChange('end_time_minute', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 60 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
           </div>
         </div>
       )}
@@ -173,11 +249,15 @@ export const EventForm: React.FC<EventFormProps> = ({
           <Input
             id="start_date_day"
             type="date"
-            value={formData.start_date.split('T')[0]}
+            value={formData.start_date}
             onChange={(e) => {
               const dateStr = e.target.value;
-              handleChange('start_date', `${dateStr}T00:00`);
-              handleChange('end_date', `${dateStr}T23:59`);
+              handleChange('start_date', dateStr);
+              handleChange('end_date', dateStr);
+              handleChange('start_time_hour', '00');
+              handleChange('start_time_minute', '00');
+              handleChange('end_time_hour', '23');
+              handleChange('end_time_minute', '59');
             }}
             required
           />
