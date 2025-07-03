@@ -1,13 +1,33 @@
 
-import React from 'react';
+import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Package, Trophy, AlertTriangle } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Trophy, AlertTriangle, Package } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useDashboardActivity } from '@/hooks/useDashboardActivity';
+import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
+import { TaskForm } from '@/components/tasks/TaskForm';
+import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
+import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const DashboardOverview = () => {
+  const navigate = useNavigate();
   const { data: stats, isLoading: statsLoading } = useDashboardStats();
   const { data: recentActivity, isLoading: activityLoading } = useDashboardActivity();
+  
+  const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
+  const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
+  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+
+  const handleAddCadet = () => {
+    navigate('/cadets');
+  };
+
+  const handleCreateTransaction = (data: any) => {
+    // This will be handled by the individual dialogs
+    console.log('Transaction created:', data);
+  };
 
   const statsConfig = [
     {
@@ -127,23 +147,35 @@ const DashboardOverview = () => {
           </CardHeader>
           <CardContent>
             <div className="grid grid-cols-2 gap-3">
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={handleAddCadet}
+                className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 <Users className="w-6 h-6 text-blue-600 mb-2" />
                 <p className="font-medium text-sm">Add Cadet</p>
                 <p className="text-xs text-gray-500">Enroll new cadet</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              <button 
+                onClick={() => setIsCreateTaskOpen(true)}
+                className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
                 <CheckSquare className="w-6 h-6 text-green-600 mb-2" />
                 <p className="font-medium text-sm">Create Task</p>
                 <p className="text-xs text-gray-500">Assign new task</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Package className="w-6 h-6 text-purple-600 mb-2" />
-                <p className="font-medium text-sm">Check Out Item</p>
-                <p className="text-xs text-gray-500">Equipment checkout</p>
+              <button 
+                onClick={() => setIsAddIncomeOpen(true)}
+                className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Plus className="w-6 h-6 text-green-600 mb-2" />
+                <p className="font-medium text-sm">Add Income</p>
+                <p className="text-xs text-gray-500">Record income</p>
               </button>
-              <button className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <DollarSign className="w-6 h-6 text-yellow-600 mb-2" />
+              <button 
+                onClick={() => setIsAddExpenseOpen(true)}
+                className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <DollarSign className="w-6 h-6 text-red-600 mb-2" />
                 <p className="font-medium text-sm">Add Expense</p>
                 <p className="text-xs text-gray-500">Record expense</p>
               </button>
@@ -151,6 +183,25 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
       </div>
+
+      {/* Modals */}
+      <TaskForm 
+        open={isCreateTaskOpen} 
+        onOpenChange={setIsCreateTaskOpen}
+        mode="create"
+      />
+
+      <AddIncomeDialog 
+        open={isAddIncomeOpen} 
+        onOpenChange={setIsAddIncomeOpen}
+        onSubmit={handleCreateTransaction}
+      />
+
+      <AddExpenseDialog 
+        open={isAddExpenseOpen} 
+        onOpenChange={setIsAddExpenseOpen}
+        onSubmit={handleCreateTransaction}
+      />
     </div>
   );
 };
