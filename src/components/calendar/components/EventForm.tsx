@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { EventAssignmentSection } from './EventAssignmentSection';
 import { useEventTypes } from '../hooks/useEventTypes';
+import { AddressLookupField } from './AddressLookupField';
 
 interface EventFormProps {
   event?: Event | null;
@@ -235,11 +236,10 @@ export const EventForm: React.FC<EventFormProps> = ({
 
         <div>
           <Label htmlFor="location">Location</Label>
-          <Input
-            id="location"
+          <AddressLookupField
             value={formData.location}
-            onChange={(e) => handleChange('location', e.target.value)}
-            placeholder="Enter location"
+            onValueChange={(value) => handleChange('location', value)}
+            placeholder="Enter location or search address"
           />
         </div>
       </div>
