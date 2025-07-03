@@ -83,7 +83,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        event_type: formData.event_type,
+        event_type: formData.event_type || 'other', // Ensure we have a valid enum value
         is_all_day: formData.is_all_day,
         start_date: new Date(startDateTime).toISOString(),
         end_date: endDateTime ? new Date(endDateTime).toISOString() : null,
