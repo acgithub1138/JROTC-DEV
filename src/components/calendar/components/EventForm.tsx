@@ -286,9 +286,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                     <SelectValue placeholder="Min" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 60 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                        {i.toString().padStart(2, '0')}
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
                       </SelectItem>
                     ))}
                   </SelectContent>
@@ -327,9 +327,9 @@ export const EventForm: React.FC<EventFormProps> = ({
                     <SelectValue placeholder="Min" />
                   </SelectTrigger>
                   <SelectContent>
-                    {Array.from({ length: 60 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                        {i.toString().padStart(2, '0')}
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
                       </SelectItem>
                     ))}
                   </SelectContent>
