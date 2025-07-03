@@ -10,6 +10,7 @@ import { AddCadetDialog } from '@/components/cadet-management/components/AddCade
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
+import { EventDialog } from '@/components/calendar/components/EventDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 const DashboardOverview = () => {
@@ -21,6 +22,7 @@ const DashboardOverview = () => {
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
+  const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
 
   const handleCreateTransaction = (data: any) => {
     // This will be handled by the individual dialogs
@@ -117,7 +119,12 @@ const DashboardOverview = () => {
                 ))
               ) : events && events.length > 0 ? (
                 events
-                  .filter(event => new Date(event.start_date) >= new Date())
+                  .filter(event => {
+                    const eventDate = new Date(event.start_date);
+                    const today = new Date();
+                    today.setHours(0, 0, 0, 0);
+                    return eventDate >= today;
+                  })
                   .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
                   .slice(0, 5)
                   .map((event, index) => (
@@ -189,6 +196,14 @@ const DashboardOverview = () => {
                 <p className="font-medium text-sm">Add Expense</p>
                 <p className="text-xs text-gray-500">Record expense</p>
               </button>
+              <button 
+                onClick={() => setIsCreateEventOpen(true)}
+                className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors"
+              >
+                <Calendar className="w-6 h-6 text-purple-600 mb-2" />
+                <p className="font-medium text-sm">Create Event</p>
+                <p className="text-xs text-gray-500">Schedule new event</p>
+              </button>
             </div>
           </CardContent>
         </Card>
@@ -227,6 +242,16 @@ const DashboardOverview = () => {
         open={isAddExpenseOpen} 
         onOpenChange={setIsAddExpenseOpen}
         onSubmit={handleCreateTransaction}
+      />
+
+      <EventDialog
+        open={isCreateEventOpen}
+        onOpenChange={setIsCreateEventOpen}
+        event={null}
+        selectedDate={null}
+        onSubmit={async () => {
+          setIsCreateEventOpen(false);
+        }}
       />
     </div>
   );
