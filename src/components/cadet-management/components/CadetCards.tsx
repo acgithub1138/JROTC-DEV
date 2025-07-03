@@ -55,21 +55,11 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
                   </p>
                 </div>
               </div>
-              {profile.grade && (
-                <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
-                  {profile.grade}
-                </Badge>
-              )}
             </div>
           </CardHeader>
           
           <CardContent className="space-y-3">
             <div className="space-y-2">
-              <div className="flex items-center space-x-2">
-                <Mail className="w-4 h-4 text-gray-400" />
-                <span className="text-sm">{profile.email}</span>
-              </div>
-              
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-gray-500">Rank:</span>
@@ -82,34 +72,41 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
               </div>
             </div>
             
-            <div className="flex justify-end space-x-2 pt-2">
-              {activeTab === 'active' ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditProfile(profile)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
+            <div className="flex justify-between items-center pt-2">
+              {profile.grade && (
+                <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
+                  {profile.grade}
+                </Badge>
+              )}
+              <div className="flex space-x-2">
+                {activeTab === 'active' ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEditProfile(profile)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onToggleStatus(profile)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </>
+                ) : (
                   <Button
                     variant="outline"
                     size="sm"
                     onClick={() => onToggleStatus(profile)}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Activate
                   </Button>
-                </>
-              ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onToggleStatus(profile)}
-                >
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Activate
-                </Button>
-              )}
+                )}
+              </div>
             </div>
           </CardContent>
         </Card>
