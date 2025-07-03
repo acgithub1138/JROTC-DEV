@@ -71,8 +71,35 @@ export const EventForm: React.FC<EventFormProps> = ({
     }
   }, [event, selectedDate]);
 
+  const validateDateTime = () => {
+    if (!formData.start_date) return { isValid: true, error: '' };
+    
+    // If no end date, it's valid (end date is optional)
+    if (!formData.end_date) return { isValid: true, error: '' };
+    
+    const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
+    const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+    
+    if (endDateTime <= startDateTime) {
+      return { 
+        isValid: false, 
+        error: 'End date and time must be after start date and time' 
+      };
+    }
+    
+    return { isValid: true, error: '' };
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validate date/time
+    const validation = validateDateTime();
+    if (!validation.isValid) {
+      alert(validation.error);
+      return;
+    }
+    
     setIsSubmitting(true);
 
     try {
@@ -109,10 +136,19 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   const handleChange = (field: string, value: any) => {
-    setFormData(prev => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData(prev => {
+      const newData = {
+        ...prev,
+        [field]: value,
+      };
+      
+      // Auto-set end date when start date changes (only if end date is empty or same as previous start date)
+      if (field === 'start_date' && value && (!prev.end_date || prev.end_date === prev.start_date)) {
+        newData.end_date = value;
+      }
+      
+      return newData;
+    });
   };
 
   return (
