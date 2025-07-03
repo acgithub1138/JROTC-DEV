@@ -85,15 +85,16 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
                 {filteredUsers.map((user) => (
                   <div
                     key={user.id}
-                    className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded cursor-pointer"
-                    onClick={() => handleToggleUser(user.id)}
+                    className="flex items-center space-x-2 p-2 hover:bg-gray-50 rounded"
                   >
                     <Checkbox
                       checked={value.includes(user.id)}
                       onCheckedChange={() => handleToggleUser(user.id)}
-                      onClick={(e) => e.stopPropagation()}
                     />
-                    <span className="text-sm">
+                    <span 
+                      className="text-sm cursor-pointer flex-1"
+                      onClick={() => handleToggleUser(user.id)}
+                    >
                       {user.last_name}, {user.first_name}
                     </span>
                   </div>
