@@ -2,55 +2,53 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users, CheckSquare, DollarSign, Package, Trophy, AlertTriangle } from 'lucide-react';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useDashboardActivity } from '@/hooks/useDashboardActivity';
 
 const DashboardOverview = () => {
-  const stats = [
+  const { data: stats, isLoading: statsLoading } = useDashboardStats();
+  const { data: recentActivity, isLoading: activityLoading } = useDashboardActivity();
+
+  const statsConfig = [
     {
       title: 'Total Cadets',
-      value: '156',
-      change: '+8 this month',
+      value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
+      change: statsLoading ? '...' : stats?.cadets.change || 'No data',
       icon: Users,
       color: 'text-blue-600',
       bgColor: 'bg-blue-100',
     },
     {
       title: 'Active Tasks',
-      value: '23',
-      change: '5 overdue',
+      value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
+      change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
       icon: CheckSquare,
       color: 'text-green-600',
       bgColor: 'bg-green-100',
     },
     {
       title: 'Budget Used',
-      value: '68%',
-      change: '$12,450 remaining',
+      value: statsLoading ? '...' : `${stats?.budget.usedPercentage || 0}%`,
+      change: statsLoading ? '...' : `$${(stats?.budget.remaining || 0).toLocaleString()} remaining`,
       icon: DollarSign,
       color: 'text-yellow-600',
       bgColor: 'bg-yellow-100',
     },
     {
       title: 'Equipment',
-      value: '247',
-      change: '12 checked out',
+      value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
+      change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
       icon: Package,
       color: 'text-purple-600',
       bgColor: 'bg-purple-100',
     },
   ];
 
-  const recentActivity = [
-    { action: 'New cadet enrolled', details: 'John Smith - Grade 10', time: '2 hours ago' },
-    { action: 'Task completed', details: 'Uniform inspection checklist', time: '4 hours ago' },
-    { action: 'Budget request approved', details: 'Competition travel expenses', time: '1 day ago' },
-    { action: 'Equipment returned', details: 'Drill rifle #45 by Cadet Johnson', time: '2 days ago' },
-  ];
-
   return (
     <div className="p-6 space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {stats.map((stat) => {
+        {statsConfig.map((stat) => {
           const Icon = stat.icon;
           return (
             <Card key={stat.title} className="hover:shadow-md transition-shadow">
@@ -82,16 +80,33 @@ const DashboardOverview = () => {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {recentActivity.map((activity, index) => (
-                <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
-                  <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
-                  <div className="flex-1 min-w-0">
-                    <p className="text-sm font-medium text-gray-900">{activity.action}</p>
-                    <p className="text-sm text-gray-500">{activity.details}</p>
-                    <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+              {activityLoading ? (
+                [...Array(4)].map((_, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
+                    <div className="w-2 h-2 bg-gray-300 rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-4 bg-gray-200 rounded animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-3/4"></div>
+                      <div className="h-3 bg-gray-200 rounded animate-pulse w-1/2"></div>
+                    </div>
                   </div>
+                ))
+              ) : recentActivity && recentActivity.length > 0 ? (
+                recentActivity.map((activity, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-3 rounded-lg hover:bg-gray-50">
+                    <div className="w-2 h-2 bg-blue-600 rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-gray-900">{activity.action}</p>
+                      <p className="text-sm text-gray-500">{activity.details}</p>
+                      <p className="text-xs text-gray-400 mt-1">{activity.time}</p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-8 text-gray-500">
+                  <p className="text-sm">No recent activity</p>
                 </div>
-              ))}
+              )}
             </div>
           </CardContent>
         </Card>
