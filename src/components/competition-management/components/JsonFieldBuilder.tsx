@@ -7,7 +7,7 @@ import { Switch } from '@/components/ui/switch';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { Plus, Trash2, ChevronDown, ChevronRight, Eye } from 'lucide-react';
+import { Plus, Trash2, ChevronDown, ChevronRight, Eye, Edit3 } from 'lucide-react';
 interface JsonField {
   id: string;
   name: string;
@@ -40,6 +40,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 }) => {
   const [fields, setFields] = useState<JsonField[]>([]);
   const [isExpanded, setIsExpanded] = useState(false);
+  const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [currentField, setCurrentField] = useState<Partial<JsonField>>({
     name: '',
     type: 'text',
@@ -97,10 +98,40 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       updateJson(preset);
     }
   };
+  
+  const editField = (field: JsonField) => {
+    setEditingFieldId(field.id);
+    setCurrentField({
+      name: field.name,
+      type: field.type,
+      textType: field.textType,
+      maxValue: field.maxValue,
+      pointValue: field.pointValue,
+      penaltyValue: field.penaltyValue,
+      scaleRanges: field.scaleRanges,
+      penalty: field.penalty,
+      values: field.values
+    });
+    setDropdownValues(field.values ? field.values.join(', ') : '');
+  };
+
+  const cancelEdit = () => {
+    setEditingFieldId(null);
+    setCurrentField({
+      name: '',
+      type: 'text',
+      textType: 'short',
+      values: [],
+      maxValue: 100,
+      penalty: false
+    });
+    setDropdownValues('');
+  };
+
   const addField = () => {
     if (!currentField.name) return;
     const newField: JsonField = {
-      id: Date.now().toString(),
+      id: editingFieldId || Date.now().toString(),
       name: currentField.name,
       type: currentField.type || 'text',
       textType: currentField.textType || 'short',
@@ -113,20 +144,21 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)
       })
     };
-    const updatedFields = [...fields, newField];
+    
+    let updatedFields;
+    if (editingFieldId) {
+      // Update existing field
+      updatedFields = fields.map(f => f.id === editingFieldId ? newField : f);
+    } else {
+      // Add new field
+      updatedFields = [...fields, newField];
+    }
+    
     setFields(updatedFields);
     updateJson(updatedFields);
 
     // Reset form
-    setCurrentField({
-      name: '',
-      type: 'text',
-      textType: 'short',
-      values: [],
-      maxValue: 100,
-      penalty: false
-    });
-    setDropdownValues('');
+    cancelEdit();
   };
   const removeField = (id: string) => {
     const updatedFields = fields.filter(f => f.id !== id);
@@ -265,8 +297,13 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 
           <Button type="button" onClick={addField} className="w-full" disabled={!currentField.name}>
             <Plus className="w-4 h-4 mr-2" />
-            Add Field
+            {editingFieldId ? 'Update Field' : 'Add Field'}
           </Button>
+          {editingFieldId && (
+            <Button type="button" variant="outline" onClick={cancelEdit} className="w-full">
+              Cancel Edit
+            </Button>
+          )}
         </CardContent>
       </Card>
 
@@ -290,9 +327,14 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
                       {field.values && `, ${field.values.length} options`})
                     </div>
                   </div>
-                  <Button type="button" variant="outline" size="sm" onClick={() => removeField(field.id)}>
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
+                  <div className="flex gap-2">
+                    <Button type="button" variant="outline" size="sm" onClick={() => editField(field)}>
+                      <Edit3 className="w-4 h-4" />
+                    </Button>
+                    <Button type="button" variant="outline" size="sm" onClick={() => removeField(field.id)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </div>
                 </div>)}
             </div>
           </CardContent>
