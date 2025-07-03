@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Calendar } from '@/components/ui/calendar';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
-import { ChevronLeft, ChevronRight, Edit, Trash2, MapPin, Clock } from 'lucide-react';
-import { format, isSameDay, startOfMonth, endOfMonth, eachDayOfInterval } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { CalendarToolbar, CalendarViewType } from './CalendarToolbar';
+import { MonthView } from './MonthView';
+import { WeekView } from './WeekView';
+import { DayView } from './DayView';
+import { AgendaView } from './AgendaView';
+import { format, startOfMonth, startOfWeek, startOfDay } from 'date-fns';
 
 interface CalendarViewProps {
   events: Event[];
@@ -14,18 +14,8 @@ interface CalendarViewProps {
   onEventEdit: (event: Event) => void;
   onEventDelete: (id: string) => void;
   onDateSelect: (date: Date) => void;
+  onCreateEvent: () => void;
 }
-
-const getEventTypeColor = (type: string) => {
-  switch (type) {
-    case 'training': return 'bg-blue-100 text-blue-800';
-    case 'competition': return 'bg-red-100 text-red-800';
-    case 'ceremony': return 'bg-purple-100 text-purple-800';
-    case 'meeting': return 'bg-green-100 text-green-800';
-    case 'drill': return 'bg-orange-100 text-orange-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
   events,
@@ -33,77 +23,62 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onEventEdit,
   onEventDelete,
   onDateSelect,
+  onCreateEvent,
 }) => {
-  const [selectedDate, setSelectedDate] = useState<Date>(new Date());
-  const [viewMode, setViewMode] = useState<'month' | 'list'>('month');
+  const [currentDate, setCurrentDate] = useState<Date>(new Date());
+  const [viewType, setViewType] = useState<CalendarViewType>('month');
   const isMobile = useIsMobile();
 
-  const handleDateSelect = (date: Date | undefined) => {
-    if (date) {
-      setSelectedDate(date);
-      onDateSelect(date);
+  // Mobile view - simplified agenda view
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        <CalendarToolbar
+          currentDate={currentDate}
+          viewType="agenda"
+          onDateChange={setCurrentDate}
+          onViewChange={() => {}} // No view switching on mobile
+          onCreateEvent={onCreateEvent}
+        />
+        
+        <AgendaView
+          currentDate={currentDate}
+          events={events}
+          onEventClick={onEventEdit}
+        />
+      </div>
+    );
+  }
+
+  const handleDateSelect = (date: Date) => {
+    setCurrentDate(date);
+    onDateSelect(date);
+  };
+
+  const handleTimeSlotClick = (date: Date, hour: number) => {
+    const selectedDateTime = new Date(date);
+    selectedDateTime.setHours(hour, 0, 0, 0);
+    onDateSelect(selectedDateTime);
+    onCreateEvent();
+  };
+
+  const handleViewChange = (newView: CalendarViewType) => {
+    setViewType(newView);
+    
+    // Adjust current date based on view type
+    switch (newView) {
+      case 'day':
+        setCurrentDate(startOfDay(currentDate));
+        break;
+      case 'week':
+        setCurrentDate(startOfWeek(currentDate, { weekStartsOn: 0 }));
+        break;
+      case 'month':
+      case 'agenda':
+        setCurrentDate(startOfMonth(currentDate));
+        break;
     }
   };
-
-  const getEventsForDate = (date: Date) => {
-    return events.filter(event => isSameDay(new Date(event.start_date), date));
-  };
-
-  const getEventsForMonth = () => {
-    const monthStart = startOfMonth(selectedDate);
-    const monthEnd = endOfMonth(selectedDate);
-    
-    return events.filter(event => {
-      const eventDate = new Date(event.start_date);
-      return eventDate >= monthStart && eventDate <= monthEnd;
-    });
-  };
-
-  const renderEventCard = (event: Event) => (
-    <Card key={event.id} className="mb-2">
-      <CardContent className="p-3">
-        <div className="flex justify-between items-start mb-2">
-          <div className="flex-1">
-            <h4 className="font-semibold text-sm">{event.title}</h4>
-            <div className="flex items-center gap-2 text-xs text-muted-foreground mt-1">
-              <Clock className="w-3 h-3" />
-              {event.is_all_day ? 'All day' : format(new Date(event.start_date), 'h:mm a')}
-              {event.location && (
-                <>
-                  <MapPin className="w-3 h-3 ml-2" />
-                  {event.location}
-                </>
-              )}
-            </div>
-          </div>
-          <div className="flex items-center gap-1">
-            <Badge className={getEventTypeColor(event.event_type)} variant="secondary">
-              {event.event_type}
-            </Badge>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEventEdit(event)}
-            >
-              <Edit className="w-3 h-3" />
-            </Button>
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => onEventDelete(event.id)}
-            >
-              <Trash2 className="w-3 h-3 text-red-600" />
-            </Button>
-          </div>
-        </div>
-        {event.description && (
-          <p className="text-xs text-muted-foreground line-clamp-2">
-            {event.description}
-          </p>
-        )}
-      </CardContent>
-    </Card>
-  );
 
   if (isLoading) {
     return (
@@ -113,88 +88,51 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     );
   }
 
-  if (isMobile) {
-    return (
-      <div className="space-y-4">
-        <div className="flex justify-between items-center">
-          <h2 className="text-lg font-semibold">
-            {format(selectedDate, 'MMMM yyyy')}
-          </h2>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() - 1))}
-            >
-              <ChevronLeft className="w-4 h-4" />
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedDate(new Date(selectedDate.getFullYear(), selectedDate.getMonth() + 1))}
-            >
-              <ChevronRight className="w-4 h-4" />
-            </Button>
-          </div>
-        </div>
-
-        <div className="space-y-2">
-          {getEventsForMonth().length === 0 ? (
-            <Card>
-              <CardContent className="p-4 text-center text-muted-foreground">
-                No events this month
-              </CardContent>
-            </Card>
-          ) : (
-            getEventsForMonth()
-              .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-              .map(renderEventCard)
-          )}
-        </div>
-      </div>
-    );
-  }
-
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 h-full">
-      <div className="lg:col-span-3">
-        <Card className="h-full">
-          <CardContent className="p-4 h-full flex flex-col">
-            <Calendar
-              mode="single"
-              selected={selectedDate}
-              onSelect={handleDateSelect}
-              className="w-full flex-1 mx-auto [&_.rdp]:w-full [&_.rdp]:h-full [&_.rdp-months]:w-full [&_.rdp-months]:h-full [&_.rdp-month]:w-full [&_.rdp-month]:h-full [&_table]:w-full [&_table]:h-full [&_td]:p-0 [&_button]:w-full [&_button]:h-12"
-              modifiers={{
-                hasEvents: (date) => getEventsForDate(date).length > 0
-              }}
-              modifiersClassNames={{
-                hasEvents: "bg-primary/20 font-bold"
-              }}
-            />
-          </CardContent>
-        </Card>
-      </div>
+    <div className="space-y-6">
+      <CalendarToolbar
+        currentDate={currentDate}
+        viewType={viewType}
+        onDateChange={setCurrentDate}
+        onViewChange={handleViewChange}
+        onCreateEvent={onCreateEvent}
+      />
 
-      <div className="lg:col-span-1">
-        <Card className="h-full">
-          <CardHeader>
-            <CardTitle>
-              Events - {format(selectedDate, 'MMM d, yyyy')}
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-2">
-              {getEventsForDate(selectedDate).length === 0 ? (
-                <p className="text-sm text-muted-foreground text-center py-4">
-                  No events for this date
-                </p>
-              ) : (
-                getEventsForDate(selectedDate).map(renderEventCard)
-              )}
-            </div>
-          </CardContent>
-        </Card>
+      <div className="calendar-content">
+        {viewType === 'month' && (
+          <MonthView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={onEventEdit}
+            onDateClick={handleDateSelect}
+          />
+        )}
+        
+        {viewType === 'week' && (
+          <WeekView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={onEventEdit}
+            onTimeSlotClick={handleTimeSlotClick}
+          />
+        )}
+        
+        {viewType === 'day' && (
+          <DayView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={onEventEdit}
+            onTimeSlotClick={handleTimeSlotClick}
+          />
+        )}
+        
+        {viewType === 'agenda' && (
+          <AgendaView
+            currentDate={currentDate}
+            events={events}
+            onEventClick={onEventEdit}
+          />
+        )}
       </div>
     </div>
   );

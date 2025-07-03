@@ -89,6 +89,7 @@ const CalendarManagementPage = () => {
         onEventEdit={handleEditEvent}
         onEventDelete={deleteEvent}
         onDateSelect={handleDateSelect}
+        onCreateEvent={handleCreateEvent}
       />
 
       <EventDialog
