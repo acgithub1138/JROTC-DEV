@@ -20,6 +20,7 @@ interface StandardTableWrapperProps {
   visibleColumns?: string[];
   onToggleColumn?: (columnKey: string) => void;
   columnsLoading?: boolean;
+  extraControls?: React.ReactNode;
 }
 export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTableWrapperProps>(({
   title,
@@ -34,7 +35,8 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
   columns,
   visibleColumns,
   onToggleColumn,
-  columnsLoading
+  columnsLoading,
+  extraControls
 }, ref) => <div ref={ref} className="space-y-6">
     {/* Header Section */}
     <div className="flex justify-between items-center">
@@ -54,7 +56,7 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
       
       <div className="flex items-center gap-4 ml-4">
         {columns && onToggleColumn && <ColumnSelector columns={columns} onToggleColumn={onToggleColumn} isLoading={columnsLoading} />}
-        <TableSettings />
+        {extraControls}
         {selectedCount > 0 && onBulkDelete && <>
             <span className="text-sm text-muted-foreground">
               {selectedCount} selected
