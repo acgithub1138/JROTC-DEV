@@ -7,6 +7,7 @@ export interface Competition {
   competition_date: string;
   registration_deadline?: string;
   type: 'drill' | 'marksmanship' | 'academic' | 'leadership' | 'physical_fitness' | 'inspection';
+  comp_type?: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   teams?: string[];
   cadets?: string[];
   overall_placement?: CompetitionPlacement;

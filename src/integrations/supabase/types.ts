@@ -246,6 +246,7 @@ export type Database = {
           armed_inspection: Database["public"]["Enums"]["comp_placement"] | null
           armed_regulation: Database["public"]["Enums"]["comp_placement"] | null
           cadets: string[] | null
+          comp_type: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at: string
           description: string | null
@@ -264,7 +265,6 @@ export type Database = {
           registration_deadline: string | null
           school_id: string | null
           teams: string[] | null
-          type: Database["public"]["Enums"]["competition_type"]
           unarmed_color_guard:
             | Database["public"]["Enums"]["comp_placement"]
             | null
@@ -293,6 +293,7 @@ export type Database = {
             | Database["public"]["Enums"]["comp_placement"]
             | null
           cadets?: string[] | null
+          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date: string
           created_at?: string
           description?: string | null
@@ -311,7 +312,6 @@ export type Database = {
           registration_deadline?: string | null
           school_id?: string | null
           teams?: string[] | null
-          type: Database["public"]["Enums"]["competition_type"]
           unarmed_color_guard?:
             | Database["public"]["Enums"]["comp_placement"]
             | null
@@ -340,6 +340,7 @@ export type Database = {
             | Database["public"]["Enums"]["comp_placement"]
             | null
           cadets?: string[] | null
+          comp_type?: Database["public"]["Enums"]["jrotc_program"] | null
           competition_date?: string
           created_at?: string
           description?: string | null
@@ -358,7 +359,6 @@ export type Database = {
           registration_deadline?: string | null
           school_id?: string | null
           teams?: string[] | null
-          type?: Database["public"]["Enums"]["competition_type"]
           unarmed_color_guard?:
             | Database["public"]["Enums"]["comp_placement"]
             | null
@@ -1825,13 +1825,6 @@ export type Database = {
         | "8th"
         | "9th"
         | "10th"
-      competition_type:
-        | "drill"
-        | "marksmanship"
-        | "academic"
-        | "leadership"
-        | "physical_fitness"
-        | "inspection"
       contact_status: "active" | "semi_active" | "not_active"
       contact_type: "parent" | "relative" | "friend"
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
@@ -2030,14 +2023,6 @@ export const Constants = {
         "8th",
         "9th",
         "10th",
-      ],
-      competition_type: [
-        "drill",
-        "marksmanship",
-        "academic",
-        "leadership",
-        "physical_fitness",
-        "inspection",
       ],
       contact_status: ["active", "semi_active", "not_active"],
       contact_type: ["parent", "relative", "friend"],
