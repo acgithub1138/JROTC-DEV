@@ -37,12 +37,6 @@ const contactSchema = z.object({
   cadet_id: z.string().min(1),
   phone: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
-  organization: z.string().optional(),
-  title: z.string().optional(),
-  address: z.string().optional(),
-  city: z.string().optional(),
-  state: z.string().optional(),
-  zip_code: z.string().optional(),
   notes: z.string().optional(),
 });
 
@@ -76,15 +70,9 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       name: contact.name,
       type: contact.type,
       status: contact.status,
-        cadet_id: contact.cadet_id || 'none',
+      cadet_id: contact.cadet_id || 'none',
       phone: contact.phone || '',
       email: contact.email || '',
-      organization: contact.organization || '',
-      title: contact.title || '',
-      address: contact.address || '',
-      city: contact.city || '',
-      state: contact.state || '',
-      zip_code: contact.zip_code || '',
       notes: contact.notes || '',
     },
   });
@@ -113,12 +101,6 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
         cadet_id: contact.cadet_id || 'none',
         phone: contact.phone || '',
         email: contact.email || '',
-        organization: contact.organization || '',
-        title: contact.title || '',
-        address: contact.address || '',
-        city: contact.city || '',
-        state: contact.state || '',
-        zip_code: contact.zip_code || '',
         notes: contact.notes || '',
       });
     }
@@ -132,12 +114,6 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
       phone: data.phone || null,
       email: data.email || null,
-      organization: data.organization || null,
-      title: data.title || null,
-      address: data.address || null,
-      city: data.city || null,
-      state: data.state || null,
-      zip_code: data.zip_code || null,
       notes: data.notes || null,
     });
     onOpenChange(false);
@@ -266,89 +242,6 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="organization"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Organization</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Organization" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="title"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Title</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Job title" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="address"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Address</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Street address" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="city"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>City</FormLabel>
-                    <FormControl>
-                      <Input placeholder="City" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="state"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>State</FormLabel>
-                    <FormControl>
-                      <Input placeholder="State" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="zip_code"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Zip Code</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Zip code" {...field} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
             </div>
 
             <FormField

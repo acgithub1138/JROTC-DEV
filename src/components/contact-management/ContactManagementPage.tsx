@@ -17,12 +17,6 @@ export interface Contact {
   phone: string | null;
   email: string | null;
   notes: string | null;
-  organization: string | null;
-  address: string | null;
-  city: string | null;
-  state: string | null;
-  zip_code: string | null;
-  title: string | null;
   created_at: string;
   updated_at: string;
   created_by: string | null;

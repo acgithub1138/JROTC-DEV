@@ -103,13 +103,12 @@ export const ContactTable: React.FC<ContactTableProps> = ({
           <TableHead>Status</TableHead>
           <TableHead>Phone</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead>Organization</TableHead>
           <TableHead className="w-[50px]">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>
       <StandardTableBody
         emptyMessage="No contacts found"
-        colSpan={7}
+        colSpan={6}
       >
         {contacts.map((contact) => (
           <TableRow key={contact.id}>
@@ -118,7 +117,6 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell>{getStatusBadge(contact.status)}</TableCell>
             <TableCell>{contact.phone || '-'}</TableCell>
             <TableCell>{contact.email || '-'}</TableCell>
-            <TableCell>{contact.organization || '-'}</TableCell>
             <TableCell>
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
