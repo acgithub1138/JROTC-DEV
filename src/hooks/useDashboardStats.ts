@@ -43,11 +43,13 @@ export const useDashboardStats = () => {
       ) || [];
 
       // Calculate budget - using same calculation as budget page
+      console.log('Budget data from query:', budgetResult.data);
       const totalIncome = budgetResult.data?.filter(t => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const totalExpenses = budgetResult.data?.filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       
+      console.log('Dashboard budget calculation:', { totalIncome, totalExpenses, netBudget: totalIncome - totalExpenses });
       const netBudget = totalIncome - totalExpenses;
 
       // Calculate inventory stats
