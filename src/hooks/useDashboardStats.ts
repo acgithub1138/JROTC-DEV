@@ -42,14 +42,13 @@ export const useDashboardStats = () => {
         task.due_date && new Date(task.due_date) < now
       ) || [];
 
-      // Calculate budget usage
+      // Calculate budget - using same calculation as budget page
       const totalIncome = budgetResult.data?.filter(t => t.type === 'income')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       const totalExpenses = budgetResult.data?.filter(t => t.type === 'expense')
         .reduce((sum, t) => sum + Number(t.amount), 0) || 0;
       
-      const budgetUsedPercentage = totalIncome > 0 ? ((totalExpenses / totalIncome) * 100) : 0;
-      const remainingBudget = totalIncome - totalExpenses;
+      const netBudget = totalIncome - totalExpenses;
 
       // Calculate inventory stats
       const totalInventory = inventoryResult.count || 0;
@@ -67,8 +66,9 @@ export const useDashboardStats = () => {
           overdue: overdueTasks.length
         },
         budget: {
-          usedPercentage: Math.round(budgetUsedPercentage),
-          remaining: remainingBudget
+          netBudget: netBudget,
+          totalIncome: totalIncome,
+          totalExpenses: totalExpenses
         },
         inventory: {
           total: totalInventory,

@@ -27,12 +27,12 @@ const DashboardOverview = () => {
       bgColor: 'bg-green-100',
     },
     {
-      title: 'Budget Used',
-      value: statsLoading ? '...' : `${stats?.budget.usedPercentage || 0}%`,
-      change: statsLoading ? '...' : `$${(stats?.budget.remaining || 0).toLocaleString()} remaining`,
+      title: 'Net Budget',
+      value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
+      change: statsLoading ? '...' : `$${(stats?.budget.totalIncome || 0).toLocaleString()} income - $${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
       icon: DollarSign,
-      color: 'text-yellow-600',
-      bgColor: 'bg-yellow-100',
+      color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
+      bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100',
     },
     {
       title: 'Equipment',
