@@ -9,11 +9,11 @@ interface BudgetSummaryCardsProps {
 
 export const BudgetSummaryCards: React.FC<BudgetSummaryCardsProps> = ({ transactions }) => {
   const totalIncome = transactions
-    .filter(t => t.category === 'income' && !t.archive)
+    .filter(t => t.category === 'income')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const totalExpenses = transactions
-    .filter(t => t.category === 'expense' && !t.archive)
+    .filter(t => t.category === 'expense')
     .reduce((sum, t) => sum + Number(t.amount), 0);
 
   const totalBudget = totalIncome - totalExpenses;
