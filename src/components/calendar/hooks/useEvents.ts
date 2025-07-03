@@ -26,7 +26,7 @@ export const useEvents = (filters: EventFilters) => {
         .eq('school_id', userProfile.school_id)
         .order('start_date', { ascending: true });
 
-      if (filters.eventType) {
+      if (filters.eventType && filters.eventType !== '') {
         query = query.eq('event_type', filters.eventType as any);
       }
 
