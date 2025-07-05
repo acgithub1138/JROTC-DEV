@@ -55,11 +55,17 @@ export const SidebarCustomizationDialog: React.FC<SidebarCustomizationDialogProp
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    if (active.id !== over?.id) {
+    if (active.id !== over?.id && over) {
       setLocalItems((items) => {
         const oldIndex = items.findIndex((item) => item.id === active.id);
-        const newIndex = items.findIndex((item) => item.id === over?.id);
+        const newIndex = items.findIndex((item) => item.id === over.id);
 
+        if (oldIndex === -1 || newIndex === -1) {
+          console.error('Could not find items for drag operation', { active: active.id, over: over.id });
+          return items;
+        }
+
+        console.log('Moving item from index', oldIndex, 'to index', newIndex);
         return arrayMove(items, oldIndex, newIndex);
       });
     }
@@ -67,21 +73,33 @@ export const SidebarCustomizationDialog: React.FC<SidebarCustomizationDialogProp
 
   const handleSave = async () => {
     setIsSaving(true);
-    const success = await savePreferences(localItems);
+    console.log('Saving sidebar preferences with items:', localItems);
     
-    if (success) {
-      toast({
-        title: "Saved",
-        description: "Your sidebar preferences have been saved.",
-      });
-      onOpenChange(false);
-      if (onPreferencesUpdated) {
-        onPreferencesUpdated();
+    try {
+      const success = await savePreferences(localItems);
+      
+      if (success) {
+        toast({
+          title: "Saved",
+          description: "Your sidebar preferences have been saved.",
+        });
+        onOpenChange(false);
+        if (onPreferencesUpdated) {
+          onPreferencesUpdated();
+        }
+      } else {
+        console.error('Save preferences returned false');
+        toast({
+          title: "Error",
+          description: "Failed to save sidebar preferences. Please check the console for details.",
+          variant: "destructive",
+        });
       }
-    } else {
+    } catch (error) {
+      console.error('Exception in handleSave:', error);
       toast({
         title: "Error",
-        description: "Failed to save sidebar preferences.",
+        description: "An unexpected error occurred while saving preferences.",
         variant: "destructive",
       });
     }
