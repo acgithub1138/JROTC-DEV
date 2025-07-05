@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/hooks/useTasks';
 import { useTaskForm } from './forms/hooks/useTaskForm';
+import { useTasks } from '@/hooks/useTasks';
+import { Check } from 'lucide-react';
 import { TaskTitleField } from './forms/fields/TaskTitleField';
 import { TaskAssigneeField } from './forms/fields/TaskAssigneeField';
 import { TaskDescriptionField } from './forms/fields/TaskDescriptionField';
@@ -20,6 +22,7 @@ interface TaskFormProps {
 
 export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
   const { userProfile } = useAuth();
+  const { updateTask } = useTasks();
   const { 
     form, 
     selectedDate, 
@@ -34,6 +37,17 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     task,
     onOpenChange,
   });
+
+  const handleCompleteTask = () => {
+    if (task) {
+      updateTask({ 
+        id: task.id, 
+        status: 'done',
+        completed_at: new Date().toISOString()
+      });
+      onOpenChange(false);
+    }
+  };
 
   const canAssignTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isEditingAssignedTask = mode === 'edit' && task?.assigned_to === userProfile?.id;
@@ -64,15 +78,31 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {getDialogTitle()}
-          </DialogTitle>
-          <DialogDescription>
-            {mode === 'create' 
-              ? 'Fill in the details to create a new task.'
-              : 'Update the task details below.'
-            }
-          </DialogDescription>
+          <div className="flex items-center justify-between">
+            <div>
+              <DialogTitle>
+                {getDialogTitle()}
+              </DialogTitle>
+              <DialogDescription>
+                {mode === 'create' 
+                  ? 'Fill in the details to create a new task.'
+                  : 'Update the task details below.'
+                }
+              </DialogDescription>
+            </div>
+            {mode === 'edit' && task?.status !== 'done' && (
+              <Button
+                type="button"
+                onClick={handleCompleteTask}
+                disabled={isSubmitting}
+                className="flex items-center gap-2"
+                variant="default"
+              >
+                <Check className="w-4 h-4" />
+                Complete Task
+              </Button>
+            )}
+          </div>
         </DialogHeader>
 
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
