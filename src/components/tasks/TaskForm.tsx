@@ -90,21 +90,18 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
                 }
               </DialogDescription>
             </div>
-            {(() => {
-              console.log('TaskForm debug:', { mode, taskStatus: task?.status, shouldShowButton: mode === 'edit' && task?.status !== 'done' });
-              return mode === 'edit' && task?.status !== 'done' && (
-                <Button
-                  type="button"
-                  onClick={handleCompleteTask}
-                  disabled={isSubmitting}
-                  className="flex items-center gap-2"
-                  variant="default"
-                >
-                  <Check className="w-4 h-4" />
-                  Complete Task
-                </Button>
-              );
-            })()}
+            {mode === 'edit' && task?.status !== 'done' && (
+              <Button
+                type="button"
+                onClick={handleCompleteTask}
+                disabled={isSubmitting}
+                className="flex items-center gap-2"
+                variant="default"
+              >
+                <Check className="w-4 h-4" />
+                Complete Task
+              </Button>
+            )}
           </div>
         </DialogHeader>
 

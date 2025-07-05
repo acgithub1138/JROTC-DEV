@@ -32,6 +32,7 @@ interface TaskTableRowProps {
   onSelectTask: (taskId: string, checked: boolean) => void;
   onSave: (task: Task, field: string, newValue: any) => void;
   onCancel: () => void;
+  onEditTask: (task: Task) => void;
 }
 
 export const TaskTableRow: React.FC<TaskTableRowProps> = ({
@@ -48,6 +49,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onSelectTask,
   onSave,
   onCancel,
+  onEditTask,
 }) => {
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
@@ -82,15 +84,25 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           />
         </TableCell>
         <TableCell className="py-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setIsDescriptionModalOpen(true)}
-            className="flex items-center gap-2"
-          >
-            <Eye className="w-4 h-4" />
-            View
-          </Button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDescriptionModalOpen(true)}
+              className="flex items-center gap-2"
+            >
+              <Eye className="w-4 h-4" />
+              View
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => onEditTask(task)}
+              className="flex items-center gap-2"
+            >
+              Edit
+            </Button>
+          </div>
         </TableCell>
         <TableCell className="py-2">
           <EditableCell

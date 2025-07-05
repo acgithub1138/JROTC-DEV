@@ -190,6 +190,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
               onSelectTask={handleSelectTask}
               onSave={handleSaveEdit}
               onCancel={cancelEdit}
+              onEditTask={onEditTask}
             />
           ))}
         </TableBody>
