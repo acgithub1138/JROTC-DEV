@@ -1,7 +1,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
+import { Check } from 'lucide-react';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -139,6 +141,19 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     }))
   ];
 
+  const handleCompleteTask = async () => {
+    await updateTask({ 
+      id: currentTask.id, 
+      status: 'done',
+      completed_at: new Date().toISOString()
+    });
+    
+    // Add system comment
+    addSystemComment('Task completed');
+    
+    onOpenChange(false);
+  };
+
   const getDialogTitle = () => {
     if (currentTask.task_number) {
       return `${currentTask.task_number} - ${currentTask.title}`;
@@ -150,24 +165,37 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl">
-            {currentTask.task_number && (
-              <span className="text-blue-600 font-mono mr-2">
-                {currentTask.task_number} -
-              </span>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl">
+              {currentTask.task_number && (
+                <span className="text-blue-600 font-mono mr-2">
+                  {currentTask.task_number} -
+                </span>
+              )}
+              <EditableField
+                field="title"
+                currentValue={currentTask.title}
+                displayValue={currentTask.title}
+                canEdit={canEdit}
+                editState={editState}
+                onStartEdit={startEdit}
+                onCancelEdit={cancelEdit}
+                onSaveEdit={saveEdit}
+                onEditStateChange={setEditState}
+              />
+            </DialogTitle>
+            {currentTask.status !== 'done' && (
+              <Button
+                type="button"
+                onClick={handleCompleteTask}
+                className="flex items-center gap-2"
+                variant="default"
+              >
+                <Check className="w-4 h-4" />
+                Complete Task
+              </Button>
             )}
-            <EditableField
-              field="title"
-              currentValue={currentTask.title}
-              displayValue={currentTask.title}
-              canEdit={canEdit}
-              editState={editState}
-              onStartEdit={startEdit}
-              onCancelEdit={cancelEdit}
-              onSaveEdit={saveEdit}
-              onEditStateChange={setEditState}
-            />
-          </DialogTitle>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">

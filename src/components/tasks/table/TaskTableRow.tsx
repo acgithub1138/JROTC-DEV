@@ -84,25 +84,15 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           />
         </TableCell>
         <TableCell className="py-2">
-          <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setIsDescriptionModalOpen(true)}
-              className="flex items-center gap-2"
-            >
-              <Eye className="w-4 h-4" />
-              View
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => onEditTask(task)}
-              className="flex items-center gap-2"
-            >
-              Edit
-            </Button>
-          </div>
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => setIsDescriptionModalOpen(true)}
+            className="flex items-center gap-2"
+          >
+            <Eye className="w-4 h-4" />
+            View
+          </Button>
         </TableCell>
         <TableCell className="py-2">
           <EditableCell
