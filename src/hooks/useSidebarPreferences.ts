@@ -22,6 +22,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
+        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
