@@ -73,7 +73,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 
   const loadPreset = (presetName: string) => {
     const presets: Record<string, JsonField[]> = {
-      'air_force_inspection': [
+      'air_force_armed_inspection': [
         { id: '1', name: 'Unit & Commander Overall', type: 'section_header', penalty: false },
         { id: '2', name: 'Overall Appearance and Bearing', type: 'scoring_scale', pointValue: 10, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 8 }, exceptional: { min: 9, max: 10 } } },
         { id: '3', name: 'Knowledge of Drill and Ceremony', type: 'scoring_scale', pointValue: 10, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 8 }, exceptional: { min: 9, max: 10 } } },
@@ -97,6 +97,16 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       setFields(preset);
       updateJson(preset);
     }
+  };
+
+  const getPresetOptions = () => {
+    const presetMap = {
+      'air_force_armed_inspection': 'Air Force - Armed Inspection'
+    };
+    
+    return Object.entries(presetMap)
+      .sort(([, a], [, b]) => a.localeCompare(b))
+      .map(([key, label]) => ({ key, label }));
   };
   
   const editField = (field: JsonField) => {
@@ -195,9 +205,21 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
         <CardHeader>
           <CardTitle>Score Sheet Builder</CardTitle>
           <div className="flex gap-2 mt-2">
-            <Button type="button" variant="outline" size="sm" onClick={() => loadPreset('air_force_inspection')}>
-              Load Air Force Preset
-            </Button>
+            <div className="flex items-center gap-2">
+              <Label htmlFor="presetSelect" className="text-sm">Load Preset:</Label>
+              <Select onValueChange={(value) => value && loadPreset(value)}>
+                <SelectTrigger className="w-64 bg-background">
+                  <SelectValue placeholder="Choose a preset..." />
+                </SelectTrigger>
+                <SelectContent className="bg-background z-50">
+                  {getPresetOptions().map(({ key, label }) => (
+                    <SelectItem key={key} value={key}>
+                      {label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
             <Button type="button" variant="outline" size="sm" onClick={() => setShowPreview(!showPreview)}>
               <Eye className="w-4 h-4 mr-2" />
               {showPreview ? 'Hide' : 'Show'} Preview
