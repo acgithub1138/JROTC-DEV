@@ -73,6 +73,43 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 
   const loadPreset = (presetName: string) => {
     const presets: Record<string, JsonField[]> = {
+      'air_force_armed_color_guard': [
+        { id: '1', name: 'Color Guard Sequence', type: 'section_header', penalty: false },
+        { id: '2', name: 'Uncase the Colors (Sling/Pre-sling Arms)', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '3', name: 'Post (step off the marching file/casefile carry)', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '4', name: 'Present Arms & Order Arms', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '5', name: 'Post (close interval, heal rest, marching to the halt)', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '6', name: 'Report In (equipment, position & VERBAL)', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '7', name: 'Colors Reverse March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '8', name: 'Left Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '9', name: 'Colors Reverse March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '10', name: 'Color Guard Halt', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '11', name: 'Mark Time March (6 seconds)', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '12', name: 'COLOR GUARD HALT', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '13', name: 'Order Colors', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '14', name: 'Parade Rest', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '15', name: 'Color Guard, Attention', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '16', name: 'CARRY COLORS', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '17', name: 'Forward March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '18', name: 'Right Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '19', name: 'Right Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '20', name: 'Colors Reverse March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '21', name: 'Eyes Right', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '22', name: 'Ready Front', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '23', name: 'Left Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '24', name: 'Left Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '25', name: 'Left Wheel March', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '26', name: 'Color Guard, Halt', type: 'number', maxValue: 10, pointValue: 10, penalty: false },
+        { id: '27', name: 'Report Out (cadet alignment, position & VERBAL)', type: 'number', maxValue: 15, pointValue: 15, penalty: false },
+        { id: '28', name: 'OVERALL TECHNICAL SCORE', type: 'number', maxValue: 20, pointValue: 20, penalty: false },
+        { id: '29', name: 'OVERALL PRECISION SCORE', type: 'number', maxValue: 20, pointValue: 20, penalty: false },
+        { id: '30', name: 'Penalties', type: 'section_header', penalty: false },
+        { id: '31', name: 'Boundary Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
+        { id: '32', name: 'Incorrect Commands', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
+        { id: '33', name: 'Pause Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
+        { id: '34', name: 'Uniform/Improper Sequence', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
+        { id: '35', name: 'Uniform Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true }
+      ],
       'air_force_armed_inspection': [
         { id: '1', name: 'Unit & Commander Overall', type: 'section_header', penalty: false },
         { id: '2', name: 'Overall Appearance and Bearing', type: 'scoring_scale', pointValue: 10, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 8 }, exceptional: { min: 9, max: 10 } } },
@@ -101,6 +138,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 
   const getPresetOptions = () => {
     const presetMap = {
+      'air_force_armed_color_guard': 'Air Force - Armed Color Guard',
       'air_force_armed_inspection': 'Air Force - Armed Inspection'
     };
     
