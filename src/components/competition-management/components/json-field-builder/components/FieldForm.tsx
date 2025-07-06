@@ -120,7 +120,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             checked={currentField.pauseField || false} 
             onCheckedChange={checked => onFieldUpdate('pauseField', checked)} 
           />
-          <Label htmlFor="pauseField">Pause Field</Label>
+          <Label htmlFor="pauseField">Bold and Grey</Label>
         </div>
       </div>
 
