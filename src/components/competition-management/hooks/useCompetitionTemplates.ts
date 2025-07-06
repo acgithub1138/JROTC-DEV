@@ -90,18 +90,24 @@ export const useCompetitionTemplates = () => {
 
   const deleteTemplate = async (id: string) => {
     try {
+      console.log('Attempting to delete template:', id);
+      console.log('User profile:', userProfile);
+      
       const { error } = await supabase
         .from('competition_templates')
         .update({ is_active: false })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Database error:', error);
+        throw error;
+      }
 
       setTemplates(prev => prev.filter(template => template.id !== id));
       toast.success('Template deleted successfully');
     } catch (error) {
       console.error('Error deleting template:', error);
-      toast.error('Failed to delete template');
+      toast.error(`Failed to delete template: ${error.message}`);
       throw error;
     }
   };
