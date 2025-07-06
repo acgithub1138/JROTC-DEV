@@ -61,6 +61,8 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               <SelectItem value="number">Number</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="calculated">Calculated Field</SelectItem>
+              <SelectItem value="pause">Pause</SelectItem>
+              <SelectItem value="label">Label</SelectItem>
             </SelectContent>
           </Select>
         </div>

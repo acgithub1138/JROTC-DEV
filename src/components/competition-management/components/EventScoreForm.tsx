@@ -72,6 +72,28 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
           </div>
         );
 
+      case 'pause':
+        return (
+          <div key={field.id} className="py-2">
+            <div className="bg-muted px-3 py-2 rounded">
+              <span className="font-bold">{field.name}</span>
+            </div>
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
+            )}
+          </div>
+        );
+
+      case 'label':
+        return (
+          <div key={field.id} className="py-2">
+            <span className="font-medium">{field.name}</span>
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
+            )}
+          </div>
+        );
+
       case 'number':
         return (
           <div key={field.id} className="py-2 border-b space-y-2">
