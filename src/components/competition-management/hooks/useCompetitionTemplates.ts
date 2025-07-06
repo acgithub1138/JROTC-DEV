@@ -95,7 +95,7 @@ export const useCompetitionTemplates = () => {
       
       const { error } = await supabase
         .from('competition_templates')
-        .update({ is_active: false })
+        .delete()
         .eq('id', id);
 
       if (error) {
