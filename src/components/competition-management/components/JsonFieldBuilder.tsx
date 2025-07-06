@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
 import { JsonFieldBuilderProps } from './json-field-builder/types';
 import { useFieldManagement } from './json-field-builder/hooks/useFieldManagement';
 import { getPresetByKey } from './json-field-builder/presets';
@@ -15,6 +16,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
   value,
   onChange
 }) => {
+  const { userProfile } = useAuth();
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
@@ -39,13 +41,15 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
     }
   };
 
+  const isAdmin = userProfile?.role === 'admin';
+
   return (
     <div className="space-y-6">
       <Card>
         <CardHeader>
           <CardTitle>Score Sheet Builder</CardTitle>
           <div className="flex gap-2 mt-2">
-            <PresetSelector onPresetSelect={handlePresetSelect} />
+            {isAdmin && <PresetSelector onPresetSelect={handlePresetSelect} />}
             <Button 
               type="button" 
               variant="outline" 
