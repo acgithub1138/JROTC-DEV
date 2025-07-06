@@ -28,12 +28,17 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
               }
               
               return (
-                <div key={field.id} className="flex items-center justify-between py-2 border-b">
-                  <span className="font-medium">{field.name}</span>
-                  <div className="flex items-center gap-2">
-                    <input className="border rounded px-2 py-1 w-32" disabled />
-                    {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
+                <div key={field.id} className="py-2 border-b space-y-2">
+                  <div className="flex items-center justify-between">
+                    <span className="font-medium">{field.name}</span>
+                    <div className="flex items-center gap-2">
+                      <input className="border rounded px-2 py-1 w-32" disabled />
+                      {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
+                    </div>
                   </div>
+                  {field.fieldInfo && (
+                    <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
+                  )}
                 </div>
               );
             })}

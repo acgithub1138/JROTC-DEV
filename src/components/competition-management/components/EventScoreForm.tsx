@@ -65,8 +65,8 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
     switch (field.type) {
       case 'section_header':
         return (
-          <div key={field.id} className="col-span-2">
-            <h3 className="text-lg font-semibold text-foreground border-b pb-2 mb-4">
+          <div key={field.id} className="border-b-2 border-primary pb-2">
+            <h3 className="text-lg font-bold text-primary">
               {field.name}
             </h3>
           </div>
@@ -74,17 +74,23 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
 
       case 'number':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>{field.name}</Label>
-            <Input
-              id={field.id}
-              type="number"
-              min="0"
-              max={field.maxValue}
-              value={fieldValue || ''}
-              onChange={(e) => handleFieldChange(field.id, e.target.value)}
-              placeholder={`Max: ${field.maxValue || 'N/A'}`}
-            />
+          <div key={field.id} className="py-2 border-b space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id={field.id}
+                  type="number"
+                  min="0"
+                  max={field.maxValue}
+                  value={fieldValue || ''}
+                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                  placeholder={`Max: ${field.maxValue || 'N/A'}`}
+                  className="w-32"
+                />
+                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
+              </div>
+            </div>
             {field.fieldInfo && (
               <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
             )}
@@ -93,20 +99,25 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
 
       case 'dropdown':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>{field.name}</Label>
-            <Select value={fieldValue || ''} onValueChange={(value) => handleFieldChange(field.id, value)}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select..." />
-              </SelectTrigger>
-              <SelectContent>
-                {field.values?.map((option) => (
-                  <SelectItem key={option} value={option}>
-                    {option}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+          <div key={field.id} className="py-2 border-b space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <div className="flex items-center gap-2">
+                <Select value={fieldValue || ''} onValueChange={(value) => handleFieldChange(field.id, value)}>
+                  <SelectTrigger className="w-32">
+                    <SelectValue placeholder="Select..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {field.values?.map((option) => (
+                      <SelectItem key={option} value={option}>
+                        {option}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
+              </div>
+            </div>
             {field.fieldInfo && (
               <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
             )}
@@ -115,14 +126,20 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
 
       case 'text':
         return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>{field.name}</Label>
-            <Input
-              id={field.id}
-              type="text"
-              value={fieldValue || ''}
-              onChange={(e) => handleFieldChange(field.id, e.target.value)}
-            />
+          <div key={field.id} className="py-2 border-b space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <div className="flex items-center gap-2">
+                <Input
+                  id={field.id}
+                  type="text"
+                  value={fieldValue || ''}
+                  onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                  className="w-32"
+                />
+                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
+              </div>
+            </div>
             {field.fieldInfo && (
               <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
             )}
@@ -151,7 +168,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="space-y-6">
         {fields.map(renderField)}
       </div>
       
