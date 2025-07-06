@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronRight, Users } from 'lucide-react';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { EventScoreForm } from './EventScoreForm';
@@ -29,6 +31,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isCadetsOpen, setIsCadetsOpen] = useState(false);
 
   const { templates, isLoading: templatesLoading } = useCompetitionTemplates();
   const { users: cadets, isLoading: cadetsLoading } = useSchoolUsers(true);
@@ -121,11 +124,28 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
 
           {/* Cadet Selection */}
           <div className="space-y-2">
-            <Label>Cadets</Label>
-            <MultiSelectProfiles
-              value={selectedCadetIds}
-              onChange={setSelectedCadetIds}
-            />
+            <Collapsible open={isCadetsOpen} onOpenChange={setIsCadetsOpen}>
+              <CollapsibleTrigger asChild>
+                <Button variant="outline" className="w-full justify-between">
+                  <div className="flex items-center gap-2">
+                    <Users className="w-4 h-4" />
+                    <span>Cadets</span>
+                    {selectedCadetIds.length > 0 && (
+                      <span className="text-sm text-muted-foreground">
+                        ({selectedCadetIds.length} selected)
+                      </span>
+                    )}
+                  </div>
+                  {isCadetsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
+                </Button>
+              </CollapsibleTrigger>
+              <CollapsibleContent className="space-y-2 pt-2">
+                <MultiSelectProfiles
+                  value={selectedCadetIds}
+                  onChange={setSelectedCadetIds}
+                />
+              </CollapsibleContent>
+            </Collapsible>
           </div>
 
           {/* Judge Number */}
@@ -161,6 +181,12 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
               <h3 className="text-lg font-semibold mb-4">
                 Score Sheet: {selectedTemplate.template_name}
               </h3>
+              <div className="mb-4 p-3 bg-muted rounded-md">
+                <h4 className="text-sm font-medium mb-2">Debug Info:</h4>
+                <pre className="text-xs overflow-auto">
+                  {JSON.stringify(selectedTemplate.scores, null, 2)}
+                </pre>
+              </div>
               <EventScoreForm
                 templateScores={selectedTemplate.scores as Record<string, any>}
                 onScoreChange={handleScoreChange}
