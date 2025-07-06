@@ -52,10 +52,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     onChange(jsonStructure);
   };
 
-  const loadPreset = (presetFields: JsonField[]) => {
-    setFields(presetFields);
-    updateJson(presetFields);
-  };
 
   const editField = (field: JsonField) => {
     setEditingFieldId(field.id);
@@ -137,7 +133,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     currentField,
     dropdownValues,
     setDropdownValues,
-    loadPreset,
     editField,
     cancelEdit,
     addField,
