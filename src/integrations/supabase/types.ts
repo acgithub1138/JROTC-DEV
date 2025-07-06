@@ -142,33 +142,39 @@ export type Database = {
           competition_id: string
           created_at: string
           id: string
+          judge_number: Database["public"]["Enums"]["judge_number"] | null
           notes: string | null
           placement: number | null
           school_id: string
           score: number | null
           team_id: string | null
+          team_name: string | null
         }
         Insert: {
           cadet_id?: string | null
           competition_id: string
           created_at?: string
           id?: string
+          judge_number?: Database["public"]["Enums"]["judge_number"] | null
           notes?: string | null
           placement?: number | null
           school_id: string
           score?: number | null
           team_id?: string | null
+          team_name?: string | null
         }
         Update: {
           cadet_id?: string | null
           competition_id?: string
           created_at?: string
           id?: string
+          judge_number?: Database["public"]["Enums"]["judge_number"] | null
           notes?: string | null
           placement?: number | null
           school_id?: string
           score?: number | null
           team_id?: string | null
+          team_name?: string | null
         }
         Relationships: [
           {
@@ -1870,6 +1876,17 @@ export type Database = {
         | "navy"
         | "marine_corps"
         | "space_force"
+      judge_number:
+        | "Judge 1"
+        | "Judge 2"
+        | "Judge 3"
+        | "Judge 4"
+        | "Judge 5"
+        | "Judge 6"
+        | "Judge 7"
+        | "Judge 8"
+        | "Judge 9"
+        | "Judge 10"
       payment_method: "cash" | "check" | "debit_card" | "credit_card" | "other"
       rank_type:
         | "cadet_private"
@@ -2071,6 +2088,18 @@ export const Constants = {
         "navy",
         "marine_corps",
         "space_force",
+      ],
+      judge_number: [
+        "Judge 1",
+        "Judge 2",
+        "Judge 3",
+        "Judge 4",
+        "Judge 5",
+        "Judge 6",
+        "Judge 7",
+        "Judge 8",
+        "Judge 9",
+        "Judge 10",
       ],
       payment_method: ["cash", "check", "debit_card", "credit_card", "other"],
       rank_type: [

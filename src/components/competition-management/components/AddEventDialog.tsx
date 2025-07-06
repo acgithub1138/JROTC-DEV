@@ -2,10 +2,12 @@ import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { EventScoreForm } from './EventScoreForm';
+import { MultiSelectProfiles } from '../../inventory-management/components/MultiSelectProfiles';
 
 interface AddEventDialogProps {
   open: boolean;
@@ -21,7 +23,9 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   onEventCreated
 }) => {
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
-  const [selectedCadetId, setSelectedCadetId] = useState<string>('');
+  const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
+  const [judgeNumber, setJudgeNumber] = useState<string>('');
+  const [teamName, setTeamName] = useState<string>('');
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -32,30 +36,43 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
   const activeCadets = cadets.filter(user => user.role === 'cadet');
 
+  // Judge number options
+  const judgeOptions = [
+    'Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5',
+    'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10'
+  ];
+
   const handleSubmit = async () => {
-    if (!selectedTemplateId || !selectedCadetId) {
+    if (!selectedTemplateId || selectedCadetIds.length === 0) {
       return;
     }
 
     setIsSubmitting(true);
     try {
-      const eventData = {
-        cadet_id: selectedCadetId,
-        event: selectedTemplate?.event,
-        score_sheet: {
-          template_id: selectedTemplateId,
-          template_name: selectedTemplate?.template_name,
-          scores: scores,
-          calculated_at: new Date().toISOString()
-        },
-        total_points: totalPoints
-      };
+      // Create an event for each selected cadet
+      for (const cadetId of selectedCadetIds) {
+        const eventData = {
+          cadet_id: cadetId,
+          event: selectedTemplate?.event,
+          judge_number: judgeNumber || null,
+          team_name: teamName || null,
+          score_sheet: {
+            template_id: selectedTemplateId,
+            template_name: selectedTemplate?.template_name,
+            scores: scores,
+            calculated_at: new Date().toISOString()
+          },
+          total_points: totalPoints
+        };
 
-      await onEventCreated(eventData);
+        await onEventCreated(eventData);
+      }
       
       // Reset form
       setSelectedTemplateId('');
-      setSelectedCadetId('');
+      setSelectedCadetIds([]);
+      setJudgeNumber('');
+      setTeamName('');
       setScores({});
       setTotalPoints(0);
       onOpenChange(false);
@@ -71,7 +88,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     setTotalPoints(newTotal);
   };
 
-  const isFormValid = selectedTemplateId && selectedCadetId;
+  const isFormValid = selectedTemplateId && selectedCadetIds.length > 0;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -104,24 +121,38 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
 
           {/* Cadet Selection */}
           <div className="space-y-2">
-            <Label>Cadet</Label>
-            <Select 
-              value={selectedCadetId} 
-              onValueChange={setSelectedCadetId}
-              disabled={cadetsLoading}
-            >
+            <Label>Cadets</Label>
+            <MultiSelectProfiles
+              value={selectedCadetIds}
+              onChange={setSelectedCadetIds}
+            />
+          </div>
+
+          {/* Judge Number */}
+          <div className="space-y-2">
+            <Label>Judge Number (Optional)</Label>
+            <Select value={judgeNumber} onValueChange={setJudgeNumber}>
               <SelectTrigger>
-                <SelectValue placeholder="Select cadet..." />
+                <SelectValue placeholder="Select judge..." />
               </SelectTrigger>
               <SelectContent>
-                {activeCadets.map((cadet) => (
-                  <SelectItem key={cadet.id} value={cadet.id}>
-                    {cadet.first_name} {cadet.last_name}
-                    {cadet.grade && ` (${cadet.grade})`}
+                {judgeOptions.map((judge) => (
+                  <SelectItem key={judge} value={judge}>
+                    {judge}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          {/* Team Name */}
+          <div className="space-y-2">
+            <Label>Team Name (Optional)</Label>
+            <Input
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+              placeholder="Enter team name..."
+            />
           </div>
 
           {/* Score Form */}

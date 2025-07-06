@@ -22,7 +22,10 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   const [totalPoints, setTotalPoints] = useState(0);
 
   // Parse template fields from the JSON structure
-  const fields: JsonField[] = templateScores.fields || [];
+  const fields: JsonField[] = templateScores?.fields || [];
+
+  console.log('Template scores:', templateScores);
+  console.log('Fields:', fields);
 
   const calculateTotal = (currentScores: Record<string, any>) => {
     let total = 0;
@@ -173,6 +176,15 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
     setTotalPoints(initialTotal);
     onScoreChange(initialScores, initialTotal);
   }, []);
+
+  if (!templateScores || !fields || fields.length === 0) {
+    return (
+      <div className="text-center py-8 text-muted-foreground">
+        <p>No scoring fields found in this template.</p>
+        <p className="text-sm mt-2">Please check the template configuration.</p>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
