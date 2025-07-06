@@ -104,19 +104,6 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </div>
         )}
 
-        {currentField.type === 'number' && (
-          <div className="space-y-2">
-            <Label htmlFor="pointValue">Point Value</Label>
-            <Input 
-              id="pointValue" 
-              type="number" 
-              value={currentField.pointValue || 10} 
-              onChange={e => onFieldUpdate('pointValue', parseInt(e.target.value))} 
-              placeholder="e.g., 10, 30" 
-            />
-          </div>
-        )}
-
         <div className="flex items-center space-x-2">
           <Switch 
             id="penalty" 

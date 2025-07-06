@@ -28,7 +28,6 @@ export const FieldList: React.FC<FieldListProps> = ({ fields, onEditField, onRem
                   <span>({field.type.replace('_', ' ')}</span>
                   {field.type === 'text' && `, ${field.textType === 'notes' ? '2500' : '75'} chars`}
                   {field.type === 'number' && `, max: ${field.maxValue}`}
-                  {field.pointValue && `, ${field.pointValue} pts`}
                   {field.penalty && ', penalty'}
                   {field.values && `, ${field.values.length} options`})
                 </div>

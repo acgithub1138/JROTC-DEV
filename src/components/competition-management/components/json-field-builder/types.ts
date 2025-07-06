@@ -6,7 +6,6 @@ export interface JsonField {
   textType?: 'short' | 'notes'; // For text fields
   values?: string[];
   maxValue?: number; // For number fields
-  pointValue?: number; // Point value for this field
   penalty: boolean;
   penaltyValue?: number; // Specific penalty amount
   // Scoring scale specific

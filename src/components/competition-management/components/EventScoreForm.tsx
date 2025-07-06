@@ -88,7 +88,6 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
                   placeholder={`Max: ${field.maxValue || 'N/A'}`}
                   className="w-32"
                 />
-                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
               </div>
             </div>
             {field.fieldInfo && (
@@ -115,7 +114,6 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
                     ))}
                   </SelectContent>
                 </Select>
-                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
               </div>
             </div>
             {field.fieldInfo && (
@@ -137,7 +135,6 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
                   onChange={(e) => handleFieldChange(field.id, e.target.value)}
                   className="w-32"
                 />
-                {field.pointValue && <span className="text-sm">{field.pointValue} pts</span>}
               </div>
             </div>
             {field.fieldInfo && (

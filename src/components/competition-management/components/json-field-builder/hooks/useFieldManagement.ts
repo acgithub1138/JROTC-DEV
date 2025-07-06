@@ -25,8 +25,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         textType: criterion.maxLength > 75 ? 'notes' : 'short',
         values: criterion.options,
         maxValue: criterion.maxValue,
-        pointValue: criterion.pointValue,
-        penaltyValue: criterion.penaltyValue,
         scaleRanges: criterion.scaleRanges,
         penalty: criterion.penalty || false
       }));
@@ -42,8 +40,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         fieldInfo: field.fieldInfo,
         maxLength: field.type === 'text' ? (field.textType === 'notes' ? 2500 : 75) : undefined,
         maxValue: field.type === 'number' ? field.maxValue : undefined,
-        pointValue: field.pointValue,
-        penaltyValue: field.penaltyValue,
         scaleRanges: field.scaleRanges,
         penalty: field.penalty,
         ...(field.values && {
@@ -63,8 +59,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       textType: field.textType,
       fieldInfo: field.fieldInfo,
       maxValue: field.maxValue,
-      pointValue: field.pointValue,
-      penaltyValue: field.penaltyValue,
       scaleRanges: field.scaleRanges,
       penalty: field.penalty,
       values: field.values
@@ -95,8 +89,6 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       textType: currentField.textType || 'short',
       fieldInfo: currentField.fieldInfo,
       maxValue: currentField.maxValue || 100,
-      pointValue: currentField.pointValue,
-      penaltyValue: currentField.penaltyValue,
       scaleRanges: currentField.scaleRanges,
       penalty: currentField.penalty || false,
       ...(currentField.type === 'dropdown' && {
