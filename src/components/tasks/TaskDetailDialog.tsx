@@ -192,7 +192,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 variant="default"
               >
                 <Check className="w-4 h-4" />
-                Complete Task
+                Complete
               </Button>
             )}
           </div>
