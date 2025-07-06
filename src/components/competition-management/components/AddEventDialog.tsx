@@ -181,12 +181,6 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
               <h3 className="text-lg font-semibold mb-4">
                 Score Sheet: {selectedTemplate.template_name}
               </h3>
-              <div className="mb-4 p-3 bg-muted rounded-md">
-                <h4 className="text-sm font-medium mb-2">Debug Info:</h4>
-                <pre className="text-xs overflow-auto">
-                  {JSON.stringify(selectedTemplate.scores, null, 2)}
-                </pre>
-              </div>
               <EventScoreForm
                 templateScores={selectedTemplate.scores as Record<string, any>}
                 onScoreChange={handleScoreChange}
