@@ -31,9 +31,9 @@ export const airForceArmedColorGuard: JsonField[] = [
   { id: '28', name: 'OVERALL TECHNICAL SCORE', type: 'number', maxValue: 20, pointValue: 20, penalty: false },
   { id: '29', name: 'OVERALL PRECISION SCORE', type: 'number', maxValue: 20, pointValue: 20, penalty: false },
   { id: '30', name: 'Penalties', type: 'section_header', penalty: false },
-  { id: '31', name: 'Boundary Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
-  { id: '32', name: 'Incorrect Commands', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
-  { id: '33', name: 'Pause Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
-  { id: '34', name: 'Uniform/Improper Sequence', type: 'penalty_checkbox', penaltyValue: 1, penalty: true },
-  { id: '35', name: 'Uniform Violations', type: 'penalty_checkbox', penaltyValue: 1, penalty: true }
+  { id: '31', name: 'Boundary Violations', type: 'text', penalty: false },
+  { id: '32', name: 'Incorrect Commands', type: 'text', penalty: false },
+  { id: '33', name: 'Pause Violations', type: 'text', penalty: false },
+  { id: '34', name: 'Uniform/Improper Sequence', type: 'text', penalty: false },
+  { id: '35', name: 'Uniform Violations', type: 'text', penalty: false }
 ];

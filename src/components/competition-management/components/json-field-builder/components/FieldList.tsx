@@ -28,10 +28,6 @@ export const FieldList: React.FC<FieldListProps> = ({ fields, onEditField, onRem
                   <span>({field.type.replace('_', ' ')}</span>
                   {field.type === 'text' && `, ${field.textType === 'notes' ? '2500' : '75'} chars`}
                   {field.type === 'number' && `, max: ${field.maxValue}`}
-                  {field.type === 'scoring_scale' && field.scaleRanges && 
-                    `, ${field.scaleRanges.poor.min}-${field.scaleRanges.poor.max}/${field.scaleRanges.average.min}-${field.scaleRanges.average.max}/${field.scaleRanges.exceptional.min}-${field.scaleRanges.exceptional.max}`
-                  }
-                  {field.type === 'penalty_checkbox' && `, -${field.penaltyValue} pts`}
                   {field.pointValue && `, ${field.pointValue} pts`}
                   {field.penalty && ', penalty'}
                   {field.values && `, ${field.values.length} options`})

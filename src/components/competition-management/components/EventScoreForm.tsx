@@ -45,16 +45,6 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
       if (field.type === 'number' && fieldValue) {
         total += Number(fieldValue) || 0;
       }
-      
-      if (field.type === 'scoring_scale' && fieldValue) {
-        // For scoring scales, use the entered score
-        total += Number(fieldValue) || 0;
-      }
-      
-      if (field.type === 'penalty_checkbox' && fieldValue === true) {
-        // Subtract penalty value
-        total -= field.penaltyValue || 0;
-      }
     });
     
     return Math.max(0, total); // Ensure total doesn't go below 0
@@ -95,29 +85,8 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
               placeholder={`Max: ${field.maxValue || 'N/A'}`}
             />
-            {field.pointValue && (
-              <p className="text-sm text-muted-foreground">Point value: {field.pointValue}</p>
-            )}
-          </div>
-        );
-
-      case 'scoring_scale':
-        return (
-          <div key={field.id} className="space-y-2">
-            <Label htmlFor={field.id}>{field.name}</Label>
-            <Input
-              id={field.id}
-              type="number"
-              min="0"
-              value={fieldValue || ''}
-              onChange={(e) => handleFieldChange(field.id, e.target.value)}
-            />
-            {field.scaleRanges && (
-              <div className="text-xs text-muted-foreground space-y-1">
-                <p>Poor: {field.scaleRanges.poor.min}-{field.scaleRanges.poor.max}</p>
-                <p>Average: {field.scaleRanges.average.min}-{field.scaleRanges.average.max}</p>
-                <p>Exceptional: {field.scaleRanges.exceptional.min}-{field.scaleRanges.exceptional.max}</p>
-              </div>
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
             )}
           </div>
         );
@@ -138,26 +107,8 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
                 ))}
               </SelectContent>
             </Select>
-          </div>
-        );
-
-      case 'penalty_checkbox':
-        return (
-          <div key={field.id} className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id={field.id}
-                checked={fieldValue === true}
-                onCheckedChange={(checked) => handleFieldChange(field.id, checked)}
-              />
-              <Label htmlFor={field.id} className="text-destructive">
-                {field.name}
-              </Label>
-            </div>
-            {field.penaltyValue && (
-              <p className="text-sm text-muted-foreground">
-                Penalty: -{field.penaltyValue} points
-              </p>
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
             )}
           </div>
         );
@@ -172,6 +123,9 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
               value={fieldValue || ''}
               onChange={(e) => handleFieldChange(field.id, e.target.value)}
             />
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
+            )}
           </div>
         );
 

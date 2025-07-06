@@ -27,41 +27,6 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
                 );
               }
               
-              if (field.type === 'scoring_scale') {
-                return (
-                  <div key={field.id} className="grid grid-cols-5 gap-2 items-center py-2 border-b">
-                    <div className="font-medium">{field.name}</div>
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground">Poor</div>
-                      <div className="text-sm">{field.scaleRanges?.poor.min}-{field.scaleRanges?.poor.max}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground">Average</div>
-                      <div className="text-sm">{field.scaleRanges?.average.min}-{field.scaleRanges?.average.max}</div>
-                    </div>
-                    <div className="text-center">
-                      <div className="text-xs text-muted-foreground">Exceptional</div>
-                      <div className="text-sm">{field.scaleRanges?.exceptional.min}-{field.scaleRanges?.exceptional.max}</div>
-                    </div>
-                    <div className="text-center font-medium">
-                      {field.pointValue} pts
-                    </div>
-                  </div>
-                );
-              }
-              
-              if (field.type === 'penalty_checkbox') {
-                return (
-                  <div key={field.id} className="flex items-center justify-between py-1 border-b border-dashed">
-                    <div className="flex items-center gap-2">
-                      <input type="checkbox" disabled className="w-4 h-4" />
-                      <span className="text-sm">{field.name}</span>
-                    </div>
-                    <span className="text-sm text-destructive">-{field.penaltyValue} pts</span>
-                  </div>
-                );
-              }
-              
               return (
                 <div key={field.id} className="flex items-center justify-between py-2 border-b">
                   <span className="font-medium">{field.name}</span>

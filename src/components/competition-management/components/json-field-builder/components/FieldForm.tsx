@@ -40,6 +40,16 @@ export const FieldForm: React.FC<FieldFormProps> = ({
         </div>
 
         <div className="space-y-2">
+          <Label htmlFor="fieldInfo">Field Info</Label>
+          <Input 
+            id="fieldInfo" 
+            value={currentField.fieldInfo || ''} 
+            onChange={e => onFieldUpdate('fieldInfo', e.target.value)} 
+            placeholder="Information to display under the field..." 
+          />
+        </div>
+
+        <div className="space-y-2">
           <Label htmlFor="fieldType">Field Type</Label>
           <Select value={currentField.type} onValueChange={value => onFieldUpdate('type', value as JsonField['type'])}>
             <SelectTrigger>
@@ -47,11 +57,9 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             </SelectTrigger>
             <SelectContent>
               <SelectItem value="section_header">Section Header</SelectItem>
-              <SelectItem value="scoring_scale">Scoring Scale (Poor/Average/Exceptional)</SelectItem>
               <SelectItem value="text">Text</SelectItem>
               <SelectItem value="number">Number</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
-              <SelectItem value="penalty_checkbox">Penalty Checkbox</SelectItem>
               <SelectItem value="calculated">Calculated Field</SelectItem>
             </SelectContent>
           </Select>
@@ -96,97 +104,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </div>
         )}
 
-        {currentField.type === 'scoring_scale' && (
-          <div className="space-y-4 md:col-span-2">
-            <Label>Scoring Scale Ranges</Label>
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label className="text-sm">Poor Range</Label>
-                <div className="flex gap-1">
-                  <Input 
-                    type="number" 
-                    placeholder="Min" 
-                    value={currentField.scaleRanges?.poor?.min || 1} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      poor: { ...currentField.scaleRanges?.poor, min: parseInt(e.target.value) || 1 }
-                    })} 
-                  />
-                  <Input 
-                    type="number" 
-                    placeholder="Max" 
-                    value={currentField.scaleRanges?.poor?.max || 2} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      poor: { ...currentField.scaleRanges?.poor, max: parseInt(e.target.value) || 2 }
-                    })} 
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm">Average Range</Label>
-                <div className="flex gap-1">
-                  <Input 
-                    type="number" 
-                    placeholder="Min" 
-                    value={currentField.scaleRanges?.average?.min || 3} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      average: { ...currentField.scaleRanges?.average, min: parseInt(e.target.value) || 3 }
-                    })} 
-                  />
-                  <Input 
-                    type="number" 
-                    placeholder="Max" 
-                    value={currentField.scaleRanges?.average?.max || 8} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      average: { ...currentField.scaleRanges?.average, max: parseInt(e.target.value) || 8 }
-                    })} 
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label className="text-sm">Exceptional Range</Label>
-                <div className="flex gap-1">
-                  <Input 
-                    type="number" 
-                    placeholder="Min" 
-                    value={currentField.scaleRanges?.exceptional?.min || 9} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      exceptional: { ...currentField.scaleRanges?.exceptional, min: parseInt(e.target.value) || 9 }
-                    })} 
-                  />
-                  <Input 
-                    type="number" 
-                    placeholder="Max" 
-                    value={currentField.scaleRanges?.exceptional?.max || 10} 
-                    onChange={e => onFieldUpdate('scaleRanges', {
-                      ...currentField.scaleRanges, 
-                      exceptional: { ...currentField.scaleRanges?.exceptional, max: parseInt(e.target.value) || 10 }
-                    })} 
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {currentField.type === 'penalty_checkbox' && (
-          <div className="space-y-2">
-            <Label htmlFor="penaltyValue">Penalty Value</Label>
-            <Input 
-              id="penaltyValue" 
-              type="number" 
-              value={currentField.penaltyValue || 1} 
-              onChange={e => onFieldUpdate('penaltyValue', parseInt(e.target.value))} 
-              placeholder="e.g., 1, 2, 5" 
-            />
-          </div>
-        )}
-
-        {(currentField.type === 'scoring_scale' || currentField.type === 'number' || currentField.type === 'penalty_checkbox') && (
+        {currentField.type === 'number' && (
           <div className="space-y-2">
             <Label htmlFor="pointValue">Point Value</Label>
             <Input 
