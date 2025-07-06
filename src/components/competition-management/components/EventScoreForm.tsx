@@ -21,11 +21,20 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   const [scores, setScores] = useState<Record<string, any>>(initialScores);
   const [totalPoints, setTotalPoints] = useState(0);
 
-  // Parse template fields from the JSON structure
-  const fields: JsonField[] = templateScores?.fields || [];
+  // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
+  const rawFields = templateScores?.criteria || [];
+  
+  // Convert template criteria to JsonField format and ensure each field has an ID
+  const fields: JsonField[] = rawFields.map((field: any, index: number) => ({
+    ...field,
+    id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
+    // Convert penalty boolean to penaltyValue for scoring
+    penaltyValue: field.penalty && field.penaltyValue ? field.penaltyValue : (field.penalty ? 5 : 0)
+  }));
 
   console.log('Template scores:', templateScores);
-  console.log('Fields:', fields);
+  console.log('Raw criteria:', rawFields);
+  console.log('Processed fields:', fields);
 
   const calculateTotal = (currentScores: Record<string, any>) => {
     let total = 0;
