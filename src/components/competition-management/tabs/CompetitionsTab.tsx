@@ -3,7 +3,11 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
+import { AddEventDialog } from '../components/AddEventDialog';
+import { EventsList } from '../components/EventsList';
 import { useCompetitions } from '../hooks/useCompetitions';
+import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -11,6 +15,8 @@ type Competition = Database['public']['Tables']['competitions']['Row'];
 export const CompetitionsTab = () => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
+  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   
   const {
     competitions,
@@ -20,6 +26,13 @@ export const CompetitionsTab = () => {
     deleteCompetition
   } = useCompetitions();
 
+  const {
+    events,
+    isLoading: eventsLoading,
+    createEvent,
+    deleteEvent
+  } = useCompetitionEvents(selectedCompetition?.id);
+
   const handleSubmit = async (data: any) => {
     if (editingCompetition) {
       await updateCompetition(editingCompetition.id, data);
@@ -28,6 +41,15 @@ export const CompetitionsTab = () => {
       await createCompetition(data);
       setShowAddDialog(false);
     }
+  };
+
+  const handleAddEvent = (competition: Competition) => {
+    setSelectedCompetition(competition);
+    setShowAddEventDialog(true);
+  };
+
+  const handleEventCreated = async (eventData: any) => {
+    await createEvent(eventData);
   };
 
   return (
@@ -45,12 +67,49 @@ export const CompetitionsTab = () => {
         </Button>
       </div>
 
-      <BasicCompetitionTable
-        competitions={competitions}
-        isLoading={isLoading}
-        onEdit={setEditingCompetition}
-        onDelete={deleteCompetition}
-      />
+      <Tabs defaultValue="competitions" className="w-full">
+        <TabsList>
+          <TabsTrigger value="competitions">Competitions</TabsTrigger>
+          {selectedCompetition && (
+            <TabsTrigger value="events">
+              {selectedCompetition.name} - Events
+            </TabsTrigger>
+          )}
+        </TabsList>
+        
+        <TabsContent value="competitions" className="space-y-4">
+          <BasicCompetitionTable
+            competitions={competitions}
+            isLoading={isLoading}
+            onEdit={setEditingCompetition}
+            onDelete={deleteCompetition}
+            onAddEvent={handleAddEvent}
+          />
+        </TabsContent>
+
+        {selectedCompetition && (
+          <TabsContent value="events" className="space-y-4">
+            <div className="flex justify-between items-center">
+              <div>
+                <h3 className="text-xl font-semibold">{selectedCompetition.name} - Events</h3>
+                <p className="text-muted-foreground">
+                  Competition held on {new Date(selectedCompetition.competition_date).toLocaleDateString()}
+                </p>
+              </div>
+              <Button onClick={() => setShowAddEventDialog(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Event
+              </Button>
+            </div>
+            
+            <EventsList
+              events={events}
+              isLoading={eventsLoading}
+              onDeleteEvent={deleteEvent}
+            />
+          </TabsContent>
+        )}
+      </Tabs>
 
       <CompetitionDialog
         open={showAddDialog || !!editingCompetition}
@@ -63,6 +122,15 @@ export const CompetitionsTab = () => {
         competition={editingCompetition as any}
         onSubmit={handleSubmit}
       />
+
+      {selectedCompetition && (
+        <AddEventDialog
+          open={showAddEventDialog}
+          onOpenChange={setShowAddEventDialog}
+          competitionId={selectedCompetition.id}
+          onEventCreated={handleEventCreated}
+        />
+      )}
     </div>
   );
 };
