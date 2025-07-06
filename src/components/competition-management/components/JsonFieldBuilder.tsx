@@ -73,6 +73,39 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
 
   const loadPreset = (presetName: string) => {
     const presets: Record<string, JsonField[]> = {
+      'air_force_armed_regulation': [
+        { id: '1', name: 'Drill Commands & Movements', type: 'section_header', penalty: false },
+        { id: '2', name: 'Forward March (ENTER)', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '3', name: 'Inspection, Port, Order Arms', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '4', name: 'Report In (VERBAL)', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '5', name: 'Parade Rest', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '6', name: 'Attention', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '7', name: '15-COUNT MANUAL ARMS', type: 'scoring_scale', pointValue: 28, penalty: false, scaleRanges: { poor: { min: 1, max: 8 }, average: { min: 9, max: 20 }, exceptional: { min: 21, max: 28 } } },
+        { id: '8', name: 'Count Off', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '9', name: 'Open Ranks', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '10', name: 'Close Ranks', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '11', name: 'Left Step March / Flight Halt', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '12', name: 'Left Face', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '13', name: 'Right Step March / FLIGHT HALT', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '14', name: 'About Face', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '15', name: 'Right Shoulder Arms', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '16', name: 'Forward March', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '17', name: 'Column Right March (Forward Mch)', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '18', name: 'FLIGHT HALT', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '19', name: 'Port Arms', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '20', name: 'Column Left March (Forward Mch)', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '21', name: 'FLIGHT HALT / Order Arms', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '22', name: 'Report Out (VERBAL)', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '23', name: 'Depart the Drill Floor', type: 'scoring_scale', pointValue: 7, penalty: false, scaleRanges: { poor: { min: 1, max: 2 }, average: { min: 3, max: 5 }, exceptional: { min: 6, max: 7 } } },
+        { id: '24', name: 'Penalties', type: 'section_header', penalty: false },
+        { id: '25', name: 'Boundary Violations (10 pts each)', type: 'penalty_checkbox', penaltyValue: 10, penalty: true },
+        { id: '26', name: 'Incorrect Commands (5 pts each)', type: 'penalty_checkbox', penaltyValue: 5, penalty: true },
+        { id: '27', name: 'Pause Violations (5 pts each)', type: 'penalty_checkbox', penaltyValue: 5, penalty: true },
+        { id: '28', name: 'Uniform Violations - Minor (20 pts)', type: 'penalty_checkbox', penaltyValue: 20, penalty: true },
+        { id: '29', name: 'Uniform Violations - Major (50 pts)', type: 'penalty_checkbox', penaltyValue: 50, penalty: true },
+        { id: '30', name: 'Technical Impression (0-15 pts)', type: 'penalty_checkbox', penaltyValue: 15, penalty: true },
+        { id: '31', name: 'Precision Impression (0-15 pts)', type: 'penalty_checkbox', penaltyValue: 15, penalty: true }
+      ],
       'air_force_armed_dual_exhibition': [
         { id: '1', name: 'Performance Overview', type: 'section_header', penalty: false },
         { id: '2', name: 'REPORT IN & REPORT OUT', type: 'scoring_scale', pointValue: 15, penalty: false, scaleRanges: { poor: { min: 1, max: 3 }, average: { min: 4, max: 12 }, exceptional: { min: 13, max: 15 } } },
@@ -183,7 +216,8 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
       'air_force_armed_color_guard': 'Air Force - Armed Color Guard',
       'air_force_armed_dual_exhibition': 'Air Force - Armed Dual Exhibition',
       'air_force_armed_exhibition': 'Air Force - Armed Exhibition',
-      'air_force_armed_inspection': 'Air Force - Armed Inspection'
+      'air_force_armed_inspection': 'Air Force - Armed Inspection',
+      'air_force_armed_regulation': 'Air Force - Armed Regulation'
     };
     
     return Object.entries(presetMap)
