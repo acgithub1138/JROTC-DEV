@@ -184,17 +184,26 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 onEditStateChange={setEditState}
               />
             </DialogTitle>
-            {currentTask.status !== 'done' && (
+            <div className="flex items-center gap-2">
+              {currentTask.status !== 'done' && (
+                <Button
+                  type="button"
+                  onClick={handleCompleteTask}
+                  className="flex items-center gap-2"
+                  variant="default"
+                >
+                  <Check className="w-4 h-4" />
+                  Complete
+                </Button>
+              )}
               <Button
                 type="button"
-                onClick={handleCompleteTask}
-                className="flex items-center gap-2"
-                variant="default"
+                onClick={() => onOpenChange(false)}
+                variant="outline"
               >
-                <Check className="w-4 h-4" />
-                Complete
+                Close
               </Button>
-            )}
+            </div>
           </div>
         </DialogHeader>
 
