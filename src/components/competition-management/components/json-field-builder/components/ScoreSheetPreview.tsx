@@ -27,18 +27,6 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
                 );
               }
               
-              if (field.type === 'pause') {
-                return (
-                  <div key={field.id} className="py-2">
-                    <div className="bg-muted px-3 py-2 rounded">
-                      <span className="font-bold">{field.name}</span>
-                    </div>
-                    {field.fieldInfo && (
-                      <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
-                    )}
-                  </div>
-                );
-              }
               
               if (field.type === 'label') {
                 return (
@@ -54,7 +42,9 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
               return (
                 <div key={field.id} className="py-2 border-b space-y-2">
                     <div className="flex items-center justify-between">
-                      <span className="font-medium">{field.name}</span>
+                      <span className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                        {field.name}
+                      </span>
                       <div className="flex items-center gap-2">
                         <input className="border rounded px-2 py-1 w-32" disabled />
                       </div>

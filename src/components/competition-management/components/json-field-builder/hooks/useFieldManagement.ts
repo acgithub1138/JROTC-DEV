@@ -10,7 +10,8 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     textType: 'short',
     values: [],
     maxValue: 100,
-    penalty: false
+    penalty: false,
+    pauseField: false
   });
   const [dropdownValues, setDropdownValues] = useState('');
 
@@ -26,7 +27,8 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         values: criterion.options,
         maxValue: criterion.maxValue,
         scaleRanges: criterion.scaleRanges,
-        penalty: criterion.penalty || false
+        penalty: criterion.penalty || false,
+        pauseField: criterion.pauseField || false
       }));
       setFields(initialFields);
     }
@@ -42,6 +44,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         maxValue: field.type === 'number' ? field.maxValue : undefined,
         scaleRanges: field.scaleRanges,
         penalty: field.penalty,
+        pauseField: field.pauseField,
         ...(field.values && {
           options: field.values
         })
@@ -61,6 +64,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       maxValue: field.maxValue,
       scaleRanges: field.scaleRanges,
       penalty: field.penalty,
+      pauseField: field.pauseField,
       values: field.values
     });
     setDropdownValues(field.values ? field.values.join(', ') : '');
@@ -74,7 +78,8 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       textType: 'short',
       values: [],
       maxValue: 100,
-      penalty: false
+      penalty: false,
+      pauseField: false
     });
     setDropdownValues('');
   };
@@ -91,6 +96,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       maxValue: currentField.maxValue || 100,
       scaleRanges: currentField.scaleRanges,
       penalty: currentField.penalty || false,
+      pauseField: currentField.pauseField || false,
       ...(currentField.type === 'dropdown' && {
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)
       })

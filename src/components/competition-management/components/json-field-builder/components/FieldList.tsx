@@ -29,6 +29,7 @@ export const FieldList: React.FC<FieldListProps> = ({ fields, onEditField, onRem
                   {field.type === 'text' && `, ${field.textType === 'notes' ? '2500' : '75'} chars`}
                   {field.type === 'number' && `, max: ${field.maxValue}`}
                   {field.penalty && ', penalty'}
+                  {field.pauseField && ', pause'}
                   {field.values && `, ${field.values.length} options`})
                 </div>
               </div>

@@ -72,17 +72,6 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
           </div>
         );
 
-      case 'pause':
-        return (
-          <div key={field.id} className="py-2">
-            <div className="bg-muted px-3 py-2 rounded">
-              <span className="font-bold">{field.name}</span>
-            </div>
-            {field.fieldInfo && (
-              <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
-            )}
-          </div>
-        );
 
       case 'label':
         return (
@@ -98,7 +87,9 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
         return (
           <div key={field.id} className="py-2 border-b space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
               <div className="flex items-center gap-2">
                 <Input
                   id={field.id}
@@ -122,7 +113,9 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
         return (
           <div key={field.id} className="py-2 border-b space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
               <div className="flex items-center gap-2">
                 <Select value={fieldValue || ''} onValueChange={(value) => handleFieldChange(field.id, value)}>
                   <SelectTrigger className="w-32">
@@ -148,7 +141,9 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
         return (
           <div key={field.id} className="py-2 border-b space-y-2">
             <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className="font-medium">{field.name}</Label>
+              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
               <div className="flex items-center gap-2">
                 <Input
                   id={field.id}

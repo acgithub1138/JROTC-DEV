@@ -1,12 +1,13 @@
 export interface JsonField {
   id: string;
   name: string;
-  type: 'text' | 'dropdown' | 'number' | 'section_header' | 'calculated' | 'pause' | 'label';
+  type: 'text' | 'dropdown' | 'number' | 'section_header' | 'calculated' | 'label';
   fieldInfo?: string; // Information text displayed under the field
   textType?: 'short' | 'notes'; // For text fields
   values?: string[];
   maxValue?: number; // For number fields
   penalty: boolean;
+  pauseField: boolean; // For pause field formatting
   penaltyValue?: number; // Specific penalty amount
   // Scoring scale specific
   scaleRanges?: {
