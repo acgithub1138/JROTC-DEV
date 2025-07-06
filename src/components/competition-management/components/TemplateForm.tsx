@@ -3,10 +3,12 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionTemplate } from '../types';
 import { JsonFieldBuilder } from './JsonFieldBuilder';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 type DatabaseCompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
 interface TemplateFormProps {
@@ -22,15 +24,19 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   useBuilder
 }) => {
   const { templates } = useCompetitionTemplates();
+  const { userProfile } = useAuth();
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
     description: (template as any)?.description || '',
     event: template?.event || 'Armed Regulation',
     jrotc_program: template?.jrotc_program || 'air_force',
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
-    is_active: template?.is_active ?? true
+    is_active: template?.is_active ?? true,
+    is_global: (template as any)?.is_global ?? false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const isAdmin = userProfile?.role === 'admin';
   const eventOptions = ['Armed Inspection', 'Armed Color Guard', 'Armed Exhibition', 'Armed Dual Exhibition', 'Armed Regulation', 'Armed Solo Exhibition', 'Unarmed Inspection', 'Unarmed Color Guard', 'Unarmed Exhibition', 'Unarmed Dual Exhibition', 'Unarmed Regulation'];
   const programOptions = [{
     value: 'air_force',
@@ -157,6 +163,22 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
           rows={3}
         />
       </div>
+
+      {isAdmin && (
+        <div className="flex items-center space-x-2">
+          <Checkbox
+            id="is_global"
+            checked={formData.is_global}
+            onCheckedChange={(checked) => updateFormData('is_global', checked)}
+          />
+          <Label htmlFor="is_global" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+            Global Template
+          </Label>
+          <p className="text-xs text-muted-foreground">
+            Global templates are visible to all schools and can only be edited by admins
+          </p>
+        </div>
+      )}
 
       <div className="space-y-4">        
         {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-2">

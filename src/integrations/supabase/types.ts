@@ -209,7 +209,9 @@ export type Database = {
           event: Database["public"]["Enums"]["comp_event_type"]
           id: string
           is_active: boolean
+          is_global: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          school_id: string | null
           scores: Json
           template_name: string
           updated_at: string
@@ -221,7 +223,9 @@ export type Database = {
           event: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           is_active?: boolean
+          is_global?: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          school_id?: string | null
           scores?: Json
           template_name: string
           updated_at?: string
@@ -233,12 +237,22 @@ export type Database = {
           event?: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           is_active?: boolean
+          is_global?: boolean
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"]
+          school_id?: string | null
           scores?: Json
           template_name?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "competition_templates_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       competitions: {
         Row: {

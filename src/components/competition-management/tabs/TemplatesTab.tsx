@@ -1,8 +1,11 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Plus } from 'lucide-react';
 import { TemplatesTable } from '../components/TemplatesTable';
 import { TemplateDialog } from '../components/TemplateDialog';
+import { TemplatePreviewDialog } from '../components/TemplatePreviewDialog';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
@@ -13,13 +16,19 @@ export const TemplatesTab = () => {
   const { userProfile } = useAuth();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<CompetitionTemplate | null>(null);
+  const [previewTemplate, setPreviewTemplate] = useState<CompetitionTemplate | null>(null);
   
   const {
     templates,
     isLoading,
+    showOnlyMyTemplates,
     createTemplate,
     updateTemplate,
-    deleteTemplate
+    deleteTemplate,
+    copyTemplate,
+    toggleMyTemplatesFilter,
+    canEditTemplate,
+    canCopyTemplate
   } = useCompetitionTemplates();
 
   const canManageTemplates = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
@@ -34,6 +43,10 @@ export const TemplatesTab = () => {
     }
   };
 
+  const handleCopy = async (templateId: string) => {
+    await copyTemplate(templateId);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -43,12 +56,22 @@ export const TemplatesTab = () => {
             Global templates for competition score sheets
           </p>
         </div>
-        {canManageTemplates && (
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Template
-          </Button>
-        )}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="my-templates"
+              checked={showOnlyMyTemplates}
+              onCheckedChange={toggleMyTemplatesFilter}
+            />
+            <Label htmlFor="my-templates">My Templates</Label>
+          </div>
+          {canManageTemplates && (
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Template
+            </Button>
+          )}
+        </div>
       </div>
 
       <TemplatesTable
@@ -56,6 +79,10 @@ export const TemplatesTab = () => {
         isLoading={isLoading}
         onEdit={canManageTemplates ? ((t: any) => setEditingTemplate(t)) : undefined}
         onDelete={canManageTemplates ? deleteTemplate : undefined}
+        onCopy={handleCopy}
+        onPreview={(t: any) => setPreviewTemplate(t)}
+        canEditTemplate={(t: any) => canEditTemplate(t)}
+        canCopyTemplate={(t: any) => canCopyTemplate(t)}
       />
 
       {canManageTemplates && (
@@ -71,6 +98,12 @@ export const TemplatesTab = () => {
           onSubmit={handleSubmit}
         />
       )}
+
+      <TemplatePreviewDialog
+        open={!!previewTemplate}
+        onOpenChange={(open) => !open && setPreviewTemplate(null)}
+        template={previewTemplate as any}
+      />
     </div>
   );
 };

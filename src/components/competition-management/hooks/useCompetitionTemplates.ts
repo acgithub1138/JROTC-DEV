@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 
 type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
@@ -8,17 +9,24 @@ type CompetitionTemplateInsert = Database['public']['Tables']['competition_templ
 type CompetitionTemplateUpdate = Database['public']['Tables']['competition_templates']['Update'];
 
 export const useCompetitionTemplates = () => {
+  const { userProfile } = useAuth();
   const [templates, setTemplates] = useState<CompetitionTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [showOnlyMyTemplates, setShowOnlyMyTemplates] = useState(false);
 
-  const fetchTemplates = async () => {
+  const fetchTemplates = async (myTemplatesOnly = false) => {
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('competition_templates')
         .select('*')
-        .eq('is_active', true)
-        .order('template_name');
+        .eq('is_active', true);
+
+      if (myTemplatesOnly) {
+        query = query.eq('school_id', userProfile?.school_id);
+      }
+
+      const { data, error } = await query.order('template_name');
 
       if (error) throw error;
       setTemplates(data || []);
@@ -32,9 +40,16 @@ export const useCompetitionTemplates = () => {
 
   const createTemplate = async (templateData: CompetitionTemplateInsert) => {
     try {
+      const user = await supabase.auth.getUser();
+      const dataWithMeta = {
+        ...templateData,
+        created_by: user.data.user?.id,
+        school_id: templateData.is_global ? null : userProfile?.school_id
+      };
+
       const { data, error } = await supabase
         .from('competition_templates')
-        .insert({ ...templateData, created_by: (await supabase.auth.getUser()).data.user?.id })
+        .insert(dataWithMeta)
         .select()
         .single();
 
@@ -91,16 +106,79 @@ export const useCompetitionTemplates = () => {
     }
   };
 
+  const copyTemplate = async (templateId: string) => {
+    try {
+      // First fetch the template to copy
+      const { data: originalTemplate, error: fetchError } = await supabase
+        .from('competition_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (fetchError) throw fetchError;
+
+      // Create a new template with copied data
+      const user = await supabase.auth.getUser();
+      const newTemplate = {
+        template_name: `${originalTemplate.template_name} (Copy)`,
+        description: originalTemplate.description,
+        event: originalTemplate.event,
+        jrotc_program: originalTemplate.jrotc_program,
+        scores: originalTemplate.scores,
+        is_global: false, // Copies are always school-specific
+        school_id: userProfile?.school_id,
+        created_by: user.data.user?.id
+      };
+
+      const { data, error } = await supabase
+        .from('competition_templates')
+        .insert(newTemplate)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setTemplates(prev => [data, ...prev]);
+      toast.success('Template copied successfully');
+      return data;
+    } catch (error) {
+      console.error('Error copying template:', error);
+      toast.error('Failed to copy template');
+      throw error;
+    }
+  };
+
+  const toggleMyTemplatesFilter = (value: boolean) => {
+    setShowOnlyMyTemplates(value);
+    fetchTemplates(value);
+  };
+
+  const canEditTemplate = (template: CompetitionTemplate) => {
+    if (userProfile?.role === 'admin') return true;
+    if (template.is_global) return false;
+    return template.school_id === userProfile?.school_id;
+  };
+
+  const canCopyTemplate = (template: CompetitionTemplate) => {
+    // Can copy if it's not owned by current school or if it's global
+    return template.school_id !== userProfile?.school_id || template.is_global;
+  };
+
   useEffect(() => {
-    fetchTemplates();
+    fetchTemplates(showOnlyMyTemplates);
   }, []);
 
   return {
     templates,
     isLoading,
+    showOnlyMyTemplates,
     createTemplate,
     updateTemplate,
     deleteTemplate,
-    refetch: fetchTemplates
+    copyTemplate,
+    toggleMyTemplatesFilter,
+    canEditTemplate,
+    canCopyTemplate,
+    refetch: () => fetchTemplates(showOnlyMyTemplates)
   };
 };

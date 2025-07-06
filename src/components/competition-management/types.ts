@@ -32,6 +32,9 @@ export interface CompetitionTemplate {
   jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   scores: Record<string, any>;
   is_active: boolean;
+  is_global: boolean;
+  school_id?: string;
+  description?: string;
   created_at: string;
   updated_at: string;
   created_by?: string;
