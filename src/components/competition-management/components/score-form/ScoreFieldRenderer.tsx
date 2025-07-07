@@ -90,6 +90,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
       case 'penalty':
+        console.log('Rendering penalty field:', field.name, 'Type:', field.type, 'Penalty:', field.penalty);
         return <div className="border-b space-y-2 py-[4px]">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className="font-medium text-destructive">
@@ -110,7 +111,56 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
           </div>;
+      case 'penalty_checkbox':
+        console.log('Rendering penalty_checkbox field:', field.name, 'Type:', field.type, 'Penalty:', field.penalty);
+        return <div className="border-b space-y-2 py-[4px]">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className="font-medium text-destructive">
+                {field.name}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input id={field.id} type="number" min="0" value={value || ''} onChange={e => onChange(field.id, e.target.value)} placeholder="Count" className="w-32" />
+              </div>
+            </div>
+            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+            {field.penaltyValue && <p className="text-xs text-destructive">Each penalty: -{field.penaltyValue} points</p>}
+          </div>;
+      case 'scoring_scale':
+        console.log('Rendering scoring_scale field:', field.name, 'Type:', field.type);
+        return <div className="border-b space-y-2 py-px">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input 
+                  id={field.id} 
+                  type="number" 
+                  min="0" 
+                  max={field.pointValue} 
+                  value={value || ''} 
+                  onChange={e => {
+                    const newValue = e.target.value;
+                    if (newValue === '' || (field.pointValue && Number(newValue) <= field.pointValue) || !field.pointValue) {
+                      onChange(field.id, newValue);
+                    }
+                  }} 
+                  placeholder={`Max: ${field.pointValue || 'N/A'}`} 
+                  className="w-32" 
+                />
+              </div>
+            </div>
+            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+            {field.scaleRanges && (
+              <div className="text-xs text-muted-foreground space-y-1">
+                <div>Poor: {field.scaleRanges.poor.min}-{field.scaleRanges.poor.max}</div>
+                <div>Average: {field.scaleRanges.average.min}-{field.scaleRanges.average.max}</div>
+                <div>Exceptional: {field.scaleRanges.exceptional.min}-{field.scaleRanges.exceptional.max}</div>
+              </div>
+            )}
+          </div>;
       default:
+        console.log('Unknown field type:', field.type, 'for field:', field.name);
         return null;
     }
   };
