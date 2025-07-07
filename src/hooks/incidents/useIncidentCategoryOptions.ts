@@ -17,7 +17,7 @@ export const useIncidentCategoryOptions = () => {
         throw error;
       }
 
-      return data || [];
+      return (data as CategoryOption[]) || [];
     },
   });
 

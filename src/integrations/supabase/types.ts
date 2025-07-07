@@ -1901,6 +1901,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_incident_category_values: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          value: string
+          label: string
+        }[]
+      }
       get_incident_status_values: {
         Args: Record<PropertyKey, never>
         Returns: {
