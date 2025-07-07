@@ -76,7 +76,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                         {option}
                       </SelectItem>
                     )) : (
-                      <SelectItem value="" disabled>No options available</SelectItem>
+                      <SelectItem value="no-options" disabled>No options available</SelectItem>
                     )}
                   </SelectContent>
                 </Select>
