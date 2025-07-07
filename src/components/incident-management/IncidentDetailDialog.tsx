@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, MessageSquare, Send, Save, X } from 'lucide-react';
+import { Edit, MessageSquare, Send, Save, X, ArrowUp, ArrowDown } from 'lucide-react';
 import { Incident, useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
@@ -81,6 +81,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { statusOptions } = useIncidentStatusOptions();
   
   const [newComment, setNewComment] = useState('');
+  const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
@@ -137,6 +138,16 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       setNewComment('');
     }
   };
+
+  const toggleSortOrder = () => {
+    setCommentsSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
+  };
+
+  const sortedComments = [...comments].sort((a, b) => {
+    const dateA = new Date(a.created_at).getTime();
+    const dateB = new Date(b.created_at).getTime();
+    return commentsSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+  });
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -326,9 +337,29 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
           {/* Comments Section */}
           <div>
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="w-5 h-5" />
-              <h3 className="font-semibold">Comments ({comments.length})</h3>
+            <div className="flex items-center justify-between mb-4">
+              <div className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                <h3 className="font-semibold">Comments ({comments.length})</h3>
+              </div>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={toggleSortOrder}
+                className="flex items-center gap-2"
+              >
+                {commentsSortOrder === 'asc' ? (
+                  <>
+                    <ArrowUp className="w-4 h-4" />
+                    Old to New
+                  </>
+                ) : (
+                  <>
+                    <ArrowDown className="w-4 h-4" />
+                    New to Old
+                  </>
+                )}
+              </Button>
             </div>
 
             {/* Add Comment */}
@@ -353,7 +384,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
             {/* Comments List */}
             <div className="space-y-3 max-h-60 overflow-y-auto">
-              {comments.map((comment) => (
+              {sortedComments.map((comment) => (
                 <div
                   key={comment.id}
                   className={`p-3 rounded-lg ${
@@ -376,7 +407,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
                 </div>
               ))}
-              {comments.length === 0 && (
+              {sortedComments.length === 0 && (
                 <p className="text-center text-gray-500 py-4">No comments yet.</p>
               )}
             </div>
