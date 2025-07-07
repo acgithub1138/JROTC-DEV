@@ -21,7 +21,7 @@ const incidentFormSchema = z.object({
   description: z.string().optional(),
   status: z.string().min(1, 'Status is required'),
   priority: z.string().min(1, 'Priority is required'),
-  category: z.enum(['technical', 'behavioral', 'safety', 'other']),
+  category: z.string().min(1, 'Category is required'),
   assigned_to: z.string().optional(),
 });
 
@@ -48,6 +48,8 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
   const { categoryOptions } = useIncidentCategoryOptions();
 
   const isAdmin = userProfile?.role === 'admin';
+  const isInstructor = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canSetAdvancedFields = isAdmin || isInstructor;
   
   const form = useForm<IncidentFormData>({
     resolver: zodResolver(incidentFormSchema),
@@ -56,7 +58,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
       description: incident?.description || '',
       status: incident?.status || 'open',
       priority: incident?.priority || 'medium',
-      category: incident?.category || 'other',
+      category: incident?.category || 'issue',
       assigned_to: incident?.assigned_to || 'unassigned',
     },
   });
@@ -69,7 +71,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           description: data.description || null,
           status: data.status,
           priority: data.priority,
-          category: data.category,
+          category: data.category as any,
           assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
       } else if (incident) {
@@ -79,7 +81,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           description: data.description || null,
           status: data.status,
           priority: data.priority,
-          category: data.category,
+          category: data.category as any,
           assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
       }
@@ -92,7 +94,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
 
   const getDialogTitle = () => {
     if (mode === 'create') {
-      return 'Report New Incident';
+      return 'Create New Incident';
     }
     if (incident?.incident_number) {
       return `${incident.incident_number} - ${incident.title}`;
@@ -107,7 +109,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           <DialogTitle>{getDialogTitle()}</DialogTitle>
           <DialogDescription>
             {mode === 'create' 
-              ? 'Fill in the details to report a new incident.'
+              ? 'Fill in the details to create a new incident.'
               : 'Update the incident details below.'
             }
           </DialogDescription>
@@ -173,34 +175,9 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
             />
 
 
-            {isAdmin && (
+            {canSetAdvancedFields && (
               <>
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="status"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Status *</FormLabel>
-                        <Select onValueChange={field.onChange} defaultValue={field.value}>
-                          <FormControl>
-                            <SelectTrigger>
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                          </FormControl>
-                          <SelectContent>
-                            {statusOptions.map((option) => (
-                              <SelectItem key={option.value} value={option.value}>
-                                {option.label}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                        <FormMessage />
-                      </FormItem>
-                    )}
-                  />
-
                   <FormField
                     control={form.control}
                     name="priority"
@@ -225,33 +202,62 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
                       </FormItem>
                     )}
                   />
+
+                  {isAdmin && (
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status *</FormLabel>
+                          <Select onValueChange={field.onChange} defaultValue={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              {statusOptions.map((option) => (
+                                <SelectItem key={option.value} value={option.value}>
+                                  {option.label}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  )}
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="assigned_to"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Assign To</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select assignee (optional)" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="unassigned">Unassigned</SelectItem>
-                          {users.map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
-                              {user.first_name} {user.last_name} ({user.role})
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                {isAdmin && (
+                  <FormField
+                    control={form.control}
+                    name="assigned_to"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Assign To</FormLabel>
+                        <Select onValueChange={field.onChange} defaultValue={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select assignee (optional)" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.first_name} {user.last_name} ({user.role})
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
               </>
             )}
 
@@ -260,7 +266,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
                 Cancel
               </Button>
               <Button type="submit" disabled={isCreating || isUpdating}>
-                {mode === 'create' ? 'Report Incident' : 'Update Incident'}
+                {mode === 'create' ? 'Create Incident' : 'Update Incident'}
               </Button>
             </div>
           </form>

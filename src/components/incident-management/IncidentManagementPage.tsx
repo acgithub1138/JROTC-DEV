@@ -136,7 +136,7 @@ const IncidentManagementPage: React.FC = () => {
         <h1 className="text-3xl font-bold">Incident Management</h1>
         <Button onClick={handleCreateIncident} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
-          Report Incident
+          Create Incident
         </Button>
       </div>
 
