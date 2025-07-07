@@ -145,6 +145,15 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     }));
   };
 
+  const reorderFields = (oldIndex: number, newIndex: number) => {
+    const updatedFields = [...fields];
+    const [movedField] = updatedFields.splice(oldIndex, 1);
+    updatedFields.splice(newIndex, 0, movedField);
+    
+    setFields(updatedFields);
+    updateJson(updatedFields);
+  };
+
   return {
     fields,
     editingFieldId,
@@ -155,6 +164,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     cancelEdit,
     addField,
     removeField,
-    updateCurrentField
+    updateCurrentField,
+    reorderFields
   };
 };

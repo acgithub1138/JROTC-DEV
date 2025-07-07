@@ -32,7 +32,8 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
     cancelEdit,
     addField: originalAddField,
     removeField,
-    updateCurrentField
+    updateCurrentField,
+    reorderFields
   } = useFieldManagement(value, onChange);
 
   // Enhanced editField that scrolls to form section
@@ -100,6 +101,7 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
         fields={fields}
         onEditField={editField}
         onRemoveField={removeField}
+        onReorderFields={reorderFields}
       />
 
       <ScoreSheetPreview
