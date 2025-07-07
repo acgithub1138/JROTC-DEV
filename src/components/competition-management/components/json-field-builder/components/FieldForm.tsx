@@ -27,9 +27,9 @@ export const FieldForm: React.FC<FieldFormProps> = ({
   onCancelEdit
 }) => {
   return (
-    <div className="space-y-4">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
+    <div className="space-y-2">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="space-y-1">
           <Label htmlFor="fieldName">Field Name *</Label>
           <Input 
             id="fieldName" 
@@ -39,7 +39,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="fieldInfo">Field Info</Label>
           <Input 
             id="fieldInfo" 
@@ -49,7 +49,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           />
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="fieldType">Field Type</Label>
           <Select value={currentField.type} onValueChange={value => onFieldUpdate('type', value as JsonField['type'])}>
             <SelectTrigger>
@@ -67,7 +67,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
         </div>
 
         {currentField.type === 'text' && (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label htmlFor="textType">Text Field Type</Label>
             <Select value={currentField.textType} onValueChange={value => onFieldUpdate('textType', value as 'short' | 'notes')}>
               <SelectTrigger>
@@ -82,7 +82,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
         )}
 
         {currentField.type === 'dropdown' && (
-          <div className="space-y-2 md:col-span-2">
+          <div className="space-y-1 md:col-span-2">
             <Label htmlFor="dropdownValues">Dropdown Values (comma-separated)</Label>
             <Input 
               id="dropdownValues" 
@@ -94,7 +94,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
         )}
 
         {currentField.type === 'number' && (
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label htmlFor="maxValue">Max Value</Label>
             <Input 
               id="maxValue" 
