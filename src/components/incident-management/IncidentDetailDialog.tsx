@@ -96,6 +96,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         category: editData.category,
         assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
       });
+      onOpenChange(false); // Close modal after successful save
     } catch (error) {
       console.error('Error updating incident:', error);
     }
