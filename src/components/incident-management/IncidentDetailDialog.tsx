@@ -41,22 +41,36 @@ const categoryOptions = [
 
 const getSeverityColor = (severity: string) => {
   switch (severity) {
-    case 'critical': return 'bg-red-100 text-red-800';
-    case 'high': return 'bg-orange-100 text-orange-800';
-    case 'medium': return 'bg-yellow-100 text-yellow-800';
-    case 'low': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+    case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
+    case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+    case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   }
 };
 
 const getCategoryColor = (category: string) => {
   switch (category) {
-    case 'technical': return 'bg-blue-100 text-blue-800';
-    case 'behavioral': return 'bg-purple-100 text-purple-800';
-    case 'safety': return 'bg-red-100 text-red-800';
-    case 'other': return 'bg-gray-100 text-gray-800';
-    default: return 'bg-gray-100 text-gray-800';
+    case 'technical': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+    case 'behavioral': return 'bg-purple-100 text-purple-800 dark:bg-purple-900/20 dark:text-purple-400';
+    case 'safety': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+    case 'other': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
   }
+};
+
+const getStatusColor = (status: string) => {
+  switch (status) {
+    case 'open': return 'bg-blue-100 text-blue-800 dark:bg-blue-900/20 dark:text-blue-400';
+    case 'in_progress': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+    case 'resolved': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+    case 'closed': return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+  }
+};
+
+const formatDisplayText = (text: string) => {
+  return text.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
 };
 
 export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
@@ -234,14 +248,14 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               <>
                 <div>
                   <h3 className="font-semibold mb-2">Status</h3>
-                  <Badge variant="outline">
-                    {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
+                  <Badge className={getStatusColor(incident.status)}>
+                    {formatDisplayText(incident.status)}
                   </Badge>
                 </div>
                 <div>
                   <h3 className="font-semibold mb-2">Priority</h3>
                   <Badge variant="outline">
-                    {incident.priority.charAt(0).toUpperCase() + incident.priority.slice(1)}
+                    {formatDisplayText(incident.priority)}
                   </Badge>
                 </div>
               </>
