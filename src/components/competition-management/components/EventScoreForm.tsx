@@ -62,7 +62,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
       }
     });
     
-    return Math.max(0, total); // Ensure total doesn't go below 0
+    return total; // Allow negative scores
   };
 
   const handleFieldChange = (fieldId: string, value: any) => {
@@ -258,12 +258,12 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
       </div>
       
       <Card>
-        <CardHeader>
-          <CardTitle>Total Score</CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-2xl font-bold text-primary">
-            {totalPoints} points
+        <CardContent className="py-4">
+          <div className="flex items-center justify-between">
+            <span className="text-lg font-semibold">Total Score</span>
+            <div className={`text-2xl font-bold ${totalPoints >= 0 ? 'text-primary' : 'text-destructive'}`}>
+              {totalPoints} points
+            </div>
           </div>
         </CardContent>
       </Card>
