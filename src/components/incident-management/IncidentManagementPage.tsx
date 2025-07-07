@@ -116,27 +116,29 @@ const IncidentManagementPage: React.FC = () => {
         />
       </div>
 
-      <Tabs defaultValue="myincidents" className="w-full">
-        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-4' : 'grid-cols-2'}`}>
-          <TabsTrigger value="myincidents">My Incidents</TabsTrigger>
+      <Tabs defaultValue={isAdmin ? "allincidents" : "myincidents"} className="w-full">
+        <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
+          {!isAdmin && <TabsTrigger value="myincidents">My Incidents</TabsTrigger>}
           {isAdmin && <TabsTrigger value="allincidents">All Incidents</TabsTrigger>}
           {isAdmin && <TabsTrigger value="assigned">Assigned to Me</TabsTrigger>}
           <TabsTrigger value="resolved">Resolved</TabsTrigger>
         </TabsList>
 
-        <TabsContent value="myincidents" className="space-y-4">
-          <IncidentTable 
-            incidents={paginatedMyIncidents}
-            onIncidentSelect={handleIncidentSelect}
-            onEditIncident={handleEditIncident}
-          />
-          <TablePagination
-            currentPage={currentPageMyIncidents}
-            totalPages={myIncidentsPages}
-            totalItems={myIncidents.length}
-            onPageChange={setCurrentPageMyIncidents}
-          />
-        </TabsContent>
+        {!isAdmin && (
+          <TabsContent value="myincidents" className="space-y-4">
+            <IncidentTable 
+              incidents={paginatedMyIncidents}
+              onIncidentSelect={handleIncidentSelect}
+              onEditIncident={handleEditIncident}
+            />
+            <TablePagination
+              currentPage={currentPageMyIncidents}
+              totalPages={myIncidentsPages}
+              totalItems={myIncidents.length}
+              onPageChange={setCurrentPageMyIncidents}
+            />
+          </TabsContent>
+        )}
 
         {isAdmin && (
           <TabsContent value="allincidents" className="space-y-4">
