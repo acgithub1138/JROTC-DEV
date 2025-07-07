@@ -1,14 +1,13 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, Search, ArrowUpDown } from 'lucide-react';
 import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
-import { EventsList } from '../components/EventsList';
 import { ViewScoreSheetDialog } from '../components/ViewScoreSheetDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
-import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useSortableTable } from '@/hooks/useSortableTable';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -20,6 +19,7 @@ export const CompetitionsTab = () => {
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [showViewScoreSheetDialog, setShowViewScoreSheetDialog] = useState(false);
   const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
   
   const {
     competitions,
@@ -29,12 +29,23 @@ export const CompetitionsTab = () => {
     deleteCompetition
   } = useCompetitions();
 
-  const {
-    events,
-    isLoading: eventsLoading,
-    createEvent,
-    deleteEvent
-  } = useCompetitionEvents(selectedCompetition?.id);
+  // Filter competitions based on search term
+  const filteredCompetitions = useMemo(() => {
+    if (!searchTerm) return competitions;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return competitions.filter(comp => 
+      comp.name.toLowerCase().includes(searchLower) ||
+      comp.location?.toLowerCase().includes(searchLower) ||
+      new Date(comp.competition_date).toLocaleDateString().includes(searchLower)
+    );
+  }, [competitions, searchTerm]);
+
+  // Add sorting functionality
+  const { sortedData, sortConfig, handleSort } = useSortableTable({
+    data: filteredCompetitions,
+    defaultSort: { key: 'competition_date', direction: 'desc' }
+  });
 
   const handleSubmit = async (data: any) => {
     if (editingCompetition) {
@@ -49,10 +60,6 @@ export const CompetitionsTab = () => {
   const handleAddEvent = (competition: Competition) => {
     setSelectedCompetition(competition);
     setShowAddEventDialog(true);
-  };
-
-  const handleEventCreated = async (eventData: any) => {
-    await createEvent(eventData);
   };
 
   const handleViewScoreSheets = (competition: Competition) => {
@@ -75,50 +82,34 @@ export const CompetitionsTab = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="competitions" className="w-full">
-        <TabsList>
-          <TabsTrigger value="competitions">Competitions</TabsTrigger>
-          {selectedCompetition && (
-            <TabsTrigger value="events">
-              {selectedCompetition.name} - Events
-            </TabsTrigger>
-          )}
-        </TabsList>
-        
-        <TabsContent value="competitions" className="space-y-4">
-          <BasicCompetitionTable
-            competitions={competitions}
-            isLoading={isLoading}
-            onEdit={setEditingCompetition}
-            onDelete={deleteCompetition}
-            onAddEvent={handleAddEvent}
-            onViewScoreSheets={handleViewScoreSheets}
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search competitions by name, date, or location..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            className="pl-10"
           />
-        </TabsContent>
+        </div>
+        <Button
+          variant="outline"
+          onClick={() => handleSort('competition_date')}
+          className="flex items-center gap-2"
+        >
+          <ArrowUpDown className="w-4 h-4" />
+          Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+        </Button>
+      </div>
 
-        {selectedCompetition && (
-          <TabsContent value="events" className="space-y-4">
-            <div className="flex justify-between items-center">
-              <div>
-                <h3 className="text-xl font-semibold">{selectedCompetition.name} - Events</h3>
-                <p className="text-muted-foreground">
-                  Competition held on {new Date(selectedCompetition.competition_date).toLocaleDateString()}
-                </p>
-              </div>
-              <Button onClick={() => setShowAddEventDialog(true)}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Event
-              </Button>
-            </div>
-            
-            <EventsList
-              events={events}
-              isLoading={eventsLoading}
-              onDeleteEvent={deleteEvent}
-            />
-          </TabsContent>
-        )}
-      </Tabs>
+      <BasicCompetitionTable
+        competitions={sortedData}
+        isLoading={isLoading}
+        onEdit={setEditingCompetition}
+        onDelete={deleteCompetition}
+        onAddEvent={handleAddEvent}
+        onViewScoreSheets={handleViewScoreSheets}
+      />
 
       <CompetitionDialog
         open={showAddDialog || !!editingCompetition}
@@ -137,7 +128,10 @@ export const CompetitionsTab = () => {
           open={showAddEventDialog}
           onOpenChange={setShowAddEventDialog}
           competitionId={selectedCompetition.id}
-          onEventCreated={handleEventCreated}
+          onEventCreated={() => {
+            setShowAddEventDialog(false);
+            setSelectedCompetition(null);
+          }}
         />
       )}
 
