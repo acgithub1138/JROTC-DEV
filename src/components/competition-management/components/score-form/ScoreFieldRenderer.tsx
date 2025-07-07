@@ -1,6 +1,7 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { JsonField } from '../json-field-builder/types';
 interface ScoreFieldRendererProps {
@@ -79,6 +80,42 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
+      case 'checkbox_list':
+        const selectedValues = Array.isArray(value) ? value : [];
+        const handleCheckboxChange = (option: string, checked: boolean) => {
+          let newValues;
+          if (checked) {
+            newValues = [...selectedValues, option];
+          } else {
+            newValues = selectedValues.filter(v => v !== option);
+          }
+          onChange(field.id, newValues);
+        };
+        
+        return (
+          <div className="py-2 border-b space-y-2">
+            <div className="space-y-3">
+              <Label className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
+              <div className="grid grid-cols-2 gap-3">
+                {field.values?.map(option => (
+                  <div key={option} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`${field.id}-${option}`}
+                      checked={selectedValues.includes(option)}
+                      onCheckedChange={(checked) => handleCheckboxChange(option, checked as boolean)}
+                    />
+                    <Label htmlFor={`${field.id}-${option}`} className="text-sm font-normal">
+                      {option}
+                    </Label>
+                  </div>
+                ))}
+              </div>
+            </div>
+            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+          </div>
+        );
       case 'text':
         return <div className="py-2 border-b space-y-2">
             <div className="flex items-center justify-between">
