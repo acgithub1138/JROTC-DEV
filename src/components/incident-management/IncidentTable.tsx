@@ -68,7 +68,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell className="font-medium">
                 {canEditIncident(incident) ? (
                   <button
-                    onClick={() => onEditIncident(incident)}
+                    onClick={() => onIncidentSelect(incident)}
                     className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
                   >
                     {incident.incident_number || 'N/A'}
