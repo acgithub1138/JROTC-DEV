@@ -98,6 +98,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const canEditIncident = isAdmin || isInstructor || incident.submitted_by === userProfile?.id;
+  const canEditCategorySeverity = isAdmin; // Only admins can edit category/severity
 
   const handleSave = async () => {
     try {
@@ -182,33 +183,45 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Category</h3>
-              <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {categoryOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {canEditCategorySeverity ? (
+                <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className={getCategoryColor(incident.category)}>
+                  {formatDisplayText(incident.category)}
+                </Badge>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2">Severity</h3>
-              <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {severityOptions.map((option) => (
-                    <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {canEditCategorySeverity ? (
+                <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {severityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge className={getSeverityColor(incident.severity)}>
+                  {formatDisplayText(incident.severity)}
+                </Badge>
+              )}
             </div>
             {isAdmin && (
               <>
