@@ -12,6 +12,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -26,7 +27,6 @@ import { useToast } from '@/hooks/use-toast';
 import { 
   UserPlus, 
   Edit, 
-  Trash2, 
   Search, 
   Users, 
   Shield, 
@@ -48,6 +48,7 @@ interface User {
   role: UserRole;
   created_at: string;
   school_id: string;
+  active: boolean;
   schools?: { name: string };
 }
 
@@ -65,10 +66,11 @@ const UserAdminPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
+  const [activeTab, setActiveTab] = useState<'active' | 'disabled'>('active');
   const [editingUser, setEditingUser] = useState<User | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
-  const [userToDelete, setUserToDelete] = useState<User | null>(null);
+  const [disableDialogOpen, setDisableDialogOpen] = useState(false);
+  const [userToDisable, setUserToDisable] = useState<User | null>(null);
   
   // Password reset states
   const [newPassword, setNewPassword] = useState('');
@@ -95,6 +97,7 @@ const UserAdminPage = () => {
           role,
           created_at,
           school_id,
+          active,
           schools (name)
         `)
         .order('created_at', { ascending: false });
@@ -137,9 +140,6 @@ const UserAdminPage = () => {
     if (!editingUser) return;
 
     try {
-      console.log('Updating user profile:', editingUser);
-      
-      // Update profile in profiles table only
       const { error: profileError } = await supabase
         .from('profiles')
         .update({
@@ -177,7 +177,7 @@ const UserAdminPage = () => {
     setPasswordResetLoading(true);
 
     try {
-      const { data, error } = await supabase.functions.invoke('reset-user-password', {
+      const { error } = await supabase.functions.invoke('reset-user-password', {
         body: {
           userId: editingUser.id,
           newPassword: newPassword
@@ -215,33 +215,33 @@ const UserAdminPage = () => {
     setNewPassword(password);
   };
 
-  const handleDeleteUser = async () => {
-    if (!userToDelete) return;
+  const handleDisableUser = async () => {
+    if (!userToDisable) return;
 
     try {
-      console.log('Deleting user profile:', userToDelete.id);
-      
-      // Delete user profile from profiles table
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .delete()
-        .eq('id', userToDelete.id);
+      const { error } = await supabase.functions.invoke('toggle-user-status', {
+        body: {
+          userId: userToDisable.id,
+          active: false
+        }
+      });
 
-      if (profileError) throw profileError;
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: "User profile deleted successfully. Note: The user's authentication account still exists.",
+        description: `User ${userToDisable.first_name} ${userToDisable.last_name} has been disabled.`,
       });
 
-      setDeleteDialogOpen(false);
-      setUserToDelete(null);
+      setDisableDialogOpen(false);
+      setUserToDisable(null);
+      setSelectedUsers(new Set()); // Clear selections
       fetchUsers();
     } catch (error) {
-      console.error('Error deleting user:', error);
+      console.error('Error disabling user:', error);
       toast({
         title: "Error",
-        description: "Failed to delete user profile",
+        description: "Failed to disable user",
         variant: "destructive",
       });
     }
@@ -272,22 +272,18 @@ const UserAdminPage = () => {
   const getAllowedRoles = (): UserRole[] => {
     if (!userProfile) return [];
     
-    // Admins can assign any role
     if (userProfile.role === 'admin') {
       return ['admin', 'instructor', 'command_staff', 'cadet', 'parent'];
     }
     
-    // Instructors can assign instructor, command_staff, cadet, and parent roles
     if (userProfile.role === 'instructor') {
       return ['instructor', 'command_staff', 'cadet', 'parent'];
     }
     
-    // Command staff can only create cadet roles
     if (userProfile.role === 'command_staff') {
       return ['cadet'];
     }
     
-    // Default fallback
     return ['cadet'];
   };
 
@@ -298,30 +294,30 @@ const UserAdminPage = () => {
   const canEditUser = (user: User) => {
     if (!userProfile) return false;
     
-    // Admins can edit anyone
     if (userProfile.role === 'admin') return true;
     
-    // Instructors can edit users in their school
     if (userProfile.role === 'instructor' && user.school_id === userProfile.school_id) return true;
     
-    // Command staff can edit command staff and cadets in their school
     if (userProfile.role === 'command_staff' && 
         user.school_id === userProfile.school_id && 
         (user.role === 'command_staff' || user.role === 'cadet')) return true;
     
-    // Users can edit themselves
     if (user.id === userProfile.id) return true;
     
     return false;
   };
 
-  const canDeleteUser = (user: User) => {
+  const canDisableUser = (user: User) => {
     if (!userProfile) return false;
     
-    // Admins can delete anyone
+    // Can only disable users who are currently active
+    if (!user.active) return false;
+    
+    // Can't disable yourself
+    if (user.id === userProfile.id) return false;
+    
     if (userProfile.role === 'admin') return true;
     
-    // Instructors can delete users in their school (except admins and instructors)
     if (userProfile.role === 'instructor' && 
         user.school_id === userProfile.school_id && 
         user.role !== 'admin' && user.role !== 'instructor') return true;
@@ -330,25 +326,10 @@ const UserAdminPage = () => {
   };
 
   const canResetPassword = (user: User) => {
-    // Only admins can reset passwords, and not their own
     return userProfile?.role === 'admin' && user.id !== userProfile.id;
   };
 
-  const canDisableUser = (user: User) => {
-    if (!userProfile) return false;
-    
-    // Admins can disable anyone except themselves
-    if (userProfile.role === 'admin' && user.id !== userProfile.id) return true;
-    
-    // Instructors can disable users in their school (except admins and instructors) and not themselves
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor' && 
-        user.id !== userProfile.id) return true;
-    
-    return false;
-  };
-
+  // Filter users based on search, school, and active tab
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -356,8 +337,9 @@ const UserAdminPage = () => {
       user.role.toLowerCase().includes(searchTerm.toLowerCase());
     
     const matchesSchool = selectedSchoolId === 'all' || user.school_id === selectedSchoolId;
+    const matchesActiveTab = activeTab === 'active' ? user.active : !user.active;
     
-    return matchesSearch && matchesSchool;
+    return matchesSearch && matchesSchool && matchesActiveTab;
   });
 
   const totalPages = Math.ceil(filteredUsers.length / RECORDS_PER_PAGE);
@@ -436,12 +418,12 @@ const UserAdminPage = () => {
   const selectableUsersOnPage = paginatedUsers.filter(user => canDisableUser(user));
   const allSelectableSelected = selectableUsersOnPage.length > 0 && 
     selectableUsersOnPage.every(user => selectedUsers.has(user.id));
-  const someSelected = selectableUsersOnPage.some(user => selectedUsers.has(user.id));
 
   // Reset to first page when filters change
   useEffect(() => {
     setCurrentPage(1);
-  }, [searchTerm, selectedSchoolId]);
+    setSelectedUsers(new Set()); // Clear selections when changing tabs/filters
+  }, [searchTerm, selectedSchoolId, activeTab]);
 
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -461,6 +443,9 @@ const UserAdminPage = () => {
       </div>
     );
   }
+
+  const activeUsers = users.filter(u => u.active);
+  const disabledUsers = users.filter(u => !u.active);
 
   return (
     <div className="p-6 space-y-6">
@@ -489,186 +474,259 @@ const UserAdminPage = () => {
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
-            Users ({filteredUsers.length})
+            Users
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="flex items-center space-x-2 mb-4">
-            <div className="relative flex-1">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-              <Input
-                placeholder="Search users..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
-              />
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'disabled')}>
+            <div className="flex items-center justify-between mb-4">
+              <TabsList>
+                <TabsTrigger value="active">
+                  Active ({activeUsers.length})
+                </TabsTrigger>
+                <TabsTrigger value="disabled">
+                  Disabled ({disabledUsers.length})
+                </TabsTrigger>
+              </TabsList>
             </div>
-            <div className="w-64">
-              <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Filter by school" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="all">All Schools</SelectItem>
-                  {schools.map((school) => (
-                    <SelectItem key={school.id} value={school.id}>
-                      {school.name}
-                    </SelectItem>
+
+            <div className="flex items-center space-x-2 mb-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                <Input
+                  placeholder="Search users..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10"
+                />
+              </div>
+              <div className="w-64">
+                <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Filter by school" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="all">All Schools</SelectItem>
+                    {schools.map((school) => (
+                      <SelectItem key={school.id} value={school.id}>
+                        {school.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <TabsContent value="active">
+              {/* Bulk Actions for active users */}
+              {selectedUsers.size > 0 && activeTab === 'active' && (
+                <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4">
+                  <span className="text-sm font-medium">
+                    {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
+                  </span>
+                  <Button
+                    variant="destructive"
+                    size="sm"
+                    onClick={() => setBulkDisableDialogOpen(true)}
+                  >
+                    <UserX className="w-4 h-4 mr-2" />
+                    Disable Selected
+                  </Button>
+                </div>
+              )}
+
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    {activeTab === 'active' && (
+                      <TableHead className="w-12">
+                        <Checkbox
+                          checked={allSelectableSelected}
+                          onCheckedChange={handleSelectAll}
+                          aria-label="Select all users"
+                        />
+                      </TableHead>
+                    )}
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>School</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id}>
+                      {activeTab === 'active' && (
+                        <TableCell className="py-2">
+                          {canDisableUser(user) ? (
+                            <Checkbox
+                              checked={selectedUsers.has(user.id)}
+                              onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
+                              aria-label={`Select ${user.first_name} ${user.last_name}`}
+                            />
+                          ) : null}
+                        </TableCell>
+                      )}
+                      <TableCell className="font-medium py-2">
+                        {user.first_name} {user.last_name}
+                      </TableCell>
+                      <TableCell className="py-2">{user.email}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
+                          {getRoleIcon(user.role)}
+                          {user.role.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {user.schools?.name || 'No school assigned'}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right py-2">
+                        <div className="flex items-center justify-end gap-2">
+                          {canEditUser(user) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingUser(user);
+                                setEditDialogOpen(true);
+                                setNewPassword('');
+                                setShowPassword(false);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {canDisableUser(user) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setUserToDisable(user);
+                                setDisableDialogOpen(true);
+                              }}
+                            >
+                              <UserX className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
                   ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+                </TableBody>
+              </Table>
+            </TabsContent>
 
-          {/* Bulk Actions */}
-          {selectedUsers.size > 0 && (
-            <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4">
-              <span className="text-sm font-medium">
-                {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
-              </span>
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={() => setBulkDisableDialogOpen(true)}
-              >
-                <UserX className="w-4 h-4 mr-2" />
-                Disable Selected
-              </Button>
-            </div>
-          )}
+            <TabsContent value="disabled">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Role</TableHead>
+                    <TableHead>School</TableHead>
+                    <TableHead>Created</TableHead>
+                    <TableHead className="text-right">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {paginatedUsers.map((user) => (
+                    <TableRow key={user.id} className="opacity-60">
+                      <TableCell className="font-medium py-2">
+                        {user.first_name} {user.last_name}
+                      </TableCell>
+                      <TableCell className="py-2">{user.email}</TableCell>
+                      <TableCell className="py-2">
+                        <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
+                          {getRoleIcon(user.role)}
+                          {user.role.replace('_', ' ').toUpperCase()}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {user.schools?.name || 'No school assigned'}
+                      </TableCell>
+                      <TableCell className="py-2">
+                        {new Date(user.created_at).toLocaleDateString()}
+                      </TableCell>
+                      <TableCell className="text-right py-2">
+                        <div className="flex items-center justify-end gap-2">
+                          {canEditUser(user) && (
+                            <Button
+                              variant="outline"
+                              size="sm"
+                              onClick={() => {
+                                setEditingUser(user);
+                                setEditDialogOpen(true);
+                                setNewPassword('');
+                                setShowPassword(false);
+                              }}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </TabsContent>
 
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead className="w-12">
-                  <Checkbox
-                    checked={allSelectableSelected}
-                    onCheckedChange={handleSelectAll}
-                    aria-label="Select all users"
-                  />
-                </TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead>Email</TableHead>
-                <TableHead>Role</TableHead>
-                <TableHead>School</TableHead>
-                <TableHead>Created</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {paginatedUsers.map((user) => (
-                <TableRow key={user.id}>
-                  <TableCell className="py-2">
-                    {canDisableUser(user) ? (
-                      <Checkbox
-                        checked={selectedUsers.has(user.id)}
-                        onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
-                        aria-label={`Select ${user.first_name} ${user.last_name}`}
+            {filteredUsers.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                No users found
+              </div>
+            )}
+
+            {totalPages > 1 && (
+              <div className="flex justify-center mt-6">
+                <Pagination>
+                  <PaginationContent>
+                    <PaginationItem>
+                      <PaginationPrevious 
+                        onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
+                        className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
                       />
-                    ) : null}
-                  </TableCell>
-                  <TableCell className="font-medium py-2">
-                    {user.first_name} {user.last_name}
-                  </TableCell>
-                  <TableCell className="py-2">{user.email}</TableCell>
-                  <TableCell className="py-2">
-                    <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
-                      {getRoleIcon(user.role)}
-                      {user.role.replace('_', ' ').toUpperCase()}
-                    </Badge>
-                  </TableCell>
-                  <TableCell className="py-2">
-                    {user.schools?.name || 'No school assigned'}
-                  </TableCell>
-                  <TableCell className="py-2">
-                    {new Date(user.created_at).toLocaleDateString()}
-                  </TableCell>
-                  <TableCell className="text-right py-2">
-                    <div className="flex items-center justify-end gap-2">
-                      {canEditUser(user) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setEditingUser(user);
-                            setEditDialogOpen(true);
-                            // Reset password form state
-                            setNewPassword('');
-                            setShowPassword(false);
-                          }}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      )}
-                      {canDeleteUser(user) && (
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => {
-                            setUserToDelete(user);
-                            setDeleteDialogOpen(true);
-                          }}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      )}
-                    </div>
-                  </TableCell>
-                </TableRow>
-              ))}
-            </TableBody>
-          </Table>
-
-          {filteredUsers.length === 0 && (
-            <div className="text-center py-8 text-muted-foreground">
-              No users found
-            </div>
-          )}
-
-          {totalPages > 1 && (
-            <div className="flex justify-center mt-6">
-              <Pagination>
-                <PaginationContent>
-                  <PaginationItem>
-                    <PaginationPrevious 
-                      onClick={() => handlePageChange(Math.max(1, currentPage - 1))}
-                      className={currentPage === 1 ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                  
-                  {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
-                    if (totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationLink
-                            onClick={() => handlePageChange(page)}
-                            isActive={currentPage === page}
-                            className="cursor-pointer"
-                          >
-                            {page}
-                          </PaginationLink>
-                        </PaginationItem>
-                      );
-                    } else if (page === currentPage - 2 || page === currentPage + 2) {
-                      return (
-                        <PaginationItem key={page}>
-                          <PaginationEllipsis />
-                        </PaginationItem>
-                      );
-                    }
-                    return null;
-                  })}
-                  
-                  <PaginationItem>
-                    <PaginationNext 
-                      onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
-                      className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
-                    />
-                  </PaginationItem>
-                </PaginationContent>
-              </Pagination>
-            </div>
-          )}
+                    </PaginationItem>
+                    
+                    {Array.from({ length: totalPages }, (_, i) => i + 1).map((page) => {
+                      if (totalPages <= 7 || page === 1 || page === totalPages || (page >= currentPage - 1 && page <= currentPage + 1)) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationLink
+                              onClick={() => handlePageChange(page)}
+                              isActive={currentPage === page}
+                              className="cursor-pointer"
+                            >
+                              {page}
+                            </PaginationLink>
+                          </PaginationItem>
+                        );
+                      } else if (page === currentPage - 2 || page === currentPage + 2) {
+                        return (
+                          <PaginationItem key={page}>
+                            <PaginationEllipsis />
+                          </PaginationItem>
+                        );
+                      }
+                      return null;
+                    })}
+                    
+                    <PaginationItem>
+                      <PaginationNext 
+                        onClick={() => handlePageChange(Math.min(totalPages, currentPage + 1))}
+                        className={currentPage === totalPages ? "pointer-events-none opacity-50" : "cursor-pointer"}
+                      />
+                    </PaginationItem>
+                  </PaginationContent>
+                </Pagination>
+              </div>
+            )}
+          </Tabs>
         </CardContent>
       </Card>
 
@@ -867,32 +925,28 @@ const UserAdminPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Delete User Dialog */}
-      <Dialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Delete User Profile</DialogTitle>
-          </DialogHeader>
-          <div className="space-y-4">
-            <p>Are you sure you want to delete this user's profile? This will remove their profile data but their authentication account will remain.</p>
-            {userToDelete && (
-              <div className="bg-gray-50 p-3 rounded">
-                <p><strong>Name:</strong> {userToDelete.first_name} {userToDelete.last_name}</p>
-                <p><strong>Email:</strong> {userToDelete.email}</p>
-                <p><strong>Role:</strong> {userToDelete.role}</p>
-              </div>
-            )}
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => setDeleteDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button variant="destructive" onClick={handleDeleteUser}>
-                Delete Profile
-              </Button>
-            </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+      {/* Disable User Dialog */}
+      <AlertDialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disable User</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disable {userToDisable?.first_name} {userToDisable?.last_name}?
+              <br /><br />
+              <strong>This will prevent them from signing in to the system.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleDisableUser}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              Disable User
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Bulk Disable Confirmation Dialog */}
       <AlertDialog open={bulkDisableDialogOpen} onOpenChange={setBulkDisableDialogOpen}>
