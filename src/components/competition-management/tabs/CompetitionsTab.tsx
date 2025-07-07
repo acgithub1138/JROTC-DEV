@@ -5,6 +5,7 @@ import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
 import { EventsList } from '../components/EventsList';
+import { ViewScoreSheetDialog } from '../components/ViewScoreSheetDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -17,6 +18,8 @@ export const CompetitionsTab = () => {
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
+  const [showViewScoreSheetDialog, setShowViewScoreSheetDialog] = useState(false);
+  const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
   
   const {
     competitions,
@@ -52,6 +55,11 @@ export const CompetitionsTab = () => {
     await createEvent(eventData);
   };
 
+  const handleViewScoreSheets = (competition: Competition) => {
+    setViewingCompetition(competition);
+    setShowViewScoreSheetDialog(true);
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -84,6 +92,7 @@ export const CompetitionsTab = () => {
             onEdit={setEditingCompetition}
             onDelete={deleteCompetition}
             onAddEvent={handleAddEvent}
+            onViewScoreSheets={handleViewScoreSheets}
           />
         </TabsContent>
 
@@ -131,6 +140,12 @@ export const CompetitionsTab = () => {
           onEventCreated={handleEventCreated}
         />
       )}
+
+      <ViewScoreSheetDialog
+        open={showViewScoreSheetDialog}
+        onOpenChange={setShowViewScoreSheetDialog}
+        competition={viewingCompetition}
+      />
     </div>
   );
 };

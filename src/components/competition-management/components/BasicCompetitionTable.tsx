@@ -2,7 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 
 interface BasicCompetitionTableProps {
   competitions: any[];
@@ -10,6 +10,7 @@ interface BasicCompetitionTableProps {
   onEdit: (competition: any) => void;
   onDelete: (id: string) => void;
   onAddEvent?: (competition: any) => void;
+  onViewScoreSheets?: (competition: any) => void;
 }
 
 export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
@@ -17,7 +18,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   isLoading,
   onEdit,
   onDelete,
-  onAddEvent
+  onAddEvent,
+  onViewScoreSheets
 }) => {
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
@@ -58,6 +60,18 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Add Event Score Sheet</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {onViewScoreSheets && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onViewScoreSheets(competition)}>
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Score Sheets</p>
                         </TooltipContent>
                       </Tooltip>
                     )}
