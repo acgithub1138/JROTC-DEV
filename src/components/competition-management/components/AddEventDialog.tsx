@@ -100,9 +100,9 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           <DialogTitle>Add Competition Event</DialogTitle>
         </DialogHeader>
 
-        <div className="space-y-6">
+        <div className="space-y-3">
           {/* Template Selection */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label>Score Sheet Template</Label>
             <Select 
               value={selectedTemplateId} 
@@ -123,7 +123,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           </div>
 
           {/* Cadet Selection */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Collapsible open={isCadetsOpen} onOpenChange={setIsCadetsOpen}>
               <CollapsibleTrigger asChild>
                 <Button variant="outline" className="w-full justify-between">
@@ -139,7 +139,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                   {isCadetsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </Button>
               </CollapsibleTrigger>
-              <CollapsibleContent className="space-y-2 pt-2">
+              <CollapsibleContent className="space-y-1 pt-2">
                 <MultiSelectProfiles
                   value={selectedCadetIds}
                   onChange={setSelectedCadetIds}
@@ -149,7 +149,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           </div>
 
           {/* Judge Number */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label>Judge Number (Optional)</Label>
             <Select value={judgeNumber} onValueChange={setJudgeNumber}>
               <SelectTrigger>
@@ -166,7 +166,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           </div>
 
           {/* Team Name */}
-          <div className="space-y-2">
+          <div className="space-y-1">
             <Label>Team Name (Optional)</Label>
             <Input
               value={teamName}
