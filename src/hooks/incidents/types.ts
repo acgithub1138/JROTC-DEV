@@ -17,6 +17,7 @@ export interface Incident {
   created_at: string;
   updated_at: string;
   resolved_at: string | null;
+  active: boolean | null;
   submitted_by_profile?: {
     id: string;
     first_name: string;

@@ -98,7 +98,7 @@ const IncidentManagementPage: React.FC = () => {
 
   // Filter incidents based on tab selection
   const myIncidents = filterIncidents(
-    incidents.filter(incident => incident.submitted_by === userProfile?.id)
+    incidents.filter(incident => incident.submitted_by === userProfile?.id && incident.active === true)
   );
   
   const allIncidents = filterIncidents(incidents);
@@ -108,7 +108,7 @@ const IncidentManagementPage: React.FC = () => {
   );
   
   const resolvedIncidents = filterIncidents(
-    incidents.filter(incident => incident.status === 'resolved' || incident.resolved_at)
+    incidents.filter(incident => (incident.status === 'resolved' || incident.resolved_at) && incident.active === true)
   );
 
   // Pagination logic for each tab
