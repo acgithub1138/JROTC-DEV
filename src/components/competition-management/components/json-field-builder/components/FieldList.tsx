@@ -21,7 +21,11 @@ export const FieldList: React.FC<FieldListProps> = ({ fields, onEditField, onRem
       <CardContent>
         <div className="space-y-2">
           {fields.map(field => (
-            <div key={field.id} className="flex items-center justify-between p-2 border rounded">
+            <div 
+              key={field.id} 
+              data-field-id={field.id}
+              className="flex items-center justify-between p-2 border rounded"
+            >
               <div className="flex-1">
                 <span className="font-medium">{field.name}</span>
                 <div className="text-sm text-muted-foreground">

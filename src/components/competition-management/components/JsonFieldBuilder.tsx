@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useCallback } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Eye } from 'lucide-react';
@@ -18,24 +18,57 @@ export const JsonFieldBuilder: React.FC<JsonFieldBuilderProps> = ({
   const [isExpanded, setIsExpanded] = useState(false);
   const [showPreview, setShowPreview] = useState(false);
 
+  // Refs for scroll behavior
+  const formSectionRef = useRef<HTMLDivElement>(null);
+  const fieldListRef = useRef<HTMLDivElement>(null);
+
   const {
     fields,
     editingFieldId,
     currentField,
     dropdownValues,
     setDropdownValues,
-    editField,
+    editField: originalEditField,
     cancelEdit,
-    addField,
+    addField: originalAddField,
     removeField,
     updateCurrentField
   } = useFieldManagement(value, onChange);
+
+  // Enhanced editField that scrolls to form section
+  const editField = useCallback((field: any) => {
+    originalEditField(field);
+    setTimeout(() => {
+      formSectionRef.current?.scrollIntoView({ 
+        behavior: 'smooth', 
+        block: 'start' 
+      });
+    }, 100);
+  }, [originalEditField]);
+
+  // Enhanced addField that scrolls back to the edited field
+  const addField = useCallback(() => {
+    const wasEditing = editingFieldId;
+    originalAddField();
+    
+    if (wasEditing) {
+      setTimeout(() => {
+        const fieldElement = document.querySelector(`[data-field-id="${wasEditing}"]`);
+        if (fieldElement) {
+          fieldElement.scrollIntoView({ 
+            behavior: 'smooth', 
+            block: 'center' 
+          });
+        }
+      }, 200);
+    }
+  }, [originalAddField, editingFieldId]);
 
   const isAdmin = userProfile?.role === 'admin';
 
   return (
     <div className="space-y-6">
-      <Card>
+      <Card ref={formSectionRef}>
         <CardHeader>
           <CardTitle>Score Sheet Builder</CardTitle>
           <div className="flex gap-2 mt-2">
