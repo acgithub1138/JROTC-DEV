@@ -167,7 +167,7 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
                          <TableHead key={event.id} className="text-center min-w-32">
                            <div className="space-y-1">
                              <div className="font-medium">
-                               Judge {event.score_sheet?.judge_number || (index + 1)}
+                               {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                              </div>
                              <div className="text-xs text-muted-foreground">
                                Total: {event.total_points || 0} pts
