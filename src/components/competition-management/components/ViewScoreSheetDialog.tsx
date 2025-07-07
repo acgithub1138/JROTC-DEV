@@ -221,6 +221,16 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
                         </TableCell>
                       ))}
                     </TableRow>
+                    
+                    {/* Grand Total Row */}
+                    <TableRow className="bg-primary/10 border-t-2">
+                      <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary">
+                        Grand Total
+                      </TableCell>
+                      <TableCell className="text-center font-bold text-primary" colSpan={filteredEvents.length}>
+                        {filteredEvents.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
+                      </TableCell>
+                    </TableRow>
                   </TableBody>
                 </Table>
               </div>
