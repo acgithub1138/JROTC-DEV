@@ -11,6 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
 import { Separator } from '@/components/ui/separator';
+import { Checkbox } from '@/components/ui/checkbox';
 import { 
   AlertDialog,
   AlertDialogAction,
@@ -32,7 +33,8 @@ import {
   GraduationCap,
   Eye,
   EyeOff,
-  Key
+  Key,
+  UserX
 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
 
@@ -73,6 +75,11 @@ const UserAdminPage = () => {
   const [showPassword, setShowPassword] = useState(false);
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
   const [passwordResetConfirmOpen, setPasswordResetConfirmOpen] = useState(false);
+  
+  // Bulk selection states
+  const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
+  const [bulkDisableDialogOpen, setBulkDisableDialogOpen] = useState(false);
+  const [bulkDisableLoading, setBulkDisableLoading] = useState(false);
 
   const RECORDS_PER_PAGE = 25;
 
@@ -327,6 +334,21 @@ const UserAdminPage = () => {
     return userProfile?.role === 'admin' && user.id !== userProfile.id;
   };
 
+  const canDisableUser = (user: User) => {
+    if (!userProfile) return false;
+    
+    // Admins can disable anyone except themselves
+    if (userProfile.role === 'admin' && user.id !== userProfile.id) return true;
+    
+    // Instructors can disable users in their school (except admins and instructors) and not themselves
+    if (userProfile.role === 'instructor' && 
+        user.school_id === userProfile.school_id && 
+        user.role !== 'admin' && user.role !== 'instructor' && 
+        user.id !== userProfile.id) return true;
+    
+    return false;
+  };
+
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
       user.last_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -342,6 +364,79 @@ const UserAdminPage = () => {
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
   const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+
+  const handleSelectUser = (userId: string, checked: boolean) => {
+    const newSelected = new Set(selectedUsers);
+    if (checked) {
+      newSelected.add(userId);
+    } else {
+      newSelected.delete(userId);
+    }
+    setSelectedUsers(newSelected);
+  };
+
+  const handleSelectAll = (checked: boolean) => {
+    if (checked) {
+      const selectableUsers = paginatedUsers
+        .filter(user => canDisableUser(user))
+        .map(user => user.id);
+      setSelectedUsers(new Set(selectableUsers));
+    } else {
+      setSelectedUsers(new Set());
+    }
+  };
+
+  const handleBulkDisable = async () => {
+    setBulkDisableLoading(true);
+    let successCount = 0;
+    let failedCount = 0;
+
+    try {
+      const promises = Array.from(selectedUsers).map(async (userId) => {
+        const { error } = await supabase.functions.invoke('toggle-user-status', {
+          body: {
+            userId: userId,
+            active: false
+          }
+        });
+        if (error) throw error;
+        return userId;
+      });
+
+      const results = await Promise.allSettled(promises);
+      
+      results.forEach((result) => {
+        if (result.status === 'fulfilled') {
+          successCount++;
+        } else {
+          failedCount++;
+        }
+      });
+
+      toast({
+        title: "Bulk Disable Complete",
+        description: `Successfully disabled ${successCount} users${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
+      });
+
+      setSelectedUsers(new Set());
+      setBulkDisableDialogOpen(false);
+      fetchUsers();
+    } catch (error) {
+      console.error('Bulk disable error:', error);
+      toast({
+        title: "Error",
+        description: "Failed to disable users",
+        variant: "destructive",
+      });
+    } finally {
+      setBulkDisableLoading(false);
+    }
+  };
+
+  const selectableUsersOnPage = paginatedUsers.filter(user => canDisableUser(user));
+  const allSelectableSelected = selectableUsersOnPage.length > 0 && 
+    selectableUsersOnPage.every(user => selectedUsers.has(user.id));
+  const someSelected = selectableUsersOnPage.some(user => selectedUsers.has(user.id));
 
   // Reset to first page when filters change
   useEffect(() => {
@@ -425,9 +520,33 @@ const UserAdminPage = () => {
             </div>
           </div>
 
+          {/* Bulk Actions */}
+          {selectedUsers.size > 0 && (
+            <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4">
+              <span className="text-sm font-medium">
+                {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
+              </span>
+              <Button
+                variant="destructive"
+                size="sm"
+                onClick={() => setBulkDisableDialogOpen(true)}
+              >
+                <UserX className="w-4 h-4 mr-2" />
+                Disable Selected
+              </Button>
+            </div>
+          )}
+
           <Table>
             <TableHeader>
               <TableRow>
+                <TableHead className="w-12">
+                  <Checkbox
+                    checked={allSelectableSelected}
+                    onCheckedChange={handleSelectAll}
+                    aria-label="Select all users"
+                  />
+                </TableHead>
                 <TableHead>Name</TableHead>
                 <TableHead>Email</TableHead>
                 <TableHead>Role</TableHead>
@@ -439,6 +558,15 @@ const UserAdminPage = () => {
             <TableBody>
               {paginatedUsers.map((user) => (
                 <TableRow key={user.id}>
+                  <TableCell className="py-2">
+                    {canDisableUser(user) ? (
+                      <Checkbox
+                        checked={selectedUsers.has(user.id)}
+                        onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
+                        aria-label={`Select ${user.first_name} ${user.last_name}`}
+                      />
+                    ) : null}
+                  </TableCell>
                   <TableCell className="font-medium py-2">
                     {user.first_name} {user.last_name}
                   </TableCell>
@@ -765,6 +893,30 @@ const UserAdminPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      {/* Bulk Disable Confirmation Dialog */}
+      <AlertDialog open={bulkDisableDialogOpen} onOpenChange={setBulkDisableDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Disable Multiple Users</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to disable {selectedUsers.size} selected user{selectedUsers.size > 1 ? 's' : ''}?
+              <br /><br />
+              <strong>This will prevent them from signing in to the system.</strong>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleBulkDisable}
+              disabled={bulkDisableLoading}
+              className="bg-red-600 hover:bg-red-700"
+            >
+              {bulkDisableLoading ? 'Disabling...' : 'Disable Users'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
