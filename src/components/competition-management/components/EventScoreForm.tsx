@@ -29,9 +29,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
     ...field,
     id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
     // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
-    pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField,
-    // Convert penalty boolean to penaltyValue for scoring
-    penaltyValue: field.penalty && field.penaltyValue ? field.penaltyValue : (field.penalty ? 5 : 0)
+    pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
   }));
 
   console.log('Template scores:', templateScores);
