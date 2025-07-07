@@ -1,24 +1,20 @@
-import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import React from 'react';
 import type { JsonField } from '../components/json-field-builder/types';
+import { ScoreFieldRenderer } from './score-form/ScoreFieldRenderer';
+import { TotalScoreCard } from './score-form/TotalScoreCard';
+import { useScoreCalculation } from './score-form/hooks/useScoreCalculation';
+
 interface EventScoreFormProps {
   templateScores: Record<string, any>;
   onScoreChange: (scores: Record<string, any>, totalPoints: number) => void;
   initialScores?: Record<string, any>;
 }
+
 export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   templateScores,
   onScoreChange,
   initialScores = {}
 }) => {
-  const [scores, setScores] = useState<Record<string, any>>(initialScores);
-  const [totalPoints, setTotalPoints] = useState(0);
-
   // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
   const rawFields = templateScores?.criteria || [];
 
@@ -29,158 +25,36 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
     // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
     pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
   }));
-  console.log('Template scores:', templateScores);
-  console.log('Raw criteria:', rawFields);
-  console.log('Processed fields:', fields);
-  console.log('Fields with pauseField:', fields.filter(f => f.pauseField));
-  const calculateTotal = (currentScores: Record<string, any>) => {
-    let total = 0;
-    fields.forEach(field => {
-      const fieldValue = currentScores[field.id];
-      if (field.type === 'number' && fieldValue) {
-        total += Number(fieldValue) || 0;
-      } else if (field.type === 'penalty' && fieldValue) {
-        if (field.penaltyType === 'points') {
-          // Calculate points-based penalty: violations × point value
-          const violations = Number(fieldValue) || 0;
-          const pointValue = field.pointValue || -10;
-          total += violations * pointValue;
-        } else if (field.penaltyType === 'minor_major') {
-          // Apply fixed penalty based on selection
-          if (fieldValue === 'minor') {
-            total += -20;
-          } else if (fieldValue === 'major') {
-            total += -50;
-          }
-        }
-      }
-    });
-    return total; // Allow negative scores
-  };
-  const handleFieldChange = (fieldId: string, value: any) => {
-    const newScores = {
-      ...scores,
-      [fieldId]: value
-    };
-    setScores(newScores);
-    const newTotal = calculateTotal(newScores);
-    setTotalPoints(newTotal);
-    onScoreChange(newScores, newTotal);
-  };
-  const renderField = (field: JsonField) => {
-    const fieldValue = scores[field.id];
-    switch (field.type) {
-      case 'section_header':
-        return <div key={field.id} className="border-b-2 border-primary pb-2">
-            <h3 className="text-lg font-bold text-primary">
-              {field.name}
-            </h3>
-          </div>;
-      case 'label':
-      case 'bold_gray':
-      case 'pause':
-        // backward compatibility
-        return <div key={field.id} className="py-2">
-            {field.pauseField ? <div className="bg-muted px-3 py-2 rounded">
-                <span className="font-bold">{field.name}</span>
-              </div> : <span className="font-medium">{field.name}</span>}
-            {field.fieldInfo && <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>}
-          </div>;
-      case 'number':
-        return <div key={field.id} className="border-b space-y-2 py-[4px]">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
-                {field.name}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input id={field.id} type="number" min="0" max={field.maxValue} value={fieldValue || ''} onChange={e => handleFieldChange(field.id, e.target.value)} placeholder={`Max: ${field.maxValue || 'N/A'}`} className="w-32" />
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-          </div>;
-      case 'dropdown':
-        return <div key={field.id} className="py-2 border-b space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
-                {field.name}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Select value={fieldValue || ''} onValueChange={value => handleFieldChange(field.id, value)}>
-                  <SelectTrigger className="w-32">
-                    <SelectValue placeholder="Select..." />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {field.values?.map(option => <SelectItem key={option} value={option}>
-                        {option}
-                      </SelectItem>)}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-          </div>;
-      case 'text':
-        return <div key={field.id} className="py-2 border-b space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
-                {field.name}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input id={field.id} type="text" value={fieldValue || ''} onChange={e => handleFieldChange(field.id, e.target.value)} className="w-32" />
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-          </div>;
-      case 'penalty':
-        return <div key={field.id} className="border-b space-y-2 py-[4px]">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className="font-medium text-destructive">
-                {field.name}
-              </Label>
-              <div className="flex items-center gap-2">
-                {field.penaltyType === 'points' ? <Input id={field.id} type="number" min="0" value={fieldValue || ''} onChange={e => handleFieldChange(field.id, e.target.value)} placeholder="Violations" className="w-32" /> : field.penaltyType === 'minor_major' ? <Select value={fieldValue || ''} onValueChange={value => handleFieldChange(field.id, value)}>
-                    <SelectTrigger className="w-32">
-                      <SelectValue placeholder="Select type" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="minor">Minor (-20)</SelectItem>
-                      <SelectItem value="major">Major (-50)</SelectItem>
-                    </SelectContent>
-                  </Select> : <Input id={field.id} type="number" value={fieldValue || ''} onChange={e => handleFieldChange(field.id, e.target.value)} className="w-32" />}
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-            {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
-          </div>;
-      default:
-        return null;
-    }
-  };
-  useEffect(() => {
-    const initialTotal = calculateTotal(initialScores);
-    setTotalPoints(initialTotal);
-    onScoreChange(initialScores, initialTotal);
-  }, []);
+
+  const { scores, totalPoints, handleFieldChange } = useScoreCalculation({
+    fields,
+    initialScores,
+    onScoreChange
+  });
+
   if (!templateScores || !fields || fields.length === 0) {
-    return <div className="text-center py-8 text-muted-foreground">
+    return (
+      <div className="text-center py-8 text-muted-foreground">
         <p>No scoring fields found in this template.</p>
         <p className="text-sm mt-2">Please check the template configuration.</p>
-      </div>;
+      </div>
+    );
   }
-  return <div className="space-y-6">
+
+  return (
+    <div className="space-y-6">
       <div className="space-y-6">
-        {fields.map(renderField)}
+        {fields.map(field => (
+          <ScoreFieldRenderer
+            key={field.id}
+            field={field}
+            value={scores[field.id]}
+            onChange={handleFieldChange}
+          />
+        ))}
       </div>
       
-      <Card>
-        <CardContent className="py-[4px]">
-          <div className="flex items-center justify-between">
-            <span className="text-lg font-semibold text-left">Total Score</span>
-            <div className={`text-2xl font-bold ${totalPoints >= 0 ? 'text-primary' : 'text-destructive'}`}>
-              {totalPoints} points
-            </div>
-          </div>
-        </CardContent>
-      </Card>
-    </div>;
+      <TotalScoreCard totalPoints={totalPoints} />
+    </div>
+  );
 };

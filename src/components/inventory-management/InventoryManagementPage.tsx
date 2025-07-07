@@ -1,102 +1,48 @@
 import React, { useState } from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Switch } from '@/components/ui/switch';
-import { Label } from '@/components/ui/label';
-import { Plus, Search, Download, Upload } from 'lucide-react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
+import { InventoryActions } from './components/InventoryActions';
+import { InventoryFilters } from './components/InventoryFilters';
 import { TablePagination } from '@/components/ui/table-pagination';
-import { ColumnSelector } from '@/components/ui/column-selector';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
-
 import { useInventoryItems } from './hooks/useInventoryItems';
+import { useInventoryFilters } from './hooks/useInventoryFilters';
 import { useToast } from '@/hooks/use-toast';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { useColumnPreferences } from '@/hooks/useColumnPreferences';
+
 const InventoryManagementPage = () => {
-  const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
-  const [showOutOfStockOnly, setShowOutOfStockOnly] = useState(false);
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
   // Define available columns for the inventory table
-  const availableColumns = [{
-    key: 'item_id',
-    label: 'Item ID',
-    enabled: true
-  }, {
-    key: 'item',
-    label: 'Item',
-    enabled: true
-  }, {
-    key: 'category',
-    label: 'Category',
-    enabled: true
-  }, {
-    key: 'sub_category',
-    label: 'Sub Category',
-    enabled: true
-  }, {
-    key: 'size',
-    label: 'Size',
-    enabled: false
-  }, {
-    key: 'gender',
-    label: 'Gender',
-    enabled: false
-  }, {
-    key: 'qty_total',
-    label: 'Total Qty',
-    enabled: true
-  }, {
-    key: 'qty_issued',
-    label: 'Issued Qty',
-    enabled: false
-  }, {
-    key: 'qty_available',
-    label: 'Available Qty',
-    enabled: true
-  }, {
-    key: 'status',
-    label: 'Status',
-    enabled: true
-  }, {
-    key: 'stock_number',
-    label: 'Stock Number',
-    enabled: false
-  }, {
-    key: 'unit_of_measure',
-    label: 'Unit',
-    enabled: false
-  }];
-  const {
-    columns,
-    enabledColumns,
-    toggleColumn,
-    isLoading: columnsLoading
-  } = useColumnPreferences('inventory', availableColumns);
-  const {
-    inventoryItems,
-    isLoading,
-    error,
-    createItem,
-    bulkCreateItems,
-    updateItem,
-    deleteItem
-  } = useInventoryItems();
-  const filteredItems = inventoryItems?.filter(item => {
-    const searchLower = searchTerm.toLowerCase();
-    const matchesSearch = item.item?.toLowerCase().includes(searchLower) || item.category?.toLowerCase().includes(searchLower) || item.sub_category?.toLowerCase().includes(searchLower) || item.item_id?.toLowerCase().includes(searchLower) || item.size?.toLowerCase().includes(searchLower) || item.stock_number?.toLowerCase().includes(searchLower);
-    const matchesOutOfStock = showOutOfStockOnly ? (item.qty_available || 0) <= 0 : true;
-    return matchesSearch && matchesOutOfStock;
-  }) || [];
+  const availableColumns = [
+    { key: 'item_id', label: 'Item ID', enabled: true },
+    { key: 'item', label: 'Item', enabled: true },
+    { key: 'category', label: 'Category', enabled: true },
+    { key: 'sub_category', label: 'Sub Category', enabled: true },
+    { key: 'size', label: 'Size', enabled: false },
+    { key: 'gender', label: 'Gender', enabled: false },
+    { key: 'qty_total', label: 'Total Qty', enabled: true },
+    { key: 'qty_issued', label: 'Issued Qty', enabled: false },
+    { key: 'qty_available', label: 'Available Qty', enabled: true },
+    { key: 'status', label: 'Status', enabled: true },
+    { key: 'stock_number', label: 'Stock Number', enabled: false },
+    { key: 'unit_of_measure', label: 'Unit', enabled: false }
+  ];
+
+  const { columns, enabledColumns, toggleColumn, isLoading: columnsLoading } = 
+    useColumnPreferences('inventory', availableColumns);
+
+  const { inventoryItems, isLoading, error, createItem, bulkCreateItems, updateItem, deleteItem } = 
+    useInventoryItems();
+
+  const { searchTerm, setSearchTerm, showOutOfStockOnly, setShowOutOfStockOnly, filteredItems } = 
+    useInventoryFilters(inventoryItems);
   const totalPages = getTotalPages(filteredItems.length);
   const paginatedItems = getPaginatedItems(filteredItems, currentPage);
   const handlePageChange = (page: number) => {
@@ -206,29 +152,20 @@ const InventoryManagementPage = () => {
         onToggleColumn={toggleColumn}
         columnsLoading={columnsLoading}
         actions={
-          <>
-            <Button variant="outline" onClick={exportToCSV}>
-              <Download className="w-4 h-4 mr-2" />
-              Export CSV
-            </Button>
-            <Button variant="outline" onClick={() => setIsBulkDialogOpen(true)}>
-              <Upload className="w-4 h-4 mr-2" />
-              Bulk Operations
-            </Button>
-            <Button onClick={() => setIsAddDialogOpen(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Item
-            </Button>
-          </>
+          <InventoryActions
+            onAddItem={() => setIsAddDialogOpen(true)}
+            onBulkOperations={() => setIsBulkDialogOpen(true)}
+            onExport={exportToCSV}
+          />
         }
         extraControls={
-          <div className="flex items-center gap-2">
-            <Switch checked={showOutOfStockOnly} onCheckedChange={setShowOutOfStockOnly} id="out-of-stock-toggle" />
-            <Label htmlFor="out-of-stock-toggle" className="text-sm">Show Out of Stock Items Only</Label>
-          </div>
+          <InventoryFilters
+            showOutOfStockOnly={showOutOfStockOnly}
+            onShowOutOfStockChange={setShowOutOfStockOnly}
+          />
         }
       >
-        <InventoryTable items={paginatedItems} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onDelete={handleDeleteItem} />
+        <InventoryTable items={paginatedItems as any} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onDelete={handleDeleteItem} />
       </StandardTableWrapper>
 
       <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredItems.length} onPageChange={handlePageChange} />
