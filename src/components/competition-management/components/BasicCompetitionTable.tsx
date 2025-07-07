@@ -1,6 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 
@@ -31,8 +32,9 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="rounded-md border">
-        <Table>
+      <Card>
+        <CardContent className="p-0">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>
@@ -120,8 +122,9 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
               </TableRow>
             ))}
           </TableBody>
-        </Table>
-      </div>
+          </Table>
+        </CardContent>
+      </Card>
     </TooltipProvider>
   );
 };
