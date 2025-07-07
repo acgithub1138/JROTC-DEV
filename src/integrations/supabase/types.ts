@@ -921,6 +921,7 @@ export type Database = {
           incident_id: string
           is_system_comment: boolean
           user_id: string
+          user_name: string | null
         }
         Insert: {
           comment_text: string
@@ -929,6 +930,7 @@ export type Database = {
           incident_id: string
           is_system_comment?: boolean
           user_id: string
+          user_name?: string | null
         }
         Update: {
           comment_text?: string
@@ -937,6 +939,7 @@ export type Database = {
           incident_id?: string
           is_system_comment?: boolean
           user_id?: string
+          user_name?: string | null
         }
         Relationships: [
           {

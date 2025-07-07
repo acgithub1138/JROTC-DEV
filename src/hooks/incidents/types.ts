@@ -40,10 +40,7 @@ export interface IncidentComment {
   comment_text: string;
   is_system_comment: boolean;
   created_at: string;
-  user_profile: {
-    first_name: string;
-    last_name: string;
-  };
+  user_name: string | null;
 }
 
 export interface CreateIncidentData {

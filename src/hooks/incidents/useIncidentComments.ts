@@ -18,10 +18,7 @@ export const useIncidentComments = (incidentId: string) => {
 
       const { data, error } = await supabase
         .from('incident_comments')
-        .select(`
-          *,
-          user_profile:profiles!incident_comments_user_id_fkey(first_name, last_name)
-        `)
+        .select('*')
         .eq('incident_id', incidentId)
         .order('created_at', { ascending: true });
 
@@ -40,6 +37,8 @@ export const useIncidentComments = (incidentId: string) => {
         throw new Error('User not authenticated');
       }
 
+      const userName = `${userProfile.last_name}, ${userProfile.first_name}`;
+      
       const { data, error } = await supabase
         .from('incident_comments')
         .insert({
@@ -47,6 +46,7 @@ export const useIncidentComments = (incidentId: string) => {
           user_id: userProfile.id,
           comment_text: commentText,
           is_system_comment: false,
+          user_name: userName,
         })
         .select()
         .single();
@@ -77,6 +77,8 @@ export const useIncidentComments = (incidentId: string) => {
         throw new Error('User not authenticated');
       }
 
+      const userName = `${userProfile.last_name}, ${userProfile.first_name}`;
+      
       const { data, error } = await supabase
         .from('incident_comments')
         .insert({
@@ -84,6 +86,7 @@ export const useIncidentComments = (incidentId: string) => {
           user_id: userProfile.id,
           comment_text: commentText,
           is_system_comment: true,
+          user_name: userName,
         })
         .select()
         .single();
