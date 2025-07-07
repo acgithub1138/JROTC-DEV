@@ -37,7 +37,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Location</TableHead>
+              <TableHead>Award</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -48,7 +48,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 <TableCell>
                   {new Date(competition.competition_date).toLocaleDateString()}
                 </TableCell>
-                <TableCell>{competition.location || '-'}</TableCell>
+                <TableCell>{competition.overall_placement || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-2 justify-end">
                     {onAddEvent && (
