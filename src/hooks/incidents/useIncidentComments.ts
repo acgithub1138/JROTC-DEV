@@ -29,7 +29,7 @@ export const useIncidentComments = (incidentId: string) => {
         console.error('Error fetching incident comments:', error);
         throw error;
       }
-      return data as IncidentComment[];
+      return data as unknown as IncidentComment[];
     },
     enabled: !!incidentId && !!userProfile?.school_id,
   });

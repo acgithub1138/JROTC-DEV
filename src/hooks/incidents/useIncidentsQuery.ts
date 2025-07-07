@@ -28,7 +28,7 @@ export const useIncidentsQuery = () => {
         throw error;
       }
 
-      return data as Incident[];
+      return data as unknown as Incident[];
     },
     enabled: !!userProfile?.school_id,
   });

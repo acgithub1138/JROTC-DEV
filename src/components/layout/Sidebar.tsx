@@ -26,6 +26,7 @@ import {
   Mails,
   Workflow,
   Briefcase,
+  AlertTriangle,
 } from 'lucide-react';
 
 interface SidebarProps {
@@ -54,6 +55,7 @@ const iconMap = {
   Workflow,
   Briefcase,
   Trophy,
+  AlertTriangle,
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
