@@ -20,14 +20,14 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
 
   return (
     <div className="rounded-md border overflow-x-auto">
-      <Table>
+      <Table className="table-fixed">
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 bg-background">Field</TableHead>
+            <TableHead className="sticky left-0 bg-background border-r w-48 px-2">Field</TableHead>
             {events.map((event, index) => (
-              <TableHead key={event.id} className="text-center min-w-32">
+              <TableHead key={event.id} className="text-center w-24 border-r px-1">
                 <div className="space-y-1">
-                  <div className="font-medium">
+                  <div className="font-medium text-xs">
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
                   <div className="text-xs text-muted-foreground">
@@ -36,8 +36,8 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
                 </div>
               </TableHead>
             ))}
-            <TableHead className="text-center min-w-32 bg-muted/30">
-              <div className="font-medium">Average</div>
+            <TableHead className="text-center w-20 bg-muted/30 px-1">
+              <div className="font-medium text-xs">Average</div>
             </TableHead>
           </TableRow>
         </TableHeader>
@@ -47,11 +47,11 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
 
             return (
               <TableRow key={fieldName}>
-                <TableCell className="sticky left-0 bg-background font-medium border-r">
+                <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
                   {getCleanFieldName(fieldName)}
                 </TableCell>
                 {events.map((event) => (
-                  <TableCell key={event.id} className="text-center">
+                  <TableCell key={event.id} className="text-center border-r px-1 text-sm">
                     {(() => {
                       const value = event.score_sheet?.scores?.[fieldName];
                       if (value === null || value === undefined) return '-';
@@ -60,7 +60,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
                     })()}
                   </TableCell>
                 ))}
-                <TableCell className="text-center font-medium bg-muted/30">
+                <TableCell className="text-center font-medium bg-muted/30 px-1 text-sm">
                   {average}
                 </TableCell>
               </TableRow>
@@ -69,25 +69,25 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
           
           {/* Total Points Row */}
           <TableRow className="bg-muted/50">
-            <TableCell className="sticky left-0 bg-muted/50 font-bold border-r">
+            <TableCell className="sticky left-0 bg-muted/50 font-bold border-r px-2 text-sm">
               Total Points
             </TableCell>
             {events.map((event) => (
-              <TableCell key={event.id} className="text-center font-bold">
+              <TableCell key={event.id} className="text-center font-bold border-r px-1 text-sm">
                 {event.total_points || 0}
               </TableCell>
             ))}
-            <TableCell className="text-center font-bold bg-muted/50">
+            <TableCell className="text-center font-bold bg-muted/50 px-1 text-sm">
               {calculateTotalAverage(events)}
             </TableCell>
           </TableRow>
           
           {/* Grand Total Row */}
           <TableRow className="bg-primary/10 border-t-2">
-            <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary">
+            <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary px-2 text-sm">
               Grand Total
             </TableCell>
-            <TableCell className="text-center font-bold text-primary" colSpan={events.length + 1}>
+            <TableCell className="text-center font-bold text-primary px-1 text-sm" colSpan={events.length + 1}>
               {events.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
             </TableCell>
           </TableRow>
