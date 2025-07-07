@@ -80,7 +80,9 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
-      case 'checkbox_list':
+      case 'penalty':
+        // Handle checkbox_list penalty type
+        if (field.penaltyType === 'checkbox_list') {
         const selectedValues = Array.isArray(value) ? value : [];
         const handleCheckboxChange = (option: string, checked: boolean) => {
           let newValues;
@@ -116,19 +118,9 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>
         );
-      case 'text':
-        return <div className="py-2 border-b space-y-2">
-            <div className="flex items-center justify-between">
-              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
-                {field.name}
-              </Label>
-              <div className="flex items-center gap-2">
-                <Input id={field.id} type="text" value={value || ''} onChange={e => onChange(field.id, e.target.value)} className="w-32" />
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-          </div>;
-      case 'penalty':
+        }
+        
+        // Handle other penalty types
         // Only show penalty fields for Judge 1
         if (judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
@@ -150,6 +142,18 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+          </div>;
+      case 'text':
+        return <div className="py-2 border-b space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                {field.name}
+              </Label>
+              <div className="flex items-center gap-2">
+                <Input id={field.id} type="text" value={value || ''} onChange={e => onChange(field.id, e.target.value)} className="w-32" />
+              </div>
+            </div>
+            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
       case 'penalty_checkbox':
         // Only show penalty fields for Judge 1
