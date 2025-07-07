@@ -20,7 +20,7 @@ export const useIncidentComments = (incidentId: string) => {
         .from('incident_comments')
         .select(`
           *,
-          user_profile:profiles(first_name, last_name)
+          user_profile:profiles!incident_comments_user_id_fkey(first_name, last_name)
         `)
         .eq('incident_id', incidentId)
         .order('created_at', { ascending: true });
