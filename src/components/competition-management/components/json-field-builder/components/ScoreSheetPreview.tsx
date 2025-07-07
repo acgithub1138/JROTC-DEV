@@ -44,6 +44,35 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
                   </div>
                 );
               }
+
+              if (field.type === 'penalty') {
+                return (
+                  <div key={field.id} className="py-2 border-b space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-destructive">{field.name}</span>
+                      <div className="flex items-center gap-2">
+                        {field.penaltyType === 'points' ? (
+                          <input className="border rounded px-2 py-1 w-32" disabled placeholder="Number of violations" />
+                        ) : field.penaltyType === 'minor_major' ? (
+                          <select className="border rounded px-2 py-1 w-32" disabled>
+                            <option>Select type</option>
+                            <option>Minor (-20)</option>
+                            <option>Major (-50)</option>
+                          </select>
+                        ) : (
+                          <input className="border rounded px-2 py-1 w-32" disabled />
+                        )}
+                      </div>
+                    </div>
+                    {field.fieldInfo && (
+                      <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
+                    )}
+                    {field.penaltyType === 'points' && field.pointValue && (
+                      <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>
+                    )}
+                  </div>
+                );
+              }
               
               return (
                 <div key={field.id} className="py-2 border-b space-y-2">

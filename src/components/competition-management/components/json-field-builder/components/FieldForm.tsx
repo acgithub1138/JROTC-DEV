@@ -61,6 +61,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="label">Label</SelectItem>
               <SelectItem value="number">Number</SelectItem>
+              <SelectItem value="penalty">Penalty</SelectItem>
               <SelectItem value="section_header">Section Header</SelectItem>
               <SelectItem value="text">Text</SelectItem>
             </SelectContent>
@@ -106,14 +107,35 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </div>
         )}
 
-        <div className="flex items-center space-x-2">
-          <Switch 
-            id="penalty" 
-            checked={currentField.penalty || false} 
-            onCheckedChange={checked => onFieldUpdate('penalty', checked)} 
-          />
-          <Label htmlFor="penalty">Penalty Field</Label>
-        </div>
+        {currentField.type === 'penalty' && (
+          <>
+            <div className="space-y-1">
+              <Label htmlFor="penaltyType">Penalty Type</Label>
+              <Select value={currentField.penaltyType} onValueChange={value => onFieldUpdate('penaltyType', value as 'points' | 'minor_major')}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select penalty type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="points">Points</SelectItem>
+                  <SelectItem value="minor_major">Minor/Major</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {currentField.penaltyType === 'points' && (
+              <div className="space-y-1">
+                <Label htmlFor="pointValue">Point Value</Label>
+                <Input 
+                  id="pointValue" 
+                  type="number" 
+                  value={currentField.pointValue || -10} 
+                  onChange={e => onFieldUpdate('pointValue', parseInt(e.target.value))} 
+                  placeholder="e.g., -10"
+                />
+              </div>
+            )}
+          </>
+        )}
 
         <div className="flex items-center space-x-2">
           <Switch 

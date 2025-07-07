@@ -47,6 +47,20 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
       
       if (field.type === 'number' && fieldValue) {
         total += Number(fieldValue) || 0;
+      } else if (field.type === 'penalty' && fieldValue) {
+        if (field.penaltyType === 'points') {
+          // Calculate points-based penalty: violations × point value
+          const violations = Number(fieldValue) || 0;
+          const pointValue = field.pointValue || -10;
+          total += violations * pointValue;
+        } else if (field.penaltyType === 'minor_major') {
+          // Apply fixed penalty based on selection
+          if (fieldValue === 'minor') {
+            total += -20;
+          } else if (fieldValue === 'major') {
+            total += -50;
+          }
+        }
       }
     });
     
@@ -167,6 +181,54 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
             </div>
             {field.fieldInfo && (
               <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
+            )}
+          </div>
+        );
+
+      case 'penalty':
+        return (
+          <div key={field.id} className="py-2 border-b space-y-2">
+            <div className="flex items-center justify-between">
+              <Label htmlFor={field.id} className="font-medium text-destructive">
+                {field.name}
+              </Label>
+              <div className="flex items-center gap-2">
+                {field.penaltyType === 'points' ? (
+                  <Input
+                    id={field.id}
+                    type="number"
+                    min="0"
+                    value={fieldValue || ''}
+                    onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                    placeholder="Violations"
+                    className="w-32"
+                  />
+                ) : field.penaltyType === 'minor_major' ? (
+                  <Select value={fieldValue || ''} onValueChange={(value) => handleFieldChange(field.id, value)}>
+                    <SelectTrigger className="w-32">
+                      <SelectValue placeholder="Select type" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="minor">Minor (-20)</SelectItem>
+                      <SelectItem value="major">Major (-50)</SelectItem>
+                    </SelectContent>
+                  </Select>
+                ) : (
+                  <Input
+                    id={field.id}
+                    type="number"
+                    value={fieldValue || ''}
+                    onChange={(e) => handleFieldChange(field.id, e.target.value)}
+                    className="w-32"
+                  />
+                )}
+              </div>
+            </div>
+            {field.fieldInfo && (
+              <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
+            )}
+            {field.penaltyType === 'points' && field.pointValue && (
+              <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>
             )}
           </div>
         );
