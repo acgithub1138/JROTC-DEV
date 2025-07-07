@@ -35,6 +35,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   console.log('Template scores:', templateScores);
   console.log('Raw criteria:', rawFields);
   console.log('Processed fields:', fields);
+  console.log('Fields with pauseField:', fields.filter(f => f.pauseField));
 
   const calculateTotal = (currentScores: Record<string, any>) => {
     let total = 0;
