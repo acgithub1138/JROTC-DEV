@@ -393,12 +393,10 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 >
                   <div className="flex items-center justify-between mb-1">
                     <span className="font-medium text-sm">
-                      {(() => {
-                        console.log('Comment user_profile:', comment.user_profile);
-                        return comment.user_profile?.first_name && comment.user_profile?.last_name 
-                          ? `${comment.user_profile.first_name} ${comment.user_profile.last_name}`
-                          : 'Unknown User';
-                      })()}
+                      {comment.user_profile?.first_name && comment.user_profile?.last_name 
+                        ? `${comment.user_profile.first_name} ${comment.user_profile.last_name}`
+                        : 'Unknown User'
+                      }
                       {comment.is_system_comment && (
                         <Badge variant="secondary" className="ml-2 text-xs">
                           System
