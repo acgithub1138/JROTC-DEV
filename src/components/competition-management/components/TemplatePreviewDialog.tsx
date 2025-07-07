@@ -27,10 +27,29 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
     const isRequired = field.required || false;
     const maxLength = field.maxLength;
     const isPenalty = field.penalty || false;
+    const isBoldGray = field.pauseField || field.type === 'bold_gray' || field.type === 'pause';
+
+    // Handle bold and grey fields (label-only display)
+    if (fieldType === 'label' || fieldType === 'bold_gray' || fieldType === 'pause') {
+      return (
+        <div key={index} className="py-2">
+          {isBoldGray ? (
+            <div className="bg-muted px-3 py-2 rounded">
+              <span className="font-bold">{fieldName}</span>
+            </div>
+          ) : (
+            <span className="font-medium">{fieldName}</span>
+          )}
+          {field.fieldInfo && (
+            <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>
+          )}
+        </div>
+      );
+    }
 
     return (
       <div key={index} className="space-y-2">
-        <Label htmlFor={`field-${index}`} className="flex items-center gap-2">
+        <Label htmlFor={`field-${index}`} className={`flex items-center gap-2 ${isBoldGray ? 'font-bold bg-muted px-3 py-2 rounded' : ''}`}>
           {fieldName}
           {isRequired && <span className="text-red-500">*</span>}
           {isPenalty && (

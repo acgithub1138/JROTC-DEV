@@ -56,6 +56,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               <SelectValue />
             </SelectTrigger>
             <SelectContent>
+              <SelectItem value="bold_gray">Bold and Grey</SelectItem>
               <SelectItem value="calculated">Calculated Field</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="label">Label</SelectItem>

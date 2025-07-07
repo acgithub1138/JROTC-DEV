@@ -28,8 +28,8 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   const fields: JsonField[] = rawFields.map((field: any, index: number) => ({
     ...field,
     id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
-    // Convert pause type to pauseField property
-    pauseField: field.type === 'pause',
+    // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
+    pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField,
     // Convert penalty boolean to penaltyValue for scoring
     penaltyValue: field.penalty && field.penaltyValue ? field.penaltyValue : (field.penalty ? 5 : 0)
   }));
@@ -77,7 +77,8 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
 
 
       case 'label':
-      case 'pause':
+      case 'bold_gray':
+      case 'pause': // backward compatibility
         return (
           <div key={field.id} className="py-2">
             {field.pauseField ? (

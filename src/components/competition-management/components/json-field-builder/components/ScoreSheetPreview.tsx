@@ -28,7 +28,7 @@ export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({ fields, sh
               }
               
               
-              if (field.type === 'label') {
+              if (field.type === 'label' || field.type === 'bold_gray' || field.type === 'pause') {
                 return (
                   <div key={field.id} className="py-2">
                     {field.pauseField ? (
