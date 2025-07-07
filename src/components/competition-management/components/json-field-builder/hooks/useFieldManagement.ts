@@ -28,7 +28,10 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         maxValue: criterion.maxValue,
         scaleRanges: criterion.scaleRanges,
         penalty: criterion.penalty || false,
-        pauseField: criterion.pauseField || false
+        pauseField: criterion.pauseField || false,
+        // Load penalty-specific properties
+        penaltyType: criterion.penaltyType,
+        pointValue: criterion.pointValue
       }));
       setFields(initialFields);
     }
@@ -45,6 +48,11 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         scaleRanges: field.scaleRanges,
         penalty: field.penalty,
         pauseField: field.pauseField,
+        // Add penalty-specific properties for penalty fields
+        ...(field.type === 'penalty' && {
+          penaltyType: field.penaltyType,
+          pointValue: field.pointValue
+        }),
         ...(field.values && {
           options: field.values
         })
@@ -65,7 +73,10 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       scaleRanges: field.scaleRanges,
       penalty: field.penalty,
       pauseField: field.pauseField,
-      values: field.values
+      values: field.values,
+      // Include penalty-specific properties
+      penaltyType: field.penaltyType,
+      pointValue: field.pointValue
     });
     setDropdownValues(field.values ? field.values.join(', ') : '');
   };
@@ -97,6 +108,11 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       scaleRanges: currentField.scaleRanges,
       penalty: currentField.penalty || false,
       pauseField: currentField.pauseField || false,
+      // Include penalty-specific properties for penalty fields
+      ...(currentField.type === 'penalty' && {
+        penaltyType: currentField.penaltyType,
+        pointValue: currentField.pointValue
+      }),
       ...(currentField.type === 'dropdown' && {
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)
       })
