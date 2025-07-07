@@ -38,6 +38,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialFormData] = useState(formData);
+  const [jsonText, setJsonText] = useState(JSON.stringify(formData.scores, null, 2));
+  const [jsonError, setJsonError] = useState<string | null>(null);
   
   const isAdmin = userProfile?.role === 'admin';
   const eventOptions = ['Armed Inspection', 'Armed Color Guard', 'Armed Exhibition', 'Armed Dual Exhibition', 'Armed Regulation', 'Armed Solo Exhibition', 'Unarmed Inspection', 'Unarmed Color Guard', 'Unarmed Exhibition', 'Unarmed Dual Exhibition', 'Unarmed Regulation'];
@@ -63,11 +65,24 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (isSubmitting) return;
+    
+    // For manual JSON mode, validate and parse JSON before submitting
+    if (!useBuilder) {
+      try {
+        const parsedScores = JSON.parse(jsonText);
+        setFormData(prev => ({ ...prev, scores: parsedScores }));
+        setJsonError(null);
+      } catch (error) {
+        setJsonError('Invalid JSON format. Please fix the JSON before saving.');
+        return;
+      }
+    }
+    
     try {
       setIsSubmitting(true);
       await onSubmit({
         ...formData,
-        scores: formData.scores
+        scores: useBuilder ? formData.scores : JSON.parse(jsonText)
       });
     } catch (error) {
       console.error('Error submitting form:', error);
@@ -120,6 +135,26 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       [field]: value
     }));
   };
+
+  const handleJsonTextChange = (value: string) => {
+    setJsonText(value);
+    setJsonError(null);
+    
+    // Try to parse JSON and update form data if valid
+    try {
+      const parsed = JSON.parse(value);
+      setFormData(prev => ({ ...prev, scores: parsed }));
+    } catch {
+      // Invalid JSON, keep the text but don't update scores yet
+    }
+  };
+
+  // Update jsonText when scores change from field builder
+  useEffect(() => {
+    if (useBuilder) {
+      setJsonText(JSON.stringify(formData.scores, null, 2));
+    }
+  }, [formData.scores, useBuilder]);
 
   // Check for changes compared to initial data
   useEffect(() => {
@@ -191,14 +226,12 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
 
       <div className="space-y-2">        
         {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-1">
-            <Textarea value={JSON.stringify(formData.scores, null, 2)} onChange={e => {
-          try {
-            const parsed = JSON.parse(e.target.value);
-            updateFormData('scores', parsed);
-          } catch {
-            // Invalid JSON, don't update
-          }
-        }} rows={10} className="font-mono text-sm" placeholder={`{
+            <Textarea 
+              value={jsonText} 
+              onChange={e => handleJsonTextChange(e.target.value)} 
+              rows={10} 
+              className="font-mono text-sm" 
+              placeholder={`{
   "criteria": [
     {
       "name": "Uniform Inspection",
@@ -207,7 +240,11 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       "penalty": false
     }
   ]
-}`} />
+}`} 
+            />
+            {jsonError && (
+              <p className="text-sm text-destructive">{jsonError}</p>
+            )}
             <p className="text-sm text-muted-foreground">
               Define the JSON structure for this score sheet template.
             </p>
