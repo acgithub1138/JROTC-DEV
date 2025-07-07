@@ -70,10 +70,14 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                   <SelectTrigger className="w-32">
                     <SelectValue placeholder="Select..." />
                   </SelectTrigger>
-                  <SelectContent>
-                    {field.values?.map(option => <SelectItem key={option} value={option}>
+                  <SelectContent className="bg-background z-50">
+                    {field.values && field.values.length > 0 ? field.values.map(option => (
+                      <SelectItem key={option} value={option}>
                         {option}
-                      </SelectItem>)}
+                      </SelectItem>
+                    )) : (
+                      <SelectItem value="" disabled>No options available</SelectItem>
+                    )}
                   </SelectContent>
                 </Select>
               </div>
