@@ -24,10 +24,16 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
   const renderScoreField = (field: any, index: number) => {
     const fieldType = field.type || 'text';
     const fieldName = field.name || `Field ${index + 1}`;
-    const isRequired = field.required || false;
-    const maxLength = field.maxLength;
-    const isPenalty = field.penalty || false;
     const isBoldGray = field.pauseField || field.type === 'bold_gray' || field.type === 'pause';
+
+    // Handle section headers
+    if (fieldType === 'section_header') {
+      return (
+        <div key={index} className="border-b-2 border-primary pb-2">
+          <h3 className="text-lg font-bold text-primary">{fieldName}</h3>
+        </div>
+      );
+    }
 
     // Handle bold and grey fields (label-only display)
     if (fieldType === 'label' || fieldType === 'bold_gray' || fieldType === 'pause') {
@@ -47,53 +53,19 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
       );
     }
 
+    // Handle input fields with the same layout as ScoreSheetPreview
     return (
-      <div key={index} className="space-y-2">
-        <Label htmlFor={`field-${index}`} className={`flex items-center gap-2 ${isBoldGray ? 'font-bold bg-muted px-3 py-2 rounded' : ''}`}>
-          {fieldName}
-          {isRequired && <span className="text-red-500">*</span>}
-          {isPenalty && (
-            <Badge variant="destructive" className="text-xs">
-              Penalty
-            </Badge>
-          )}
-        </Label>
-        
-        {fieldType === 'textarea' ? (
-          <Textarea
-            id={`field-${index}`}
-            placeholder={field.placeholder || `Enter ${fieldName.toLowerCase()}`}
-            disabled
-            rows={3}
-          />
-        ) : fieldType === 'number' ? (
-          <Input
-            id={`field-${index}`}
-            type="number"
-            placeholder={field.placeholder || "0"}
-            min={field.min}
-            max={field.max}
-            step={field.step}
-            disabled
-          />
-        ) : (
-          <Input
-            id={`field-${index}`}
-            type="text"
-            placeholder={field.placeholder || `Enter ${fieldName.toLowerCase()}`}
-            maxLength={maxLength}
-            disabled
-          />
-        )}
-        
-        {field.description && (
-          <p className="text-xs text-muted-foreground">{field.description}</p>
-        )}
-        
-        {maxLength && fieldType === 'text' && (
-          <p className="text-xs text-muted-foreground">
-            Maximum {maxLength} characters
-          </p>
+      <div key={index} className="py-2 border-b space-y-2">
+        <div className="flex items-center justify-between">
+          <span className={isBoldGray ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+            {fieldName}
+          </span>
+          <div className="flex items-center gap-2">
+            <input className="border rounded px-2 py-1 w-32" disabled />
+          </div>
+        </div>
+        {field.fieldInfo && (
+          <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>
         )}
       </div>
     );
@@ -145,12 +117,16 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
       return (
         <Card>
           <CardHeader>
-            <CardTitle>Score Criteria</CardTitle>
+            <CardTitle>Score Sheet Preview</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            {template.scores.criteria.map((field: any, index: number) => 
-              renderScoreField(field, index)
-            )}
+          <CardContent>
+            <div className="border-2 border-dashed border-muted-foreground/20 p-6 bg-background">
+              <div className="space-y-6">
+                {template.scores.criteria.map((field: any, index: number) => 
+                  renderScoreField(field, index)
+                )}
+              </div>
+            </div>
           </CardContent>
         </Card>
       );
