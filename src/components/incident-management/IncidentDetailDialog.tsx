@@ -9,7 +9,7 @@ import { Edit, MessageSquare, Send, Save, X } from 'lucide-react';
 import { Incident, useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 interface IncidentDetailDialogProps {
@@ -23,6 +23,13 @@ const severityOptions = [
   { value: 'medium', label: 'Medium' },
   { value: 'high', label: 'High' },
   { value: 'critical', label: 'Critical' },
+];
+
+const statusOptions = [
+  { value: 'open', label: 'Open' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'resolved', label: 'Resolved' },
+  { value: 'closed', label: 'Closed' },
 ];
 
 const categoryOptions = [
@@ -60,7 +67,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { userProfile } = useAuth();
   const { comments, addComment, isAddingComment } = useIncidentComments(incident.id);
   const { updateIncident, isUpdating } = useIncidents();
-  const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
   
