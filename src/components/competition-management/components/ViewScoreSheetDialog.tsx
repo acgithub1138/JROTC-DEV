@@ -189,48 +189,74 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
                            </div>
                          </TableHead>
                        ))}
+                       <TableHead className="text-center min-w-32 bg-muted/30">
+                         <div className="font-medium">Average</div>
+                       </TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {fieldNames.map((fieldName) => (
-                      <TableRow key={fieldName}>
-                         <TableCell className="sticky left-0 bg-background font-medium border-r">
-                           {getCleanFieldName(fieldName)}
+                     {fieldNames.map((fieldName) => {
+                       // Calculate average for this field
+                       const fieldValues = filteredEvents
+                         .map(event => {
+                           const value = event.score_sheet?.scores?.[fieldName];
+                           return value !== null && value !== undefined && value !== '' ? Number(value) : null;
+                         })
+                         .filter(v => v !== null && !isNaN(v));
+                       
+                       const average = fieldValues.length > 0 
+                         ? (fieldValues.reduce((sum, val) => sum + val, 0) / fieldValues.length).toFixed(1)
+                         : '-';
+
+                       return (
+                         <TableRow key={fieldName}>
+                            <TableCell className="sticky left-0 bg-background font-medium border-r">
+                              {getCleanFieldName(fieldName)}
+                            </TableCell>
+                            {filteredEvents.map((event) => (
+                              <TableCell key={event.id} className="text-center">
+                                {(() => {
+                                  const value = event.score_sheet?.scores?.[fieldName];
+                                  if (value === null || value === undefined) return '-';
+                                  if (typeof value === 'object') return JSON.stringify(value);
+                                  return String(value);
+                                })()}
+                              </TableCell>
+                            ))}
+                            <TableCell className="text-center font-medium bg-muted/30">
+                              {average}
+                            </TableCell>
+                         </TableRow>
+                       );
+                     })}
+                     
+                     {/* Total Points Row */}
+                     <TableRow className="bg-muted/50">
+                       <TableCell className="sticky left-0 bg-muted/50 font-bold border-r">
+                         Total Points
+                       </TableCell>
+                       {filteredEvents.map((event) => (
+                         <TableCell key={event.id} className="text-center font-bold">
+                           {event.total_points || 0}
                          </TableCell>
-                         {filteredEvents.map((event) => (
-                           <TableCell key={event.id} className="text-center">
-                             {(() => {
-                               const value = event.score_sheet?.scores?.[fieldName];
-                               if (value === null || value === undefined) return '-';
-                               if (typeof value === 'object') return JSON.stringify(value);
-                               return String(value);
-                             })()}
-                           </TableCell>
-                         ))}
-                      </TableRow>
-                    ))}
-                    
-                    {/* Total Points Row */}
-                    <TableRow className="bg-muted/50">
-                      <TableCell className="sticky left-0 bg-muted/50 font-bold border-r">
-                        Total Points
-                      </TableCell>
-                      {filteredEvents.map((event) => (
-                        <TableCell key={event.id} className="text-center font-bold">
-                          {event.total_points || 0}
-                        </TableCell>
-                      ))}
-                    </TableRow>
-                    
-                    {/* Grand Total Row */}
-                    <TableRow className="bg-primary/10 border-t-2">
-                      <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary">
-                        Grand Total
-                      </TableCell>
-                      <TableCell className="text-center font-bold text-primary" colSpan={filteredEvents.length}>
-                        {filteredEvents.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
-                      </TableCell>
-                    </TableRow>
+                       ))}
+                       <TableCell className="text-center font-bold bg-muted/50">
+                         {filteredEvents.length > 0 
+                           ? (filteredEvents.reduce((sum, event) => sum + (event.total_points || 0), 0) / filteredEvents.length).toFixed(1)
+                           : '-'
+                         }
+                       </TableCell>
+                     </TableRow>
+                     
+                     {/* Grand Total Row */}
+                     <TableRow className="bg-primary/10 border-t-2">
+                       <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary">
+                         Grand Total
+                       </TableCell>
+                       <TableCell className="text-center font-bold text-primary" colSpan={filteredEvents.length + 1}>
+                         {filteredEvents.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
+                       </TableCell>
+                     </TableRow>
                   </TableBody>
                 </Table>
               </div>
