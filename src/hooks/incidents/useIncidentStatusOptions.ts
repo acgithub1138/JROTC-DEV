@@ -1,4 +1,5 @@
-import { useMemo } from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 
 export interface IncidentStatusOption {
   value: string;
@@ -6,25 +7,23 @@ export interface IncidentStatusOption {
 }
 
 export const useIncidentStatusOptions = () => {
-  const statusOptions = useMemo(() => {
-    // These values come from the incident_status enum in the database
-    const enumValues = [
-      'new',
-      'in_progress', 
-      'need_information',
-      'on_hold',
-      'resolved',
-      'cancelled'
-    ];
+  const { data: statusOptions = [], isLoading } = useQuery({
+    queryKey: ['incident-status-options'],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .rpc('get_incident_status_values');
 
-    return enumValues.map((status: string): IncidentStatusOption => ({
-      value: status,
-      label: status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')
-    }));
-  }, []);
+      if (error) {
+        console.error('Error fetching incident status options:', error);
+        throw error;
+      }
+
+      return data as IncidentStatusOption[];
+    },
+  });
 
   return {
     statusOptions,
-    isLoading: false
+    isLoading
   };
 };

@@ -1901,6 +1901,13 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      get_incident_status_values: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          value: string
+          label: string
+        }[]
+      }
       get_table_columns: {
         Args: { table_name: string }
         Returns: {
@@ -1988,7 +1995,7 @@ export type Database = {
         | "need_information"
         | "on_hold"
         | "resolved"
-        | "cancelled"
+        | "canceled"
       income_type: "fundraiser" | "donation" | "other"
       inventory_status:
         | "available"
@@ -2218,7 +2225,7 @@ export const Constants = {
         "need_information",
         "on_hold",
         "resolved",
-        "cancelled",
+        "canceled",
       ],
       income_type: ["fundraiser", "donation", "other"],
       inventory_status: [
