@@ -1,68 +1,47 @@
 import React, { useState, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Pagination, PaginationContent, PaginationEllipsis, PaginationItem, PaginationLink, PaginationNext, PaginationPrevious } from '@/components/ui/pagination';
-import { Separator } from '@/components/ui/separator';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { 
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-import { useToast } from '@/hooks/use-toast';
-import { 
   UserPlus, 
-  Edit, 
   Search, 
   Users, 
-  Shield, 
-  GraduationCap,
-  Eye,
-  EyeOff,
-  Key,
-  UserX
 } from 'lucide-react';
 import CreateUserDialog from './CreateUserDialog';
-
-type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
-
-interface User {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role: UserRole;
-  created_at: string;
-  school_id: string;
-  active: boolean;
-  schools?: { name: string };
-}
-
-interface School {
-  id: string;
-  name: string;
-}
+import { UserTable } from './components/UserTable';
+import { BulkUserActions } from './components/BulkUserActions';
+import { UserEditDialog } from './components/UserEditDialog';
+import { UserConfirmationDialogs } from './components/UserConfirmationDialogs';
+import { useUserManagement } from './hooks/useUserManagement';
+import { useUserPermissions } from './hooks/useUserPermissions';
+import { User } from './types';
+import { useAuth } from '@/contexts/AuthContext';
 
 const UserAdminPage = () => {
   const { userProfile } = useAuth();
-  const { toast } = useToast();
-  const [users, setUsers] = useState<User[]>([]);
-  const [schools, setSchools] = useState<School[]>([]);
-  const [loading, setLoading] = useState(true);
+  const {
+    users,
+    schools,
+    loading,
+    fetchUsers,
+    handleToggleUserStatus,
+    handleBulkToggle,
+    handleResetPassword,
+    updateUser,
+  } = useUserManagement();
+
+  const {
+    getAllowedRoles,
+    canCreateUsers,
+    canEditUser,
+    canDisableUser,
+    canEnableUser,
+    canResetPassword,
+  } = useUserPermissions();
+
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('all');
   const [currentPage, setCurrentPage] = useState(1);
@@ -71,285 +50,33 @@ const UserAdminPage = () => {
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [disableDialogOpen, setDisableDialogOpen] = useState(false);
   const [userToDisable, setUserToDisable] = useState<User | null>(null);
-  
-  // Password reset states
-  const [newPassword, setNewPassword] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [passwordResetLoading, setPasswordResetLoading] = useState(false);
-  const [passwordResetConfirmOpen, setPasswordResetConfirmOpen] = useState(false);
+  const [bulkDisableLoading, setBulkDisableLoading] = useState(false);
+  const [bulkDisableDialogOpen, setBulkDisableDialogOpen] = useState(false);
   
   // Bulk selection states
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
-  const [bulkDisableDialogOpen, setBulkDisableDialogOpen] = useState(false);
-  const [bulkDisableLoading, setBulkDisableLoading] = useState(false);
 
   const RECORDS_PER_PAGE = 25;
-
-  const fetchUsers = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('profiles')
-        .select(`
-          id,
-          first_name,
-          last_name,
-          email,
-          role,
-          created_at,
-          school_id,
-          active,
-          schools (name)
-        `)
-        .order('created_at', { ascending: false });
-
-      if (error) throw error;
-      setUsers(data || []);
-    } catch (error) {
-      console.error('Error fetching users:', error);
-      toast({
-        title: "Error",
-        description: "Failed to fetch users",
-        variant: "destructive",
-      });
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const fetchSchools = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('id, name')
-        .order('name', { ascending: true });
-
-      if (error) throw error;
-      setSchools(data || []);
-    } catch (error) {
-      console.error('Error fetching schools:', error);
-    }
-  };
-
-  useEffect(() => {
-    fetchUsers();
-    fetchSchools();
-  }, [userProfile]);
-
-  const handleEditUser = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingUser) return;
-
-    try {
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({
-          first_name: editingUser.first_name,
-          last_name: editingUser.last_name,
-          email: editingUser.email,
-          role: editingUser.role,
-          school_id: editingUser.school_id,
-        })
-        .eq('id', editingUser.id);
-
-      if (profileError) throw profileError;
-
-      toast({
-        title: "Success",
-        description: "User profile updated successfully",
-      });
-
-      setEditDialogOpen(false);
-      setEditingUser(null);
-      fetchUsers();
-    } catch (error) {
-      console.error('Error updating user:', error);
-      toast({
-        title: "Error",
-        description: "Failed to update user profile",
-        variant: "destructive",
-      });
-    }
-  };
-
-  const handleResetPassword = async () => {
-    if (!editingUser || !newPassword) return;
-
-    setPasswordResetLoading(true);
-
-    try {
-      const { error } = await supabase.functions.invoke('reset-user-password', {
-        body: {
-          userId: editingUser.id,
-          newPassword: newPassword
-        }
-      });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: `Password reset successfully for ${editingUser.first_name} ${editingUser.last_name}`,
-      });
-
-      setNewPassword('');
-      setPasswordResetConfirmOpen(false);
-      setShowPassword(false);
-    } catch (error) {
-      console.error('Error resetting password:', error);
-      toast({
-        title: "Error",
-        description: "Failed to reset password",
-        variant: "destructive",
-      });
-    } finally {
-      setPasswordResetLoading(false);
-    }
-  };
-
-  const generateRandomPassword = () => {
-    const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
-    let password = '';
-    for (let i = 0; i < 12; i++) {
-      password += chars.charAt(Math.floor(Math.random() * chars.length));
-    }
-    setNewPassword(password);
-  };
-
-  const handleToggleUserStatus = async (userId: string, active: boolean) => {
-    try {
-      const { error } = await supabase.functions.invoke('toggle-user-status', {
-        body: {
-          userId: userId,
-          active: active
-        }
-      });
-
-      if (error) throw error;
-
-      const user = users.find(u => u.id === userId);
-      toast({
-        title: "Success",
-        description: `User ${user?.first_name} ${user?.last_name} has been ${active ? 'enabled' : 'disabled'}.`,
-      });
-
-      setDisableDialogOpen(false);
-      setUserToDisable(null);
-      setSelectedUsers(new Set()); // Clear selections
-      fetchUsers();
-    } catch (error) {
-      console.error('Error toggling user status:', error);
-      toast({
-        title: "Error",
-        description: `Failed to ${active ? 'enable' : 'disable'} user`,
-        variant: "destructive",
-      });
-    }
-  };
 
   const handleDisableUser = () => {
     if (!userToDisable) return;
     handleToggleUserStatus(userToDisable.id, false);
+    setDisableDialogOpen(false);
+    setUserToDisable(null);
+    setSelectedUsers(new Set());
   };
 
   const handleEnableUser = (user: User) => {
     handleToggleUserStatus(user.id, true);
   };
 
-  const getRoleIcon = (role: UserRole) => {
-    switch (role) {
-      case 'admin': return <Shield className="w-4 h-4" />;
-      case 'instructor': return <Shield className="w-4 h-4" />;
-      case 'command_staff': return <Users className="w-4 h-4" />;
-      case 'cadet': return <GraduationCap className="w-4 h-4" />;
-      case 'parent': return <Users className="w-4 h-4" />;
-      default: return <Users className="w-4 h-4" />;
-    }
-  };
-
-  const getRoleColor = (role: UserRole) => {
-    switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'instructor': return 'bg-blue-100 text-blue-800';
-      case 'command_staff': return 'bg-green-100 text-green-800';
-      case 'cadet': return 'bg-gray-100 text-gray-800';
-      case 'parent': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getAllowedRoles = (): UserRole[] => {
-    if (!userProfile) return [];
-    
-    if (userProfile.role === 'admin') {
-      return ['admin', 'instructor', 'command_staff', 'cadet', 'parent'];
-    }
-    
-    if (userProfile.role === 'instructor') {
-      return ['instructor', 'command_staff', 'cadet', 'parent'];
-    }
-    
-    if (userProfile.role === 'command_staff') {
-      return ['cadet'];
-    }
-    
-    return ['cadet'];
-  };
-
-  const canCreateUsers = () => {
-    return userProfile?.role === 'admin' || userProfile?.role === 'instructor';
-  };
-
-  const canEditUser = (user: User) => {
-    if (!userProfile) return false;
-    
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && user.school_id === userProfile.school_id) return true;
-    
-    if (userProfile.role === 'command_staff' && 
-        user.school_id === userProfile.school_id && 
-        (user.role === 'command_staff' || user.role === 'cadet')) return true;
-    
-    if (user.id === userProfile.id) return true;
-    
-    return false;
-  };
-
-  const canDisableUser = (user: User) => {
-    if (!userProfile) return false;
-    
-    // Can only disable users who are currently active
-    if (!user.active) return false;
-    
-    // Can't disable yourself
-    if (user.id === userProfile.id) return false;
-    
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor') return true;
-    
-    return false;
-  };
-
-  const canEnableUser = (user: User) => {
-    if (!userProfile) return false;
-    
-    // Can only enable users who are currently disabled
-    if (user.active) return false;
-    
-    if (userProfile.role === 'admin') return true;
-    
-    if (userProfile.role === 'instructor' && 
-        user.school_id === userProfile.school_id && 
-        user.role !== 'admin' && user.role !== 'instructor') return true;
-    
-    return false;
-  };
-
-  const canResetPassword = (user: User) => {
-    return userProfile?.role === 'admin' && user.id !== userProfile.id;
+  const handleBulkAction = async () => {
+    setBulkDisableLoading(true);
+    const isDisabling = activeTab === 'active';
+    await handleBulkToggle(Array.from(selectedUsers), !isDisabling);
+    setSelectedUsers(new Set());
+    setBulkDisableDialogOpen(false);
+    setBulkDisableLoading(false);
   };
 
   // Filter users based on search, school, and active tab
@@ -390,56 +117,6 @@ const UserAdminPage = () => {
       setSelectedUsers(new Set());
     }
   };
-
-  const handleBulkToggle = async (active: boolean) => {
-    setBulkDisableLoading(true);
-    let successCount = 0;
-    let failedCount = 0;
-
-    try {
-      const promises = Array.from(selectedUsers).map(async (userId) => {
-        const { error } = await supabase.functions.invoke('toggle-user-status', {
-          body: {
-            userId: userId,
-            active: active
-          }
-        });
-        if (error) throw error;
-        return userId;
-      });
-
-      const results = await Promise.allSettled(promises);
-      
-      results.forEach((result) => {
-        if (result.status === 'fulfilled') {
-          successCount++;
-        } else {
-          failedCount++;
-        }
-      });
-
-      toast({
-        title: `Bulk ${active ? 'Enable' : 'Disable'} Complete`,
-        description: `Successfully ${active ? 'enabled' : 'disabled'} ${successCount} users${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
-      });
-
-      setSelectedUsers(new Set());
-      setBulkDisableDialogOpen(false);
-      fetchUsers();
-    } catch (error) {
-      console.error(`Bulk ${active ? 'enable' : 'disable'} error:`, error);
-      toast({
-        title: "Error",
-        description: `Failed to ${active ? 'enable' : 'disable'} users`,
-        variant: "destructive",
-      });
-    } finally {
-      setBulkDisableLoading(false);
-    }
-  };
-
-  const handleBulkDisable = () => handleBulkToggle(false);
-  const handleBulkEnable = () => handleBulkToggle(true);
 
   const selectableUsersOnPage = paginatedUsers.filter(user => 
     activeTab === 'active' ? canDisableUser(user) : canEnableUser(user)
@@ -546,200 +223,61 @@ const UserAdminPage = () => {
             </div>
 
             <TabsContent value="active">
-              {/* Bulk Actions for active users */}
-              {selectedUsers.size > 0 && activeTab === 'active' && (
-                <div className="flex items-center justify-between bg-blue-50 p-3 rounded-lg mb-4">
-                  <span className="text-sm font-medium">
-                    {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
-                  </span>
-                  <Button
-                    variant="destructive"
-                    size="sm"
-                    onClick={() => setBulkDisableDialogOpen(true)}
-                  >
-                    <UserX className="w-4 h-4 mr-2" />
-                    Disable Selected
-                  </Button>
-                </div>
-              )}
+              <BulkUserActions
+                selectedCount={selectedUsers.size}
+                activeTab={activeTab}
+                onBulkAction={() => setBulkDisableDialogOpen(true)}
+              />
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={allSelectableSelected}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all users"
-                      />
-                    </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>School</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedUsers.map((user) => (
-                    <TableRow key={user.id}>
-                      <TableCell className="py-2">
-                        {canDisableUser(user) ? (
-                          <Checkbox
-                            checked={selectedUsers.has(user.id)}
-                            onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
-                            aria-label={`Select ${user.first_name} ${user.last_name}`}
-                          />
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {user.first_name} {user.last_name}
-                      </TableCell>
-                      <TableCell className="py-2">{user.email}</TableCell>
-                      <TableCell className="py-2">
-                        <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
-                          {getRoleIcon(user.role)}
-                          {user.role.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        {user.schools?.name || 'No school assigned'}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right py-2">
-                        <div className="flex items-center justify-end gap-2">
-                          {canEditUser(user) && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingUser(user);
-                                setEditDialogOpen(true);
-                                setNewPassword('');
-                                setShowPassword(false);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canDisableUser(user) && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setUserToDisable(user);
-                                setDisableDialogOpen(true);
-                              }}
-                            >
-                              <UserX className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <UserTable
+                users={paginatedUsers}
+                activeTab={activeTab}
+                selectedUsers={selectedUsers}
+                onSelectUser={handleSelectUser}
+                onSelectAll={handleSelectAll}
+                allSelectableSelected={allSelectableSelected}
+                canEditUser={canEditUser}
+                canDisableUser={canDisableUser}
+                canEnableUser={canEnableUser}
+                onEditUser={(user) => {
+                  setEditingUser(user);
+                  setEditDialogOpen(true);
+                }}
+                onDisableUser={(user) => {
+                  setUserToDisable(user);
+                  setDisableDialogOpen(true);
+                }}
+                onEnableUser={handleEnableUser}
+              />
             </TabsContent>
 
             <TabsContent value="disabled">
-              {/* Bulk Actions for disabled users */}
-              {selectedUsers.size > 0 && activeTab === 'disabled' && (
-                <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg mb-4">
-                  <span className="text-sm font-medium">
-                    {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
-                  </span>
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => setBulkDisableDialogOpen(true)}
-                  >
-                    <UserPlus className="w-4 h-4 mr-2" />
-                    Enable Selected
-                  </Button>
-                </div>
-              )}
+              <BulkUserActions
+                selectedCount={selectedUsers.size}
+                activeTab={activeTab}
+                onBulkAction={() => setBulkDisableDialogOpen(true)}
+              />
 
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead className="w-12">
-                      <Checkbox
-                        checked={allSelectableSelected}
-                        onCheckedChange={handleSelectAll}
-                        aria-label="Select all users"
-                      />
-                    </TableHead>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Email</TableHead>
-                    <TableHead>Role</TableHead>
-                    <TableHead>School</TableHead>
-                    <TableHead>Created</TableHead>
-                    <TableHead className="text-right">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {paginatedUsers.map((user) => (
-                    <TableRow key={user.id} className="opacity-60">
-                      <TableCell className="py-2">
-                        {canEnableUser(user) ? (
-                          <Checkbox
-                            checked={selectedUsers.has(user.id)}
-                            onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
-                            aria-label={`Select ${user.first_name} ${user.last_name}`}
-                          />
-                        ) : null}
-                      </TableCell>
-                      <TableCell className="font-medium py-2">
-                        {user.first_name} {user.last_name}
-                      </TableCell>
-                      <TableCell className="py-2">{user.email}</TableCell>
-                      <TableCell className="py-2">
-                        <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
-                          {getRoleIcon(user.role)}
-                          {user.role.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                      </TableCell>
-                      <TableCell className="py-2">
-                        {user.schools?.name || 'No school assigned'}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        {new Date(user.created_at).toLocaleDateString()}
-                      </TableCell>
-                      <TableCell className="text-right py-2">
-                        <div className="flex items-center justify-end gap-2">
-                          {canEditUser(user) && (
-                            <Button
-                              variant="outline"
-                              size="sm"
-                              onClick={() => {
-                                setEditingUser(user);
-                                setEditDialogOpen(true);
-                                setNewPassword('');
-                                setShowPassword(false);
-                              }}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canEnableUser(user) && (
-                            <Button
-                              variant="default"
-                              size="sm"
-                              onClick={() => handleEnableUser(user)}
-                            >
-                              <UserPlus className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>
-                  ))}
-                </TableBody>
-              </Table>
+              <UserTable
+                users={paginatedUsers}
+                activeTab={activeTab}
+                selectedUsers={selectedUsers}
+                onSelectUser={handleSelectUser}
+                onSelectAll={handleSelectAll}
+                allSelectableSelected={allSelectableSelected}
+                canEditUser={canEditUser}
+                canDisableUser={canDisableUser}
+                canEnableUser={canEnableUser}
+                onEditUser={(user) => {
+                  setEditingUser(user);
+                  setEditDialogOpen(true);
+                }}
+                onDisableUser={(user) => {
+                  setUserToDisable(user);
+                  setDisableDialogOpen(true);
+                }}
+                onEnableUser={handleEnableUser}
+              />
             </TabsContent>
 
             {filteredUsers.length === 0 && (
@@ -796,254 +334,30 @@ const UserAdminPage = () => {
         </CardContent>
       </Card>
 
-      {/* Edit User Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
-        <DialogContent className="max-w-2xl">
-          <DialogHeader>
-            <DialogTitle>Edit User Profile</DialogTitle>
-          </DialogHeader>
-          {editingUser && (
-            <form onSubmit={handleEditUser} className="space-y-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="edit-firstName">First Name</Label>
-                  <Input
-                    id="edit-firstName"
-                    value={editingUser.first_name}
-                    onChange={(e) => setEditingUser({
-                      ...editingUser,
-                      first_name: e.target.value
-                    })}
-                    required
-                  />
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="edit-lastName">Last Name</Label>
-                  <Input
-                    id="edit-lastName"
-                    value={editingUser.last_name}
-                    onChange={(e) => setEditingUser({
-                      ...editingUser,
-                      last_name: e.target.value
-                    })}
-                    required
-                  />
-                </div>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-email">Email</Label>
-                <Input
-                  id="edit-email"
-                  type="email"
-                  value={editingUser.email}
-                  onChange={(e) => setEditingUser({
-                    ...editingUser,
-                    email: e.target.value
-                  })}
-                  required
-                />
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="edit-role">Role</Label>
-                <Select 
-                  value={editingUser.role} 
-                  onValueChange={(value: UserRole) => setEditingUser({
-                    ...editingUser,
-                    role: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {getAllowedRoles().map((role) => (
-                      <SelectItem key={role} value={role}>
-                        {role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
+      <UserEditDialog
+        user={editingUser}
+        schools={schools}
+        allowedRoles={getAllowedRoles()}
+        canResetPassword={canResetPassword}
+        isAdmin={userProfile?.role === 'admin'}
+        open={editDialogOpen}
+        onOpenChange={setEditDialogOpen}
+        onUpdateUser={updateUser}
+        onResetPassword={handleResetPassword}
+      />
 
-              {userProfile?.role === 'admin' && (
-                <div className="space-y-2">
-                  <Label htmlFor="edit-school">School</Label>
-                  <Select 
-                    value={editingUser.school_id} 
-                    onValueChange={(value) => setEditingUser({
-                      ...editingUser,
-                      school_id: value
-                    })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select school" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {schools.map((school) => (
-                        <SelectItem key={school.id} value={school.id}>
-                          {school.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              )}
-
-              {/* Password Reset Section - Only for Admins */}
-              {canResetPassword(editingUser) && (
-                <>
-                  <Separator className="my-6" />
-                  <div className="space-y-4">
-                    <div className="flex items-center gap-2 text-sm font-medium text-orange-600">
-                      <Key className="w-4 h-4" />
-                      Password Reset
-                    </div>
-                    <p className="text-sm text-muted-foreground">
-                      Reset the user's password. They will need to use the new password to sign in.
-                    </p>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="new-password">New Password</Label>
-                      <div className="flex gap-2">
-                        <div className="relative flex-1">
-                          <Input
-                            id="new-password"
-                            type={showPassword ? "text" : "password"}
-                            value={newPassword}
-                            onChange={(e) => setNewPassword(e.target.value)}
-                            placeholder="Enter new password (min 6 characters)"
-                            minLength={6}
-                          />
-                          <Button
-                            type="button"
-                            variant="ghost"
-                            size="sm"
-                            className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                            onClick={() => setShowPassword(!showPassword)}
-                          >
-                            {showPassword ? (
-                              <EyeOff className="h-4 w-4" />
-                            ) : (
-                              <Eye className="h-4 w-4" />
-                            )}
-                          </Button>
-                        </div>
-                        <Button
-                          type="button"
-                          variant="outline"
-                          onClick={generateRandomPassword}
-                        >
-                          Generate
-                        </Button>
-                      </div>
-                    </div>
-
-                    {newPassword && (
-                      <Button
-                        type="button"
-                        variant="outline"
-                        onClick={() => setPasswordResetConfirmOpen(true)}
-                        className="w-full"
-                      >
-                        Reset Password
-                      </Button>
-                    )}
-                  </div>
-                </>
-              )}
-              
-              <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
-                  Cancel
-                </Button>
-                <Button type="submit">
-                  Update Profile
-                </Button>
-              </div>
-            </form>
-          )}
-        </DialogContent>
-      </Dialog>
-
-      {/* Password Reset Confirmation Dialog */}
-      <AlertDialog open={passwordResetConfirmOpen} onOpenChange={setPasswordResetConfirmOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Reset User Password</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to reset the password for {editingUser?.first_name} {editingUser?.last_name}?
-              <br /><br />
-              <strong>The user will need to use the new password to sign in.</strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleResetPassword}
-              disabled={passwordResetLoading}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Disable User Dialog */}
-      <AlertDialog open={disableDialogOpen} onOpenChange={setDisableDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Disable User</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to disable {userToDisable?.first_name} {userToDisable?.last_name}?
-              <br /><br />
-              <strong>This will prevent them from signing in to the system.</strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDisableUser}
-              className="bg-red-600 hover:bg-red-700"
-            >
-              Disable User
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
-
-      {/* Bulk Toggle Confirmation Dialog */}
-      <AlertDialog open={bulkDisableDialogOpen} onOpenChange={setBulkDisableDialogOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>
-              {activeTab === 'active' ? 'Disable' : 'Enable'} Multiple Users
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to {activeTab === 'active' ? 'disable' : 'enable'} {selectedUsers.size} selected user{selectedUsers.size > 1 ? 's' : ''}?
-              <br /><br />
-              <strong>
-                This will {activeTab === 'active' ? 'prevent them from signing in to' : 'allow them to access'} the system.
-              </strong>
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={activeTab === 'active' ? handleBulkDisable : handleBulkEnable}
-              disabled={bulkDisableLoading}
-              className={activeTab === 'active' ? "bg-red-600 hover:bg-red-700" : ""}
-            >
-              {bulkDisableLoading ? 
-                `${activeTab === 'active' ? 'Disabling' : 'Enabling'}...` : 
-                `${activeTab === 'active' ? 'Disable' : 'Enable'} Users`
-              }
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UserConfirmationDialogs
+        disableDialogOpen={disableDialogOpen}
+        bulkDialogOpen={bulkDisableDialogOpen}
+        bulkLoading={bulkDisableLoading}
+        userToDisable={userToDisable}
+        selectedCount={selectedUsers.size}
+        activeTab={activeTab}
+        onDisableDialogChange={setDisableDialogOpen}
+        onBulkDialogChange={setBulkDisableDialogOpen}
+        onDisableUser={handleDisableUser}
+        onBulkAction={handleBulkAction}
+      />
     </div>
   );
 };
