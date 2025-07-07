@@ -2,190 +2,102 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Separator } from '@/components/ui/separator';
-import { Check } from 'lucide-react';
+import { Check, Save, X } from 'lucide-react';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { TaskOverviewCards } from './components/TaskOverviewCards';
-import { TaskDescriptionCard } from './components/TaskDescriptionCard';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
-import { EditableField } from './components/EditableField';
-import { TaskDetailProps, EditState } from './types/TaskDetailTypes';
-import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
+import { TaskDetailProps } from './types/TaskDetailTypes';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
-  const { updateTask, tasks } = useTasks();
+  const { updateTask, isUpdating } = useTasks();
   const { users } = useSchoolUsers();
-  const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
+  const { comments, addComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const [editState, setEditState] = useState<EditState>({ field: null, value: null });
-  const [currentTask, setCurrentTask] = useState(task);
-
-  // Update currentTask when the task prop changes or when tasks are refetched
-  useEffect(() => {
-    const updatedTask = tasks.find(t => t.id === task.id);
-    if (updatedTask) {
-      setCurrentTask(updatedTask);
-    } else {
-      setCurrentTask(task);
-    }
-  }, [task, tasks]);
+  
+  const [editData, setEditData] = useState({
+    title: task.title,
+    description: task.description || '',
+    status: task.status,
+    priority: task.priority,
+    assigned_to: task.assigned_to || 'unassigned',
+    due_date: task.due_date || '',
+  });
 
   const canEdit = userProfile?.role === 'instructor' || 
                   userProfile?.role === 'command_staff' || 
-                  currentTask.assigned_to === userProfile?.id;
+                  task.assigned_to === userProfile?.id;
 
-  const startEdit = (field: string, currentValue: any) => {
-    setEditState({ field, value: currentValue });
-  };
-
-  const cancelEdit = () => {
-    setEditState({ field: null, value: null });
-  };
-
-  const saveEdit = async (field: string) => {
-    if (!editState.field) return;
-
-    const oldValue = currentTask[field as keyof typeof currentTask];
-    const newValue = editState.value;
-
-    // Skip if values are the same
-    if (oldValue === newValue) {
-      cancelEdit();
-      return;
-    }
-
-    const updateData: any = { id: currentTask.id };
-    
-    if (field === 'due_date') {
-      updateData.due_date = editState.value ? editState.value.toISOString() : null;
-    } else if (field === 'assigned_to') {
-      updateData.assigned_to = editState.value === 'unassigned' ? null : editState.value;
-    } else {
-      updateData[field] = editState.value;
-    }
-
+  const handleSave = async () => {
     try {
+      const updateData: any = {
+        id: task.id,
+        title: editData.title,
+        description: editData.description || null,
+        status: editData.status,
+        priority: editData.priority,
+        assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
+        due_date: editData.due_date || null,
+      };
+      
       await updateTask(updateData);
-      
-      // Add system comment for tracked fields
-      const trackedFields = ['status', 'priority', 'assigned_to', 'description', 'due_date'];
-      if (trackedFields.includes(field)) {
-        const commentText = formatFieldChangeComment(
-          field,
-          oldValue,
-          newValue,
-          statusOptions,
-          priorityOptions,
-          users
-        );
-        addSystemComment(commentText);
-      }
-      
-      cancelEdit();
-      
-      // Update the local task state immediately for better UX
-      const updatedTask = { ...currentTask, [field]: editState.value };
-      setCurrentTask(updatedTask);
+      onOpenChange(false); // Close modal after successful save
     } catch (error) {
-      console.error('Failed to update task:', error);
+      console.error('Error updating task:', error);
     }
   };
 
-  const handleQuickUpdate = async (field: string, value: any) => {
-    const oldValue = currentTask[field as keyof typeof currentTask];
+  // Update the form state when the task prop changes (after successful save and refetch)
+  useEffect(() => {
+    setEditData({
+      title: task.title,
+      description: task.description || '',
+      status: task.status,
+      priority: task.priority,
+      assigned_to: task.assigned_to || 'unassigned',
+      due_date: task.due_date || '',
+    });
+  }, [task]);
 
-    // Skip if values are the same
-    if (oldValue === value) {
-      return;
-    }
-
-    const updateData: any = { id: currentTask.id };
-    updateData[field] = value;
-
-    try {
-      await updateTask(updateData);
-      
-      // Add system comment for tracked fields
-      const trackedFields = ['status', 'priority', 'assigned_to', 'due_date'];
-      if (trackedFields.includes(field)) {
-        const commentText = formatFieldChangeComment(
-          field,
-          oldValue,
-          value,
-          statusOptions,
-          priorityOptions,
-          users
-        );
-        addSystemComment(commentText);
-      }
-      
-      // Update the local task state immediately
-      const updatedTask = { ...currentTask, [field]: value };
-      setCurrentTask(updatedTask);
-    } catch (error) {
-      console.error('Failed to update task:', error);
-    }
+  const handleCancel = () => {
+    onOpenChange(false);
   };
-
-  const assigneeOptions = [
-    { value: 'unassigned', label: 'Unassigned' },
-    ...users.map(user => ({
-      value: user.id,
-      label: `${user.last_name}, ${user.first_name}`
-    }))
-  ];
 
   const handleCompleteTask = async () => {
     await updateTask({ 
-      id: currentTask.id, 
+      id: task.id, 
       status: 'done',
       completed_at: new Date().toISOString()
     });
-    
-    // Add system comment
-    addSystemComment('Task completed');
     
     onOpenChange(false);
   };
 
   const getDialogTitle = () => {
-    if (currentTask.task_number) {
-      return `${currentTask.task_number} - ${currentTask.title}`;
+    if (task.task_number) {
+      return `${task.task_number}`;
     }
-    return currentTask.title;
+    return 'Task Details';
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-4xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl">
-              {currentTask.task_number && (
-                <span className="text-blue-600 font-mono mr-2">
-                  {currentTask.task_number} -
-                </span>
-              )}
-              <EditableField
-                field="title"
-                currentValue={currentTask.title}
-                displayValue={currentTask.title}
-                canEdit={canEdit}
-                editState={editState}
-                onStartEdit={startEdit}
-                onCancelEdit={cancelEdit}
-                onSaveEdit={saveEdit}
-                onEditStateChange={setEditState}
-              />
+            <DialogTitle>
+              {getDialogTitle()}
             </DialogTitle>
-            <div className="flex items-center gap-2">
-              {currentTask.status !== 'done' && (
+            <div className="flex gap-2">
+              {task.status !== 'done' && (
                 <Button
                   type="button"
                   onClick={handleCompleteTask}
@@ -196,42 +108,138 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                   Complete
                 </Button>
               )}
-              <Button
-                type="button"
-                onClick={() => onOpenChange(false)}
-                variant="outline"
-              >
-                Close
-              </Button>
+              {canEdit && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isUpdating}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isUpdating}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                </>
+              )}
             </div>
           </div>
         </DialogHeader>
 
         <div className="space-y-6">
-          <TaskOverviewCards
-            task={currentTask}
-            canEdit={canEdit}
-            editState={editState}
-            statusOptions={statusOptions}
-            priorityOptions={priorityOptions}
-            assigneeOptions={assigneeOptions}
-            userProfile={userProfile}
-            onStartEdit={startEdit}
-            onCancelEdit={cancelEdit}
-            onSaveEdit={saveEdit}
-            onEditStateChange={setEditState}
-            onQuickUpdate={handleQuickUpdate}
-          />
+          {/* Task Details */}
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold mb-2">Title</h3>
+              <Input
+                value={editData.title}
+                onChange={(e) => setEditData({...editData, title: e.target.value})}
+                className="text-lg"
+                disabled={!canEdit}
+              />
+            </div>
 
-          <TaskDescriptionCard
-            task={currentTask}
-            canEdit={canEdit}
-            editState={editState}
-            onStartEdit={startEdit}
-            onCancelEdit={cancelEdit}
-            onSaveEdit={saveEdit}
-            onEditStateChange={setEditState}
-          />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <h3 className="font-semibold mb-2">Status</h3>
+                <Select
+                  value={editData.status}
+                  onValueChange={(value) => setEditData({...editData, status: value})}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Priority</h3>
+                <Select
+                  value={editData.priority}
+                  onValueChange={(value) => setEditData({...editData, priority: value})}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Assigned To</h3>
+                <Select
+                  value={editData.assigned_to}
+                  onValueChange={(value) => setEditData({...editData, assigned_to: value})}
+                  disabled={!canEdit}
+                >
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.last_name}, {user.first_name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Due Date</h3>
+                <Input
+                  type="date"
+                  value={editData.due_date ? new Date(editData.due_date).toISOString().split('T')[0] : ''}
+                  onChange={(e) => setEditData({...editData, due_date: e.target.value})}
+                  disabled={!canEdit}
+                />
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Created</h3>
+                <p className="text-sm">{new Date(task.created_at).toLocaleString()}</p>
+              </div>
+
+              <div>
+                <h3 className="font-semibold mb-2">Last Updated</h3>
+                <p className="text-sm">{new Date(task.updated_at).toLocaleString()}</p>
+              </div>
+            </div>
+
+            <div>
+              <h3 className="font-semibold mb-2">Description</h3>
+              <Textarea
+                value={editData.description}
+                onChange={(e) => setEditData({...editData, description: e.target.value})}
+                rows={4}
+                placeholder="Task description..."
+                disabled={!canEdit}
+              />
+            </div>
+          </div>
 
           <Separator />
 
