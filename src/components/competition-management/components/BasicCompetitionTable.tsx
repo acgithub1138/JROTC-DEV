@@ -37,7 +37,17 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
             <TableRow>
               <TableHead>Name</TableHead>
               <TableHead>Date</TableHead>
-              <TableHead>Award</TableHead>
+              <TableHead>Overall Placement</TableHead>
+              <TableHead>Overall Armed</TableHead>
+              <TableHead>Overall Unarmed</TableHead>
+              <TableHead>Armed Regulation</TableHead>
+              <TableHead>Armed Exhibition</TableHead>
+              <TableHead>Armed Color Guard</TableHead>
+              <TableHead>Armed Inspection</TableHead>
+              <TableHead>Unarmed Regulation</TableHead>
+              <TableHead>Unarmed Exhibition</TableHead>
+              <TableHead>Unarmed Color Guard</TableHead>
+              <TableHead>Unarmed Inspection</TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
@@ -49,6 +59,16 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                   {new Date(competition.competition_date).toLocaleDateString()}
                 </TableCell>
                 <TableCell>{competition.overall_placement || '-'}</TableCell>
+                <TableCell>{competition.overall_armed_placement || '-'}</TableCell>
+                <TableCell>{competition.overall_unarmed_placement || '-'}</TableCell>
+                <TableCell>{competition.armed_regulation || '-'}</TableCell>
+                <TableCell>{competition.armed_exhibition || '-'}</TableCell>
+                <TableCell>{competition.armed_color_guard || '-'}</TableCell>
+                <TableCell>{competition.armed_inspection || '-'}</TableCell>
+                <TableCell>{competition.unarmed_regulation || '-'}</TableCell>
+                <TableCell>{competition.unarmed_exhibition || '-'}</TableCell>
+                <TableCell>{competition.unarmed_color_guard || '-'}</TableCell>
+                <TableCell>{competition.unarmed_inspection || '-'}</TableCell>
                 <TableCell className="text-right">
                   <div className="flex gap-2 justify-end">
                     {onAddEvent && (
