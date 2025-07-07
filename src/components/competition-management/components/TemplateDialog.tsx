@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Button } from '@/components/ui/button';
 import { TemplateForm } from './TemplateForm';
 import { CompetitionTemplate } from '../types';
@@ -18,35 +19,75 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
   onSubmit,
 }) => {
   const [useBuilder, setUseBuilder] = useState(true);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
 
   const handleSubmit = async (data: any) => {
     await onSubmit(data);
+    setHasUnsavedChanges(false);
+    onOpenChange(false);
+  };
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && hasUnsavedChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      onOpenChange(newOpen);
+      if (!newOpen) {
+        setHasUnsavedChanges(false);
+      }
+    }
+  };
+
+  const confirmClose = () => {
+    setShowConfirmDialog(false);
+    setHasUnsavedChanges(false);
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
-        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
-          <DialogTitle>
-            {template ? 'Edit Template' : 'Create Template'}
-          </DialogTitle>
-          <Button 
-            type="button" 
-            variant="outline" 
-            size="sm" 
-            onClick={() => setUseBuilder(!useBuilder)}
-          >
-            {useBuilder ? 'Manual JSON' : 'Field Builder'}
-          </Button>
-        </DialogHeader>
-        <TemplateForm
-          template={template}
-          onSubmit={handleSubmit}
-          onCancel={() => onOpenChange(false)}
-          useBuilder={useBuilder}
-        />
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
+        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+          <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+            <DialogTitle>
+              {template ? 'Edit Template' : 'Create Template'}
+            </DialogTitle>
+            <Button 
+              type="button" 
+              variant="outline" 
+              size="sm" 
+              onClick={() => setUseBuilder(!useBuilder)}
+            >
+              {useBuilder ? 'Manual JSON' : 'Field Builder'}
+            </Button>
+          </DialogHeader>
+          <TemplateForm
+            template={template}
+            onSubmit={handleSubmit}
+            onCancel={() => handleOpenChange(false)}
+            onFormChange={setHasUnsavedChanges}
+            useBuilder={useBuilder}
+          />
+        </DialogContent>
+      </Dialog>
+
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved changes that will be lost if you close this form. Are you sure you want to continue?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Stay on Form</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmClose}>
+              Discard Changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+    </>
   );
 };

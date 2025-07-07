@@ -15,12 +15,14 @@ interface TemplateFormProps {
   template?: CompetitionTemplate | DatabaseCompetitionTemplate | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  onFormChange?: (hasChanges: boolean) => void;
   useBuilder: boolean;
 }
 export const TemplateForm: React.FC<TemplateFormProps> = ({
   template,
   onSubmit,
   onCancel,
+  onFormChange,
   useBuilder
 }) => {
   const { templates } = useCompetitionTemplates();
@@ -35,6 +37,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     is_global: (template as any)?.is_global ?? false
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [initialFormData] = useState(formData);
   
   const isAdmin = userProfile?.role === 'admin';
   const eventOptions = ['Armed Inspection', 'Armed Color Guard', 'Armed Exhibition', 'Armed Dual Exhibition', 'Armed Regulation', 'Armed Solo Exhibition', 'Unarmed Inspection', 'Unarmed Color Guard', 'Unarmed Exhibition', 'Unarmed Dual Exhibition', 'Unarmed Regulation'];
@@ -117,6 +120,12 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       [field]: value
     }));
   };
+
+  // Check for changes compared to initial data
+  useEffect(() => {
+    const hasChanges = JSON.stringify(formData) !== JSON.stringify(initialFormData);
+    onFormChange?.(hasChanges);
+  }, [formData, initialFormData, onFormChange]);
   return <form onSubmit={handleSubmit} className="space-y-3">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
         <div className="space-y-1">
