@@ -83,7 +83,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   const handleSave = async () => {
     try {
-      await updateIncident({
+      const updateData: any = {
         id: incident.id,
         title: editData.title,
         description: editData.description || null,
@@ -91,7 +91,14 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         priority: editData.priority,
         category: editData.category,
         assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
-      });
+      };
+
+      // If status is being changed to resolved, set active to false
+      if (editData.status === 'resolved') {
+        updateData.active = false;
+      }
+
+      await updateIncident(updateData);
       onOpenChange(false); // Close modal after successful save
     } catch (error) {
       console.error('Error updating incident:', error);

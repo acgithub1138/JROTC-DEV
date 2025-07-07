@@ -101,14 +101,14 @@ const IncidentManagementPage: React.FC = () => {
     incidents.filter(incident => incident.submitted_by === userProfile?.id && incident.active === true)
   );
   
-  const allIncidents = filterIncidents(incidents);
+  const allIncidents = filterIncidents(incidents.filter(incident => incident.active === true));
   
   const assignedIncidents = filterIncidents(
     incidents.filter(incident => incident.assigned_to === userProfile?.id)
   );
   
   const resolvedIncidents = filterIncidents(
-    incidents.filter(incident => (incident.status === 'resolved' || incident.resolved_at) && incident.active === true)
+    incidents.filter(incident => incident.active === false)
   );
 
   // Pagination logic for each tab
@@ -153,7 +153,7 @@ const IncidentManagementPage: React.FC = () => {
       <Tabs defaultValue={isAdmin ? "allincidents" : "myincidents"} className="w-full">
         <TabsList className={`grid w-full ${isAdmin ? 'grid-cols-3' : 'grid-cols-2'}`}>
           {!isAdmin && <TabsTrigger value="myincidents">My Incidents</TabsTrigger>}
-          {isAdmin && <TabsTrigger value="allincidents">All Incidents</TabsTrigger>}
+          {isAdmin && <TabsTrigger value="allincidents">All Active Incidents</TabsTrigger>}
           {isAdmin && <TabsTrigger value="assigned">Assigned to Me</TabsTrigger>}
           <TabsTrigger value="resolved">Resolved</TabsTrigger>
         </TabsList>
