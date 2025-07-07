@@ -6,20 +6,24 @@ import { Input } from '@/components/ui/input';
 import { IncidentForm } from './IncidentForm';
 import { IncidentTable } from './IncidentTable';
 import { IncidentDetailDialog } from './IncidentDetailDialog';
+import { CancelIncidentDialog } from './components/CancelIncidentDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { useIncidents, Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
+import { supabase } from '@/integrations/supabase/client';
 
 const IncidentManagementPage: React.FC = () => {
-  const { incidents } = useIncidents();
+  const { incidents, updateIncident } = useIncidents();
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [cancelingIncident, setCancelingIncident] = useState<Incident | null>(null);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPageMyIncidents, setCurrentPageMyIncidents] = useState(1);
   const [currentPageAllIncidents, setCurrentPageAllIncidents] = useState(1);
@@ -49,11 +53,33 @@ const IncidentManagementPage: React.FC = () => {
     setEditingIncident(null);
   };
 
-  const handleDeleteIncident = (incident: Incident) => {
-    // For now, just show a confirmation alert - you can implement a proper delete dialog later
-    if (window.confirm(`Are you sure you want to delete incident ${incident.incident_number}?`)) {
-      // TODO: Implement delete functionality
-      console.log('Delete incident:', incident);
+  const handleCancelIncident = (incident: Incident) => {
+    setCancelingIncident(incident);
+    setIsCancelDialogOpen(true);
+  };
+
+  const handleConfirmCancel = async (reason: string) => {
+    if (!cancelingIncident) return;
+
+    try {
+      // Update incident status to canceled
+      await updateIncident({
+        id: cancelingIncident.id,
+        status: 'canceled',
+        resolved_at: new Date().toISOString(),
+      });
+
+      // Add a system comment with the cancellation reason using supabase directly
+      await supabase
+        .from('incident_comments')
+        .insert({
+          incident_id: cancelingIncident.id,
+          user_id: userProfile?.id,
+          comment_text: `Incident canceled by ${userProfile?.first_name} ${userProfile?.last_name}. Reason: ${reason}`,
+          is_system_comment: true,
+        });
+    } catch (error) {
+      console.error('Error canceling incident:', error);
     }
   };
 
@@ -138,7 +164,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedMyIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
-              onDeleteIncident={handleDeleteIncident}
+              onCancelIncident={handleCancelIncident}
             />
             <TablePagination
               currentPage={currentPageMyIncidents}
@@ -155,7 +181,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedAllIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
-              onDeleteIncident={handleDeleteIncident}
+              onCancelIncident={handleCancelIncident}
             />
             <TablePagination
               currentPage={currentPageAllIncidents}
@@ -172,7 +198,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedAssignedIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
-              onDeleteIncident={handleDeleteIncident}
+              onCancelIncident={handleCancelIncident}
             />
             <TablePagination
               currentPage={currentPageAssigned}
@@ -188,7 +214,7 @@ const IncidentManagementPage: React.FC = () => {
             incidents={paginatedResolvedIncidents}
             onIncidentSelect={handleIncidentSelect}
             onEditIncident={handleEditIncident}
-            onDeleteIncident={handleDeleteIncident}
+            onCancelIncident={handleCancelIncident}
           />
           <TablePagination
             currentPage={currentPageResolved}
@@ -215,6 +241,14 @@ const IncidentManagementPage: React.FC = () => {
           onOpenChange={setIsDetailDialogOpen}
         />
       )}
+
+      {/* Cancel Incident Dialog */}
+      <CancelIncidentDialog
+        incident={cancelingIncident}
+        open={isCancelDialogOpen}
+        onOpenChange={setIsCancelDialogOpen}
+        onConfirm={handleConfirmCancel}
+      />
     </div>
   );
 };

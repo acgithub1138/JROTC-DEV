@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Trash2 } from 'lucide-react';
+import { Trash2 } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -10,7 +10,7 @@ interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
   onEditIncident: (incident: Incident) => void;
-  onDeleteIncident: (incident: Incident) => void;
+  onCancelIncident: (incident: Incident) => void;
 }
 
 const getSeverityColor = (severity: string) => {
@@ -37,13 +37,18 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents, 
   onIncidentSelect, 
   onEditIncident,
-  onDeleteIncident
+  onCancelIncident
 }) => {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
+  const isInstructor = userProfile?.role === 'instructor';
 
   const canEditIncident = (incident: Incident) => {
     return isAdmin || incident.submitted_by === userProfile?.id;
+  };
+
+  const canCancelIncident = (incident: Incident) => {
+    return (isInstructor || isAdmin) && incident.status !== 'canceled' && incident.status !== 'resolved';
   };
 
   return (
@@ -112,18 +117,12 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onIncidentSelect(incident)}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                  {isAdmin && (
+                  {canCancelIncident(incident) && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDeleteIncident(incident)}
+                      onClick={() => onCancelIncident(incident)}
+                      className="text-orange-600 hover:text-orange-700"
                     >
                       <Trash2 className="w-4 h-4" />
                     </Button>

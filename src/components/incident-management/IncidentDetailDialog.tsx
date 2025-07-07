@@ -30,6 +30,7 @@ const statusOptions = [
   { value: 'in_progress', label: 'In Progress' },
   { value: 'resolved', label: 'Resolved' },
   { value: 'closed', label: 'Closed' },
+  { value: 'canceled', label: 'Canceled' },
 ];
 
 const categoryOptions = [
