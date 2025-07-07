@@ -49,6 +49,14 @@ const IncidentManagementPage: React.FC = () => {
     setEditingIncident(null);
   };
 
+  const handleDeleteIncident = (incident: Incident) => {
+    // For now, just show a confirmation alert - you can implement a proper delete dialog later
+    if (window.confirm(`Are you sure you want to delete incident ${incident.incident_number}?`)) {
+      // TODO: Implement delete functionality
+      console.log('Delete incident:', incident);
+    }
+  };
+
   // Filter incidents based on search term
   const filterIncidents = (incidentList: Incident[]) => {
     if (!searchTerm) return incidentList;
@@ -130,6 +138,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedMyIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
+              onDeleteIncident={handleDeleteIncident}
             />
             <TablePagination
               currentPage={currentPageMyIncidents}
@@ -146,6 +155,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedAllIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
+              onDeleteIncident={handleDeleteIncident}
             />
             <TablePagination
               currentPage={currentPageAllIncidents}
@@ -162,6 +172,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={paginatedAssignedIncidents}
               onIncidentSelect={handleIncidentSelect}
               onEditIncident={handleEditIncident}
+              onDeleteIncident={handleDeleteIncident}
             />
             <TablePagination
               currentPage={currentPageAssigned}
@@ -177,6 +188,7 @@ const IncidentManagementPage: React.FC = () => {
             incidents={paginatedResolvedIncidents}
             onIncidentSelect={handleIncidentSelect}
             onEditIncident={handleEditIncident}
+            onDeleteIncident={handleDeleteIncident}
           />
           <TablePagination
             currentPage={currentPageResolved}

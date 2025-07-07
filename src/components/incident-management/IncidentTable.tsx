@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Edit, Eye } from 'lucide-react';
+import { Eye, Trash2 } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -10,6 +10,7 @@ interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
   onEditIncident: (incident: Incident) => void;
+  onDeleteIncident: (incident: Incident) => void;
 }
 
 const getSeverityColor = (severity: string) => {
@@ -35,7 +36,8 @@ const getCategoryColor = (category: string) => {
 export const IncidentTable: React.FC<IncidentTableProps> = ({ 
   incidents, 
   onIncidentSelect, 
-  onEditIncident 
+  onEditIncident,
+  onDeleteIncident
 }) => {
   const { userProfile } = useAuth();
   const isAdmin = userProfile?.role === 'admin';
@@ -64,7 +66,16 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
           {incidents.map((incident) => (
             <TableRow key={incident.id}>
               <TableCell className="font-medium">
-                {incident.incident_number || 'N/A'}
+                {canEditIncident(incident) ? (
+                  <button
+                    onClick={() => onEditIncident(incident)}
+                    className="text-primary hover:underline cursor-pointer"
+                  >
+                    {incident.incident_number || 'N/A'}
+                  </button>
+                ) : (
+                  incident.incident_number || 'N/A'
+                )}
               </TableCell>
               <TableCell className="max-w-xs truncate">
                 {incident.title}
@@ -108,13 +119,13 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
                   >
                     <Eye className="w-4 h-4" />
                   </Button>
-                  {canEditIncident(incident) && (
+                  {isAdmin && (
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onEditIncident(incident)}
+                      onClick={() => onDeleteIncident(incident)}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Trash2 className="w-4 h-4" />
                     </Button>
                   )}
                 </div>
