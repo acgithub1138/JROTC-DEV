@@ -49,6 +49,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Incident #</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Category</TableHead>
+            <TableHead>Priority</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Submitted By</TableHead>
             <TableHead>Assigned To</TableHead>
@@ -77,6 +78,11 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell>
                 <Badge variant="secondary" className={getCategoryColor(incident.category)}>
                   {incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant="outline">
+                  {incident.priority.charAt(0).toUpperCase() + incident.priority.slice(1)}
                 </Badge>
               </TableCell>
               <TableCell>
