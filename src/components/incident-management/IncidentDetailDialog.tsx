@@ -82,7 +82,8 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   });
 
   const isAdmin = userProfile?.role === 'admin';
-  const canEditIncident = isAdmin || incident.submitted_by === userProfile?.id;
+  const isInstructor = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canEditIncident = isAdmin || isInstructor || incident.submitted_by === userProfile?.id;
 
   const handleSave = async () => {
     try {
