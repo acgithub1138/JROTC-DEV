@@ -1,7 +1,7 @@
 export interface JsonField {
   id: string;
   name: string;
-  type: 'text' | 'dropdown' | 'number' | 'section_header' | 'calculated' | 'label';
+  type: 'text' | 'dropdown' | 'number' | 'section_header' | 'calculated' | 'label' | 'pause';
   fieldInfo?: string; // Information text displayed under the field
   textType?: 'short' | 'notes'; // For text fields
   values?: string[];
