@@ -23,7 +23,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 bg-background border-r px-2 min-w-48">Field</TableHead>
+            <TableHead className="text-center bg-muted/30 px-2 min-w-20">Field</TableHead>
             {events.map((event, index) => (
               <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
                 <div className="font-medium text-sm">
