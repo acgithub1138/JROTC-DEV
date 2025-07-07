@@ -92,12 +92,26 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
     
     const allFields = new Set<string>();
     filteredEvents.forEach(event => {
-      if (event.score_sheet && typeof event.score_sheet === 'object') {
-        Object.keys(event.score_sheet).forEach(key => allFields.add(key));
+      if (event.score_sheet?.scores && typeof event.score_sheet.scores === 'object') {
+        Object.keys(event.score_sheet.scores).forEach(key => allFields.add(key));
       }
     });
     
-    return Array.from(allFields).sort();
+    // Sort field names logically (by field number if present)
+    return Array.from(allFields).sort((a, b) => {
+      const aNum = parseInt(a.match(/field_(\d+)/)?.[1] || '999');
+      const bNum = parseInt(b.match(/field_(\d+)/)?.[1] || '999');
+      return aNum - bNum;
+    });
+  };
+
+  // Clean up field names for display
+  const getCleanFieldName = (fieldName: string) => {
+    // Remove field_ prefix and convert underscores to spaces
+    return fieldName
+      .replace(/^field_\d+_/, '')
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase());
   };
 
   const fieldNames = getFieldNames();
@@ -149,36 +163,36 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
                   <TableHeader>
                     <TableRow>
                       <TableHead className="sticky left-0 bg-background">Field</TableHead>
-                      {filteredEvents.map((event, index) => (
-                        <TableHead key={event.id} className="text-center min-w-32">
-                          <div className="space-y-1">
-                            <div className="font-medium">
-                              {event.profiles?.first_name} {event.profiles?.last_name}
-                            </div>
-                            <div className="text-xs text-muted-foreground">
-                              Total: {event.total_points || 0} pts
-                            </div>
-                          </div>
-                        </TableHead>
-                      ))}
+                       {filteredEvents.map((event, index) => (
+                         <TableHead key={event.id} className="text-center min-w-32">
+                           <div className="space-y-1">
+                             <div className="font-medium">
+                               Judge {event.score_sheet?.judge_number || (index + 1)}
+                             </div>
+                             <div className="text-xs text-muted-foreground">
+                               Total: {event.total_points || 0} pts
+                             </div>
+                           </div>
+                         </TableHead>
+                       ))}
                     </TableRow>
                   </TableHeader>
                   <TableBody>
                     {fieldNames.map((fieldName) => (
                       <TableRow key={fieldName}>
-                        <TableCell className="sticky left-0 bg-background font-medium border-r">
-                          {fieldName}
-                        </TableCell>
-                        {filteredEvents.map((event) => (
-                          <TableCell key={event.id} className="text-center">
-                            {(() => {
-                              const value = event.score_sheet?.[fieldName];
-                              if (value === null || value === undefined) return '-';
-                              if (typeof value === 'object') return JSON.stringify(value);
-                              return String(value);
-                            })()}
-                          </TableCell>
-                        ))}
+                         <TableCell className="sticky left-0 bg-background font-medium border-r">
+                           {getCleanFieldName(fieldName)}
+                         </TableCell>
+                         {filteredEvents.map((event) => (
+                           <TableCell key={event.id} className="text-center">
+                             {(() => {
+                               const value = event.score_sheet?.scores?.[fieldName];
+                               if (value === null || value === undefined) return '-';
+                               if (typeof value === 'object') return JSON.stringify(value);
+                               return String(value);
+                             })()}
+                           </TableCell>
+                         ))}
                       </TableRow>
                     ))}
                     
