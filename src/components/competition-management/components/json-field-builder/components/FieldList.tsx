@@ -111,7 +111,7 @@ export const FieldList: React.FC<FieldListProps> = ({ fields, onEditField, onRem
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Added Fields ({fields.length})</CardTitle>
+        <CardTitle>Form Fields ({fields.length})</CardTitle>
       </CardHeader>
       <CardContent>
         <DndContext 
