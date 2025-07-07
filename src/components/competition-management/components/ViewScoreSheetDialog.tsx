@@ -52,17 +52,31 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
           event,
           score_sheet,
           total_points,
-          cadet_id,
-          profiles:cadet_id (
-            first_name,
-            last_name
-          )
+          cadet_id
         `)
         .eq('competition_id', competition.id)
         .eq('school_id', userProfile.school_id);
 
       if (error) throw error;
-      setEvents(data || []);
+
+      // Get cadet profiles separately to avoid foreign key issues
+      if (data && data.length > 0) {
+        const cadetIds = data.map(event => event.cadet_id);
+        const { data: profiles } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name')
+          .in('id', cadetIds);
+
+        // Map profiles to events
+        const eventsWithProfiles = data.map(event => ({
+          ...event,
+          profiles: profiles?.find(p => p.id === event.cadet_id)
+        }));
+        
+        setEvents(eventsWithProfiles);
+      } else {
+        setEvents(data || []);
+      }
     } catch (error) {
       console.error('Error fetching competition events:', error);
       toast.error('Failed to load competition events');
