@@ -69,7 +69,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
       priority: incident?.priority || 'medium',
       severity: incident?.severity || 'medium',
       category: incident?.category || 'other',
-      assigned_to: incident?.assigned_to || '',
+      assigned_to: incident?.assigned_to || 'unassigned',
     },
   });
 
@@ -83,7 +83,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           priority: data.priority,
           severity: data.severity,
           category: data.category,
-          assigned_to: data.assigned_to || null,
+          assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
       } else if (incident) {
         await updateIncident({
@@ -94,7 +94,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           priority: data.priority,
           severity: data.severity,
           category: data.category,
-          assigned_to: data.assigned_to || null,
+          assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
       }
       onOpenChange(false);
@@ -280,7 +280,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">Unassigned</SelectItem>
+                          <SelectItem value="unassigned">Unassigned</SelectItem>
                           {users.map((user) => (
                             <SelectItem key={user.id} value={user.id}>
                               {user.first_name} {user.last_name} ({user.role})
