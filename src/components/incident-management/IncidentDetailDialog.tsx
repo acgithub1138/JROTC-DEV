@@ -11,6 +11,7 @@ import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOptions';
 
 interface IncidentDetailDialogProps {
   incident: Incident;
@@ -25,13 +26,6 @@ const severityOptions = [
   { value: 'critical', label: 'Critical' },
 ];
 
-const statusOptions = [
-  { value: 'open', label: 'Open' },
-  { value: 'in_progress', label: 'In Progress' },
-  { value: 'resolved', label: 'Resolved' },
-  { value: 'closed', label: 'Closed' },
-  { value: 'canceled', label: 'Canceled' },
-];
 
 const categoryOptions = [
   { value: 'technical', label: 'Technical' },
@@ -84,6 +78,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { updateIncident, isUpdating } = useIncidents();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
+  const { statusOptions } = useIncidentStatusOptions();
   
   const [newComment, setNewComment] = useState('');
   const [editData, setEditData] = useState({

@@ -65,7 +65,7 @@ const IncidentManagementPage: React.FC = () => {
       // Update incident status to canceled
       await updateIncident({
         id: cancelingIncident.id,
-        status: 'canceled',
+        status: 'cancelled',
         resolved_at: new Date().toISOString(),
       });
 

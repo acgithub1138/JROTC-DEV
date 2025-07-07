@@ -957,6 +957,7 @@ export type Database = {
       }
       incidents: {
         Row: {
+          active: boolean | null
           assigned_to: string | null
           category: string
           created_at: string
@@ -973,6 +974,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active?: boolean | null
           assigned_to?: string | null
           category?: string
           created_at?: string
@@ -989,6 +991,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active?: boolean | null
           assigned_to?: string | null
           category?: string
           created_at?: string
@@ -1979,6 +1982,13 @@ export type Database = {
         | "other"
       expense_status: "pending" | "paid" | "not_paid"
       expense_type: "equipment" | "travel" | "meals" | "supplies" | "other"
+      incident_status:
+        | "new"
+        | "in_progress"
+        | "need_information"
+        | "on_hold"
+        | "resolved"
+        | "cancelled"
       income_type: "fundraiser" | "donation" | "other"
       inventory_status:
         | "available"
@@ -2202,6 +2212,14 @@ export const Constants = {
       ],
       expense_status: ["pending", "paid", "not_paid"],
       expense_type: ["equipment", "travel", "meals", "supplies", "other"],
+      incident_status: [
+        "new",
+        "in_progress",
+        "need_information",
+        "on_hold",
+        "resolved",
+        "cancelled",
+      ],
       income_type: ["fundraiser", "donation", "other"],
       inventory_status: [
         "available",

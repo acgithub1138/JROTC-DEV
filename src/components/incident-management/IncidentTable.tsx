@@ -48,7 +48,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
   };
 
   const canCancelIncident = (incident: Incident) => {
-    return (isInstructor || isAdmin) && incident.status !== 'canceled' && incident.status !== 'resolved';
+    return (isInstructor || isAdmin) && incident.status !== 'cancelled' && incident.status !== 'resolved';
   };
 
   return (
@@ -97,7 +97,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell>
                 <Badge variant="outline">
-                  {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
+                  {incident.status.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
                 </Badge>
               </TableCell>
               <TableCell>
