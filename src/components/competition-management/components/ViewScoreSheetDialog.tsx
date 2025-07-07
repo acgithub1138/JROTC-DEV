@@ -171,7 +171,12 @@ export const ViewScoreSheetDialog: React.FC<ViewScoreSheetDialogProps> = ({
                         </TableCell>
                         {filteredEvents.map((event) => (
                           <TableCell key={event.id} className="text-center">
-                            {event.score_sheet?.[fieldName] || '-'}
+                            {(() => {
+                              const value = event.score_sheet?.[fieldName];
+                              if (value === null || value === undefined) return '-';
+                              if (typeof value === 'object') return JSON.stringify(value);
+                              return String(value);
+                            })()}
                           </TableCell>
                         ))}
                       </TableRow>
