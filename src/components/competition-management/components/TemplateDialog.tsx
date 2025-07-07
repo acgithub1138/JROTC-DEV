@@ -45,6 +45,15 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
     onOpenChange(false);
   };
 
+  const saveAndClose = async () => {
+    setShowConfirmDialog(false);
+    // The form will handle saving and closing via handleSubmit
+    const form = document.querySelector('form');
+    if (form) {
+      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -82,6 +91,9 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Stay on Form</AlertDialogCancel>
+            <Button variant="outline" onClick={saveAndClose}>
+              Save and Close
+            </Button>
             <AlertDialogAction onClick={confirmClose}>
               Discard Changes
             </AlertDialogAction>
