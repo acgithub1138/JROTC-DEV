@@ -71,7 +71,8 @@ const SortableFieldItem: React.FC<SortableFieldItemProps> = ({ field, onEditFiel
           <span>({field.type.replace('_', ' ')}</span>
           {field.type === 'text' && `, ${field.textType === 'notes' ? '2500' : '75'} chars`}
           {field.type === 'number' && `, max: ${field.maxValue}`}
-          {field.penalty && ', penalty'}
+          {field.type === 'penalty' && field.penaltyType && `, ${field.penaltyType.replace('_', ' ')}`}
+          {field.type !== 'penalty' && field.penalty && ', penalty'}
           {field.pauseField && ', pause'}
           {field.values && `, ${field.values.length} options`})
         </div>
