@@ -215,22 +215,21 @@ const UserAdminPage = () => {
     setNewPassword(password);
   };
 
-  const handleDisableUser = async () => {
-    if (!userToDisable) return;
-
+  const handleToggleUserStatus = async (userId: string, active: boolean) => {
     try {
       const { error } = await supabase.functions.invoke('toggle-user-status', {
         body: {
-          userId: userToDisable.id,
-          active: false
+          userId: userId,
+          active: active
         }
       });
 
       if (error) throw error;
 
+      const user = users.find(u => u.id === userId);
       toast({
         title: "Success",
-        description: `User ${userToDisable.first_name} ${userToDisable.last_name} has been disabled.`,
+        description: `User ${user?.first_name} ${user?.last_name} has been ${active ? 'enabled' : 'disabled'}.`,
       });
 
       setDisableDialogOpen(false);
@@ -238,13 +237,22 @@ const UserAdminPage = () => {
       setSelectedUsers(new Set()); // Clear selections
       fetchUsers();
     } catch (error) {
-      console.error('Error disabling user:', error);
+      console.error('Error toggling user status:', error);
       toast({
         title: "Error",
-        description: "Failed to disable user",
+        description: `Failed to ${active ? 'enable' : 'disable'} user`,
         variant: "destructive",
       });
     }
+  };
+
+  const handleDisableUser = () => {
+    if (!userToDisable) return;
+    handleToggleUserStatus(userToDisable.id, false);
+  };
+
+  const handleEnableUser = (user: User) => {
+    handleToggleUserStatus(user.id, true);
   };
 
   const getRoleIcon = (role: UserRole) => {
@@ -325,6 +333,21 @@ const UserAdminPage = () => {
     return false;
   };
 
+  const canEnableUser = (user: User) => {
+    if (!userProfile) return false;
+    
+    // Can only enable users who are currently disabled
+    if (user.active) return false;
+    
+    if (userProfile.role === 'admin') return true;
+    
+    if (userProfile.role === 'instructor' && 
+        user.school_id === userProfile.school_id && 
+        user.role !== 'admin' && user.role !== 'instructor') return true;
+    
+    return false;
+  };
+
   const canResetPassword = (user: User) => {
     return userProfile?.role === 'admin' && user.id !== userProfile.id;
   };
@@ -360,7 +383,7 @@ const UserAdminPage = () => {
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
       const selectableUsers = paginatedUsers
-        .filter(user => canDisableUser(user))
+        .filter(user => activeTab === 'active' ? canDisableUser(user) : canEnableUser(user))
         .map(user => user.id);
       setSelectedUsers(new Set(selectableUsers));
     } else {
@@ -368,7 +391,7 @@ const UserAdminPage = () => {
     }
   };
 
-  const handleBulkDisable = async () => {
+  const handleBulkToggle = async (active: boolean) => {
     setBulkDisableLoading(true);
     let successCount = 0;
     let failedCount = 0;
@@ -378,7 +401,7 @@ const UserAdminPage = () => {
         const { error } = await supabase.functions.invoke('toggle-user-status', {
           body: {
             userId: userId,
-            active: false
+            active: active
           }
         });
         if (error) throw error;
@@ -396,18 +419,18 @@ const UserAdminPage = () => {
       });
 
       toast({
-        title: "Bulk Disable Complete",
-        description: `Successfully disabled ${successCount} users${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
+        title: `Bulk ${active ? 'Enable' : 'Disable'} Complete`,
+        description: `Successfully ${active ? 'enabled' : 'disabled'} ${successCount} users${failedCount > 0 ? `, ${failedCount} failed` : ''}`,
       });
 
       setSelectedUsers(new Set());
       setBulkDisableDialogOpen(false);
       fetchUsers();
     } catch (error) {
-      console.error('Bulk disable error:', error);
+      console.error(`Bulk ${active ? 'enable' : 'disable'} error:`, error);
       toast({
         title: "Error",
-        description: "Failed to disable users",
+        description: `Failed to ${active ? 'enable' : 'disable'} users`,
         variant: "destructive",
       });
     } finally {
@@ -415,7 +438,12 @@ const UserAdminPage = () => {
     }
   };
 
-  const selectableUsersOnPage = paginatedUsers.filter(user => canDisableUser(user));
+  const handleBulkDisable = () => handleBulkToggle(false);
+  const handleBulkEnable = () => handleBulkToggle(true);
+
+  const selectableUsersOnPage = paginatedUsers.filter(user => 
+    activeTab === 'active' ? canDisableUser(user) : canEnableUser(user)
+  );
   const allSelectableSelected = selectableUsersOnPage.length > 0 && 
     selectableUsersOnPage.every(user => selectedUsers.has(user.id));
 
@@ -538,15 +566,13 @@ const UserAdminPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    {activeTab === 'active' && (
-                      <TableHead className="w-12">
-                        <Checkbox
-                          checked={allSelectableSelected}
-                          onCheckedChange={handleSelectAll}
-                          aria-label="Select all users"
-                        />
-                      </TableHead>
-                    )}
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={allSelectableSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all users"
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
@@ -558,17 +584,15 @@ const UserAdminPage = () => {
                 <TableBody>
                   {paginatedUsers.map((user) => (
                     <TableRow key={user.id}>
-                      {activeTab === 'active' && (
-                        <TableCell className="py-2">
-                          {canDisableUser(user) ? (
-                            <Checkbox
-                              checked={selectedUsers.has(user.id)}
-                              onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
-                              aria-label={`Select ${user.first_name} ${user.last_name}`}
-                            />
-                          ) : null}
-                        </TableCell>
-                      )}
+                      <TableCell className="py-2">
+                        {canDisableUser(user) ? (
+                          <Checkbox
+                            checked={selectedUsers.has(user.id)}
+                            onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
+                            aria-label={`Select ${user.first_name} ${user.last_name}`}
+                          />
+                        ) : null}
+                      </TableCell>
                       <TableCell className="font-medium py-2">
                         {user.first_name} {user.last_name}
                       </TableCell>
@@ -622,9 +646,33 @@ const UserAdminPage = () => {
             </TabsContent>
 
             <TabsContent value="disabled">
+              {/* Bulk Actions for disabled users */}
+              {selectedUsers.size > 0 && activeTab === 'disabled' && (
+                <div className="flex items-center justify-between bg-green-50 p-3 rounded-lg mb-4">
+                  <span className="text-sm font-medium">
+                    {selectedUsers.size} user{selectedUsers.size > 1 ? 's' : ''} selected
+                  </span>
+                  <Button
+                    variant="default"
+                    size="sm"
+                    onClick={() => setBulkDisableDialogOpen(true)}
+                  >
+                    <UserPlus className="w-4 h-4 mr-2" />
+                    Enable Selected
+                  </Button>
+                </div>
+              )}
+
               <Table>
                 <TableHeader>
                   <TableRow>
+                    <TableHead className="w-12">
+                      <Checkbox
+                        checked={allSelectableSelected}
+                        onCheckedChange={handleSelectAll}
+                        aria-label="Select all users"
+                      />
+                    </TableHead>
                     <TableHead>Name</TableHead>
                     <TableHead>Email</TableHead>
                     <TableHead>Role</TableHead>
@@ -636,6 +684,15 @@ const UserAdminPage = () => {
                 <TableBody>
                   {paginatedUsers.map((user) => (
                     <TableRow key={user.id} className="opacity-60">
+                      <TableCell className="py-2">
+                        {canEnableUser(user) ? (
+                          <Checkbox
+                            checked={selectedUsers.has(user.id)}
+                            onCheckedChange={(checked) => handleSelectUser(user.id, checked as boolean)}
+                            aria-label={`Select ${user.first_name} ${user.last_name}`}
+                          />
+                        ) : null}
+                      </TableCell>
                       <TableCell className="font-medium py-2">
                         {user.first_name} {user.last_name}
                       </TableCell>
@@ -666,6 +723,15 @@ const UserAdminPage = () => {
                               }}
                             >
                               <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {canEnableUser(user) && (
+                            <Button
+                              variant="default"
+                              size="sm"
+                              onClick={() => handleEnableUser(user)}
+                            >
+                              <UserPlus className="w-4 h-4" />
                             </Button>
                           )}
                         </div>
@@ -948,25 +1014,32 @@ const UserAdminPage = () => {
         </AlertDialogContent>
       </AlertDialog>
 
-      {/* Bulk Disable Confirmation Dialog */}
+      {/* Bulk Toggle Confirmation Dialog */}
       <AlertDialog open={bulkDisableDialogOpen} onOpenChange={setBulkDisableDialogOpen}>
         <AlertDialogContent>
           <AlertDialogHeader>
-            <AlertDialogTitle>Disable Multiple Users</AlertDialogTitle>
+            <AlertDialogTitle>
+              {activeTab === 'active' ? 'Disable' : 'Enable'} Multiple Users
+            </AlertDialogTitle>
             <AlertDialogDescription>
-              Are you sure you want to disable {selectedUsers.size} selected user{selectedUsers.size > 1 ? 's' : ''}?
+              Are you sure you want to {activeTab === 'active' ? 'disable' : 'enable'} {selectedUsers.size} selected user{selectedUsers.size > 1 ? 's' : ''}?
               <br /><br />
-              <strong>This will prevent them from signing in to the system.</strong>
+              <strong>
+                This will {activeTab === 'active' ? 'prevent them from signing in to' : 'allow them to access'} the system.
+              </strong>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
             <AlertDialogAction
-              onClick={handleBulkDisable}
+              onClick={activeTab === 'active' ? handleBulkDisable : handleBulkEnable}
               disabled={bulkDisableLoading}
-              className="bg-red-600 hover:bg-red-700"
+              className={activeTab === 'active' ? "bg-red-600 hover:bg-red-700" : ""}
             >
-              {bulkDisableLoading ? 'Disabling...' : 'Disable Users'}
+              {bulkDisableLoading ? 
+                `${activeTab === 'active' ? 'Disabling' : 'Enabling'}...` : 
+                `${activeTab === 'active' ? 'Disable' : 'Enable'} Users`
+              }
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
