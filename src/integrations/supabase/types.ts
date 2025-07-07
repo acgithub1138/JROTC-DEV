@@ -913,6 +913,92 @@ export type Database = {
           },
         ]
       }
+      incident_comments: {
+        Row: {
+          comment_text: string
+          created_at: string
+          id: string
+          incident_id: string
+          is_system_comment: boolean
+          user_id: string
+        }
+        Insert: {
+          comment_text: string
+          created_at?: string
+          id?: string
+          incident_id: string
+          is_system_comment?: boolean
+          user_id: string
+        }
+        Update: {
+          comment_text?: string
+          created_at?: string
+          id?: string
+          incident_id?: string
+          is_system_comment?: boolean
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "incident_comments_incident_id_fkey"
+            columns: ["incident_id"]
+            isOneToOne: false
+            referencedRelation: "incidents"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      incidents: {
+        Row: {
+          assigned_to: string | null
+          category: string
+          created_at: string
+          description: string | null
+          id: string
+          incident_number: string | null
+          priority: string
+          resolved_at: string | null
+          school_id: string
+          severity: string
+          status: string
+          submitted_by: string | null
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_number?: string | null
+          priority?: string
+          resolved_at?: string | null
+          school_id: string
+          severity?: string
+          status?: string
+          submitted_by?: string | null
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          assigned_to?: string | null
+          category?: string
+          created_at?: string
+          description?: string | null
+          id?: string
+          incident_number?: string | null
+          priority?: string
+          resolved_at?: string | null
+          school_id?: string
+          severity?: string
+          status?: string
+          submitted_by?: string | null
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       inventory_checkout: {
         Row: {
           cadet_id: string
@@ -1772,6 +1858,10 @@ export type Database = {
       }
       encrypt_smtp_password: {
         Args: { password_text: string }
+        Returns: string
+      }
+      generate_incident_number: {
+        Args: Record<PropertyKey, never>
         Returns: string
       }
       generate_task_number: {
