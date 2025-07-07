@@ -1,6 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
@@ -165,9 +166,11 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           {/* Task Details */}
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Task Information Card */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm">Task Information</h3>
-              <div className="space-y-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Task Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
@@ -238,13 +241,15 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                     </span>
                   )}
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
 
             {/* Assignment Details Card */}
-            <div className="space-y-4">
-              <h3 className="font-semibold text-sm">Assignment Details</h3>
-              <div className="space-y-3">
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Assignment Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
@@ -286,8 +291,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                     {format(new Date(currentTask.created_at), 'PPP')}
                   </span>
                 </div>
-              </div>
-            </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Description */}
