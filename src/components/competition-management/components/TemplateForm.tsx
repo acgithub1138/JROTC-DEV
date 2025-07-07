@@ -117,9 +117,9 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
       [field]: value
     }));
   };
-  return <form onSubmit={handleSubmit} className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
+  return <form onSubmit={handleSubmit} className="space-y-3">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="space-y-1">
           <Label htmlFor="jrotc_program">JROTC Program *</Label>
           <Select value={formData.jrotc_program} onValueChange={value => updateFormData('jrotc_program', value)}>
             <SelectTrigger>
@@ -133,7 +133,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
           </Select>
         </div>
 
-        <div className="space-y-2">
+        <div className="space-y-1">
           <Label htmlFor="event">Event Type *</Label>
           <Select value={formData.event} onValueChange={value => updateFormData('event', value)}>
             <SelectTrigger>
@@ -148,12 +148,12 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="template_name">Template Name *</Label>
         <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-1">
         <Label htmlFor="description">Description</Label>
         <Textarea 
           id="description" 
@@ -180,8 +180,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       )}
 
-      <div className="space-y-4">        
-        {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-2">
+      <div className="space-y-2">        
+        {useBuilder ? <JsonFieldBuilder value={formData.scores} onChange={scores => updateFormData('scores', scores)} /> : <div className="space-y-1">
             <Textarea value={JSON.stringify(formData.scores, null, 2)} onChange={e => {
           try {
             const parsed = JSON.parse(e.target.value);
@@ -205,7 +205,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
           </div>}
       </div>
 
-      <div className="flex justify-end gap-2 pt-4">
+      <div className="flex justify-end gap-2 pt-2">
         <Button type="button" variant="outline" onClick={onCancel}>
           Cancel
         </Button>
