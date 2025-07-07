@@ -21,6 +21,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'user-admin', label: 'User Management', icon: 'UserCog' },
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'tasks', label: 'Tasks', icon: 'CheckSquare' },
+        { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
