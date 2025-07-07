@@ -222,7 +222,6 @@ const IncidentManagementPage: React.FC = () => {
           incident={selectedIncident}
           open={isDetailDialogOpen}
           onOpenChange={setIsDetailDialogOpen}
-          onEdit={handleEditIncident}
         />
       )}
     </div>

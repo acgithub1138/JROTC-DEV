@@ -3,17 +3,34 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
-import { Edit, MessageSquare, Send } from 'lucide-react';
-import { Incident } from '@/hooks/incidents/useIncidents';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Edit, MessageSquare, Send, Save, X } from 'lucide-react';
+import { Incident, useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 interface IncidentDetailDialogProps {
   incident: Incident;
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onEdit: (incident: Incident) => void;
 }
+
+const severityOptions = [
+  { value: 'low', label: 'Low' },
+  { value: 'medium', label: 'Medium' },
+  { value: 'high', label: 'High' },
+  { value: 'critical', label: 'Critical' },
+];
+
+const categoryOptions = [
+  { value: 'technical', label: 'Technical' },
+  { value: 'behavioral', label: 'Behavioral' },
+  { value: 'safety', label: 'Safety' },
+  { value: 'other', label: 'Other' },
+];
 
 const getSeverityColor = (severity: string) => {
   switch (severity) {
@@ -39,14 +56,59 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   incident,
   open,
   onOpenChange,
-  onEdit,
 }) => {
   const { userProfile } = useAuth();
   const { comments, addComment, isAddingComment } = useIncidentComments(incident.id);
+  const { updateIncident, isUpdating } = useIncidents();
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
+  const { users } = useSchoolUsers();
+  
   const [newComment, setNewComment] = useState('');
+  const [isEditing, setIsEditing] = useState(false);
+  const [editData, setEditData] = useState({
+    title: incident.title,
+    description: incident.description || '',
+    status: incident.status,
+    priority: incident.priority,
+    severity: incident.severity,
+    category: incident.category,
+    assigned_to: incident.assigned_to || 'unassigned',
+  });
 
   const isAdmin = userProfile?.role === 'admin';
   const canEditIncident = isAdmin || incident.submitted_by === userProfile?.id;
+
+  const handleSave = async () => {
+    try {
+      await updateIncident({
+        id: incident.id,
+        title: editData.title,
+        description: editData.description || null,
+        status: editData.status,
+        priority: editData.priority,
+        severity: editData.severity,
+        category: editData.category,
+        assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
+      });
+      setIsEditing(false);
+    } catch (error) {
+      console.error('Error updating incident:', error);
+    }
+  };
+
+  const handleCancel = () => {
+    setEditData({
+      title: incident.title,
+      description: incident.description || '',
+      status: incident.status,
+      priority: incident.priority,
+      severity: incident.severity,
+      category: incident.category,
+      assigned_to: incident.assigned_to || 'unassigned',
+    });
+    setIsEditing(false);
+  };
 
   const handleAddComment = () => {
     if (newComment.trim()) {
@@ -61,17 +123,49 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>
-              {incident.incident_number} - {incident.title}
+              {isEditing ? (
+                <Input
+                  value={editData.title}
+                  onChange={(e) => setEditData({...editData, title: e.target.value})}
+                  className="text-lg font-semibold"
+                />
+              ) : (
+                `${incident.incident_number} - ${incident.title}`
+              )}
             </DialogTitle>
             {canEditIncident && (
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(incident)}
-              >
-                <Edit className="w-4 h-4 mr-2" />
-                Edit
-              </Button>
+              <div className="flex gap-2">
+                {isEditing ? (
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={handleCancel}
+                      disabled={isUpdating}
+                    >
+                      <X className="w-4 h-4 mr-2" />
+                      Cancel
+                    </Button>
+                    <Button
+                      size="sm"
+                      onClick={handleSave}
+                      disabled={isUpdating}
+                    >
+                      <Save className="w-4 h-4 mr-2" />
+                      Save
+                    </Button>
+                  </>
+                ) : (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => setIsEditing(true)}
+                  >
+                    <Edit className="w-4 h-4 mr-2" />
+                    Edit
+                  </Button>
+                )}
+              </div>
             )}
           </div>
         </DialogHeader>
@@ -81,28 +175,108 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           <div className="grid grid-cols-2 gap-4">
             <div>
               <h3 className="font-semibold mb-2">Category</h3>
-              <Badge variant="secondary" className={getCategoryColor(incident.category)}>
-                {incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}
-              </Badge>
+              {isEditing ? (
+                <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categoryOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge variant="secondary" className={getCategoryColor(incident.category)}>
+                  {incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}
+                </Badge>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2">Severity</h3>
-              <Badge variant="secondary" className={getSeverityColor(incident.severity)}>
-                {incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}
-              </Badge>
+              {isEditing ? (
+                <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {severityOptions.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <Badge variant="secondary" className={getSeverityColor(incident.severity)}>
+                  {incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}
+                </Badge>
+              )}
             </div>
-            <div>
-              <h3 className="font-semibold mb-2">Status</h3>
-              <Badge variant="outline">
-                {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
-              </Badge>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Priority</h3>
-              <Badge variant="outline">
-                {incident.priority.charAt(0).toUpperCase() + incident.priority.slice(1)}
-              </Badge>
-            </div>
+            {isAdmin && (
+              <>
+                <div>
+                  <h3 className="font-semibold mb-2">Status</h3>
+                  {isEditing ? (
+                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline">
+                      {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
+                    </Badge>
+                  )}
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Priority</h3>
+                  {isEditing ? (
+                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                      <SelectTrigger>
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline">
+                      {incident.priority.charAt(0).toUpperCase() + incident.priority.slice(1)}
+                    </Badge>
+                  )}
+                </div>
+              </>
+            )}
+            {!isAdmin && (
+              <>
+                <div>
+                  <h3 className="font-semibold mb-2">Status</h3>
+                  <Badge variant="outline">
+                    {incident.status.charAt(0).toUpperCase() + incident.status.slice(1)}
+                  </Badge>
+                </div>
+                <div>
+                  <h3 className="font-semibold mb-2">Priority</h3>
+                  <Badge variant="outline">
+                    {incident.priority.charAt(0).toUpperCase() + incident.priority.slice(1)}
+                  </Badge>
+                </div>
+              </>
+            )}
             <div>
               <h3 className="font-semibold mb-2">Submitted By</h3>
               <p className="text-sm">
@@ -114,12 +288,28 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
             </div>
             <div>
               <h3 className="font-semibold mb-2">Assigned To</h3>
-              <p className="text-sm">
-                {incident.assigned_to_profile 
-                  ? `${incident.assigned_to_profile.first_name} ${incident.assigned_to_profile.last_name}`
-                  : 'Unassigned'
-                }
-              </p>
+              {isAdmin && isEditing ? (
+                <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {users.map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.first_name} {user.last_name} ({user.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              ) : (
+                <p className="text-sm">
+                  {incident.assigned_to_profile 
+                    ? `${incident.assigned_to_profile.first_name} ${incident.assigned_to_profile.last_name}`
+                    : 'Unassigned'
+                  }
+                </p>
+              )}
             </div>
             <div>
               <h3 className="font-semibold mb-2">Created</h3>
@@ -134,9 +324,18 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            <p className="text-sm text-gray-600 whitespace-pre-wrap">
-              {incident.description || 'No description provided.'}
-            </p>
+            {isEditing ? (
+              <Textarea
+                value={editData.description}
+                onChange={(e) => setEditData({...editData, description: e.target.value})}
+                rows={4}
+                placeholder="Detailed description of what happened..."
+              />
+            ) : (
+              <p className="text-sm text-gray-600 whitespace-pre-wrap">
+                {incident.description || 'No description provided.'}
+              </p>
+            )}
           </div>
 
           {/* Comments Section */}
