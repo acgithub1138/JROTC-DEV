@@ -206,28 +206,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   )}
                 </div>
                 <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Status:</span>
-                  {isAdmin ? (
-                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getStatusColor(incident.status)}>
-                      {formatDisplayText(incident.status)}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
                   {isAdmin ? (
@@ -246,6 +224,28 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   ) : (
                     <Badge variant="outline">
                       {formatDisplayText(incident.priority)}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Status:</span>
+                  {isAdmin ? (
+                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getStatusColor(incident.status)}>
+                      {formatDisplayText(incident.status)}
                     </Badge>
                   )}
                 </div>
