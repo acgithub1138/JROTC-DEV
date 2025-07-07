@@ -20,24 +20,19 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
 
   return (
     <div className="rounded-md border overflow-x-auto">
-      <Table className="table-fixed">
+      <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="sticky left-0 bg-background border-r w-48 px-2">Field</TableHead>
+            <TableHead className="sticky left-0 bg-background border-r px-2 min-w-48">Field</TableHead>
             {events.map((event, index) => (
-              <TableHead key={event.id} className="text-center w-24 border-r px-1">
-                <div className="space-y-1">
-                  <div className="font-medium text-xs">
-                    {event.score_sheet?.judge_number || `Judge ${index + 1}`}
-                  </div>
-                  <div className="text-xs text-muted-foreground">
-                    Total: {event.total_points || 0} pts
-                  </div>
+              <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
+                <div className="font-medium text-sm">
+                  {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                 </div>
               </TableHead>
             ))}
-            <TableHead className="text-center w-20 bg-muted/30 px-1">
-              <div className="font-medium text-xs">Average</div>
+            <TableHead className="text-center bg-muted/30 px-2 min-w-20">
+              <div className="font-medium text-sm">Average</div>
             </TableHead>
           </TableRow>
         </TableHeader>
