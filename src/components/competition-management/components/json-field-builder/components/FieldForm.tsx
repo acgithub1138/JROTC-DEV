@@ -58,6 +58,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
             <SelectContent>
               <SelectItem value="bold_gray">Bold and Grey</SelectItem>
               <SelectItem value="calculated">Calculated Field</SelectItem>
+              <SelectItem value="checkbox_list">Checkbox List</SelectItem>
               <SelectItem value="dropdown">Dropdown</SelectItem>
               <SelectItem value="label">Label</SelectItem>
               <SelectItem value="number">Number</SelectItem>
@@ -91,6 +92,18 @@ export const FieldForm: React.FC<FieldFormProps> = ({
               value={dropdownValues} 
               onChange={e => onDropdownValuesChange(e.target.value)} 
               placeholder="e.g., Excellent, Good, Fair, Poor" 
+            />
+          </div>
+        )}
+
+        {currentField.type === 'checkbox_list' && (
+          <div className="space-y-1 md:col-span-2">
+            <Label htmlFor="checkboxValues">Checkbox List Values (comma-separated)</Label>
+            <Input 
+              id="checkboxValues" 
+              value={dropdownValues} 
+              onChange={e => onDropdownValuesChange(e.target.value)} 
+              placeholder="e.g., Option 1, Option 2, Option 3" 
             />
           </div>
         )}
