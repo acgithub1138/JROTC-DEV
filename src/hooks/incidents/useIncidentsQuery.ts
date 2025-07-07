@@ -13,15 +13,20 @@ export const useIncidentsQuery = () => {
         throw new Error('User school not found');
       }
 
-      const { data, error } = await supabase
+      let query = supabase
         .from('incidents')
         .select(`
           *,
           submitted_by_profile:profiles!incidents_submitted_by_fkey(id, first_name, last_name, email),
           assigned_to_profile:profiles!incidents_assigned_to_fkey(id, first_name, last_name, email)
-        `)
-        .eq('school_id', userProfile.school_id)
-        .order('created_at', { ascending: false });
+        `);
+
+      // Only filter by school_id for non-admin users (admins can see all incidents via RLS policy)
+      if (userProfile.role !== 'admin') {
+        query = query.eq('school_id', userProfile.school_id);
+      }
+
+      const { data, error } = await query.order('created_at', { ascending: false });
 
       if (error) {
         console.error('Error fetching incidents:', error);
