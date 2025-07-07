@@ -96,19 +96,23 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         category: editData.category,
         assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
       });
-      setEditData({
-        title: incident.title,
-        description: incident.description || '',
-        status: incident.status,
-        priority: incident.priority,
-        severity: incident.severity,
-        category: incident.category,
-        assigned_to: incident.assigned_to || 'unassigned',
-      });
     } catch (error) {
       console.error('Error updating incident:', error);
     }
   };
+
+  // Update the form state when the incident prop changes (after successful save and refetch)
+  React.useEffect(() => {
+    setEditData({
+      title: incident.title,
+      description: incident.description || '',
+      status: incident.status,
+      priority: incident.priority,
+      severity: incident.severity,
+      category: incident.category,
+      assigned_to: incident.assigned_to || 'unassigned',
+    });
+  }, [incident]);
 
   const handleCancel = () => {
     onOpenChange(false);
