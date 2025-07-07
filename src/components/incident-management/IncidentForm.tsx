@@ -12,14 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIncidents, Incident } from '@/hooks/incidents/useIncidents';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
 
 
-const categoryOptions = [
-  { value: 'technical', label: 'Technical' },
-  { value: 'behavioral', label: 'Behavioral' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
 
 const incidentFormSchema = z.object({
   title: z.string().min(1, 'Title is required'),
@@ -50,6 +45,7 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
+  const { categoryOptions } = useIncidentCategoryOptions();
 
   const isAdmin = userProfile?.role === 'admin';
   

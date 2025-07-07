@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOptions';
+import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
 
 interface IncidentDetailDialogProps {
   incident: Incident;
@@ -22,12 +23,6 @@ interface IncidentDetailDialogProps {
 
 
 
-const categoryOptions = [
-  { value: 'technical', label: 'Technical' },
-  { value: 'behavioral', label: 'Behavioral' },
-  { value: 'safety', label: 'Safety' },
-  { value: 'other', label: 'Other' },
-];
 
 
 const getCategoryColor = (category: string) => {
@@ -65,6 +60,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
   const { statusOptions } = useIncidentStatusOptions();
+  const { categoryOptions } = useIncidentCategoryOptions();
   
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');

@@ -1989,6 +1989,7 @@ export type Database = {
         | "other"
       expense_status: "pending" | "paid" | "not_paid"
       expense_type: "equipment" | "travel" | "meals" | "supplies" | "other"
+      incident_category: "issue" | "request" | "enhancement"
       incident_status:
         | "new"
         | "in_progress"
@@ -2219,6 +2220,7 @@ export const Constants = {
       ],
       expense_status: ["pending", "paid", "not_paid"],
       expense_type: ["equipment", "travel", "meals", "supplies", "other"],
+      incident_category: ["issue", "request", "enhancement"],
       incident_status: [
         "new",
         "in_progress",
