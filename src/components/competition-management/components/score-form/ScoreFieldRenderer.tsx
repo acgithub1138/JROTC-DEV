@@ -37,7 +37,21 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                 {field.name}
               </Label>
               <div className="flex items-center gap-2">
-                <Input id={field.id} type="number" min="0" max={field.maxValue} value={value || ''} onChange={e => onChange(field.id, e.target.value)} placeholder={`Max: ${field.maxValue || 'N/A'}`} className="w-32" />
+                <Input 
+                  id={field.id} 
+                  type="number" 
+                  min="0" 
+                  max={field.maxValue} 
+                  value={value || ''} 
+                  onChange={e => {
+                    const newValue = e.target.value;
+                    if (newValue === '' || (field.maxValue && Number(newValue) <= field.maxValue) || !field.maxValue) {
+                      onChange(field.id, newValue);
+                    }
+                  }} 
+                  placeholder={`Max: ${field.maxValue || 'N/A'}`} 
+                  className="w-32" 
+                />
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
