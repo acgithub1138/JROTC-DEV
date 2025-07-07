@@ -1,11 +1,12 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, MessageSquare, Send, Save, X, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, MessageSquare, Send, Save, X, ArrowUp, ArrowDown, Flag, User, Calendar as CalendarIcon } from 'lucide-react';
 import { Incident, useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
@@ -187,152 +188,179 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
         <div className="space-y-6">
           {/* Incident Details */}
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <h3 className="font-semibold mb-2">Category</h3>
-              {canEditCategorySeverity ? (
-                <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categoryOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Badge className={getCategoryColor(incident.category)}>
-                  {formatDisplayText(incident.category)}
-                </Badge>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Severity</h3>
-              {canEditCategorySeverity ? (
-                <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {severityOptions.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
-                        {option.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <Badge className={getSeverityColor(incident.severity)}>
-                  {formatDisplayText(incident.severity)}
-                </Badge>
-              )}
-            </div>
-            {isAdmin && (
-              <>
-                <div>
-                  <h3 className="font-semibold mb-2">Status</h3>
-                  <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {statusOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {/* Incident Information Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Incident Information</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <Flag className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Category:</span>
+                  {canEditCategorySeverity ? (
+                    <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getCategoryColor(incident.category)}>
+                      {formatDisplayText(incident.category)}
+                    </Badge>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Priority</h3>
-                  <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {priorityOptions.map((option) => (
-                        <SelectItem key={option.value} value={option.value}>
-                          {option.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                <div className="flex items-center gap-2">
+                  <Flag className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Severity:</span>
+                  {canEditCategorySeverity ? (
+                    <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {severityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getSeverityColor(incident.severity)}>
+                      {formatDisplayText(incident.severity)}
+                    </Badge>
+                  )}
                 </div>
-              </>
-            )}
-            {!isAdmin && (
-              <>
-                <div>
-                  <h3 className="font-semibold mb-2">Status</h3>
-                  <Badge className={getStatusColor(incident.status)}>
-                    {formatDisplayText(incident.status)}
-                  </Badge>
+                <div className="flex items-center gap-2">
+                  <MessageSquare className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Status:</span>
+                  {isAdmin ? (
+                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {statusOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getStatusColor(incident.status)}>
+                      {formatDisplayText(incident.status)}
+                    </Badge>
+                  )}
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Priority</h3>
-                  <Badge variant="outline">
-                    {formatDisplayText(incident.priority)}
-                  </Badge>
+                <div className="flex items-center gap-2">
+                  <Flag className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Priority:</span>
+                  {isAdmin ? (
+                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {priorityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge variant="outline">
+                      {formatDisplayText(incident.priority)}
+                    </Badge>
+                  )}
                 </div>
-              </>
-            )}
-            <div>
-              <h3 className="font-semibold mb-2">Submitted By</h3>
-              <p className="text-sm">
-                {incident.submitted_by_profile 
-                  ? `${incident.submitted_by_profile.first_name} ${incident.submitted_by_profile.last_name}`
-                  : 'Unknown'
-                }
-              </p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Assigned To</h3>
-              {isAdmin ? (
-                <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
-                  <SelectTrigger>
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="unassigned">Unassigned</SelectItem>
-                    {users.map((user) => (
-                      <SelectItem key={user.id} value={user.id}>
-                        {user.first_name} {user.last_name} ({user.role})
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              ) : (
-                <p className="text-sm">
-                  {incident.assigned_to_profile 
-                    ? `${incident.assigned_to_profile.first_name} ${incident.assigned_to_profile.last_name}`
-                    : 'Unassigned'
-                  }
-                </p>
-              )}
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Created</h3>
-              <p className="text-sm">{new Date(incident.created_at).toLocaleString()}</p>
-            </div>
-            <div>
-              <h3 className="font-semibold mb-2">Last Updated</h3>
-              <p className="text-sm">{new Date(incident.updated_at).toLocaleString()}</p>
-            </div>
+              </CardContent>
+            </Card>
+
+            {/* Assignment Details Card */}
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Assignment Details</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Submitted By:</span>
+                  <span className="text-sm font-medium">
+                    {incident.submitted_by_profile 
+                      ? `${incident.submitted_by_profile.first_name} ${incident.submitted_by_profile.last_name}`
+                      : 'Unknown'
+                    }
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <User className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Assigned To:</span>
+                  {isAdmin ? (
+                    <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {users.map((user) => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.first_name} {user.last_name} ({user.role})
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <span className="text-sm font-medium">
+                      {incident.assigned_to_profile 
+                        ? `${incident.assigned_to_profile.first_name} ${incident.assigned_to_profile.last_name}`
+                        : 'Unassigned'
+                      }
+                    </span>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Created:</span>
+                  <span className="text-sm font-medium">
+                    {new Date(incident.created_at).toLocaleString()}
+                  </span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <CalendarIcon className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Last Updated:</span>
+                  <span className="text-sm font-medium">
+                    {new Date(incident.updated_at).toLocaleString()}
+                  </span>
+                </div>
+              </CardContent>
+            </Card>
           </div>
 
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            <Textarea
-              value={editData.description}
-              onChange={(e) => setEditData({...editData, description: e.target.value})}
-              rows={4}
-              placeholder="Detailed description of what happened..."
-            />
+            {canEditIncident ? (
+              <Textarea
+                value={editData.description}
+                onChange={(e) => setEditData({...editData, description: e.target.value})}
+                rows={4}
+                placeholder="Detailed description of what happened..."
+              />
+            ) : (
+              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+                {editData.description || 'No description'}
+              </p>
+            )}
           </div>
 
           {/* Comments Section */}
