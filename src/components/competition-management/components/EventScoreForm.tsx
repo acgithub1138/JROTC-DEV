@@ -8,12 +8,14 @@ interface EventScoreFormProps {
   templateScores: Record<string, any>;
   onScoreChange: (scores: Record<string, any>, totalPoints: number) => void;
   initialScores?: Record<string, any>;
+  judgeNumber?: string;
 }
 
 export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   templateScores,
   onScoreChange,
-  initialScores = {}
+  initialScores = {},
+  judgeNumber
 }) => {
   // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
   const rawFields = templateScores?.criteria || [];
@@ -50,6 +52,7 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
             field={field}
             value={scores[field.id]}
             onChange={handleFieldChange}
+            judgeNumber={judgeNumber}
           />
         ))}
       </div>

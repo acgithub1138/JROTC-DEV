@@ -7,11 +7,13 @@ interface ScoreFieldRendererProps {
   field: JsonField;
   value: any;
   onChange: (fieldId: string, value: any) => void;
+  judgeNumber?: string;
 }
 export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
   field,
   value,
-  onChange
+  onChange,
+  judgeNumber
 }) => {
   const renderField = () => {
     switch (field.type) {
@@ -90,7 +92,8 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
       case 'penalty':
-        console.log('Rendering penalty field:', field.name, 'Type:', field.type, 'Penalty:', field.penalty);
+        // Only show penalty fields for Judge 1
+        if (judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className="font-medium text-destructive">
@@ -112,7 +115,8 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
           </div>;
       case 'penalty_checkbox':
-        console.log('Rendering penalty_checkbox field:', field.name, 'Type:', field.type, 'Penalty:', field.penalty);
+        // Only show penalty fields for Judge 1
+        if (judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className="font-medium text-destructive">
@@ -126,7 +130,6 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.penaltyValue && <p className="text-xs text-destructive">Each penalty: -{field.penaltyValue} points</p>}
           </div>;
       case 'scoring_scale':
-        console.log('Rendering scoring_scale field:', field.name, 'Type:', field.type);
         return <div className="border-b space-y-2 py-px">
             <div className="flex items-center justify-between">
               <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
@@ -160,7 +163,6 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             )}
           </div>;
       default:
-        console.log('Unknown field type:', field.type, 'for field:', field.name);
         return null;
     }
   };

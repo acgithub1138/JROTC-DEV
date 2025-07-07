@@ -184,6 +184,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
               <EventScoreForm
                 templateScores={selectedTemplate.scores as Record<string, any>}
                 onScoreChange={handleScoreChange}
+                judgeNumber={judgeNumber}
               />
             </div>
           )}
