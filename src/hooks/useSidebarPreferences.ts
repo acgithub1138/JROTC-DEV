@@ -43,6 +43,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
+        { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
       ];
     
     case 'command_staff':
