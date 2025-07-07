@@ -20,12 +20,6 @@ interface IncidentDetailDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-const severityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
 
 
 const categoryOptions = [
@@ -35,15 +29,6 @@ const categoryOptions = [
   { value: 'other', label: 'Other' },
 ];
 
-const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'critical': return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
-    case 'high': return 'bg-orange-100 text-orange-800 dark:bg-orange-900/20 dark:text-orange-400';
-    case 'medium': return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-    case 'low': return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-    default: return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
-  }
-};
 
 const getCategoryColor = (category: string) => {
   switch (category) {
@@ -88,7 +73,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     description: incident.description || '',
     status: incident.status,
     priority: incident.priority,
-    severity: incident.severity,
     category: incident.category,
     assigned_to: incident.assigned_to || 'unassigned',
   });
@@ -96,7 +80,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const canEditIncident = isAdmin || isInstructor || incident.submitted_by === userProfile?.id;
-  const canEditCategorySeverity = isAdmin; // Only admins can edit category/severity
 
   const handleSave = async () => {
     try {
@@ -106,7 +89,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         description: editData.description || null,
         status: editData.status,
         priority: editData.priority,
-        severity: editData.severity,
         category: editData.category,
         assigned_to: editData.assigned_to === 'unassigned' ? null : editData.assigned_to,
       });
@@ -123,7 +105,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       description: incident.description || '',
       status: incident.status,
       priority: incident.priority,
-      severity: incident.severity,
       category: incident.category,
       assigned_to: incident.assigned_to || 'unassigned',
     });
@@ -198,7 +179,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Category:</span>
-                  {canEditCategorySeverity ? (
+                  {isAdmin ? (
                     <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -214,28 +195,6 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   ) : (
                     <Badge className={getCategoryColor(incident.category)}>
                       {formatDisplayText(incident.category)}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <Flag className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Severity:</span>
-                  {canEditCategorySeverity ? (
-                    <Select value={editData.severity} onValueChange={(value) => setEditData({...editData, severity: value as any})}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {severityOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getSeverityColor(incident.severity)}>
-                      {formatDisplayText(incident.severity)}
                     </Badge>
                   )}
                 </div>

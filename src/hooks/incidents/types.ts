@@ -1,7 +1,6 @@
 // Incident types adapted from task types
 export type IncidentStatus = string;
 export type IncidentPriority = string;
-export type IncidentSeverity = 'low' | 'medium' | 'high' | 'critical';
 export type IncidentCategory = 'technical' | 'behavioral' | 'safety' | 'other';
 
 export interface Incident {
@@ -11,7 +10,6 @@ export interface Incident {
   description: string | null;
   status: IncidentStatus;
   priority: IncidentPriority;
-  severity: IncidentSeverity;
   category: IncidentCategory;
   submitted_by: string | null;
   assigned_to: string | null;
@@ -48,7 +46,6 @@ export interface CreateIncidentData {
   description?: string | null;
   status: IncidentStatus;
   priority: IncidentPriority;
-  severity: IncidentSeverity;
   category: IncidentCategory;
   assigned_to?: string | null;
 }

@@ -970,7 +970,6 @@ export type Database = {
           priority: string
           resolved_at: string | null
           school_id: string
-          severity: string
           status: string
           submitted_by: string | null
           title: string
@@ -987,7 +986,6 @@ export type Database = {
           priority?: string
           resolved_at?: string | null
           school_id: string
-          severity?: string
           status?: string
           submitted_by?: string | null
           title: string
@@ -1004,7 +1002,6 @@ export type Database = {
           priority?: string
           resolved_at?: string | null
           school_id?: string
-          severity?: string
           status?: string
           submitted_by?: string | null
           title?: string

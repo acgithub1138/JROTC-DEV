@@ -13,16 +13,6 @@ interface IncidentTableProps {
   onCancelIncident: (incident: Incident) => void;
 }
 
-const getSeverityColor = (severity: string) => {
-  switch (severity) {
-    case 'critical': return 'bg-red-100 text-red-800';
-    case 'high': return 'bg-orange-100 text-orange-800';
-    case 'medium': return 'bg-yellow-100 text-yellow-800';
-    case 'low': return 'bg-green-100 text-green-800';
-    default: return 'bg-gray-100 text-gray-800';
-  }
-};
-
 const getCategoryColor = (category: string) => {
   switch (category) {
     case 'technical': return 'bg-blue-100 text-blue-800';
@@ -59,7 +49,6 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Incident #</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Category</TableHead>
-            <TableHead>Severity</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Submitted By</TableHead>
             <TableHead>Assigned To</TableHead>
@@ -88,11 +77,6 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell>
                 <Badge variant="secondary" className={getCategoryColor(incident.category)}>
                   {incident.category.charAt(0).toUpperCase() + incident.category.slice(1)}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <Badge variant="secondary" className={getSeverityColor(incident.severity)}>
-                  {incident.severity.charAt(0).toUpperCase() + incident.severity.slice(1)}
                 </Badge>
               </TableCell>
               <TableCell>

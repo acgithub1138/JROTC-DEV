@@ -13,12 +13,6 @@ import { useIncidents, Incident } from '@/hooks/incidents/useIncidents';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
-const severityOptions = [
-  { value: 'low', label: 'Low' },
-  { value: 'medium', label: 'Medium' },
-  { value: 'high', label: 'High' },
-  { value: 'critical', label: 'Critical' },
-];
 
 const categoryOptions = [
   { value: 'technical', label: 'Technical' },
@@ -32,7 +26,6 @@ const incidentFormSchema = z.object({
   description: z.string().optional(),
   status: z.string().min(1, 'Status is required'),
   priority: z.string().min(1, 'Priority is required'),
-  severity: z.enum(['low', 'medium', 'high', 'critical']),
   category: z.enum(['technical', 'behavioral', 'safety', 'other']),
   assigned_to: z.string().optional(),
 });
@@ -67,7 +60,6 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
       description: incident?.description || '',
       status: incident?.status || 'open',
       priority: incident?.priority || 'medium',
-      severity: incident?.severity || 'medium',
       category: incident?.category || 'other',
       assigned_to: incident?.assigned_to || 'unassigned',
     },
@@ -81,7 +73,6 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           description: data.description || null,
           status: data.status,
           priority: data.priority,
-          severity: data.severity,
           category: data.category,
           assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
@@ -92,7 +83,6 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
           description: data.description || null,
           status: data.status,
           priority: data.priority,
-          severity: data.severity,
           category: data.category,
           assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
         });
@@ -161,57 +151,31 @@ export const IncidentForm: React.FC<IncidentFormProps> = ({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
-              <FormField
-                control={form.control}
-                name="category"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Category *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {categoryOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="category"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Category *</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select category" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {categoryOptions.map((option) => (
+                        <SelectItem key={option.value} value={option.value}>
+                          {option.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
 
-              <FormField
-                control={form.control}
-                name="severity"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Severity *</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select severity" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {severityOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
 
             {isAdmin && (
               <>
