@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { CalendarView } from './components/CalendarView';
 import { EventDialog } from './components/EventDialog';
+import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -25,7 +26,9 @@ export interface Event {
 
 const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
+  const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
+  const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filters, setFilters] = useState({
     eventType: '',
@@ -52,13 +55,20 @@ const CalendarManagementPage = () => {
     setShowEventDialog(true);
   };
 
+  const handleViewEvent = (event: Event) => {
+    setViewingEvent(event);
+    setShowEventDetailsDialog(true);
+  };
+
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
 
   const handleCloseDialog = () => {
     setShowEventDialog(false);
+    setShowEventDetailsDialog(false);
     setEditingEvent(null);
+    setViewingEvent(null);
     setSelectedDate(null);
   };
 
@@ -80,6 +90,7 @@ const CalendarManagementPage = () => {
         events={events}
         isLoading={isLoading}
         onEventEdit={canCreateEvents() ? handleEditEvent : undefined}
+        onEventView={!canCreateEvents() ? handleViewEvent : undefined}
         onEventDelete={canCreateEvents() ? deleteEvent : undefined}
         onDateSelect={handleDateSelect}
         onCreateEvent={canCreateEvents() ? handleCreateEvent : undefined}
@@ -97,6 +108,12 @@ const CalendarManagementPage = () => {
           onSubmit={handleEventSubmit}
         />
       )}
+
+      <EventDetailsDialog
+        open={showEventDetailsDialog}
+        onOpenChange={handleCloseDialog}
+        event={viewingEvent}
+      />
     </div>
   );
 };

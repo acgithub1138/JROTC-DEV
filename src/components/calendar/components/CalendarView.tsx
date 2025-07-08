@@ -12,6 +12,7 @@ interface CalendarViewProps {
   events: Event[];
   isLoading: boolean;
   onEventEdit?: (event: Event) => void;
+  onEventView?: (event: Event) => void;
   onEventDelete?: (id: string) => void;
   onDateSelect: (date: Date) => void;
   onCreateEvent?: () => void;
@@ -27,6 +28,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   events,
   isLoading,
   onEventEdit,
+  onEventView,
   onEventDelete,
   onDateSelect,
   onCreateEvent,
@@ -56,7 +58,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         <AgendaView
           currentDate={currentDate}
           events={events}
-          onEventClick={onEventEdit}
+          onEventClick={readOnly ? onEventView : onEventEdit}
         />
       </div>
     );
@@ -119,7 +121,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <MonthView
             currentDate={currentDate}
             events={events}
-            onEventClick={readOnly ? undefined : onEventEdit}
+            onEventClick={readOnly ? onEventView : onEventEdit}
             onDateClick={handleDateSelect}
           />
         )}
@@ -128,7 +130,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <WeekView
             currentDate={currentDate}
             events={events}
-            onEventClick={readOnly ? undefined : onEventEdit}
+            onEventClick={readOnly ? onEventView : onEventEdit}
             onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
           />
         )}
@@ -137,7 +139,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <DayView
             currentDate={currentDate}
             events={events}
-            onEventClick={readOnly ? undefined : onEventEdit}
+            onEventClick={readOnly ? onEventView : onEventEdit}
             onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
           />
         )}
@@ -146,7 +148,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <AgendaView
             currentDate={currentDate}
             events={events}
-            onEventClick={readOnly ? undefined : onEventEdit}
+            onEventClick={readOnly ? onEventView : onEventEdit}
           />
         )}
       </div>
