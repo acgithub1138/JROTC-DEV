@@ -18,7 +18,7 @@ import { getGradeColor } from '@/utils/gradeColors';
 interface BulkImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onBulkImport: (cadets: NewCadet[], onProgress?: (current: number, total: number, currentBatch: number, totalBatches: number) => void) => Promise<{ success: number; failed: number; errors: string[] }>;
+  onBulkImport: (cadets: NewCadet[]) => Promise<{ success: number; failed: number; errors: string[] }>;
 }
 
 interface ParsedCadet extends NewCadet {
@@ -40,9 +40,6 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
   const [progress, setProgress] = useState(0);
   const [importResults, setImportResults] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
   const [isImporting, setIsImporting] = useState(false);
-  const [currentBatch, setCurrentBatch] = useState(0);
-  const [totalBatches, setTotalBatches] = useState(0);
-  const [processedCount, setProcessedCount] = useState(0);
 
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     try {
@@ -114,19 +111,9 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
 
     setIsImporting(true);
     setStep('import');
-    setProgress(0);
-    setProcessedCount(0);
-    setCurrentBatch(0);
-    setTotalBatches(Math.ceil(validCadets.length / 5)); // 5 is the batch size
+    setProgress(50); // Start at 50% since we're doing bulk operation
 
-    const progressCallback = (current: number, total: number, currentBatch: number, totalBatches: number) => {
-      setProcessedCount(current);
-      setCurrentBatch(currentBatch);
-      setTotalBatches(totalBatches);
-      setProgress((current / total) * 100);
-    };
-
-    const results = await onBulkImport(validCadets, progressCallback);
+    const results = await onBulkImport(validCadets);
     
     setImportResults(results);
     setProgress(100);
@@ -142,9 +129,6 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
     setProgress(0);
     setImportResults(null);
     setIsImporting(false);
-    setCurrentBatch(0);
-    setTotalBatches(0);
-    setProcessedCount(0);
     onOpenChange(false);
   };
 
@@ -438,7 +422,7 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
               <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
               <h3 className="text-lg font-semibold mb-2">Creating Cadets...</h3>
               <p className="text-muted-foreground mb-6">
-                Processing batch {currentBatch} of {totalBatches} • {processedCount} of {validCount} cadets processed
+                Creating user {Math.floor((progress / 100) * validCount) + 1} of {validCount}
               </p>
               <Progress value={progress} className="w-full max-w-md mx-auto" />
             </div>
