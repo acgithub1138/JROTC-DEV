@@ -140,63 +140,55 @@ const DashboardOverview = () => {
       })}
       </div>
 
+      {/* Quick Actions - Only for Command Staff and above - Compact first row */}
+      {isCommandStaffOrAbove() && (
+        <Card className="mb-6">
+          <CardHeader className="pb-4">
+            <CardTitle className="flex items-center text-lg">
+              <Trophy className="w-4 h-4 mr-2 text-blue-600" />
+              Quick Actions
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="pt-0">
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {canCreateTasks() && (
+                <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <CheckSquare className="w-5 h-5 text-green-600 mb-1" />
+                  <p className="font-medium text-xs">Create Task</p>
+                  <p className="text-[10px] text-gray-500">Assign new task</p>
+                </button>
+              )}
+              {canCreateEvents() && (
+                <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Calendar className="w-5 h-5 text-purple-600 mb-1" />
+                  <p className="font-medium text-xs">Create Event</p>
+                  <p className="text-[10px] text-gray-500">Schedule new event</p>
+                </button>
+              )}
+              {/* Instructor-only actions */}
+              {userProfile?.role === 'instructor' && (
+                <>
+                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Users className="w-5 h-5 text-blue-600 mb-1" />
+                    <p className="font-medium text-xs">Add Cadet</p>
+                    <p className="text-[10px] text-gray-500">Enroll new cadet</p>
+                  </button>
+                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Plus className="w-5 h-5 text-green-600 mb-1" />
+                    <p className="font-medium text-xs">Add Income</p>
+                    <p className="text-[10px] text-gray-500">Record income</p>
+                  </button>
+                </>
+              )}
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Tasks Widget */}
         <MyTasksWidget />
 
-        {/* Quick Actions - Only for Command Staff and above - Moved above Upcoming Events */}
-        {isCommandStaffOrAbove() && (
-          <Card>
-            <CardHeader>
-              <CardTitle className="flex items-center">
-                <Trophy className="w-5 h-5 mr-2 text-blue-600" />
-                Quick Actions
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-3">
-                {canCreateTasks() && (
-                  <button onClick={() => setIsCreateTaskOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <CheckSquare className="w-6 h-6 text-green-600 mb-2" />
-                    <p className="font-medium text-sm">Create Task</p>
-                    <p className="text-xs text-gray-500">Assign new task</p>
-                  </button>
-                )}
-                {canCreateEvents() && (
-                  <button onClick={() => setIsCreateEventOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Calendar className="w-6 h-6 text-purple-600 mb-2" />
-                    <p className="font-medium text-sm">Create Event</p>
-                    <p className="text-xs text-gray-500">Schedule new event</p>
-                  </button>
-                )}
-                {/* Instructor-only actions */}
-                {userProfile?.role === 'instructor' && (
-                  <>
-                    <button onClick={() => setIsAddCadetOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Users className="w-6 h-6 text-blue-600 mb-2" />
-                      <p className="font-medium text-sm">Add Cadet</p>
-                      <p className="text-xs text-gray-500">Enroll new cadet</p>
-                    </button>
-                    <button onClick={() => setIsAddIncomeOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                      <Plus className="w-6 h-6 text-green-600 mb-2" />
-                      <p className="font-medium text-sm">Add Income</p>
-                      <p className="text-xs text-gray-500">Record income</p>
-                    </button>
-                    <button onClick={() => setIsAddExpenseOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                      <DollarSign className="w-6 h-6 text-red-600 mb-2" />
-                      <p className="font-medium text-sm">Add Expense</p>
-                      <p className="text-xs text-gray-500">Record expense</p>
-                    </button>
-                  </>
-                )}
-              </div>
-            </CardContent>
-          </Card>
-        )}
-      </div>
-
-      {/* Second row for Upcoming Events - Full width when no Quick Actions for cadets */}
-      <div className={isCommandStaffOrAbove() ? "grid grid-cols-1" : "grid grid-cols-1 lg:grid-cols-2 gap-6"}>
         {/* Upcoming Events */}
         <Card>
           <CardHeader>
