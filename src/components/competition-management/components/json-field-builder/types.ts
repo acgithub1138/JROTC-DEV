@@ -10,8 +10,11 @@ export interface JsonField {
   pauseField: boolean; // For pause field formatting
   penaltyValue?: number; // Specific penalty amount
   // Penalty-specific fields
-  penaltyType?: 'points' | 'minor_major';
+  penaltyType?: 'points' | 'minor_major' | 'split';
   pointValue?: number; // For points-based penalties
+  // Split penalty specific
+  splitFirstValue?: number; // Penalty for 1st occurrence
+  splitSubsequentValue?: number; // Penalty for 2+ occurrences
   // Scoring scale specific
   scaleRanges?: {
     poor: { min: number; max: number };

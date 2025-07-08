@@ -31,7 +31,9 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         pauseField: criterion.pauseField || false,
         // Load penalty-specific properties
         penaltyType: criterion.penaltyType,
-        pointValue: criterion.pointValue
+        pointValue: criterion.pointValue,
+        splitFirstValue: criterion.splitFirstValue,
+        splitSubsequentValue: criterion.splitSubsequentValue
       }));
       setFields(initialFields);
     }
@@ -51,7 +53,9 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         // Add penalty-specific properties for penalty fields
         ...(field.type === 'penalty' && {
           penaltyType: field.penaltyType,
-          pointValue: field.pointValue
+          pointValue: field.pointValue,
+          splitFirstValue: field.splitFirstValue,
+          splitSubsequentValue: field.splitSubsequentValue
         }),
         ...(field.values && {
           options: field.values
@@ -76,7 +80,9 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       values: field.values,
       // Include penalty-specific properties
       penaltyType: field.penaltyType,
-      pointValue: field.pointValue
+      pointValue: field.pointValue,
+      splitFirstValue: field.splitFirstValue,
+      splitSubsequentValue: field.splitSubsequentValue
     });
     setDropdownValues(field.values ? field.values.join(', ') : '');
   };
@@ -111,7 +117,9 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
       // Include penalty-specific properties for penalty fields
       ...(currentField.type === 'penalty' && {
         penaltyType: currentField.penaltyType,
-        pointValue: currentField.pointValue
+        pointValue: currentField.pointValue,
+        splitFirstValue: currentField.splitFirstValue,
+        splitSubsequentValue: currentField.splitSubsequentValue
       }),
       ...(currentField.type === 'dropdown' && {
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)

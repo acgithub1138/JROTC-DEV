@@ -40,6 +40,18 @@ export const useScoreCalculation = ({
           } else if (fieldValue === 'major') {
             total += -50;
           }
+        } else if (field.penaltyType === 'split') {
+          // Calculate split penalty: 1st occurrence uses splitFirstValue, 2+ use splitSubsequentValue each
+          const occurrences = Number(fieldValue) || 0;
+          if (occurrences >= 1) {
+            const firstValue = field.splitFirstValue || -5;
+            const subsequentValue = field.splitSubsequentValue || -25;
+            if (occurrences === 1) {
+              total += firstValue;
+            } else {
+              total += firstValue + (occurrences - 1) * subsequentValue;
+            }
+          }
         } else if (field.penaltyType === 'checkbox_list' && Array.isArray(fieldValue)) {
           // Calculate penalty for checkbox list selections
           const penaltyValue = field.penaltyValue || -10;

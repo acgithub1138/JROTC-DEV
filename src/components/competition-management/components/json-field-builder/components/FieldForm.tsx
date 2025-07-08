@@ -119,6 +119,7 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                 <SelectContent>
                   <SelectItem value="points">Points</SelectItem>
                   <SelectItem value="minor_major">Minor (-20)/Major (-50)</SelectItem>
+                  <SelectItem value="split">Split</SelectItem>
                 </SelectContent>
               </Select>
             </div>
@@ -134,6 +135,31 @@ export const FieldForm: React.FC<FieldFormProps> = ({
                   placeholder="e.g., -10"
                 />
               </div>
+            )}
+
+            {currentField.penaltyType === 'split' && (
+              <>
+                <div className="space-y-1">
+                  <Label htmlFor="splitFirstValue">1st Occurrence</Label>
+                  <Input 
+                    id="splitFirstValue" 
+                    type="number" 
+                    value={currentField.splitFirstValue || -5} 
+                    onChange={e => onFieldUpdate('splitFirstValue', parseInt(e.target.value))} 
+                    placeholder="e.g., -5"
+                  />
+                </div>
+                <div className="space-y-1">
+                  <Label htmlFor="splitSubsequentValue">2+ Occurrences</Label>
+                  <Input 
+                    id="splitSubsequentValue" 
+                    type="number" 
+                    value={currentField.splitSubsequentValue || -25} 
+                    onChange={e => onFieldUpdate('splitSubsequentValue', parseInt(e.target.value))} 
+                    placeholder="e.g., -25"
+                  />
+                </div>
+              </>
             )}
           </>
         )}

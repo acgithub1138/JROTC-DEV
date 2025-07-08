@@ -104,11 +104,16 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                       <SelectItem value="minor">Minor (-20)</SelectItem>
                       <SelectItem value="major">Major (-50)</SelectItem>
                     </SelectContent>
-                  </Select> : <Input id={field.id} type="number" value={value || ''} onChange={e => onChange(field.id, e.target.value)} className="w-32" />}
+                  </Select> : field.penaltyType === 'split' ? <Input id={field.id} type="number" min="0" value={value || ''} onChange={e => onChange(field.id, e.target.value)} placeholder="Occurrences" className="w-32" /> : <Input id={field.id} type="number" value={value || ''} onChange={e => onChange(field.id, e.target.value)} className="w-32" />}
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
             {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+            {field.penaltyType === 'split' && field.splitFirstValue && field.splitSubsequentValue && (
+              <p className="text-xs text-destructive">
+                1st occurrence: {field.splitFirstValue} points | 2+ occurrences: {field.splitSubsequentValue} each
+              </p>
+            )}
           </div>;
       case 'text':
         return <div className="py-2 border-b space-y-2">
