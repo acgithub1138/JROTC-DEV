@@ -58,10 +58,10 @@ export const TemplatesTab = () => {
     await copyTemplate(templateId);
   };
   return <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          
-          
+      <div className="flex items-center justify-between gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input placeholder="Search by template name, event type, or JROTC program..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
         <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
@@ -72,13 +72,6 @@ export const TemplatesTab = () => {
               <Plus className="w-4 h-4 mr-2" />
               Add Template
             </Button>}
-        </div>
-      </div>
-
-      <div className="flex items-center gap-4">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-          <Input placeholder="Search by template name, event type, or JROTC program..." value={searchQuery} onChange={e => setSearchQuery(e.target.value)} className="pl-10" />
         </div>
       </div>
 
