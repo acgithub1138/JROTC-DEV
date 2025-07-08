@@ -15,9 +15,7 @@ interface EquipmentItem {
   item: string;
   description: string | null;
   category: string | null;
-  serial_number: string | null;
-  condition: string | null;
-  status: string;
+  sub_category: string | null;
   checkout_info?: {
     checked_out_at: string;
     expected_return_date: string | null;
@@ -37,9 +35,7 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
           item,
           description,
           category,
-          serial_number,
-          condition,
-          status,
+          sub_category,
           checkout_info:inventory_checkout(
             checked_out_at,
             expected_return_date,
@@ -101,17 +97,21 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Item</TableHead>
+                  <TableHead>Item ID</TableHead>
                   <TableHead>Category</TableHead>
-                  <TableHead>Serial Number</TableHead>
-                  <TableHead>Status</TableHead>
+                  <TableHead>Sub Category</TableHead>
+                  <TableHead>Item</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {equipment.map((item) => {
-                  const latestCheckout = item.checkout_info?.[0];
                   return (
                     <TableRow key={item.id}>
+                      <TableCell className="font-mono text-xs">
+                        {item.id}
+                      </TableCell>
+                      <TableCell>{item.category || '-'}</TableCell>
+                      <TableCell>{item.sub_category || '-'}</TableCell>
                       <TableCell className="font-medium">
                         <div>
                           <p className="font-medium">{item.item}</p>
@@ -119,15 +119,6 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                             <p className="text-xs text-muted-foreground">{item.description}</p>
                           )}
                         </div>
-                      </TableCell>
-                      <TableCell>{item.category || '-'}</TableCell>
-                      <TableCell className="font-mono text-xs">
-                        {item.serial_number || '-'}
-                      </TableCell>
-                      <TableCell>
-                        <Badge className={getStatusColor(item.status)}>
-                          {item.status}
-                        </Badge>
                       </TableCell>
                     </TableRow>
                   );
