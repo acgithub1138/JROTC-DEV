@@ -2,7 +2,8 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trash2 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { X } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
 
@@ -108,14 +109,23 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell className="text-right">
                 <div className="flex items-center justify-end gap-2">
                   {canCancelIncident(incident) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onCancelIncident(incident)}
-                      className="text-orange-600 hover:text-orange-700"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onCancelIncident(incident)}
+                            className="text-orange-600 hover:text-orange-700"
+                          >
+                            <X className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Cancel incident</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               </TableCell>
