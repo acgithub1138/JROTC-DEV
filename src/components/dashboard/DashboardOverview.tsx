@@ -118,9 +118,55 @@ const DashboardOverview = () => {
   };
 
   const statsConfig = getStatsConfig();
+  
+  // Render Quick Actions as a widget for Command Staff
+  const renderQuickActionsWidget = () => {
+    if (!isCommandStaffOrAbove()) return null;
+    
+    return (
+      <Card className="hover:shadow-md transition-shadow">
+        <CardContent className="p-6 py-[12px]">
+          <div className="space-y-3">
+            <div className="flex items-center mb-3">
+              <Trophy className="w-4 h-4 mr-2 text-primary" />
+              <p className="text-sm font-medium text-gray-600">Quick Actions</p>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {canCreateTasks() && (
+                <button onClick={() => setIsCreateTaskOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <CheckSquare className="w-4 h-4 text-green-600 mb-1" />
+                  <p className="font-medium text-[10px]">Create Task</p>
+                </button>
+              )}
+              {canCreateEvents() && (
+                <button onClick={() => setIsCreateEventOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                  <Calendar className="w-4 h-4 text-purple-600 mb-1" />
+                  <p className="font-medium text-[10px]">Create Event</p>
+                </button>
+              )}
+              {/* Instructor-only actions */}
+              {userProfile?.role === 'instructor' && (
+                <>
+                  <button onClick={() => setIsAddCadetOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Users className="w-4 h-4 text-blue-600 mb-1" />
+                    <p className="font-medium text-[10px]">Add Cadet</p>
+                  </button>
+                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Plus className="w-4 h-4 text-green-600 mb-1" />
+                    <p className="font-medium text-[10px]">Add Income</p>
+                  </button>
+                </>
+              )}
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  };
+
   return <div className="p-6 space-y-6">
-      {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+      {/* Stats Grid with Quick Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;
         return <Card key={stat.title} className="hover:shadow-md transition-shadow">
@@ -138,52 +184,9 @@ const DashboardOverview = () => {
               </CardContent>
             </Card>;
       })}
+        {/* Quick Actions Widget for Command Staff */}
+        {renderQuickActionsWidget()}
       </div>
-
-      {/* Quick Actions - Only for Command Staff and above - Compact first row */}
-      {isCommandStaffOrAbove() && (
-        <Card className="mb-6">
-          <CardHeader className="pb-4">
-            <CardTitle className="flex items-center text-lg">
-              <Trophy className="w-4 h-4 mr-2 text-blue-600" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="pt-0">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {canCreateTasks() && (
-                <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <CheckSquare className="w-5 h-5 text-green-600 mb-1" />
-                  <p className="font-medium text-xs">Create Task</p>
-                  <p className="text-[10px] text-gray-500">Assign new task</p>
-                </button>
-              )}
-              {canCreateEvents() && (
-                <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Calendar className="w-5 h-5 text-purple-600 mb-1" />
-                  <p className="font-medium text-xs">Create Event</p>
-                  <p className="text-[10px] text-gray-500">Schedule new event</p>
-                </button>
-              )}
-              {/* Instructor-only actions */}
-              {userProfile?.role === 'instructor' && (
-                <>
-                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Users className="w-5 h-5 text-blue-600 mb-1" />
-                    <p className="font-medium text-xs">Add Cadet</p>
-                    <p className="text-[10px] text-gray-500">Enroll new cadet</p>
-                  </button>
-                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Plus className="w-5 h-5 text-green-600 mb-1" />
-                    <p className="font-medium text-xs">Add Income</p>
-                    <p className="text-[10px] text-gray-500">Record income</p>
-                  </button>
-                </>
-              )}
-            </div>
-          </CardContent>
-        </Card>
-      )}
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* My Tasks Widget */}
