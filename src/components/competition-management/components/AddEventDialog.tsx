@@ -24,6 +24,8 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   competitionId,
   onEventCreated
 }) => {
+  const [selectedProgram, setSelectedProgram] = useState<string>('');
+  const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [selectedTemplateId, setSelectedTemplateId] = useState<string>('');
   const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
   const [judgeNumber, setJudgeNumber] = useState<string>('');
@@ -39,11 +41,54 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
   const activeCadets = cadets.filter(user => user.role === 'cadet');
 
+  // Get unique programs from templates
+  const availablePrograms = [...new Set(templates.map(t => t.jrotc_program))].sort();
+
+  // Get events filtered by selected program
+  const availableEvents = selectedProgram 
+    ? [...new Set(templates
+        .filter(t => t.jrotc_program === selectedProgram)
+        .map(t => t.event)
+      )].sort()
+    : [];
+
+  // Get templates filtered by selected program and event
+  const filteredTemplates = selectedProgram && selectedEvent
+    ? templates.filter(t => 
+        t.jrotc_program === selectedProgram && 
+        t.event === selectedEvent
+      )
+    : [];
+
   // Judge number options
   const judgeOptions = [
     'Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5',
     'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10'
   ];
+
+  // Handle program selection change
+  const handleProgramChange = (program: string) => {
+    setSelectedProgram(program);
+    setSelectedEvent(''); // Reset event when program changes
+    setSelectedTemplateId(''); // Reset template when program changes
+    setScores({});
+    setTotalPoints(0);
+  };
+
+  // Handle event selection change
+  const handleEventChange = (event: string) => {
+    setSelectedEvent(event);
+    setSelectedTemplateId(''); // Reset template when event changes
+    setScores({});
+    setTotalPoints(0);
+  };
+
+  // Handle template selection change
+  const handleTemplateChange = (templateId: string) => {
+    setSelectedTemplateId(templateId);
+    setScores({});
+    setTotalPoints(0);
+  };
 
   const handleSubmit = async () => {
     if (!selectedTemplateId || selectedCadetIds.length === 0) {
@@ -72,6 +117,8 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
       }
       
       // Reset form
+      setSelectedProgram('');
+      setSelectedEvent('');
       setSelectedTemplateId('');
       setSelectedCadetIds([]);
       setJudgeNumber('');
@@ -101,21 +148,63 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Template Selection */}
+          {/* Program Selection */}
           <div className="space-y-1">
-            <Label>Score Sheet Template</Label>
+            <Label>Program</Label>
             <Select 
-              value={selectedTemplateId} 
-              onValueChange={setSelectedTemplateId}
+              value={selectedProgram} 
+              onValueChange={handleProgramChange}
               disabled={templatesLoading}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select a score sheet template..." />
+                <SelectValue placeholder="Select a program..." />
               </SelectTrigger>
               <SelectContent>
-                {templates.map((template) => (
+                {availablePrograms.map((program) => (
+                  <SelectItem key={program} value={program}>
+                    {program.charAt(0).toUpperCase() + program.slice(1).replace('_', ' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Event Selection */}
+          <div className="space-y-1">
+            <Label>Event</Label>
+            <Select 
+              value={selectedEvent} 
+              onValueChange={handleEventChange}
+              disabled={templatesLoading || !selectedProgram}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {availableEvents.map((event) => (
+                  <SelectItem key={event} value={event}>
+                    {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          {/* Template Selection */}
+          <div className="space-y-1">
+            <Label>Template Name</Label>
+            <Select 
+              value={selectedTemplateId} 
+              onValueChange={handleTemplateChange}
+              disabled={templatesLoading || !selectedEvent}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredTemplates.map((template) => (
                   <SelectItem key={template.id} value={template.id}>
-                    {template.template_name} - {template.event}
+                    {template.template_name}
                   </SelectItem>
                 ))}
               </SelectContent>
