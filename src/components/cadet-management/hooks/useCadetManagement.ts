@@ -108,8 +108,8 @@ export const useCadetManagement = () => {
       if (error) throw error;
 
       toast({
-        title: "Success",
-        description: `Invitation email sent to ${newCadet.email}. They will receive an email to set up their account.`,
+        title: "Cadet Successfully Created",
+        description: `${newCadet.first_name} ${newCadet.last_name} has been created with default password: Sh0wc@se`,
         duration: 8000
       });
 
