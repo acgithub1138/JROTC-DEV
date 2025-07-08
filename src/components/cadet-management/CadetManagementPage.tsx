@@ -131,7 +131,7 @@ const CadetManagementPage = () => {
       <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        <CardHeader>Default password: <strong>Sh0wc@se</strong></br>
+        <CardHeader>Default password: Sh0wc@se
         Users will be asked to reset their password when they first log in.</CardHeader>
         <CardContent>
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
