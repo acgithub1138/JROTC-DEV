@@ -148,67 +148,70 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-3">
-          {/* Program Selection */}
-          <div className="space-y-1">
-            <Label>Program</Label>
-            <Select 
-              value={selectedProgram} 
-              onValueChange={handleProgramChange}
-              disabled={templatesLoading}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select a program..." />
-              </SelectTrigger>
-              <SelectContent>
-                {availablePrograms.map((program) => (
-                  <SelectItem key={program} value={program}>
-                    {program.charAt(0).toUpperCase() + program.slice(1).replace('_', ' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {/* Program, Event, and Template Selection - Responsive Layout */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+            {/* Program Selection */}
+            <div className="space-y-1">
+              <Label>Program</Label>
+              <Select 
+                value={selectedProgram} 
+                onValueChange={handleProgramChange}
+                disabled={templatesLoading}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a program..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {availablePrograms.map((program) => (
+                    <SelectItem key={program} value={program}>
+                      {program.charAt(0).toUpperCase() + program.slice(1).replace('_', ' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Event Selection */}
-          <div className="space-y-1">
-            <Label>Event</Label>
-            <Select 
-              value={selectedEvent} 
-              onValueChange={handleEventChange}
-              disabled={templatesLoading || !selectedProgram}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {availableEvents.map((event) => (
-                  <SelectItem key={event} value={event}>
-                    {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+            {/* Event Selection */}
+            <div className="space-y-1">
+              <Label>Event</Label>
+              <Select 
+                value={selectedEvent} 
+                onValueChange={handleEventChange}
+                disabled={templatesLoading || !selectedProgram}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableEvents.map((event) => (
+                    <SelectItem key={event} value={event}>
+                      {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
 
-          {/* Template Selection */}
-          <div className="space-y-1">
-            <Label>Template Name</Label>
-            <Select 
-              value={selectedTemplateId} 
-              onValueChange={handleTemplateChange}
-              disabled={templatesLoading || !selectedEvent}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
-              </SelectTrigger>
-              <SelectContent>
-                {filteredTemplates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.template_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+            {/* Template Selection */}
+            <div className="space-y-1">
+              <Label>Template Name</Label>
+              <Select 
+                value={selectedTemplateId} 
+                onValueChange={handleTemplateChange}
+                disabled={templatesLoading || !selectedEvent}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {filteredTemplates.map((template) => (
+                    <SelectItem key={template.id} value={template.id}>
+                      {template.template_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
           {/* Cadet Selection */}
