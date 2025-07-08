@@ -20,6 +20,7 @@ import BudgetManagementPage from '@/components/budget-management/BudgetManagemen
 import ContactManagementPage from '@/components/contact-management/ContactManagementPage';
 import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
+import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 import IncidentManagementPage from '@/components/incident-management/IncidentManagementPage';
 
 const MainApplication = () => {
@@ -107,6 +108,7 @@ const MainApplication = () => {
             <Route path="/contacts" element={<ContactManagementPage />} />
             <Route path="/calendar" element={<CalendarManagementPage />} />
             <Route path="/competitions" element={<CompetitionManagementPage />} />
+            <Route path="/competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
             <Route path="/incidents" element={<IncidentManagementPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>

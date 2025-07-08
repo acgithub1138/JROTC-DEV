@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, ArrowUpDown } from 'lucide-react';
@@ -14,12 +15,11 @@ import type { Database } from '@/integrations/supabase/types';
 type Competition = Database['public']['Tables']['competitions']['Row'];
 
 export const CompetitionsTab = () => {
+  const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
-  const [showViewScoreSheetDialog, setShowViewScoreSheetDialog] = useState(false);
-  const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   
   const {
@@ -66,8 +66,7 @@ export const CompetitionsTab = () => {
   };
 
   const handleViewScoreSheets = (competition: Competition) => {
-    setViewingCompetition(competition);
-    setShowViewScoreSheetDialog(true);
+    navigate(`/competitions/score-sheets/${competition.id}`);
   };
 
   const handleEventCreated = async (eventData: any) => {
@@ -145,12 +144,6 @@ export const CompetitionsTab = () => {
           onEventCreated={handleEventCreated}
         />
       )}
-
-      <ViewScoreSheetDialog
-        open={showViewScoreSheetDialog}
-        onOpenChange={setShowViewScoreSheetDialog}
-        competition={viewingCompetition}
-      />
     </div>
   );
 };
