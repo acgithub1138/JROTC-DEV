@@ -25,6 +25,7 @@ interface Profile {
   school_id: string;
   phone?: string;
   rank?: string;
+  password_change_required?: boolean;
   schools?: School;
 }
 

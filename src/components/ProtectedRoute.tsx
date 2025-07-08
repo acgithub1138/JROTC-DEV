@@ -1,16 +1,27 @@
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import AuthPage from '@/components/auth/AuthPage';
+import PasswordChangeDialog from '@/components/auth/PasswordChangeDialog';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
-  const { user, loading } = useAuth();
+  const { user, userProfile, loading } = useAuth();
+  const [showPasswordChange, setShowPasswordChange] = useState(false);
 
   console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
+
+  // Check if user needs to change password
+  useEffect(() => {
+    if (user && userProfile && userProfile.password_change_required) {
+      setShowPasswordChange(true);
+    } else {
+      setShowPasswordChange(false);
+    }
+  }, [user, userProfile]);
 
   if (loading) {
     return (
@@ -29,6 +40,20 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
   }
 
   console.log('User authenticated, showing main app');
+  
+  // Show password change dialog if required
+  if (showPasswordChange) {
+    return (
+      <>
+        {children}
+        <PasswordChangeDialog 
+          open={showPasswordChange} 
+          onClose={() => setShowPasswordChange(false)} 
+        />
+      </>
+    );
+  }
+  
   return <>{children}</>;
 };
 
