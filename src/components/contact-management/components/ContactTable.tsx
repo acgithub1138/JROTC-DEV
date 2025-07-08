@@ -4,6 +4,7 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Contact } from '../ContactManagementPage';
 
 interface ContactTableProps {
@@ -113,24 +114,40 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell>{contact.email || '-'}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onEdit(contact)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Edit className="h-4 w-4" />
-                  <span className="sr-only">Edit contact</span>
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => onDelete(contact.id)}
-                  className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                >
-                  <Trash2 className="h-4 w-4" />
-                  <span className="sr-only">Delete contact</span>
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onEdit(contact)}
+                        className="h-8 w-8 p-0"
+                      >
+                        <Edit className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit contact</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => onDelete(contact.id)}
+                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Delete contact</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </TableCell>
           </TableRow>

@@ -18,6 +18,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '@/components/ui/alert-dialog';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Mail, Eye } from 'lucide-react';
 import { TeamWithMembers } from '../types';
 
@@ -91,15 +92,24 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                 <div className="flex items-center gap-2">
                   <span className="font-medium">{team.member_count}</span> members
                   {team.member_count > 0 && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onViewMembers(team)}
-                      className="h-7 px-2"
-                    >
-                      <Eye className="w-3 h-3 mr-1" />
-                      View
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onViewMembers(team)}
+                            className="h-7 px-2"
+                          >
+                            <Eye className="w-3 h-3 mr-1" />
+                            View
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View team members</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               </TableCell>
@@ -108,33 +118,57 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
               </TableCell>
               <TableCell className="py-2">
                 <div className="flex items-center gap-1">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onSendEmail(team)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Mail className="h-4 w-4" />
-                    <span className="sr-only">Send email to team</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEditTeam(team)}
-                    className="h-8 w-8 p-0"
-                  >
-                    <Edit className="h-4 w-4" />
-                    <span className="sr-only">Edit team</span>
-                  </Button>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => handleDeleteClick(team)}
-                    className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    <span className="sr-only">Delete team</span>
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onSendEmail(team)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Mail className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Send email to team</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEditTeam(team)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit team</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDeleteClick(team)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete team</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </TableCell>
             </TableRow>

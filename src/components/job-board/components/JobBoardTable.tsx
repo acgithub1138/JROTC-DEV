@@ -1,6 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2 } from 'lucide-react';
 import { JobBoardWithCadet } from '../types';
 interface JobBoardTableProps {
@@ -41,14 +42,32 @@ export const JobBoardTable = ({
               {!readOnly && (
                 <div className="flex items-center justify-end gap-2">
                   {onEditJob && (
-                    <Button variant="outline" size="sm" onClick={() => onEditJob(job)}>
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onEditJob(job)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit job</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   {onDeleteJob && (
-                    <Button variant="outline" size="sm" onClick={() => onDeleteJob(job)}>
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onDeleteJob(job)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete job</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               )}

@@ -2,6 +2,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, UserX, UserPlus } from 'lucide-react';
 import { User } from '../types';
 import { getRoleIcon, getRoleColor } from './UserRoleUtils';
@@ -85,31 +86,58 @@ export const UserTable = ({
             <TableCell className="text-right py-2">
               <div className="flex items-center justify-end gap-2">
                 {canEditUser(user) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEditUser(user)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEditUser(user)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit user</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
                 {activeTab === 'active' && canDisableUser(user) && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDisableUser(user)}
-                  >
-                    <UserX className="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onDisableUser(user)}
+                        >
+                          <UserX className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Disable user</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
                 {activeTab === 'disabled' && canEnableUser(user) && (
-                  <Button
-                    variant="default"
-                    size="sm"
-                    onClick={() => onEnableUser(user)}
-                  >
-                    <UserPlus className="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="default"
+                          size="sm"
+                          onClick={() => onEnableUser(user)}
+                        >
+                          <UserPlus className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Enable user</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 )}
               </div>
             </TableCell>

@@ -6,6 +6,7 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Package, AlertTriangle, History } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
@@ -304,32 +305,56 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                  <div className="flex items-center justify-end space-x-1">
                    {item.issued_to && item.issued_to.length > 0 && (
                      <IssuedUsersPopover issuedTo={item.issued_to} />
-                    )}
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setHistoryItem(item)}
-                      title="View history"
-                    >
-                      <History className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEdit(item)}
-                      title="Edit item"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onDelete(item.id)}
-                      title="Delete item"
-                      className="hover:text-red-600"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                     )}
+                     <TooltipProvider>
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => setHistoryItem(item)}
+                           >
+                             <History className="w-4 h-4" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>View history</p>
+                         </TooltipContent>
+                       </Tooltip>
+                     </TooltipProvider>
+                     <TooltipProvider>
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => handleEdit(item)}
+                           >
+                             <Edit className="w-4 h-4" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Edit item</p>
+                         </TooltipContent>
+                       </Tooltip>
+                     </TooltipProvider>
+                     <TooltipProvider>
+                       <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => onDelete(item.id)}
+                             className="hover:text-red-600"
+                           >
+                             <Trash2 className="w-4 h-4" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Delete item</p>
+                         </TooltipContent>
+                       </Tooltip>
+                     </TooltipProvider>
                 </div>
               </TableCell>
             </TableRow>

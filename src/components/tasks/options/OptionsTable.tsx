@@ -3,6 +3,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2 } from 'lucide-react';
 
 interface Option {
@@ -47,12 +48,30 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
             <TableCell>{option.sort_order}</TableCell>
             <TableCell>
               <div className="flex space-x-2">
-                <Button variant="outline" size="sm" onClick={() => onEdit(option)}>
-                  <Edit className="w-3 h-3" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => onDelete(option.id)}>
-                  <Trash2 className="w-3 h-3" />
-                </Button>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={() => onEdit(option)}>
+                        <Edit className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit option</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
+                <TooltipProvider>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button variant="outline" size="sm" onClick={() => onDelete(option.id)}>
+                        <Trash2 className="w-3 h-3" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Delete option</p>
+                    </TooltipContent>
+                  </Tooltip>
+                </TooltipProvider>
               </div>
             </TableCell>
           </TableRow>

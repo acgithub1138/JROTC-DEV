@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { Competition } from '../types';
 
@@ -63,27 +64,54 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(competition)}
-                  >
-                    <Edit className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(competition.id)}
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                  <Button
-                    variant="outline" 
-                    size="sm"
-                    title="Add Event"
-                  >
-                    <Plus className="w-4 h-4" />
-                  </Button>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onEdit(competition)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit competition</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="sm"
+                          onClick={() => onDelete(competition.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete competition</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline" 
+                          size="sm"
+                          title="Add Event"
+                        >
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Add event</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
                 </div>
               </TableCell>
             </TableRow>

@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { CompetitionTemplate } from '../types';
 import { SortConfig } from '@/components/ui/sortable-table';
@@ -121,44 +122,76 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">
                   {onPreview && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onPreview(template)}
-                      title="Preview Template"
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onPreview(template)}
+                          >
+                            <Eye className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Preview template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   {onCopy && canCopyTemplate?.(template) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onCopy(template.id)}
-                      title="Copy Template"
-                    >
-                      <Copy className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onCopy(template.id)}
+                          >
+                            <Copy className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Copy template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   {onEdit && canEditTemplate?.(template) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(template)}
-                      title="Edit Template"
-                    >
-                      <Edit className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onEdit(template)}
+                          >
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                   {onDelete && canEditTemplate?.(template) && (
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onDelete(template.id)}
-                      title="Delete Template"
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => onDelete(template.id)}
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete template</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
                   )}
                 </div>
               </TableCell>
