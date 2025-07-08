@@ -10,6 +10,17 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
   const fieldNames = getFieldNames(events);
 
+  // Get unique cadets from events
+  const uniqueCadets = events.reduce((acc, event) => {
+    if (event.profiles) {
+      const fullName = `${event.profiles.first_name} ${event.profiles.last_name}`;
+      if (!acc.includes(fullName)) {
+        acc.push(fullName);
+      }
+    }
+    return acc;
+  }, [] as string[]);
+
   if (events.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -19,7 +30,17 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
   }
 
   return (
-    <div className="rounded-md border overflow-x-auto">
+    <div className="space-y-4">
+      {uniqueCadets.length > 0 && (
+        <div className="rounded-md border p-4 bg-muted/30">
+          <div className="text-sm font-medium text-foreground mb-2">Cadets:</div>
+          <div className="text-sm text-muted-foreground">
+            {uniqueCadets.join(', ')}
+          </div>
+        </div>
+      )}
+      
+      <div className="rounded-md border overflow-x-auto">
       <Table>
         <TableHeader>
           <TableRow>
@@ -88,6 +109,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
           </TableRow>
         </TableBody>
       </Table>
+      </div>
     </div>
   );
 };
