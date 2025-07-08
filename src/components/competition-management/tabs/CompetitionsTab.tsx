@@ -7,6 +7,7 @@ import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewScoreSheetDialog } from '../components/ViewScoreSheetDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
+import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -28,6 +29,8 @@ export const CompetitionsTab = () => {
     updateCompetition,
     deleteCompetition
   } = useCompetitions();
+
+  const { createEvent } = useCompetitionEvents(selectedCompetition?.id);
 
   // Filter competitions based on search term
   const filteredCompetitions = useMemo(() => {
@@ -65,6 +68,17 @@ export const CompetitionsTab = () => {
   const handleViewScoreSheets = (competition: Competition) => {
     setViewingCompetition(competition);
     setShowViewScoreSheetDialog(true);
+  };
+
+  const handleEventCreated = async (eventData: any) => {
+    try {
+      await createEvent(eventData);
+      setShowAddEventDialog(false);
+      setSelectedCompetition(null);
+    } catch (error) {
+      console.error('Failed to create event:', error);
+      // Keep dialog open on error so user can retry
+    }
   };
 
   return (
@@ -128,10 +142,7 @@ export const CompetitionsTab = () => {
           open={showAddEventDialog}
           onOpenChange={setShowAddEventDialog}
           competitionId={selectedCompetition.id}
-          onEventCreated={() => {
-            setShowAddEventDialog(false);
-            setSelectedCompetition(null);
-          }}
+          onEventCreated={handleEventCreated}
         />
       )}
 
