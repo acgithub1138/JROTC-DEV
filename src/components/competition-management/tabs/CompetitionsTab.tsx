@@ -82,17 +82,11 @@ export const CompetitionsTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <div>
-          <h2 className="text-2xl font-bold">Competitions</h2>
-          <p className="text-muted-foreground">
-            Manage your competition entries and results
-          </p>
-        </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Competition
-        </Button>
+      <div>
+        <h2 className="text-2xl font-bold">Competitions</h2>
+        <p className="text-muted-foreground">
+          Manage your competition entries and results
+        </p>
       </div>
 
       <div className="flex items-center gap-4">
@@ -112,6 +106,10 @@ export const CompetitionsTab = () => {
         >
           <ArrowUpDown className="w-4 h-4" />
           Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
+        </Button>
+        <Button onClick={() => setShowAddDialog(true)}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Competition
         </Button>
       </div>
 
