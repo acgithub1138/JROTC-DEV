@@ -131,9 +131,8 @@ const CadetManagementPage = () => {
       <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        <CardHeader>
-        </CardHeader>
         <CardContent>
+          </br>
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onToggleStatus={profile => {
