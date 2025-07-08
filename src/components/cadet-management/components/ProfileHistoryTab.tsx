@@ -3,7 +3,7 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { formatDistanceToNow } from 'date-fns';
+import { format } from 'date-fns';
 
 interface ProfileHistoryTabProps {
   profileId: string;
@@ -91,33 +91,29 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
                 key={item.id} 
                 className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center gap-2 mb-2">
-                      <Badge variant="outline" className="text-xs">
-                        {formatFieldName(item.field_name)}
-                      </Badge>
-                      <span className="text-xs text-muted-foreground">
-                        {formatDistanceToNow(new Date(item.created_at), { addSuffix: true })}
-                      </span>
-                    </div>
-                    <div className="text-sm">
-                      <span className="text-muted-foreground">Changed from </span>
-                      <span className="font-medium text-red-600">
-                        "{formatValue(item.old_value)}"
-                      </span>
-                      <span className="text-muted-foreground"> to </span>
-                      <span className="font-medium text-green-600">
-                        "{formatValue(item.new_value)}"
-                      </span>
-                    </div>
-                    {item.changed_by_profile && (
-                      <div className="text-xs text-muted-foreground mt-1">
-                        Changed by: {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}
-                      </div>
-                    )}
-                  </div>
+                <div className="flex items-start justify-between mb-2">
+                  <Badge variant="outline" className="text-xs">
+                    {formatFieldName(item.field_name)}
+                  </Badge>
+                  <span className="text-xs text-muted-foreground">
+                    {format(new Date(item.created_at), 'MM/dd/yyyy HH:mm:ss')}
+                  </span>
                 </div>
+                <div className="text-sm mb-2">
+                  <span className="text-muted-foreground">Changed from </span>
+                  <span className="font-medium text-red-600">
+                    "{formatValue(item.old_value)}"
+                  </span>
+                  <span className="text-muted-foreground"> to </span>
+                  <span className="font-medium text-green-600">
+                    "{formatValue(item.new_value)}"
+                  </span>
+                </div>
+                {item.changed_by_profile && (
+                  <div className="text-xs text-muted-foreground">
+                    Changed by: {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}
+                  </div>
+                )}
               </div>
             ))}
           </div>
