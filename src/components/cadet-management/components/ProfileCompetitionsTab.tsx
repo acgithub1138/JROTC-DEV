@@ -13,12 +13,11 @@ interface ProfileCompetitionsTabProps {
 interface CompetitionEvent {
   id: string;
   event: string;
-  total_points: number | null;
+  score_sheet: any;
   competition: {
     id: string;
     name: string;
     competition_date: string;
-    location: string | null;
   };
 }
 
@@ -31,12 +30,11 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
         .select(`
           id,
           event,
-          total_points,
+          score_sheet,
           competition:competitions(
             id,
             name,
-            competition_date,
-            location
+            competition_date
           )
         `)
         .eq('cadet_id', profileId)
@@ -57,12 +55,9 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
       .replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const getScoreColor = (score: number | null) => {
-    if (!score) return 'bg-gray-100 text-gray-800';
-    if (score >= 90) return 'bg-green-100 text-green-800';
-    if (score >= 80) return 'bg-blue-100 text-blue-800';
-    if (score >= 70) return 'bg-yellow-100 text-yellow-800';
-    return 'bg-red-100 text-red-800';
+  const getJudge1Score = (scoreSheet: any) => {
+    if (!scoreSheet || typeof scoreSheet !== 'object') return '-';
+    return scoreSheet.judge1 || '-';
   };
 
   if (isLoading) {
@@ -96,8 +91,7 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
                 <TableHead>Competition</TableHead>
                 <TableHead>Event</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Score</TableHead>
+                <TableHead>Judge 1 Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -114,15 +108,10 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
                   <TableCell>
                     {format(new Date(comp.competition.competition_date), 'MMM d, yyyy')}
                   </TableCell>
-                  <TableCell>{comp.competition.location || '-'}</TableCell>
                   <TableCell>
-                    {comp.total_points !== null ? (
-                      <Badge className={getScoreColor(comp.total_points)}>
-                        {comp.total_points}
-                      </Badge>
-                    ) : (
-                      <span className="text-muted-foreground">-</span>
-                    )}
+                    <span className="text-muted-foreground">
+                      {getJudge1Score(comp.score_sheet)}
+                    </span>
                   </TableCell>
                 </TableRow>
               ))}
