@@ -12,9 +12,10 @@ interface CalendarToolbarProps {
   viewType: CalendarViewType;
   onDateChange: (date: Date) => void;
   onViewChange: (view: CalendarViewType) => void;
-  onCreateEvent: () => void;
+  onCreateEvent?: () => void;
   selectedEventType?: string;
   onEventTypeChange: (eventType: string) => void;
+  readOnly?: boolean;
 }
 
 export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
@@ -25,6 +26,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   onCreateEvent,
   selectedEventType,
   onEventTypeChange,
+  readOnly = false,
 }) => {
   const { eventTypes } = useEventTypes();
   const handlePrevious = () => {
@@ -139,10 +141,12 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
             ))}
           </SelectContent>
         </Select>
-        <Button onClick={onCreateEvent} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          New Event
-        </Button>
+        {!readOnly && onCreateEvent && (
+          <Button onClick={onCreateEvent} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            New Event
+          </Button>
+        )}
       </div>
     </div>
   );

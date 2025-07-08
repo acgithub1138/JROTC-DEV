@@ -6,6 +6,7 @@ import { EventDialog } from './components/EventDialog';
 import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useRolePermissions } from '@/hooks/useRolePermissions';
 
 export interface Event {
   id: string;
@@ -31,6 +32,7 @@ const CalendarManagementPage = () => {
     assignedTo: '',
   });
   const isMobile = useIsMobile();
+  const { canCreateEvents } = useRolePermissions();
 
   const {
     events,
@@ -77,21 +79,24 @@ const CalendarManagementPage = () => {
       <CalendarView
         events={events}
         isLoading={isLoading}
-        onEventEdit={handleEditEvent}
-        onEventDelete={deleteEvent}
+        onEventEdit={canCreateEvents() ? handleEditEvent : undefined}
+        onEventDelete={canCreateEvents() ? deleteEvent : undefined}
         onDateSelect={handleDateSelect}
-        onCreateEvent={handleCreateEvent}
+        onCreateEvent={canCreateEvents() ? handleCreateEvent : undefined}
         filters={filters}
         onFiltersChange={setFilters}
+        readOnly={!canCreateEvents()}
       />
 
-      <EventDialog
-        open={showEventDialog}
-        onOpenChange={handleCloseDialog}
-        event={editingEvent}
-        selectedDate={selectedDate}
-        onSubmit={handleEventSubmit}
-      />
+      {canCreateEvents() && (
+        <EventDialog
+          open={showEventDialog}
+          onOpenChange={handleCloseDialog}
+          event={editingEvent}
+          selectedDate={selectedDate}
+          onSubmit={handleEventSubmit}
+        />
+      )}
     </div>
   );
 };

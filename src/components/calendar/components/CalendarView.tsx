@@ -11,15 +11,16 @@ import { format, startOfMonth, startOfWeek, startOfDay } from 'date-fns';
 interface CalendarViewProps {
   events: Event[];
   isLoading: boolean;
-  onEventEdit: (event: Event) => void;
-  onEventDelete: (id: string) => void;
+  onEventEdit?: (event: Event) => void;
+  onEventDelete?: (id: string) => void;
   onDateSelect: (date: Date) => void;
-  onCreateEvent: () => void;
+  onCreateEvent?: () => void;
   filters: {
     eventType: string;
     assignedTo: string;
   };
   onFiltersChange: (filters: { eventType: string; assignedTo: string }) => void;
+  readOnly?: boolean;
 }
 
 export const CalendarView: React.FC<CalendarViewProps> = ({
@@ -31,6 +32,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onCreateEvent,
   filters,
   onFiltersChange,
+  readOnly = false,
 }) => {
   const [currentDate, setCurrentDate] = useState<Date>(new Date());
   const [viewType, setViewType] = useState<CalendarViewType>('month');
@@ -48,6 +50,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           onCreateEvent={onCreateEvent}
           selectedEventType={filters.eventType || 'all'}
           onEventTypeChange={(eventType) => onFiltersChange({ ...filters, eventType: eventType === 'all' ? '' : eventType })}
+          readOnly={readOnly}
         />
         
         <AgendaView
@@ -65,6 +68,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   };
 
   const handleTimeSlotClick = (date: Date, hour: number) => {
+    if (readOnly || !onCreateEvent) return;
     const selectedDateTime = new Date(date);
     selectedDateTime.setHours(hour, 0, 0, 0);
     onDateSelect(selectedDateTime);
@@ -107,6 +111,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         onCreateEvent={onCreateEvent}
         selectedEventType={filters.eventType || 'all'}
         onEventTypeChange={(eventType) => onFiltersChange({ ...filters, eventType: eventType === 'all' ? '' : eventType })}
+        readOnly={readOnly}
       />
 
       <div className="calendar-content">
@@ -114,7 +119,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <MonthView
             currentDate={currentDate}
             events={events}
-            onEventClick={onEventEdit}
+            onEventClick={readOnly ? undefined : onEventEdit}
             onDateClick={handleDateSelect}
           />
         )}
@@ -123,8 +128,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <WeekView
             currentDate={currentDate}
             events={events}
-            onEventClick={onEventEdit}
-            onTimeSlotClick={handleTimeSlotClick}
+            onEventClick={readOnly ? undefined : onEventEdit}
+            onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
           />
         )}
         
@@ -132,8 +137,8 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <DayView
             currentDate={currentDate}
             events={events}
-            onEventClick={onEventEdit}
-            onTimeSlotClick={handleTimeSlotClick}
+            onEventClick={readOnly ? undefined : onEventEdit}
+            onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
           />
         )}
         
@@ -141,7 +146,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           <AgendaView
             currentDate={currentDate}
             events={events}
-            onEventClick={onEventEdit}
+            onEventClick={readOnly ? undefined : onEventEdit}
           />
         )}
       </div>
