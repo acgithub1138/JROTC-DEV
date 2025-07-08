@@ -1,14 +1,29 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Button } from '@/components/ui/button';
+import { Edit } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
+import { EditScoreSheetDialog } from './EditScoreSheetDialog';
 
 interface ScoreSheetTableProps {
   events: CompetitionEvent[];
+  onEventsRefresh?: () => void;
 }
 
-export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
+export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
+  const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const fieldNames = getFieldNames(events);
+
+  const handleEditScoreSheet = (event: CompetitionEvent) => {
+    setSelectedEvent(event);
+    setIsEditDialogOpen(true);
+  };
+
+  const handleEventUpdated = () => {
+    onEventsRefresh?.();
+  };
 
   // Get unique cadets from events
   const uniqueCadets = events.reduce((acc, event) => {
@@ -47,8 +62,18 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
             <TableHead className="text-center bg-muted/30 px-2 min-w-20">Field</TableHead>
             {events.map((event, index) => (
               <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
-                <div className="font-medium text-sm">
-                  {event.score_sheet?.judge_number || `Judge ${index + 1}`}
+                <div className="space-y-1">
+                  <div className="font-medium text-sm">
+                    {event.score_sheet?.judge_number || `Judge ${index + 1}`}
+                  </div>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => handleEditScoreSheet(event)}
+                    className="h-6 w-6 p-0 hover:bg-muted"
+                  >
+                    <Edit className="h-3 w-3" />
+                  </Button>
                 </div>
               </TableHead>
             ))}
@@ -110,6 +135,13 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events }) => {
         </TableBody>
       </Table>
       </div>
+
+      <EditScoreSheetDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        event={selectedEvent}
+        onEventUpdated={handleEventUpdated}
+      />
     </div>
   );
 };

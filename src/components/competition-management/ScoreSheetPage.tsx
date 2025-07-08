@@ -91,7 +91,10 @@ export const ScoreSheetPage = () => {
                 Showing {filteredEvents.length} score sheets for {selectedEvent}
               </div>
               
-              <ScoreSheetTable events={filteredEvents} />
+              <ScoreSheetTable 
+                events={filteredEvents} 
+                onEventsRefresh={refetch}
+              />
             </div>
           ) : selectedEvent && filteredEvents.length === 0 ? (
             <div className="text-center py-8 text-muted-foreground">
