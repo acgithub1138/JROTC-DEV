@@ -132,7 +132,6 @@ const CadetManagementPage = () => {
 
       <Card>
         <CardHeader>
-          
         </CardHeader>
         <CardContent>
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
