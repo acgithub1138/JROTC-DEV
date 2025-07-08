@@ -5,7 +5,7 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2, CheckCircle } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Eye } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
@@ -14,6 +14,7 @@ interface CadetTableProps {
   profiles: Profile[];
   activeTab: string;
   onEditProfile: (profile: Profile) => void;
+  onViewProfile: (profile: Profile) => void;
   onToggleStatus: (profile: Profile) => void;
   selectedCadets: string[];
   onSelectCadet: (cadetId: string, checked: boolean) => void;
@@ -24,6 +25,7 @@ export const CadetTable = ({
   profiles, 
   activeTab, 
   onEditProfile, 
+  onViewProfile,
   onToggleStatus,
   selectedCadets,
   onSelectCadet,
@@ -105,6 +107,13 @@ onSelectAll
                   <Button
                     variant="outline"
                     size="sm"
+                    onClick={() => onViewProfile(profile)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
                     onClick={() => onEditProfile(profile)}
                   >
                     <Edit className="w-4 h-4" />
@@ -118,14 +127,23 @@ onSelectAll
                   </Button>
                 </div>
               ) : (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onToggleStatus(profile)}
-                >
-                  <CheckCircle className="w-4 h-4 mr-1" />
-                  Activate
-                </Button>
+                <div className="flex items-center justify-end gap-2">
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onViewProfile(profile)}
+                  >
+                    <Eye className="w-4 h-4" />
+                  </Button>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onToggleStatus(profile)}
+                  >
+                    <CheckCircle className="w-4 h-4 mr-1" />
+                    Activate
+                  </Button>
+                </div>
               )}
             </TableCell>
           </TableRow>

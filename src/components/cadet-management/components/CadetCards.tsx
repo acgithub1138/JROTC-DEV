@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Edit, Trash2, CheckCircle, Mail, Phone } from 'lucide-react';
+import { Edit, Trash2, CheckCircle, Mail, Phone, Eye } from 'lucide-react';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
 
@@ -11,6 +11,7 @@ interface CadetCardsProps {
   profiles: Profile[];
   activeTab: string;
   onEditProfile: (profile: Profile) => void;
+  onViewProfile: (profile: Profile) => void;
   onToggleStatus: (profile: Profile) => void;
   selectedCadets: string[];
   onSelectCadet: (cadetId: string, checked: boolean) => void;
@@ -20,6 +21,7 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
   profiles, 
   activeTab, 
   onEditProfile, 
+  onViewProfile,
   onToggleStatus,
   selectedCadets,
   onSelectCadet
@@ -78,9 +80,16 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
                   {profile.grade}
                 </Badge>
               )}
-              <div className="flex space-x-2">
+               <div className="flex space-x-2">
                 {activeTab === 'active' ? (
                   <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewProfile(profile)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
                     <Button
                       variant="outline"
                       size="sm"
@@ -97,14 +106,23 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
                     </Button>
                   </>
                 ) : (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onToggleStatus(profile)}
-                  >
-                    <CheckCircle className="w-4 h-4 mr-1" />
-                    Activate
-                  </Button>
+                  <>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onViewProfile(profile)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onToggleStatus(profile)}
+                    >
+                      <CheckCircle className="w-4 h-4 mr-1" />
+                      Activate
+                    </Button>
+                  </>
                 )}
               </div>
             </div>

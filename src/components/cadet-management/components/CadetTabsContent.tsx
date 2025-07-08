@@ -15,6 +15,7 @@ interface CadetTabsContentProps {
   selectedCadets: string[];
   massOperationLoading: boolean;
   onEditProfile: (profile: Profile) => void;
+  onViewProfile: (profile: Profile) => void;
   onToggleStatus: (profile: Profile) => void;
   onSelectCadet: (cadetId: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
@@ -33,6 +34,7 @@ export const CadetTabsContent = ({
   selectedCadets,
   massOperationLoading,
   onEditProfile,
+  onViewProfile,
   onToggleStatus,
   onSelectCadet,
   onSelectAll,
@@ -51,6 +53,7 @@ export const CadetTabsContent = ({
           profiles={paginatedProfiles}
           activeTab={activeTab}
           onEditProfile={onEditProfile}
+          onViewProfile={onViewProfile}
           onToggleStatus={onToggleStatus}
           selectedCadets={selectedCadets}
           onSelectCadet={onSelectCadet}
@@ -58,17 +61,18 @@ export const CadetTabsContent = ({
       );
     }
     
-    return (
-      <CadetTable
-        profiles={paginatedProfiles}
-        activeTab={activeTab}
-        onEditProfile={onEditProfile}
-        onToggleStatus={onToggleStatus}
-        selectedCadets={selectedCadets}
-        onSelectCadet={onSelectCadet}
-        onSelectAll={(checked) => onSelectAll(checked)}
-      />
-    );
+      return (
+        <CadetTable
+          profiles={paginatedProfiles}
+          activeTab={activeTab}
+          onEditProfile={onEditProfile}
+          onViewProfile={onViewProfile}
+          onToggleStatus={onToggleStatus}
+          selectedCadets={selectedCadets}
+          onSelectCadet={onSelectCadet}
+          onSelectAll={(checked) => onSelectAll(checked)}
+        />
+      );
   };
 
   return (
