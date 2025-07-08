@@ -13,7 +13,6 @@ interface ProfileCompetitionsTabProps {
 interface CompetitionEvent {
   id: string;
   event: string;
-  score_sheet: any;
   competition: {
     id: string;
     name: string;
@@ -30,7 +29,6 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
         .select(`
           id,
           event,
-          score_sheet,
           competition:competitions(
             id,
             name,
@@ -45,7 +43,16 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
         throw error;
       }
 
-      return data as CompetitionEvent[];
+      // Filter to unique events
+      const uniqueEvents = new Map();
+      data?.forEach((item) => {
+        const key = `${item.competition.name}-${item.event}`;
+        if (!uniqueEvents.has(key)) {
+          uniqueEvents.set(key, item);
+        }
+      });
+
+      return Array.from(uniqueEvents.values()) as CompetitionEvent[];
     },
   });
 
@@ -55,10 +62,6 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
       .replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const getJudge1Score = (scoreSheet: any) => {
-    if (!scoreSheet || typeof scoreSheet !== 'object') return '-';
-    return scoreSheet.judge1 || '-';
-  };
 
   if (isLoading) {
     return (
@@ -91,7 +94,6 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
                 <TableHead>Competition</TableHead>
                 <TableHead>Event</TableHead>
                 <TableHead>Date</TableHead>
-                <TableHead>Judge 1 Score</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -107,11 +109,6 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
                   </TableCell>
                   <TableCell>
                     {format(new Date(comp.competition.competition_date), 'MMM d, yyyy')}
-                  </TableCell>
-                  <TableCell>
-                    <span className="text-muted-foreground">
-                      {getJudge1Score(comp.score_sheet)}
-                    </span>
                   </TableCell>
                 </TableRow>
               ))}
