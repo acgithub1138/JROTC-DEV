@@ -44,10 +44,10 @@ serve(async (req) => {
 
     console.log('Creating user:', email, 'with role:', role)
 
-    // Create user directly without email verification
+    // Create user directly with default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // Generate random password
+      password: 'Sh0wc@se', // Default password
       email_confirm: true, // Skip email verification
       user_metadata: {
         first_name,
@@ -65,24 +65,39 @@ serve(async (req) => {
     console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', role)
 
     // Update the profile that will be automatically created by the trigger
-    // Note: We need to wait a moment for the trigger to create the profile
-    setTimeout(async () => {
-      const { error: profileError } = await supabaseAdmin
-        .from('profiles')
-        .update({
-          role,
-          grade: grade || null,
-          rank: rank || null,
-          flight: flight || null,
-        })
-        .eq('id', authUser.user!.id)
+    // Use a more reliable approach with retries for profile updates
+    const updateProfile = async (retries = 3): Promise<void> => {
+      for (let i = 0; i < retries; i++) {
+        // Wait for profile to be created by trigger
+        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+        
+        const { error: profileError } = await supabaseAdmin
+          .from('profiles')
+          .update({
+            role,
+            grade: grade || null,
+            rank: rank || null,
+            flight: flight || null,
+            password_change_required: true, // Force password change on first login
+          })
+          .eq('id', authUser.user!.id)
 
-      if (profileError) {
-        console.error('Profile update error:', profileError)
-      } else {
-        console.log('Profile updated successfully with role:', role)
+        if (!profileError) {
+          console.log('Profile updated successfully with role:', role, 'password_change_required: true')
+          return
+        }
+        
+        console.error(`Profile update attempt ${i + 1} failed:`, profileError)
+        if (i === retries - 1) {
+          throw profileError
+        }
       }
-    }, 1000)
+    }
+
+    // Start profile update in background
+    updateProfile().catch(error => {
+      console.error('Final profile update error:', error)
+    })
 
     return new Response(
       JSON.stringify({ 

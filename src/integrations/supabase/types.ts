@@ -1382,6 +1382,7 @@ export type Database = {
           grade: string | null
           id: string
           last_name: string
+          password_change_required: boolean
           phone: string | null
           rank: string | null
           role: Database["public"]["Enums"]["user_role"]
@@ -1397,6 +1398,7 @@ export type Database = {
           grade?: string | null
           id: string
           last_name: string
+          password_change_required?: boolean
           phone?: string | null
           rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
@@ -1412,6 +1414,7 @@ export type Database = {
           grade?: string | null
           id?: string
           last_name?: string
+          password_change_required?: boolean
           phone?: string | null
           rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
