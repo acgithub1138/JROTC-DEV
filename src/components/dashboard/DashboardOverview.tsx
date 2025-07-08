@@ -64,14 +64,19 @@ const DashboardOverview = () => {
   };
   // Configure stats based on user role
   const getStatsConfig = () => {
-    const baseStats = [{
-      title: 'Total Cadets',
-      value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
-      change: statsLoading ? '...' : stats?.cadets.change || 'No data',
-      icon: Users,
-      color: 'text-blue-600',
-      bgColor: 'bg-blue-100'
-    }];
+    const baseStats = [];
+
+    // Only show Total Cadets widget for non-cadet roles
+    if (!isCadet()) {
+      baseStats.push({
+        title: 'Total Cadets',
+        value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
+        change: statsLoading ? '...' : stats?.cadets.change || 'No data',
+        icon: Users,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100'
+      });
+    }
 
     // Show additional stats only for command staff and above
     if (isCommandStaffOrAbove()) {
