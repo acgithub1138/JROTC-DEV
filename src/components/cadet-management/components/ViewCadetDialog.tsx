@@ -88,16 +88,22 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
               </TabsList>
               
               <div className="flex-1 overflow-hidden">
-                <TabsContent value="history" className="h-full overflow-auto">
-                  <ProfileHistoryTab profileId={profile.id} />
+                <TabsContent value="history" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfileHistoryTab profileId={profile.id} />
+                  </div>
                 </TabsContent>
                 
-                <TabsContent value="equipment" className="h-full overflow-auto">
-                  <ProfileEquipmentTab profileId={profile.id} />
+                <TabsContent value="equipment" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfileEquipmentTab profileId={profile.id} />
+                  </div>
                 </TabsContent>
                 
-                <TabsContent value="competitions" className="h-full overflow-auto">
-                  <ProfileCompetitionsTab profileId={profile.id} />
+                <TabsContent value="competitions" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfileCompetitionsTab profileId={profile.id} />
+                  </div>
                 </TabsContent>
               </div>
             </Tabs>

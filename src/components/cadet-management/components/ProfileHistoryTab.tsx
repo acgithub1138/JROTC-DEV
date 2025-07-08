@@ -75,17 +75,17 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
         <CardTitle>Profile Change History</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-hidden">
         {history.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No profile changes recorded yet</p>
           </div>
         ) : (
-          <div className="space-y-4">
+          <div className="h-full overflow-y-auto space-y-4">
             {history.map((item) => (
               <div 
                 key={item.id} 

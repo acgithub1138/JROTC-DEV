@@ -87,68 +87,70 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
         <CardTitle>Assigned Equipment</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-hidden">
         {equipment.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No equipment currently assigned</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Item</TableHead>
-                <TableHead>Category</TableHead>
-                <TableHead>Serial Number</TableHead>
-                <TableHead>Condition</TableHead>
-                <TableHead>Status</TableHead>
-                <TableHead>Checked Out</TableHead>
-                <TableHead>Expected Return</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {equipment.map((item) => {
-                const latestCheckout = item.checkout_info?.[0];
-                return (
-                  <TableRow key={item.id}>
-                    <TableCell className="font-medium">
-                      <div>
-                        <p className="font-medium">{item.item}</p>
-                        {item.description && (
-                          <p className="text-xs text-muted-foreground">{item.description}</p>
-                        )}
-                      </div>
-                    </TableCell>
-                    <TableCell>{item.category || '-'}</TableCell>
-                    <TableCell className="font-mono text-xs">
-                      {item.serial_number || '-'}
-                    </TableCell>
-                    <TableCell>{item.condition || '-'}</TableCell>
-                    <TableCell>
-                      <Badge className={getStatusColor(item.status)}>
-                        {item.status}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {latestCheckout?.checked_out_at ? 
-                        format(new Date(latestCheckout.checked_out_at), 'MMM d, yyyy') : 
-                        '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      {latestCheckout?.expected_return_date ? 
-                        format(new Date(latestCheckout.expected_return_date), 'MMM d, yyyy') : 
-                        '-'
-                      }
-                    </TableCell>
-                  </TableRow>
-                );
-              })}
-            </TableBody>
-          </Table>
+          <div className="h-full overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Item</TableHead>
+                  <TableHead>Category</TableHead>
+                  <TableHead>Serial Number</TableHead>
+                  <TableHead>Condition</TableHead>
+                  <TableHead>Status</TableHead>
+                  <TableHead>Checked Out</TableHead>
+                  <TableHead>Expected Return</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {equipment.map((item) => {
+                  const latestCheckout = item.checkout_info?.[0];
+                  return (
+                    <TableRow key={item.id}>
+                      <TableCell className="font-medium">
+                        <div>
+                          <p className="font-medium">{item.item}</p>
+                          {item.description && (
+                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>{item.category || '-'}</TableCell>
+                      <TableCell className="font-mono text-xs">
+                        {item.serial_number || '-'}
+                      </TableCell>
+                      <TableCell>{item.condition || '-'}</TableCell>
+                      <TableCell>
+                        <Badge className={getStatusColor(item.status)}>
+                          {item.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        {latestCheckout?.checked_out_at ? 
+                          format(new Date(latestCheckout.checked_out_at), 'MMM d, yyyy') : 
+                          '-'
+                        }
+                      </TableCell>
+                      <TableCell>
+                        {latestCheckout?.expected_return_date ? 
+                          format(new Date(latestCheckout.expected_return_date), 'MMM d, yyyy') : 
+                          '-'
+                        }
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>

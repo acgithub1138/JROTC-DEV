@@ -65,8 +65,8 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
 
   if (isLoading) {
     return (
-      <Card>
-        <CardContent className="p-6">
+      <Card className="h-full flex flex-col">
+        <CardContent className="flex-1 p-6">
           <div className="animate-pulse space-y-4">
             {[...Array(3)].map((_, i) => (
               <div key={i} className="h-16 bg-muted rounded"></div>
@@ -78,42 +78,44 @@ export const ProfileCompetitionsTab = ({ profileId }: ProfileCompetitionsTabProp
   }
 
   return (
-    <Card>
-      <CardHeader>
+    <Card className="h-full flex flex-col">
+      <CardHeader className="flex-shrink-0">
         <CardTitle>Competition History</CardTitle>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-hidden">
         {competitions.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No competition participation recorded</p>
           </div>
         ) : (
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Competition</TableHead>
-                <TableHead>Event</TableHead>
-                <TableHead>Date</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {competitions.map((comp) => (
-                <TableRow key={comp.id}>
-                  <TableCell className="font-medium">
-                    {comp.competition.name}
-                  </TableCell>
-                  <TableCell>
-                    <Badge variant="outline">
-                      {formatEventType(comp.event)}
-                    </Badge>
-                  </TableCell>
-                  <TableCell>
-                    {format(new Date(comp.competition.competition_date), 'MMM d, yyyy')}
-                  </TableCell>
+          <div className="h-full overflow-y-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Competition</TableHead>
+                  <TableHead>Event</TableHead>
+                  <TableHead>Date</TableHead>
                 </TableRow>
-              ))}
-            </TableBody>
-          </Table>
+              </TableHeader>
+              <TableBody>
+                {competitions.map((comp) => (
+                  <TableRow key={comp.id}>
+                    <TableCell className="font-medium">
+                      {comp.competition.name}
+                    </TableCell>
+                    <TableCell>
+                      <Badge variant="outline">
+                        {formatEventType(comp.event)}
+                      </Badge>
+                    </TableCell>
+                    <TableCell>
+                      {format(new Date(comp.competition.competition_date), 'MMM d, yyyy')}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
         )}
       </CardContent>
     </Card>
