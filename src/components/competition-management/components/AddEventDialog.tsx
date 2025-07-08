@@ -10,14 +10,12 @@ import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { EventScoreForm } from './EventScoreForm';
 import { MultiSelectProfiles } from '../../inventory-management/components/MultiSelectProfiles';
-
 interface AddEventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
   onEventCreated: (eventData: any) => void;
 }
-
 export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   open,
   onOpenChange,
@@ -34,10 +32,14 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isCadetsOpen, setIsCadetsOpen] = useState(false);
-
-  const { templates, isLoading: templatesLoading } = useCompetitionTemplates();
-  const { users: cadets, isLoading: cadetsLoading } = useSchoolUsers(true);
-
+  const {
+    templates,
+    isLoading: templatesLoading
+  } = useCompetitionTemplates();
+  const {
+    users: cadets,
+    isLoading: cadetsLoading
+  } = useSchoolUsers(true);
   const selectedTemplate = templates.find(t => t.id === selectedTemplateId);
   const activeCadets = cadets.filter(user => user.role === 'cadet');
 
@@ -45,26 +47,13 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
   const availablePrograms = [...new Set(templates.map(t => t.jrotc_program))].sort();
 
   // Get events filtered by selected program
-  const availableEvents = selectedProgram 
-    ? [...new Set(templates
-        .filter(t => t.jrotc_program === selectedProgram)
-        .map(t => t.event)
-      )].sort()
-    : [];
+  const availableEvents = selectedProgram ? [...new Set(templates.filter(t => t.jrotc_program === selectedProgram).map(t => t.event))].sort() : [];
 
   // Get templates filtered by selected program and event
-  const filteredTemplates = selectedProgram && selectedEvent
-    ? templates.filter(t => 
-        t.jrotc_program === selectedProgram && 
-        t.event === selectedEvent
-      )
-    : [];
+  const filteredTemplates = selectedProgram && selectedEvent ? templates.filter(t => t.jrotc_program === selectedProgram && t.event === selectedEvent) : [];
 
   // Judge number options
-  const judgeOptions = [
-    'Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5',
-    'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10'
-  ];
+  const judgeOptions = ['Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5', 'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10'];
 
   // Handle program selection change
   const handleProgramChange = (program: string) => {
@@ -89,12 +78,10 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     setScores({});
     setTotalPoints(0);
   };
-
   const handleSubmit = async () => {
     if (!selectedTemplateId || selectedCadetIds.length === 0) {
       return;
     }
-
     setIsSubmitting(true);
     try {
       // Create an event for each selected cadet
@@ -112,10 +99,9 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           },
           total_points: totalPoints
         };
-
         await onEventCreated(eventData);
       }
-      
+
       // Reset form
       setSelectedProgram('');
       setSelectedEvent('');
@@ -132,16 +118,12 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
       setIsSubmitting(false);
     }
   };
-
   const handleScoreChange = (newScores: Record<string, any>, newTotal: number) => {
     setScores(newScores);
     setTotalPoints(newTotal);
   };
-
   const isFormValid = selectedTemplateId && selectedCadetIds.length > 0;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Competition Event</DialogTitle>
@@ -152,21 +134,16 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
             {/* Program Selection */}
             <div className="space-y-1">
-              <Label>Program</Label>
-              <Select 
-                value={selectedProgram} 
-                onValueChange={handleProgramChange}
-                disabled={templatesLoading}
-              >
+              <Label>Branch
+            </Label>
+              <Select value={selectedProgram} onValueChange={handleProgramChange} disabled={templatesLoading}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select a program..." />
                 </SelectTrigger>
                 <SelectContent>
-                  {availablePrograms.map((program) => (
-                    <SelectItem key={program} value={program}>
+                  {availablePrograms.map(program => <SelectItem key={program} value={program}>
                       {program.charAt(0).toUpperCase() + program.slice(1).replace('_', ' ')}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -174,20 +151,14 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
             {/* Event Selection */}
             <div className="space-y-1">
               <Label>Event</Label>
-              <Select 
-                value={selectedEvent} 
-                onValueChange={handleEventChange}
-                disabled={templatesLoading || !selectedProgram}
-              >
+              <Select value={selectedEvent} onValueChange={handleEventChange} disabled={templatesLoading || !selectedProgram}>
                 <SelectTrigger>
                   <SelectValue placeholder={selectedProgram ? "Select an event..." : "Select a program first"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {availableEvents.map((event) => (
-                    <SelectItem key={event} value={event}>
+                  {availableEvents.map(event => <SelectItem key={event} value={event}>
                       {event.split('_').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ')}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -195,20 +166,14 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
             {/* Template Selection */}
             <div className="space-y-1">
               <Label>Template Name</Label>
-              <Select 
-                value={selectedTemplateId} 
-                onValueChange={handleTemplateChange}
-                disabled={templatesLoading || !selectedEvent}
-              >
+              <Select value={selectedTemplateId} onValueChange={handleTemplateChange} disabled={templatesLoading || !selectedEvent}>
                 <SelectTrigger>
                   <SelectValue placeholder={selectedEvent ? "Select a template..." : "Select an event first"} />
                 </SelectTrigger>
                 <SelectContent>
-                  {filteredTemplates.map((template) => (
-                    <SelectItem key={template.id} value={template.id}>
+                  {filteredTemplates.map(template => <SelectItem key={template.id} value={template.id}>
                       {template.template_name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
@@ -222,20 +187,15 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
                     <span>Cadets</span>
-                    {selectedCadetIds.length > 0 && (
-                      <span className="text-sm text-muted-foreground">
+                    {selectedCadetIds.length > 0 && <span className="text-sm text-muted-foreground">
                         ({selectedCadetIds.length} selected)
-                      </span>
-                    )}
+                      </span>}
                   </div>
                   {isCadetsOpen ? <ChevronDown className="w-4 h-4" /> : <ChevronRight className="w-4 h-4" />}
                 </Button>
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-1 pt-2">
-                <MultiSelectProfiles
-                  value={selectedCadetIds}
-                  onChange={setSelectedCadetIds}
-                />
+                <MultiSelectProfiles value={selectedCadetIds} onChange={setSelectedCadetIds} />
               </CollapsibleContent>
             </Collapsible>
           </div>
@@ -248,11 +208,9 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                 <SelectValue placeholder="Select judge..." />
               </SelectTrigger>
               <SelectContent>
-                {judgeOptions.map((judge) => (
-                  <SelectItem key={judge} value={judge}>
+                {judgeOptions.map(judge => <SelectItem key={judge} value={judge}>
                     {judge}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
@@ -260,40 +218,26 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           {/* Team Name */}
           <div className="space-y-1">
             <Label>Team Name (Optional)</Label>
-            <Input
-              value={teamName}
-              onChange={(e) => setTeamName(e.target.value)}
-              placeholder="Enter team name..."
-            />
+            <Input value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="Enter team name..." />
           </div>
 
           {/* Score Form */}
-          {selectedTemplate && (
-            <div className="border-t pt-6">
+          {selectedTemplate && <div className="border-t pt-6">
               <h3 className="text-lg font-semibold mb-4">
                 Score Sheet: {selectedTemplate.template_name}
               </h3>
-              <EventScoreForm
-                templateScores={selectedTemplate.scores as Record<string, any>}
-                onScoreChange={handleScoreChange}
-                judgeNumber={judgeNumber}
-              />
-            </div>
-          )}
+              <EventScoreForm templateScores={selectedTemplate.scores as Record<string, any>} onScoreChange={handleScoreChange} judgeNumber={judgeNumber} />
+            </div>}
         </div>
 
         <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSubmit}
-            disabled={!isFormValid || isSubmitting}
-          >
+          <Button onClick={handleSubmit} disabled={!isFormValid || isSubmitting}>
             {isSubmitting ? 'Adding...' : 'Add Event'}
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
