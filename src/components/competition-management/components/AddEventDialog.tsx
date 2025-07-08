@@ -78,7 +78,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     setScores({});
     setTotalPoints(0);
   };
-  const handleSubmit = async (action: 'close' | 'same-template' | 'new-event' = 'close') => {
+  const handleSubmit = async () => {
     if (!selectedTemplateId || selectedCadetIds.length === 0) {
       return;
     }
@@ -102,36 +102,16 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
         await onEventCreated(eventData);
       }
 
-      // Handle different actions after successful submission
-      if (action === 'same-template') {
-        // Reset only form data, keep template selection
-        setSelectedCadetIds([]);
-        setJudgeNumber('');
-        setTeamName('');
-        setScores({});
-        setTotalPoints(0);
-      } else if (action === 'new-event') {
-        // Reset everything
-        setSelectedProgram('');
-        setSelectedEvent('');
-        setSelectedTemplateId('');
-        setSelectedCadetIds([]);
-        setJudgeNumber('');
-        setTeamName('');
-        setScores({});
-        setTotalPoints(0);
-      } else {
-        // Close modal (default behavior)
-        setSelectedProgram('');
-        setSelectedEvent('');
-        setSelectedTemplateId('');
-        setSelectedCadetIds([]);
-        setJudgeNumber('');
-        setTeamName('');
-        setScores({});
-        setTotalPoints(0);
-        onOpenChange(false);
-      }
+      // Reset form
+      setSelectedProgram('');
+      setSelectedEvent('');
+      setSelectedTemplateId('');
+      setSelectedCadetIds([]);
+      setJudgeNumber('');
+      setTeamName('');
+      setScores({});
+      setTotalPoints(0);
+      onOpenChange(false);
     } catch (error) {
       console.error('Error creating event:', error);
     } finally {
@@ -250,29 +230,13 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
             </div>}
         </div>
 
-        <DialogFooter className="flex flex-col sm:flex-row gap-2">
+        <DialogFooter>
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
-          <div className="flex gap-2">
-            <Button onClick={() => handleSubmit('close')} disabled={!isFormValid || isSubmitting}>
-              {isSubmitting ? 'Adding...' : 'Add Event'}
-            </Button>
-            <Button 
-              variant="secondary" 
-              onClick={() => handleSubmit('same-template')} 
-              disabled={!isFormValid || isSubmitting}
-            >
-              Add another Score Sheet
-            </Button>
-            <Button 
-              variant="secondary" 
-              onClick={() => handleSubmit('new-event')} 
-              disabled={!isFormValid || isSubmitting}
-            >
-              Add another Event
-            </Button>
-          </div>
+          <Button onClick={handleSubmit} disabled={!isFormValid || isSubmitting}>
+            {isSubmitting ? 'Adding...' : 'Add Event'}
+          </Button>
         </DialogFooter>
       </DialogContent>
     </Dialog>;
