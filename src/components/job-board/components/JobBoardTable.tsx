@@ -5,13 +5,15 @@ import { Edit, Trash2 } from 'lucide-react';
 import { JobBoardWithCadet } from '../types';
 interface JobBoardTableProps {
   jobs: JobBoardWithCadet[];
-  onEditJob: (job: JobBoardWithCadet) => void;
-  onDeleteJob: (job: JobBoardWithCadet) => void;
+  onEditJob?: (job: JobBoardWithCadet) => void;
+  onDeleteJob?: (job: JobBoardWithCadet) => void;
+  readOnly?: boolean;
 }
 export const JobBoardTable = ({
   jobs,
   onEditJob,
-  onDeleteJob
+  onDeleteJob,
+  readOnly = false
 }: JobBoardTableProps) => {
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
     return `${cadet.last_name}, ${cadet.first_name}`;
@@ -36,14 +38,20 @@ export const JobBoardTable = ({
             <TableCell className="py-2">{job.reports_to || '-'}</TableCell>
             <TableCell className="py-2">{job.assistant || '-'}</TableCell>
             <TableCell className="text-right py-2">
-              <div className="flex items-center justify-end gap-2">
-                <Button variant="outline" size="sm" onClick={() => onEditJob(job)}>
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button variant="outline" size="sm" onClick={() => onDeleteJob(job)}>
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+              {!readOnly && (
+                <div className="flex items-center justify-end gap-2">
+                  {onEditJob && (
+                    <Button variant="outline" size="sm" onClick={() => onEditJob(job)}>
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  )}
+                  {onDeleteJob && (
+                    <Button variant="outline" size="sm" onClick={() => onDeleteJob(job)}>
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              )}
             </TableCell>
           </TableRow>)}
         {jobs.length === 0 && <TableRow>

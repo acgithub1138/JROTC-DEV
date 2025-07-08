@@ -12,7 +12,11 @@ import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
-export const TemplatesTab = () => {
+interface TemplatesTabProps {
+  readOnly?: boolean;
+}
+
+export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
   const {
     userProfile
   } = useAuth();
@@ -44,7 +48,7 @@ export const TemplatesTab = () => {
       direction: 'asc'
     }
   });
-  const canManageTemplates = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canManageTemplates = !readOnly && (userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff');
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
       await updateTemplate(editingTemplate.id, data);

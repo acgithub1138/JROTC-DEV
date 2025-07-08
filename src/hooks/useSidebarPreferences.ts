@@ -47,16 +47,23 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
       ];
     
     case 'command_staff':
-    case 'cadet':
       return [
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
-        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },        
-        { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+        { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'email-management', label: 'Email', icon: 'Mails' },        
+        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+      ];
+    
+    case 'cadet':
+      return [
+        ...baseItems,
+        { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
+        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
       ];
     
     default:

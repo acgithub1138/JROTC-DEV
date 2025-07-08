@@ -2,9 +2,11 @@ import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { TemplatesTab } from './tabs/TemplatesTab';
+import { useRolePermissions } from '@/hooks/useRolePermissions';
 
 const CompetitionManagementPage = () => {
   const [activeTab, setActiveTab] = useState('competitions');
+  const { canManageCompetitions } = useRolePermissions();
 
   return (
     <div className="p-6 space-y-6">
@@ -22,11 +24,11 @@ const CompetitionManagementPage = () => {
         </TabsList>
         
         <TabsContent value="competitions" className="space-y-6">
-          <CompetitionsTab />
+          <CompetitionsTab readOnly={!canManageCompetitions()} />
         </TabsContent>
         
         <TabsContent value="templates" className="space-y-6">
-          <TemplatesTab />
+          <TemplatesTab readOnly={!canManageCompetitions()} />
         </TabsContent>
       </Tabs>
     </div>

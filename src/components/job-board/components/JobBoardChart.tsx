@@ -14,13 +14,14 @@ interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
   onRefresh?: () => void;
   onUpdateJob?: (jobId: string, updates: Partial<JobBoardWithCadet>) => void;
+  readOnly?: boolean;
 }
 
 const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
+const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
   const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
@@ -100,6 +101,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
+    if (readOnly) return; // Don't allow editing in read-only mode
+    
     console.log('Edge double-clicked:', edge);
     event.stopPropagation();
     
@@ -138,7 +141,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
       currentSourceHandle: edge.sourceHandle || 'bottom-source',
       currentTargetHandle: edge.targetHandle || 'top-target',
     });
-  }, [jobs]);
+  }, [jobs, readOnly]);
 
   const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
     if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
@@ -222,7 +225,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps
   );
 };
 
-export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartProps) => {
+export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
   if (jobs.length === 0) {
     return (
       <div className="flex items-center justify-center h-96 text-gray-500">
@@ -237,6 +240,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob }: JobBoardChartPro
         jobs={jobs}
         onRefresh={onRefresh}
         onUpdateJob={onUpdateJob}
+        readOnly={readOnly}
       />
     </ReactFlowProvider>
   );

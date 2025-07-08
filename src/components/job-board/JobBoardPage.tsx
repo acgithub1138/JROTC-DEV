@@ -14,6 +14,7 @@ import { DeleteJobDialog } from './components/DeleteJobDialog';
 import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
+import { useRolePermissions } from '@/hooks/useRolePermissions';
 
 const JobBoardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -22,6 +23,7 @@ const JobBoardPage = () => {
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
   
   const [activeTab, setActiveTab] = useState('table');
+  const { canManageJobBoard } = useRolePermissions();
 
   const {
     jobs,
@@ -85,10 +87,12 @@ const JobBoardPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Job
-          </Button>
+          {canManageJobBoard() && (
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Job
+            </Button>
+          )}
         </div>
 
         <Card>
@@ -115,8 +119,9 @@ const JobBoardPage = () => {
               <TabsContent value="table" className="mt-4">
                 <JobBoardTable
                   jobs={filteredJobs}
-                  onEditJob={setEditingJob}
-                  onDeleteJob={setDeletingJob}
+                  onEditJob={canManageJobBoard() ? setEditingJob : undefined}
+                  onDeleteJob={canManageJobBoard() ? setDeletingJob : undefined}
+                  readOnly={!canManageJobBoard()}
                 />
               </TabsContent>
 
@@ -124,37 +129,42 @@ const JobBoardPage = () => {
                 <JobBoardChart
                   jobs={filteredJobs}
                   onRefresh={handleRefresh}
-                  onUpdateJob={handleEditJob}
+                  onUpdateJob={canManageJobBoard() ? handleEditJob : undefined}
+                  readOnly={!canManageJobBoard()}
                 />
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
-        <AddJobDialog
-          open={showAddDialog}
-          onOpenChange={setShowAddDialog}
-          onSubmit={handleAddJob}
-          loading={createJob.isPending}
-          jobs={jobs}
-        />
+        {canManageJobBoard() && (
+          <>
+            <AddJobDialog
+              open={showAddDialog}
+              onOpenChange={setShowAddDialog}
+              onSubmit={handleAddJob}
+              loading={createJob.isPending}
+              jobs={jobs}
+            />
 
-        <EditJobDialog
-          open={!!editingJob}
-          onOpenChange={(open) => !open && setEditingJob(null)}
-          job={editingJob}
-          onSubmit={handleEditJob}
-          loading={updateJob.isPending}
-          jobs={jobs}
-        />
+            <EditJobDialog
+              open={!!editingJob}
+              onOpenChange={(open) => !open && setEditingJob(null)}
+              job={editingJob}
+              onSubmit={handleEditJob}
+              loading={updateJob.isPending}
+              jobs={jobs}
+            />
 
-        <DeleteJobDialog
-          open={!!deletingJob}
-          onOpenChange={(open) => !open && setDeletingJob(null)}
-          job={deletingJob}
-          onConfirm={handleDeleteJob}
-          loading={deleteJob.isPending}
-        />
+            <DeleteJobDialog
+              open={!!deletingJob}
+              onOpenChange={(open) => !open && setDeletingJob(null)}
+              job={deletingJob}
+              onConfirm={handleDeleteJob}
+              loading={deleteJob.isPending}
+            />
+          </>
+        )}
 
       </div>
     </div>

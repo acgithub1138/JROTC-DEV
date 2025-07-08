@@ -12,7 +12,11 @@ import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import type { Database } from '@/integrations/supabase/types';
 type Competition = Database['public']['Tables']['competitions']['Row'];
-export const CompetitionsTab = () => {
+interface CompetitionsTabProps {
+  readOnly?: boolean;
+}
+
+export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
@@ -92,21 +96,34 @@ export const CompetitionsTab = () => {
             Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
           </Button>
         </div>
-        <Button onClick={() => setShowAddDialog(true)}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Competition
-        </Button>
+        {!readOnly && (
+          <Button onClick={() => setShowAddDialog(true)}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Competition
+          </Button>
+        )}
       </div>
 
-      <BasicCompetitionTable competitions={sortedData} isLoading={isLoading} onEdit={setEditingCompetition} onDelete={deleteCompetition} onAddEvent={handleAddEvent} onViewScoreSheets={handleViewScoreSheets} />
+      <BasicCompetitionTable 
+        competitions={sortedData} 
+        isLoading={isLoading} 
+        onEdit={readOnly ? undefined : setEditingCompetition} 
+        onDelete={readOnly ? undefined : deleteCompetition} 
+        onAddEvent={readOnly ? undefined : handleAddEvent} 
+        onViewScoreSheets={handleViewScoreSheets} 
+      />
 
-      <CompetitionDialog open={showAddDialog || !!editingCompetition} onOpenChange={open => {
-      if (!open) {
-        setShowAddDialog(false);
-        setEditingCompetition(null);
-      }
-    }} competition={editingCompetition as any} onSubmit={handleSubmit} />
+      {!readOnly && (
+        <>
+          <CompetitionDialog open={showAddDialog || !!editingCompetition} onOpenChange={open => {
+            if (!open) {
+              setShowAddDialog(false);
+              setEditingCompetition(null);
+            }
+          }} competition={editingCompetition as any} onSubmit={handleSubmit} />
 
-      {selectedCompetition && <AddEventDialog open={showAddEventDialog} onOpenChange={setShowAddEventDialog} competitionId={selectedCompetition.id} onEventCreated={handleEventCreated} />}
+          {selectedCompetition && <AddEventDialog open={showAddEventDialog} onOpenChange={setShowAddEventDialog} competitionId={selectedCompetition.id} onEventCreated={handleEventCreated} />}
+        </>
+      )}
     </div>;
 };

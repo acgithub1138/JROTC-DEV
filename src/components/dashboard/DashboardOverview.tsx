@@ -11,8 +11,13 @@ import { AddIncomeDialog } from '@/components/budget-management/components/AddIn
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MyTasksWidget } from './widgets/MyTasksWidget';
+import { useAuth } from '@/contexts/AuthContext';
+import { useRolePermissions } from '@/hooks/useRolePermissions';
 const DashboardOverview = () => {
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
+  const { canCreateTasks, canCreateEvents, isCommandStaffOrAbove, isCadet } = useRolePermissions();
   const {
     data: stats,
     isLoading: statsLoading
@@ -57,39 +62,57 @@ const DashboardOverview = () => {
     // This will be handled by the individual dialogs
     console.log('Transaction created:', data);
   };
-  const statsConfig = [{
-    title: 'Total Cadets',
-    value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
-    change: statsLoading ? '...' : stats?.cadets.change || 'No data',
-    icon: Users,
-    color: 'text-blue-600',
-    bgColor: 'bg-blue-100'
-  }, {
-    title: 'Active Tasks',
-    value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
-    change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
-    icon: CheckSquare,
-    color: 'text-green-600',
-    bgColor: 'bg-green-100'
-  }, {
-    title: 'Net Budget',
-    value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
-    change: statsLoading ? '...' : <>
-          ${(stats?.budget.totalIncome || 0).toLocaleString()} income
-          <br />
-          ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses
-        </>,
-    icon: DollarSign,
-    color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
-    bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
-  }, {
-    title: 'Equipment',
-    value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
-    change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
-    icon: Package,
-    color: 'text-purple-600',
-    bgColor: 'bg-purple-100'
-  }];
+  // Configure stats based on user role
+  const getStatsConfig = () => {
+    const baseStats = [{
+      title: 'Total Cadets',
+      value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
+      change: statsLoading ? '...' : stats?.cadets.change || 'No data',
+      icon: Users,
+      color: 'text-blue-600',
+      bgColor: 'bg-blue-100'
+    }];
+
+    // Show additional stats only for command staff and above
+    if (isCommandStaffOrAbove()) {
+      baseStats.push({
+        title: 'Active Tasks',
+        value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
+        icon: CheckSquare,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100'
+      });
+
+      // Show inventory only for command staff (not cadets)
+      if (!isCadet()) {
+        baseStats.push({
+          title: 'Equipment',
+          value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
+          change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
+          icon: Package,
+          color: 'text-purple-600',
+          bgColor: 'bg-purple-100'
+        });
+      }
+    }
+
+    // Budget is only for instructors and admins
+    if (userProfile?.role === 'instructor' || userProfile?.role === 'admin') {
+      baseStats.push({
+        title: 'Net Budget',
+        value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
+        change: statsLoading ? '...' : `${(stats?.budget.totalIncome || 0).toLocaleString()} income, ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
+        icon: DollarSign,
+        color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
+        bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
+      });
+    }
+
+    return baseStats;
+  };
+
+  const statsConfig = getStatsConfig();
   return <div className="p-6 space-y-6">
       {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -113,6 +136,9 @@ const DashboardOverview = () => {
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* My Tasks Widget */}
+        <MyTasksWidget />
+
         {/* Upcoming Events */}
         <Card>
           <CardHeader>
@@ -152,66 +178,85 @@ const DashboardOverview = () => {
           </CardContent>
         </Card>
 
-        {/* Quick Actions */}
-        <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Trophy className="w-5 h-5 mr-2 text-blue-600" />
-              Quick Actions
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 gap-3">
-              <button onClick={() => setIsAddCadetOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Users className="w-6 h-6 text-blue-600 mb-2" />
-                <p className="font-medium text-sm">Add Cadet</p>
-                <p className="text-xs text-gray-500">Enroll new cadet</p>
-              </button>
-              <button onClick={() => setIsCreateTaskOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <CheckSquare className="w-6 h-6 text-green-600 mb-2" />
-                <p className="font-medium text-sm">Create Task</p>
-                <p className="text-xs text-gray-500">Assign new task</p>
-              </button>
-              <button onClick={() => setIsAddIncomeOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Plus className="w-6 h-6 text-green-600 mb-2" />
-                <p className="font-medium text-sm">Add Income</p>
-                <p className="text-xs text-gray-500">Record income</p>
-              </button>
-              <button onClick={() => setIsAddExpenseOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <DollarSign className="w-6 h-6 text-red-600 mb-2" />
-                <p className="font-medium text-sm">Add Expense</p>
-                <p className="text-xs text-gray-500">Record expense</p>
-              </button>
-              <button onClick={() => setIsCreateEventOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                <Calendar className="w-6 h-6 text-purple-600 mb-2" />
-                <p className="font-medium text-sm">Create Event</p>
-                <p className="text-xs text-gray-500">Schedule new event</p>
-              </button>
-            </div>
-          </CardContent>
-        </Card>
+        {/* Quick Actions - Only for Command Staff and above */}
+        {isCommandStaffOrAbove() && (
+          <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Trophy className="w-5 h-5 mr-2 text-blue-600" />
+                Quick Actions
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-3">
+                {canCreateTasks() && (
+                  <button onClick={() => setIsCreateTaskOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <CheckSquare className="w-6 h-6 text-green-600 mb-2" />
+                    <p className="font-medium text-sm">Create Task</p>
+                    <p className="text-xs text-gray-500">Assign new task</p>
+                  </button>
+                )}
+                {canCreateEvents() && (
+                  <button onClick={() => setIsCreateEventOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                    <Calendar className="w-6 h-6 text-purple-600 mb-2" />
+                    <p className="font-medium text-sm">Create Event</p>
+                    <p className="text-xs text-gray-500">Schedule new event</p>
+                  </button>
+                )}
+                {/* Instructor-only actions */}
+                {userProfile?.role === 'instructor' && (
+                  <>
+                    <button onClick={() => setIsAddCadetOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <Users className="w-6 h-6 text-blue-600 mb-2" />
+                      <p className="font-medium text-sm">Add Cadet</p>
+                      <p className="text-xs text-gray-500">Enroll new cadet</p>
+                    </button>
+                    <button onClick={() => setIsAddIncomeOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <Plus className="w-6 h-6 text-green-600 mb-2" />
+                      <p className="font-medium text-sm">Add Income</p>
+                      <p className="text-xs text-gray-500">Record income</p>
+                    </button>
+                    <button onClick={() => setIsAddExpenseOpen(true)} className="p-4 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+                      <DollarSign className="w-6 h-6 text-red-600 mb-2" />
+                      <p className="font-medium text-sm">Add Expense</p>
+                      <p className="text-xs text-gray-500">Record expense</p>
+                    </button>
+                  </>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        )}
       </div>
 
-      {/* Modals */}
-      <AddCadetDialog open={isAddCadetOpen} onOpenChange={setIsAddCadetOpen} newCadet={{
-      first_name: '',
-      last_name: '',
-      email: '',
-      grade: '',
-      rank: '',
-      flight: '',
-      role: 'cadet'
-    }} setNewCadet={() => {}} onSubmit={() => {}} />
+      {/* Modals - Only show for roles that can use them */}
+      {userProfile?.role === 'instructor' && (
+        <>
+          <AddCadetDialog open={isAddCadetOpen} onOpenChange={setIsAddCadetOpen} newCadet={{
+            first_name: '',
+            last_name: '',
+            email: '',
+            grade: '',
+            rank: '',
+            flight: '',
+            role: 'cadet'
+          }} setNewCadet={() => {}} onSubmit={() => {}} />
 
-      <TaskForm open={isCreateTaskOpen} onOpenChange={setIsCreateTaskOpen} mode="create" />
+          <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
 
-      <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
+          <AddExpenseDialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} onSubmit={handleCreateTransaction} />
+        </>
+      )}
 
-      <AddExpenseDialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} onSubmit={handleCreateTransaction} />
+      {canCreateTasks() && (
+        <TaskForm open={isCreateTaskOpen} onOpenChange={setIsCreateTaskOpen} mode="create" />
+      )}
 
-      <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async () => {
-      setIsCreateEventOpen(false);
-    }} />
+      {canCreateEvents() && (
+        <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async () => {
+          setIsCreateEventOpen(false);
+        }} />
+      )}
     </div>;
 };
 export default DashboardOverview;
