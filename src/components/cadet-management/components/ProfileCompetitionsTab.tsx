@@ -86,7 +86,7 @@ export const ProfileCompetitionsTab = ({
               </TableHeader>
               <TableBody>
                 {competitions.map(comp => <TableRow key={comp.id}>
-                    <TableCell className="font-medium py-[2px]">
+                    <TableCell>
                       {comp.competition.name}
                     </TableCell>
                     <TableCell>
