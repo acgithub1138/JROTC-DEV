@@ -124,7 +124,7 @@ const DashboardOverview = () => {
     if (!isCommandStaffOrAbove()) return null;
     
     return (
-      <Card className="hover:shadow-md transition-shadow">
+      <Card className="hover:shadow-md transition-shadow col-span-2">
         <CardContent className="p-6 py-[12px]">
           <div className="space-y-3">
             <div className="flex items-center mb-3">
@@ -166,7 +166,7 @@ const DashboardOverview = () => {
 
   return <div className="p-6 space-y-6">
       {/* Stats Grid with Quick Actions */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;
         return <Card key={stat.title} className="hover:shadow-md transition-shadow">
