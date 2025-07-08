@@ -57,25 +57,22 @@ export const ScoreSheetPage = () => {
     <div className="p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
-          <div className="flex items-center gap-4">
+          <h1 className="text-2xl font-bold">Score Sheets for {competition.name}</h1>
+          <div className="flex flex-col gap-2">
             <Button variant="outline" onClick={handleBack}>
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Competitions
             </Button>
-            <div>
-              <h1 className="text-2xl font-bold">Score Sheets</h1>
-              <p className="text-muted-foreground">{competition.name}</p>
-            </div>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={refetch}
+              disabled={isLoading}
+            >
+              <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
+              Refresh
+            </Button>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={refetch}
-            disabled={isLoading}
-          >
-            <RefreshCw className={`w-4 h-4 ${isLoading ? 'animate-spin' : ''}`} />
-            Refresh
-          </Button>
         </div>
 
         <div className="space-y-6">
