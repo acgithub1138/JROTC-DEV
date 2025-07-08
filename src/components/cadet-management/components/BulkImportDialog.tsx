@@ -18,7 +18,7 @@ import { getGradeColor } from '@/utils/gradeColors';
 interface BulkImportDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onBulkImport: (cadets: NewCadet[]) => Promise<{ success: number; failed: number; errors: string[] }>;
+  onBulkImport: (cadets: NewCadet[], onProgress?: (current: number, total: number) => void) => Promise<{ success: number; failed: number; errors: string[] }>;
 }
 
 interface ParsedCadet extends NewCadet {
@@ -111,9 +111,12 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
 
     setIsImporting(true);
     setStep('import');
-    setProgress(50); // Start at 50% since we're doing bulk operation
+    setProgress(0);
 
-    const results = await onBulkImport(validCadets);
+    const results = await onBulkImport(validCadets, (current, total) => {
+      const progressPercent = Math.round((current / total) * 100);
+      setProgress(progressPercent);
+    });
     
     setImportResults(results);
     setProgress(100);
@@ -421,9 +424,9 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
             <div className="text-center">
               <Users className="w-16 h-16 mx-auto mb-4 text-primary" />
               <h3 className="text-lg font-semibold mb-2">Creating Cadets...</h3>
-              <p className="text-muted-foreground mb-6">
-                Creating user {Math.floor((progress / 100) * validCount) + 1} of {validCount}
-              </p>
+               <p className="text-muted-foreground mb-6">
+                 Creating user {Math.min(Math.floor((progress / 100) * validCount) + 1, validCount)} of {validCount}
+               </p>
               <Progress value={progress} className="w-full max-w-md mx-auto" />
             </div>
           </div>

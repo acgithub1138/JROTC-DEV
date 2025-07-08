@@ -134,41 +134,42 @@ export const useCadetManagement = () => {
     }
   };
 
-  const handleBulkImport = async (cadets: NewCadet[]) => {
+  const handleBulkImport = async (cadets: NewCadet[], onProgress?: (current: number, total: number) => void) => {
     let successCount = 0;
     let failedCount = 0;
     const errors: string[] = [];
 
     try {
-      // Create all cadet invitations in bulk using Promise.all for much better performance
-      const promises = cadets.map(async (cadet) => {
-        const { error } = await supabase.functions.invoke('create-cadet-user', {
-          body: {
-            email: cadet.email,
-            first_name: cadet.first_name,
-            last_name: cadet.last_name,
-            role: cadet.role,
-            grade: cadet.grade || null,
-            rank: cadet.rank || null,
-            flight: cadet.flight || null,
-            school_id: userProfile?.school_id!
-          }
-        });
+      // Process cadets sequentially to track progress
+      for (let i = 0; i < cadets.length; i++) {
+        const cadet = cadets[i];
+        
+        try {
+          const { error } = await supabase.functions.invoke('create-cadet-user', {
+            body: {
+              email: cadet.email,
+              first_name: cadet.first_name,
+              last_name: cadet.last_name,
+              role: cadet.role,
+              grade: cadet.grade || null,
+              rank: cadet.rank || null,
+              flight: cadet.flight || null,
+              school_id: userProfile?.school_id!
+            }
+          });
 
-        if (error) throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
-        return cadet;
-      });
-
-      const results = await Promise.allSettled(promises);
-      
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
+          if (error) throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
           successCount++;
-        } else {
+        } catch (error: any) {
           failedCount++;
-          errors.push(`Failed to create ${result.reason.message}`);
+          errors.push(`Failed to create ${error.message}`);
         }
-      });
+
+        // Update progress
+        if (onProgress) {
+          onProgress(i + 1, cadets.length);
+        }
+      }
 
       if (successCount > 0) {
         toast({
