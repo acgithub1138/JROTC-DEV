@@ -87,35 +87,26 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
         ) : (
           <div className="h-full overflow-y-auto space-y-4">
             {history.map((item) => (
-              <div 
-                key={item.id} 
-                className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
-              >
+              <div key={item.id} className="border rounded-lg p-4">
                 <div className="flex items-center justify-between mb-2">
                   <div className="flex items-center gap-2">
-                    <Badge variant="outline" className="text-xs">
+                    <span className="font-medium text-sm">
+                      {item.changed_by_profile ? 
+                        `${item.changed_by_profile.first_name} ${item.changed_by_profile.last_name}` : 
+                        'System'
+                      }
+                    </span>
+                    <Badge variant="secondary" className="text-xs">
                       {formatFieldName(item.field_name)}
                     </Badge>
-                    {item.changed_by_profile && (
-                      <span className="text-xs text-muted-foreground">
-                        Changed by: {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}
-                      </span>
-                    )}
                   </div>
-                  <span className="text-xs text-muted-foreground">
-                    {format(new Date(item.created_at), 'MM/dd/yyyy HH:mm:ss')}
+                  <span className="text-xs text-gray-500">
+                    {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
                   </span>
                 </div>
-                <div className="text-sm">
-                  <span className="text-muted-foreground">Changed from </span>
-                  <span className="font-medium text-red-600">
-                    "{formatValue(item.old_value)}"
-                  </span>
-                  <span className="text-muted-foreground"> to </span>
-                  <span className="font-medium text-green-600">
-                    "{formatValue(item.new_value)}"
-                  </span>
-                </div>
+                <p className="text-sm text-gray-700">
+                  Changed from <span className="font-medium text-red-600">"{formatValue(item.old_value)}"</span> to <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
+                </p>
               </div>
             ))}
           </div>
