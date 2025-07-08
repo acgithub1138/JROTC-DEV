@@ -91,15 +91,22 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
                 key={item.id} 
                 className="border rounded-lg p-4 hover:bg-muted/50 transition-colors"
               >
-                <div className="flex items-start justify-between mb-2">
-                  <Badge variant="outline" className="text-xs">
-                    {formatFieldName(item.field_name)}
-                  </Badge>
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <Badge variant="outline" className="text-xs">
+                      {formatFieldName(item.field_name)}
+                    </Badge>
+                    {item.changed_by_profile && (
+                      <span className="text-xs text-muted-foreground">
+                        Changed by: {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}
+                      </span>
+                    )}
+                  </div>
                   <span className="text-xs text-muted-foreground">
                     {format(new Date(item.created_at), 'MM/dd/yyyy HH:mm:ss')}
                   </span>
                 </div>
-                <div className="text-sm mb-2">
+                <div className="text-sm">
                   <span className="text-muted-foreground">Changed from </span>
                   <span className="font-medium text-red-600">
                     "{formatValue(item.old_value)}"
@@ -109,11 +116,6 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
                     "{formatValue(item.new_value)}"
                   </span>
                 </div>
-                {item.changed_by_profile && (
-                  <div className="text-xs text-muted-foreground">
-                    Changed by: {item.changed_by_profile.first_name} {item.changed_by_profile.last_name}
-                  </div>
-                )}
               </div>
             ))}
           </div>
