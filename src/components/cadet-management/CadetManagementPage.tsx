@@ -140,7 +140,7 @@ const CadetManagementPage = () => {
 
       <Card>
         <CardHeader>
-          <p className="w-4 h-4 mr-2"> Default password: Sh0wc@se</p>
+          Default password: Sh0wc@se
         </CardHeader>
         <CardContent>
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
