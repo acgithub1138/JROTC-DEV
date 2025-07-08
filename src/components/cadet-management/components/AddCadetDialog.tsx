@@ -28,7 +28,7 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
         <DialogHeader>
           <DialogTitle>Add New Cadet</DialogTitle>
           <DialogDescription>
-            Create a new cadet or command staff member for your school. They will receive an invitation email to set up their account.
+            Create a new cadet for your school.
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={onSubmit} className="space-y-4">
@@ -163,7 +163,7 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
               Cancel
             </Button>
             <Button type="submit">
-              Create Cadet
+              Send Invitation
             </Button>
           </div>
         </form>
