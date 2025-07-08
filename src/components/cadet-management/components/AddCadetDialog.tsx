@@ -163,7 +163,7 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
               Cancel
             </Button>
             <Button type="submit">
-              Send Invitation
+              Create Cadet
             </Button>
           </div>
         </form>
