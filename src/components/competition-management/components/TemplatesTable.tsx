@@ -2,12 +2,15 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Copy, Eye, Globe } from 'lucide-react';
+import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { CompetitionTemplate } from '../types';
+import { SortConfig } from '@/components/ui/sortable-table';
 
 interface TemplatesTableProps {
   templates: CompetitionTemplate[];
   isLoading: boolean;
+  sortConfig?: SortConfig | null;
+  onSort?: (key: string) => void;
   onEdit?: (template: CompetitionTemplate) => void;
   onDelete?: (id: string) => void;
   onCopy?: (id: string) => void;
@@ -19,6 +22,8 @@ interface TemplatesTableProps {
 export const TemplatesTable: React.FC<TemplatesTableProps> = ({
   templates,
   isLoading,
+  sortConfig,
+  onSort,
   onEdit,
   onDelete,
   onCopy,
@@ -26,6 +31,29 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
   canEditTemplate,
   canCopyTemplate
 }) => {
+  const getSortIcon = (columnKey: string) => {
+    if (!sortConfig || sortConfig.key !== columnKey) {
+      return <ArrowUpDown className="w-4 h-4" />;
+    }
+    return sortConfig.direction === 'asc' 
+      ? <ArrowUp className="w-4 h-4" />
+      : <ArrowDown className="w-4 h-4" />;
+  };
+
+  const SortableHeader = ({ children, sortKey }: { children: React.ReactNode; sortKey: string }) => (
+    <TableHead>
+      <Button
+        variant="ghost"
+        className="h-auto p-0 font-semibold hover:bg-transparent"
+        onClick={() => onSort?.(sortKey)}
+      >
+        <div className="flex items-center gap-2">
+          {children}
+          {getSortIcon(sortKey)}
+        </div>
+      </Button>
+    </TableHead>
+  );
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -49,11 +77,11 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Template Name</TableHead>
-            <TableHead>Event Type</TableHead>
-            <TableHead>JROTC Program</TableHead>
+            <SortableHeader sortKey="template_name">Template Name</SortableHeader>
+            <SortableHeader sortKey="event">Event Type</SortableHeader>
+            <SortableHeader sortKey="jrotc_program">JROTC Program</SortableHeader>
             <TableHead>Source</TableHead>
-            <TableHead>Created</TableHead>
+            <SortableHeader sortKey="created_at">Created</SortableHeader>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
         </TableHeader>

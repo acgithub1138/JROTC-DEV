@@ -1,8 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Plus, Search } from 'lucide-react';
+import { useSortableTable } from '@/hooks/useSortableTable';
 import { TemplatesTable } from '../components/TemplatesTable';
 import { TemplateDialog } from '../components/TemplateDialog';
 import { TemplatePreviewDialog } from '../components/TemplatePreviewDialog';
@@ -22,6 +24,8 @@ export const TemplatesTab = () => {
     templates,
     isLoading,
     showOnlyMyTemplates,
+    searchQuery,
+    setSearchQuery,
     createTemplate,
     updateTemplate,
     deleteTemplate,
@@ -30,6 +34,11 @@ export const TemplatesTab = () => {
     canEditTemplate,
     canCopyTemplate
   } = useCompetitionTemplates();
+
+  const { sortedData: sortedTemplates, sortConfig, handleSort } = useSortableTable({
+    data: templates,
+    defaultSort: { key: 'template_name', direction: 'asc' }
+  });
 
   const canManageTemplates = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
 
@@ -74,9 +83,23 @@ export const TemplatesTab = () => {
         </div>
       </div>
 
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search by template name, event type, or JROTC program..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-10"
+          />
+        </div>
+      </div>
+
       <TemplatesTable
-        templates={templates as any}
+        templates={sortedTemplates as any}
         isLoading={isLoading}
+        sortConfig={sortConfig}
+        onSort={handleSort}
         onEdit={canManageTemplates ? ((t: any) => setEditingTemplate(t)) : undefined}
         onDelete={canManageTemplates ? deleteTemplate : undefined}
         onCopy={handleCopy}

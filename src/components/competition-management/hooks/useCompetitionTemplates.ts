@@ -13,6 +13,7 @@ export const useCompetitionTemplates = () => {
   const [templates, setTemplates] = useState<CompetitionTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [showOnlyMyTemplates, setShowOnlyMyTemplates] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   const fetchTemplates = async (myTemplatesOnly = false) => {
     try {
@@ -170,14 +171,29 @@ export const useCompetitionTemplates = () => {
     return template.school_id !== userProfile?.school_id || template.is_global;
   };
 
+  const filteredTemplates = templates.filter(template => {
+    if (!searchQuery) return true;
+    
+    const query = searchQuery.toLowerCase();
+    const templateName = template.template_name.toLowerCase();
+    const eventType = template.event.toLowerCase();
+    const jrotcProgram = template.jrotc_program.toLowerCase();
+    
+    return templateName.includes(query) || 
+           eventType.includes(query) || 
+           jrotcProgram.includes(query);
+  });
+
   useEffect(() => {
     fetchTemplates(showOnlyMyTemplates);
   }, []);
 
   return {
-    templates,
+    templates: filteredTemplates,
     isLoading,
     showOnlyMyTemplates,
+    searchQuery,
+    setSearchQuery,
     createTemplate,
     updateTemplate,
     deleteTemplate,
