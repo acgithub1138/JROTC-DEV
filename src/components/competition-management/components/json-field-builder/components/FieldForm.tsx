@@ -95,17 +95,6 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           </div>
         )}
 
-        {currentField.type === 'penalty' && currentField.penaltyType === 'checkbox_list' && (
-          <div className="space-y-1 md:col-span-2">
-            <Label htmlFor="checkboxValues">Checkbox List Values (comma-separated)</Label>
-            <Input 
-              id="checkboxValues" 
-              value={dropdownValues} 
-              onChange={e => onDropdownValuesChange(e.target.value)} 
-              placeholder="e.g., Option 1, Option 2, Option 3" 
-            />
-          </div>
-        )}
 
         {currentField.type === 'number' && (
           <div className="space-y-1">
@@ -123,14 +112,13 @@ export const FieldForm: React.FC<FieldFormProps> = ({
           <>
             <div className="space-y-1">
               <Label htmlFor="penaltyType">Penalty Type</Label>
-              <Select value={currentField.penaltyType} onValueChange={value => onFieldUpdate('penaltyType', value as 'points' | 'minor_major' | 'checkbox_list')}>
+              <Select value={currentField.penaltyType} onValueChange={value => onFieldUpdate('penaltyType', value as 'points' | 'minor_major')}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select penalty type" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="points">Points</SelectItem>
-                  <SelectItem value="minor_major">Minor/Major</SelectItem>
-                  <SelectItem value="checkbox_list">Checkbox List</SelectItem>
+                  <SelectItem value="minor_major">Minor (-20)/Major (-50)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

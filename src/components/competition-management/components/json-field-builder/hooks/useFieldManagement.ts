@@ -113,7 +113,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
         penaltyType: currentField.penaltyType,
         pointValue: currentField.pointValue
       }),
-      ...((currentField.type === 'dropdown' || (currentField.type === 'penalty' && currentField.penaltyType === 'checkbox_list')) && {
+      ...(currentField.type === 'dropdown' && {
         values: dropdownValues.split(',').map(v => v.trim()).filter(v => v)
       })
     };

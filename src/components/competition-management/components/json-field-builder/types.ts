@@ -10,7 +10,7 @@ export interface JsonField {
   pauseField: boolean; // For pause field formatting
   penaltyValue?: number; // Specific penalty amount
   // Penalty-specific fields
-  penaltyType?: 'points' | 'minor_major' | 'checkbox_list';
+  penaltyType?: 'points' | 'minor_major';
   pointValue?: number; // For points-based penalties
   // Scoring scale specific
   scaleRanges?: {

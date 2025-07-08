@@ -87,46 +87,7 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
           </div>;
       case 'penalty':
-        // Handle checkbox_list penalty type
-        if (field.penaltyType === 'checkbox_list') {
-        const selectedValues = Array.isArray(value) ? value : [];
-        const handleCheckboxChange = (option: string, checked: boolean) => {
-          let newValues;
-          if (checked) {
-            newValues = [...selectedValues, option];
-          } else {
-            newValues = selectedValues.filter(v => v !== option);
-          }
-          onChange(field.id, newValues);
-        };
-        
-        return (
-          <div className="py-2 border-b space-y-2">
-            <div className="space-y-3">
-              <Label className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
-                {field.name}
-              </Label>
-              <div className="grid grid-cols-2 gap-3">
-                {field.values?.map(option => (
-                  <div key={option} className="flex items-center space-x-2">
-                    <Checkbox
-                      id={`${field.id}-${option}`}
-                      checked={selectedValues.includes(option)}
-                      onCheckedChange={(checked) => handleCheckboxChange(option, checked as boolean)}
-                    />
-                    <Label htmlFor={`${field.id}-${option}`} className="text-sm font-normal">
-                      {option}
-                    </Label>
-                  </div>
-                ))}
-              </div>
-            </div>
-            {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
-          </div>
-        );
-        }
-        
-        // Handle other penalty types
+        // Handle penalty types
         // Only show penalty fields for Judge 1
         if (judgeNumber !== 'Judge 1') return null;
         return <div className="border-b space-y-2 py-[4px]">
