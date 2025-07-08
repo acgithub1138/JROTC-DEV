@@ -104,10 +104,7 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                   <TableHead>Item</TableHead>
                   <TableHead>Category</TableHead>
                   <TableHead>Serial Number</TableHead>
-                  <TableHead>Condition</TableHead>
                   <TableHead>Status</TableHead>
-                  <TableHead>Checked Out</TableHead>
-                  <TableHead>Expected Return</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -127,23 +124,10 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                       <TableCell className="font-mono text-xs">
                         {item.serial_number || '-'}
                       </TableCell>
-                      <TableCell>{item.condition || '-'}</TableCell>
                       <TableCell>
                         <Badge className={getStatusColor(item.status)}>
                           {item.status}
                         </Badge>
-                      </TableCell>
-                      <TableCell>
-                        {latestCheckout?.checked_out_at ? 
-                          format(new Date(latestCheckout.checked_out_at), 'MMM d, yyyy') : 
-                          '-'
-                        }
-                      </TableCell>
-                      <TableCell>
-                        {latestCheckout?.expected_return_date ? 
-                          format(new Date(latestCheckout.expected_return_date), 'MMM d, yyyy') : 
-                          '-'
-                        }
                       </TableCell>
                     </TableRow>
                   );
