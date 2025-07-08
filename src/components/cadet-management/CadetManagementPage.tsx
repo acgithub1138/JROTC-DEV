@@ -8,7 +8,6 @@ import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
-import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
@@ -43,9 +42,7 @@ const CadetManagementPage = () => {
     handleBulkDeactivate
   } = useCadetMassOperations();
   const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
-  const [viewingProfile, setViewingProfile] = useState<Profile | null>(null);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
-  const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [bulkImportDialogOpen, setBulkImportDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
@@ -60,11 +57,6 @@ const CadetManagementPage = () => {
   const handleEditProfile = (profile: Profile) => {
     setEditingProfile(profile);
     setEditDialogOpen(true);
-  };
-
-  const handleViewProfile = (profile: Profile) => {
-    setViewingProfile(profile);
-    setViewDialogOpen(true);
   };
   const handleSaveProfileWrapper = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -139,12 +131,13 @@ const CadetManagementPage = () => {
       <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        <CardHeader>Default password: Sh0wc@se
-Users will be asked to reset their password when they first log in.</CardHeader>
+        <CardHeader>
+          <p className="w-4 h-4 mr-2"> Default password: Sh0wc@se</p>
+        </CardHeader>
         <CardContent>
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-          <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
+          <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onToggleStatus={profile => {
           setProfileToToggle(profile);
           setStatusDialogOpen(true);
         }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onUpdateGrade={() => setGradeDialogOpen(true)} onUpdateRank={() => setRankDialogOpen(true)} onUpdateFlight={() => setFlightDialogOpen(true)} onUpdateRole={() => setRoleDialogOpen(true)} onDeactivate={() => setDeactivateDialogOpen(true)} />
@@ -158,12 +151,6 @@ Users will be asked to reset their password when they first log in.</CardHeader>
       </Card>
 
       <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadet} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
-
-      <ViewCadetDialog 
-        open={viewDialogOpen} 
-        onOpenChange={setViewDialogOpen} 
-        profile={viewingProfile} 
-      />
     </div>;
 };
 export default CadetManagementPage;
