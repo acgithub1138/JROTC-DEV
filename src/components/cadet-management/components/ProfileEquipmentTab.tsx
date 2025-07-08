@@ -109,16 +109,16 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                 {equipment.map((item) => {
                   return (
                     <TableRow key={item.id}>
-                      <TableCell className="font-mono text-xs">
+                      <TableCell>
                         {item.item_id || '-'}
                       </TableCell>
                       <TableCell>{item.category || '-'}</TableCell>
                       <TableCell>{item.sub_category || '-'}</TableCell>
-                      <TableCell className="font-medium">
+                      <TableCell>
                         <div>
-                          <p className="font-medium">{item.item}</p>
+                          <p>{item.item}</p>
                           {item.description && (
-                            <p className="text-xs text-muted-foreground">{item.description}</p>
+                            <p className="text-muted-foreground">{item.description}</p>
                           )}
                         </div>
                       </TableCell>
