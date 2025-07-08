@@ -6,7 +6,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
   const [editingFieldId, setEditingFieldId] = useState<string | null>(null);
   const [currentField, setCurrentField] = useState<Partial<JsonField>>({
     name: '',
-    type: 'text',
+    type: 'number',
     textType: 'short',
     values: [],
     maxValue: 100,
@@ -85,7 +85,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     setEditingFieldId(null);
     setCurrentField({
       name: '',
-      type: 'text',
+      type: 'number',
       textType: 'short',
       values: [],
       maxValue: 100,
@@ -101,7 +101,7 @@ export const useFieldManagement = (value: Record<string, any>, onChange: (value:
     const newField: JsonField = {
       id: editingFieldId || Date.now().toString(),
       name: currentField.name,
-      type: currentField.type || 'text',
+      type: currentField.type || 'number',
       textType: currentField.textType || 'short',
       fieldInfo: currentField.fieldInfo,
       maxValue: currentField.maxValue || 100,
