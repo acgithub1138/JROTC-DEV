@@ -65,7 +65,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="font-mono text-sm py-2">
           <button
             onClick={() => onTaskSelect(task)}
-            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold"
           >
             {task.task_number || 'N/A'}
           </button>
