@@ -1,38 +1,33 @@
-
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator 
-} from '@/components/ui/dropdown-menu';
-import { 
-  Sheet, 
-  SheetContent, 
-  SheetHeader, 
-  SheetTitle, 
-  SheetTrigger 
-} from '@/components/ui/sheet';
+import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
 import { User, LogOut, Settings, Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
-
 interface HeaderProps {
   activeModule: string;
   onModuleChange?: (module: string) => void;
   isMobile?: boolean;
 }
-
-export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, isMobile }) => {
-  const { signOut, userProfile } = useAuth();
+export const Header: React.FC<HeaderProps> = ({
+  activeModule,
+  onModuleChange,
+  isMobile
+}) => {
+  const {
+    signOut,
+    userProfile
+  } = useAuth();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const { menuItems } = useSidebarPreferences();
-
+  const {
+    menuItems
+  } = useSidebarPreferences();
   const getModuleTitle = (module: string) => {
-    const titles: { [key: string]: string } = {
+    const titles: {
+      [key: string]: string;
+    } = {
       dashboard: 'Dashboard Overview',
       cadets: 'Cadet Management',
       teams: 'Team Management',
@@ -45,29 +40,31 @@ export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, is
       calendar: 'Calendar & Events',
       documents: 'Document Management',
       email: 'Email Management',
-      settings: 'System Settings',
+      settings: 'System Settings'
     };
     return titles[module] || module.charAt(0).toUpperCase() + module.slice(1);
   };
-
   const getRoleColor = (role: string) => {
     switch (role) {
-      case 'admin': return 'bg-red-100 text-red-800';
-      case 'instructor': return 'bg-blue-100 text-blue-800';
-      case 'command_staff': return 'bg-green-100 text-green-800';
-      case 'cadet': return 'bg-gray-100 text-gray-800';
-      case 'parent': return 'bg-purple-100 text-purple-800';
-      default: return 'bg-gray-100 text-gray-800';
+      case 'admin':
+        return 'bg-red-100 text-red-800';
+      case 'instructor':
+        return 'bg-blue-100 text-blue-800';
+      case 'command_staff':
+        return 'bg-green-100 text-green-800';
+      case 'cadet':
+        return 'bg-gray-100 text-gray-800';
+      case 'parent':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
     }
   };
-
-  return (
-    <div className="bg-white border-b border-gray-200 px-6 py-4">
+  return <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
           {/* Mobile Menu Button */}
-          {isMobile && onModuleChange && (
-            <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          {isMobile && onModuleChange && <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="w-5 h-5" />
@@ -82,28 +79,18 @@ export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, is
                   </SheetTitle>
                 </SheetHeader>
                 <div className="mt-6 space-y-2">
-                  {menuItems.map((item) => (
-                    <Button
-                      key={item.id}
-                      variant={activeModule === item.id ? 'secondary' : 'ghost'}
-                      className="w-full justify-start"
-                      onClick={() => {
-                        onModuleChange(item.id);
-                        setMobileMenuOpen(false);
-                      }}
-                    >
+                  {menuItems.map(item => <Button key={item.id} variant={activeModule === item.id ? 'secondary' : 'ghost'} className="w-full justify-start" onClick={() => {
+                onModuleChange(item.id);
+                setMobileMenuOpen(false);
+              }}>
                       {item.label}
-                    </Button>
-                  ))}
+                    </Button>)}
                 </div>
               </SheetContent>
-            </Sheet>
-          )}
+            </Sheet>}
           
           <div>
-            {userProfile?.schools && (
-              <p className="text-sm text-gray-600">{userProfile.schools.name}</p>
-            )}
+            {userProfile?.schools && <p className="text-sm text-gray-600">{userProfile.schools.name}</p>}
           </div>
         </div>
         
@@ -124,11 +111,8 @@ export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, is
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem>
-                <Settings className="w-4 h-4 mr-2" />
-                Profile Settings
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
+              
+              
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-2" />
                 Sign Out
@@ -137,6 +121,5 @@ export const Header: React.FC<HeaderProps> = ({ activeModule, onModuleChange, is
           </DropdownMenu>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
