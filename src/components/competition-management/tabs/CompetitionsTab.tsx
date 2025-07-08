@@ -11,9 +11,7 @@ import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import type { Database } from '@/integrations/supabase/types';
-
 type Competition = Database['public']['Tables']['competitions']['Row'];
-
 export const CompetitionsTab = () => {
   const navigate = useNavigate();
   const [showAddDialog, setShowAddDialog] = useState(false);
@@ -21,7 +19,6 @@ export const CompetitionsTab = () => {
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
-  
   const {
     competitions,
     isLoading,
@@ -29,27 +26,29 @@ export const CompetitionsTab = () => {
     updateCompetition,
     deleteCompetition
   } = useCompetitions();
-
-  const { createEvent } = useCompetitionEvents(selectedCompetition?.id);
+  const {
+    createEvent
+  } = useCompetitionEvents(selectedCompetition?.id);
 
   // Filter competitions based on search term
   const filteredCompetitions = useMemo(() => {
     if (!searchTerm) return competitions;
-    
     const searchLower = searchTerm.toLowerCase();
-    return competitions.filter(comp => 
-      comp.name.toLowerCase().includes(searchLower) ||
-      comp.location?.toLowerCase().includes(searchLower) ||
-      new Date(comp.competition_date).toLocaleDateString().includes(searchLower)
-    );
+    return competitions.filter(comp => comp.name.toLowerCase().includes(searchLower) || comp.location?.toLowerCase().includes(searchLower) || new Date(comp.competition_date).toLocaleDateString().includes(searchLower));
   }, [competitions, searchTerm]);
 
   // Add sorting functionality
-  const { sortedData, sortConfig, handleSort } = useSortableTable({
+  const {
+    sortedData,
+    sortConfig,
+    handleSort
+  } = useSortableTable({
     data: filteredCompetitions,
-    defaultSort: { key: 'competition_date', direction: 'desc' }
+    defaultSort: {
+      key: 'competition_date',
+      direction: 'desc'
+    }
   });
-
   const handleSubmit = async (data: any) => {
     if (editingCompetition) {
       await updateCompetition(editingCompetition.id, data);
@@ -59,16 +58,13 @@ export const CompetitionsTab = () => {
       setShowAddDialog(false);
     }
   };
-
   const handleAddEvent = (competition: Competition) => {
     setSelectedCompetition(competition);
     setShowAddEventDialog(true);
   };
-
   const handleViewScoreSheets = (competition: Competition) => {
     navigate(`/competitions/score-sheets/${competition.id}`);
   };
-
   const handleEventCreated = async (eventData: any) => {
     try {
       await createEvent(eventData);
@@ -79,32 +75,19 @@ export const CompetitionsTab = () => {
       // Keep dialog open on error so user can retry
     }
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-bold">Competitions</h2>
-        <p className="text-muted-foreground">
-          Manage your competition entries and results
-        </p>
+        
+        
       </div>
 
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-4">
           <div className="relative flex-1 max-w-md">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input
-              placeholder="Search competitions by name, date, or location..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10"
-            />
+            <Input placeholder="Search competitions by name, date, or location..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
           </div>
-          <Button
-            variant="outline"
-            onClick={() => handleSort('competition_date')}
-            className="flex items-center gap-2"
-          >
+          <Button variant="outline" onClick={() => handleSort('competition_date')} className="flex items-center gap-2">
             <ArrowUpDown className="w-4 h-4" />
             Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
           </Button>
@@ -115,35 +98,15 @@ export const CompetitionsTab = () => {
         </Button>
       </div>
 
-      <BasicCompetitionTable
-        competitions={sortedData}
-        isLoading={isLoading}
-        onEdit={setEditingCompetition}
-        onDelete={deleteCompetition}
-        onAddEvent={handleAddEvent}
-        onViewScoreSheets={handleViewScoreSheets}
-      />
+      <BasicCompetitionTable competitions={sortedData} isLoading={isLoading} onEdit={setEditingCompetition} onDelete={deleteCompetition} onAddEvent={handleAddEvent} onViewScoreSheets={handleViewScoreSheets} />
 
-      <CompetitionDialog
-        open={showAddDialog || !!editingCompetition}
-        onOpenChange={(open) => {
-          if (!open) {
-            setShowAddDialog(false);
-            setEditingCompetition(null);
-          }
-        }}
-        competition={editingCompetition as any}
-        onSubmit={handleSubmit}
-      />
+      <CompetitionDialog open={showAddDialog || !!editingCompetition} onOpenChange={open => {
+      if (!open) {
+        setShowAddDialog(false);
+        setEditingCompetition(null);
+      }
+    }} competition={editingCompetition as any} onSubmit={handleSubmit} />
 
-      {selectedCompetition && (
-        <AddEventDialog
-          open={showAddEventDialog}
-          onOpenChange={setShowAddEventDialog}
-          competitionId={selectedCompetition.id}
-          onEventCreated={handleEventCreated}
-        />
-      )}
-    </div>
-  );
+      {selectedCompetition && <AddEventDialog open={showAddEventDialog} onOpenChange={setShowAddEventDialog} competitionId={selectedCompetition.id} onEventCreated={handleEventCreated} />}
+    </div>;
 };
