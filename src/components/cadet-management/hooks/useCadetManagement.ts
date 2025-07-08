@@ -134,41 +134,90 @@ export const useCadetManagement = () => {
     }
   };
 
-  const handleBulkImport = async (cadets: NewCadet[]) => {
+  const handleBulkImport = async (cadets: NewCadet[], onProgress?: (current: number, total: number, currentBatch: number, totalBatches: number) => void) => {
     let successCount = 0;
     let failedCount = 0;
     const errors: string[] = [];
+    const BATCH_SIZE = 5; // Process 5 cadets at a time to respect rate limits
+    const BATCH_DELAY = 2000; // 2 second delay between batches
+
+    const batches = [];
+    for (let i = 0; i < cadets.length; i += BATCH_SIZE) {
+      batches.push(cadets.slice(i, i + BATCH_SIZE));
+    }
+
+    const sleep = (ms: number) => new Promise(resolve => setTimeout(resolve, ms));
+
+    const processCadetWithRetry = async (cadet: NewCadet, maxRetries = 3): Promise<{ success: boolean; error?: string }> => {
+      for (let attempt = 1; attempt <= maxRetries; attempt++) {
+        try {
+          const { error } = await supabase.functions.invoke('create-cadet-user', {
+            body: {
+              email: cadet.email,
+              first_name: cadet.first_name,
+              last_name: cadet.last_name,
+              role: cadet.role,
+              grade: cadet.grade || null,
+              rank: cadet.rank || null,
+              flight: cadet.flight || null,
+              school_id: userProfile?.school_id!
+            }
+          });
+
+          if (error) {
+            // Check if it's a rate limit error
+            if (error.message?.includes('rate limit') || error.message?.includes('429')) {
+              if (attempt < maxRetries) {
+                await sleep(Math.pow(2, attempt) * 1000); // Exponential backoff
+                continue;
+              }
+            }
+            throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
+          }
+          
+          return { success: true };
+        } catch (error: any) {
+          if (attempt === maxRetries) {
+            return { success: false, error: error.message };
+          }
+          // Wait before retry
+          await sleep(Math.pow(2, attempt) * 1000);
+        }
+      }
+      return { success: false, error: 'Max retries exceeded' };
+    };
 
     try {
-      // Create all cadet invitations in bulk using Promise.all for much better performance
-      const promises = cadets.map(async (cadet) => {
-        const { error } = await supabase.functions.invoke('create-cadet-user', {
-          body: {
-            email: cadet.email,
-            first_name: cadet.first_name,
-            last_name: cadet.last_name,
-            role: cadet.role,
-            grade: cadet.grade || null,
-            rank: cadet.rank || null,
-            flight: cadet.flight || null,
-            school_id: userProfile?.school_id!
+      for (let batchIndex = 0; batchIndex < batches.length; batchIndex++) {
+        const batch = batches[batchIndex];
+        
+        // Process current batch
+        const batchPromises = batch.map(cadet => processCadetWithRetry(cadet));
+        const batchResults = await Promise.allSettled(batchPromises);
+        
+        // Process results
+        batchResults.forEach((result, index) => {
+          if (result.status === 'fulfilled' && result.value.success) {
+            successCount++;
+          } else {
+            failedCount++;
+            const errorMsg = result.status === 'fulfilled' 
+              ? result.value.error 
+              : `Failed to create ${batch[index].first_name} ${batch[index].last_name}`;
+            if (errorMsg) errors.push(errorMsg);
           }
         });
 
-        if (error) throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
-        return cadet;
-      });
+        // Update progress
+        const currentProcessed = (batchIndex + 1) * BATCH_SIZE;
+        const totalProcessed = Math.min(currentProcessed, cadets.length);
+        onProgress?.(totalProcessed, cadets.length, batchIndex + 1, batches.length);
 
-      const results = await Promise.allSettled(promises);
-      
-      results.forEach((result, index) => {
-        if (result.status === 'fulfilled') {
-          successCount++;
-        } else {
-          failedCount++;
-          errors.push(`Failed to create ${result.reason.message}`);
+        // Add delay between batches (except for the last batch)
+        if (batchIndex < batches.length - 1) {
+          await sleep(BATCH_DELAY);
         }
-      });
+      }
 
       if (successCount > 0) {
         toast({
