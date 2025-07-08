@@ -133,27 +133,27 @@ const DashboardOverview = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {canCreateTasks() && (
-                <button onClick={() => setIsCreateTaskOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <CheckSquare className="w-4 h-4 text-green-600 mb-1" />
-                  <p className="font-medium text-[10px]">Create Task</p>
+                <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
+                  <p className="font-medium text-sm">Create Task</p>
                 </button>
               )}
               {canCreateEvents() && (
-                <button onClick={() => setIsCreateEventOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                  <Calendar className="w-4 h-4 text-purple-600 mb-1" />
-                  <p className="font-medium text-[10px]">Create Event</p>
+                <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <Calendar className="w-4 h-4 text-purple-600 mr-2" />
+                  <p className="font-medium text-sm">Create Event</p>
                 </button>
               )}
               {/* Instructor-only actions */}
               {userProfile?.role === 'instructor' && (
                 <>
-                  <button onClick={() => setIsAddCadetOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Users className="w-4 h-4 text-blue-600 mb-1" />
-                    <p className="font-medium text-[10px]">Add Cadet</p>
+                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Users className="w-4 h-4 text-blue-600 mr-2" />
+                    <p className="font-medium text-sm">Add Cadet</p>
                   </button>
-                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-2 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
-                    <Plus className="w-4 h-4 text-green-600 mb-1" />
-                    <p className="font-medium text-[10px]">Add Income</p>
+                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Plus className="w-4 h-4 text-green-600 mr-2" />
+                    <p className="font-medium text-sm">Add Income</p>
                   </button>
                 </>
               )}
