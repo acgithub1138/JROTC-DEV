@@ -12,6 +12,7 @@ interface ProfileEquipmentTabProps {
 
 interface EquipmentItem {
   id: string;
+  item_id: string | null;
   item: string;
   description: string | null;
   category: string | null;
@@ -32,6 +33,7 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
         .from('inventory_items')
         .select(`
           id,
+          item_id,
           item,
           description,
           category,
@@ -108,7 +110,7 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                   return (
                     <TableRow key={item.id}>
                       <TableCell className="font-mono text-xs">
-                        {item.id}
+                        {item.item_id || '-'}
                       </TableCell>
                       <TableCell>{item.category || '-'}</TableCell>
                       <TableCell>{item.sub_category || '-'}</TableCell>
