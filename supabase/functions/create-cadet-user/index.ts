@@ -42,11 +42,14 @@ serve(async (req) => {
       school_id 
     }: CreateCadetRequest = await req.json()
 
-    console.log('Inviting user:', email, 'with role:', role)
+    console.log('Creating user:', email, 'with role:', role)
 
-    // Send invitation email using admin client
-    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.inviteUserByEmail(email, {
-      data: {
+    // Create user directly without email verification
+    const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
+      email,
+      password: Math.random().toString(36).slice(-8) + Math.random().toString(36).slice(-8), // Generate random password
+      email_confirm: true, // Skip email verification
+      user_metadata: {
         first_name,
         last_name,
         role,
@@ -59,7 +62,7 @@ serve(async (req) => {
       throw authError
     }
 
-    console.log('Invitation sent to:', email, 'user id:', authUser.user?.id, 'with role:', role)
+    console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', role)
 
     // Update the profile that will be automatically created by the trigger
     // Note: We need to wait a moment for the trigger to create the profile
@@ -85,7 +88,7 @@ serve(async (req) => {
       JSON.stringify({ 
         success: true, 
         user_id: authUser.user!.id,
-        email_sent: true,
+        email_sent: false,
         role: role
       }),
       {
