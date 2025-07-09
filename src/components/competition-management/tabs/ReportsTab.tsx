@@ -57,12 +57,12 @@ export const ReportsTab = () => {
   // Get original criteria before mapping for the advanced widget
   const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
   
-  // Store original criteria when they are first loaded (before mapping is applied)
+  // Store original criteria when they are first loaded
   useEffect(() => {
-    if (scoringCriteria.length > 0 && criteriaMapping.length === 0) {
+    if (scoringCriteria.length > 0) {
       setOriginalCriteria(scoringCriteria);
     }
-  }, [scoringCriteria, criteriaMapping]);
+  }, [scoringCriteria]);
 
   // Auto-select all criteria when scoringCriteria changes (new event selected)
   useEffect(() => {
