@@ -55,6 +55,11 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
         // Allow empty selections (don't default back to "All")
         onCompetitionSelect(newSelections);
       } else {
+        // Check if adding this competition would exceed the limit of 6
+        if (selectedCompetitions.length >= 6) {
+          return; // Don't allow more than 6 selections
+        }
+        
         const newSelections = [...selectedCompetitions, competitionId];
         // If we've selected all competitions, switch to "All" mode
         if (newSelections.length === availableCompetitions.length) {
@@ -138,7 +143,18 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                         <Checkbox
                           id="select-all-competitions"
                           checked={isAllSelected}
-                          onCheckedChange={() => isAllSelected ? onCompetitionSelect([]) : handleSelectAll()}
+                          onCheckedChange={() => {
+                            if (isAllSelected) {
+                              onCompetitionSelect([]);
+                            } else {
+                              // Select first 6 competitions ordered by date descending
+                              const sortedCompetitions = [...availableCompetitions]
+                                .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime())
+                                .slice(0, 6)
+                                .map(comp => comp.id);
+                              onCompetitionSelect(sortedCompetitions);
+                            }
+                          }}
                         />
                         <Label htmlFor="select-all-competitions" className="text-sm whitespace-nowrap cursor-pointer">
                           Select All
@@ -164,6 +180,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                                 <Checkbox
                                   checked={isAllSelected || isSelected}
                                   onCheckedChange={() => handleCompetitionToggle(comp.id)}
+                                  disabled={!isSelected && selectedCompetitions !== null && selectedCompetitions.length >= 6}
                                 />
                                 <span 
                                   className="text-sm cursor-pointer flex-1"

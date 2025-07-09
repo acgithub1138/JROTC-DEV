@@ -80,6 +80,15 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       return;
     }
 
+    // If no competitions are selected (empty array), don't fetch any data
+    if (selectedCompetitions !== null && selectedCompetitions.length === 0) {
+      console.log('No competitions selected, clearing data');
+      setReportData([]);
+      setScoringCriteria([]);
+      setIsLoading(false);
+      return;
+    }
+
     try {
       setIsLoading(true);
       console.log('Fetching report data for event:', selectedEvent);

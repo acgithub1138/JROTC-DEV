@@ -15,6 +15,15 @@ export const ReportsTab = () => {
   const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
     setVisibleCriteria([]); // Reset visible criteria when event changes
+    
+    // Auto-select first 6 competitions ordered by date descending when event is selected
+    if (event && availableCompetitions.length > 0) {
+      const sortedCompetitions = [...availableCompetitions]
+        .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime())
+        .slice(0, 6)
+        .map(comp => comp.id);
+      setSelectedCompetitions(sortedCompetitions);
+    }
   };
 
   // Auto-select all criteria when scoringCriteria changes (new event selected)
