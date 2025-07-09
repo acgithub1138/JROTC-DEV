@@ -198,12 +198,15 @@ const DashboardOverview = () => {
       })}
       </div>
 
+      {/* Quick Actions Widget for Command Staff only - positioned at top left */}
+      {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
+
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* Left Column: My Tasks and Quick Actions */}
+        {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
           <MyTasksWidget />
-          {/* Quick Actions Widget for Command Staff */}
-          {renderQuickActionsWidget()}
+          {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
+          {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
         {/* Right Column: Upcoming Events */}
