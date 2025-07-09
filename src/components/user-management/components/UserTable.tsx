@@ -48,7 +48,7 @@ export const UserTable = ({
             />
           </TableHead>
           <TableHead>Name</TableHead>
-          <TableHead>Email</TableHead>
+          
           <TableHead>Role</TableHead>
           <TableHead>School</TableHead>
           <TableHead>Created</TableHead>
@@ -70,7 +70,7 @@ export const UserTable = ({
             <TableCell className="font-medium py-2">
               {user.first_name} {user.last_name}
             </TableCell>
-            <TableCell className="py-2">{user.email}</TableCell>
+            
             <TableCell className="py-2">
               <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
                 {getRoleIcon(user.role)}
