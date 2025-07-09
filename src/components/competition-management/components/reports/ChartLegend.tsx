@@ -61,7 +61,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
       <CardContent>
         
         {/* Individual Criteria Checkboxes */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 gap-3">
         {[...scoringCriteria]
           .sort((a, b) => {
             // Extract number from beginning of criteria strings
