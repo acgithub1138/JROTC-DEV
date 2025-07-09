@@ -3,14 +3,20 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { TableSelector } from './components/TableSelector';
 import { FieldSelector } from './components/FieldSelector';
 import { ReportViewer } from './components/ReportViewer';
+import { ChartConfig } from './components/ChartConfig';
+import { ChartViewer } from './components/ChartViewer';
 import { Button } from '@/components/ui/button';
-import { FileText, Download } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { FileText, Download, BarChart3, Table2 } from 'lucide-react';
 
 export const ReportsPage: React.FC = () => {
   const [selectedTable, setSelectedTable] = useState<string>('');
   const [selectedFields, setSelectedFields] = useState<string[]>([]);
   const [reportData, setReportData] = useState<any[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
+  const [chartType, setChartType] = useState<string>('bar');
+  const [xField, setXField] = useState<string>('');
+  const [yField, setYField] = useState<string>('');
 
   const handleGenerateReport = async () => {
     if (!selectedTable || selectedFields.length === 0) return;
@@ -24,6 +30,8 @@ export const ReportsPage: React.FC = () => {
     setSelectedTable(table);
     setSelectedFields([]);
     setReportData([]);
+    setXField('');
+    setYField('');
   };
 
   return (
@@ -37,7 +45,7 @@ export const ReportsPage: React.FC = () => {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
         {/* Table Selection */}
         <Card>
           <CardHeader>
@@ -74,6 +82,17 @@ export const ReportsPage: React.FC = () => {
           </CardContent>
         </Card>
 
+        {/* Chart Configuration */}
+        <ChartConfig
+          selectedFields={selectedFields}
+          chartType={chartType}
+          xField={xField}
+          yField={yField}
+          onChartTypeChange={setChartType}
+          onXFieldChange={setXField}
+          onYFieldChange={setYField}
+        />
+
         {/* Actions */}
         <Card>
           <CardHeader>
@@ -101,13 +120,38 @@ export const ReportsPage: React.FC = () => {
         </Card>
       </div>
 
-      {/* Report Viewer */}
+      {/* Report Results */}
       {selectedTable && selectedFields.length > 0 && (
-        <ReportViewer
-          selectedTable={selectedTable}
-          selectedFields={selectedFields}
-          onDataChange={setReportData}
-        />
+        <Tabs defaultValue="table" className="w-full">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="table" className="flex items-center gap-2">
+              <Table2 className="w-4 h-4" />
+              Table View
+            </TabsTrigger>
+            <TabsTrigger value="chart" className="flex items-center gap-2">
+              <BarChart3 className="w-4 h-4" />
+              Chart View
+            </TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="table">
+            <ReportViewer
+              selectedTable={selectedTable}
+              selectedFields={selectedFields}
+              onDataChange={setReportData}
+            />
+          </TabsContent>
+          
+          <TabsContent value="chart">
+            <ChartViewer
+              data={reportData}
+              chartType={chartType}
+              xField={xField}
+              yField={yField}
+              selectedTable={selectedTable}
+            />
+          </TabsContent>
+        </Tabs>
       )}
     </div>
   );
