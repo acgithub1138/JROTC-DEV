@@ -30,7 +30,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   const allSelected = scoringCriteria.length > 0 && visibleCriteria.length === scoringCriteria.length;
   const noneSelected = visibleCriteria.length === 0;
   return (
-    <Card className="mt-4">
+    <Card className="mt-4 h-[500px] flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Scoring Criteria</CardTitle>
@@ -58,10 +58,10 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
           </div>
         </div>
       </CardHeader>
-      <CardContent>
+      <CardContent className="flex-1 overflow-hidden">
         
         {/* Individual Criteria Checkboxes */}
-        <div className="grid grid-cols-2 gap-3">
+        <div className="grid grid-cols-1 gap-3 overflow-y-auto h-full">
         {[...scoringCriteria]
           .sort((a, b) => {
             // Extract number from beginning of criteria strings
