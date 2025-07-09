@@ -196,6 +196,9 @@ const DashboardOverview = () => {
               </CardContent>
             </Card>;
       })}
+      
+      {/* Quick Actions Widget for Command Staff only - positioned in stats row */}
+      {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
@@ -206,11 +209,8 @@ const DashboardOverview = () => {
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
-        {/* Right Column: Quick Actions for Command Staff and Upcoming Events */}
+        {/* Right Column: Upcoming Events */}
         <div className="space-y-6">
-          {/* Quick Actions Widget for Command Staff only - positioned at top right */}
-          {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
-          
           {/* Upcoming Events */}
           <Card>
           <CardHeader>
