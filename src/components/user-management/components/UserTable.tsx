@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, UserX, UserPlus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Edit, X, UserPlus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { User } from '../types';
 import { getRoleIcon, getRoleColor } from './UserRoleUtils';
 
@@ -163,7 +163,7 @@ export const UserTable = ({
                           size="sm"
                           onClick={() => onDisableUser(user)}
                         >
-                          <UserX className="w-4 h-4" />
+                          <X className="w-4 h-4" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
