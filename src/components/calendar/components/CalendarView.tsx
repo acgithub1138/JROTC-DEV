@@ -16,6 +16,7 @@ interface CalendarViewProps {
   onEventDelete?: (id: string) => void;
   onDateSelect: (date: Date) => void;
   onCreateEvent?: () => void;
+  onDateDoubleClick?: (date: Date) => void;
   filters: {
     eventType: string;
     assignedTo: string;
@@ -32,6 +33,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   onEventDelete,
   onDateSelect,
   onCreateEvent,
+  onDateDoubleClick,
   filters,
   onFiltersChange,
   readOnly = false,
@@ -123,6 +125,7 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             events={events}
             onEventClick={readOnly ? onEventView : onEventEdit}
             onDateClick={handleDateSelect}
+            onDateDoubleClick={readOnly ? undefined : onDateDoubleClick}
           />
         )}
         

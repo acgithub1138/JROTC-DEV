@@ -10,6 +10,7 @@ interface MonthViewProps {
   events: Event[];
   onEventClick: (event: Event) => void;
   onDateClick: (date: Date) => void;
+  onDateDoubleClick?: (date: Date) => void;
 }
 
 const getEventTypeColor = (type: string) => {
@@ -28,6 +29,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
   events,
   onEventClick,
   onDateClick,
+  onDateDoubleClick,
 }) => {
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
@@ -68,6 +70,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                 isCurrentDay && "bg-primary/10"
               )}
               onClick={() => onDateClick(day)}
+              onDoubleClick={() => onDateDoubleClick?.(day)}
             >
               <div className={cn(
                 "text-sm font-medium mb-1",

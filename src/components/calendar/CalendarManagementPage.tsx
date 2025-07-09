@@ -80,6 +80,13 @@ const CalendarManagementPage = () => {
     }
   };
 
+  const handleDateDoubleClick = (date: Date) => {
+    if (!canCreateEvents()) return;
+    setSelectedDate(date);
+    setEditingEvent(null);
+    setShowEventDialog(true);
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
@@ -93,6 +100,7 @@ const CalendarManagementPage = () => {
         onEventView={!canCreateEvents() ? handleViewEvent : undefined}
         onEventDelete={canCreateEvents() ? deleteEvent : undefined}
         onDateSelect={handleDateSelect}
+        onDateDoubleClick={handleDateDoubleClick}
         onCreateEvent={canCreateEvents() ? handleCreateEvent : undefined}
         filters={filters}
         onFiltersChange={setFilters}
