@@ -9,6 +9,7 @@ interface EventDialogProps {
   event?: Event | null;
   selectedDate?: Date | null;
   onSubmit: (eventData: any) => Promise<void>;
+  onDelete?: (id: string) => Promise<void>;
 }
 
 export const EventDialog: React.FC<EventDialogProps> = ({
@@ -17,10 +18,18 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   event,
   selectedDate,
   onSubmit,
+  onDelete,
 }) => {
   const handleSubmit = async (eventData: any) => {
     await onSubmit(eventData);
     onOpenChange(false);
+  };
+
+  const handleDelete = async () => {
+    if (event && onDelete) {
+      await onDelete(event.id);
+      onOpenChange(false);
+    }
   };
 
   return (
@@ -36,6 +45,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
           selectedDate={selectedDate}
           onSubmit={handleSubmit}
           onCancel={() => onOpenChange(false)}
+          onDelete={event && onDelete ? handleDelete : undefined}
         />
         <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
           Location search powered by{' '}

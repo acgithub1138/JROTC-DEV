@@ -106,6 +106,7 @@ const CalendarManagementPage = () => {
           event={editingEvent}
           selectedDate={selectedDate}
           onSubmit={handleEventSubmit}
+          onDelete={deleteEvent}
         />
       )}
 

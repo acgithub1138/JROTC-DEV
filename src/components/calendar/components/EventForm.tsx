@@ -18,6 +18,7 @@ interface EventFormProps {
   selectedDate?: Date | null;
   onSubmit: (eventData: any) => Promise<void>;
   onCancel: () => void;
+  onDelete?: () => Promise<void>;
 }
 
 export const EventForm: React.FC<EventFormProps> = ({
@@ -25,6 +26,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   selectedDate,
   onSubmit,
   onCancel,
+  onDelete,
 }) => {
   const [formData, setFormData] = useState({
     title: '',
@@ -366,13 +368,20 @@ export const EventForm: React.FC<EventFormProps> = ({
         <EventAssignmentSection eventId={event.id} />
       )}
 
-      <div className="flex justify-end gap-2 pt-4 border-t">
-        <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
-        </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : (event ? 'Update Event' : 'Create Event')}
-        </Button>
+      <div className="flex justify-between pt-4 border-t">
+        {event && onDelete && (
+          <Button type="button" variant="destructive" onClick={onDelete}>
+            Delete Event
+          </Button>
+        )}
+        <div className="flex gap-2 ml-auto">
+          <Button type="button" variant="outline" onClick={onCancel}>
+            Cancel
+          </Button>
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : (event ? 'Update Event' : 'Create Event')}
+          </Button>
+        </div>
       </div>
     </form>
   );
