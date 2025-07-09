@@ -134,7 +134,9 @@ const IncidentManagementPage: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Incident Management</h1>
-        <p>TEST</p>
+        <p className="text-muted-foreground">
+          Manage your Incidents
+        </p>
         <Button onClick={handleCreateIncident} className="flex items-center gap-2">
           <Plus className="w-4 h-4" />
           Create Incident
