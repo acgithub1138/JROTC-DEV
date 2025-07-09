@@ -1,0 +1,213 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+
+interface CreateSchoolDialogProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+}
+
+interface NewSchool {
+  name: string;
+  district: string;
+  address: string;
+  city: string;
+  state: string;
+  zip_code: string;
+  phone: string;
+  email: string;
+  jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
+}
+
+export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
+  const [isLoading, setIsLoading] = useState(false);
+  const [newSchool, setNewSchool] = useState<NewSchool>({
+    name: '',
+    district: '',
+    address: '',
+    city: '',
+    state: '',
+    zip_code: '',
+    phone: '',
+    email: '',
+    jrotc_program: 'air_force'
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsLoading(true);
+
+    try {
+      const { data, error } = await supabase
+        .from('schools')
+        .insert([newSchool])
+        .select()
+        .single();
+
+      if (error) {
+        toast.error('Failed to create school: ' + error.message);
+        return;
+      }
+
+      toast.success('School created successfully');
+      
+      // Reset form
+      setNewSchool({
+        name: '',
+        district: '',
+        address: '',
+        city: '',
+        state: '',
+        zip_code: '',
+        phone: '',
+        email: '',
+        jrotc_program: 'air_force'
+      });
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error creating school:', error);
+      toast.error('Failed to create school');
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle>Create New School</DialogTitle>
+          <DialogDescription>
+            Add a new school to the system with JROTC program details.
+          </DialogDescription>
+        </DialogHeader>
+
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div>
+            <Label htmlFor="name">School Name</Label>
+            <Input
+              id="name"
+              value={newSchool.name}
+              onChange={(e) => setNewSchool({ ...newSchool, name: e.target.value })}
+              placeholder="Enter school name"
+              required
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="district">District</Label>
+            <Input
+              id="district"
+              value={newSchool.district}
+              onChange={(e) => setNewSchool({ ...newSchool, district: e.target.value })}
+              placeholder="Enter school district"
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="jrotc_program">JROTC Program</Label>
+            <Select
+              value={newSchool.jrotc_program}
+              onValueChange={(value) => setNewSchool({ ...newSchool, jrotc_program: value as typeof newSchool.jrotc_program })}
+            >
+              <SelectTrigger>
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                <SelectItem value="army">Army JROTC</SelectItem>
+                <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                <SelectItem value="navy">Navy JROTC</SelectItem>
+                <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                <SelectItem value="space_force">Space Force JROTC</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div>
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              value={newSchool.address}
+              onChange={(e) => setNewSchool({ ...newSchool, address: e.target.value })}
+              placeholder="Enter street address"
+            />
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
+            <div>
+              <Label htmlFor="city">City</Label>
+              <Input
+                id="city"
+                value={newSchool.city}
+                onChange={(e) => setNewSchool({ ...newSchool, city: e.target.value })}
+                placeholder="Enter city"
+              />
+            </div>
+            <div>
+              <Label htmlFor="state">State</Label>
+              <Input
+                id="state"
+                value={newSchool.state}
+                onChange={(e) => setNewSchool({ ...newSchool, state: e.target.value })}
+                placeholder="Enter state"
+              />
+            </div>
+            <div>
+              <Label htmlFor="zip_code">ZIP Code</Label>
+              <Input
+                id="zip_code"
+                value={newSchool.zip_code}
+                onChange={(e) => setNewSchool({ ...newSchool, zip_code: e.target.value })}
+                placeholder="Enter ZIP code"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="phone">Phone</Label>
+              <Input
+                id="phone"
+                type="tel"
+                value={newSchool.phone}
+                onChange={(e) => setNewSchool({ ...newSchool, phone: e.target.value })}
+                placeholder="Enter phone number"
+              />
+            </div>
+            <div>
+              <Label htmlFor="email">Email</Label>
+              <Input
+                id="email"
+                type="email"
+                value={newSchool.email}
+                onChange={(e) => setNewSchool({ ...newSchool, email: e.target.value })}
+                placeholder="Enter email address"
+              />
+            </div>
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-4">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={() => onOpenChange(false)}
+              disabled={isLoading}
+            >
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isLoading}>
+              {isLoading ? 'Creating...' : 'Create School'}
+            </Button>
+          </div>
+        </form>
+      </DialogContent>
+    </Dialog>
+  );
+};

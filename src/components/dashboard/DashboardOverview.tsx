@@ -11,6 +11,8 @@ import { AddIncomeDialog } from '@/components/budget-management/components/AddIn
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
 import { IncidentForm } from '@/components/incident-management/IncidentForm';
+import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
+import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -60,6 +62,8 @@ const DashboardOverview = () => {
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
+  const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
+  const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
   const handleCreateTransaction = (data: any) => {
     // This will be handled by the individual dialogs
     console.log('Transaction created:', data);
@@ -169,11 +173,11 @@ const DashboardOverview = () => {
               {/* Admin-specific actions */}
               {userProfile?.role === 'admin' && (
                 <>
-                  <button onClick={() => {/* TODO: Navigate to create school */}} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => setIsCreateSchoolOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
                   </button>
-                  <button onClick={() => {/* TODO: Navigate to create user */}} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Users className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Create User</p>
                   </button>
@@ -337,6 +341,20 @@ const DashboardOverview = () => {
           mode="create" 
           incident={null} 
         />
+      )}
+
+      {/* Admin-only modals */}
+      {userProfile?.role === 'admin' && (
+        <>
+          <CreateUserDialog 
+            open={isCreateUserOpen} 
+            onOpenChange={setIsCreateUserOpen} 
+          />
+          <CreateSchoolDialog 
+            open={isCreateSchoolOpen} 
+            onOpenChange={setIsCreateSchoolOpen} 
+          />
+        </>
       )}
     </div>;
 };
