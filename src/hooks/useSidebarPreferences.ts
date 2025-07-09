@@ -24,6 +24,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'reports', label: 'Cmpetition Reports', icon: 'BarChart3' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
@@ -39,7 +40,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
-        { id: 'reports', label: 'Reports', icon: 'BarChart3' },
+        { id: 'reports', label: 'Cmpetition Reports', icon: 'BarChart3' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'documents', label: 'Documents', icon: 'FileText' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
@@ -55,6 +56,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'reports', label: 'Cmpetition Reports', icon: 'BarChart3' },
       ];
     
     case 'cadet':
@@ -64,6 +66,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'reports', label: 'Cmpetition Reports', icon: 'BarChart3' },
       ];
     
     default:
