@@ -37,7 +37,7 @@ export const ProfileCompetitionsTab = ({
             name,
             competition_date
           )
-        `).eq('cadet_id', profileId).order('created_at', {
+        `).contains('cadet_ids', [profileId]).order('created_at', {
         ascending: false
       });
       if (error) {

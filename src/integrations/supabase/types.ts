@@ -85,46 +85,42 @@ export type Database = {
       }
       competition_events: {
         Row: {
-          cadet_id: string
+          cadet_ids: string[]
           competition_id: string
           created_at: string
           event: Database["public"]["Enums"]["comp_event_type"]
           id: string
           school_id: string
           score_sheet: Json
+          team_name: string | null
           total_points: number | null
           updated_at: string
         }
         Insert: {
-          cadet_id: string
+          cadet_ids?: string[]
           competition_id: string
           created_at?: string
           event: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           school_id: string
           score_sheet?: Json
+          team_name?: string | null
           total_points?: number | null
           updated_at?: string
         }
         Update: {
-          cadet_id?: string
+          cadet_ids?: string[]
           competition_id?: string
           created_at?: string
           event?: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           school_id?: string
           score_sheet?: Json
+          team_name?: string | null
           total_points?: number | null
           updated_at?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "competition_events_cadet_id_fkey"
-            columns: ["cadet_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "competition_events_competition_id_fkey"
             columns: ["competition_id"]

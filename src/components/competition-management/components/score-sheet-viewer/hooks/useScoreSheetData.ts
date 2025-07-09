@@ -21,7 +21,8 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
           event,
           score_sheet,
           total_points,
-          cadet_id,
+          cadet_ids,
+          team_name,
           created_at
         `)
         .eq('competition_id', competition.id)
@@ -32,16 +33,16 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
 
       // Get cadet profiles separately to avoid foreign key issues
       if (data && data.length > 0) {
-        const cadetIds = data.map(event => event.cadet_id);
+        const allCadetIds = [...new Set(data.flatMap(event => event.cadet_ids))];
         const { data: profiles } = await supabase
           .from('profiles')
           .select('id, first_name, last_name')
-          .in('id', cadetIds);
+          .in('id', allCadetIds);
 
         // Map profiles to events
         const eventsWithProfiles = data.map(event => ({
           ...event,
-          profiles: profiles?.find(p => p.id === event.cadet_id)
+          profiles: profiles?.filter(p => event.cadet_ids.includes(p.id)) || []
         }));
         
         // Sort events to maintain consistent order: by judge number if available, then by creation date

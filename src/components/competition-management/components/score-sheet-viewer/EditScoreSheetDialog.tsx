@@ -65,9 +65,9 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
     }
   };
 
-  const cadetName = event?.profiles 
-    ? `${event.profiles.first_name} ${event.profiles.last_name}`
-    : 'Unknown Cadet';
+  const cadetNames = event?.profiles && Array.isArray(event.profiles)
+    ? event.profiles.map(p => `${p.first_name} ${p.last_name}`).join(', ')
+    : 'Unknown Cadets';
 
   const judgeNumber = event?.score_sheet?.judge_number || 'Unknown Judge';
 
@@ -76,7 +76,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Edit Score Sheet - {cadetName} ({judgeNumber})
+            Edit Score Sheet - {cadetNames} ({judgeNumber})
           </DialogTitle>
         </DialogHeader>
 

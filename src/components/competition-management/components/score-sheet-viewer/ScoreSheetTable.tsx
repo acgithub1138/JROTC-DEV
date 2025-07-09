@@ -29,11 +29,13 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
 
   // Get unique cadets from events
   const uniqueCadets = events.reduce((acc, event) => {
-    if (event.profiles) {
-      const fullName = `${event.profiles.first_name} ${event.profiles.last_name}`;
-      if (!acc.includes(fullName)) {
-        acc.push(fullName);
-      }
+    if (event.profiles && Array.isArray(event.profiles)) {
+      event.profiles.forEach(profile => {
+        const fullName = `${profile.first_name} ${profile.last_name}`;
+        if (!acc.includes(fullName)) {
+          acc.push(fullName);
+        }
+      });
     }
     return acc;
   }, [] as string[]);

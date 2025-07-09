@@ -3,11 +3,13 @@ export interface CompetitionEvent {
   event: string;
   score_sheet: any;
   total_points: number;
-  cadet_id: string;
+  cadet_ids: string[];
+  team_name?: string;
   profiles?: {
+    id: string;
     first_name: string;
     last_name: string;
-  };
+  }[];
 }
 
 export interface ViewScoreSheetDialogProps {

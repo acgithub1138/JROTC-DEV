@@ -20,14 +20,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('competition_events')
-        .select(`
-          *,
-          profiles:cadet_id (
-            id,
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .eq('competition_id', competitionId)
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: false });
@@ -53,14 +46,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
           school_id: userProfile.school_id,
           competition_id: competitionId!
         })
-        .select(`
-          *,
-          profiles:cadet_id (
-            id,
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;
@@ -81,14 +67,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .from('competition_events')
         .update(updates)
         .eq('id', id)
-        .select(`
-          *,
-          profiles:cadet_id (
-            id,
-            first_name,
-            last_name
-          )
-        `)
+        .select('*')
         .single();
 
       if (error) throw error;

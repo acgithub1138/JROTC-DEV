@@ -45,7 +45,8 @@ export interface CompetitionEvent {
   school_id: string;
   competition_id: string;
   event: CompetitionEventType;
-  cadet_id: string;
+  cadet_ids: string[];
+  team_name?: string;
   total_points: number;
   score_sheet: Record<string, any>;
   created_at: string;

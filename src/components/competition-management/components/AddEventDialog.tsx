@@ -84,23 +84,21 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     }
     setIsSubmitting(true);
     try {
-      // Create an event for each selected cadet
-      for (const cadetId of selectedCadetIds) {
-        const eventData = {
-          cadet_id: cadetId,
-          event: selectedTemplate?.event,
-          score_sheet: {
-            template_id: selectedTemplateId,
-            template_name: selectedTemplate?.template_name,
-            judge_number: judgeNumber || null,
-            team_name: teamName || null,
-            scores: scores,
-            calculated_at: new Date().toISOString()
-          },
-          total_points: totalPoints
-        };
-        await onEventCreated(eventData);
-      }
+      // Create ONE event for all selected cadets
+      const eventData = {
+        cadet_ids: selectedCadetIds,
+        team_name: teamName || null,
+        event: selectedTemplate?.event,
+        score_sheet: {
+          template_id: selectedTemplateId,
+          template_name: selectedTemplate?.template_name,
+          judge_number: judgeNumber || null,
+          scores: scores,
+          calculated_at: new Date().toISOString()
+        },
+        total_points: totalPoints
+      };
+      await onEventCreated(eventData);
 
       // Reset form
       setSelectedProgram('');
