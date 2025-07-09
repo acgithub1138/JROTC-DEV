@@ -93,10 +93,12 @@ export const useColumnPreferences = (tableName: string, defaultColumns: ColumnPr
   };
 
   const enabledColumns = columns.filter(col => col.enabled);
+  const visibleColumns = enabledColumns.map(col => col.key);
 
   return {
     columns,
     enabledColumns,
+    visibleColumns,
     toggleColumn,
     isLoading
   };

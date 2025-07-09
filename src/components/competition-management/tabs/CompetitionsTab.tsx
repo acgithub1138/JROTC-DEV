@@ -56,6 +56,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const {
     columns,
     enabledColumns,
+    visibleColumns,
     toggleColumn,
     isLoading: columnsLoading
   } = useColumnPreferences('competitions', defaultColumns);
@@ -142,14 +143,13 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       </div>
 
       <BasicCompetitionTable 
-        key={`competitions-table-${enabledColumns.map(c => `${c.key}:${c.enabled}`).join('-')}`}
         competitions={sortedData} 
         isLoading={isLoading} 
         onEdit={readOnly ? undefined : setEditingCompetition} 
         onDelete={readOnly ? undefined : deleteCompetition} 
         onAddEvent={readOnly ? undefined : handleAddEvent} 
         onViewScoreSheets={handleViewScoreSheets}
-        enabledColumns={enabledColumns}
+        visibleColumns={visibleColumns}
       />
 
       {!readOnly && (
