@@ -15,7 +15,7 @@ import { useAvailableTables } from '@/hooks/email/useTableColumns';
 import { BasicFieldsSection } from './components/BasicFieldsSection';
 import { TriggerConfigSection } from './components/TriggerConfigSection';
 import { RecipientConfigSection } from './components/RecipientConfigSection';
-import { EmailRuleFormData, RecipientConfig, TriggerConditions } from './components/types';
+import { EmailRuleFormData, RecipientConfig } from './components/types';
 
 interface EmailRuleDialogProps {
   open: boolean;
@@ -39,7 +39,6 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
     template_id: '',
     source_table: '',
     trigger_event: 'INSERT',
-    trigger_conditions: {},
     recipient_config: {
       recipient_type: 'field',
       recipient_field: '',
@@ -59,51 +58,11 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
           static_email: dbRecipientConfig?.static_email || '',
         };
 
-        // Convert trigger conditions to new format if needed with robust error handling
-        let triggerConditions: TriggerConditions | Record<string, any> = {};
-        
-        try {
-          if (rule.trigger_event === 'UPDATE') {
-            // Check if trigger_conditions exists and is valid
-            if (rule.trigger_conditions && typeof rule.trigger_conditions === 'object') {
-              // Check if it's already in the new format
-              const conditions = rule.trigger_conditions as any;
-              if (conditions.conditions && Array.isArray(conditions.conditions)) {
-                // Already in new format
-                triggerConditions = {
-                  conditions: conditions.conditions || [],
-                  logic: conditions.logic || 'AND'
-                } as TriggerConditions;
-              } else {
-                // Legacy format or invalid - convert to new format
-                triggerConditions = {
-                  conditions: [],
-                  logic: 'AND'
-                } as TriggerConditions;
-              }
-            } else {
-              // No conditions or invalid - initialize empty
-              triggerConditions = {
-                conditions: [],
-                logic: 'AND'
-              } as TriggerConditions;
-            }
-          } else {
-            // For non-UPDATE events, use empty object
-            triggerConditions = {};
-          }
-        } catch (conditionsError) {
-          console.error('Error processing trigger conditions:', conditionsError);
-          // Fallback to safe default
-          triggerConditions = rule.trigger_event === 'UPDATE' ? { conditions: [], logic: 'AND' } : {};
-        }
-
         setFormData({
           name: rule.name || '',
           template_id: rule.template_id || '',
           source_table: rule.source_table || '',
-          trigger_event: rule.trigger_event || 'INSERT',
-          trigger_conditions: triggerConditions,
+          trigger_event: 'INSERT', // Always use INSERT
           recipient_config: recipientConfig,
           is_active: rule.is_active ?? true,
         });
@@ -114,8 +73,7 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
           name: rule.name || '',
           template_id: rule.template_id || '', // Preserve original UUID
           source_table: rule.source_table || '',
-          trigger_event: rule.trigger_event || 'INSERT',
-          trigger_conditions: rule.trigger_event === 'UPDATE' ? { conditions: [], logic: 'AND' } : {},
+          trigger_event: 'INSERT',
           recipient_config: {
             recipient_type: 'field',
             recipient_field: '',
@@ -130,7 +88,6 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
         template_id: '',
         source_table: '',
         trigger_event: 'INSERT',
-        trigger_conditions: {},
         recipient_config: {
           recipient_type: 'field',
           recipient_field: '',
@@ -174,9 +131,13 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
       updateRule({
         id: rule.id,
         ...cleanedFormData,
+        trigger_conditions: {}, // Add empty trigger_conditions for update
       });
     } else {
-      createRule(cleanedFormData);
+      createRule({
+        ...cleanedFormData,
+        trigger_conditions: {}, // Add empty trigger_conditions for create
+      });
     }
     
     onOpenChange(false);

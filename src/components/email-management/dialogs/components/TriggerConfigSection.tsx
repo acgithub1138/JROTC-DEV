@@ -2,8 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { EmailRuleFormData, TriggerConditions } from './types';
-import { TriggerConditionsSection } from './TriggerConditionsSection';
+import { EmailRuleFormData } from './types';
 
 interface TriggerConfigSectionProps {
   formData: EmailRuleFormData;
@@ -16,45 +15,17 @@ export const TriggerConfigSection: React.FC<TriggerConfigSectionProps> = ({
   availableTemplates,
   onFormChange,
 }) => {
-  const handleConditionsChange = (conditions: TriggerConditions) => {
-    onFormChange({ trigger_conditions: conditions });
-  };
-
-  const handleTriggerEventChange = (value: string) => {
-    const updates: Partial<EmailRuleFormData> = { trigger_event: value as any };
-    
-    // Reset trigger conditions when switching away from UPDATE
-    if (value !== 'UPDATE') {
-      updates.trigger_conditions = {};
-    } else {
-      // Initialize with empty conditions structure for UPDATE
-      updates.trigger_conditions = {
-        conditions: [],
-        logic: 'AND'
-      };
-    }
-    
-    onFormChange(updates);
-  };
-
   return (
     <div className="space-y-4">
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
           <Label>Trigger Event</Label>
-          <Select
-            value={formData.trigger_event}
-            onValueChange={handleTriggerEventChange}
-          >
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="INSERT">Insert (New Record)</SelectItem>
-              <SelectItem value="UPDATE">Update (Record Changed)</SelectItem>
-              <SelectItem value="DELETE">Delete (Record Removed)</SelectItem>
-            </SelectContent>
-          </Select>
+          <div className="p-3 border rounded-md bg-muted">
+            <p className="text-sm text-muted-foreground">Insert (New Record)</p>
+            <p className="text-xs text-muted-foreground mt-1">
+              Email will be sent when a new record is created
+            </p>
+          </div>
         </div>
 
         <div className="space-y-2">
@@ -77,14 +48,6 @@ export const TriggerConfigSection: React.FC<TriggerConfigSectionProps> = ({
           </Select>
         </div>
       </div>
-
-      {formData.trigger_event === 'UPDATE' && (
-        <TriggerConditionsSection
-          sourceTable={formData.source_table}
-          triggerConditions={formData.trigger_conditions}
-          onConditionsChange={handleConditionsChange}
-        />
-      )}
     </div>
   );
 };
