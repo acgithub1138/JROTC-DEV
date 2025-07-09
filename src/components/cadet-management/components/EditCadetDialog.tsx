@@ -5,7 +5,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Separator } from '@/components/ui/separator';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
@@ -207,55 +207,56 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
 
         {/* Password Reset Section */}
         {canResetPassword(userForPermissionCheck) && (
-          <>
-            <Separator className="my-6" />
-            <div className="space-y-4">
-              <div>
-                <h3 className="text-lg font-semibold">Reset Password</h3>
+          <Accordion type="single" collapsible className="mt-6">
+            <AccordionItem value="password-reset">
+              <AccordionTrigger className="text-lg font-semibold">
+                Reset Password
+              </AccordionTrigger>
+              <AccordionContent className="space-y-4">
                 <p className="text-sm text-muted-foreground">
                   Reset the cadet's password. They will need to use the new password to sign in.
                 </p>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="newPassword">New Password</Label>
-                <div className="relative">
-                  <Input
-                    id="newPassword"
-                    type={showPassword ? "text" : "password"}
-                    value={newPassword}
-                    onChange={(e) => setNewPassword(e.target.value)}
-                    placeholder="Enter new password"
-                    className="pr-10"
-                  />
+                
+                <div className="space-y-2">
+                  <Label htmlFor="newPassword">New Password</Label>
+                  <div className="relative">
+                    <Input
+                      id="newPassword"
+                      type={showPassword ? "text" : "password"}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                      placeholder="Enter new password"
+                      className="pr-10"
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                      onClick={() => setShowPassword(!showPassword)}
+                    >
+                      {showPassword ? (
+                        <EyeOff className="h-4 w-4" />
+                      ) : (
+                        <Eye className="h-4 w-4" />
+                      )}
+                    </Button>
+                  </div>
+                </div>
+
+                <div className="flex justify-end">
                   <Button
                     type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                    onClick={() => setShowPassword(!showPassword)}
+                    onClick={handleResetPassword}
+                    disabled={passwordResetLoading || !newPassword.trim()}
+                    variant="destructive"
                   >
-                    {showPassword ? (
-                      <EyeOff className="h-4 w-4" />
-                    ) : (
-                      <Eye className="h-4 w-4" />
-                    )}
+                    {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
                   </Button>
                 </div>
-              </div>
-
-              <div className="flex justify-end">
-                <Button
-                  type="button"
-                  onClick={handleResetPassword}
-                  disabled={passwordResetLoading || !newPassword.trim()}
-                  variant="destructive"
-                >
-                  {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
-                </Button>
-              </div>
-            </div>
-          </>
+              </AccordionContent>
+            </AccordionItem>
+          </Accordion>
         )}
       </DialogContent>
     </Dialog>
