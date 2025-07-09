@@ -47,6 +47,7 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
 
   const fetchReportData = async () => {
     if (!userProfile?.school_id || !selectedEvent) {
+      console.log('Missing data for fetch:', { school_id: userProfile?.school_id, selectedEvent });
       setReportData([]);
       setScoringCriteria([]);
       return;
@@ -54,6 +55,7 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
 
     try {
       setIsLoading(true);
+      console.log('Fetching report data for event:', selectedEvent);
       
       const { data, error } = await supabase
         .from('competition_events')
@@ -71,8 +73,18 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
 
       if (error) throw error;
 
+      console.log('Raw competition data received:', data);
+      console.log('Number of records found:', data?.length || 0);
+      
+      if (data && data.length > 0) {
+        console.log('Sample score sheet structure:', data[0]?.score_sheet);
+      }
+
       // Process the data to extract scoring criteria and calculate individual criteria performance
       const { processedData, criteria } = processCompetitionData(data as any);
+      console.log('Processed criteria:', criteria);
+      console.log('Processed data points:', processedData.length);
+      
       setReportData(processedData);
       setScoringCriteria(criteria);
     } catch (error) {
@@ -106,20 +118,51 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
   const processCompetitionData = (data: any[]): { processedData: PerformanceData[], criteria: string[] } => {
     console.log('Processing competition data:', data);
     
+    if (!data || data.length === 0) {
+      console.log('No data to process');
+      return { processedData: [], criteria: [] };
+    }
+    
     // First, collect all unique scoring criteria from all score sheets
     const rawToFormattedCriteriaMap = new Map<string, string>();
     const allFormattedCriteria = new Set<string>();
     
-    data.forEach(item => {
-      if (item.score_sheet?.scores) {
+    data.forEach((item, index) => {
+      console.log(`Processing item ${index}:`, item);
+      
+      // Check if score_sheet exists and has the expected structure
+      if (!item.score_sheet) {
+        console.log(`Item ${index} has no score_sheet`);
+        return;
+      }
+      
+      console.log(`Score sheet for item ${index}:`, item.score_sheet);
+      
+      // Handle different possible structures of score_sheet
+      let scoresData = null;
+      if (item.score_sheet.scores) {
+        scoresData = item.score_sheet.scores;
+      } else if (typeof item.score_sheet === 'object') {
+        // score_sheet might directly contain the scores
+        scoresData = item.score_sheet;
+      }
+      
+      if (scoresData) {
+        console.log(`Found scores data for item ${index}:`, scoresData);
+        
         const extractCriteriaKeys = (obj: any, prefix = ''): void => {
+          console.log(`Extracting from object at prefix "${prefix}":`, obj);
+          
           if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
             Object.keys(obj).forEach(key => {
               const fullKey = prefix ? `${prefix}.${key}` : key;
               const value = obj[key];
               
+              console.log(`Checking key "${fullKey}" with value:`, value, `(type: ${typeof value})`);
+              
               if (typeof value === 'number') {
                 const formattedName = formatCriteriaName(fullKey);
+                console.log(`Found numeric criteria: ${fullKey} -> ${formattedName}`);
                 rawToFormattedCriteriaMap.set(fullKey, formattedName);
                 allFormattedCriteria.add(formattedName);
               } else if (typeof value === 'object' && value !== null) {
@@ -129,7 +172,9 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
           }
         };
         
-        extractCriteriaKeys(item.score_sheet.scores);
+        extractCriteriaKeys(scoresData);
+      } else {
+        console.log(`No scores data found in item ${index}`);
       }
     });
 
@@ -147,7 +192,15 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
         groupedByDate[date] = {};
       }
 
+      // Handle different possible structures of score_sheet (same logic as criteria extraction)
+      let scoresData = null;
       if (item.score_sheet?.scores) {
+        scoresData = item.score_sheet.scores;
+      } else if (item.score_sheet && typeof item.score_sheet === 'object') {
+        scoresData = item.score_sheet;
+      }
+
+      if (scoresData) {
         const extractScoresByCriteria = (obj: any, prefix = ''): { [key: string]: number } => {
           const scores: { [key: string]: number } = {};
           
@@ -166,7 +219,7 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
           return scores;
         };
         
-        const scoresByCriteria = extractScoresByCriteria(item.score_sheet.scores);
+        const scoresByCriteria = extractScoresByCriteria(scoresData);
         
         // Add scores for each criteria
         Object.entries(scoresByCriteria).forEach(([criteria, score]) => {
