@@ -5,35 +5,21 @@ import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
 import { AdvancedCriteriaMapping, type CriteriaMapping } from '../components/reports/AdvancedCriteriaMapping';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
+import { useCriteriaMapping } from '../hooks/useCriteriaMapping';
 export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
-  const [criteriaMapping, setCriteriaMapping] = useState<CriteriaMapping[]>([]);
-  
-  // Load mappings from localStorage when event changes
-  useEffect(() => {
-    if (selectedEvent) {
-      const savedMappings = localStorage.getItem(`criteria-mappings-${selectedEvent}`);
-      if (savedMappings) {
-        try {
-          setCriteriaMapping(JSON.parse(savedMappings));
-        } catch (error) {
-          console.error('Failed to parse saved mappings:', error);
-          setCriteriaMapping([]);
-        }
-      } else {
-        setCriteriaMapping([]);
-      }
-    }
-  }, [selectedEvent]);
 
-  // Save mappings to localStorage whenever they change
-  useEffect(() => {
-    if (selectedEvent && criteriaMapping.length >= 0) {
-      localStorage.setItem(`criteria-mappings-${selectedEvent}`, JSON.stringify(criteriaMapping));
-    }
-  }, [selectedEvent, criteriaMapping]);
+  // Get original criteria before mapping for the advanced widget
+  const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
+
+  // Use the criteria mapping hook for proper localStorage persistence
+  const { mappings, setMappings, getMappedCriteria, applyMappingsToData } = useCriteriaMapping({
+    selectedEvent,
+    originalCriteria
+  });
+
   const {
     reportData,
     isLoading,
@@ -42,7 +28,8 @@ export const ReportsTab = () => {
     availableEvents,
     availableCompetitions,
     scoringCriteria
-  } = useCompetitionReports(selectedEvent, selectedCompetitions, criteriaMapping);
+  } = useCompetitionReports(selectedEvent, selectedCompetitions, mappings);
+
   const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
     setVisibleCriteria([]); // Reset visible criteria when event changes
@@ -53,9 +40,6 @@ export const ReportsTab = () => {
       setSelectedCompetitions(sortedCompetitions);
     }
   };
-
-  // Get original criteria before mapping for the advanced widget
-  const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
   
   // Store original criteria when they are first loaded
   useEffect(() => {
@@ -108,8 +92,8 @@ export const ReportsTab = () => {
           {/* Advanced Criteria Mapping - Full width below the chart */}
           <AdvancedCriteriaMapping
             availableCriteria={originalCriteria}
-            mappings={criteriaMapping}
-            onMappingsChange={setCriteriaMapping}
+            mappings={mappings}
+            onMappingsChange={setMappings}
             selectedEvent={selectedEvent}
           />
         </div>
