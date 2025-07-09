@@ -84,13 +84,23 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
   };
 
   const formatCriteriaName = (rawName: string): string => {
-    // Remove field prefixes like "field_1_1." and convert to readable format
+    console.log('Formatting criteria name:', rawName);
+    
+    // Handle the specific format from database: field_X_Y._description
     const cleaned = rawName.replace(/^field_\d+_\d+\./, '');
-    // Convert underscores to spaces and capitalize words
-    return cleaned
+    
+    // Remove leading underscore and clean up
+    const withoutUnderscore = cleaned.replace(/^_/, '');
+    
+    // Convert underscores to spaces, handle special characters, and capitalize
+    const formatted = withoutUnderscore
       .replace(/_/g, ' ')
-      .replace(/\b\w/g, l => l.toUpperCase())
-      .replace(/^\./, ''); // Remove leading dot if present
+      .replace(/&/g, '&')
+      .replace(/\//g, '/')
+      .replace(/\b\w/g, l => l.toUpperCase());
+    
+    console.log('Formatted criteria name:', formatted);
+    return formatted;
   };
 
   const processCompetitionData = (data: any[]): { processedData: PerformanceData[], criteria: string[] } => {
