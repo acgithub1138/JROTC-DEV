@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, UserX, UserPlus } from 'lucide-react';
+import { Edit, UserX, UserPlus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { User } from '../types';
 import { getRoleIcon, getRoleColor } from './UserRoleUtils';
 
@@ -17,6 +17,9 @@ interface UserTableProps {
   canEditUser: (user: User) => boolean;
   canDisableUser: (user: User) => boolean;
   canEnableUser: (user: User) => boolean;
+  sortField?: 'name' | 'role' | 'school' | 'created';
+  sortDirection?: 'asc' | 'desc';
+  onSort?: (field: 'name' | 'role' | 'school' | 'created') => void;
   onEditUser: (user: User) => void;
   onDisableUser: (user: User) => void;
   onEnableUser: (user: User) => void;
@@ -32,10 +35,27 @@ export const UserTable = ({
   canEditUser,
   canDisableUser,
   canEnableUser,
+  sortField = 'name',
+  sortDirection = 'asc',
+  onSort,
   onEditUser,
   onDisableUser,
   onEnableUser,
 }: UserTableProps) => {
+  const getSortIcon = (field: string) => {
+    if (!onSort || sortField !== field) {
+      return <ArrowUpDown className="w-4 h-4 ml-1" />;
+    }
+    return sortDirection === 'asc' ? 
+      <ArrowUp className="w-4 h-4 ml-1" /> : 
+      <ArrowDown className="w-4 h-4 ml-1" />;
+  };
+
+  const handleHeaderClick = (field: 'name' | 'role' | 'school' | 'created') => {
+    if (onSort) {
+      onSort(field);
+    }
+  };
   return (
     <Table>
       <TableHeader>
@@ -47,10 +67,42 @@ export const UserTable = ({
               aria-label="Select all users"
             />
           </TableHead>
-          <TableHead>Name</TableHead>
-          <TableHead>Role</TableHead>
-          <TableHead>School</TableHead>
-          <TableHead>Created</TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 select-none"
+            onClick={() => handleHeaderClick('name')}
+          >
+            <div className="flex items-center">
+              Name
+              {getSortIcon('name')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 select-none"
+            onClick={() => handleHeaderClick('role')}
+          >
+            <div className="flex items-center">
+              Role
+              {getSortIcon('role')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 select-none"
+            onClick={() => handleHeaderClick('school')}
+          >
+            <div className="flex items-center">
+              School
+              {getSortIcon('school')}
+            </div>
+          </TableHead>
+          <TableHead 
+            className="cursor-pointer hover:bg-muted/50 select-none"
+            onClick={() => handleHeaderClick('created')}
+          >
+            <div className="flex items-center">
+              Created
+              {getSortIcon('created')}
+            </div>
+          </TableHead>
           <TableHead className="text-right">Actions</TableHead>
         </TableRow>
       </TableHeader>

@@ -52,6 +52,8 @@ const UserAdminPage = () => {
   const [userToDisable, setUserToDisable] = useState<User | null>(null);
   const [bulkDisableLoading, setBulkDisableLoading] = useState(false);
   const [bulkDisableDialogOpen, setBulkDisableDialogOpen] = useState(false);
+  const [sortField, setSortField] = useState<'name' | 'role' | 'school' | 'created'>('name');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   
   // Bulk selection states
   const [selectedUsers, setSelectedUsers] = useState<Set<string>>(new Set());
@@ -79,6 +81,15 @@ const UserAdminPage = () => {
     setBulkDisableLoading(false);
   };
 
+  const handleSort = (field: 'name' | 'role' | 'school' | 'created') => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
   // Filter users based on search, school, and active tab
   const filteredUsers = users.filter(user => {
     const matchesSearch = user.first_name.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -93,10 +104,41 @@ const UserAdminPage = () => {
     return matchesSearch && matchesSchool && matchesActiveTab && isNotAdmin;
   });
 
-  const totalPages = Math.ceil(filteredUsers.length / RECORDS_PER_PAGE);
+  // Sort filtered users
+  const sortedUsers = [...filteredUsers].sort((a, b) => {
+    let aValue: string | Date;
+    let bValue: string | Date;
+
+    switch (sortField) {
+      case 'name':
+        aValue = `${a.first_name} ${a.last_name}`.toLowerCase();
+        bValue = `${b.first_name} ${b.last_name}`.toLowerCase();
+        break;
+      case 'role':
+        aValue = a.role.toLowerCase();
+        bValue = b.role.toLowerCase();
+        break;
+      case 'school':
+        aValue = (a.schools?.name || '').toLowerCase();
+        bValue = (b.schools?.name || '').toLowerCase();
+        break;
+      case 'created':
+        aValue = new Date(a.created_at);
+        bValue = new Date(b.created_at);
+        break;
+      default:
+        return 0;
+    }
+
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedUsers.length / RECORDS_PER_PAGE);
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
-  const paginatedUsers = filteredUsers.slice(startIndex, endIndex);
+  const paginatedUsers = sortedUsers.slice(startIndex, endIndex);
 
   const handleSelectUser = (userId: string, checked: boolean) => {
     const newSelected = new Set(selectedUsers);
@@ -242,6 +284,9 @@ const UserAdminPage = () => {
                 canEditUser={canEditUser}
                 canDisableUser={canDisableUser}
                 canEnableUser={canEnableUser}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
                 onEditUser={(user) => {
                   setEditingUser(user);
                   setEditDialogOpen(true);
@@ -271,6 +316,9 @@ const UserAdminPage = () => {
                 canEditUser={canEditUser}
                 canDisableUser={canDisableUser}
                 canEnableUser={canEnableUser}
+                sortField={sortField}
+                sortDirection={sortDirection}
+                onSort={handleSort}
                 onEditUser={(user) => {
                   setEditingUser(user);
                   setEditDialogOpen(true);
@@ -283,7 +331,7 @@ const UserAdminPage = () => {
               />
             </TabsContent>
 
-            {filteredUsers.length === 0 && (
+            {sortedUsers.length === 0 && (
               <div className="text-center py-8 text-muted-foreground">
                 No users found
               </div>
