@@ -57,7 +57,28 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
       }
     });
 
-    return Array.from(mappedCriteria).sort();
+    return Array.from(mappedCriteria).sort((a, b) => {
+      // Extract numbers from criteria names for proper ordering
+      const getNumber = (criteria: string): number => {
+        const match = criteria.match(/^(\d+)\./);
+        return match ? parseInt(match[1], 10) : 999; // Put non-numbered items at the end
+      };
+      
+      const aNum = getNumber(a);
+      const bNum = getNumber(b);
+      
+      // If both have numbers, sort by number
+      if (aNum !== 999 && bNum !== 999) {
+        return aNum - bNum;
+      }
+      
+      // If only one has a number, numbered item comes first
+      if (aNum !== 999) return -1;
+      if (bNum !== 999) return 1;
+      
+      // If neither has a number, sort alphabetically
+      return a.localeCompare(b);
+    });
   };
 
   // Apply mappings to raw data processing
