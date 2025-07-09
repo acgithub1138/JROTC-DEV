@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, ArrowUpDown } from 'lucide-react';
+import { ColumnSelector } from '@/components/ui/column-selector';
 import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
@@ -10,12 +11,29 @@ import { ViewScoreSheetDialog } from '../components/ViewScoreSheetDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
+import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 import type { Database } from '@/integrations/supabase/types';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 type Competition = Database['public']['Tables']['competitions']['Row'];
 interface CompetitionsTabProps {
   readOnly?: boolean;
 }
+
+const defaultColumns = [
+  { key: 'name', label: 'Name', enabled: true },
+  { key: 'date', label: 'Date', enabled: true },
+  { key: 'overall_placement', label: 'Overall Placement', enabled: true },
+  { key: 'overall_armed_placement', label: 'Overall Armed', enabled: true },
+  { key: 'overall_unarmed_placement', label: 'Overall Unarmed', enabled: true },
+  { key: 'armed_regulation', label: 'Armed Regulation', enabled: false },
+  { key: 'armed_exhibition', label: 'Armed Exhibition', enabled: false },
+  { key: 'armed_color_guard', label: 'Armed Color Guard', enabled: false },
+  { key: 'armed_inspection', label: 'Armed Inspection', enabled: false },
+  { key: 'unarmed_regulation', label: 'Unarmed Regulation', enabled: false },
+  { key: 'unarmed_exhibition', label: 'Unarmed Exhibition', enabled: false },
+  { key: 'unarmed_color_guard', label: 'Unarmed Color Guard', enabled: false },
+  { key: 'unarmed_inspection', label: 'Unarmed Inspection', enabled: false },
+];
 
 export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
@@ -34,6 +52,13 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const {
     createEvent
   } = useCompetitionEvents(selectedCompetition?.id);
+  
+  const {
+    columns,
+    enabledColumns,
+    toggleColumn,
+    isLoading: columnsLoading
+  } = useColumnPreferences('competitions', defaultColumns);
 
   // Filter competitions based on search term
   const filteredCompetitions = useMemo(() => {
@@ -101,12 +126,19 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
             Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
           </Button>
         </div>
-        {!readOnly && (
-          <Button onClick={() => setShowAddDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Competition
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          <ColumnSelector 
+            columns={columns}
+            onToggleColumn={toggleColumn}
+            isLoading={columnsLoading}
+          />
+          {!readOnly && (
+            <Button onClick={() => setShowAddDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Competition
+            </Button>
+          )}
+        </div>
       </div>
 
       <BasicCompetitionTable 
@@ -115,7 +147,8 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onEdit={readOnly ? undefined : setEditingCompetition} 
         onDelete={readOnly ? undefined : deleteCompetition} 
         onAddEvent={readOnly ? undefined : handleAddEvent} 
-        onViewScoreSheets={handleViewScoreSheets} 
+        onViewScoreSheets={handleViewScoreSheets}
+        enabledColumns={enabledColumns}
       />
 
       {!readOnly && (

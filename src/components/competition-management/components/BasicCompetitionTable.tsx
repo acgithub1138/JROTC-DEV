@@ -8,6 +8,7 @@ import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
+import type { ColumnPreference } from '@/hooks/useColumnPreferences';
 
 interface BasicCompetitionTableProps {
   competitions: any[];
@@ -16,6 +17,7 @@ interface BasicCompetitionTableProps {
   onDelete: (id: string) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
+  enabledColumns?: ColumnPreference[];
 }
 
 const getPlacementColor = (placement: string | null) => {
@@ -73,9 +75,16 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onEdit,
   onDelete,
   onAddEvent,
-  onViewScoreSheets
+  onViewScoreSheets,
+  enabledColumns = []
 }) => {
   const isMobile = useIsMobile();
+  
+  // Helper function to check if a column is enabled
+  const isColumnEnabled = (columnKey: string) => {
+    const column = enabledColumns.find(col => col.key === columnKey);
+    return column ? column.enabled : true; // Default to true if no column preferences
+  };
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
@@ -106,40 +115,42 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
           <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Name</TableHead>
-              <TableHead>Date</TableHead>
-              <TableHead>Overall Placement</TableHead>
-              <TableHead>Overall Armed</TableHead>
-              <TableHead>Overall Unarmed</TableHead>
-              <TableHead>Armed Regulation</TableHead>
-              <TableHead>Armed Exhibition</TableHead>
-              <TableHead>Armed Color Guard</TableHead>
-              <TableHead>Armed Inspection</TableHead>
-              <TableHead>Unarmed Regulation</TableHead>
-              <TableHead>Unarmed Exhibition</TableHead>
-              <TableHead>Unarmed Color Guard</TableHead>
-              <TableHead>Unarmed Inspection</TableHead>
+              {isColumnEnabled('name') && <TableHead>Name</TableHead>}
+              {isColumnEnabled('date') && <TableHead>Date</TableHead>}
+              {isColumnEnabled('overall_placement') && <TableHead>Overall Placement</TableHead>}
+              {isColumnEnabled('overall_armed_placement') && <TableHead>Overall Armed</TableHead>}
+              {isColumnEnabled('overall_unarmed_placement') && <TableHead>Overall Unarmed</TableHead>}
+              {isColumnEnabled('armed_regulation') && <TableHead>Armed Regulation</TableHead>}
+              {isColumnEnabled('armed_exhibition') && <TableHead>Armed Exhibition</TableHead>}
+              {isColumnEnabled('armed_color_guard') && <TableHead>Armed Color Guard</TableHead>}
+              {isColumnEnabled('armed_inspection') && <TableHead>Armed Inspection</TableHead>}
+              {isColumnEnabled('unarmed_regulation') && <TableHead>Unarmed Regulation</TableHead>}
+              {isColumnEnabled('unarmed_exhibition') && <TableHead>Unarmed Exhibition</TableHead>}
+              {isColumnEnabled('unarmed_color_guard') && <TableHead>Unarmed Color Guard</TableHead>}
+              {isColumnEnabled('unarmed_inspection') && <TableHead>Unarmed Inspection</TableHead>}
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
             {competitions.map((competition) => (
               <TableRow key={competition.id}>
-                <TableCell className="font-medium">{competition.name}</TableCell>
-                <TableCell>
-                  {formatCompetitionDateFull(competition.competition_date)}
-                </TableCell>
-                <TableCell><PlacementCell placement={competition.overall_placement} /></TableCell>
-                <TableCell><PlacementCell placement={competition.overall_armed_placement} /></TableCell>
-                <TableCell><PlacementCell placement={competition.overall_unarmed_placement} /></TableCell>
-                <TableCell><PlacementCell placement={competition.armed_regulation} /></TableCell>
-                <TableCell><PlacementCell placement={competition.armed_exhibition} /></TableCell>
-                <TableCell><PlacementCell placement={competition.armed_color_guard} /></TableCell>
-                <TableCell><PlacementCell placement={competition.armed_inspection} /></TableCell>
-                <TableCell><PlacementCell placement={competition.unarmed_regulation} /></TableCell>
-                <TableCell><PlacementCell placement={competition.unarmed_exhibition} /></TableCell>
-                <TableCell><PlacementCell placement={competition.unarmed_color_guard} /></TableCell>
-                <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>
+                {isColumnEnabled('name') && <TableCell className="font-medium">{competition.name}</TableCell>}
+                {isColumnEnabled('date') && (
+                  <TableCell>
+                    {formatCompetitionDateFull(competition.competition_date)}
+                  </TableCell>
+                )}
+                {isColumnEnabled('overall_placement') && <TableCell><PlacementCell placement={competition.overall_placement} /></TableCell>}
+                {isColumnEnabled('overall_armed_placement') && <TableCell><PlacementCell placement={competition.overall_armed_placement} /></TableCell>}
+                {isColumnEnabled('overall_unarmed_placement') && <TableCell><PlacementCell placement={competition.overall_unarmed_placement} /></TableCell>}
+                {isColumnEnabled('armed_regulation') && <TableCell><PlacementCell placement={competition.armed_regulation} /></TableCell>}
+                {isColumnEnabled('armed_exhibition') && <TableCell><PlacementCell placement={competition.armed_exhibition} /></TableCell>}
+                {isColumnEnabled('armed_color_guard') && <TableCell><PlacementCell placement={competition.armed_color_guard} /></TableCell>}
+                {isColumnEnabled('armed_inspection') && <TableCell><PlacementCell placement={competition.armed_inspection} /></TableCell>}
+                {isColumnEnabled('unarmed_regulation') && <TableCell><PlacementCell placement={competition.unarmed_regulation} /></TableCell>}
+                {isColumnEnabled('unarmed_exhibition') && <TableCell><PlacementCell placement={competition.unarmed_exhibition} /></TableCell>}
+                {isColumnEnabled('unarmed_color_guard') && <TableCell><PlacementCell placement={competition.unarmed_color_guard} /></TableCell>}
+                {isColumnEnabled('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
                 <TableCell className="text-right">
                   <div className="flex gap-2 justify-end">
                     {onAddEvent && (
