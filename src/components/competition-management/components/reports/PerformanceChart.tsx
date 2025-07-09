@@ -103,7 +103,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             {visibleCriteria.map((criteria, index) => (
               <Line
                 key={criteria}
-                type="monotone"
+                type="linear"
                 dataKey={criteria}
                 stroke={EVENT_COLORS[index % EVENT_COLORS.length]}
                 strokeWidth={2}
