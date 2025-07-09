@@ -79,7 +79,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     setTotalPoints(0);
   };
   const handleSubmit = async () => {
-    if (!selectedTemplateId || selectedCadetIds.length === 0) {
+    if (!isFormValid) {
       return;
     }
     setIsSubmitting(true);
@@ -120,7 +120,7 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
     setScores(newScores);
     setTotalPoints(newTotal);
   };
-  const isFormValid = selectedTemplateId && selectedCadetIds.length > 0;
+  const isFormValid = selectedTemplateId && judgeNumber && (judgeNumber !== 'Judge 1' || selectedCadetIds.length > 0);
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -177,6 +177,21 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
             </div>
           </div>
 
+          {/* Judge Number */}
+          <div className="space-y-1">
+            <Label>Judge Number <span className="text-destructive">*</span></Label>
+            <Select value={judgeNumber} onValueChange={setJudgeNumber}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select judge..." />
+              </SelectTrigger>
+              <SelectContent>
+                {judgeOptions.map(judge => <SelectItem key={judge} value={judge}>
+                    {judge}
+                  </SelectItem>)}
+              </SelectContent>
+            </Select>
+          </div>
+
           {/* Cadet Selection */}
           <div className="space-y-1">
             <Collapsible open={isCadetsOpen} onOpenChange={setIsCadetsOpen}>
@@ -184,7 +199,10 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                 <Button variant="outline" className="w-full justify-between">
                   <div className="flex items-center gap-2">
                     <Users className="w-4 h-4" />
-                    <span>Cadets</span>
+                    <span>
+                      Cadets 
+                      {judgeNumber === 'Judge 1' && <span className="text-destructive">*</span>}
+                    </span>
                     {selectedCadetIds.length > 0 && <span className="text-sm text-muted-foreground">
                         ({selectedCadetIds.length} selected)
                       </span>}
@@ -196,21 +214,6 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
                 <MultiSelectProfiles value={selectedCadetIds} onChange={setSelectedCadetIds} />
               </CollapsibleContent>
             </Collapsible>
-          </div>
-
-          {/* Judge Number */}
-          <div className="space-y-1">
-            <Label>Judge Number (Optional)</Label>
-            <Select value={judgeNumber} onValueChange={setJudgeNumber}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select judge..." />
-              </SelectTrigger>
-              <SelectContent>
-                {judgeOptions.map(judge => <SelectItem key={judge} value={judge}>
-                    {judge}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
           </div>
 
           {/* Team Name */}
