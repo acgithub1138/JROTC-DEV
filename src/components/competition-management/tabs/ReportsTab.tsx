@@ -30,6 +30,14 @@ export const ReportsTab = () => {
     );
   };
 
+  const handleSelectAllCriteria = () => {
+    setVisibleCriteria(scoringCriteria);
+  };
+
+  const handleUnselectAllCriteria = () => {
+    setVisibleCriteria([]);
+  };
+
   return (
     <div className="space-y-6">
       <div>
@@ -53,6 +61,8 @@ export const ReportsTab = () => {
               scoringCriteria={scoringCriteria}
               visibleCriteria={visibleCriteria}
               onCriteriaToggle={handleCriteriaVisibilityToggle}
+              onSelectAll={handleSelectAllCriteria}
+              onUnselectAll={handleUnselectAllCriteria}
             />
           )}
         </div>
