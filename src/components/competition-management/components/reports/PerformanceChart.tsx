@@ -96,7 +96,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             <Tooltip 
               labelFormatter={formatTooltipDate}
               formatter={(value: number, name: string) => [
-                value.toFixed(2),
+                `${value.toFixed(2)} (avg)`,
                 name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
               ]}
             />

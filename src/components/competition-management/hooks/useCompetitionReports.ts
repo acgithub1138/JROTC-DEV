@@ -95,17 +95,30 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
         groupedByDate[date][event] = [];
       }
 
-      // Extract scores from score_sheet.scores and calculate average
+      // Extract scores from score_sheet and calculate average
       let averageScore = 0;
       
       if (item.score_sheet?.scores) {
-        const scores = Object.values(item.score_sheet.scores) as number[];
-        const validScores = scores.filter(score => typeof score === 'number' && !isNaN(score));
+        // Handle both object and array formats for scores
+        let scores: number[] = [];
         
-        if (validScores.length > 0) {
-          averageScore = validScores.reduce((sum, score) => sum + score, 0) / validScores.length;
+        if (typeof item.score_sheet.scores === 'object') {
+          if (Array.isArray(item.score_sheet.scores)) {
+            scores = item.score_sheet.scores.filter(score => typeof score === 'number' && !isNaN(score));
+          } else {
+            // Object format - extract all numeric values
+            scores = Object.values(item.score_sheet.scores)
+              .filter(score => typeof score === 'number' && !isNaN(score)) as number[];
+          }
         }
-      } else if (item.total_points) {
+        
+        if (scores.length > 0) {
+          averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        }
+      } 
+      
+      // Fallback to total_points if no score_sheet data
+      if (averageScore === 0 && item.total_points) {
         averageScore = item.total_points;
       }
 
@@ -119,7 +132,7 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
       Object.entries(events).forEach(([event, scores]) => {
         // Calculate average for this event on this date
         const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-        dataPoint[event] = average;
+        dataPoint[event] = Math.round(average * 100) / 100; // Round to 2 decimal places
       });
       
       return dataPoint;
