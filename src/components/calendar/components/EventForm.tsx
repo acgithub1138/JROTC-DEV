@@ -150,6 +150,35 @@ export const EventForm: React.FC<EventFormProps> = ({
         newData.end_date = value;
       }
       
+      // Auto-update end time when start time changes (add 1 hour)
+      if ((field === 'start_time_hour' || field === 'start_time_minute') && !prev.is_all_day) {
+        const startHour = field === 'start_time_hour' ? parseInt(value) : parseInt(prev.start_time_hour || '0');
+        const startMinute = field === 'start_time_minute' ? parseInt(value) : parseInt(prev.start_time_minute || '0');
+        
+        // Add 1 hour to start time
+        let endHour = startHour + 1;
+        let endMinute = startMinute;
+        
+        // Handle hour overflow (24:00 -> 00:00 next day)
+        if (endHour >= 24) {
+          endHour = endHour - 24;
+          // If we overflow to the next day, update the end date too
+          if (newData.start_date && (!newData.end_date || newData.end_date === newData.start_date)) {
+            const nextDay = new Date(newData.start_date);
+            nextDay.setDate(nextDay.getDate() + 1);
+            newData.end_date = nextDay.toISOString().split('T')[0];
+          }
+        } else {
+          // Make sure end date matches start date if we're not overflowing
+          if (newData.start_date && (!newData.end_date || newData.end_date !== newData.start_date)) {
+            newData.end_date = newData.start_date;
+          }
+        }
+        
+        newData.end_time_hour = endHour.toString().padStart(2, '0');
+        newData.end_time_minute = endMinute.toString().padStart(2, '0');
+      }
+      
       return newData;
     });
   };
