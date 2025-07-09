@@ -187,37 +187,27 @@ export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
           ) : (
             <div className="space-y-4">
               {history.map((entry) => (
-                <div key={entry.id} className="border rounded-lg p-4 bg-card">
-                  <div className="flex items-start justify-between mb-2">
+                <div key={entry.id} className="border rounded-lg p-4">
+                  <div className="flex items-center justify-between mb-2">
                     <div className="flex items-center gap-2">
-                      <Badge className={getFieldBadgeColor(entry.field_name)}>
+                      <span className="font-medium text-sm">
+                        {entry.profiles ? `${entry.profiles.first_name} ${entry.profiles.last_name}` : 'System'}
+                      </span>
+                      <Badge variant="secondary" className="text-xs">
                         {getFieldDisplayName(entry.field_name)}
                       </Badge>
-                      <span className="text-sm text-muted-foreground">
-                        {format(new Date(entry.created_at), 'MMM d, yyyy HH:mm')}
-                      </span>
                     </div>
-                    {entry.profiles && (
-                      <div className="flex items-center gap-1 text-sm text-muted-foreground">
-                        <User className="w-3 h-3" />
-                        {entry.profiles.first_name} {entry.profiles.last_name}
-                      </div>
-                    )}
+                    <span className="text-xs text-gray-500">
+                      {format(new Date(entry.created_at), 'MMM d, yyyy HH:mm')}
+                    </span>
                   </div>
                   
                   {entry.field_name === 'issued_to' ? (
                     <IssuedToChanges oldValue={entry.old_value} newValue={entry.new_value} />
                   ) : (
-                    <div className="flex items-center gap-2 text-sm">
-                      <span className="text-muted-foreground">Changed from:</span>
-                      <code className="bg-muted px-2 py-1 rounded text-xs">
-                        {entry.old_value || 'empty'}
-                      </code>
-                      <span className="text-muted-foreground">to:</span>
-                      <code className="bg-muted px-2 py-1 rounded text-xs">
-                        {entry.new_value || 'empty'}
-                      </code>
-                    </div>
+                    <p className="text-sm text-gray-700">
+                      Changed from <span className="font-medium text-red-600">"{entry.old_value || 'empty'}"</span> to <span className="font-medium text-green-600">"{entry.new_value || 'empty'}"</span>
+                    </p>
                   )}
                 </div>
               ))}
