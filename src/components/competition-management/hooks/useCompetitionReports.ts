@@ -148,12 +148,12 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     // Remove leading underscore and clean up
     const withoutUnderscore = cleaned.replace(/^_/, '');
     
-    // Convert underscores to spaces, handle special characters, and capitalize
+    // Convert underscores to spaces and handle special characters
+    // Don't auto-capitalize to preserve original formatting like "1. REPORT IN & REPORT OUT"
     const formatted = withoutUnderscore
       .replace(/_/g, ' ')
       .replace(/&/g, '&')
-      .replace(/\//g, '/')
-      .replace(/\b\w/g, l => l.toUpperCase());
+      .replace(/\//g, '/');
     
     console.log('Formatted criteria name:', formatted);
     return formatted;
