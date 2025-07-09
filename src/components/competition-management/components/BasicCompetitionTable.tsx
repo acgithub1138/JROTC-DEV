@@ -82,8 +82,11 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   
   // Helper function to check if a column is enabled
   const isColumnEnabled = (columnKey: string) => {
+    if (!enabledColumns || enabledColumns.length === 0) {
+      return true; // Show all columns by default when no preferences loaded
+    }
     const column = enabledColumns.find(col => col.key === columnKey);
-    return column ? column.enabled : true; // Default to true if no column preferences
+    return column ? column.enabled : true;
   };
 
   // Show cards on mobile, table on desktop

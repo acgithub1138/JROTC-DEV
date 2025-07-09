@@ -142,6 +142,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       </div>
 
       <BasicCompetitionTable 
+        key={`competitions-table-${enabledColumns.map(c => `${c.key}:${c.enabled}`).join('-')}`}
         competitions={sortedData} 
         isLoading={isLoading} 
         onEdit={readOnly ? undefined : setEditingCompetition} 
