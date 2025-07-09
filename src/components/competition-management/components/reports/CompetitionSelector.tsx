@@ -42,8 +42,12 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
 
   const handleCompetitionToggle = (competitionId: string) => {
     if (!selectedCompetitions) {
-      // If "All" was selected, start with just this competition
-      onCompetitionSelect([competitionId]);
+      // If "All" was selected, clicking on a competition should deselect it
+      // This means selecting all OTHER competitions
+      const allOtherCompetitions = availableCompetitions
+        .filter(comp => comp.id !== competitionId)
+        .map(comp => comp.id);
+      onCompetitionSelect(allOtherCompetitions);
     } else {
       const isSelected = selectedCompetitions.includes(competitionId);
       if (isSelected) {
@@ -51,7 +55,13 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
         // If no competitions left selected, default to "All"
         onCompetitionSelect(newSelections.length === 0 ? null : newSelections);
       } else {
-        onCompetitionSelect([...selectedCompetitions, competitionId]);
+        const newSelections = [...selectedCompetitions, competitionId];
+        // If we've selected all competitions, switch to "All" mode
+        if (newSelections.length === availableCompetitions.length) {
+          onCompetitionSelect(null);
+        } else {
+          onCompetitionSelect(newSelections);
+        }
       }
     }
   };
@@ -184,7 +194,6 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                                 <Checkbox
                                   checked={isAllSelected || isSelected}
                                   onCheckedChange={() => handleCompetitionToggle(comp.id)}
-                                  disabled={isAllSelected}
                                 />
                                 <span 
                                   className="text-sm cursor-pointer flex-1"
