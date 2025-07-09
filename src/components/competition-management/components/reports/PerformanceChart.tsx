@@ -38,7 +38,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   const formatXAxisDate = (value: string) => {
     try {
-      return format(parseISO(value), 'MMM dd');
+      return format(parseISO(value), 'M/d');
     } catch {
       return value;
     }
