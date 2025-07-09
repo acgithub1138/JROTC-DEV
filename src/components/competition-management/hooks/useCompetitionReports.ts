@@ -95,29 +95,39 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
         groupedByDate[date][event] = [];
       }
 
-      // Extract scores from score_sheet and calculate average
+      // Extract ALL individual scores from score_sheet and calculate average
       let averageScore = 0;
       
       if (item.score_sheet?.scores) {
-        // Handle both object and array formats for scores
-        let scores: number[] = [];
+        let allScores: number[] = [];
         
-        if (typeof item.score_sheet.scores === 'object') {
-          if (Array.isArray(item.score_sheet.scores)) {
-            scores = item.score_sheet.scores.filter(score => typeof score === 'number' && !isNaN(score));
-          } else {
-            // Object format - extract all numeric values
-            scores = Object.values(item.score_sheet.scores)
-              .filter(score => typeof score === 'number' && !isNaN(score)) as number[];
+        // Recursively extract all numeric values from the scores object
+        const extractScores = (obj: any): number[] => {
+          let scores: number[] = [];
+          
+          if (typeof obj === 'number' && !isNaN(obj)) {
+            scores.push(obj);
+          } else if (Array.isArray(obj)) {
+            obj.forEach(item => {
+              scores = scores.concat(extractScores(item));
+            });
+          } else if (typeof obj === 'object' && obj !== null) {
+            Object.values(obj).forEach(value => {
+              scores = scores.concat(extractScores(value));
+            });
           }
-        }
+          
+          return scores;
+        };
         
-        if (scores.length > 0) {
-          averageScore = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+        allScores = extractScores(item.score_sheet.scores);
+        
+        if (allScores.length > 0) {
+          averageScore = allScores.reduce((sum, score) => sum + score, 0) / allScores.length;
         }
-      } 
+      }
       
-      // Fallback to total_points if no score_sheet data
+      // Only use total_points as fallback if no individual scores found
       if (averageScore === 0 && item.total_points) {
         averageScore = item.total_points;
       }
