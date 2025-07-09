@@ -52,8 +52,8 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
     }
   });
 
-  // Pagination constants for templates (50 per page)
-  const TEMPLATES_PER_PAGE = 50;
+  // Pagination constants for templates (25 per page)
+  const TEMPLATES_PER_PAGE = 25;
   
   // Calculate pagination
   const totalPages = Math.ceil(sortedTemplates.length / TEMPLATES_PER_PAGE);
