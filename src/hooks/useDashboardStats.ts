@@ -9,7 +9,8 @@ export const useDashboardStats = () => {
         cadetsResult,
         tasksResult,
         budgetResult,
-        inventoryResult
+        inventoryResult,
+        incidentsResult
       ] = await Promise.all([
         // Total cadets count
         supabase
@@ -33,7 +34,13 @@ export const useDashboardStats = () => {
         // Inventory items count and issued count
         supabase
           .from('inventory_items')
-          .select('id, qty_total, qty_issued, qty_available', { count: 'exact' })
+          .select('id, qty_total, qty_issued, qty_available', { count: 'exact' }),
+        
+        // Incidents data
+        supabase
+          .from('incidents')
+          .select('id, status, priority, created_at')
+          .eq('active', true)
       ]);
 
       // Calculate overdue tasks
@@ -58,6 +65,22 @@ export const useDashboardStats = () => {
         sum + (item.qty_issued || 0), 0
       ) || 0;
 
+      // Calculate incident stats
+      const activeIncidents = incidentsResult.data?.filter(incident => 
+        incident.status !== 'resolved' && incident.status !== 'canceled'
+      ) || [];
+      
+      const overdueIncidents = incidentsResult.data?.filter(incident => {
+        const createdDate = new Date(incident.created_at);
+        const daysSinceCreated = Math.floor((now.getTime() - createdDate.getTime()) / (1000 * 60 * 60 * 24));
+        return daysSinceCreated > 7 && incident.status !== 'resolved' && incident.status !== 'canceled';
+      }) || [];
+      
+      const urgentCriticalIncidents = incidentsResult.data?.filter(incident => 
+        (incident.priority === 'urgent' || incident.priority === 'critical') &&
+        incident.status !== 'resolved' && incident.status !== 'canceled'
+      ) || [];
+
       return {
         cadets: {
           total: cadetsResult.count || 0,
@@ -75,6 +98,11 @@ export const useDashboardStats = () => {
         inventory: {
           total: totalInventory,
           issued: totalIssued
+        },
+        incidents: {
+          active: activeIncidents.length,
+          overdue: overdueIncidents.length,
+          urgentCritical: urgentCriticalIncidents.length
         }
       };
     },

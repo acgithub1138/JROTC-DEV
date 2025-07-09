@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle, Building } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
@@ -68,8 +68,35 @@ const DashboardOverview = () => {
   const getStatsConfig = () => {
     const baseStats = [];
 
-    // Admin role gets no stats widgets
+    // Admin role gets incident stats widgets
     if (userProfile?.role === 'admin') {
+      baseStats.push({
+        title: 'Active Incidents',
+        value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
+        change: statsLoading ? '...' : 'Currently open',
+        icon: AlertTriangle,
+        color: 'text-orange-600',
+        bgColor: 'bg-orange-100'
+      });
+
+      baseStats.push({
+        title: 'Overdue Incidents',
+        value: statsLoading ? '...' : stats?.incidents.overdue.toString() || '0',
+        change: statsLoading ? '...' : 'Past due date',
+        icon: AlertTriangle,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100'
+      });
+
+      baseStats.push({
+        title: 'Urgent & Critical',
+        value: statsLoading ? '...' : stats?.incidents.urgentCritical.toString() || '0',
+        change: statsLoading ? '...' : 'High priority',
+        icon: AlertTriangle,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100'
+      });
+
       return baseStats;
     }
 
@@ -126,9 +153,9 @@ const DashboardOverview = () => {
 
   const statsConfig = getStatsConfig();
   
-  // Render Quick Actions as a widget for Command Staff
+  // Render Quick Actions as a widget for Admin and Command Staff
   const renderQuickActionsWidget = () => {
-    if (!isCommandStaffOrAbove()) return null;
+    if (!isCommandStaffOrAbove() && userProfile?.role !== 'admin') return null;
     
     return (
       <Card className="hover:shadow-md transition-shadow col-span-2">
@@ -139,13 +166,27 @@ const DashboardOverview = () => {
               <p className="text-sm font-medium text-gray-600">Quick Actions</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
-              {canCreateTasks() && (
+              {/* Admin-specific actions */}
+              {userProfile?.role === 'admin' && (
+                <>
+                  <button onClick={() => {/* TODO: Navigate to create school */}} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Building className="w-4 h-4 text-blue-600 mr-2" />
+                    <p className="font-medium text-sm">Create School</p>
+                  </button>
+                  <button onClick={() => {/* TODO: Navigate to create user */}} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Users className="w-4 h-4 text-green-600 mr-2" />
+                    <p className="font-medium text-sm">Create User</p>
+                  </button>
+                </>
+              )}
+              {/* Non-admin actions */}
+              {userProfile?.role !== 'admin' && canCreateTasks() && (
                 <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                   <p className="font-medium text-sm">Create Task</p>
                 </button>
               )}
-              {canCreateEvents() && (
+              {userProfile?.role !== 'admin' && canCreateEvents() && (
                 <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                   <p className="font-medium text-sm">Create Event</p>
@@ -209,7 +250,8 @@ const DashboardOverview = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
-          <MyTasksWidget />
+          {/* Hide My Tasks for admin users */}
+          {userProfile?.role !== 'admin' && <MyTasksWidget />}
           {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
