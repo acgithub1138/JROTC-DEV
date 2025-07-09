@@ -9,9 +9,11 @@ interface ChartConfigProps {
   chartType: string;
   xField: string;
   yField: string;
+  aggregationType: string;
   onChartTypeChange: (type: string) => void;
   onXFieldChange: (field: string) => void;
   onYFieldChange: (field: string) => void;
+  onAggregationTypeChange: (type: string) => void;
 }
 
 export const ChartConfig: React.FC<ChartConfigProps> = ({
@@ -19,14 +21,22 @@ export const ChartConfig: React.FC<ChartConfigProps> = ({
   chartType,
   xField,
   yField,
+  aggregationType,
   onChartTypeChange,
   onXFieldChange,
-  onYFieldChange
+  onYFieldChange,
+  onAggregationTypeChange
 }) => {
   const chartTypes = [
     { value: 'bar', label: 'Bar Chart', icon: BarChart3 },
     { value: 'line', label: 'Line Chart', icon: TrendingUp },
     { value: 'pie', label: 'Pie Chart', icon: PieChart },
+  ];
+
+  const aggregationTypes = [
+    { value: 'count', label: 'Count' },
+    { value: 'sum', label: 'Sum' },
+    { value: 'average', label: 'Average' },
   ];
 
   if (selectedFields.length === 0) {
@@ -101,6 +111,23 @@ export const ChartConfig: React.FC<ChartConfigProps> = ({
               {selectedFields.map((field) => (
                 <SelectItem key={field} value={field}>
                   {field.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+
+        {/* Aggregation Type */}
+        <div className="space-y-2">
+          <Label>Aggregation</Label>
+          <Select value={aggregationType} onValueChange={onAggregationTypeChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select aggregation..." />
+            </SelectTrigger>
+            <SelectContent>
+              {aggregationTypes.map((type) => (
+                <SelectItem key={type.value} value={type.value}>
+                  {type.label}
                 </SelectItem>
               ))}
             </SelectContent>

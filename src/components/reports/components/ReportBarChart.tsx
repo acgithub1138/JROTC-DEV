@@ -5,9 +5,10 @@ interface ReportBarChartProps {
   data: any[];
   xField: string;
   yField: string;
+  aggregationType: string;
 }
 
-export const ReportBarChart: React.FC<ReportBarChartProps> = ({ data, xField, yField }) => {
+export const ReportBarChart: React.FC<ReportBarChartProps> = ({ data, xField, yField, aggregationType }) => {
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -28,7 +29,7 @@ export const ReportBarChart: React.FC<ReportBarChartProps> = ({ data, xField, yF
           height={80}
         />
         <YAxis tick={{ fontSize: 12 }} />
-        <Tooltip />
+        <Tooltip formatter={(value) => [value, `${aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1)} of ${yField}`]} />
         <Legend />
         <Bar dataKey={yField} fill="hsl(var(--primary))" />
       </BarChart>

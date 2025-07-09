@@ -5,9 +5,10 @@ interface ReportLineChartProps {
   data: any[];
   xField: string;
   yField: string;
+  aggregationType: string;
 }
 
-export const ReportLineChart: React.FC<ReportLineChartProps> = ({ data, xField, yField }) => {
+export const ReportLineChart: React.FC<ReportLineChartProps> = ({ data, xField, yField, aggregationType }) => {
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -28,7 +29,7 @@ export const ReportLineChart: React.FC<ReportLineChartProps> = ({ data, xField, 
           height={80}
         />
         <YAxis tick={{ fontSize: 12 }} />
-        <Tooltip />
+        <Tooltip formatter={(value) => [value, `${aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1)} of ${yField}`]} />
         <Legend />
         <Line 
           type="monotone" 

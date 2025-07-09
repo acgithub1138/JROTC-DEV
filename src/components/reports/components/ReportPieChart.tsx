@@ -5,6 +5,7 @@ interface ReportPieChartProps {
   data: any[];
   nameField: string;
   valueField: string;
+  aggregationType: string;
 }
 
 const COLORS = [
@@ -17,7 +18,7 @@ const COLORS = [
   'hsl(210, 40%, 20%)',
 ];
 
-export const ReportPieChart: React.FC<ReportPieChartProps> = ({ data, nameField, valueField }) => {
+export const ReportPieChart: React.FC<ReportPieChartProps> = ({ data, nameField, valueField, aggregationType }) => {
   if (!data || data.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -26,19 +27,11 @@ export const ReportPieChart: React.FC<ReportPieChartProps> = ({ data, nameField,
     );
   }
 
-  // Process data for pie chart - group by nameField and count or sum valueField
-  const processedData = data.reduce((acc: any[], item) => {
-    const name = item[nameField] || 'Unknown';
-    const value = typeof item[valueField] === 'number' ? item[valueField] : 1;
-    
-    const existing = acc.find(d => d.name === name);
-    if (existing) {
-      existing.value += value;
-    } else {
-      acc.push({ name, value });
-    }
-    return acc;
-  }, []);
+  // Data is already aggregated, so just use it directly
+  const processedData = data.map(item => ({
+    name: item[nameField] || 'Unknown',
+    value: item[valueField] || 0
+  }));
 
   return (
     <ResponsiveContainer width="100%" height={400}>
@@ -57,7 +50,7 @@ export const ReportPieChart: React.FC<ReportPieChartProps> = ({ data, nameField,
             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
           ))}
         </Pie>
-        <Tooltip />
+        <Tooltip formatter={(value) => [value, `${aggregationType.charAt(0).toUpperCase() + aggregationType.slice(1)}`]} />
         <Legend />
       </PieChart>
     </ResponsiveContainer>

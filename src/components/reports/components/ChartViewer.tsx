@@ -4,12 +4,14 @@ import { ReportBarChart } from './ReportBarChart';
 import { ReportLineChart } from './ReportLineChart';
 import { ReportPieChart } from './ReportPieChart';
 import { Badge } from '@/components/ui/badge';
+import { aggregateData } from '../utils/aggregation';
 
 interface ChartViewerProps {
   data: any[];
   chartType: string;
   xField: string;
   yField: string;
+  aggregationType: string;
   selectedTable: string;
 }
 
@@ -18,9 +20,10 @@ export const ChartViewer: React.FC<ChartViewerProps> = ({
   chartType,
   xField,
   yField,
+  aggregationType,
   selectedTable
 }) => {
-  if (!chartType || !xField || !yField) {
+  if (!chartType || !xField || !yField || !aggregationType) {
     return (
       <Card>
         <CardHeader>
@@ -36,13 +39,16 @@ export const ChartViewer: React.FC<ChartViewerProps> = ({
   }
 
   const renderChart = () => {
+    // Process data with aggregation
+    const aggregatedData = aggregateData(data, xField, yField, aggregationType);
+    
     switch (chartType) {
       case 'bar':
-        return <ReportBarChart data={data} xField={xField} yField={yField} />;
+        return <ReportBarChart data={aggregatedData} xField={xField} yField={yField} aggregationType={aggregationType} />;
       case 'line':
-        return <ReportLineChart data={data} xField={xField} yField={yField} />;
+        return <ReportLineChart data={aggregatedData} xField={xField} yField={yField} aggregationType={aggregationType} />;
       case 'pie':
-        return <ReportPieChart data={data} nameField={xField} valueField={yField} />;
+        return <ReportPieChart data={aggregatedData} nameField={xField} valueField={yField} aggregationType={aggregationType} />;
       default:
         return (
           <div className="text-center py-8 text-muted-foreground">
@@ -60,6 +66,7 @@ export const ChartViewer: React.FC<ChartViewerProps> = ({
           <div className="flex items-center gap-2 mt-2">
             <Badge variant="secondary">{selectedTable}</Badge>
             <Badge variant="outline">{chartType} chart</Badge>
+            <Badge variant="outline">{aggregationType}</Badge>
             <span className="text-sm text-muted-foreground">
               {data.length} records
             </span>

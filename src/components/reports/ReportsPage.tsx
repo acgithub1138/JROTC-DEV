@@ -17,6 +17,7 @@ export const ReportsPage: React.FC = () => {
   const [chartType, setChartType] = useState<string>('bar');
   const [xField, setXField] = useState<string>('');
   const [yField, setYField] = useState<string>('');
+  const [aggregationType, setAggregationType] = useState<string>('count');
 
   const handleGenerateReport = async () => {
     if (!selectedTable || selectedFields.length === 0) return;
@@ -32,6 +33,7 @@ export const ReportsPage: React.FC = () => {
     setReportData([]);
     setXField('');
     setYField('');
+    setAggregationType('count');
   };
 
   return (
@@ -88,9 +90,11 @@ export const ReportsPage: React.FC = () => {
           chartType={chartType}
           xField={xField}
           yField={yField}
+          aggregationType={aggregationType}
           onChartTypeChange={setChartType}
           onXFieldChange={setXField}
           onYFieldChange={setYField}
+          onAggregationTypeChange={setAggregationType}
         />
 
         {/* Actions */}
@@ -148,6 +152,7 @@ export const ReportsPage: React.FC = () => {
               chartType={chartType}
               xField={xField}
               yField={yField}
+              aggregationType={aggregationType}
               selectedTable={selectedTable}
             />
           </TabsContent>
