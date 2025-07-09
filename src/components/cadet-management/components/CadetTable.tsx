@@ -33,7 +33,8 @@ export const CadetTable = ({
 onSelectAll
 }: CadetTableProps) => {
   const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
-    data: profiles
+    data: profiles,
+    defaultSort: { key: 'last_name', direction: 'asc' }
   });
   
   const allSelected = profiles.length > 0 && selectedCadets.length === profiles.length;
