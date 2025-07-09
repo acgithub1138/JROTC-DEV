@@ -139,7 +139,9 @@ const IncidentManagementPage: React.FC = () => {
           Create Incident
         </Button>
       </div>
-
+        <p className="text-muted-foreground">
+          Manage competitions, score sheets, and track performance
+        </p>
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
         <Input
