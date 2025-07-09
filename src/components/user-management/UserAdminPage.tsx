@@ -212,11 +212,13 @@ const UserAdminPage = () => {
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="all">All Schools</SelectItem>
-                    {schools.map((school) => (
-                      <SelectItem key={school.id} value={school.id}>
-                        {school.name}
-                      </SelectItem>
-                    ))}
+                    {schools
+                      .filter(school => school.name !== 'Carey Unlimited')
+                      .map((school) => (
+                        <SelectItem key={school.id} value={school.id}>
+                          {school.name}
+                        </SelectItem>
+                      ))}
                   </SelectContent>
                 </Select>
               </div>
