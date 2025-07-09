@@ -6,7 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Edit, MessageSquare, Send, Save, X, ArrowUp, ArrowDown, Flag, User, Calendar as CalendarIcon } from 'lucide-react';
+import { Edit, MessageSquare, Send, Save, X, ArrowUp, ArrowDown, Flag, User, Calendar as CalendarIcon, Bell } from 'lucide-react';
 import { Incident, useIncidents } from '@/hooks/incidents/useIncidents';
 import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useAuth } from '@/contexts/AuthContext';
@@ -14,6 +14,9 @@ import { useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOptions';
 import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
+import { useIncidentEmailTemplates } from '@/hooks/incidents/useIncidentEmailTemplates';
+import { useIncidentNotifications } from '@/hooks/incidents/useIncidentNotifications';
+import { Checkbox } from '@/components/ui/checkbox';
 
 interface IncidentDetailDialogProps {
   incident: Incident;
@@ -61,9 +64,13 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { users } = useSchoolUsers();
   const { statusOptions } = useIncidentStatusOptions();
   const { categoryOptions } = useIncidentCategoryOptions();
+  const { templates } = useIncidentEmailTemplates();
+  const { sendNotification, isSending } = useIncidentNotifications();
   
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [sendNotificationChecked, setSendNotificationChecked] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState('');
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
@@ -94,7 +101,22 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         updateData.active = false;
       }
 
+      // First save the incident
       await updateIncident(updateData);
+
+      // Send notification if checked and template selected
+      if (sendNotificationChecked && selectedTemplate && incident.submitted_by_profile?.email) {
+        sendNotification({
+          incidentId: incident.id,
+          templateId: selectedTemplate,
+          recipientEmail: incident.submitted_by_profile.email,
+          incidentData: {
+            ...incident,
+            ...editData,
+          },
+        });
+      }
+
       onOpenChange(false); // Close modal after successful save
     } catch (error) {
       console.error('Error updating incident:', error);
@@ -111,6 +133,9 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       category: incident.category,
       assigned_to: incident.assigned_to || 'unassigned',
     });
+    // Reset notification fields when incident changes
+    setSendNotificationChecked(false);
+    setSelectedTemplate('');
   }, [incident]);
 
   const handleCancel = () => {
@@ -157,13 +182,13 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   <X className="w-4 h-4 mr-2" />
                   Cancel
                 </Button>
-                <Button
+                 <Button
                   size="sm"
                   onClick={handleSave}
-                  disabled={isUpdating}
+                  disabled={isUpdating || isSending}
                 >
                   <Save className="w-4 h-4 mr-2" />
-                  Save
+                  {isSending ? 'Saving...' : 'Save'}
                 </Button>
               </div>
             )}
@@ -307,6 +332,66 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               </CardContent>
             </Card>
           </div>
+
+          {/* Notifications Section */}
+          {canEditIncident && incident.submitted_by_profile?.email && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium flex items-center gap-2">
+                  <Bell className="w-4 h-4" />
+                  Notifications
+                </CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="send-notification"
+                    checked={sendNotificationChecked}
+                    onCheckedChange={(checked) => {
+                      setSendNotificationChecked(checked as boolean);
+                      if (!checked) {
+                        setSelectedTemplate('');
+                      }
+                    }}
+                  />
+                  <label
+                    htmlFor="send-notification"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Send notification to submitter ({incident.submitted_by_profile.email})
+                  </label>
+                </div>
+                
+                {sendNotificationChecked && (
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium">
+                      Notification Template
+                    </label>
+                    <Select 
+                      value={selectedTemplate} 
+                      onValueChange={setSelectedTemplate}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a notification template" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {templates.map((template) => (
+                          <SelectItem key={template.id} value={template.id}>
+                            {template.name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    {templates.length === 0 && (
+                      <p className="text-sm text-muted-foreground">
+                        No incident email templates available. Create one in Email Management first.
+                      </p>
+                    )}
+                  </div>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           {/* Description */}
           <div>
