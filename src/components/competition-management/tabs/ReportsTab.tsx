@@ -74,25 +74,29 @@ export const ReportsTab = () => {
         />
       </div>
 
-      <PerformanceChart
-        data={reportData}
-        visibleCriteria={visibleCriteria}
-        isLoading={isLoading}
-      />
-        
-        {selectedEvent && (
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-            <div className="md:col-span-2 lg:col-span-3">
-              <ChartLegend
-                scoringCriteria={scoringCriteria}
-                visibleCriteria={visibleCriteria}
-                onCriteriaToggle={handleCriteriaVisibilityToggle}
-                onSelectAll={handleSelectAllCriteria}
-                onUnselectAll={handleUnselectAllCriteria}
-              />
-            </div>
+      {selectedEvent && (
+        <div className="flex gap-4">
+          {/* Performance Trends - 3/4 width */}
+          <div className="w-3/4">
+            <PerformanceChart
+              data={reportData}
+              visibleCriteria={visibleCriteria}
+              isLoading={isLoading}
+            />
           </div>
-        )}
+          
+          {/* Scoring Criteria - 1/4 width */}
+          <div className="w-1/4">
+            <ChartLegend
+              scoringCriteria={scoringCriteria}
+              visibleCriteria={visibleCriteria}
+              onCriteriaToggle={handleCriteriaVisibilityToggle}
+              onSelectAll={handleSelectAllCriteria}
+              onUnselectAll={handleUnselectAllCriteria}
+            />
+          </div>
+        </div>
+      )}
     </div>
   );
 };
