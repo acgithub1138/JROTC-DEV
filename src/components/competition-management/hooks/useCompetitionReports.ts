@@ -143,19 +143,29 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     console.log('Formatting criteria name:', rawName);
     
     // Handle the specific format from database: field_X_Y._description
-    const cleaned = rawName.replace(/^field_\d+_\d+\./, '');
+    // Extract the first number from field_X_Y to use as display number
+    const fieldMatch = rawName.match(/^field_(\d+)_\d+\.(.*)/);
     
-    // Remove leading underscore and clean up
-    const withoutUnderscore = cleaned.replace(/^_/, '');
+    if (fieldMatch) {
+      const displayNumber = fieldMatch[1]; // First number from field_X_Y
+      const description = fieldMatch[2]; // Everything after the dot
+      
+      // Clean up the description part
+      const cleanDescription = description
+        .replace(/^_/, '') // Remove leading underscore
+        .replace(/_/g, ' ') // Convert underscores to spaces
+        .replace(/&/g, '&') // Handle special characters
+        .replace(/\//g, '/')
+        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize words
+      
+      const formatted = `${displayNumber}. ${cleanDescription}`;
+      console.log('Formatted criteria name:', formatted);
+      return formatted;
+    }
     
-    // Convert underscores to spaces and handle special characters
-    // Don't auto-capitalize to preserve original formatting like "1. REPORT IN & REPORT OUT"
-    const formatted = withoutUnderscore
-      .replace(/_/g, ' ')
-      .replace(/&/g, '&')
-      .replace(/\//g, '/');
-    
-    console.log('Formatted criteria name:', formatted);
+    // Fallback for unexpected format
+    const formatted = rawName.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+    console.log('Formatted criteria name (fallback):', formatted);
     return formatted;
   };
 
