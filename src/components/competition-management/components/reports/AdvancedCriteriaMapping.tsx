@@ -186,7 +186,7 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                 
                 <div className="space-y-3">
                   <div className="flex gap-2 items-end">
-                    <div className="flex-1">
+                    <div className="w-1/4">
                       <Label htmlFor="mapping-name">Display Name</Label>
                       <Input
                         id="mapping-name"
