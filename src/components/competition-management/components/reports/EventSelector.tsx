@@ -67,18 +67,6 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
                 ))}
               </SelectContent>
             </Select>
-
-            {selectedEvent && (
-              <div className="flex items-center justify-between p-2 bg-muted rounded-md">
-                <span className="text-sm font-medium">Selected: {formatEventName(selectedEvent)}</span>
-                <button
-                  onClick={handleEventClear}
-                  className="text-muted-foreground hover:text-destructive text-lg"
-                >
-                  ×
-                </button>
-              </div>
-            )}
           </>
         )}
       </CardContent>
