@@ -194,7 +194,7 @@ export const InventoryHistoryDialog: React.FC<InventoryHistoryDialogProps> = ({
                         {getFieldDisplayName(entry.field_name)}
                       </Badge>
                       <span className="text-sm text-muted-foreground">
-                        {format(new Date(entry.created_at), 'MM/dd/yyyy HH:mm:ss')}
+                        {format(new Date(entry.created_at), 'MMM d, yyyy HH:mm')}
                       </span>
                     </div>
                     {entry.profiles && (
