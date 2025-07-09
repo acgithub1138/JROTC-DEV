@@ -124,9 +124,58 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
 
         <CollapsibleContent>
           <CardContent className="space-y-6">
+            {/* Create New Mapping */}
+            {unmappedCriteria.length > 0 && (
+              <div className="space-y-4">
+                <h4 className="font-medium">Create New Mapping:</h4>
+                
+                <div className="space-y-3">
+                  <div className="flex gap-2 items-end">
+                    <div className="w-1/4">
+                      <Label htmlFor="mapping-name">Display Name</Label>
+                      <Input
+                        id="mapping-name"
+                        value={newMappingName}
+                        onChange={(e) => setNewMappingName(e.target.value)}
+                        placeholder="e.g., Routine Marching"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleCreateMapping}
+                      disabled={!newMappingName.trim() || selectedCriteria.length === 0}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Mapping
+                    </Button>
+                  </div>
+
+                  <div>
+                    <Label>Select Criteria to Group:</Label>
+                    <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto">
+                      {unmappedCriteria.map((criteria) => (
+                        <div key={criteria} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`criteria-${criteria}`}
+                            checked={selectedCriteria.includes(criteria)}
+                            onCheckedChange={() => handleCriteriaToggle(criteria)}
+                          />
+                          <Label 
+                            htmlFor={`criteria-${criteria}`} 
+                            className="text-sm cursor-pointer flex-1"
+                          >
+                            {criteria}
+                          </Label>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Current Mappings */}
             {mappings.length > 0 && (
-              <div className="space-y-3">
+              <div className="space-y-3 border-t pt-4">
                 <h4 className="font-medium">Current Mappings:</h4>
                 {mappings.map((mapping) => (
                   <div key={mapping.id} className="flex items-center justify-between p-3 border rounded-lg">
@@ -176,55 +225,6 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                     )}
                   </div>
                 ))}
-              </div>
-            )}
-
-            {/* Create New Mapping */}
-            {unmappedCriteria.length > 0 && (
-              <div className="space-y-4 border-t pt-4">
-                <h4 className="font-medium">Create New Mapping:</h4>
-                
-                <div className="space-y-3">
-                  <div className="flex gap-2 items-end">
-                    <div className="w-1/4">
-                      <Label htmlFor="mapping-name">Display Name</Label>
-                      <Input
-                        id="mapping-name"
-                        value={newMappingName}
-                        onChange={(e) => setNewMappingName(e.target.value)}
-                        placeholder="e.g., Routine Marching"
-                      />
-                    </div>
-                    <Button 
-                      onClick={handleCreateMapping}
-                      disabled={!newMappingName.trim() || selectedCriteria.length === 0}
-                    >
-                      <Plus className="h-4 w-4 mr-2" />
-                      Create Mapping
-                    </Button>
-                  </div>
-
-                  <div>
-                    <Label>Select Criteria to Group:</Label>
-                    <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto">
-                      {unmappedCriteria.map((criteria) => (
-                        <div key={criteria} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`criteria-${criteria}`}
-                            checked={selectedCriteria.includes(criteria)}
-                            onCheckedChange={() => handleCriteriaToggle(criteria)}
-                          />
-                          <Label 
-                            htmlFor={`criteria-${criteria}`} 
-                            className="text-sm cursor-pointer flex-1"
-                          >
-                            {criteria}
-                          </Label>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
               </div>
             )}
 
