@@ -122,37 +122,28 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
               </CollapsibleTrigger>
               <CollapsibleContent className="space-y-2 pt-2">
                 <div className="border rounded-md">
-                  {/* Controls and search */}
-                  <div className="p-3 border-b space-y-3">
-                    <div className="flex gap-2">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleSelectAll}
-                        disabled={isAllSelected}
-                        className="text-xs"
-                      >
-                        All
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onCompetitionSelect([])}
-                        disabled={selectedCompetitions !== null && selectedCount === 0}
-                        className="text-xs"
-                      >
-                        None
-                      </Button>
-                    </div>
-                    
-                    <div className="relative">
-                      <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
-                      <Input
-                        placeholder="Search competitions..."
-                        value={searchTerm}
-                        onChange={(e) => setSearchTerm(e.target.value)}
-                        className="pl-10"
-                      />
+                  {/* Search and Select All */}
+                  <div className="p-3 border-b">
+                    <div className="flex gap-3 items-center">
+                      <div className="relative flex-1">
+                        <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
+                        <Input
+                          placeholder="Search competitions..."
+                          value={searchTerm}
+                          onChange={(e) => setSearchTerm(e.target.value)}
+                          className="pl-10"
+                        />
+                      </div>
+                      <div className="flex items-center space-x-2 flex-shrink-0">
+                        <Checkbox
+                          id="select-all-competitions"
+                          checked={isAllSelected}
+                          onCheckedChange={() => isAllSelected ? onCompetitionSelect([]) : handleSelectAll()}
+                        />
+                        <Label htmlFor="select-all-competitions" className="text-sm whitespace-nowrap cursor-pointer">
+                          Select All
+                        </Label>
+                      </div>
                     </div>
                   </div>
                   
