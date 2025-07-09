@@ -1,7 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { format, parseISO } from 'date-fns';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -28,6 +30,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   visibleCriteria,
   isLoading
 }) => {
+  const [isCurved, setIsCurved] = useState(false);
   const formatTooltipDate = (value: string) => {
     try {
       return format(parseISO(value), 'MMM dd, yyyy');
@@ -48,7 +51,17 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Performance Trends</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Performance Trends</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="curved-toggle" className="text-sm">Curved</Label>
+              <Switch
+                id="curved-toggle"
+                checked={isCurved}
+                onCheckedChange={setIsCurved}
+              />
+            </div>
+          </div>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-96 w-full" />
@@ -78,10 +91,20 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle>Performance Trends Over Time</CardTitle>
-      </CardHeader>
+      <Card>
+        <CardHeader>
+          <div className="flex items-center justify-between">
+            <CardTitle>Performance Trends</CardTitle>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="curved-toggle" className="text-sm">Curved</Label>
+              <Switch
+                id="curved-toggle"
+                checked={isCurved}
+                onCheckedChange={setIsCurved}
+              />
+            </div>
+          </div>
+        </CardHeader>
       <CardContent>
         <ResponsiveContainer width="100%" height={400}>
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
@@ -103,7 +126,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             {visibleCriteria.map((criteria, index) => (
               <Line
                 key={criteria}
-                type="linear"
+                type={isCurved ? "monotone" : "linear"}
                 dataKey={criteria}
                 stroke={EVENT_COLORS[index % EVENT_COLORS.length]}
                 strokeWidth={2}
