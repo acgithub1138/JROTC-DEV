@@ -14,7 +14,7 @@ interface PerformanceData {
 
 interface PerformanceChartProps {
   data: PerformanceData[];
-  visibleEvents: CompetitionEventType[];
+  visibleCriteria: string[];
   isLoading: boolean;
 }
 
@@ -25,7 +25,7 @@ const EVENT_COLORS = [
 
 export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   data,
-  visibleEvents,
+  visibleCriteria,
   isLoading
 }) => {
   const formatTooltipDate = (value: string) => {
@@ -57,7 +57,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     );
   }
 
-  if (data.length === 0 || visibleEvents.length === 0) {
+  if (data.length === 0 || visibleCriteria.length === 0) {
     return (
       <Card>
         <CardHeader>
@@ -66,9 +66,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
         <CardContent className="flex items-center justify-center h-96">
           <div className="text-center">
             <p className="text-muted-foreground">
-              {visibleEvents.length === 0 
-                ? 'Select events to view performance trends'
-                : 'No data available for the selected events'
+              {visibleCriteria.length === 0 
+                ? 'Select scoring criteria to view performance trends'
+                : 'No data available for the selected criteria'
               }
             </p>
           </div>
@@ -100,11 +100,11 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
                 name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
               ]}
             />
-            {visibleEvents.map((event, index) => (
+            {visibleCriteria.map((criteria, index) => (
               <Line
-                key={event}
+                key={criteria}
                 type="monotone"
-                dataKey={event}
+                dataKey={criteria}
                 stroke={EVENT_COLORS[index % EVENT_COLORS.length]}
                 strokeWidth={2}
                 dot={{ r: 4 }}

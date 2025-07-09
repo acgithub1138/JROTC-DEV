@@ -9,39 +9,35 @@ type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 interface EventSelectorProps {
   availableEvents: CompetitionEventType[];
-  selectedEvents: CompetitionEventType[];
-  onEventSelect: (events: CompetitionEventType[]) => void;
+  selectedEvent: CompetitionEventType | null;
+  onEventSelect: (event: CompetitionEventType | null) => void;
   isLoading: boolean;
 }
 
 export const EventSelector: React.FC<EventSelectorProps> = ({
   availableEvents,
-  selectedEvents,
+  selectedEvent,
   onEventSelect,
   isLoading
 }) => {
   const handleEventSelect = (eventValue: string) => {
     const event = eventValue as CompetitionEventType;
-    if (!selectedEvents.includes(event)) {
-      onEventSelect([...selectedEvents, event]);
-    }
+    onEventSelect(event);
   };
 
-  const handleEventRemove = (eventToRemove: CompetitionEventType) => {
-    onEventSelect(selectedEvents.filter(e => e !== eventToRemove));
+  const handleEventClear = () => {
+    onEventSelect(null);
   };
 
   const formatEventName = (event: CompetitionEventType) => {
     return event.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
   };
 
-  const availableToAdd = availableEvents.filter(event => !selectedEvents.includes(event));
-
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Select Events</CardTitle>
+          <CardTitle>Select Event</CardTitle>
         </CardHeader>
         <CardContent>
           <Skeleton className="h-10 w-full" />
@@ -53,7 +49,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Select Events</CardTitle>
+        <CardTitle>Select Event</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         {availableEvents.length === 0 ? (
@@ -62,12 +58,12 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
           </p>
         ) : (
           <>
-            <Select onValueChange={handleEventSelect}>
+            <Select value={selectedEvent || ''} onValueChange={handleEventSelect}>
               <SelectTrigger>
-                <SelectValue placeholder="Add an event to analyze..." />
+                <SelectValue placeholder="Select an event to analyze..." />
               </SelectTrigger>
               <SelectContent>
-                {availableToAdd.map((event) => (
+                {availableEvents.map((event) => (
                   <SelectItem key={event} value={event}>
                     {formatEventName(event)}
                   </SelectItem>
@@ -75,22 +71,15 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
               </SelectContent>
             </Select>
 
-            {selectedEvents.length > 0 && (
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Selected Events:</Label>
-                <div className="space-y-1">
-                  {selectedEvents.map((event) => (
-                    <div key={event} className="flex items-center justify-between p-2 bg-muted rounded-md">
-                      <span className="text-sm">{formatEventName(event)}</span>
-                      <button
-                        onClick={() => handleEventRemove(event)}
-                        className="text-muted-foreground hover:text-destructive"
-                      >
-                        ×
-                      </button>
-                    </div>
-                  ))}
-                </div>
+            {selectedEvent && (
+              <div className="flex items-center justify-between p-2 bg-muted rounded-md">
+                <span className="text-sm font-medium">Selected: {formatEventName(selectedEvent)}</span>
+                <button
+                  onClick={handleEventClear}
+                  className="text-muted-foreground hover:text-destructive text-lg"
+                >
+                  ×
+                </button>
               </div>
             )}
           </>

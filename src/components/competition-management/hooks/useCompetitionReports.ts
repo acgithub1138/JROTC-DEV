@@ -11,10 +11,11 @@ interface PerformanceData {
   [event: string]: number | string;
 }
 
-export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) => {
+export const useCompetitionReports = (selectedEvent: CompetitionEventType | null) => {
   const { userProfile } = useAuth();
   const [reportData, setReportData] = useState<PerformanceData[]>([]);
   const [availableEvents, setAvailableEvents] = useState<CompetitionEventType[]>([]);
+  const [scoringCriteria, setScoringCriteria] = useState<string[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -44,8 +45,9 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
   };
 
   const fetchReportData = async () => {
-    if (!userProfile?.school_id || selectedEvents.length === 0) {
+    if (!userProfile?.school_id || !selectedEvent) {
       setReportData([]);
+      setScoringCriteria([]);
       return;
     }
 
@@ -63,14 +65,15 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
           )
         `)
         .eq('school_id', userProfile.school_id)
-        .in('event', selectedEvents)
+        .eq('event', selectedEvent)
         .order('competitions(competition_date)', { ascending: true });
 
       if (error) throw error;
 
-      // Process the data to calculate averages per date/event
-      const processedData = processCompetitionData(data as any);
+      // Process the data to extract scoring criteria and calculate individual criteria performance
+      const { processedData, criteria } = processCompetitionData(data as any);
       setReportData(processedData);
+      setScoringCriteria(criteria);
     } catch (error) {
       console.error('Error fetching report data:', error);
       toast.error('Failed to load report data');
@@ -79,76 +82,95 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
     }
   };
 
-  const processCompetitionData = (data: any[]): PerformanceData[] => {
-    // Group data by date
-    const groupedByDate: { [date: string]: { [event: string]: number[] } } = {};
+  const processCompetitionData = (data: any[]): { processedData: PerformanceData[], criteria: string[] } => {
+    // First, collect all unique scoring criteria from all score sheets
+    const allCriteria = new Set<string>();
+    
+    data.forEach(item => {
+      if (item.score_sheet?.scores) {
+        const extractCriteriaKeys = (obj: any, prefix = ''): void => {
+          if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
+            Object.keys(obj).forEach(key => {
+              const fullKey = prefix ? `${prefix}.${key}` : key;
+              const value = obj[key];
+              
+              if (typeof value === 'number') {
+                allCriteria.add(fullKey);
+              } else if (typeof value === 'object' && value !== null) {
+                extractCriteriaKeys(value, fullKey);
+              }
+            });
+          }
+        };
+        
+        extractCriteriaKeys(item.score_sheet.scores);
+      }
+    });
+
+    const criteriaList = Array.from(allCriteria).sort();
+    
+    // Group data by date and extract individual scores for each criteria
+    const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
 
     data.forEach(item => {
       const date = item.competitions.competition_date;
-      const event = item.event;
       
       if (!groupedByDate[date]) {
         groupedByDate[date] = {};
       }
-      
-      if (!groupedByDate[date][event]) {
-        groupedByDate[date][event] = [];
-      }
 
-      // Extract ALL individual scores from score_sheet and calculate average
-      let averageScore = 0;
-      
       if (item.score_sheet?.scores) {
-        let allScores: number[] = [];
-        
-        // Recursively extract all numeric values from the scores object
-        const extractScores = (obj: any): number[] => {
-          let scores: number[] = [];
+        const extractScoresByCriteria = (obj: any, prefix = ''): { [key: string]: number } => {
+          const scores: { [key: string]: number } = {};
           
-          if (typeof obj === 'number' && !isNaN(obj)) {
-            scores.push(obj);
-          } else if (Array.isArray(obj)) {
-            obj.forEach(item => {
-              scores = scores.concat(extractScores(item));
-            });
-          } else if (typeof obj === 'object' && obj !== null) {
-            Object.values(obj).forEach(value => {
-              scores = scores.concat(extractScores(value));
+          if (typeof obj === 'object' && obj !== null && !Array.isArray(obj)) {
+            Object.entries(obj).forEach(([key, value]) => {
+              const fullKey = prefix ? `${prefix}.${key}` : key;
+              
+              if (typeof value === 'number') {
+                scores[fullKey] = value;
+              } else if (typeof value === 'object' && value !== null) {
+                Object.assign(scores, extractScoresByCriteria(value, fullKey));
+              }
             });
           }
           
           return scores;
         };
         
-        allScores = extractScores(item.score_sheet.scores);
+        const scoresByCriteria = extractScoresByCriteria(item.score_sheet.scores);
         
-        if (allScores.length > 0) {
-          averageScore = allScores.reduce((sum, score) => sum + score, 0) / allScores.length;
-        }
+        // Add scores for each criteria
+        Object.entries(scoresByCriteria).forEach(([criteria, score]) => {
+          if (!groupedByDate[date][criteria]) {
+            groupedByDate[date][criteria] = [];
+          }
+          groupedByDate[date][criteria].push(score);
+        });
       }
-      
-      // Only use total_points as fallback if no individual scores found
-      if (averageScore === 0 && item.total_points) {
-        averageScore = item.total_points;
-      }
-
-      groupedByDate[date][event].push(averageScore);
     });
 
     // Convert to chart data format
-    const chartData: PerformanceData[] = Object.entries(groupedByDate).map(([date, events]) => {
+    const chartData: PerformanceData[] = Object.entries(groupedByDate).map(([date, criteriaScores]) => {
       const dataPoint: PerformanceData = { date };
       
-      Object.entries(events).forEach(([event, scores]) => {
-        // Calculate average for this event on this date
-        const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-        dataPoint[event] = Math.round(average * 100) / 100; // Round to 2 decimal places
+      criteriaList.forEach(criteria => {
+        if (criteriaScores[criteria] && criteriaScores[criteria].length > 0) {
+          const scores = criteriaScores[criteria];
+          const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
+          dataPoint[criteria] = Math.round(average * 100) / 100; // Round to 2 decimal places
+        }
       });
       
       return dataPoint;
     });
 
-    return chartData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    const sortedData = chartData.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+    
+    return {
+      processedData: sortedData,
+      criteria: criteriaList
+    };
   };
 
   useEffect(() => {
@@ -157,11 +179,12 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
 
   useEffect(() => {
     fetchReportData();
-  }, [selectedEvents, userProfile?.school_id]);
+  }, [selectedEvent, userProfile?.school_id]);
 
   return {
     reportData,
     availableEvents,
+    scoringCriteria,
     isLoading,
     isLoadingEvents,
     refetch: fetchReportData

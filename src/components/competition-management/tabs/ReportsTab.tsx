@@ -8,21 +8,21 @@ import type { Database } from '@/integrations/supabase/types';
 type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 export const ReportsTab = () => {
-  const [selectedEvents, setSelectedEvents] = useState<CompetitionEventType[]>([]);
-  const [visibleEvents, setVisibleEvents] = useState<CompetitionEventType[]>([]);
+  const [selectedEvent, setSelectedEvent] = useState<CompetitionEventType | null>(null);
+  const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   
-  const { reportData, isLoading, isLoadingEvents, availableEvents } = useCompetitionReports(selectedEvents);
+  const { reportData, isLoading, isLoadingEvents, availableEvents, scoringCriteria } = useCompetitionReports(selectedEvent);
 
-  const handleEventSelect = (events: CompetitionEventType[]) => {
-    setSelectedEvents(events);
-    setVisibleEvents(events); // By default, show all selected events
+  const handleEventSelect = (event: CompetitionEventType | null) => {
+    setSelectedEvent(event);
+    setVisibleCriteria([]); // Reset visible criteria when event changes
   };
 
-  const handleEventVisibilityToggle = (event: CompetitionEventType) => {
-    setVisibleEvents(prev => 
-      prev.includes(event) 
-        ? prev.filter(e => e !== event)
-        : [...prev, event]
+  const handleCriteriaVisibilityToggle = (criteria: string) => {
+    setVisibleCriteria(prev => 
+      prev.includes(criteria) 
+        ? prev.filter(c => c !== criteria)
+        : [...prev, criteria]
     );
   };
 
@@ -39,16 +39,16 @@ export const ReportsTab = () => {
         <div className="lg:col-span-1">
           <EventSelector
             availableEvents={availableEvents}
-            selectedEvents={selectedEvents}
+            selectedEvent={selectedEvent}
             onEventSelect={handleEventSelect}
             isLoading={isLoadingEvents}
           />
           
-          {selectedEvents.length > 0 && (
+          {selectedEvent && (
             <ChartLegend
-              selectedEvents={selectedEvents}
-              visibleEvents={visibleEvents}
-              onEventToggle={handleEventVisibilityToggle}
+              scoringCriteria={scoringCriteria}
+              visibleCriteria={visibleCriteria}
+              onCriteriaToggle={handleCriteriaVisibilityToggle}
             />
           )}
         </div>
@@ -56,7 +56,7 @@ export const ReportsTab = () => {
         <div className="lg:col-span-3">
           <PerformanceChart
             data={reportData}
-            visibleEvents={visibleEvents}
+            visibleCriteria={visibleCriteria}
             isLoading={isLoading}
           />
         </div>
