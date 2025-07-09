@@ -1,8 +1,8 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import type { Database } from '@/integrations/supabase/types';
 
 type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
@@ -20,13 +20,22 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   onEventSelect,
   isLoading
 }) => {
-  const handleEventToggle = (event: CompetitionEventType, checked: boolean) => {
-    if (checked) {
+  const handleEventSelect = (eventValue: string) => {
+    const event = eventValue as CompetitionEventType;
+    if (!selectedEvents.includes(event)) {
       onEventSelect([...selectedEvents, event]);
-    } else {
-      onEventSelect(selectedEvents.filter(e => e !== event));
     }
   };
+
+  const handleEventRemove = (eventToRemove: CompetitionEventType) => {
+    onEventSelect(selectedEvents.filter(e => e !== eventToRemove));
+  };
+
+  const formatEventName = (event: CompetitionEventType) => {
+    return event.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  };
+
+  const availableToAdd = availableEvents.filter(event => !selectedEvents.includes(event));
 
   if (isLoading) {
     return (
@@ -34,13 +43,8 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
         <CardHeader>
           <CardTitle>Select Events</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-3">
-          {[1, 2, 3, 4].map((i) => (
-            <div key={i} className="flex items-center space-x-2">
-              <Skeleton className="h-4 w-4" />
-              <Skeleton className="h-4 w-32" />
-            </div>
-          ))}
+        <CardContent>
+          <Skeleton className="h-10 w-full" />
         </CardContent>
       </Card>
     );
@@ -51,27 +55,45 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
       <CardHeader>
         <CardTitle>Select Events</CardTitle>
       </CardHeader>
-      <CardContent className="space-y-3">
+      <CardContent className="space-y-4">
         {availableEvents.length === 0 ? (
           <p className="text-sm text-muted-foreground">
             No competition events found. Add some competitions with events to see performance data.
           </p>
         ) : (
-          availableEvents.map((event) => (
-            <div key={event} className="flex items-center space-x-2">
-              <Checkbox
-                id={event}
-                checked={selectedEvents.includes(event)}
-                onCheckedChange={(checked) => handleEventToggle(event, checked as boolean)}
-              />
-              <Label 
-                htmlFor={event} 
-                className="text-sm font-normal cursor-pointer"
-              >
-                {event.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
-              </Label>
-            </div>
-          ))
+          <>
+            <Select onValueChange={handleEventSelect}>
+              <SelectTrigger>
+                <SelectValue placeholder="Add an event to analyze..." />
+              </SelectTrigger>
+              <SelectContent>
+                {availableToAdd.map((event) => (
+                  <SelectItem key={event} value={event}>
+                    {formatEventName(event)}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {selectedEvents.length > 0 && (
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Selected Events:</Label>
+                <div className="space-y-1">
+                  {selectedEvents.map((event) => (
+                    <div key={event} className="flex items-center justify-between p-2 bg-muted rounded-md">
+                      <span className="text-sm">{formatEventName(event)}</span>
+                      <button
+                        onClick={() => handleEventRemove(event)}
+                        className="text-muted-foreground hover:text-destructive"
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
+          </>
         )}
       </CardContent>
     </Card>
