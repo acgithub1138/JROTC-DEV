@@ -1893,6 +1893,7 @@ export type Database = {
       }
       user_sidebar_preferences: {
         Row: {
+          competitions_columns: string[] | null
           created_at: string
           id: string
           inventory_columns: Json | null
@@ -1901,6 +1902,7 @@ export type Database = {
           user_id: string
         }
         Insert: {
+          competitions_columns?: string[] | null
           created_at?: string
           id?: string
           inventory_columns?: Json | null
@@ -1909,6 +1911,7 @@ export type Database = {
           user_id: string
         }
         Update: {
+          competitions_columns?: string[] | null
           created_at?: string
           id?: string
           inventory_columns?: Json | null
