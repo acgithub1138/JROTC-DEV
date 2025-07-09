@@ -88,8 +88,9 @@ const UserAdminPage = () => {
     
     const matchesSchool = selectedSchoolId === 'all' || user.school_id === selectedSchoolId;
     const matchesActiveTab = activeTab === 'active' ? user.active : !user.active;
+    const isNotAdmin = user.role !== 'admin';
     
-    return matchesSearch && matchesSchool && matchesActiveTab;
+    return matchesSearch && matchesSchool && matchesActiveTab && isNotAdmin;
   });
 
   const totalPages = Math.ceil(filteredUsers.length / RECORDS_PER_PAGE);
