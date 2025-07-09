@@ -22,6 +22,7 @@ import CalendarManagementPage from '@/components/calendar/CalendarManagementPage
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 import IncidentManagementPage from '@/components/incident-management/IncidentManagementPage';
+import { ReportsPage } from '@/components/reports/ReportsPage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -45,6 +46,7 @@ const MainApplication = () => {
     if (path.startsWith('/calendar')) return 'calendar';
     if (path.startsWith('/competitions')) return 'competitions';
     if (path.startsWith('/incidents')) return 'incidents';
+    if (path.startsWith('/reports')) return 'reports';
     if (path.startsWith('/settings')) return 'settings';
     return 'dashboard';
   });
@@ -68,6 +70,7 @@ const MainApplication = () => {
       'calendar': '/calendar',
       'competitions': '/competitions',
       'incidents': '/incidents',
+      'reports': '/reports',
       'settings': '/settings'
     };
     
@@ -110,6 +113,7 @@ const MainApplication = () => {
             <Route path="/competitions" element={<CompetitionManagementPage />} />
             <Route path="/competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
             <Route path="/incidents" element={<IncidentManagementPage />} />
+            <Route path="/reports" element={<ReportsPage />} />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

@@ -24,6 +24,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'reports', label: 'Reports', icon: 'BarChart3' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
