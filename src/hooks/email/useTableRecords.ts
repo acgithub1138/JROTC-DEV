@@ -21,6 +21,13 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
               assigned_by_profile:profiles!tasks_assigned_by_fkey(id, first_name, last_name, email)
             `;
             break;
+          case 'incidents':
+            selectQuery = `
+              *,
+              submitted_by_profile:profiles!incidents_submitted_by_fkey(id, first_name, last_name, email),
+              assigned_to_profile:profiles!incidents_assigned_to_fkey(id, first_name, last_name, email)
+            `;
+            break;
           case 'cadets':
             selectQuery = `
               *,
@@ -86,6 +93,14 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['assigned_by.last_name'] = record.assigned_by_profile.last_name;
           flattened['assigned_by.email'] = record.assigned_by_profile.email;
           flattened['assigned_by.full_name'] = `${record.assigned_by_profile.first_name} ${record.assigned_by_profile.last_name}`;
+        }
+        
+        if (record.submitted_by_profile) {
+          flattened['submitted_by.id'] = record.submitted_by_profile.id;
+          flattened['submitted_by.first_name'] = record.submitted_by_profile.first_name;
+          flattened['submitted_by.last_name'] = record.submitted_by_profile.last_name;
+          flattened['submitted_by.email'] = record.submitted_by_profile.email;
+          flattened['submitted_by.full_name'] = `${record.submitted_by_profile.first_name} ${record.submitted_by_profile.last_name}`;
         }
         
         if (record.created_by_profile) {
