@@ -5,6 +5,8 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { CompetitionCards } from './CompetitionCards';
 
 interface BasicCompetitionTableProps {
   competitions: any[];
@@ -72,6 +74,22 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onAddEvent,
   onViewScoreSheets
 }) => {
+  const isMobile = useIsMobile();
+
+  // Show cards on mobile, table on desktop
+  if (isMobile) {
+    return (
+      <CompetitionCards
+        competitions={competitions}
+        isLoading={isLoading}
+        onEdit={onEdit}
+        onDelete={onDelete}
+        onAddEvent={onAddEvent}
+        onViewScoreSheets={onViewScoreSheets}
+      />
+    );
+  }
+
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
   }
