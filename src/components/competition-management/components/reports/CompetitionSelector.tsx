@@ -84,6 +84,10 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
 
   const isAllSelected = !selectedCompetitions;
   const selectedCount = selectedCompetitions?.length || 0;
+  
+  // Check if all filtered competitions are selected
+  const isAllFilteredSelected = selectedCompetitions !== null && filteredCompetitions.length > 0 && 
+    filteredCompetitions.every(comp => selectedCompetitions.includes(comp.id));
 
   const getDisplayText = () => {
     if (isAllSelected) {
@@ -142,17 +146,28 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                       <div className="flex items-center space-x-2 flex-shrink-0">
                         <Checkbox
                           id="select-all-competitions"
-                          checked={isAllSelected}
+                          checked={isAllSelected || isAllFilteredSelected}
                           onCheckedChange={() => {
-                            if (isAllSelected) {
-                              onCompetitionSelect([]);
+                            if (isAllSelected || isAllFilteredSelected) {
+                              // If all are selected or all filtered are selected, deselect all filtered
+                              const currentSelections = selectedCompetitions || [];
+                              const filteredIds = filteredCompetitions.map(comp => comp.id);
+                              const newSelections = currentSelections.filter(id => !filteredIds.includes(id));
+                              onCompetitionSelect(newSelections);
                             } else {
-                              // Select first 6 competitions ordered by date descending
-                              const sortedCompetitions = [...availableCompetitions]
-                                .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime())
-                                .slice(0, 6)
-                                .map(comp => comp.id);
-                              onCompetitionSelect(sortedCompetitions);
+                              // Select filtered competitions (up to 6 total)
+                              const currentSelections = selectedCompetitions || [];
+                              const filteredIds = filteredCompetitions.map(comp => comp.id);
+                              const newSelections = [...currentSelections];
+                              
+                              // Add filtered competitions that aren't already selected, respecting the 6 limit
+                              for (const id of filteredIds) {
+                                if (!newSelections.includes(id) && newSelections.length < 6) {
+                                  newSelections.push(id);
+                                }
+                              }
+                              
+                              onCompetitionSelect(newSelections);
                             }
                           }}
                         />
