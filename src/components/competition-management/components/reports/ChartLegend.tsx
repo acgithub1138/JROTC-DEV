@@ -30,7 +30,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   const allSelected = scoringCriteria.length > 0 && visibleCriteria.length === scoringCriteria.length;
   const noneSelected = visibleCriteria.length === 0;
   return (
-    <Card className="mt-4 h-[500px] flex flex-col">
+    <Card className="h-[500px] flex flex-col">
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Scoring Criteria</CardTitle>

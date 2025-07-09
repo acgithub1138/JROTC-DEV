@@ -55,7 +55,7 @@ export const ReportsTab = () => {
         <CompetitionSelector availableCompetitions={availableCompetitions} selectedCompetitions={selectedCompetitions} onCompetitionSelect={setSelectedCompetitions} isLoading={isLoadingCompetitions} />
       </div>
 
-      {selectedEvent && <div className="flex gap-4">
+      {selectedEvent && <div className="flex gap-4 items-start">
           {/* Performance Trends - 3/4 width */}
           <div className="w-3/4">
             <PerformanceChart data={reportData} visibleCriteria={visibleCriteria} isLoading={isLoading} />
