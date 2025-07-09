@@ -134,12 +134,12 @@ const IssuedToChanges: React.FC<{ oldValue: string | null; newValue: string | nu
   
   if (addedUsers && addedUsers.length > 0) {
     const userNames = addedUsers.map(user => `${user.last_name}, ${user.first_name}`).join(', ');
-    changes.push(`Added User(s) - ${userNames}`);
+    changes.push(`Issued to - ${userNames}`);
   }
   
   if (removedUsers && removedUsers.length > 0) {
     const userNames = removedUsers.map(user => `${user.last_name}, ${user.first_name}`).join(', ');
-    changes.push(`Removed User(s) - ${userNames}`);
+    changes.push(`Returned from - ${userNames}`);
   }
 
   if (changes.length === 0) {
