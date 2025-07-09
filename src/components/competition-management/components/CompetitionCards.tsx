@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus, Eye, Calendar, MapPin } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 interface CompetitionCardsProps {
@@ -106,17 +106,9 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                   <CardTitle className="text-lg font-semibold line-clamp-2">
                     {competition.name}
                   </CardTitle>
-                  <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                    <div className="flex items-center gap-1">
-                      <Calendar className="w-4 h-4" />
-                      {new Date(competition.competition_date).toLocaleDateString()}
-                    </div>
-                    {competition.location && (
-                      <div className="flex items-center gap-1">
-                        <MapPin className="w-4 h-4" />
-                        <span className="truncate">{competition.location}</span>
-                      </div>
-                    )}
+                  <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
+                    <Calendar className="w-4 h-4" />
+                    {new Date(competition.competition_date).toLocaleDateString()}
                   </div>
                 </div>
                 <div className="flex gap-2 ml-4">
