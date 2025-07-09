@@ -76,9 +76,17 @@ export const useEmailRules = () => {
 
   const updateRule = useMutation({
     mutationFn: async ({ id, ...ruleData }: Partial<EmailRule> & { id: string }) => {
+      // Validate UUID fields to prevent empty string errors
+      const cleanedData = { ...ruleData };
+      
+      // Ensure template_id is never an empty string
+      if (cleanedData.template_id === '') {
+        delete cleanedData.template_id; // Remove from update if empty, let database keep existing value
+      }
+      
       const { data, error } = await supabase
         .from('email_rules')
-        .update(ruleData)
+        .update(cleanedData)
         .eq('id', id)
         .select()
         .single();

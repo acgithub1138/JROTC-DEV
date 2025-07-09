@@ -109,19 +109,19 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
         });
       } catch (error) {
         console.error('Error processing rule data:', error);
-        // Fallback to empty form if there's an error
+        // Fallback preserving original UUID values to prevent empty string errors
         setFormData({
-          name: '',
-          template_id: '',
-          source_table: '',
-          trigger_event: 'INSERT',
-          trigger_conditions: {},
+          name: rule.name || '',
+          template_id: rule.template_id || '', // Preserve original UUID
+          source_table: rule.source_table || '',
+          trigger_event: rule.trigger_event || 'INSERT',
+          trigger_conditions: rule.trigger_event === 'UPDATE' ? { conditions: [], logic: 'AND' } : {},
           recipient_config: {
             recipient_type: 'field',
             recipient_field: '',
             static_email: '',
           },
-          is_active: true,
+          is_active: rule.is_active ?? true,
         });
       }
     } else {
@@ -155,13 +155,28 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Validate and clean form data to prevent UUID errors
+    const cleanedFormData = { ...formData };
+    
+    // Ensure template_id is either a valid UUID or null, never an empty string
+    if (!cleanedFormData.template_id || cleanedFormData.template_id.trim() === '') {
+      // For edit mode, preserve the original template_id if the current one is empty
+      if (mode === 'edit' && rule?.template_id) {
+        cleanedFormData.template_id = rule.template_id;
+      } else {
+        // For create mode or when no original template_id exists, this should be caught by form validation
+        console.error('Template ID is required');
+        return;
+      }
+    }
+    
     if (mode === 'edit' && rule) {
       updateRule({
         id: rule.id,
-        ...formData,
+        ...cleanedFormData,
       });
     } else {
-      createRule(formData);
+      createRule(cleanedFormData);
     }
     
     onOpenChange(false);
