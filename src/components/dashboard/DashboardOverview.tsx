@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package, AlertTriangle } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
@@ -130,7 +130,7 @@ const DashboardOverview = () => {
         <CardContent className="p-6 py-[12px]">
           <div className="space-y-3">
             <div className="flex items-center mb-3">
-              <Trophy className="w-4 h-4 mr-2 text-primary" />
+              <Zap className="w-4 h-4 mr-2 text-primary" />
               <p className="text-sm font-medium text-gray-600">Quick Actions</p>
             </div>
             <div className="grid grid-cols-2 gap-2">
@@ -198,9 +198,6 @@ const DashboardOverview = () => {
       })}
       </div>
 
-      {/* Quick Actions Widget for Command Staff only - positioned at top left */}
-      {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
-
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
@@ -209,8 +206,13 @@ const DashboardOverview = () => {
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
-        {/* Right Column: Upcoming Events */}
-        <Card>
+        {/* Right Column: Quick Actions for Command Staff and Upcoming Events */}
+        <div className="space-y-6">
+          {/* Quick Actions Widget for Command Staff only - positioned at top right */}
+          {userProfile?.role === 'command_staff' && renderQuickActionsWidget()}
+          
+          {/* Upcoming Events */}
+          <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
               <Calendar className="w-5 h-5 mr-2 text-primary" />
@@ -247,6 +249,7 @@ const DashboardOverview = () => {
             </div>
           </CardContent>
         </Card>
+        </div>
       </div>
 
       {/* Modals - Only show for roles that can use them */}
