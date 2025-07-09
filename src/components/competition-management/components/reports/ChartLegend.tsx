@@ -32,30 +32,31 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   return (
     <Card className="mt-4">
       <CardHeader>
-        <CardTitle className="text-sm">Scoring Criteria</CardTitle>
-      </CardHeader>
-      <CardContent className="space-y-4">
-        {/* Select/Unselect All Controls */}
-        <div className="flex gap-2">
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onSelectAll}
-            disabled={allSelected}
-            className="flex-1 text-xs"
-          >
-            Select All
-          </Button>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={onUnselectAll}
-            disabled={noneSelected}
-            className="flex-1 text-xs"
-          >
-            Unselect All
-          </Button>
+        <div className="flex items-center justify-between">
+          <CardTitle className="text-sm">Scoring Criteria</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onSelectAll}
+              disabled={allSelected}
+              className="text-xs"
+            >
+              Select All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={onUnselectAll}
+              disabled={noneSelected}
+              className="text-xs"
+            >
+              Unselect All
+            </Button>
+          </div>
         </div>
+      </CardHeader>
+      <CardContent>
         
         {/* Individual Criteria Checkboxes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
