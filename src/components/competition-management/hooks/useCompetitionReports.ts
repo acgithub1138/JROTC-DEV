@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import type { CriteriaMapping } from '../components/reports/AdvancedCriteriaMapping';
 
 type CompetitionEventType = string; // Using string instead of enum to handle database values
 
@@ -11,7 +12,7 @@ interface PerformanceData {
   [event: string]: number | string;
 }
 
-export const useCompetitionReports = (selectedEvent: string | null, selectedCompetitions: string[] | null = null) => {
+export const useCompetitionReports = (selectedEvent: string | null, selectedCompetitions: string[] | null = null, criteriaMapping?: CriteriaMapping[]) => {
   const { userProfile } = useAuth();
   const [reportData, setReportData] = useState<PerformanceData[]>([]);
   const [availableEvents, setAvailableEvents] = useState<string[]>([]);
@@ -125,7 +126,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       }
 
       // Process the data to extract scoring criteria and calculate individual criteria performance
-      const { processedData, criteria } = processCompetitionData(data as any);
+const { processedData, criteria } = processCompetitionData(data as any);
       console.log('Processed criteria:', criteria);
       console.log('Processed data points:', processedData.length);
       
@@ -250,9 +251,42 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       }
     });
 
+    // Apply criteria mappings if provided
+    let finalCriteriaMap = rawToFormattedCriteriaMap;
+    if (criteriaMapping && criteriaMapping.length > 0) {
+      console.log('Applying criteria mappings:', criteriaMapping);
+      
+      // Create reverse mapping from original criteria to display names
+      const originalToDisplay = new Map<string, string>();
+      criteriaMapping.forEach(mapping => {
+        mapping.originalCriteria.forEach(original => {
+          originalToDisplay.set(original, mapping.displayName);
+        });
+      });
+
+      // Apply mappings to the criteria map
+      const mappedCriteriaMap = new Map<string, string>();
+      const mappedFormattedCriteria = new Set<string>();
+      
+      rawToFormattedCriteriaMap.forEach((formatted, raw) => {
+        const displayName = originalToDisplay.get(formatted);
+        if (displayName) {
+          mappedCriteriaMap.set(raw, displayName);
+          mappedFormattedCriteria.add(displayName);
+        } else {
+          mappedCriteriaMap.set(raw, formatted);
+          mappedFormattedCriteria.add(formatted);
+        }
+      });
+      
+      finalCriteriaMap = mappedCriteriaMap;
+      allFormattedCriteria.clear();
+      mappedFormattedCriteria.forEach(criteria => allFormattedCriteria.add(criteria));
+    }
+
     const criteriaList = Array.from(allFormattedCriteria).sort();
-    console.log('Extracted criteria:', criteriaList);
-    console.log('Raw to formatted mapping:', rawToFormattedCriteriaMap);
+    console.log('Final criteria (after mapping):', criteriaList);
+    console.log('Final criteria mapping:', finalCriteriaMap);
     
     // Group data by date and extract individual scores for each criteria
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
@@ -315,7 +349,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
         const scoresForThisCriteria: number[] = [];
         
         // Find all raw criteria that map to this formatted criteria
-        rawToFormattedCriteriaMap.forEach((formatted, raw) => {
+        finalCriteriaMap.forEach((formatted, raw) => {
           if (formatted === formattedCriteria && criteriaScores[raw]) {
             scoresForThisCriteria.push(...criteriaScores[raw]);
           }
@@ -345,7 +379,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
   useEffect(() => {
     fetchReportData();
-  }, [selectedEvent, selectedCompetitions, userProfile?.school_id]);
+  }, [selectedEvent, selectedCompetitions, userProfile?.school_id, criteriaMapping]);
 
   return {
     reportData,

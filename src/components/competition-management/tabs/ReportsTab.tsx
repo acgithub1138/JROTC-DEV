@@ -3,11 +3,37 @@ import { EventSelector } from '../components/reports/EventSelector';
 import { CompetitionSelector } from '../components/reports/CompetitionSelector';
 import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
+import { AdvancedCriteriaMapping, type CriteriaMapping } from '../components/reports/AdvancedCriteriaMapping';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
 export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
+  const [criteriaMapping, setCriteriaMapping] = useState<CriteriaMapping[]>([]);
+  
+  // Load mappings from localStorage when event changes
+  useEffect(() => {
+    if (selectedEvent) {
+      const savedMappings = localStorage.getItem(`criteria-mappings-${selectedEvent}`);
+      if (savedMappings) {
+        try {
+          setCriteriaMapping(JSON.parse(savedMappings));
+        } catch (error) {
+          console.error('Failed to parse saved mappings:', error);
+          setCriteriaMapping([]);
+        }
+      } else {
+        setCriteriaMapping([]);
+      }
+    }
+  }, [selectedEvent]);
+
+  // Save mappings to localStorage whenever they change
+  useEffect(() => {
+    if (selectedEvent && criteriaMapping.length >= 0) {
+      localStorage.setItem(`criteria-mappings-${selectedEvent}`, JSON.stringify(criteriaMapping));
+    }
+  }, [selectedEvent, criteriaMapping]);
   const {
     reportData,
     isLoading,
@@ -16,7 +42,7 @@ export const ReportsTab = () => {
     availableEvents,
     availableCompetitions,
     scoringCriteria
-  } = useCompetitionReports(selectedEvent, selectedCompetitions);
+  } = useCompetitionReports(selectedEvent, selectedCompetitions, criteriaMapping);
   const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
     setVisibleCriteria([]); // Reset visible criteria when event changes
@@ -27,6 +53,16 @@ export const ReportsTab = () => {
       setSelectedCompetitions(sortedCompetitions);
     }
   };
+
+  // Get original criteria before mapping for the advanced widget
+  const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
+  
+  // Store original criteria when they are first loaded (before mapping is applied)
+  useEffect(() => {
+    if (scoringCriteria.length > 0 && criteriaMapping.length === 0) {
+      setOriginalCriteria(scoringCriteria);
+    }
+  }, [scoringCriteria, criteriaMapping]);
 
   // Auto-select all criteria when scoringCriteria changes (new event selected)
   useEffect(() => {
@@ -55,16 +91,28 @@ export const ReportsTab = () => {
         <CompetitionSelector availableCompetitions={availableCompetitions} selectedCompetitions={selectedCompetitions} onCompetitionSelect={setSelectedCompetitions} isLoading={isLoadingCompetitions} />
       </div>
 
-      {selectedEvent && <div className="flex gap-4 items-start">
-          {/* Performance Trends - 3/4 width */}
-          <div className="w-3/4">
-            <PerformanceChart data={reportData} visibleCriteria={visibleCriteria} isLoading={isLoading} />
+      {selectedEvent && (
+        <div className="space-y-6">
+          <div className="flex gap-4 items-start">
+            {/* Performance Trends - 3/4 width */}
+            <div className="w-3/4">
+              <PerformanceChart data={reportData} visibleCriteria={visibleCriteria} isLoading={isLoading} />
+            </div>
+            
+            {/* Scoring Criteria - 1/4 width */}
+            <div className="w-1/4">
+              <ChartLegend scoringCriteria={scoringCriteria} visibleCriteria={visibleCriteria} onCriteriaToggle={handleCriteriaVisibilityToggle} onSelectAll={handleSelectAllCriteria} onUnselectAll={handleUnselectAllCriteria} />
+            </div>
           </div>
-          
-          {/* Scoring Criteria - 1/4 width */}
-          <div className="w-1/4">
-            <ChartLegend scoringCriteria={scoringCriteria} visibleCriteria={visibleCriteria} onCriteriaToggle={handleCriteriaVisibilityToggle} onSelectAll={handleSelectAllCriteria} onUnselectAll={handleUnselectAllCriteria} />
-          </div>
-        </div>}
+
+          {/* Advanced Criteria Mapping - Full width below the chart */}
+          <AdvancedCriteriaMapping
+            availableCriteria={originalCriteria}
+            mappings={criteriaMapping}
+            onMappingsChange={setCriteriaMapping}
+            selectedEvent={selectedEvent}
+          />
+        </div>
+      )}
     </div>;
 };
