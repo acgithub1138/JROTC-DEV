@@ -48,9 +48,7 @@ export const UserTable = ({
             />
           </TableHead>
           <TableHead>Name</TableHead>
-          
           <TableHead>Role</TableHead>
-          <TableHead>Rank</TableHead>
           <TableHead>School</TableHead>
           <TableHead>Created</TableHead>
           <TableHead className="text-right">Actions</TableHead>
@@ -77,9 +75,6 @@ export const UserTable = ({
                 {getRoleIcon(user.role)}
                 {user.role.replace('_', ' ').toUpperCase()}
               </Badge>
-            </TableCell>
-            <TableCell className="py-2">
-              {user.rank || '-'}
             </TableCell>
             <TableCell className="py-2">
               {user.schools?.name || 'No school assigned'}
