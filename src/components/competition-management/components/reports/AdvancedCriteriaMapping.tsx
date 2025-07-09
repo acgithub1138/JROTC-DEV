@@ -82,11 +82,18 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
   };
 
   const handleCriteriaToggle = (criteria: string) => {
-    setSelectedCriteria(prev => 
-      prev.includes(criteria) 
+    setSelectedCriteria(prev => {
+      const newSelected = prev.includes(criteria) 
         ? prev.filter(c => c !== criteria)
-        : [...prev, criteria]
-    );
+        : [...prev, criteria];
+      
+      // If this is the first criteria being selected and display name is empty, set it
+      if (!prev.includes(criteria) && !newMappingName.trim()) {
+        setNewMappingName(criteria);
+      }
+      
+      return newSelected;
+    });
   };
 
   if (!selectedEvent || availableCriteria.length === 0) {
@@ -178,15 +185,23 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                 <h4 className="font-medium">Create New Mapping:</h4>
                 
                 <div className="space-y-3">
-                  <div>
-                    <Label htmlFor="mapping-name">Display Name</Label>
-                    <Input
-                      id="mapping-name"
-                      value={newMappingName}
-                      onChange={(e) => setNewMappingName(e.target.value)}
-                      placeholder="e.g., Routine Marching"
-                      className="max-w-xs"
-                    />
+                  <div className="flex gap-2 items-end">
+                    <div className="flex-1">
+                      <Label htmlFor="mapping-name">Display Name</Label>
+                      <Input
+                        id="mapping-name"
+                        value={newMappingName}
+                        onChange={(e) => setNewMappingName(e.target.value)}
+                        placeholder="e.g., Routine Marching"
+                      />
+                    </div>
+                    <Button 
+                      onClick={handleCreateMapping}
+                      disabled={!newMappingName.trim() || selectedCriteria.length === 0}
+                    >
+                      <Plus className="h-4 w-4 mr-2" />
+                      Create Mapping
+                    </Button>
                   </div>
 
                   <div>
@@ -209,15 +224,6 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                       ))}
                     </div>
                   </div>
-
-                  <Button 
-                    onClick={handleCreateMapping}
-                    disabled={!newMappingName.trim() || selectedCriteria.length === 0}
-                    className="w-full"
-                  >
-                    <Plus className="h-4 w-4 mr-2" />
-                    Create Mapping
-                  </Button>
                 </div>
               </div>
             )}
