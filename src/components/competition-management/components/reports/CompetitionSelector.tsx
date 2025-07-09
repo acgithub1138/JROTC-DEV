@@ -52,8 +52,8 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
       const isSelected = selectedCompetitions.includes(competitionId);
       if (isSelected) {
         const newSelections = selectedCompetitions.filter(id => id !== competitionId);
-        // If no competitions left selected, default to "All"
-        onCompetitionSelect(newSelections.length === 0 ? null : newSelections);
+        // Allow empty selections (don't default back to "All")
+        onCompetitionSelect(newSelections);
       } else {
         const newSelections = [...selectedCompetitions, competitionId];
         // If we've selected all competitions, switch to "All" mode
@@ -73,7 +73,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
   const handleRemoveCompetition = (competitionId: string) => {
     if (selectedCompetitions) {
       const newSelections = selectedCompetitions.filter(id => id !== competitionId);
-      onCompetitionSelect(newSelections.length === 0 ? null : newSelections);
+      onCompetitionSelect(newSelections);
     }
   };
 
@@ -112,27 +112,6 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
           </p>
         ) : (
           <>
-            {/* Selected competitions display */}
-            {selectedCount > 0 && !isAllSelected && (
-              <div className="space-y-2">
-                <span className="text-sm font-medium">Selected Competitions ({selectedCount})</span>
-                <div className="flex flex-wrap gap-2">
-                  {selectedCompetitionData.map((comp) => (
-                    <Badge key={comp.id} variant="secondary" className="flex items-center gap-1">
-                      {formatCompetitionName(comp)}
-                      <button
-                        type="button"
-                        onClick={() => handleRemoveCompetition(comp.id)}
-                        className="ml-1 hover:bg-red-100 rounded-full p-0.5"
-                      >
-                        <X className="h-3 w-3" />
-                      </button>
-                    </Badge>
-                  ))}
-                </div>
-              </div>
-            )}
-
             {/* Collapsible competition selector */}
             <Collapsible open={isOpen} onOpenChange={setIsOpen}>
               <CollapsibleTrigger asChild>
@@ -159,7 +138,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                         variant="outline"
                         size="sm"
                         onClick={() => onCompetitionSelect([])}
-                        disabled={selectedCount === 0}
+                        disabled={selectedCompetitions !== null && selectedCount === 0}
                         className="text-xs"
                       >
                         None
