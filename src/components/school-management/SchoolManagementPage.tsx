@@ -170,7 +170,6 @@ const SchoolManagementPage = () => {
 
   const filteredSchools = schools.filter(school =>
     school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    school.district?.toLowerCase().includes(searchTerm.toLowerCase()) ||
     school.city?.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -242,7 +241,6 @@ const SchoolManagementPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>District</TableHead>
                 <TableHead>City</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
@@ -253,7 +251,6 @@ const SchoolManagementPage = () => {
               {paginatedSchools.map((school) => (
                 <TableRow key={school.id}>
                   <TableCell className="font-medium py-2">{school.name}</TableCell>
-                  <TableCell className="py-2">{school.district}</TableCell>
                   <TableCell className="py-2">{school.city}</TableCell>
                   <TableCell className="py-2">{school.phone}</TableCell>
                   <TableCell className="py-2">{school.email}</TableCell>
