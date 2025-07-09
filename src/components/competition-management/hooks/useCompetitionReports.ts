@@ -160,9 +160,10 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
               
               console.log(`Checking key "${fullKey}" with value:`, value, `(type: ${typeof value})`);
               
-              if (typeof value === 'number') {
+              // Accept both numbers and numeric strings
+              if (typeof value === 'number' || (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '')) {
                 const formattedName = formatCriteriaName(fullKey);
-                console.log(`Found numeric criteria: ${fullKey} -> ${formattedName}`);
+                console.log(`Found criteria: ${fullKey} -> ${formattedName} (value: ${value}, type: ${typeof value})`);
                 rawToFormattedCriteriaMap.set(fullKey, formattedName);
                 allFormattedCriteria.add(formattedName);
               } else if (typeof value === 'object' && value !== null) {
@@ -208,8 +209,11 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
             Object.entries(obj).forEach(([key, value]) => {
               const fullKey = prefix ? `${prefix}.${key}` : key;
               
+              // Accept both numbers and numeric strings, convert to number
               if (typeof value === 'number') {
                 scores[fullKey] = value;
+              } else if (typeof value === 'string' && !isNaN(Number(value)) && value.trim() !== '') {
+                scores[fullKey] = Number(value);
               } else if (typeof value === 'object' && value !== null) {
                 Object.assign(scores, extractScoresByCriteria(value, fullKey));
               }
