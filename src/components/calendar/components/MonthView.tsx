@@ -93,7 +93,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
                     }}
                     title={event.title}
                   >
-                    {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'h:mm a')} ${event.title}`}
+                    {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'HH:mm')} ${event.title}`}
                   </div>
                 ))}
                 

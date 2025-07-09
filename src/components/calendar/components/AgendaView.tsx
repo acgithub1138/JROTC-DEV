@@ -122,10 +122,10 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
                                 'All day'
                               ) : (
                                 <>
-                                  {format(new Date(event.start_date), 'h:mm a')}
-                                  {event.end_date && (
-                                    <span> - {format(new Date(event.end_date), 'h:mm a')}</span>
-                                  )}
+                                   {format(new Date(event.start_date), 'HH:mm')}
+                                   {event.end_date && (
+                                     <span> - {format(new Date(event.end_date), 'HH:mm')}</span>
+                                   )}
                                 </>
                               )}
                             </div>

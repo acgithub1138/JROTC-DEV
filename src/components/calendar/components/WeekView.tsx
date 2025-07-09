@@ -134,11 +134,11 @@ export const WeekView: React.FC<WeekViewProps> = ({
                     )}
                     style={position}
                     onClick={() => onEventClick(event)}
-                    title={`${event.title} - ${format(new Date(event.start_date), 'h:mm a')}`}
+                    title={`${event.title} - ${format(new Date(event.start_date), 'HH:mm')}`}
                   >
                     <div className="text-xs font-medium truncate">{event.title}</div>
                     <div className="text-xs opacity-90">
-                      {format(new Date(event.start_date), 'h:mm a')}
+                      {format(new Date(event.start_date), 'HH:mm')}
                     </div>
                   </div>
                 );

@@ -108,7 +108,7 @@ export const DayView: React.FC<DayViewProps> = ({
           <div className="col-span-2 border-r bg-muted/30">
             {hours.map(hour => (
               <div key={hour} className="h-16 border-b px-3 py-2 text-sm text-muted-foreground">
-                {format(new Date().setHours(hour, 0), 'h:mm a')}
+                {format(new Date().setHours(hour, 0), 'HH:mm')}
               </div>
             ))}
           </div>
@@ -150,8 +150,8 @@ export const DayView: React.FC<DayViewProps> = ({
                 >
                   <div className="font-medium truncate">{event.title}</div>
                   <div className="text-sm opacity-90">
-                    {format(new Date(event.start_date), 'h:mm a')}
-                    {event.end_date && ` - ${format(new Date(event.end_date), 'h:mm a')}`}
+                     {format(new Date(event.start_date), 'HH:mm')}
+                     {event.end_date && ` - ${format(new Date(event.end_date), 'HH:mm')}`}
                   </div>
                   {event.location && (
                     <div className="text-sm opacity-80 truncate">{event.location}</div>

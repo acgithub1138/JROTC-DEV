@@ -27,7 +27,7 @@ export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
     if (isAllDay) {
       return format(date, 'EEEE, MMMM d, yyyy');
     }
-    return format(date, 'EEEE, MMMM d, yyyy \'at\' h:mm a');
+    return format(date, 'EEEE, MMMM d, yyyy \'at\' HH:mm');
   };
 
   return (
@@ -90,12 +90,12 @@ export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
           <div className="border-t pt-4 space-y-2">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>Created: {format(new Date(event.created_at), 'MMM d, yyyy \'at\' h:mm a')}</span>
+              <span>Created: {format(new Date(event.created_at), 'MMM d, yyyy \'at\' HH:mm')}</span>
             </div>
             {event.updated_at !== event.created_at && (
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>Updated: {format(new Date(event.updated_at), 'MMM d, yyyy \'at\' h:mm a')}</span>
+                <span>Updated: {format(new Date(event.updated_at), 'MMM d, yyyy \'at\' HH:mm')}</span>
               </div>
             )}
           </div>
