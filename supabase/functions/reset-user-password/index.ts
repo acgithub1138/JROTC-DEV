@@ -39,15 +39,44 @@ serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
-    // Check if user is admin
+    // Check if user has permission to reset passwords
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
-      .select('role')
+      .select('role, school_id')
       .eq('id', user.id)
       .single()
 
-    if (profileError || profile?.role !== 'admin') {
-      throw new Error('Insufficient permissions - admin role required')
+    if (profileError || !profile) {
+      throw new Error('Unable to verify user permissions')
+    }
+
+    // Get the target user's profile to check permissions
+    const { data: targetUser, error: targetUserError } = await supabaseAdmin
+      .from('profiles')
+      .select('role, school_id')
+      .eq('id', userId)
+      .single()
+
+    if (targetUserError || !targetUser) {
+      throw new Error('Target user not found')
+    }
+
+    // Check permissions based on current user role
+    let hasPermission = false;
+
+    if (profile.role === 'admin') {
+      // Admins can reset anyone's password
+      hasPermission = true;
+    } else if (profile.role === 'instructor') {
+      // Instructors can reset passwords for cadets, command_staff, and parents in their school
+      // but not for other instructors or admins
+      hasPermission = profile.school_id === targetUser.school_id && 
+                     targetUser.role !== 'admin' && 
+                     targetUser.role !== 'instructor';
+    }
+
+    if (!hasPermission) {
+      throw new Error('Insufficient permissions to reset this user\'s password')
     }
 
     const { userId, newPassword }: ResetPasswordRequest = await req.json()
@@ -61,7 +90,7 @@ serve(async (req) => {
       throw new Error('Password must be at least 6 characters long')
     }
 
-    console.log('Admin', user.id, 'resetting password for user:', userId)
+    console.log('User', user.id, 'resetting password for user:', userId)
 
     // Reset the user's password using admin API
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
