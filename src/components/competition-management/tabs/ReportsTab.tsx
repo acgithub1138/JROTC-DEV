@@ -4,24 +4,26 @@ import { CompetitionSelector } from '../components/reports/CompetitionSelector';
 import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
-
 export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
-  
-  const { reportData, isLoading, isLoadingEvents, isLoadingCompetitions, availableEvents, availableCompetitions, scoringCriteria } = useCompetitionReports(selectedEvent, selectedCompetitions);
-
+  const {
+    reportData,
+    isLoading,
+    isLoadingEvents,
+    isLoadingCompetitions,
+    availableEvents,
+    availableCompetitions,
+    scoringCriteria
+  } = useCompetitionReports(selectedEvent, selectedCompetitions);
   const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
     setVisibleCriteria([]); // Reset visible criteria when event changes
-    
+
     // Auto-select first 6 competitions ordered by date descending when event is selected
     if (event && availableCompetitions.length > 0) {
-      const sortedCompetitions = [...availableCompetitions]
-        .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime())
-        .slice(0, 6)
-        .map(comp => comp.id);
+      const sortedCompetitions = [...availableCompetitions].sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime()).slice(0, 6).map(comp => comp.id);
       setSelectedCompetitions(sortedCompetitions);
     }
   };
@@ -32,71 +34,37 @@ export const ReportsTab = () => {
       setVisibleCriteria(scoringCriteria);
     }
   }, [scoringCriteria, selectedEvent]);
-
   const handleCriteriaVisibilityToggle = (criteria: string) => {
-    setVisibleCriteria(prev => 
-      prev.includes(criteria) 
-        ? prev.filter(c => c !== criteria)
-        : [...prev, criteria]
-    );
+    setVisibleCriteria(prev => prev.includes(criteria) ? prev.filter(c => c !== criteria) : [...prev, criteria]);
   };
-
   const handleSelectAllCriteria = () => {
     setVisibleCriteria(scoringCriteria);
   };
-
   const handleUnselectAllCriteria = () => {
     setVisibleCriteria([]);
   };
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       <div>
-        <h2 className="text-2xl font-semibold mb-2">Competition Performance Reports</h2>
-        <p className="text-muted-foreground">
-          Analyze your competition performance trends over time by event type.
-        </p>
+        
+        
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <EventSelector
-          availableEvents={availableEvents}
-          selectedEvent={selectedEvent}
-          onEventSelect={handleEventSelect}
-          isLoading={isLoadingEvents}
-        />
+        <EventSelector availableEvents={availableEvents} selectedEvent={selectedEvent} onEventSelect={handleEventSelect} isLoading={isLoadingEvents} />
         
-        <CompetitionSelector
-          availableCompetitions={availableCompetitions}
-          selectedCompetitions={selectedCompetitions}
-          onCompetitionSelect={setSelectedCompetitions}
-          isLoading={isLoadingCompetitions}
-        />
+        <CompetitionSelector availableCompetitions={availableCompetitions} selectedCompetitions={selectedCompetitions} onCompetitionSelect={setSelectedCompetitions} isLoading={isLoadingCompetitions} />
       </div>
 
-      {selectedEvent && (
-        <div className="flex gap-4">
+      {selectedEvent && <div className="flex gap-4">
           {/* Performance Trends - 3/4 width */}
           <div className="w-3/4">
-            <PerformanceChart
-              data={reportData}
-              visibleCriteria={visibleCriteria}
-              isLoading={isLoading}
-            />
+            <PerformanceChart data={reportData} visibleCriteria={visibleCriteria} isLoading={isLoading} />
           </div>
           
           {/* Scoring Criteria - 1/4 width */}
           <div className="w-1/4">
-            <ChartLegend
-              scoringCriteria={scoringCriteria}
-              visibleCriteria={visibleCriteria}
-              onCriteriaToggle={handleCriteriaVisibilityToggle}
-              onSelectAll={handleSelectAllCriteria}
-              onUnselectAll={handleUnselectAllCriteria}
-            />
+            <ChartLegend scoringCriteria={scoringCriteria} visibleCriteria={visibleCriteria} onCriteriaToggle={handleCriteriaVisibilityToggle} onSelectAll={handleSelectAllCriteria} onUnselectAll={handleUnselectAllCriteria} />
           </div>
-        </div>
-      )}
-    </div>
-  );
+        </div>}
+    </div>;
 };
