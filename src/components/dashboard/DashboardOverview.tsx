@@ -155,6 +155,10 @@ const DashboardOverview = () => {
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
                   </button>
+                  <button onClick={() => setIsAddExpenseOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <DollarSign className="w-4 h-4 text-red-600 mr-2" />
+                    <p className="font-medium text-sm">Add Expense</p>
+                  </button>
                 </>
               )}
             </div>
