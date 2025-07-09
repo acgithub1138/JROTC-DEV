@@ -15,7 +15,7 @@ import { useAvailableTables } from '@/hooks/email/useTableColumns';
 import { BasicFieldsSection } from './components/BasicFieldsSection';
 import { TriggerConfigSection } from './components/TriggerConfigSection';
 import { RecipientConfigSection } from './components/RecipientConfigSection';
-import { EmailRuleFormData, RecipientConfig } from './components/types';
+import { EmailRuleFormData, RecipientConfig, TriggerConditions } from './components/types';
 
 interface EmailRuleDialogProps {
   open: boolean;
@@ -58,12 +58,22 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
         static_email: dbRecipientConfig.static_email || '',
       };
 
+      // Convert trigger conditions to new format if needed
+      let triggerConditions = rule.trigger_conditions;
+      if (rule.trigger_event === 'UPDATE' && triggerConditions && !('conditions' in triggerConditions)) {
+        // Convert legacy format to new structured format
+        triggerConditions = {
+          conditions: [],
+          logic: 'AND'
+        } as TriggerConditions;
+      }
+
       setFormData({
         name: rule.name,
         template_id: rule.template_id,
         source_table: rule.source_table,
         trigger_event: rule.trigger_event,
-        trigger_conditions: rule.trigger_conditions,
+        trigger_conditions: triggerConditions,
         recipient_config: recipientConfig,
         is_active: rule.is_active,
       });
