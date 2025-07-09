@@ -60,12 +60,17 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
 
       // Convert trigger conditions to new format if needed
       let triggerConditions = rule.trigger_conditions;
-      if (rule.trigger_event === 'UPDATE' && triggerConditions && !('conditions' in triggerConditions)) {
-        // Convert legacy format to new structured format
-        triggerConditions = {
-          conditions: [],
-          logic: 'AND'
-        } as TriggerConditions;
+      if (rule.trigger_event === 'UPDATE') {
+        // Ensure trigger conditions are in the new structured format
+        if (!triggerConditions || typeof triggerConditions !== 'object' || !('conditions' in triggerConditions)) {
+          triggerConditions = {
+            conditions: [],
+            logic: 'AND'
+          } as TriggerConditions;
+        }
+      } else {
+        // For non-UPDATE events, use empty object
+        triggerConditions = {};
       }
 
       setFormData({
