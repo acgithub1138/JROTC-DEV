@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Plus } from 'lucide-react';
 import { Competition } from '../types';
+import { formatCompetitionDateFull } from '@/utils/dateUtils';
 
 interface CompetitionsTableProps {
   competitions: Competition[];
@@ -54,7 +55,7 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
             <TableRow key={competition.id}>
               <TableCell className="font-medium">{competition.name}</TableCell>
               <TableCell>
-                {new Date(competition.competition_date).toLocaleDateString()}
+                {formatCompetitionDateFull(competition.competition_date)}
               </TableCell>
               <TableCell>{competition.location || '-'}</TableCell>
               <TableCell>

@@ -11,6 +11,7 @@ import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import type { Database } from '@/integrations/supabase/types';
+import { formatCompetitionDateFull } from '@/utils/dateUtils';
 type Competition = Database['public']['Tables']['competitions']['Row'];
 interface CompetitionsTabProps {
   readOnly?: boolean;
@@ -38,7 +39,11 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const filteredCompetitions = useMemo(() => {
     if (!searchTerm) return competitions;
     const searchLower = searchTerm.toLowerCase();
-    return competitions.filter(comp => comp.name.toLowerCase().includes(searchLower) || comp.location?.toLowerCase().includes(searchLower) || new Date(comp.competition_date).toLocaleDateString().includes(searchLower));
+    return competitions.filter(comp => 
+      comp.name.toLowerCase().includes(searchLower) || 
+      comp.location?.toLowerCase().includes(searchLower) || 
+      formatCompetitionDateFull(comp.competition_date).includes(searchLower)
+    );
   }, [competitions, searchTerm]);
 
   // Add sorting functionality

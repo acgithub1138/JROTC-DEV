@@ -7,6 +7,7 @@ import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
+import { formatCompetitionDateFull } from '@/utils/dateUtils';
 
 interface BasicCompetitionTableProps {
   competitions: any[];
@@ -126,7 +127,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
               <TableRow key={competition.id}>
                 <TableCell className="font-medium">{competition.name}</TableCell>
                 <TableCell>
-                  {new Date(competition.competition_date).toLocaleDateString()}
+                  {formatCompetitionDateFull(competition.competition_date)}
                 </TableCell>
                 <TableCell><PlacementCell placement={competition.overall_placement} /></TableCell>
                 <TableCell><PlacementCell placement={competition.overall_armed_placement} /></TableCell>
