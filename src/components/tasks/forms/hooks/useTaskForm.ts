@@ -16,9 +16,6 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
-  const [selectedDate, setSelectedDate] = React.useState<Date | undefined>(
-    task?.due_date ? new Date(task.due_date) : undefined
-  );
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -35,6 +32,7 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
       assigned_to: task?.assigned_to || '',
       priority: task?.priority || (validPriorities[0] || 'medium'),
       status: task?.status || (validStatuses[0] || 'not_started'),
+      due_date: task?.due_date ? new Date(task.due_date) : undefined,
     },
   });
 
@@ -62,7 +60,7 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
       status: data.status,
       priority: data.priority,
       assigned_to: data.assigned_to || null,
-      due_date: selectedDate ? selectedDate.toISOString() : null,
+      due_date: data.due_date ? data.due_date.toISOString() : null,
       team_id: null,
     };
 
@@ -76,13 +74,10 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
     
     onOpenChange(false);
     form.reset();
-    setSelectedDate(undefined);
   };
 
   return {
     form,
-    selectedDate,
-    setSelectedDate,
     onSubmit,
     isSubmitting: isCreating || isUpdating,
     isLoading: statusLoading || priorityLoading,

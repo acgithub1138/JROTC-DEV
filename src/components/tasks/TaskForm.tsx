@@ -2,6 +2,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Form } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/hooks/useTasks';
 import { useTaskForm } from './forms/hooks/useTaskForm';
@@ -22,8 +23,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
   const { userProfile } = useAuth();
   const { 
     form, 
-    selectedDate, 
-    setSelectedDate, 
     onSubmit, 
     isSubmitting, 
     isLoading, 
@@ -75,35 +74,34 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
           </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-          <TaskTitleField form={form} />
-          
-          <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} />
-          
-          <TaskDescriptionField form={form} />
-          
-          <TaskPriorityStatusFields 
-            form={form} 
-            canAssignTasks={canAssignTasks} 
-            isEditingAssignedTask={isEditingAssignedTask}
-            statusOptions={statusOptions}
-            priorityOptions={priorityOptions}
-          />
-          
-          <TaskDueDateField 
-            selectedDate={selectedDate} 
-            setSelectedDate={setSelectedDate} 
-          />
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <TaskTitleField form={form} />
+            
+            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} />
+            
+            <TaskDescriptionField form={form} />
+            
+            <TaskPriorityStatusFields 
+              form={form} 
+              canAssignTasks={canAssignTasks} 
+              isEditingAssignedTask={isEditingAssignedTask}
+              statusOptions={statusOptions}
+              priorityOptions={priorityOptions}
+            />
+            
+            <TaskDueDateField form={form} />
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isSubmitting}>
-              {mode === 'create' ? 'Create Task' : 'Update Task'}
-            </Button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={isSubmitting}>
+                {mode === 'create' ? 'Create Task' : 'Update Task'}
+              </Button>
+            </div>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
