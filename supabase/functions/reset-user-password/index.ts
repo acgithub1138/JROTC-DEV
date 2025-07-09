@@ -39,6 +39,13 @@ serve(async (req) => {
       throw new Error('Unauthorized')
     }
 
+    // Parse request body first to get userId
+    const { userId, newPassword }: ResetPasswordRequest = await req.json()
+
+    if (!userId || !newPassword) {
+      throw new Error('User ID and new password are required')
+    }
+
     // Check if user has permission to reset passwords
     const { data: profile, error: profileError } = await supabaseAdmin
       .from('profiles')
@@ -77,12 +84,6 @@ serve(async (req) => {
 
     if (!hasPermission) {
       throw new Error('Insufficient permissions to reset this user\'s password')
-    }
-
-    const { userId, newPassword }: ResetPasswordRequest = await req.json()
-
-    if (!userId || !newPassword) {
-      throw new Error('User ID and new password are required')
     }
 
     // Validate password length
