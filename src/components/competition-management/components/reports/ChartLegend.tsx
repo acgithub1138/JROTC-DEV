@@ -34,25 +34,27 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
       <CardHeader>
         <div className="flex items-center justify-between">
           <CardTitle className="text-sm">Scoring Criteria</CardTitle>
-          <div className="flex gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onSelectAll}
-              disabled={allSelected}
-              className="text-xs"
-            >
+          <div className="flex items-center space-x-2">
+            <Checkbox
+              id="select-all-criteria"
+              checked={allSelected}
+              ref={(el) => {
+                if (el) {
+                  const checkbox = el.querySelector('button') as HTMLButtonElement & { indeterminate?: boolean };
+                  if (checkbox) checkbox.indeterminate = visibleCriteria.length > 0 && !allSelected;
+                }
+              }}
+              onCheckedChange={() => {
+                if (allSelected) {
+                  onUnselectAll();
+                } else {
+                  onSelectAll();
+                }
+              }}
+            />
+            <Label htmlFor="select-all-criteria" className="text-xs cursor-pointer">
               Select All
-            </Button>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={onUnselectAll}
-              disabled={noneSelected}
-              className="text-xs"
-            >
-              Unselect All
-            </Button>
+            </Label>
           </div>
         </div>
       </CardHeader>
