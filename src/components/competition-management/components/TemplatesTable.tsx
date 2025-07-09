@@ -81,7 +81,6 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
             <SortableHeader sortKey="template_name">Template Name</SortableHeader>
             <SortableHeader sortKey="event">Event Type</SortableHeader>
             <SortableHeader sortKey="jrotc_program">JROTC Program</SortableHeader>
-            <TableHead>Source</TableHead>
             <SortableHeader sortKey="created_at">Created</SortableHeader>
             <TableHead className="text-right">Actions</TableHead>
           </TableRow>
@@ -106,15 +105,6 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                 <Badge variant="secondary">
                   {template.jrotc_program.replace('_', ' ').toUpperCase()}
                 </Badge>
-              </TableCell>
-              <TableCell>
-                {template.is_global ? (
-                  <Badge variant="default" className="bg-blue-100 text-blue-800">
-                    Global
-                  </Badge>
-                ) : (
-                  <Badge variant="outline">School</Badge>
-                )}
               </TableCell>
               <TableCell>
                 {new Date(template.created_at).toLocaleDateString()}
