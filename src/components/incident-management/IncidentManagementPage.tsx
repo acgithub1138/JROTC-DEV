@@ -140,7 +140,7 @@ const IncidentManagementPage: React.FC = () => {
         </Button>
       </div>
         <p className="text-muted-foreground">
-          Manage competitions, score sheets, and track performance
+          Here is where you can report issues with the platform, or ask for new functionality
         </p>
       <div className="relative">
         <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
