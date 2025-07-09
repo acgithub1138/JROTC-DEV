@@ -178,6 +178,12 @@ export const EditableCell: React.FC<EditableCellProps> = ({
                 console.log('Due date changed:', date);
                 onSave(task, field, date);
               }}
+              disabled={(date) => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                tomorrow.setHours(0, 0, 0, 0);
+                return date < tomorrow;
+              }}
               initialFocus
               className="pointer-events-auto"
             />

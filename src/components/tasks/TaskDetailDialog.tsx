@@ -231,7 +231,14 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                           mode="single"
                           selected={editData.due_date}
                           onSelect={(date) => setEditData({...editData, due_date: date})}
+                          disabled={(date) => {
+                            const tomorrow = new Date();
+                            tomorrow.setDate(tomorrow.getDate() + 1);
+                            tomorrow.setHours(0, 0, 0, 0);
+                            return date < tomorrow;
+                          }}
                           initialFocus
+                          className="pointer-events-auto"
                         />
                       </PopoverContent>
                     </Popover>
