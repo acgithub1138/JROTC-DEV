@@ -33,10 +33,7 @@ export class QueueProcessor {
   async getGlobalSmtpSettings(): Promise<SmtpSettings | null> {
     const { data: globalSmtpSettings, error: smtpError } = await this.supabaseClient
       .from('smtp_settings')
-      .select(`
-        *,
-        decrypted_password:decrypt_smtp_password(smtp_password)
-      `)
+      .select('*')
       .eq('is_global', true)
       .eq('is_active', true)
       .single();
@@ -46,9 +43,17 @@ export class QueueProcessor {
     }
 
     if (globalSmtpSettings) {
+      // Decrypt the password using the PostgreSQL function
+      const { data: decryptedPassword, error: decryptError } = await this.supabaseClient
+        .rpc('decrypt_smtp_password', { encrypted_password: globalSmtpSettings.smtp_password });
+
+      if (decryptError) {
+        console.error('Error decrypting SMTP password:', decryptError);
+        throw decryptError;
+      }
+
       // Replace encrypted password with decrypted one
-      globalSmtpSettings.smtp_password = globalSmtpSettings.decrypted_password;
-      delete globalSmtpSettings.decrypted_password;
+      globalSmtpSettings.smtp_password = decryptedPassword;
     }
 
     return globalSmtpSettings;
