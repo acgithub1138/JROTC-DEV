@@ -76,7 +76,20 @@ export const useUserPermissions = () => {
   };
 
   const canResetPassword = (user: User) => {
-    return userProfile?.role === 'admin' && user.id !== userProfile.id;
+    if (!userProfile) return false;
+    
+    // Can't reset your own password
+    if (user.id === userProfile.id) return false;
+    
+    // Admins can reset anyone's password except their own
+    if (userProfile.role === 'admin') return true;
+    
+    // Instructors can reset passwords for cadets, command_staff, and parents in their school
+    if (userProfile.role === 'instructor' && 
+        user.school_id === userProfile.school_id && 
+        user.role !== 'admin' && user.role !== 'instructor') return true;
+    
+    return false;
   };
 
   return {
