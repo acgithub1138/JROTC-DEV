@@ -1,0 +1,119 @@
+import React from 'react';
+import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Skeleton } from '@/components/ui/skeleton';
+import { format, parseISO } from 'date-fns';
+import type { Database } from '@/integrations/supabase/types';
+
+type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
+
+interface PerformanceData {
+  date: string;
+  [event: string]: number | string;
+}
+
+interface PerformanceChartProps {
+  data: PerformanceData[];
+  visibleEvents: CompetitionEventType[];
+  isLoading: boolean;
+}
+
+const EVENT_COLORS = [
+  '#8884d8', '#82ca9d', '#ffc658', '#ff7300', '#d084d0',
+  '#8dd1e1', '#ffb347', '#87ceeb', '#dda0dd', '#98fb98'
+];
+
+export const PerformanceChart: React.FC<PerformanceChartProps> = ({
+  data,
+  visibleEvents,
+  isLoading
+}) => {
+  const formatTooltipDate = (value: string) => {
+    try {
+      return format(parseISO(value), 'MMM dd, yyyy');
+    } catch {
+      return value;
+    }
+  };
+
+  const formatXAxisDate = (value: string) => {
+    try {
+      return format(parseISO(value), 'MMM dd');
+    } catch {
+      return value;
+    }
+  };
+
+  if (isLoading) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Trends</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Skeleton className="h-96 w-full" />
+        </CardContent>
+      </Card>
+    );
+  }
+
+  if (data.length === 0 || visibleEvents.length === 0) {
+    return (
+      <Card>
+        <CardHeader>
+          <CardTitle>Performance Trends</CardTitle>
+        </CardHeader>
+        <CardContent className="flex items-center justify-center h-96">
+          <div className="text-center">
+            <p className="text-muted-foreground">
+              {visibleEvents.length === 0 
+                ? 'Select events to view performance trends'
+                : 'No data available for the selected events'
+              }
+            </p>
+          </div>
+        </CardContent>
+      </Card>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle>Performance Trends Over Time</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <ResponsiveContainer width="100%" height={400}>
+          <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
+            <CartesianGrid strokeDasharray="3 3" />
+            <XAxis 
+              dataKey="date" 
+              tickFormatter={formatXAxisDate}
+            />
+            <YAxis 
+              label={{ value: 'Average Score', angle: -90, position: 'insideLeft' }}
+            />
+            <Tooltip 
+              labelFormatter={formatTooltipDate}
+              formatter={(value: number, name: string) => [
+                value.toFixed(2),
+                name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+              ]}
+            />
+            {visibleEvents.map((event, index) => (
+              <Line
+                key={event}
+                type="monotone"
+                dataKey={event}
+                stroke={EVENT_COLORS[index % EVENT_COLORS.length]}
+                strokeWidth={2}
+                dot={{ r: 4 }}
+                connectNulls={false}
+              />
+            ))}
+          </LineChart>
+        </ResponsiveContainer>
+      </CardContent>
+    </Card>
+  );
+};
