@@ -51,6 +51,10 @@ export const useRolePermissions = () => {
            userProfile?.role === 'command_staff';
   };
 
+  const canCreateIncidents = () => {
+    return userProfile?.role === 'admin' || userProfile?.role === 'instructor';
+  };
+
   const isCommandStaffOrAbove = () => {
     return userProfile?.role === 'admin' || 
            userProfile?.role === 'instructor' || 
@@ -70,6 +74,7 @@ export const useRolePermissions = () => {
     canViewInventory,
     canCreateTasks,
     canCreateEvents,
+    canCreateIncidents,
     isCommandStaffOrAbove,
     isCadet,
   };

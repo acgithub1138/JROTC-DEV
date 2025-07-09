@@ -1,7 +1,7 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Trophy, Calendar, Package, AlertTriangle } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
@@ -10,6 +10,7 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
+import { IncidentForm } from '@/components/incident-management/IncidentForm';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { useAuth } from '@/contexts/AuthContext';
@@ -17,7 +18,7 @@ import { useRolePermissions } from '@/hooks/useRolePermissions';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
-  const { canCreateTasks, canCreateEvents, isCommandStaffOrAbove, isCadet } = useRolePermissions();
+  const { canCreateTasks, canCreateEvents, canCreateIncidents, isCommandStaffOrAbove, isCadet } = useRolePermissions();
   const {
     data: stats,
     isLoading: statsLoading
@@ -58,6 +59,7 @@ const DashboardOverview = () => {
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   const handleCreateTransaction = (data: any) => {
     // This will be handled by the individual dialogs
     console.log('Transaction created:', data);
@@ -142,6 +144,12 @@ const DashboardOverview = () => {
                 <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                   <p className="font-medium text-sm">Create Event</p>
+                </button>
+              )}
+              {canCreateIncidents() && (
+                <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
+                  <p className="font-medium text-sm">Create Incident</p>
                 </button>
               )}
               {/* Instructor-only actions */}
@@ -265,6 +273,15 @@ const DashboardOverview = () => {
         <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async () => {
           setIsCreateEventOpen(false);
         }} />
+      )}
+
+      {canCreateIncidents() && (
+        <IncidentForm 
+          open={isCreateIncidentOpen} 
+          onOpenChange={setIsCreateIncidentOpen} 
+          mode="create" 
+          incident={null} 
+        />
       )}
     </div>;
 };
