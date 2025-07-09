@@ -130,7 +130,7 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                 )}
               </div>
               <span className="text-xs text-gray-500">
-                {format(new Date(comment.created_at), 'MMM d, yyyy h:mm a')}
+                {format(new Date(comment.created_at), 'MMM d, yyyy HH:mm')}
               </span>
             </div>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">
