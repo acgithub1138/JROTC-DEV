@@ -11,6 +11,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Play, Pause } from 'lucide-react';
 import { EmailRule } from '@/hooks/email/useEmailRules';
 
@@ -60,7 +61,8 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
   };
 
   return (
-    <Card>
+    <TooltipProvider>
+      <Card>
       <CardHeader>
         <CardTitle>Email Rules</CardTitle>
       </CardHeader>
@@ -101,27 +103,48 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex items-center space-x-2">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onToggleActive(rule.id, !rule.is_active)}
-                      >
-                        {rule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(rule)}
-                      >
-                        <Edit className="h-4 w-4" />
-                      </Button>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(rule.id)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onToggleActive(rule.id, !rule.is_active)}
+                          >
+                            {rule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>{rule.is_active ? 'Deactivate rule' : 'Activate rule'}</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onEdit(rule)}
+                          >
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit rule</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => onDelete(rule.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete rule</p>
+                        </TooltipContent>
+                      </Tooltip>
                     </div>
                   </TableCell>
                 </TableRow>
@@ -131,5 +154,6 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
         )}
       </CardContent>
     </Card>
+    </TooltipProvider>
   );
 };
