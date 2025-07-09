@@ -5,7 +5,7 @@ import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
 import { AdvancedCriteriaMapping, type CriteriaMapping } from '../components/reports/AdvancedCriteriaMapping';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
-import { useCriteriaMapping } from '../hooks/useCriteriaMapping';
+import { useCriteriaMapping, sortCriteriaByNumber } from '../hooks/useCriteriaMapping';
 export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
@@ -91,7 +91,7 @@ export const ReportsTab = () => {
 
           {/* Advanced Criteria Mapping - Full width below the chart */}
           <AdvancedCriteriaMapping
-            availableCriteria={originalCriteria}
+            availableCriteria={sortCriteriaByNumber([...originalCriteria])}
             mappings={mappings}
             onMappingsChange={setMappings}
             selectedEvent={selectedEvent}
