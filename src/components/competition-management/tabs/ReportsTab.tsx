@@ -1,22 +1,26 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { EventSelector } from '../components/reports/EventSelector';
 import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
-import type { Database } from '@/integrations/supabase/types';
-
-type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 export const ReportsTab = () => {
-  const [selectedEvent, setSelectedEvent] = useState<CompetitionEventType | null>(null);
+  const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   
   const { reportData, isLoading, isLoadingEvents, availableEvents, scoringCriteria } = useCompetitionReports(selectedEvent);
 
-  const handleEventSelect = (event: CompetitionEventType | null) => {
+  const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
     setVisibleCriteria([]); // Reset visible criteria when event changes
   };
+
+  // Auto-select all criteria when scoringCriteria changes (new event selected)
+  useEffect(() => {
+    if (scoringCriteria.length > 0 && selectedEvent) {
+      setVisibleCriteria(scoringCriteria);
+    }
+  }, [scoringCriteria, selectedEvent]);
 
   const handleCriteriaVisibilityToggle = (criteria: string) => {
     setVisibleCriteria(prev => 

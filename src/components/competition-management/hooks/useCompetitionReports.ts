@@ -4,17 +4,17 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
+type CompetitionEventType = string; // Using string instead of enum to handle database values
 
 interface PerformanceData {
   date: string;
   [event: string]: number | string;
 }
 
-export const useCompetitionReports = (selectedEvent: CompetitionEventType | null) => {
+export const useCompetitionReports = (selectedEvent: string | null) => {
   const { userProfile } = useAuth();
   const [reportData, setReportData] = useState<PerformanceData[]>([]);
-  const [availableEvents, setAvailableEvents] = useState<CompetitionEventType[]>([]);
+  const [availableEvents, setAvailableEvents] = useState<string[]>([]);
   const [scoringCriteria, setScoringCriteria] = useState<string[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
@@ -34,7 +34,8 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
 
       if (error) throw error;
 
-      const uniqueEvents = [...new Set(data.map(item => item.event))] as CompetitionEventType[];
+      const uniqueEvents = [...new Set(data.map(item => item.event))];
+      console.log('Available events:', uniqueEvents);
       setAvailableEvents(uniqueEvents);
     } catch (error) {
       console.error('Error fetching available events:', error);
@@ -65,7 +66,7 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
           )
         `)
         .eq('school_id', userProfile.school_id)
-        .eq('event', selectedEvent)
+        .eq('event', selectedEvent as any) // Cast to any to handle string vs enum mismatch
         .order('competitions(competition_date)', { ascending: true });
 
       if (error) throw error;
@@ -82,9 +83,22 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
     }
   };
 
+  const formatCriteriaName = (rawName: string): string => {
+    // Remove field prefixes like "field_1_1." and convert to readable format
+    const cleaned = rawName.replace(/^field_\d+_\d+\./, '');
+    // Convert underscores to spaces and capitalize words
+    return cleaned
+      .replace(/_/g, ' ')
+      .replace(/\b\w/g, l => l.toUpperCase())
+      .replace(/^\./, ''); // Remove leading dot if present
+  };
+
   const processCompetitionData = (data: any[]): { processedData: PerformanceData[], criteria: string[] } => {
+    console.log('Processing competition data:', data);
+    
     // First, collect all unique scoring criteria from all score sheets
-    const allCriteria = new Set<string>();
+    const rawToFormattedCriteriaMap = new Map<string, string>();
+    const allFormattedCriteria = new Set<string>();
     
     data.forEach(item => {
       if (item.score_sheet?.scores) {
@@ -95,7 +109,9 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
               const value = obj[key];
               
               if (typeof value === 'number') {
-                allCriteria.add(fullKey);
+                const formattedName = formatCriteriaName(fullKey);
+                rawToFormattedCriteriaMap.set(fullKey, formattedName);
+                allFormattedCriteria.add(formattedName);
               } else if (typeof value === 'object' && value !== null) {
                 extractCriteriaKeys(value, fullKey);
               }
@@ -107,7 +123,9 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
       }
     });
 
-    const criteriaList = Array.from(allCriteria).sort();
+    const criteriaList = Array.from(allFormattedCriteria).sort();
+    console.log('Extracted criteria:', criteriaList);
+    console.log('Raw to formatted mapping:', rawToFormattedCriteriaMap);
     
     // Group data by date and extract individual scores for each criteria
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
@@ -150,15 +168,24 @@ export const useCompetitionReports = (selectedEvent: CompetitionEventType | null
       }
     });
 
-    // Convert to chart data format
+    // Convert to chart data format using the mapping
     const chartData: PerformanceData[] = Object.entries(groupedByDate).map(([date, criteriaScores]) => {
       const dataPoint: PerformanceData = { date };
       
-      criteriaList.forEach(criteria => {
-        if (criteriaScores[criteria] && criteriaScores[criteria].length > 0) {
-          const scores = criteriaScores[criteria];
-          const average = scores.reduce((sum, score) => sum + score, 0) / scores.length;
-          dataPoint[criteria] = Math.round(average * 100) / 100; // Round to 2 decimal places
+      // For each formatted criteria name, find all corresponding raw criteria scores
+      criteriaList.forEach(formattedCriteria => {
+        const scoresForThisCriteria: number[] = [];
+        
+        // Find all raw criteria that map to this formatted criteria
+        rawToFormattedCriteriaMap.forEach((formatted, raw) => {
+          if (formatted === formattedCriteria && criteriaScores[raw]) {
+            scoresForThisCriteria.push(...criteriaScores[raw]);
+          }
+        });
+        
+        if (scoresForThisCriteria.length > 0) {
+          const average = scoresForThisCriteria.reduce((sum, score) => sum + score, 0) / scoresForThisCriteria.length;
+          dataPoint[formattedCriteria] = Math.round(average * 100) / 100; // Round to 2 decimal places
         }
       });
       

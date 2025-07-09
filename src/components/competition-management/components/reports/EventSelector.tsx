@@ -3,14 +3,11 @@ import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import type { Database } from '@/integrations/supabase/types';
-
-type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 interface EventSelectorProps {
-  availableEvents: CompetitionEventType[];
-  selectedEvent: CompetitionEventType | null;
-  onEventSelect: (event: CompetitionEventType | null) => void;
+  availableEvents: string[];
+  selectedEvent: string | null;
+  onEventSelect: (event: string | null) => void;
   isLoading: boolean;
 }
 
@@ -21,16 +18,16 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   isLoading
 }) => {
   const handleEventSelect = (eventValue: string) => {
-    const event = eventValue as CompetitionEventType;
-    onEventSelect(event);
+    onEventSelect(eventValue);
   };
 
   const handleEventClear = () => {
     onEventSelect(null);
   };
 
-  const formatEventName = (event: CompetitionEventType) => {
-    return event.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase());
+  const formatEventName = (event: string) => {
+    // Event names are already properly formatted in the database (e.g., "Armed Inspection")
+    return event;
   };
 
   if (isLoading) {
