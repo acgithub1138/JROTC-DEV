@@ -169,8 +169,10 @@ const SchoolManagementPage = () => {
   };
 
   const filteredSchools = schools.filter(school =>
-    school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    school.city?.toLowerCase().includes(searchTerm.toLowerCase())
+    // Filter out the admin school
+    school.name !== 'Carey Unlimited' &&
+    (school.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    school.city?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   const totalPages = Math.ceil(filteredSchools.length / RECORDS_PER_PAGE);
