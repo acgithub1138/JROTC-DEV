@@ -6,6 +6,7 @@ export interface User {
   last_name: string;
   email: string;
   role: UserRole;
+  rank?: string;
   created_at: string;
   school_id: string;
   active: boolean;
