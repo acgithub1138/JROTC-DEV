@@ -3,6 +3,7 @@ import { Edit, Trash2, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { TableCell, TableHead, TableRow } from '@/components/ui/table';
 import { SortableTableHead } from '@/components/ui/sortable-table';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
@@ -98,7 +99,8 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   }
 
   return (
-    <StandardTable>
+    <TooltipProvider>
+      <StandardTable>
       <StandardTableHeader>
         <TableRow>
           <TableHead className="w-12">
@@ -163,25 +165,40 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             </TableCell>
             <TableCell className={getPaddingClass()}>
               <div className="flex gap-2">
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onEdit(transaction)}
-                >
-                  <Edit className="w-4 h-4" />
-                </Button>
-                <Button
-                  variant="ghost"
-                  size="icon"
-                  onClick={() => onDelete(transaction.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onEdit(transaction)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit transaction</p>
+                  </TooltipContent>
+                </Tooltip>
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => onDelete(transaction.id)}
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete transaction</p>
+                  </TooltipContent>
+                </Tooltip>
               </div>
             </TableCell>
           </TableRow>
         ))}
       </StandardTableBody>
     </StandardTable>
+    </TooltipProvider>
   );
 };
