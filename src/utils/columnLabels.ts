@@ -99,6 +99,22 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
       approved_at: 'Approved At',
       school_id: 'School',
       created_at: 'Created Date'
+    },
+    incidents: {
+      id: 'Incident ID',
+      incident_number: 'Incident Number',
+      title: 'Title',
+      description: 'Description',
+      category: 'Category',
+      priority: 'Priority',
+      status: 'Status',
+      submitted_by: 'Submitted By',
+      assigned_to: 'Assigned To',
+      active: 'Active',
+      resolved_at: 'Resolved At',
+      school_id: 'School',
+      created_at: 'Created Date',
+      updated_at: 'Updated Date'
     }
   };
 
@@ -110,7 +126,8 @@ export const getProfileReferenceFields = (tableName: string): string[] => {
     tasks: ['assigned_to', 'assigned_by'],
     cadets: ['profile_id'],
     teams: ['team_lead_id'],
-    expenses: ['created_by', 'approved_by']
+    expenses: ['created_by', 'approved_by'],
+    incidents: ['submitted_by', 'assigned_to']
   };
 
   return profileFields[tableName] || [];

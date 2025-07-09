@@ -16,6 +16,7 @@ const getRelatedTableName = (columnName: string): string | null => {
     'assigned_by': 'profiles',
     'created_by': 'profiles',
     'approved_by': 'profiles',
+    'submitted_by': 'profiles',
     'team_lead_id': 'profiles',
     'profile_id': 'profiles',
     'team_id': 'teams',
