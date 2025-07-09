@@ -142,13 +142,12 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
   const formatCriteriaName = (rawName: string): string => {
     console.log('Formatting criteria name:', rawName);
     
-    // Handle the specific format from database: field_X_Y._description
-    // Extract the first number from field_X_Y to use as display number
-    const fieldMatch = rawName.match(/^field_(\d+)_\d+\.(.*)/);
+    // Handle numbered criteria: field_X_Y._description
+    const numberedMatch = rawName.match(/^field_(\d+)_\d+\.(.*)/);
     
-    if (fieldMatch) {
-      const displayNumber = fieldMatch[1]; // First number from field_X_Y
-      const description = fieldMatch[2]; // Everything after the dot
+    if (numberedMatch) {
+      const displayNumber = numberedMatch[1]; // First number from field_X_Y
+      const description = numberedMatch[2]; // Everything after the dot
       
       // Clean up the description part
       const cleanDescription = description
@@ -159,7 +158,25 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
         .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize words
       
       const formatted = `${displayNumber}. ${cleanDescription}`;
-      console.log('Formatted criteria name:', formatted);
+      console.log('Formatted numbered criteria:', formatted);
+      return formatted;
+    }
+    
+    // Handle penalty fields: field_X_description (without dot and second number)
+    const penaltyMatch = rawName.match(/^field_\d+_(.*)/);
+    
+    if (penaltyMatch) {
+      const description = penaltyMatch[1];
+      
+      // Clean up the penalty description
+      const cleanDescription = description
+        .replace(/_/g, ' ') // Convert underscores to spaces
+        .replace(/&/g, '&') // Handle special characters
+        .replace(/\//g, '/')
+        .replace(/\b\w/g, l => l.toUpperCase()); // Capitalize words
+      
+      const formatted = cleanDescription;
+      console.log('Formatted penalty criteria:', formatted);
       return formatted;
     }
     

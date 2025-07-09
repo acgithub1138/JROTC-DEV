@@ -66,8 +66,8 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
           .sort((a, b) => {
             // Extract number from beginning of criteria strings
             const getNumber = (str: string) => {
-              const match = str.match(/^(\d+)/);
-              return match ? parseInt(match[1]) : 999;
+              const match = str.match(/^(\d+)\./);
+              return match ? parseInt(match[1]) : 999; // Penalty fields go to end (999)
             };
             return getNumber(a) - getNumber(b);
           })
