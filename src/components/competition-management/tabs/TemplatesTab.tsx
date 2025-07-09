@@ -10,6 +10,8 @@ import { TemplateDialog } from '../components/TemplateDialog';
 import { TemplatePreviewDialog } from '../components/TemplatePreviewDialog';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
+import { TablePagination } from '@/components/ui/table-pagination';
+import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import type { Database } from '@/integrations/supabase/types';
 type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
 interface TemplatesTabProps {
@@ -23,6 +25,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<CompetitionTemplate | null>(null);
   const [previewTemplate, setPreviewTemplate] = useState<CompetitionTemplate | null>(null);
+  const [currentPage, setCurrentPage] = useState(1);
   const {
     templates,
     isLoading,
@@ -48,6 +51,22 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
       direction: 'asc'
     }
   });
+
+  // Pagination constants for templates (50 per page)
+  const TEMPLATES_PER_PAGE = 50;
+  
+  // Calculate pagination
+  const totalPages = Math.ceil(sortedTemplates.length / TEMPLATES_PER_PAGE);
+  const paginatedTemplates = useMemo(() => {
+    const startIndex = (currentPage - 1) * TEMPLATES_PER_PAGE;
+    const endIndex = startIndex + TEMPLATES_PER_PAGE;
+    return sortedTemplates.slice(startIndex, endIndex);
+  }, [sortedTemplates, currentPage]);
+
+  // Reset to first page when filters change
+  React.useEffect(() => {
+    setCurrentPage(1);
+  }, [searchQuery, showOnlyMyTemplates]);
   const canManageTemplates = !readOnly && (userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff');
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
@@ -79,7 +98,15 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
         </div>
       </div>
 
-      <TemplatesTable templates={sortedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={canManageTemplates ? (t: any) => setEditingTemplate(t) : undefined} onDelete={canManageTemplates ? deleteTemplate : undefined} onCopy={handleCopy} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCopyTemplate(t)} />
+      <TemplatesTable templates={paginatedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={canManageTemplates ? (t: any) => setEditingTemplate(t) : undefined} onDelete={canManageTemplates ? deleteTemplate : undefined} onCopy={handleCopy} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCopyTemplate(t)} />
+
+      {/* Pagination */}
+      <TablePagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={sortedTemplates.length}
+        onPageChange={setCurrentPage}
+      />
 
       {canManageTemplates && <TemplateDialog open={showAddDialog || !!editingTemplate} onOpenChange={open => {
       if (!open) {
