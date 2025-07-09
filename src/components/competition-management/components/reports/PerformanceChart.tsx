@@ -49,7 +49,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   if (isLoading) {
     return (
-      <Card>
+      <Card className="h-[500px] flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Performance Trends</CardTitle>
@@ -63,8 +63,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             </div>
           </div>
         </CardHeader>
-        <CardContent>
-          <Skeleton className="h-96 w-full" />
+        <CardContent className="flex-1">
+          <Skeleton className="h-full w-full" />
         </CardContent>
       </Card>
     );
@@ -72,11 +72,11 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   if (data.length === 0 || visibleCriteria.length === 0) {
     return (
-      <Card>
+      <Card className="h-[500px] flex flex-col">
         <CardHeader>
           <CardTitle>Performance Trends</CardTitle>
         </CardHeader>
-        <CardContent className="flex items-center justify-center h-96">
+        <CardContent className="flex items-center justify-center flex-1">
           <div className="text-center">
             <p className="text-muted-foreground">
               {visibleCriteria.length === 0 
@@ -91,7 +91,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }
 
   return (
-      <Card>
+      <Card className="h-[500px] flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Performance Trends</CardTitle>
@@ -105,8 +105,8 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             </div>
           </div>
         </CardHeader>
-      <CardContent>
-        <ResponsiveContainer width="100%" height={400}>
+      <CardContent className="flex-1">
+        <ResponsiveContainer width="100%" height="100%">
           <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
             <CartesianGrid strokeDasharray="3 3" />
             <XAxis 
