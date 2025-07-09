@@ -2,6 +2,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { getColumnLabel, getEnhancedVariables } from '@/utils/columnLabels';
+import { useAuth } from '@/contexts/AuthContext';
 
 export interface TableColumn {
   column_name: string;
@@ -51,19 +52,50 @@ export const useEnhancedVariables = (tableName: string) => {
 };
 
 export const useAvailableTables = () => {
+  const { userProfile } = useAuth();
+  
   return useQuery({
-    queryKey: ['available-tables'],
+    queryKey: ['available-tables', userProfile?.role],
     queryFn: async () => {
-      // Return commonly used tables that users would want to create email templates for
-      return [
-        { name: 'tasks', label: 'Tasks' },
-        { name: 'cadets', label: 'Cadets' },
-        { name: 'profiles', label: 'Profiles' },
-        { name: 'teams', label: 'Teams' },
-        { name: 'competitions', label: 'Competitions' },
-        { name: 'inventory_items', label: 'Inventory Items' },
-        { name: 'expenses', label: 'Expenses' },
-      ];
+      // Get unique table names from schema_tracking
+      const { data, error } = await supabase
+        .from('schema_tracking')
+        .select('table_name')
+        .eq('is_active', true);
+      
+      if (error) throw error;
+      
+      // Get unique table names
+      const uniqueTables = [...new Set(data.map(item => item.table_name))];
+      
+      // Define table labels
+      const tableLabels: Record<string, string> = {
+        'tasks': 'Tasks',
+        'profiles': 'Profiles', 
+        'competitions': 'Competitions',
+        'inventory_items': 'Inventory Items',
+        'expenses': 'Expenses',
+        'contacts': 'Contacts',
+        'events': 'Events',
+        'budget_transactions': 'Budget Transactions',
+        'incidents': 'Incidents'
+      };
+      
+      // Map to table objects with labels
+      let availableTables = uniqueTables
+        .filter(tableName => tableLabels[tableName]) // Only include tables we have labels for
+        .map(tableName => ({
+          name: tableName,
+          label: tableLabels[tableName]
+        }));
+      
+      // Filter out incidents table unless user is admin
+      if (userProfile?.role !== 'admin') {
+        availableTables = availableTables.filter(table => table.name !== 'incidents');
+      }
+      
+      return availableTables;
     },
+    enabled: !!userProfile,
   });
 };
