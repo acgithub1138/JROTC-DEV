@@ -62,7 +62,16 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
         
         {/* Individual Criteria Checkboxes */}
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-        {scoringCriteria.map((criteria, index) => (
+        {[...scoringCriteria]
+          .sort((a, b) => {
+            // Extract number from beginning of criteria strings
+            const getNumber = (str: string) => {
+              const match = str.match(/^(\d+)/);
+              return match ? parseInt(match[1]) : 999;
+            };
+            return getNumber(a) - getNumber(b);
+          })
+          .map((criteria, index) => (
           <div key={criteria} className="flex items-center space-x-2">
             <Checkbox
               id={`legend-${criteria}`}
@@ -77,7 +86,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
               htmlFor={`legend-${criteria}`} 
               className="text-xs font-normal cursor-pointer"
             >
-              {criteria.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+              {criteria.replace(/_/g, ' ')}
             </Label>
           </div>
         ))}
