@@ -14,7 +14,6 @@ interface CreateSchoolDialogProps {
 
 interface NewSchool {
   name: string;
-  district: string;
   address: string;
   city: string;
   state: string;
@@ -28,7 +27,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
   const [isLoading, setIsLoading] = useState(false);
   const [newSchool, setNewSchool] = useState<NewSchool>({
     name: '',
-    district: '',
     address: '',
     city: '',
     state: '',
@@ -59,7 +57,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
       // Reset form
       setNewSchool({
         name: '',
-        district: '',
         address: '',
         city: '',
         state: '',
@@ -97,16 +94,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
               onChange={(e) => setNewSchool({ ...newSchool, name: e.target.value })}
               placeholder="Enter school name"
               required
-            />
-          </div>
-
-          <div>
-            <Label htmlFor="district">District</Label>
-            <Input
-              id="district"
-              value={newSchool.district}
-              onChange={(e) => setNewSchool({ ...newSchool, district: e.target.value })}
-              placeholder="Enter school district"
             />
           </div>
 

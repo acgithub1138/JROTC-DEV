@@ -6,7 +6,6 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
@@ -19,6 +18,7 @@ import {
   PaginationPrevious,
 } from '@/components/ui/pagination';
 import { useToast } from '@/hooks/use-toast';
+import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { 
   Building2, 
   Edit, 
@@ -26,6 +26,7 @@ import {
   Search, 
   Plus 
 } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
 interface School {
   id: string;
@@ -48,8 +49,8 @@ const SchoolManagementPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
   const [editingSchool, setEditingSchool] = useState<School | null>(null);
-  const [isCreating, setIsCreating] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [createSchoolOpen, setCreateSchoolOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
 
@@ -92,14 +93,11 @@ const SchoolManagementPage = () => {
   }, []);
 
   const handleCreateSchool = () => {
-    setEditingSchool({ ...emptySchool, id: '', created_at: '' });
-    setIsCreating(true);
-    setEditDialogOpen(true);
+    setCreateSchoolOpen(true);
   };
 
   const handleEditSchool = (school: School) => {
     setEditingSchool(school);
-    setIsCreating(false);
     setEditDialogOpen(true);
   };
 
@@ -108,46 +106,25 @@ const SchoolManagementPage = () => {
     if (!editingSchool) return;
 
     try {
-      if (isCreating) {
-        const { error } = await supabase
-          .from('schools')
-          .insert([{
-            name: editingSchool.name,
-            district: editingSchool.district,
-            address: editingSchool.address,
-            city: editingSchool.city,
-            state: editingSchool.state,
-            zip_code: editingSchool.zip_code,
-            phone: editingSchool.phone,
-            email: editingSchool.email,
-          }]);
+      const { error } = await supabase
+        .from('schools')
+        .update({
+          name: editingSchool.name,
+          district: editingSchool.district,
+          address: editingSchool.address,
+          city: editingSchool.city,
+          state: editingSchool.state,
+          zip_code: editingSchool.zip_code,
+          phone: editingSchool.phone,
+          email: editingSchool.email,
+        })
+        .eq('id', editingSchool.id);
 
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "School created successfully",
-        });
-      } else {
-        const { error } = await supabase
-          .from('schools')
-          .update({
-            name: editingSchool.name,
-            district: editingSchool.district,
-            address: editingSchool.address,
-            city: editingSchool.city,
-            state: editingSchool.state,
-            zip_code: editingSchool.zip_code,
-            phone: editingSchool.phone,
-            email: editingSchool.email,
-          })
-          .eq('id', editingSchool.id);
-
-        if (error) throw error;
-        toast({
-          title: "Success",
-          description: "School updated successfully",
-        });
-      }
+      if (error) throw error;
+      toast({
+        title: "Success",
+        description: "School updated successfully",
+      });
 
       setEditDialogOpen(false);
       setEditingSchool(null);
@@ -377,11 +354,22 @@ const SchoolManagementPage = () => {
         </CardContent>
       </Card>
 
-      {/* Edit/Create School Dialog */}
+      {/* Create School Dialog */}
+      <CreateSchoolDialog 
+        open={createSchoolOpen} 
+        onOpenChange={(open) => {
+          setCreateSchoolOpen(open);
+          if (!open) {
+            fetchSchools(); // Refresh the list when dialog closes
+          }
+        }} 
+      />
+
+      {/* Edit School Dialog */}
       <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
         <DialogContent className="max-w-2xl">
           <DialogHeader>
-            <DialogTitle>{isCreating ? 'Create School' : 'Edit School'}</DialogTitle>
+            <DialogTitle>Edit School</DialogTitle>
           </DialogHeader>
           {editingSchool && (
             <form onSubmit={handleSaveSchool} className="space-y-4">
@@ -490,7 +478,7 @@ const SchoolManagementPage = () => {
                   Cancel
                 </Button>
                 <Button type="submit">
-                  {isCreating ? 'Create School' : 'Update School'}
+                  Update School
                 </Button>
               </div>
             </form>
