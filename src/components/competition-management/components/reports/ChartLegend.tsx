@@ -58,7 +58,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
         </div>
         
         {/* Individual Criteria Checkboxes */}
-        <div className="space-y-3">
+        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
         {scoringCriteria.map((criteria, index) => (
           <div key={criteria} className="flex items-center space-x-2">
             <Checkbox
