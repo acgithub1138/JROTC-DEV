@@ -47,33 +47,33 @@ export const ReportsTab = () => {
         </p>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
-        <div className="lg:col-span-1">
-          <EventSelector
-            availableEvents={availableEvents}
-            selectedEvent={selectedEvent}
-            onEventSelect={handleEventSelect}
-            isLoading={isLoadingEvents}
-          />
-          
-          {selectedEvent && (
-            <ChartLegend
-              scoringCriteria={scoringCriteria}
-              visibleCriteria={visibleCriteria}
-              onCriteriaToggle={handleCriteriaVisibilityToggle}
-              onSelectAll={handleSelectAllCriteria}
-              onUnselectAll={handleUnselectAllCriteria}
-            />
-          )}
-        </div>
+      <div className="space-y-6">
+        <EventSelector
+          availableEvents={availableEvents}
+          selectedEvent={selectedEvent}
+          onEventSelect={handleEventSelect}
+          isLoading={isLoadingEvents}
+        />
 
-        <div className="lg:col-span-3">
-          <PerformanceChart
-            data={reportData}
-            visibleCriteria={visibleCriteria}
-            isLoading={isLoading}
-          />
-        </div>
+        <PerformanceChart
+          data={reportData}
+          visibleCriteria={visibleCriteria}
+          isLoading={isLoading}
+        />
+        
+        {selectedEvent && (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div className="md:col-span-2 lg:col-span-3">
+              <ChartLegend
+                scoringCriteria={scoringCriteria}
+                visibleCriteria={visibleCriteria}
+                onCriteriaToggle={handleCriteriaVisibilityToggle}
+                onSelectAll={handleSelectAllCriteria}
+                onUnselectAll={handleUnselectAllCriteria}
+              />
+            </div>
+          </div>
+        )}
       </div>
     </div>
   );
