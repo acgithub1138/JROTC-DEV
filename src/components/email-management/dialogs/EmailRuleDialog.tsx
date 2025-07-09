@@ -50,38 +50,80 @@ export const EmailRuleDialog: React.FC<EmailRuleDialogProps> = ({
 
   useEffect(() => {
     if (rule && mode === 'edit') {
-      // Safely convert the recipient_config from the database
-      const dbRecipientConfig = rule.recipient_config as Record<string, any>;
-      const recipientConfig: RecipientConfig = {
-        recipient_type: dbRecipientConfig.recipient_type || 'field',
-        recipient_field: dbRecipientConfig.recipient_field || '',
-        static_email: dbRecipientConfig.static_email || '',
-      };
+      try {
+        // Safely convert the recipient_config from the database
+        const dbRecipientConfig = rule.recipient_config as Record<string, any>;
+        const recipientConfig: RecipientConfig = {
+          recipient_type: dbRecipientConfig?.recipient_type || 'field',
+          recipient_field: dbRecipientConfig?.recipient_field || '',
+          static_email: dbRecipientConfig?.static_email || '',
+        };
 
-      // Convert trigger conditions to new format if needed
-      let triggerConditions = rule.trigger_conditions;
-      if (rule.trigger_event === 'UPDATE') {
-        // Ensure trigger conditions are in the new structured format
-        if (!triggerConditions || typeof triggerConditions !== 'object' || !('conditions' in triggerConditions)) {
-          triggerConditions = {
-            conditions: [],
-            logic: 'AND'
-          } as TriggerConditions;
+        // Convert trigger conditions to new format if needed with robust error handling
+        let triggerConditions: TriggerConditions | Record<string, any> = {};
+        
+        try {
+          if (rule.trigger_event === 'UPDATE') {
+            // Check if trigger_conditions exists and is valid
+            if (rule.trigger_conditions && typeof rule.trigger_conditions === 'object') {
+              // Check if it's already in the new format
+              const conditions = rule.trigger_conditions as any;
+              if (conditions.conditions && Array.isArray(conditions.conditions)) {
+                // Already in new format
+                triggerConditions = {
+                  conditions: conditions.conditions || [],
+                  logic: conditions.logic || 'AND'
+                } as TriggerConditions;
+              } else {
+                // Legacy format or invalid - convert to new format
+                triggerConditions = {
+                  conditions: [],
+                  logic: 'AND'
+                } as TriggerConditions;
+              }
+            } else {
+              // No conditions or invalid - initialize empty
+              triggerConditions = {
+                conditions: [],
+                logic: 'AND'
+              } as TriggerConditions;
+            }
+          } else {
+            // For non-UPDATE events, use empty object
+            triggerConditions = {};
+          }
+        } catch (conditionsError) {
+          console.error('Error processing trigger conditions:', conditionsError);
+          // Fallback to safe default
+          triggerConditions = rule.trigger_event === 'UPDATE' ? { conditions: [], logic: 'AND' } : {};
         }
-      } else {
-        // For non-UPDATE events, use empty object
-        triggerConditions = {};
-      }
 
-      setFormData({
-        name: rule.name,
-        template_id: rule.template_id,
-        source_table: rule.source_table,
-        trigger_event: rule.trigger_event,
-        trigger_conditions: triggerConditions,
-        recipient_config: recipientConfig,
-        is_active: rule.is_active,
-      });
+        setFormData({
+          name: rule.name || '',
+          template_id: rule.template_id || '',
+          source_table: rule.source_table || '',
+          trigger_event: rule.trigger_event || 'INSERT',
+          trigger_conditions: triggerConditions,
+          recipient_config: recipientConfig,
+          is_active: rule.is_active ?? true,
+        });
+      } catch (error) {
+        console.error('Error processing rule data:', error);
+        // Fallback to empty form if there's an error
+        setFormData({
+          name: '',
+          template_id: '',
+          source_table: '',
+          trigger_event: 'INSERT',
+          trigger_conditions: {},
+          recipient_config: {
+            recipient_type: 'field',
+            recipient_field: '',
+            static_email: '',
+          },
+          is_active: true,
+        });
+      }
     } else {
       setFormData({
         name: '',
