@@ -1,7 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Skeleton } from '@/components/ui/skeleton';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 
 interface CompetitionSelectorProps {
   availableCompetitions: Array<{ id: string; name: string; competition_date: string }>;
@@ -16,12 +18,28 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
   onCompetitionSelect,
   isLoading
 }) => {
-  const handleCompetitionSelect = (value: string) => {
-    if (value === 'all') {
-      onCompetitionSelect(null); // null means all competitions
+  const handleCompetitionToggle = (competitionId: string) => {
+    if (!selectedCompetitions) {
+      // If "All" was selected, start with just this competition
+      onCompetitionSelect([competitionId]);
     } else {
-      onCompetitionSelect([value]);
+      const isSelected = selectedCompetitions.includes(competitionId);
+      if (isSelected) {
+        const newSelections = selectedCompetitions.filter(id => id !== competitionId);
+        // If no competitions left selected, default to "All"
+        onCompetitionSelect(newSelections.length === 0 ? null : newSelections);
+      } else {
+        onCompetitionSelect([...selectedCompetitions, competitionId]);
+      }
     }
+  };
+
+  const handleSelectAll = () => {
+    onCompetitionSelect(null); // null means all competitions
+  };
+
+  const handleSelectNone = () => {
+    onCompetitionSelect([]);
   };
 
   const formatCompetitionName = (comp: { name: string; competition_date: string }) => {
@@ -29,21 +47,17 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
     return `${comp.name} (${date})`;
   };
 
-  const getDisplayValue = () => {
-    if (!selectedCompetitions || selectedCompetitions.length === 0) {
-      return 'all';
-    }
-    return selectedCompetitions[0];
-  };
+  const isAllSelected = !selectedCompetitions;
+  const selectedCount = selectedCompetitions?.length || 0;
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
-          <CardTitle>Select Competition</CardTitle>
+          <CardTitle>Select Competitions</CardTitle>
         </CardHeader>
         <CardContent>
-          <Skeleton className="h-10 w-full" />
+          <Skeleton className="h-40 w-full" />
         </CardContent>
       </Card>
     );
@@ -52,7 +66,29 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
   return (
     <Card>
       <CardHeader>
-        <CardTitle>Select Competition</CardTitle>
+        <div className="flex items-center justify-between">
+          <CardTitle>Select Competitions</CardTitle>
+          <div className="flex gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectAll}
+              disabled={isAllSelected}
+              className="text-xs"
+            >
+              All
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handleSelectNone}
+              disabled={selectedCount === 0}
+              className="text-xs"
+            >
+              None
+            </Button>
+          </div>
+        </div>
       </CardHeader>
       <CardContent>
         {availableCompetitions.length === 0 ? (
@@ -60,19 +96,46 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
             No competitions found. Add some competitions to see data.
           </p>
         ) : (
-          <Select value={getDisplayValue()} onValueChange={handleCompetitionSelect}>
-            <SelectTrigger>
-              <SelectValue placeholder="Select a competition..." />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="all">All Competitions</SelectItem>
-              {availableCompetitions.map((comp) => (
-                <SelectItem key={comp.id} value={comp.id}>
-                  {formatCompetitionName(comp)}
-                </SelectItem>
-              ))}
-            </SelectContent>
-          </Select>
+          <div className="space-y-3 max-h-60 overflow-y-auto">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="all-competitions"
+                checked={isAllSelected}
+                onCheckedChange={() => handleSelectAll()}
+              />
+              <Label htmlFor="all-competitions" className="text-sm font-medium cursor-pointer">
+                All Competitions ({availableCompetitions.length})
+              </Label>
+            </div>
+            
+            <div className="border-t pt-3 space-y-2">
+              {availableCompetitions.map((comp) => {
+                const isSelected = selectedCompetitions?.includes(comp.id) || false;
+                return (
+                  <div key={comp.id} className="flex items-center space-x-2">
+                    <Checkbox
+                      id={`competition-${comp.id}`}
+                      checked={isAllSelected || isSelected}
+                      onCheckedChange={() => handleCompetitionToggle(comp.id)}
+                      disabled={isAllSelected}
+                    />
+                    <Label 
+                      htmlFor={`competition-${comp.id}`} 
+                      className="text-xs cursor-pointer"
+                    >
+                      {formatCompetitionName(comp)}
+                    </Label>
+                  </div>
+                );
+              })}
+            </div>
+            
+            {selectedCount > 0 && !isAllSelected && (
+              <div className="text-xs text-muted-foreground pt-2 border-t">
+                {selectedCount} of {availableCompetitions.length} competitions selected
+              </div>
+            )}
+          </div>
         )}
       </CardContent>
     </Card>
