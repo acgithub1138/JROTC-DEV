@@ -165,7 +165,7 @@ const DashboardOverview = () => {
   };
 
   return <div className="p-6 space-y-6">
-      {/* Stats Grid with Quick Actions */}
+      {/* Stats Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;
@@ -184,15 +184,17 @@ const DashboardOverview = () => {
               </CardContent>
             </Card>;
       })}
-        {/* Quick Actions Widget for Command Staff */}
-        {renderQuickActionsWidget()}
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        {/* My Tasks Widget */}
-        <MyTasksWidget />
+        {/* Left Column: My Tasks and Quick Actions */}
+        <div className="space-y-6">
+          <MyTasksWidget />
+          {/* Quick Actions Widget for Command Staff */}
+          {renderQuickActionsWidget()}
+        </div>
 
-        {/* Upcoming Events */}
+        {/* Right Column: Upcoming Events */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center">
