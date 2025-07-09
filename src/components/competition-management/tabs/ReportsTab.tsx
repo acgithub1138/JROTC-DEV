@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { EventSelector } from '../components/reports/EventSelector';
+import { CompetitionSelector } from '../components/reports/CompetitionSelector';
 import { PerformanceChart } from '../components/reports/PerformanceChart';
 import { ChartLegend } from '../components/reports/ChartLegend';
 import { useCompetitionReports } from '../hooks/useCompetitionReports';
 
 export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
+  const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
   
-  const { reportData, isLoading, isLoadingEvents, availableEvents, scoringCriteria } = useCompetitionReports(selectedEvent);
+  const { reportData, isLoading, isLoadingEvents, isLoadingCompetitions, availableEvents, availableCompetitions, scoringCriteria } = useCompetitionReports(selectedEvent, selectedCompetitions);
 
   const handleEventSelect = (event: string | null) => {
     setSelectedEvent(event);
@@ -47,19 +49,27 @@ export const ReportsTab = () => {
         </p>
       </div>
 
-      <div className="space-y-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <EventSelector
           availableEvents={availableEvents}
           selectedEvent={selectedEvent}
           onEventSelect={handleEventSelect}
           isLoading={isLoadingEvents}
         />
-
-        <PerformanceChart
-          data={reportData}
-          visibleCriteria={visibleCriteria}
-          isLoading={isLoading}
+        
+        <CompetitionSelector
+          availableCompetitions={availableCompetitions}
+          selectedCompetitions={selectedCompetitions}
+          onCompetitionSelect={setSelectedCompetitions}
+          isLoading={isLoadingCompetitions}
         />
+      </div>
+
+      <PerformanceChart
+        data={reportData}
+        visibleCriteria={visibleCriteria}
+        isLoading={isLoading}
+      />
         
         {selectedEvent && (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -74,7 +84,6 @@ export const ReportsTab = () => {
             </div>
           </div>
         )}
-      </div>
     </div>
   );
 };

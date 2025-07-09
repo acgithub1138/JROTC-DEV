@@ -11,12 +11,14 @@ interface PerformanceData {
   [event: string]: number | string;
 }
 
-export const useCompetitionReports = (selectedEvent: string | null) => {
+export const useCompetitionReports = (selectedEvent: string | null, selectedCompetitions: string[] | null = null) => {
   const { userProfile } = useAuth();
   const [reportData, setReportData] = useState<PerformanceData[]>([]);
   const [availableEvents, setAvailableEvents] = useState<string[]>([]);
+  const [availableCompetitions, setAvailableCompetitions] = useState<Array<{ id: string; name: string; competition_date: string }>>([]);
   const [scoringCriteria, setScoringCriteria] = useState<string[]>([]);
   const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [isLoadingCompetitions, setIsLoadingCompetitions] = useState(true);
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchAvailableEvents = async () => {
@@ -45,6 +47,31 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
     }
   };
 
+  const fetchAvailableCompetitions = async () => {
+    if (!userProfile?.school_id) {
+      setIsLoadingCompetitions(false);
+      return;
+    }
+
+    try {
+      setIsLoadingCompetitions(true);
+      const { data, error } = await supabase
+        .from('competitions')
+        .select('id, name, competition_date')
+        .eq('school_id', userProfile.school_id)
+        .order('competition_date', { ascending: false });
+
+      if (error) throw error;
+
+      setAvailableCompetitions(data || []);
+    } catch (error) {
+      console.error('Error fetching available competitions:', error);
+      toast.error('Failed to load available competitions');
+    } finally {
+      setIsLoadingCompetitions(false);
+    }
+  };
+
   const fetchReportData = async () => {
     if (!userProfile?.school_id || !selectedEvent) {
       console.log('Missing data for fetch:', { school_id: userProfile?.school_id, selectedEvent });
@@ -57,19 +84,27 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
       setIsLoading(true);
       console.log('Fetching report data for event:', selectedEvent);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('competition_events')
         .select(`
           event,
           score_sheet,
           total_points,
+          competition_id,
           competitions!inner(
+            id,
             competition_date
           )
         `)
         .eq('school_id', userProfile.school_id)
-        .eq('event', selectedEvent as any) // Cast to any to handle string vs enum mismatch
-        .order('competitions(competition_date)', { ascending: true });
+        .eq('event', selectedEvent as any); // Cast to any to handle string vs enum mismatch
+      
+      // Filter by specific competitions if selected
+      if (selectedCompetitions && selectedCompetitions.length > 0) {
+        query = query.in('competition_id', selectedCompetitions);
+      }
+      
+      const { data, error } = await query.order('competitions(competition_date)', { ascending: true });
 
       if (error) throw error;
 
@@ -269,18 +304,21 @@ export const useCompetitionReports = (selectedEvent: string | null) => {
 
   useEffect(() => {
     fetchAvailableEvents();
+    fetchAvailableCompetitions();
   }, [userProfile?.school_id]);
 
   useEffect(() => {
     fetchReportData();
-  }, [selectedEvent, userProfile?.school_id]);
+  }, [selectedEvent, selectedCompetitions, userProfile?.school_id]);
 
   return {
     reportData,
     availableEvents,
+    availableCompetitions,
     scoringCriteria,
     isLoading,
     isLoadingEvents,
+    isLoadingCompetitions,
     refetch: fetchReportData
   };
 };
