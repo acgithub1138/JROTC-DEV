@@ -101,7 +101,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
                     </Badge>
                   </div>
                   <span className="text-xs text-gray-500">
-                    {format(new Date(item.created_at), 'MMM d, yyyy h:mm a')}
+                    {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
                   </span>
                 </div>
                 <p className="text-sm text-gray-700">
