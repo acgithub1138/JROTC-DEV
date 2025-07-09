@@ -11,7 +11,7 @@ export const ReportsTab = () => {
   const [selectedEvents, setSelectedEvents] = useState<CompetitionEventType[]>([]);
   const [visibleEvents, setVisibleEvents] = useState<CompetitionEventType[]>([]);
   
-  const { reportData, isLoading, availableEvents } = useCompetitionReports(selectedEvents);
+  const { reportData, isLoading, isLoadingEvents, availableEvents } = useCompetitionReports(selectedEvents);
 
   const handleEventSelect = (events: CompetitionEventType[]) => {
     setSelectedEvents(events);
@@ -41,7 +41,7 @@ export const ReportsTab = () => {
             availableEvents={availableEvents}
             selectedEvents={selectedEvents}
             onEventSelect={handleEventSelect}
-            isLoading={isLoading}
+            isLoading={isLoadingEvents}
           />
           
           {selectedEvents.length > 0 && (

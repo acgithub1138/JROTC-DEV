@@ -15,12 +15,17 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
   const { userProfile } = useAuth();
   const [reportData, setReportData] = useState<PerformanceData[]>([]);
   const [availableEvents, setAvailableEvents] = useState<CompetitionEventType[]>([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [isLoadingEvents, setIsLoadingEvents] = useState(true);
+  const [isLoading, setIsLoading] = useState(false);
 
   const fetchAvailableEvents = async () => {
-    if (!userProfile?.school_id) return;
+    if (!userProfile?.school_id) {
+      setIsLoadingEvents(false);
+      return;
+    }
 
     try {
+      setIsLoadingEvents(true);
       const { data, error } = await supabase
         .from('competition_events')
         .select('event')
@@ -33,6 +38,8 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
     } catch (error) {
       console.error('Error fetching available events:', error);
       toast.error('Failed to load available events');
+    } finally {
+      setIsLoadingEvents(false);
     }
   };
 
@@ -133,6 +140,7 @@ export const useCompetitionReports = (selectedEvents: CompetitionEventType[]) =>
     reportData,
     availableEvents,
     isLoading,
+    isLoadingEvents,
     refetch: fetchReportData
   };
 };
