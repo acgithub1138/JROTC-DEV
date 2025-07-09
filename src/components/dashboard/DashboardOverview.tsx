@@ -68,6 +68,11 @@ const DashboardOverview = () => {
   const getStatsConfig = () => {
     const baseStats = [];
 
+    // Admin role gets no stats widgets
+    if (userProfile?.role === 'admin') {
+      return baseStats;
+    }
+
     // Only show Total Cadets widget for non-cadet roles
     if (!isCadet()) {
       baseStats.push({
@@ -91,8 +96,8 @@ const DashboardOverview = () => {
         bgColor: 'bg-green-100'
       });
 
-      // Show equipment only for non-command staff (instructors and admins)
-      if (userProfile?.role === 'instructor' || userProfile?.role === 'admin') {
+      // Show equipment only for non-command staff (instructors)
+      if (userProfile?.role === 'instructor') {
         baseStats.push({
           title: 'Equipment',
           value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
@@ -104,8 +109,8 @@ const DashboardOverview = () => {
       }
     }
 
-    // Budget is only for instructors and admins
-    if (userProfile?.role === 'instructor' || userProfile?.role === 'admin') {
+    // Budget is only for instructors
+    if (userProfile?.role === 'instructor') {
       baseStats.push({
         title: 'Net Budget',
         value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
@@ -211,44 +216,46 @@ const DashboardOverview = () => {
 
         {/* Right Column: Upcoming Events */}
         <div className="space-y-6">
-          {/* Upcoming Events */}
-          <Card>
-          <CardHeader>
-            <CardTitle className="flex items-center">
-              <Calendar className="w-5 h-5 mr-2 text-primary" />
-              Upcoming Events
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <div className="space-y-4">
-              {eventsLoading ? [...Array(3)].map((_, index) => <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
-                    <div className="w-2 h-2 bg-muted rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
-                    <div className="flex-1 min-w-0 space-y-2">
-                      <div className="h-4 bg-muted rounded animate-pulse"></div>
-                      <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
-                      <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
-                    </div>
-                  </div>) : upcomingEvents.length > 0 ? upcomingEvents.map(event => <div key={event.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors px-[6px] py-[2px] rounded-lg">
-                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-foreground text-base">{event.title}</p>
-                      <p className="text-muted-foreground capitalize text-sm">{event.event_type.replace('_', ' ')} • {event.location || 'No location'}</p>
-                      <p className="text-muted-foreground mt-1 text-sm">
-                        {new Date(event.start_date).toLocaleDateString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    year: 'numeric',
-                    hour: event.is_all_day ? undefined : 'numeric',
-                    minute: event.is_all_day ? undefined : '2-digit'
-                  })}
-                      </p>
-                    </div>
-                  </div>) : <div className="text-center py-8 text-muted-foreground">
-                  <p className="text-sm">No upcoming events</p>
-                </div>}
-            </div>
-          </CardContent>
-        </Card>
+          {/* Upcoming Events - hidden for admin users */}
+          {userProfile?.role !== 'admin' && (
+            <Card>
+            <CardHeader>
+              <CardTitle className="flex items-center">
+                <Calendar className="w-5 h-5 mr-2 text-primary" />
+                Upcoming Events
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="space-y-4">
+                {eventsLoading ? [...Array(3)].map((_, index) => <div key={index} className="flex items-start space-x-3 p-3 rounded-lg">
+                      <div className="w-2 h-2 bg-muted rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                      <div className="flex-1 min-w-0 space-y-2">
+                        <div className="h-4 bg-muted rounded animate-pulse"></div>
+                        <div className="h-3 bg-muted rounded animate-pulse w-3/4"></div>
+                        <div className="h-3 bg-muted rounded animate-pulse w-1/2"></div>
+                      </div>
+                    </div>) : upcomingEvents.length > 0 ? upcomingEvents.map(event => <div key={event.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors px-[6px] py-[2px] rounded-lg">
+                      <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                      <div className="flex-1 min-w-0">
+                        <p className="font-medium text-foreground text-base">{event.title}</p>
+                        <p className="text-muted-foreground capitalize text-sm">{event.event_type.replace('_', ' ')} • {event.location || 'No location'}</p>
+                        <p className="text-muted-foreground mt-1 text-sm">
+                          {new Date(event.start_date).toLocaleDateString('en-US', {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                      hour: event.is_all_day ? undefined : 'numeric',
+                      minute: event.is_all_day ? undefined : '2-digit'
+                    })}
+                        </p>
+                      </div>
+                    </div>) : <div className="text-center py-8 text-muted-foreground">
+                    <p className="text-sm">No upcoming events</p>
+                  </div>}
+              </div>
+            </CardContent>
+          </Card>
+          )}
         </div>
       </div>
 
