@@ -54,9 +54,6 @@ onSelectAll
           <SortableTableHead sortKey="last_name" currentSort={sortConfig} onSort={handleSort}>
             Name
           </SortableTableHead>
-          <SortableTableHead sortKey="email" currentSort={sortConfig} onSort={handleSort}>
-            Email
-          </SortableTableHead>
           <SortableTableHead sortKey="role" currentSort={sortConfig} onSort={handleSort}>
             Role
           </SortableTableHead>
@@ -90,7 +87,7 @@ onSelectAll
             <TableCell className="font-medium py-2">
               {profile.last_name}, {profile.first_name}
             </TableCell>
-            <TableCell className="py-2">{profile.email}</TableCell>
+            
             <TableCell className="capitalize py-2">{profile.role.replace('_', ' ')}</TableCell>
             <TableCell className="py-2">
               {profile.grade ? (
