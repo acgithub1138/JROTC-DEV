@@ -5,12 +5,15 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format } from 'date-fns';
-import { Eye } from 'lucide-react';
+import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
+import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { EditableCell } from './EditableCell';
+import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
+import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 
 interface EditState {
   taskId: string | null;
@@ -28,11 +31,14 @@ interface TaskTableRowProps {
   users: any[];
   canEdit: boolean;
   canEditTask: (task: Task) => boolean;
-  onTaskSelect: (task: Task) => void;
+  onTaskSelect: (task: Task | Subtask) => void;
   onSelectTask: (taskId: string, checked: boolean) => void;
-  onSave: (task: Task, field: string, newValue: any) => void;
+  onSave: (task: Task | Subtask, field: string, newValue: any) => void;
   onCancel: () => void;
   onEditTask: (task: Task) => void;
+  expandedTasks: Set<string>;
+  onToggleExpanded: (taskId: string) => void;
+  selectedTasks: string[];
 }
 
 export const TaskTableRow: React.FC<TaskTableRowProps> = ({
@@ -50,8 +56,21 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onSave,
   onCancel,
   onEditTask,
+  expandedTasks,
+  onToggleExpanded,
+  selectedTasks,
 }) => {
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
+  const { subtasks } = useSubtasks(task.id);
+  
+  const isExpanded = expandedTasks.has(task.id);
+  const hasSubtasks = subtasks.length > 0;
+
+  const handleSubtaskSave = (subtask: Subtask, field: string, newValue: any) => {
+    // Handle subtask updates through the parent component
+    onSave(subtask, field, newValue);
+  };
 
   return (
     <>
@@ -63,16 +82,35 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           />
         </TableCell>
         <TableCell className="font-mono text-sm py-2">
-          <button
-            onClick={() => onTaskSelect(task)}
-            className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
-              task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
-                ? 'bg-red-100 text-red-800 hover:text-red-900'
-                : ''
-            }`}
-          >
-            {task.task_number || 'N/A'}
-          </button>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-6 w-6 p-0"
+              onClick={() => onToggleExpanded(task.id)}
+              disabled={!hasSubtasks}
+            >
+              {hasSubtasks ? (
+                isExpanded ? (
+                  <ChevronDown className="h-4 w-4" />
+                ) : (
+                  <ChevronRight className="h-4 w-4" />
+                )
+              ) : (
+                <div className="w-4 h-4" />
+              )}
+            </Button>
+            <button
+              onClick={() => onTaskSelect(task)}
+              className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
+                task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
+                  ? 'bg-red-100 text-red-800 hover:text-red-900'
+                  : ''
+              }`}
+            >
+              {task.task_number || 'N/A'}
+            </button>
+          </div>
         </TableCell>
         <TableCell className="font-medium py-2">
           <EditableCell
@@ -166,13 +204,53 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="py-2">
           {format(new Date(task.created_at), 'MMM d, yyyy')}
         </TableCell>
+        <TableCell className="py-2">
+          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsCreateSubtaskOpen(true)}
+              className="h-8 w-8 p-0"
+            >
+              <Plus className="h-4 w-4" />
+            </Button>
+          </div>
+        </TableCell>
       </TableRow>
+
+      {/* Render subtasks when expanded */}
+      {isExpanded && subtasks.map((subtask) => (
+        <SubtaskTableRow
+          key={subtask.id}
+          subtask={subtask}
+          isSelected={selectedTasks.includes(subtask.id)}
+          editState={editState}
+          setEditState={setEditState}
+          statusOptions={statusOptions}
+          priorityOptions={priorityOptions}
+          users={users}
+          canEdit={canEdit}
+          canEditTask={(s) => canEditTask(s as any)}
+          onTaskSelect={onTaskSelect}
+          onSelectTask={onSelectTask}
+          onSave={handleSubtaskSave}
+          onCancel={onCancel}
+          onEditTask={(s) => onEditTask(s as any)}
+        />
+      ))}
       
       <TaskDescriptionModal
         isOpen={isDescriptionModalOpen}
         onClose={() => setIsDescriptionModalOpen(false)}
         taskTitle={task.title}
         taskDescription={task.description}
+      />
+
+      <CreateSubtaskDialog
+        isOpen={isCreateSubtaskOpen}
+        onClose={() => setIsCreateSubtaskOpen(false)}
+        parentTaskId={task.id}
+        parentTaskTitle={task.title}
       />
     </>
   );

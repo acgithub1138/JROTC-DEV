@@ -31,6 +31,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
+  const [expandedTasks, setExpandedTasks] = React.useState<Set<string>>(new Set());
   
   // Custom sort function for tasks that handles nested values
   const customSortFn = (a: Task, b: Task, sortConfig: SortConfig) => {
@@ -103,8 +104,20 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   };
 
   // Enhanced save function that includes system comment handling
-  const handleSaveEdit = (task: Task, field: string, newValue: any) => {
+  const handleSaveEdit = (task: Task | any, field: string, newValue: any) => {
     saveEdit(task, field, newValue, handleSystemComment);
+  };
+
+  const handleToggleExpanded = (taskId: string) => {
+    setExpandedTasks(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(taskId)) {
+        newSet.delete(taskId);
+      } else {
+        newSet.add(taskId);
+      }
+      return newSet;
+    });
   };
 
   return (
@@ -184,6 +197,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
             >
               Created
             </SortableTableHead>
+            <TableHead className="w-[80px]">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -204,6 +218,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
               onSave={handleSaveEdit}
               onCancel={cancelEdit}
               onEditTask={onEditTask}
+              expandedTasks={expandedTasks}
+              onToggleExpanded={handleToggleExpanded}
+              selectedTasks={selectedTasks}
             />
           ))}
         </TableBody>
