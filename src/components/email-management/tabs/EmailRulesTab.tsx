@@ -3,10 +3,12 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { EmailRuleDialog } from '../dialogs/EmailRuleDialog';
 import { EmailRulesTable } from '../tables/EmailRulesTable';
 
 export const EmailRulesTab: React.FC = () => {
+  const { canCreate } = useModulePermissions('email');
   const { rules, isLoading, deleteRule, updateRule } = useEmailRules();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
@@ -39,10 +41,12 @@ export const EmailRulesTab: React.FC = () => {
             Configure when emails are automatically sent based on database events.
           </p>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Create Rule
-        </Button>
+        {canCreate && (
+          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Create Rule
+          </Button>
+        )}
       </div>
 
       <EmailRulesTable
