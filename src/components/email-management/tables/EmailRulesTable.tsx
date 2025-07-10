@@ -15,6 +15,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit, Trash2, Play, Pause, Eye } from 'lucide-react';
 import { EmailRule } from '@/hooks/email/useEmailRules';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 
 interface EmailRulesTableProps {
   rules: (EmailRule & { email_templates: { name: string; subject: string } })[];
@@ -32,6 +33,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
   onToggleActive,
 }) => {
   const { canUpdate, canDelete: canDeletePerm } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('email');
   if (isLoading) {
     return (
       <Card>
@@ -105,20 +107,22 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex items-center space-x-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onEdit(rule)}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View rule</p>
-                        </TooltipContent>
-                      </Tooltip>
+                      {canViewDetails && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onEdit(rule)}
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View rule</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                       {canUpdate('email_rules') && (
                         <>
                           <Tooltip>

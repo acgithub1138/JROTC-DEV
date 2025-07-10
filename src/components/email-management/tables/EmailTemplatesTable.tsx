@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { format } from 'date-fns';
 
 interface EmailTemplatesTableProps {
@@ -29,6 +30,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
 }) => {
   const { deleteTemplate } = useEmailTemplates();
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('email');
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
@@ -72,20 +74,22 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
               </TableCell>
               <TableCell className="py-2">
                 <div className="flex items-center gap-2">
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(template)}
-                      >
-                        <Eye className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View template</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  {canViewDetails && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(template)}
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View template</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                   {canUpdate('email_templates') && (
                     <Tooltip>
                       <TooltipTrigger asChild>
