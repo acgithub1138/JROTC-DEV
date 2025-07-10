@@ -76,6 +76,8 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
     // Skip if values are the same
     if (oldValue === newValue) {
+      // Clear edit state even if no change
+      setEditState({ taskId: null, field: null, value: null });
       return;
     }
 
@@ -92,8 +94,12 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
     try {
       await updateSubtask(updateData);
+      // Clear edit state after successful update
+      setEditState({ taskId: null, field: null, value: null });
     } catch (error) {
       console.error('Failed to update subtask:', error);
+      // Also clear edit state on error to reset the UI
+      setEditState({ taskId: null, field: null, value: null });
     }
   };
 
