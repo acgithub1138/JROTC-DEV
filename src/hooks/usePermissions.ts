@@ -188,6 +188,11 @@ export const usePermissions = () => {
     resetToDefaults: resetToDefaultsMutation.mutate,
     isUpdating: updatePermissionMutation.isPending,
     isResetting: resetToDefaultsMutation.isPending,
+    refreshData: () => {
+      queryClient.invalidateQueries({ queryKey: ['permission-actions'] });
+      queryClient.invalidateQueries({ queryKey: ['permission-modules'] });
+      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+    },
   };
 };
 
