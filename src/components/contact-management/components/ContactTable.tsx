@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { Contact } from '../ContactManagementPage';
 
 interface ContactTableProps {
@@ -22,6 +23,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   onDelete,
 }) => {
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -116,23 +118,25 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell>{contact.email || '-'}</TableCell>
             <TableCell>
               <div className="flex items-center gap-2">
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onEdit(contact)}
-                        className="h-8 w-8 p-0"
-                      >
-                        <Eye className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>View contact</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {canViewDetails && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(contact)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>View contact</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
                 {canUpdate('contacts') && (
                   <TooltipProvider>
                     <Tooltip>

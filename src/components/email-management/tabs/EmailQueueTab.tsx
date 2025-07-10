@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Clock, RefreshCw, X, Mail, AlertCircle, Play, Eye } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { useEmailProcessor } from '@/hooks/email/useEmailProcessor';
 import { EmailViewDialog } from '../dialogs/EmailViewDialog';
 import { format } from 'date-fns';
@@ -27,6 +28,7 @@ const getStatusColor = (status: string) => {
 
 export const EmailQueueTab: React.FC = () => {
   const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
+  const { canViewDetails } = useModulePermissions('email');
   const { processEmailQueue, isProcessing } = useEmailProcessor();
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
   const [showViewDialog, setShowViewDialog] = useState(false);
@@ -140,13 +142,15 @@ export const EmailQueueTab: React.FC = () => {
                       </TableCell>
                       <TableCell className="py-2">
                         <div className="flex gap-2">
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => handleViewEmail(item)}
-                          >
-                            <Eye className="w-4 h-4" />
-                          </Button>
+                          {canViewDetails && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => handleViewEmail(item)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          )}
                           {item.status === 'failed' && (
                             <Button
                               size="sm"

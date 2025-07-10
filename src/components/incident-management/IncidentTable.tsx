@@ -3,6 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { X } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +33,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('incidents');
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor';
 
@@ -105,7 +107,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell className="text-right">
                 <TableActionButtons
-                  canView={true}
+                  canView={canViewDetails}
                   canEdit={canUpdate('incidents') && canEditIncident(incident)}
                   canDelete={canDelete('incidents')}
                   onView={() => onIncidentSelect(incident)}
