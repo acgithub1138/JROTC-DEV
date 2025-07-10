@@ -1,43 +1,42 @@
 // Module-specific permission mappings - defines which actions are relevant for each module
 export const modulePermissionMappings = {
   'budget': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
-  'users': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'activate_deactivate', 'reset_password', 'bulk_import'
+  'cadets': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
+    'activate_deactivate', 'bulk_import', 'reset_password'
   ],
-  'tasks': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+  'cadet_tasks': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ],
-  'events': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+  'calendar': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ],
   'competitions': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
   'contacts': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
   'email': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'reset_password'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
-  'incidents': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+  'incident_management': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ],
   'inventory': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'bulk_import'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
+    'assign', 'bulk_import'
   ],
   'job_board': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
   'teams': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ]
 };
