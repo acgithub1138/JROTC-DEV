@@ -16,6 +16,7 @@ import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOpt
 import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
 import { useIncidentEmailTemplates } from '@/hooks/incidents/useIncidentEmailTemplates';
 import { useIncidentNotifications } from '@/hooks/incidents/useIncidentNotifications';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface IncidentDetailDialogProps {
@@ -66,6 +67,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { categoryOptions } = useIncidentCategoryOptions();
   const { templates } = useIncidentEmailTemplates();
   const { sendNotification, isSending } = useIncidentNotifications();
+  const { canUpdate, canAssign } = useUserPermissions();
   
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -80,9 +82,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     assigned_to: incident.assigned_to || 'unassigned',
   });
 
-  const isAdmin = userProfile?.role === 'admin';
-  const isInstructor = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
-  const canEditIncident = isAdmin || isInstructor || incident.submitted_by === userProfile?.id;
+  const canEditIncident = canUpdate('incidents') || incident.submitted_by === userProfile?.id;
 
   const handleSave = async () => {
     try {
@@ -165,11 +165,16 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle>
-              <Input
-                value={editData.title}
-                onChange={(e) => setEditData({...editData, title: e.target.value})}
-                className="text-lg font-semibold"
-              />
+              {canEditIncident ? (
+                <Input
+                  value={editData.title}
+                  onChange={(e) => setEditData({...editData, title: e.target.value})}
+                  className="text-lg font-semibold"
+                  disabled={!canEditIncident}
+                />
+              ) : (
+                <span className="text-lg font-semibold">{editData.title}</span>
+              )}
             </DialogTitle>
             {canEditIncident && (
               <div className="flex gap-2">
@@ -207,7 +212,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Category:</span>
-                  {isAdmin ? (
+                   {canEditIncident ? (
                     <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value as any})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -229,7 +234,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {isAdmin ? (
+                   {canEditIncident ? (
                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -251,7 +256,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {isAdmin ? (
+                   {canEditIncident ? (
                     <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -292,7 +297,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned To:</span>
-                  {isAdmin ? (
+                  {canEditIncident && canAssign('incidents') ? (
                     <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />

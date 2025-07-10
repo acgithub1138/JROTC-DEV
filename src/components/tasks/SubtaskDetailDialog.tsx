@@ -16,6 +16,7 @@ import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 
 interface SubtaskDetailDialogProps {
@@ -37,6 +38,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const { comments, addComment, addSystemComment, isAddingComment } = useSubtaskComments(subtask.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
+  const { canUpdate, canAssign } = useUserPermissions();
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
   const [editData, setEditData] = useState({
     title: subtask.title,
@@ -62,9 +64,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     });
   }, [subtask, subtasks]);
 
-  const canEdit = userProfile?.role === 'instructor' || 
-                  userProfile?.role === 'command_staff' || 
-                  currentSubtask.assigned_to === userProfile?.id;
+  const canEdit = canUpdate('tasks') || currentSubtask.assigned_to === userProfile?.id;
 
   const handleSave = async () => {
     try {
@@ -268,7 +268,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
-                  {canEdit && (userProfile?.role === 'instructor' || userProfile?.role === 'command_staff') ? (
+                  {canEdit && canAssign('tasks') ? (
                     <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
