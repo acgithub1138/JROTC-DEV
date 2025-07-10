@@ -1,14 +1,12 @@
 
 import React from 'react';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Check, X, Edit, CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { Edit } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { EditableTitleCell } from './editable-cells/EditableTitleCell';
+import { EditableSelectCell } from './editable-cells/EditableSelectCell';
+import { EditableAssigneeCell } from './editable-cells/EditableAssigneeCell';
+import { EditableDateCell } from './editable-cells/EditableDateCell';
 
 interface EditState {
   taskId: string | null;
@@ -61,137 +59,73 @@ export const EditableCell: React.FC<EditableCellProps> = ({
   };
 
   if (isEditing) {
-    if (field === 'title') {
-      return (
-        <div className="flex items-center gap-2">
-          <Input
+    const handleSave = (newValue: any) => onSave(task, field, newValue);
+    const updateValue = (newValue: any) => setEditState({ ...editState, value: newValue });
+
+    switch (field) {
+      case 'title':
+        return (
+          <EditableTitleCell
             value={editState.value}
-            onChange={(e) => setEditState({ ...editState, value: e.target.value })}
-            onKeyDown={(e) => {
-              if (e.key === 'Enter') onSave(task, field, editState.value);
-              if (e.key === 'Escape') onCancel();
-            }}
-            className="h-8"
-            autoFocus
+            onChange={updateValue}
+            onSave={() => handleSave(editState.value)}
+            onCancel={onCancel}
           />
-          <Button size="sm" variant="ghost" onClick={() => onSave(task, field, editState.value)}>
-            <Check className="w-4 h-4" />
-          </Button>
-          <Button size="sm" variant="ghost" onClick={onCancel}>
-            <X className="w-4 h-4" />
-          </Button>
-        </div>
-      );
-    }
+        );
 
-    if (field === 'status') {
-      return (
-        <Select
-          value={editState.value}
-          onValueChange={(newValue) => {
-            console.log('Status changed:', newValue);
-            onSave(task, field, newValue);
-          }}
-        >
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {statusOptions
-              .filter(option => option.is_active)
-              .sort((a, b) => a.sort_order - b.sort_order)
-              .map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      );
-    }
+      case 'status':
+        return (
+          <EditableSelectCell
+            value={editState.value}
+            options={statusOptions.map(opt => ({
+              value: opt.value,
+              label: opt.label,
+              sort_order: opt.sort_order,
+              is_active: opt.is_active
+            }))}
+            onValueChange={(newValue) => {
+              console.log('Status changed:', newValue);
+              handleSave(newValue);
+            }}
+          />
+        );
 
-    if (field === 'priority') {
-      return (
-        <Select
-          value={editState.value}
-          onValueChange={(newValue) => {
-            console.log('Priority changed:', newValue);
-            onSave(task, field, newValue);
-          }}
-        >
-          <SelectTrigger className="h-8">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {priorityOptions
-              .filter(option => option.is_active)
-              .sort((a, b) => a.sort_order - b.sort_order)
-              .map((option) => (
-                <SelectItem key={option.value} value={option.value}>
-                  {option.label}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      );
-    }
+      case 'priority':
+        return (
+          <EditableSelectCell
+            value={editState.value}
+            options={priorityOptions.map(opt => ({
+              value: opt.value,
+              label: opt.label,
+              sort_order: opt.sort_order,
+              is_active: opt.is_active
+            }))}
+            onValueChange={(newValue) => {
+              console.log('Priority changed:', newValue);
+              handleSave(newValue);
+            }}
+          />
+        );
 
-    if (field === 'assigned_to') {
-      return (
-        <Select
-          value={editState.value || 'unassigned'}
-          onValueChange={(newValue) => {
-            const actualValue = newValue === 'unassigned' ? null : newValue;
-            console.log('Assigned to changed:', newValue, '-> actualValue:', actualValue);
-            onSave(task, field, actualValue);
-          }}
-        >
-          <SelectTrigger className="h-8">
-            <SelectValue placeholder="Unassigned" />
-          </SelectTrigger>
-          <SelectContent>
-            <SelectItem value="unassigned">Unassigned</SelectItem>
-            {users
-              .sort((a, b) => a.last_name.localeCompare(b.last_name))
-              .map((user) => (
-                <SelectItem key={user.id} value={user.id}>
-                  {user.last_name}, {user.first_name}
-                </SelectItem>
-              ))}
-          </SelectContent>
-        </Select>
-      );
-    }
+      case 'assigned_to':
+        return (
+          <EditableAssigneeCell
+            value={editState.value === 'unassigned' ? null : editState.value}
+            users={users}
+            onValueChange={handleSave}
+          />
+        );
 
-    if (field === 'due_date') {
-      return (
-        <Popover>
-          <PopoverTrigger asChild>
-            <Button variant="outline" className="h-8 text-left">
-              <CalendarIcon className="mr-2 h-4 w-4" />
-              {editState.value ? format(editState.value, 'MMM d, yyyy') : 'Set date'}
-            </Button>
-          </PopoverTrigger>
-          <PopoverContent className="w-auto p-0">
-            <Calendar
-              mode="single"
-              selected={editState.value}
-              onSelect={(date) => {
-                console.log('Due date changed:', date);
-                onSave(task, field, date);
-              }}
-              disabled={(date) => {
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-                return date < tomorrow;
-              }}
-              initialFocus
-              className="pointer-events-auto"
-            />
-          </PopoverContent>
-        </Popover>
-      );
+      case 'due_date':
+        return (
+          <EditableDateCell
+            value={editState.value}
+            onValueChange={handleSave}
+          />
+        );
+
+      default:
+        return <span>{displayValue}</span>;
     }
   }
 

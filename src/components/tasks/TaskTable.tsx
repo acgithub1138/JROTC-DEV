@@ -1,16 +1,15 @@
 
 import React from 'react';
 import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { SortableTableHead, SortConfig } from '@/components/ui/sortable-table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task } from '@/hooks/useTasks';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
 import { TaskTableRow } from './table/TaskTableRow';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
+import { useTaskSorting } from '@/hooks/useTaskSorting';
+import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useSortableTable } from '@/hooks/useSortableTable';
-import { useQueryClient } from '@tanstack/react-query';
-import { useAuth } from '@/contexts/AuthContext';
-import { supabase } from '@/integrations/supabase/client';
 
 interface TaskTableProps {
   tasks: Task[];
@@ -29,37 +28,11 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   overdueFilterChecked = false,
   onOverdueFilterChange 
 }) => {
-  const { userProfile } = useAuth();
-  const queryClient = useQueryClient();
   const [expandedTasks, setExpandedTasks] = React.useState<Set<string>>(new Set());
   
-  // Custom sort function for tasks that handles nested values
-  const customSortFn = (a: Task, b: Task, sortConfig: SortConfig) => {
-    const getTaskValue = (task: Task, key: string) => {
-      if (key === 'assigned_to_name') {
-        return task.assigned_to_profile 
-          ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
-          : '';
-      }
-      return task[key as keyof Task];
-    };
-
-    const aValue = getTaskValue(a, sortConfig.key);
-    const bValue = getTaskValue(b, sortConfig.key);
-
-    if (aValue === null || aValue === undefined) return 1;
-    if (bValue === null || bValue === undefined) return -1;
-
-    if (typeof aValue === 'string' && typeof bValue === 'string') {
-      const comparison = aValue.localeCompare(bValue);
-      return sortConfig.direction === 'asc' ? comparison : -comparison;
-    }
-
-    if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-    if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-    return 0;
-  };
-
+  const { customSortFn } = useTaskSorting();
+  const { handleSystemComment } = useTaskSystemComments();
+  
   const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
     data: tasks,
     customSortFn
@@ -80,28 +53,6 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     saveEdit,
     canEditTask,
   } = useTaskTableLogic();
-  const handleSystemComment = async (taskId: string, commentText: string) => {
-    try {
-      const { error } = await supabase
-        .from('task_comments')
-        .insert({
-          task_id: taskId,
-          user_id: userProfile?.id,
-          comment_text: commentText,
-          is_system_comment: true,
-        });
-
-      if (error) {
-        console.error('Error adding system comment:', error);
-        return;
-      }
-
-      // Invalidate the task comments query to refresh the UI
-      queryClient.invalidateQueries({ queryKey: ['task-comments', taskId] });
-    } catch (error) {
-      console.error('Failed to add system comment:', error);
-    }
-  };
 
   // Enhanced save function that includes system comment handling
   const handleSaveEdit = (task: Task | any, field: string, newValue: any) => {
