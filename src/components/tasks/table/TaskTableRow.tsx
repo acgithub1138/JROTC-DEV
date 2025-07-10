@@ -63,14 +63,38 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 }) => {
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
-  const { subtasks } = useSubtasks(task.id);
+  const { subtasks, updateSubtask } = useSubtasks(task.id);
   
   const isExpanded = expandedTasks.has(task.id);
   const hasSubtasks = subtasks.length > 0;
 
-  const handleSubtaskSave = (subtask: Subtask, field: string, newValue: any) => {
-    // Handle subtask updates through the parent component
-    onSave(subtask, field, newValue);
+  const handleSubtaskSave = async (subtask: Subtask, field: string, newValue: any) => {
+    console.log('Saving subtask update:', { subtaskId: subtask.id, field, newValue });
+
+    // Get the old value for comparison
+    const oldValue = subtask[field as keyof Subtask];
+
+    // Skip if values are the same
+    if (oldValue === newValue) {
+      return;
+    }
+
+    const updateData: any = { id: subtask.id };
+    
+    // Handle date field conversion
+    if (field === 'due_date') {
+      updateData.due_date = newValue ? newValue.toISOString() : null;
+    } else {
+      updateData[field] = newValue;
+    }
+
+    console.log('Final subtask update data:', updateData);
+
+    try {
+      await updateSubtask(updateData);
+    } catch (error) {
+      console.error('Failed to update subtask:', error);
+    }
   };
 
   return (
