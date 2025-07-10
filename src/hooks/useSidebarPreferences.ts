@@ -202,7 +202,7 @@ export const useSidebarPreferences = () => {
       console.log('Sidebar preferences loaded, setting loading to false');
       setIsLoading(false);
     }
-  }, [userProfile?.id, userProfile?.role, allRolePermissions, hasPermission]);
+  }, [userProfile?.id, userProfile?.role, allRolePermissions.length]);
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
     if (!userProfile?.id) {
