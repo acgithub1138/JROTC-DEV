@@ -112,6 +112,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         if (commentText) {
           await handleSubtaskSystemComment(task.id, commentText);
         }
+
+        // Clear edit state after successful update
+        cancelEdit();
       } catch (error) {
         console.error('Failed to update subtask:', error);
       }
