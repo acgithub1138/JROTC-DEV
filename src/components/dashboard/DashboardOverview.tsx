@@ -104,8 +104,18 @@ const DashboardOverview = () => {
       return baseStats;
     }
 
-    // Only show Total Cadets widget for non-cadet roles
-    if (!isCadet()) {
+    // For instructors, show Overdue Tasks instead of Total Cadets
+    if (userProfile?.role === 'instructor') {
+      baseStats.push({
+        title: 'Overdue Tasks',
+        value: statsLoading ? '...' : stats?.tasks.overdue.toString() || '0',
+        change: statsLoading ? '...' : 'Past due date',
+        icon: CheckSquare,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100'
+      });
+    } else if (!isCadet()) {
+      // Only show Total Cadets widget for non-cadet, non-instructor roles
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
