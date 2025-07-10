@@ -115,6 +115,8 @@ export const usePermissions = () => {
       actionId: string;
       enabled: boolean;
     }) => {
+      console.log('Updating permission:', { role, moduleId, actionId, enabled });
+      
       const { data, error } = await supabase
         .from('role_permissions')
         .upsert({
@@ -122,10 +124,16 @@ export const usePermissions = () => {
           module_id: moduleId,
           action_id: actionId,
           enabled,
+        }, {
+          onConflict: 'role,module_id,action_id'
         })
         .select();
       
-      if (error) throw error;
+      if (error) {
+        console.error('Permission update error:', error);
+        throw error;
+      }
+      console.log('Permission updated successfully:', data);
       return data;
     },
     onSuccess: () => {
