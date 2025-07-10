@@ -16,11 +16,19 @@ import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { useAuth } from '@/contexts/AuthContext';
-import { useRolePermissions } from '@/hooks/useRolePermissions';
+import { useTaskPermissions, useEventPermissions, useIncidentPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
-  const { canCreateTasks, canCreateEvents, canCreateIncidents, isCommandStaffOrAbove, isCadet } = useRolePermissions();
+  const { canCreate: canCreateTasks } = useTaskPermissions();
+  const { canCreate: canCreateEvents } = useEventPermissions();
+  const { canSubmit: canCreateIncidents } = useIncidentPermissions();
+  const { canViewAnalytics } = useDashboardPermissions();
+  const { canCreate: canCreateUsers } = useUserPermissions();
+  
+  // Derived permissions for UI logic
+  const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const isCadet = userProfile?.role === 'cadet';
   const {
     data: stats,
     isLoading: statsLoading
@@ -114,7 +122,7 @@ const DashboardOverview = () => {
         color: 'text-red-600',
         bgColor: 'bg-red-100'
       });
-    } else if (!isCadet()) {
+    } else if (!isCadet) {
       // Only show Total Cadets widget for non-cadet, non-instructor roles
       baseStats.push({
         title: 'Total Cadets',
@@ -127,7 +135,7 @@ const DashboardOverview = () => {
     }
 
     // Show additional stats only for command staff and above
-    if (isCommandStaffOrAbove()) {
+    if (isCommandStaffOrAbove) {
       baseStats.push({
         title: 'Active Tasks',
         value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
@@ -169,7 +177,7 @@ const DashboardOverview = () => {
   
   // Render Quick Actions as a widget for Admin and Command Staff
   const renderQuickActionsWidget = () => {
-    if (!isCommandStaffOrAbove() && userProfile?.role !== 'admin') return null;
+    if (!isCommandStaffOrAbove && userProfile?.role !== 'admin') return null;
     
     return (
       <Card className="hover:shadow-md transition-shadow col-span-2">
@@ -194,13 +202,13 @@ const DashboardOverview = () => {
                 </>
               )}
               {/* Non-admin actions */}
-              {userProfile?.role !== 'admin' && canCreateTasks() && (
+              {userProfile?.role !== 'admin' && canCreateTasks && (
                 <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                   <p className="font-medium text-sm">Create Task</p>
                 </button>
               )}
-              {userProfile?.role !== 'admin' && canCreateEvents() && (
+              {userProfile?.role !== 'admin' && canCreateEvents && (
                 <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                   <p className="font-medium text-sm">Create Event</p>
@@ -223,7 +231,7 @@ const DashboardOverview = () => {
                   </button>
                 </>
               )}
-              {canCreateIncidents() && (
+              {canCreateIncidents && (
                 <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                   <p className="font-medium text-sm">Create Incident</p>
@@ -334,17 +342,17 @@ const DashboardOverview = () => {
         </>
       )}
 
-      {canCreateTasks() && (
+      {canCreateTasks && (
         <TaskForm open={isCreateTaskOpen} onOpenChange={setIsCreateTaskOpen} mode="create" />
       )}
 
-      {canCreateEvents() && (
+      {canCreateEvents && (
         <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async () => {
           setIsCreateEventOpen(false);
         }} />
       )}
 
-      {canCreateIncidents() && (
+      {canCreateIncidents && (
         <IncidentForm 
           open={isCreateIncidentOpen} 
           onOpenChange={setIsCreateIncidentOpen} 

@@ -13,6 +13,7 @@ import { useIncidents, Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { supabase } from '@/integrations/supabase/client';
+import { useIncidentPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const IncidentManagementPage: React.FC = () => {
   const { incidents, updateIncident } = useIncidents();
@@ -30,7 +31,8 @@ const IncidentManagementPage: React.FC = () => {
   const [currentPageAssigned, setCurrentPageAssigned] = useState(1);
   const [currentPageResolved, setCurrentPageResolved] = useState(1);
 
-  const isAdmin = userProfile?.role === 'admin';
+  const { canSubmit, canApprove } = useIncidentPermissions();
+  const isAdmin = canApprove;
 
   const handleIncidentSelect = (incident: Incident) => {
     setSelectedIncident(incident);

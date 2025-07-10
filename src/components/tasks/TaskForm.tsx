@@ -11,6 +11,7 @@ import { TaskAssigneeField } from './forms/fields/TaskAssigneeField';
 import { TaskDescriptionField } from './forms/fields/TaskDescriptionField';
 import { TaskPriorityStatusFields } from './forms/fields/TaskPriorityStatusFields';
 import { TaskDueDateField } from './forms/fields/TaskDueDateField';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface TaskFormProps {
   open: boolean;
@@ -21,8 +22,9 @@ interface TaskFormProps {
 
 export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
   const { userProfile } = useAuth();
+  const { canAssign } = useTaskPermissions();
   
-  const canAssignTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canAssignTasks = canAssign;
   
   const { 
     form, 
