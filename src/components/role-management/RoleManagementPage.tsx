@@ -305,16 +305,14 @@ export const RoleManagementPage: React.FC = () => {
                       </td>
                       {orderedActions.map((action) => {
                         const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-                        const isRelevant = isPermissionRelevantForModule(module.name, action.name);
                         return (
                           <td key={action.id} className="p-3 text-center">
                             <Checkbox
                               checked={isEnabled}
-                              disabled={isUpdating || !isRelevant}
+                              disabled={isUpdating}
                               onCheckedChange={(checked) =>
                                 handlePermissionChange(module.id, action.id, !!checked)
                               }
-                              className={!isRelevant ? 'opacity-30' : ''}
                             />
                           </td>
                         );
