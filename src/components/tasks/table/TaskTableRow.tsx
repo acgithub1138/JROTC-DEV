@@ -65,7 +65,11 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="font-mono text-sm py-2">
           <button
             onClick={() => onTaskSelect(task)}
-            className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold"
+            className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
+              task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
+                ? 'bg-red-100 text-red-800 hover:text-red-900'
+                : ''
+            }`}
           >
             {task.task_number || 'N/A'}
           </button>
