@@ -1,6 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InventoryItemForm } from './InventoryItemForm';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface EditInventoryItemDialogProps {
@@ -16,21 +17,29 @@ export const EditInventoryItemDialog: React.FC<EditInventoryItemDialogProps> = (
   onOpenChange,
   onSubmit,
 }) => {
+  const { canUpdate } = useUserPermissions();
+  const isReadOnly = !canUpdate('inventory');
+
   const handleSubmit = async (data: any) => {
-    await onSubmit({ id: item.id, ...data });
-    onOpenChange(false);
+    if (!isReadOnly) {
+      await onSubmit({ id: item.id, ...data });
+      onOpenChange(false);
+    }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Inventory Item</DialogTitle>
+          <DialogTitle>
+            {isReadOnly ? 'View Inventory Item' : 'Edit Inventory Item'}
+          </DialogTitle>
         </DialogHeader>
         <InventoryItemForm 
           initialData={item}
           onSubmit={handleSubmit} 
-          onCancel={() => onOpenChange(false)} 
+          onCancel={() => onOpenChange(false)}
+          readOnly={isReadOnly}
         />
       </DialogContent>
     </Dialog>

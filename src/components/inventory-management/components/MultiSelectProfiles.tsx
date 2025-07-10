@@ -9,11 +9,13 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 interface MultiSelectProfilesProps {
   value: string[];
   onChange: (value: string[]) => void;
+  disabled?: boolean;
 }
 
 export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
   value,
   onChange,
+  disabled = false,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
   const { users, isLoading } = useSchoolUsers();
@@ -51,6 +53,7 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
                   type="button"
                   onClick={() => handleRemove(user.id)}
                   className="ml-1 hover:bg-red-100 rounded-full p-0.5"
+                  disabled={disabled}
                 >
                   <X className="h-3 w-3" />
                 </button>
@@ -70,6 +73,7 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               className="pl-10"
+              disabled={disabled}
             />
           </div>
         </div>
@@ -90,10 +94,11 @@ export const MultiSelectProfiles: React.FC<MultiSelectProfilesProps> = ({
                     <Checkbox
                       checked={value.includes(user.id)}
                       onCheckedChange={() => handleToggleUser(user.id)}
+                      disabled={disabled}
                     />
                     <span 
-                      className="text-sm cursor-pointer flex-1"
-                      onClick={() => handleToggleUser(user.id)}
+                      className={`text-sm flex-1 ${disabled ? 'cursor-not-allowed opacity-50' : 'cursor-pointer'}`}
+                      onClick={disabled ? undefined : () => handleToggleUser(user.id)}
                     >
                       {user.last_name}, {user.first_name}
                     </span>

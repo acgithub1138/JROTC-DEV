@@ -17,6 +17,7 @@ interface CategorySelectProps {
   options: string[];
   placeholder?: string;
   isLoading?: boolean;
+  disabled?: boolean;
 }
 
 export const CategorySelect: React.FC<CategorySelectProps> = ({
@@ -25,6 +26,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
   options,
   placeholder = "Select option...",
   isLoading = false,
+  disabled = false,
 }) => {
   const [showAddNew, setShowAddNew] = useState(false);
   const [newValue, setNewValue] = useState('');
@@ -95,6 +97,7 @@ export const CategorySelect: React.FC<CategorySelectProps> = ({
           role="combobox"
           aria-expanded={open}
           className="w-full justify-between"
+          disabled={disabled}
         >
           {value || placeholder}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />

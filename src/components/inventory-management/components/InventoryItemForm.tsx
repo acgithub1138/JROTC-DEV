@@ -40,12 +40,14 @@ interface InventoryItemFormProps {
   initialData?: Tables<'inventory_items'> | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  readOnly?: boolean;
 }
 
 export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   initialData,
   onSubmit,
   onCancel,
+  readOnly = false,
 }) => {
   const { categories, subCategories, isCategoriesLoading, isSubCategoriesLoading, getSubCategoriesForCategory } = useInventoryCategories();
   const [filteredSubCategories, setFilteredSubCategories] = useState<string[]>([]);
@@ -128,6 +130,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="item_id"
             {...register('item_id')}
             placeholder="Enter item ID"
+            disabled={readOnly}
           />
         </div>
 
@@ -137,6 +140,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="item"
             {...register('item', { required: 'Item name is required' })}
             placeholder="Enter item name"
+            disabled={readOnly}
           />
           {errors.item && (
             <span className="text-sm text-red-500">{errors.item.message}</span>
@@ -151,6 +155,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             options={categories}
             placeholder="Select category"
             isLoading={isCategoriesLoading}
+            disabled={readOnly}
           />
         </div>
 
@@ -162,6 +167,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             options={filteredSubCategories}
             placeholder="Select sub category"
             isLoading={isSubCategoriesLoading}
+            disabled={readOnly}
           />
         </div>
 
@@ -171,6 +177,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="size"
             {...register('size')}
             placeholder="Enter size"
+            disabled={readOnly}
           />
         </div>
 
@@ -179,6 +186,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <Select
             value={watchedValues.gender || undefined}
             onValueChange={(value) => setValue('gender', value as 'M' | 'F')}
+            disabled={readOnly}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select gender" />
@@ -199,6 +207,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               min: { value: 0, message: 'Quantity must be non-negative' }
             })}
             placeholder="0"
+            disabled={readOnly}
           />
           {errors.qty_total && (
             <span className="text-sm text-red-500">{errors.qty_total.message}</span>
@@ -214,6 +223,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               min: { value: 0, message: 'Quantity must be non-negative' }
             })}
             placeholder="0"
+            disabled={readOnly}
           />
           {errors.qty_issued && (
             <span className="text-sm text-red-500">{errors.qty_issued.message}</span>
@@ -226,6 +236,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="stock_number"
             {...register('stock_number')}
             placeholder="Enter stock number"
+            disabled={readOnly}
           />
         </div>
 
@@ -234,6 +245,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           <Select
             value={watchedValues.unit_of_measure || undefined}
             onValueChange={(value) => setValue('unit_of_measure', value as 'EA' | 'PR')}
+            disabled={readOnly}
           >
             <SelectTrigger>
               <SelectValue placeholder="Select unit" />
@@ -251,6 +263,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="location"
             {...register('location')}
             placeholder="Enter location"
+            disabled={readOnly}
           />
         </div>
 
@@ -259,6 +272,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="has_serial_number"
             checked={watchedValues.has_serial_number}
             onCheckedChange={(checked) => setValue('has_serial_number', !!checked)}
+            disabled={readOnly}
           />
           <Label htmlFor="has_serial_number">Has Serial Number</Label>
         </div>
@@ -270,6 +284,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
               id="model_number"
               {...register('model_number')}
               placeholder="Enter model number"
+              disabled={readOnly}
             />
           </div>
         )}
@@ -295,6 +310,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             <MultiSelectProfiles
               value={watchedValues.issued_to || []}
               onChange={(value) => setValue('issued_to', value)}
+              disabled={readOnly}
             />
           </CollapsibleContent>
         </Collapsible>
@@ -306,6 +322,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="returnable"
             checked={watchedValues.returnable}
             onCheckedChange={(checked) => setValue('returnable', !!checked)}
+            disabled={readOnly}
           />
           <Label htmlFor="returnable">Returnable</Label>
         </div>
@@ -315,6 +332,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             id="accountable"
             checked={watchedValues.accountable}
             onCheckedChange={(checked) => setValue('accountable', !!checked)}
+            disabled={readOnly}
           />
           <Label htmlFor="accountable">Accountable</Label>
         </div>
@@ -328,6 +346,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             type="number"
             {...register('pending_updates', { min: 0 })}
             placeholder="0"
+            disabled={readOnly}
           />
         </div>
 
@@ -338,6 +357,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             type="number"
             {...register('pending_issue_changes', { min: 0 })}
             placeholder="0"
+            disabled={readOnly}
           />
         </div>
 
@@ -348,6 +368,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
             type="number"
             {...register('pending_write_offs', { min: 0 })}
             placeholder="0"
+            disabled={readOnly}
           />
         </div>
       </div>
@@ -359,16 +380,19 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
           {...register('notes')}
           placeholder="Enter notes"
           rows={2}
+          disabled={readOnly}
         />
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
         <Button type="button" variant="outline" onClick={onCancel}>
-          Cancel
+          {readOnly ? 'Close' : 'Cancel'}
         </Button>
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? 'Saving...' : initialData ? 'Update Item' : 'Add Item'}
-        </Button>
+        {!readOnly && (
+          <Button type="submit" disabled={isSubmitting}>
+            {isSubmitting ? 'Saving...' : initialData ? 'Update Item' : 'Add Item'}
+          </Button>
+        )}
       </div>
     </form>
   );
