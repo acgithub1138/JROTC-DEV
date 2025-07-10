@@ -1,7 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Download, Upload } from 'lucide-react';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useInventoryPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface InventoryActionsProps {
   onAddItem: () => void;
@@ -14,8 +14,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   onBulkOperations,
   onExport
 }) => {
-  const { canCreate, canRead } = useModulePermissions('inventory');
-  const canBulkImport = canRead; // Using read permission as proxy for bulk import
+  const { canCreate, canBulkImport } = useInventoryPermissions();
 
   return (
     <>

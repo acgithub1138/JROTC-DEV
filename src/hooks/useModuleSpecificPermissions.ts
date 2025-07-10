@@ -101,6 +101,7 @@ export const useInventoryPermissions = () => {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('inventory', 'assign'),
+    canBulkImport: hasPermission('inventory', 'bulk_import'),
   };
 };
 
