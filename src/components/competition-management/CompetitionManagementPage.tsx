@@ -26,7 +26,7 @@ const CompetitionManagementPage = () => {
         </TabsList>
         
         <TabsContent value="competitions" className="space-y-6">
-          <CompetitionsTab readOnly={!canUpdate} />
+          <CompetitionsTab readOnly={!canCreate} />
         </TabsContent>
         
         <TabsContent value="templates" className="space-y-6">
