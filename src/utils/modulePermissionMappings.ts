@@ -26,7 +26,7 @@ export const modulePermissionMappings = {
   ],
   'incidents': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'assign'
+    'assign', 'update_assigned'
   ],
   'inventory': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
