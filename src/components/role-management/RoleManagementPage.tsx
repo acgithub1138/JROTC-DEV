@@ -212,10 +212,20 @@ export const RoleManagementPage: React.FC = () => {
 
   const getPermissionCount = (role: UserRole) => {
     const perms = getRolePermissions(role);
-    const total = modules.length * actions.length;
-    const enabled = modules.reduce((count, module) => {
-      return count + actions.filter(action => perms[module.name]?.[action.name]).length;
-    }, 0);
+    let total = 0;
+    let enabled = 0;
+    
+    modules.forEach((module) => {
+      actions.forEach((action) => {
+        if (isPermissionRelevantForModule(module.name, action.name)) {
+          total++;
+          if (perms[module.name]?.[action.name]) {
+            enabled++;
+          }
+        }
+      });
+    });
+    
     return { enabled, total };
   };
 
@@ -304,16 +314,20 @@ export const RoleManagementPage: React.FC = () => {
                         <div className="font-medium">{module.label}</div>
                       </td>
                       {orderedActions.map((action) => {
+                        const isRelevant = isPermissionRelevantForModule(module.name, action.name);
                         const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+                        
                         return (
                           <td key={action.id} className="p-3 text-center">
-                            <Checkbox
-                              checked={isEnabled}
-                              disabled={isUpdating}
-                              onCheckedChange={(checked) =>
-                                handlePermissionChange(module.id, action.id, !!checked)
-                              }
-                            />
+                            {isRelevant ? (
+                              <Checkbox
+                                checked={isEnabled}
+                                disabled={isUpdating}
+                                onCheckedChange={(checked) =>
+                                  handlePermissionChange(module.id, action.id, !!checked)
+                                }
+                              />
+                            ) : null}
                           </td>
                         );
                       })}
