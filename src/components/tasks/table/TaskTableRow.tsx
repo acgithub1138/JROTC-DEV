@@ -14,7 +14,7 @@ import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
-
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 
 interface EditState {
@@ -62,6 +62,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onToggleExpanded,
   selectedTasks,
 }) => {
+  const { canCreate } = useUserPermissions();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
   
@@ -216,7 +217,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           {format(new Date(task.created_at), 'MMM d, yyyy')}
         </TableCell>
         <TableCell className="py-2">
-          {!isSubtask && (
+          {!isSubtask && canCreate('tasks') && (
             <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
               <Tooltip>
                 <TooltipTrigger asChild>

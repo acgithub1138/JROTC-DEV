@@ -55,7 +55,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     });
   }, [task, tasks]);
 
-  const canEdit = canUpdate('tasks') || currentTask.assigned_to === userProfile?.id;
+  const canEdit = canUpdate('tasks');
 
   const handleSave = async () => {
     try {
