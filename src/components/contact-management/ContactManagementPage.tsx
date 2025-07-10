@@ -8,6 +8,7 @@ import { AddContactDialog } from './components/AddContactDialog';
 import { EditContactDialog } from './components/EditContactDialog';
 import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 export interface Contact {
   id: string;
@@ -25,6 +26,7 @@ export interface Contact {
 }
 
 const ContactManagementPage = () => {
+  const { canCreate } = useUserPermissions();
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -47,10 +49,12 @@ const ContactManagementPage = () => {
         onSearchChange={setSearchValue}
         searchPlaceholder="Search contacts by name, email, or phone..."
         actions={
-          <Button onClick={() => setShowAddContact(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Add Contact
-          </Button>
+          canCreate('contacts') ? (
+            <Button onClick={() => setShowAddContact(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Add Contact
+            </Button>
+          ) : undefined
         }
       >
         {isMobile ? (

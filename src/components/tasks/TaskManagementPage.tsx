@@ -10,8 +10,10 @@ import { TaskTabs } from './components/TaskTabs';
 import { useTaskManagement } from './hooks/useTaskManagement';
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 const TaskManagementPage: React.FC = () => {
+  const { canCreate } = useUserPermissions();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
@@ -67,10 +69,12 @@ const TaskManagementPage: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Task Management</h1>
-        <Button onClick={handleCreateTask} className="flex items-center gap-2">
-          <Plus className="w-4 h-4" />
-          Create Task
-        </Button>
+        {canCreate('tasks') && (
+          <Button onClick={handleCreateTask} className="flex items-center gap-2">
+            <Plus className="w-4 h-4" />
+            Create Task
+          </Button>
+        )}
       </div>
 
       <TaskFilters 

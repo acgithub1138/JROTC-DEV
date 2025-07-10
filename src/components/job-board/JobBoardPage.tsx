@@ -15,6 +15,7 @@ import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
 import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 const JobBoardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -24,6 +25,7 @@ const JobBoardPage = () => {
   
   const [activeTab, setActiveTab] = useState('table');
   const { canManageHierarchy } = useJobBoardPermissions();
+  const { canCreate } = useUserPermissions();
 
   const {
     jobs,
@@ -87,7 +89,7 @@ const JobBoardPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
-          {canManageHierarchy && (
+          {canManageHierarchy && canCreate('job_board') && (
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job

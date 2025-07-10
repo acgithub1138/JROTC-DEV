@@ -11,6 +11,7 @@ import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
 import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 export interface BudgetTransaction {
   id: string;
   school_id: string;
@@ -38,6 +39,7 @@ export interface BudgetFilters {
   budgetYear: string;
 }
 const BudgetManagementPage = () => {
+  const { canCreate } = useUserPermissions();
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
@@ -72,14 +74,18 @@ const BudgetManagementPage = () => {
           <p className="text-muted-foreground">Manage school budget transactions and expenses</p>
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
-          <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Income
-          </Button>
-          <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
-            <Plus className="w-4 h-4 mr-2" />
-            Add Expense
-          </Button>
+          {canCreate('budget') && (
+            <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Income
+            </Button>
+          )}
+          {canCreate('budget') && (
+            <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
+              <Plus className="w-4 h-4 mr-2" />
+              Add Expense
+            </Button>
+          )}
           <Button onClick={handleArchiveAll} variant="outline" className="hidden md:flex">Archive Expenses</Button>
         </div>
       </div>

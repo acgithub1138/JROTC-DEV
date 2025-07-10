@@ -2,6 +2,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Upload } from 'lucide-react';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 interface CadetPageHeaderProps {
   onAddCadet: () => void;
@@ -9,6 +10,8 @@ interface CadetPageHeaderProps {
 }
 
 export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderProps) => {
+  const { canCreate, canBulkImport } = useUserPermissions();
+
   return (
     <div className="flex items-center justify-between">
       <div>
@@ -18,14 +21,18 @@ export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderPro
         </p>
       </div>
       <div className="flex gap-2">
-        <Button variant="outline" onClick={onBulkImport} className="hidden md:flex">
-          <Upload className="w-4 h-4 mr-2" />
-          Bulk Import
-        </Button>
-        <Button onClick={onAddCadet}>
-          <Plus className="w-4 h-4 mr-2" />
-          Add Cadet
-        </Button>
+        {canBulkImport('cadets') && (
+          <Button variant="outline" onClick={onBulkImport} className="hidden md:flex">
+            <Upload className="w-4 h-4 mr-2" />
+            Bulk Import
+          </Button>
+        )}
+        {canCreate('cadets') && (
+          <Button onClick={onAddCadet}>
+            <Plus className="w-4 h-4 mr-2" />
+            Add Cadet
+          </Button>
+        )}
       </div>
     </div>
   );
