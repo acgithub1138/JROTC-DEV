@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Users } from 'lucide-react';
 import { useCadetManagement } from './hooks/useCadetManagement';
 import { useCadetMassOperations } from './hooks/useCadetMassOperations';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CadetPageHeader } from './components/CadetPageHeader';
 import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
@@ -12,6 +13,7 @@ import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
+  const { canUpdate } = useCadetPermissions();
   const {
     profiles,
     loading,
@@ -58,6 +60,7 @@ const CadetManagementPage = () => {
   const [roleDialogOpen, setRoleDialogOpen] = useState(false);
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const handleEditProfile = (profile: Profile) => {
+    if (!canUpdate) return;
     setEditingProfile(profile);
     setEditDialogOpen(true);
   };

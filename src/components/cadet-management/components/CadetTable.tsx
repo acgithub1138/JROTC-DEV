@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CheckCircle, X } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
@@ -33,7 +33,7 @@ export const CadetTable = ({
   onSelectCadet,
 onSelectAll
 }: CadetTableProps) => {
-  const { canView, canUpdate: canEdit, canDelete, canActivateDeactivate } = useUserPermissions();
+  const { canViewDetails: canView, canUpdate: canEdit, canDelete, canActivateDeactivate } = useCadetPermissions();
   const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
     data: profiles,
     defaultSort: { key: 'last_name', direction: 'asc' }

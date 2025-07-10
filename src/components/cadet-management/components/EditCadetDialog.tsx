@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
-import { useUserPermissions } from '@/components/user-management/hooks/useUserPermissions';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Profile } from '../types';
@@ -25,7 +25,7 @@ interface EditCadetDialogProps {
 
 export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditingProfile, onSubmit }: EditCadetDialogProps) => {
   const { userProfile } = useAuth();
-  const { canResetPassword } = useUserPermissions();
+  const { canResetPassword, canUpdate } = useCadetPermissions();
   const { toast } = useToast();
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
   
@@ -123,6 +123,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <Select
                 value={editingProfile.grade || ""}
                 onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
+                disabled={!canUpdate}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select grade" />
@@ -141,6 +142,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <Select
                 value={editingProfile.flight || ""}
                 onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
+                disabled={!canUpdate}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select flight" />
@@ -161,6 +163,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             <Select
               value={editingProfile.role || ""}
               onValueChange={(value) => setEditingProfile({ ...editingProfile, role: value })}
+              disabled={!canUpdate}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
@@ -180,6 +183,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             <Select
               value={editingProfile.rank || ""}
               onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
+              disabled={!canUpdate}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select rank" />
@@ -199,14 +203,14 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={!canUpdate}>
               Update Cadet
             </Button>
           </div>
         </form>
 
         {/* Password Reset Section */}
-        {canResetPassword(userForPermissionCheck) && (
+        {canResetPassword && (
           <Accordion type="single" collapsible className="mt-6">
             <AccordionItem value="password-reset">
               <AccordionTrigger className="text-lg font-semibold">

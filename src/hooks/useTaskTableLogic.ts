@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface EditState {
   taskId: string | null;
@@ -17,10 +18,11 @@ export const useTaskTableLogic = () => {
   const { users } = useSchoolUsers();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
+  const { canUpdate, canDelete } = useTaskPermissions();
   const [editState, setEditState] = useState<EditState>({ taskId: null, field: null, value: null });
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
-  const canEdit = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canEdit = canUpdate;
 
   const handleSelectTask = (taskId: string, checked: boolean) => {
     if (checked) {
@@ -39,7 +41,7 @@ export const useTaskTableLogic = () => {
   };
 
   const handleBulkDelete = () => {
-    if (selectedTasks.length === 0) return;
+    if (selectedTasks.length === 0 || !canDelete) return;
     
     const confirmMessage = `Are you sure you want to delete ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
     if (confirm(confirmMessage)) {

@@ -27,6 +27,20 @@ export const useUserPermissions = () => {
   };
 };
 
+// Cadet management specific permissions
+export const useCadetPermissions = () => {
+  const modulePermissions = useModulePermissions('cadets');
+  const { hasPermission } = usePermissions();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
+    canActivateDeactivate: hasPermission('cadets', 'activate_deactivate'),
+    canResetPassword: hasPermission('cadets', 'reset_password'),
+    canBulkImport: hasPermission('cadets', 'bulk_import'),
+  };
+};
+
 // Event-specific permissions
 export const useEventPermissions = () => {
   const modulePermissions = useModulePermissions('events');

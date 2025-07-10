@@ -14,10 +14,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { supabase } from '@/integrations/supabase/client';
 import { useIncidentPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 const IncidentManagementPage: React.FC = () => {
-  const { canCreate } = useUserPermissions();
+  const { canCreate } = useIncidentPermissions();
   const { incidents, updateIncident } = useIncidents();
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
@@ -138,7 +137,7 @@ const IncidentManagementPage: React.FC = () => {
     <div className="container mx-auto p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Incident Management</h1>
-        {canCreate('incidents') && (
+        {canCreate && (
           <Button onClick={handleCreateIncident} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Create Incident
