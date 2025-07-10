@@ -35,7 +35,7 @@ const CalendarManagementPage = () => {
     assignedTo: '',
   });
   const isMobile = useIsMobile();
-  const { canCreate: canCreateEvents } = useModulePermissions('events');
+  const { canCreate: canCreateEvents } = useModulePermissions('calendar');
 
   const {
     events,
