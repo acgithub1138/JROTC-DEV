@@ -6,7 +6,7 @@ export const modulePermissionMappings = {
   ],
   'tasks': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'assign', 'manage_options'
+    'assign'
   ],
   'events': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
@@ -14,15 +14,13 @@ export const modulePermissionMappings = {
   ],
   'competitions': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'manage_templates', 'manage_scoring'
+    'manage_templates'
   ],
   'incidents': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'submit', 'approve'
+    'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ],
   'job_board': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'manage_hierarchy'
+    'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ],
   'inventory': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
