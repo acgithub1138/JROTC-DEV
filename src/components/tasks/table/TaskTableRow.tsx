@@ -14,6 +14,7 @@ import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 
 interface EditState {
@@ -69,6 +70,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   
   // Only fetch subtasks if this is a task, not a subtask
   const { subtasks, updateSubtask } = useSubtasks(isSubtask ? undefined : task.id);
+  const { handleSystemComment } = useSubtaskSystemComments();
   
   const isExpanded = expandedTasks.has(task.id);
   const hasSubtasks = !isSubtask && subtasks.length > 0;
@@ -99,6 +101,29 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
     try {
       await updateSubtask(updateData);
+      
+      // Add system comment for the change
+      let commentText = '';
+      if (field === 'status') {
+        commentText = `Status changed from "${oldValue}" to "${newValue}"`;
+      } else if (field === 'priority') {
+        commentText = `Priority changed from "${oldValue}" to "${newValue}"`;
+      } else if (field === 'assigned_to') {
+        const oldAssignee = subtask.assigned_to_profile ? `${subtask.assigned_to_profile.first_name} ${subtask.assigned_to_profile.last_name}` : 'Unassigned';
+        const newAssignee = newValue ? users.find(u => u.id === newValue)?.first_name + ' ' + users.find(u => u.id === newValue)?.last_name : 'Unassigned';
+        commentText = `Assigned to changed from "${oldAssignee}" to "${newAssignee}"`;
+      } else if (field === 'due_date') {
+        const oldDate = oldValue ? format(new Date(oldValue as string), 'MMM d, yyyy') : 'No due date';
+        const newDate = newValue ? format(newValue, 'MMM d, yyyy') : 'No due date';
+        commentText = `Due date changed from "${oldDate}" to "${newDate}"`;
+      } else if (field === 'title') {
+        commentText = `Title changed from "${oldValue}" to "${newValue}"`;
+      }
+      
+      if (commentText) {
+        await handleSystemComment(subtask.id, commentText);
+      }
+      
       // Clear edit state after successful update
       setEditState({ taskId: null, field: null, value: null });
     } catch (error) {
