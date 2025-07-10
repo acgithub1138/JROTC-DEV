@@ -26,7 +26,7 @@ export const modulePermissionMappings = {
     'assign'
   ],
   'dashboard': [
-    'view', 'sidebar', 'view_analytics'
+    'view', 'sidebar'
   ],
   'budget': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar'
