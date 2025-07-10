@@ -160,7 +160,9 @@ export const useSidebarPreferences = () => {
     }
 
     console.log('Loading sidebar preferences for user:', userProfile.id, 'role:', userProfile.role);
+    console.log('Permission system loaded:', allRolePermissions.length > 0);
     setIsLoading(true);
+    
     try {
       const { data, error } = await supabase
         .from('user_sidebar_preferences')
@@ -172,9 +174,12 @@ export const useSidebarPreferences = () => {
         console.error('Error loading sidebar preferences:', error);
       }
 
-      // Always use fallback for now until permissions are fully loaded
-      console.log('Using fallback menu items for role:', userProfile.role);
-      const defaultItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      // Use database permissions if loaded, otherwise fallback to hardcoded
+      const defaultItems = allRolePermissions.length > 0 
+        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
+        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      
+      console.log('Using', allRolePermissions.length > 0 ? 'database permissions' : 'fallback permissions', 'for role:', userProfile.role);
       
       if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
         console.log('Found saved preferences, filtering menu items');
@@ -197,7 +202,7 @@ export const useSidebarPreferences = () => {
       console.log('Sidebar preferences loaded, setting loading to false');
       setIsLoading(false);
     }
-  }, [userProfile?.id, userProfile?.role]);
+  }, [userProfile?.id, userProfile?.role, allRolePermissions, hasPermission]);
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
     if (!userProfile?.id) {
