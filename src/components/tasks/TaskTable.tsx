@@ -97,6 +97,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
               sortKey="task_number"
               currentSort={sortConfig}
               onSort={handleSort}
+              className="text-center"
             >
               Task #
             </SortableTableHead>

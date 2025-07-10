@@ -151,7 +151,6 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                   : ''
               }`}
             >
-              {isSubtask && <span className="text-xs opacity-60 mr-1">ST:</span>}
               {task.task_number || 'N/A'}
             </button>
           </div>
