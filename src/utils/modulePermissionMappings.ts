@@ -1,5 +1,8 @@
 // Module-specific permission mappings - defines which actions are relevant for each module
 export const modulePermissionMappings = {
+  'budget': [
+    'view', 'create', 'read', 'update', 'delete', 'sidebar'
+  ],
   'users': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
     'activate_deactivate', 'reset_password', 'bulk_import'
@@ -15,21 +18,27 @@ export const modulePermissionMappings = {
   'competitions': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ],
-  'incidents': [
+  'contacts': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar'
+  ],
+  'email': [
+    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+    'reset_password'
+  ],
+  'incidents': [
+    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+    'assign'
+  ],
+  'inventory': [
+    'view', 'create', 'read', 'update', 'delete', 'sidebar',
+    'bulk_import'
   ],
   'job_board': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ],
-  'inventory': [
+  'teams': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar',
     'assign'
-  ],
-  'dashboard': [
-    'view', 'sidebar'
-  ],
-  'budget': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ]
 };
 
