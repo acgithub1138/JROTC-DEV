@@ -10,6 +10,7 @@ export const useTaskPermissions = () => {
     canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('tasks', 'assign'),
     canManageOptions: hasPermission('tasks', 'manage_options'),
+    canUpdateAssigned: hasPermission('tasks', 'update_assigned'),
   };
 };
 

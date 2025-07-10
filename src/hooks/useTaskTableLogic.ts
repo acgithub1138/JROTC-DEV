@@ -4,7 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface EditState {
   taskId: string | null;
@@ -18,11 +18,11 @@ export const useTaskTableLogic = () => {
   const { users } = useSchoolUsers();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { canUpdate, canDelete } = useUserPermissions();
+  const { canUpdate, canDelete, canUpdateAssigned } = useTaskPermissions();
   const [editState, setEditState] = useState<EditState>({ taskId: null, field: null, value: null });
   const [selectedTasks, setSelectedTasks] = useState<string[]>([]);
 
-  const canEdit = canUpdate('tasks');
+  const canEdit = canUpdate;
 
   const handleSelectTask = (taskId: string, checked: boolean) => {
     if (checked) {
@@ -41,7 +41,7 @@ export const useTaskTableLogic = () => {
   };
 
   const handleBulkDelete = () => {
-    if (selectedTasks.length === 0 || !canDelete('tasks')) return;
+    if (selectedTasks.length === 0 || !canDelete) return;
     
     const confirmMessage = `Are you sure you want to delete ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
     if (confirm(confirmMessage)) {
@@ -104,7 +104,7 @@ export const useTaskTableLogic = () => {
   };
 
   const canEditTask = (task: Task) => {
-    return canUpdate('tasks') || task.assigned_to === userProfile?.id;
+    return canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
   };
 
   return {
