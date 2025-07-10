@@ -114,12 +114,30 @@ export const RoleManagementPage: React.FC = () => {
   } = usePermissions();
   const { toast } = useToast();
   
-  // State for column ordering
+  // State for column ordering with localStorage persistence
   const [orderedActions, setOrderedActions] = useState(actions);
   
-  // Update ordered actions when actions change
+  // Load saved column order from localStorage
   React.useEffect(() => {
-    setOrderedActions(actions);
+    if (actions.length > 0) {
+      const savedOrder = localStorage.getItem('roleManagement-columnOrder');
+      if (savedOrder) {
+        try {
+          const savedActionIds = JSON.parse(savedOrder);
+          // Reorder actions based on saved order, keeping any new actions at the end
+          const reorderedActions = savedActionIds
+            .map((id: string) => actions.find(action => action.id === id))
+            .filter(Boolean)
+            .concat(actions.filter(action => !savedActionIds.includes(action.id)));
+          setOrderedActions(reorderedActions);
+        } catch (error) {
+          console.error('Failed to parse saved column order:', error);
+          setOrderedActions(actions);
+        }
+      } else {
+        setOrderedActions(actions);
+      }
+    }
   }, [actions]);
 
   // Drag and drop sensors
@@ -138,7 +156,13 @@ export const RoleManagementPage: React.FC = () => {
         const oldIndex = actions.findIndex((action) => action.id === active.id);
         const newIndex = actions.findIndex((action) => action.id === over.id);
 
-        return arrayMove(actions, oldIndex, newIndex);
+        const newOrder = arrayMove(actions, oldIndex, newIndex);
+        
+        // Save the new order to localStorage
+        const actionIds = newOrder.map(action => action.id);
+        localStorage.setItem('roleManagement-columnOrder', JSON.stringify(actionIds));
+        
+        return newOrder;
       });
     }
   };
