@@ -33,7 +33,9 @@ export const SortableTableHead: React.FC<SortableTableHeadProps> = ({
   return (
     <TableHead className={className}>
       <div 
-        className="flex items-center cursor-pointer hover:text-foreground font-medium text-muted-foreground transition-colors"
+        className={`flex items-center cursor-pointer hover:text-foreground font-medium text-muted-foreground transition-colors ${
+          className?.includes('text-center') ? 'justify-center' : ''
+        }`}
         onClick={handleClick}
       >
         <span>{children}</span>
