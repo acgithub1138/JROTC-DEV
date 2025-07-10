@@ -8,6 +8,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw, GripVertical } from 'lucide-react';
 import { isPermissionRelevantForModule } from '@/utils/modulePermissionMappings';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   DndContext,
   closestCenter,
@@ -56,19 +57,47 @@ const SortableColumnHeader: React.FC<SortableColumnHeaderProps> = ({ action, chi
     opacity: isDragging ? 0.5 : 1,
   };
 
+  const getTooltipContent = (actionName: string) => {
+    switch (actionName) {
+      case 'sidebar':
+        return 'Access to module/page via navigation and sidebar';
+      case 'view':
+        return 'Access to view individual record details in modals/popups';
+      case 'read':
+        return 'Access to see data in tables, lists, and related content';
+      case 'create':
+        return 'Ability to create new records';
+      case 'update':
+        return 'Ability to edit existing records';
+      case 'delete':
+        return 'Ability to delete records';
+      default:
+        return action.description || '';
+    }
+  };
+
   return (
-    <th
-      ref={setNodeRef}
-      style={style}
-      className="text-center p-3 font-medium min-w-24 relative group cursor-move"
-      {...attributes}
-      {...listeners}
-    >
-      <div className="flex items-center justify-center gap-1">
-        <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-        <span>{children}</span>
-      </div>
-    </th>
+    <TooltipProvider>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <th
+            ref={setNodeRef}
+            style={style}
+            className="text-center p-3 font-medium min-w-24 relative group cursor-move"
+            {...attributes}
+            {...listeners}
+          >
+            <div className="flex items-center justify-center gap-1">
+              <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+              <span>{children}</span>
+            </div>
+          </th>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p className="text-sm">{getTooltipContent(action.name)}</p>
+        </TooltipContent>
+      </Tooltip>
+    </TooltipProvider>
   );
 };
 
@@ -238,7 +267,7 @@ export const RoleManagementPage: React.FC = () => {
                     >
                       {orderedActions.map((action) => (
                         <SortableColumnHeader key={action.id} action={action}>
-                          {action.label}
+                          {action.name === 'sidebar' ? 'Module Access' : action.label}
                         </SortableColumnHeader>
                       ))}
                     </SortableContext>

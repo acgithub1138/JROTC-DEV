@@ -196,11 +196,12 @@ export const useModulePermissions = (module: string) => {
   const { hasPermission } = usePermissions();
   
   return {
-    canView: hasPermission(module, 'view'),
+    canAccess: hasPermission(module, 'sidebar'), // Module access via navigation
+    canRead: hasPermission(module, 'read'), // Access to see data in tables
+    canViewDetails: hasPermission(module, 'view'), // Access to view record details
     canCreate: hasPermission(module, 'create'),
-    canRead: hasPermission(module, 'read'),
     canUpdate: hasPermission(module, 'update'),
     canDelete: hasPermission(module, 'delete'),
-    canSeeInSidebar: hasPermission(module, 'sidebar'),
+    canSeeInSidebar: hasPermission(module, 'sidebar'), // Kept for backwards compatibility
   };
 };

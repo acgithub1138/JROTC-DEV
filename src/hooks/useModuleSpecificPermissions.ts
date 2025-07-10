@@ -7,6 +7,7 @@ export const useTaskPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('tasks', 'assign'),
     canManageOptions: hasPermission('tasks', 'manage_options'),
   };
@@ -19,6 +20,7 @@ export const useUserPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canActivateDeactivate: hasPermission('users', 'activate_deactivate'),
     canResetPassword: hasPermission('users', 'reset_password'),
     canBulkImport: hasPermission('users', 'bulk_import'),
@@ -32,6 +34,7 @@ export const useEventPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('events', 'assign'),
   };
 };
@@ -43,6 +46,7 @@ export const useCompetitionPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canManageTemplates: hasPermission('competitions', 'manage_templates'),
     canManageScoring: hasPermission('competitions', 'manage_scoring'),
   };
@@ -55,6 +59,7 @@ export const useIncidentPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canSubmit: hasPermission('incidents', 'submit'),
     canApprove: hasPermission('incidents', 'approve'),
   };
@@ -67,6 +72,7 @@ export const useJobBoardPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canManageHierarchy: hasPermission('job_board', 'manage_hierarchy'),
   };
 };
@@ -78,6 +84,7 @@ export const useInventoryPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('inventory', 'assign'),
   };
 };
@@ -89,6 +96,7 @@ export const useDashboardPermissions = () => {
   
   return {
     ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
     canViewAnalytics: hasPermission('dashboard', 'view_analytics'),
   };
 };
