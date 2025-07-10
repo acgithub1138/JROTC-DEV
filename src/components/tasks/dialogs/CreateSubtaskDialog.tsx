@@ -50,7 +50,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
       description: formData.description || null,
       status: formData.status,
       priority: formData.priority,
-      assigned_to: formData.assigned_to || null,
+      assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to || null,
       due_date: formData.due_date?.toISOString() || null,
     });
 
@@ -147,7 +147,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">Unassigned</SelectItem>
+                  <SelectItem value="unassigned">Unassigned</SelectItem>
                   {users.map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.last_name}, {user.first_name}

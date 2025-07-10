@@ -4,6 +4,7 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { format } from 'date-fns';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
@@ -206,14 +207,21 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={() => setIsCreateSubtaskOpen(true)}
-              className="h-8 w-8 p-0"
-            >
-              <Plus className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setIsCreateSubtaskOpen(true)}
+                  className="h-8 w-8 p-0"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Add Subtask</p>
+              </TooltipContent>
+            </Tooltip>
           </div>
         </TableCell>
       </TableRow>
