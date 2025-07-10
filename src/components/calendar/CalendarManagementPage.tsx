@@ -7,7 +7,7 @@ import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useEventPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 
 export interface Event {
   id: string;
@@ -35,7 +35,7 @@ const CalendarManagementPage = () => {
     assignedTo: '',
   });
   const isMobile = useIsMobile();
-  const { canCreate: canCreateEvents } = useEventPermissions();
+  const { canCreate: canCreateEvents } = useModulePermissions('events');
 
   const {
     events,
