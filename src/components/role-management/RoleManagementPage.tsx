@@ -6,8 +6,27 @@ import { Button } from '@/components/ui/button';
 import { usePermissions, UserRole } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
-import { RefreshCw, RotateCcw } from 'lucide-react';
+import { RefreshCw, RotateCcw, GripVertical } from 'lucide-react';
 import { isPermissionRelevantForModule } from '@/utils/modulePermissionMappings';
+import {
+  DndContext,
+  closestCenter,
+  KeyboardSensor,
+  PointerSensor,
+  useSensor,
+  useSensors,
+  DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  arrayMove,
+  SortableContext,
+  sortableKeyboardCoordinates,
+  horizontalListSortingStrategy,
+} from '@dnd-kit/sortable';
+import {
+  useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 
 const ROLES: { value: UserRole; label: string }[] = [
   { value: 'admin', label: 'Admin' },
@@ -15,6 +34,43 @@ const ROLES: { value: UserRole; label: string }[] = [
   { value: 'command_staff', label: 'Command Staff' },
   { value: 'cadet', label: 'Cadet' },
 ];
+
+interface SortableColumnHeaderProps {
+  action: any;
+  children: React.ReactNode;
+}
+
+const SortableColumnHeader: React.FC<SortableColumnHeaderProps> = ({ action, children }) => {
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: action.id });
+
+  const style = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.5 : 1,
+  };
+
+  return (
+    <th
+      ref={setNodeRef}
+      style={style}
+      className="text-center p-3 font-medium min-w-24 relative group cursor-move"
+      {...attributes}
+      {...listeners}
+    >
+      <div className="flex items-center justify-center gap-1">
+        <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
+        <span>{children}</span>
+      </div>
+    </th>
+  );
+};
 
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
@@ -28,6 +84,35 @@ export const RoleManagementPage: React.FC = () => {
     isResetting 
   } = usePermissions();
   const { toast } = useToast();
+  
+  // State for column ordering
+  const [orderedActions, setOrderedActions] = useState(actions);
+  
+  // Update ordered actions when actions change
+  React.useEffect(() => {
+    setOrderedActions(actions);
+  }, [actions]);
+
+  // Drag and drop sensors
+  const sensors = useSensors(
+    useSensor(PointerSensor),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    })
+  );
+
+  const handleDragEnd = (event: DragEndEvent) => {
+    const { active, over } = event;
+
+    if (over && active.id !== over.id) {
+      setOrderedActions((actions) => {
+        const oldIndex = actions.findIndex((action) => action.id === active.id);
+        const newIndex = actions.findIndex((action) => action.id === over.id);
+
+        return arrayMove(actions, oldIndex, newIndex);
+      });
+    }
+  };
 
   const rolePermissions = getRolePermissions(selectedRole);
 
@@ -138,43 +223,54 @@ export const RoleManagementPage: React.FC = () => {
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse">
-              <thead>
-                <tr className="border-b">
-                  <th className="text-left p-3 font-medium">Module</th>
-                  {actions.map((action) => (
-                    <th key={action.id} className="text-center p-3 font-medium min-w-24">
-                      {action.label}
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {modules.map((module) => (
-                  <tr key={module.id} className="border-b hover:bg-gray-50">
-                    <td className="p-3 font-medium">
-                      <div className="font-medium">{module.label}</div>
-                    </td>
-                    {actions.map((action) => {
-                      const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-                      const isRelevant = isPermissionRelevantForModule(module.name, action.name);
-                      return (
-                        <td key={action.id} className="p-3 text-center">
-                          <Checkbox
-                            checked={isEnabled}
-                            disabled={isUpdating || !isRelevant}
-                            onCheckedChange={(checked) =>
-                              handlePermissionChange(module.id, action.id, !!checked)
-                            }
-                            className={!isRelevant ? 'opacity-30' : ''}
-                          />
-                        </td>
-                      );
-                    })}
+            <DndContext
+              sensors={sensors}
+              collisionDetection={closestCenter}
+              onDragEnd={handleDragEnd}
+            >
+              <table className="w-full border-collapse">
+                <thead>
+                  <tr className="border-b">
+                    <th className="text-left p-3 font-medium">Module</th>
+                    <SortableContext
+                      items={orderedActions.map(action => action.id)}
+                      strategy={horizontalListSortingStrategy}
+                    >
+                      {orderedActions.map((action) => (
+                        <SortableColumnHeader key={action.id} action={action}>
+                          {action.label}
+                        </SortableColumnHeader>
+                      ))}
+                    </SortableContext>
                   </tr>
-                ))}
-              </tbody>
-            </table>
+                </thead>
+                <tbody>
+                  {modules.map((module) => (
+                    <tr key={module.id} className="border-b hover:bg-gray-50">
+                      <td className="p-3 font-medium">
+                        <div className="font-medium">{module.label}</div>
+                      </td>
+                      {orderedActions.map((action) => {
+                        const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+                        const isRelevant = isPermissionRelevantForModule(module.name, action.name);
+                        return (
+                          <td key={action.id} className="p-3 text-center">
+                            <Checkbox
+                              checked={isEnabled}
+                              disabled={isUpdating || !isRelevant}
+                              onCheckedChange={(checked) =>
+                                handlePermissionChange(module.id, action.id, !!checked)
+                              }
+                              className={!isRelevant ? 'opacity-30' : ''}
+                            />
+                          </td>
+                        );
+                      })}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </DndContext>
           </div>
 
           {isUpdating && (
