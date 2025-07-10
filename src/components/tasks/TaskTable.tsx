@@ -10,6 +10,8 @@ import { TaskTableRow } from './table/TaskTableRow';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
 import { useTaskSorting } from '@/hooks/useTaskSorting';
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+import { useSubtasks } from '@/hooks/useSubtasks';
 import { useSortableTable } from '@/hooks/useSortableTable';
 
 interface TaskTableProps {
@@ -33,11 +35,15 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   
   const { customSortFn } = useTaskSorting();
   const { handleSystemComment } = useTaskSystemComments();
+  const { handleSystemComment: handleSubtaskSystemComment } = useSubtaskSystemComments();
   
   const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
     data: tasks,
     customSortFn
   });
+
+  // Get subtask mutations for updating subtasks
+  const { updateSubtask } = useSubtasks();
 
   const {
     editState,
@@ -55,9 +61,64 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     canEditTask,
   } = useTaskTableLogic();
 
-  // Enhanced save function that includes system comment handling
-  const handleSaveEdit = (task: Task | any, field: string, newValue: any) => {
-    saveEdit(task, field, newValue, handleSystemComment);
+  // Enhanced save function that detects subtasks vs tasks
+  const handleSaveEdit = async (task: Task | any, field: string, newValue: any) => {
+    // Check if this is a subtask (has parent_task_id)
+    const isSubtask = 'parent_task_id' in task;
+    
+    if (isSubtask) {
+      // Handle subtask update
+      console.log('Saving subtask update:', { subtaskId: task.id, field, newValue });
+
+      // Get the old value for comparison
+      const oldValue = task[field as keyof typeof task];
+
+      // Skip if values are the same
+      if (oldValue === newValue) {
+        return;
+      }
+
+      const updateData: any = { id: task.id };
+      
+      // Handle date field conversion
+      if (field === 'due_date') {
+        updateData.due_date = newValue ? newValue.toISOString() : null;
+      } else {
+        updateData[field] = newValue;
+      }
+
+      try {
+        await updateSubtask(updateData);
+        
+        // Add system comment for the change
+        let commentText = '';
+        if (field === 'status') {
+          commentText = `Status changed from "${oldValue}" to "${newValue}"`;
+        } else if (field === 'priority') {
+          commentText = `Priority changed from "${oldValue}" to "${newValue}"`;
+        } else if (field === 'assigned_to') {
+          const oldAssignee = task.assigned_to_profile ? `${task.assigned_to_profile.first_name} ${task.assigned_to_profile.last_name}` : 'Unassigned';
+          const newAssignee = newValue ? users.find(u => u.id === newValue)?.first_name + ' ' + users.find(u => u.id === newValue)?.last_name : 'Unassigned';
+          commentText = `Assigned to changed from "${oldAssignee}" to "${newAssignee}"`;
+        } else if (field === 'due_date') {
+          const { format } = await import('date-fns');
+          const oldDate = oldValue ? format(new Date(oldValue as string), 'MMM d, yyyy') : 'No due date';
+          const newDate = newValue ? format(newValue, 'MMM d, yyyy') : 'No due date';
+          commentText = `Due date changed from "${oldDate}" to "${newDate}"`;
+        } else if (field === 'title') {
+          commentText = `Title changed from "${oldValue}" to "${newValue}"`;
+        }
+        
+        if (commentText) {
+          await handleSubtaskSystemComment(task.id, commentText);
+        }
+      } catch (error) {
+        console.error('Failed to update subtask:', error);
+      }
+    } else {
+      // Handle regular task update
+      saveEdit(task, field, newValue, handleSystemComment);
+    }
   };
 
   const handleToggleExpanded = (taskId: string) => {
