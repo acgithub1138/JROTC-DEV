@@ -179,26 +179,30 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         </TooltipContent>
                       </Tooltip>
                     )}
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit Competition</p>
-                      </TooltipContent>
-                    </Tooltip>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete Competition</p>
-                      </TooltipContent>
-                    </Tooltip>
+                    {onEdit && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit Competition</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {onDelete && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete Competition</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
                   </div>
                 </TableCell>
               </TableRow>
