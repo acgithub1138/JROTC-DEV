@@ -116,3 +116,15 @@ export const useDashboardPermissions = () => {
     canViewAnalytics: hasPermission('dashboard', 'view_analytics'),
   };
 };
+
+// Calendar-specific permissions
+export const useCalendarPermissions = () => {
+  const modulePermissions = useModulePermissions('calendar');
+  const { hasPermission } = usePermissions();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
+    canViewDetails: modulePermissions.canRead,
+  };
+};

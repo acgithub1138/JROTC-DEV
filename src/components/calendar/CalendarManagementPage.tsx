@@ -7,7 +7,7 @@ import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useCalendarPermissions } from '@/hooks/useModuleSpecificPermissions';
 export interface Event {
   id: string;
   school_id: string;
@@ -34,8 +34,10 @@ const CalendarManagementPage = () => {
   });
   const isMobile = useIsMobile();
   const {
-    canCreate: canCreateEvents
-  } = useModulePermissions('calendar');
+    canCreate: canCreateEvents,
+    canUpdate: canUpdateEvents,
+    canViewDetails
+  } = useCalendarPermissions();
   const {
     events,
     isLoading,
@@ -48,10 +50,20 @@ const CalendarManagementPage = () => {
     setShowEventDialog(true);
   };
   const handleEditEvent = (event: Event) => {
-    setEditingEvent(event);
-    setShowEventDialog(true);
+    if (!canViewDetails) return; // Don't show anything if can't view
+    
+    if (canUpdateEvents) {
+      setEditingEvent(event);
+      setShowEventDialog(true);
+    } else {
+      // Show read-only view if can view but can't update
+      setViewingEvent(event);
+      setShowEventDetailsDialog(true);
+    }
   };
+  
   const handleViewEvent = (event: Event) => {
+    if (!canViewDetails) return; // Don't show anything if can't view
     setViewingEvent(event);
     setShowEventDetailsDialog(true);
   };
@@ -84,7 +96,19 @@ const CalendarManagementPage = () => {
         {canCreateEvents}
       </div>
 
-      <CalendarView events={events} isLoading={isLoading} onEventEdit={canCreateEvents ? handleEditEvent : undefined} onEventView={!canCreateEvents ? handleViewEvent : undefined} onEventDelete={canCreateEvents ? deleteEvent : undefined} onDateSelect={handleDateSelect} onDateDoubleClick={handleDateDoubleClick} onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} filters={filters} onFiltersChange={setFilters} readOnly={!canCreateEvents} />
+      <CalendarView 
+        events={events} 
+        isLoading={isLoading} 
+        onEventEdit={canViewDetails ? handleEditEvent : undefined} 
+        onEventView={canViewDetails ? handleViewEvent : undefined} 
+        onEventDelete={canCreateEvents ? deleteEvent : undefined} 
+        onDateSelect={handleDateSelect} 
+        onDateDoubleClick={handleDateDoubleClick} 
+        onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} 
+        filters={filters} 
+        onFiltersChange={setFilters} 
+        readOnly={!canCreateEvents} 
+      />
 
       {canCreateEvents && <EventDialog open={showEventDialog} onOpenChange={handleCloseDialog} event={editingEvent} selectedDate={selectedDate} onSubmit={handleEventSubmit} onDelete={deleteEvent} />}
 
