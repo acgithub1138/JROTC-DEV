@@ -16,9 +16,19 @@ interface TaskTableProps {
   tasks: Task[];
   onTaskSelect: (task: Task) => void;
   onEditTask: (task: Task) => void;
+  showOverdueFilter?: boolean;
+  overdueFilterChecked?: boolean;
+  onOverdueFilterChange?: (checked: boolean) => void;
 }
 
-export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEditTask }) => {
+export const TaskTable: React.FC<TaskTableProps> = ({ 
+  tasks, 
+  onTaskSelect, 
+  onEditTask, 
+  showOverdueFilter = false,
+  overdueFilterChecked = false,
+  onOverdueFilterChange 
+}) => {
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
   
@@ -105,6 +115,9 @@ export const TaskTable: React.FC<TaskTableProps> = ({ tasks, onTaskSelect, onEdi
         onSelectAll={(checked) => handleSelectAll(checked, sortedTasks)}
         onBulkDelete={handleBulkDelete}
         canEdit={canEdit}
+        showOverdueFilter={showOverdueFilter}
+        overdueFilterChecked={overdueFilterChecked}
+        onOverdueFilterChange={onOverdueFilterChange}
       />
       <Table>
         <TableHeader>

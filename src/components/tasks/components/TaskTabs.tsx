@@ -22,6 +22,8 @@ interface TaskTabsProps {
   onPageChangeMyTasks: (page: number) => void;
   onPageChangeAllTasks: (page: number) => void;
   onPageChangeCompleted: (page: number) => void;
+  overdueFilter: boolean;
+  onOverdueFilterChange: (checked: boolean) => void;
 }
 
 export const TaskTabs: React.FC<TaskTabsProps> = ({
@@ -38,11 +40,13 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onEditTask,
   onPageChangeMyTasks,
   onPageChangeAllTasks,
-  onPageChangeCompleted
+  onPageChangeCompleted,
+  overdueFilter,
+  onOverdueFilterChange
 }) => {
   const isMobile = useIsMobile();
 
-  const renderTaskContent = (tasks: Task[]) => {
+  const renderTaskContent = (tasks: Task[], isAllTasksTab = false) => {
     if (isMobile) {
       return (
         <TaskCards 
@@ -59,6 +63,9 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
         tasks={tasks}
         onTaskSelect={onTaskSelect}
         onEditTask={onEditTask}
+        showOverdueFilter={isAllTasksTab}
+        overdueFilterChecked={overdueFilter}
+        onOverdueFilterChange={onOverdueFilterChange}
       />
     );
   };
@@ -82,7 +89,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
       </TabsContent>
 
       <TabsContent value="alltasks" className="space-y-4">
-        {renderTaskContent(allSchoolTasks)}
+        {renderTaskContent(allSchoolTasks, true)}
         <TablePagination
           currentPage={currentPageAllTasks}
           totalPages={allTasksPages}

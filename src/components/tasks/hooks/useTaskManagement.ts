@@ -10,6 +10,7 @@ export const useTaskManagement = () => {
   const { tasks } = useTasks();
   const { userProfile } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
+  const [overdueFilter, setOverdueFilter] = useState(false);
   const [currentPageMyTasks, setCurrentPageMyTasks] = useState(1);
   const [currentPageAllTasks, setCurrentPageAllTasks] = useState(1);
   const [currentPageCompleted, setCurrentPageCompleted] = useState(1);
@@ -19,9 +20,19 @@ export const useTaskManagement = () => {
     syncTaskOptions().catch(console.error);
   }, []);
 
-  // Filter tasks based on search term
+  // Helper function to filter overdue tasks
+  const filterOverdueTasks = (taskList: Task[]) => {
+    if (!overdueFilter) return taskList;
+    const now = new Date();
+    return taskList.filter(task => 
+      task.due_date && new Date(task.due_date) < now
+    );
+  };
+
+  // Filter tasks based on search term and overdue filter
   const myActiveTasks = filterTasks(getMyActiveTasks(tasks, userProfile?.id), searchTerm);
-  const allSchoolTasks = filterTasks(getAllSchoolTasks(tasks), searchTerm);
+  const allSchoolTasksFiltered = filterTasks(getAllSchoolTasks(tasks), searchTerm);
+  const allSchoolTasks = filterOverdueTasks(allSchoolTasksFiltered);
   const completedTasks = filterTasks(getCompletedTasks(tasks), searchTerm);
 
   // Pagination logic for each tab
@@ -33,16 +44,18 @@ export const useTaskManagement = () => {
   const paginatedAllTasks = getPaginatedItems(allSchoolTasks, currentPageAllTasks);
   const paginatedCompletedTasks = getPaginatedItems(completedTasks, currentPageCompleted);
 
-  // Reset pagination when search changes
+  // Reset pagination when search or overdue filter changes
   useEffect(() => {
     setCurrentPageMyTasks(1);
     setCurrentPageAllTasks(1);
     setCurrentPageCompleted(1);
-  }, [searchTerm]);
+  }, [searchTerm, overdueFilter]);
 
   return {
     searchTerm,
     setSearchTerm,
+    overdueFilter,
+    setOverdueFilter,
     myActiveTasks: paginatedMyTasks,
     allSchoolTasks: paginatedAllTasks,
     completedTasks: paginatedCompletedTasks,

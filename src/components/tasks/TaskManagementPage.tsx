@@ -18,6 +18,8 @@ const TaskManagementPage: React.FC = () => {
   const {
     searchTerm,
     setSearchTerm,
+    overdueFilter,
+    setOverdueFilter,
     myActiveTasks,
     allSchoolTasks,
     completedTasks,
@@ -86,6 +88,8 @@ const TaskManagementPage: React.FC = () => {
         onPageChangeMyTasks={setCurrentPageMyTasks}
         onPageChangeAllTasks={setCurrentPageAllTasks}
         onPageChangeCompleted={setCurrentPageCompleted}
+        overdueFilter={overdueFilter}
+        onOverdueFilterChange={setOverdueFilter}
       />
 
       {/* Create Task Form */}
