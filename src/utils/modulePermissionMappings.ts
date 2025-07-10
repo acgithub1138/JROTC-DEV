@@ -13,8 +13,7 @@ export const modulePermissionMappings = {
     'assign'
   ],
   'competitions': [
-    'view', 'create', 'read', 'update', 'delete', 'sidebar',
-    'manage_templates'
+    'view', 'create', 'read', 'update', 'delete', 'sidebar'
   ],
   'incidents': [
     'view', 'create', 'read', 'update', 'delete', 'sidebar'
