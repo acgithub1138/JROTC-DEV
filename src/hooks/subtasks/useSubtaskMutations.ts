@@ -8,9 +8,9 @@ export const useSubtaskMutations = () => {
   const deleteSubtaskMutation = useDeleteSubtask();
 
   return {
-    createSubtask: createSubtaskMutation.mutate,
-    updateSubtask: updateSubtaskMutation.mutate,
-    deleteSubtask: deleteSubtaskMutation.mutate,
+    createSubtask: createSubtaskMutation.mutateAsync,
+    updateSubtask: updateSubtaskMutation.mutateAsync,
+    deleteSubtask: deleteSubtaskMutation.mutateAsync,
     isCreating: createSubtaskMutation.isPending,
     isUpdating: updateSubtaskMutation.isPending,
     isDeleting: deleteSubtaskMutation.isPending,
