@@ -53,6 +53,10 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     setEditingItem(item);
   };
 
+  const handleView = (item: InventoryItem) => {
+    setEditingItem(item);
+  };
+
   const handleEditSubmit = async (updatedItem: any) => {
     await onEdit(updatedItem);
     setEditingItem(null);
@@ -326,22 +330,22 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                          </TooltipContent>
                        </Tooltip>
                       </TooltipProvider>
-                      <TooltipProvider>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEdit(item)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View item</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </TooltipProvider>
+                       <TooltipProvider>
+                         <Tooltip>
+                           <TooltipTrigger asChild>
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => handleView(item)}
+                             >
+                               <Eye className="w-4 h-4" />
+                             </Button>
+                           </TooltipTrigger>
+                           <TooltipContent>
+                             <p>View item</p>
+                           </TooltipContent>
+                         </Tooltip>
+                       </TooltipProvider>
                        {canUpdate('inventory') && (
                          <TooltipProvider>
                            <Tooltip>
