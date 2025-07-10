@@ -1,7 +1,7 @@
-
 import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissions } from './usePermissions';
 
 export interface MenuItem {
   id: string;
@@ -9,6 +9,77 @@ export interface MenuItem {
   icon: any;
 }
 
+// Module mapping for permissions
+const MODULE_MAPPING: Record<string, string> = {
+  'user-admin': 'cadets',
+  'school-management': 'cadets',
+  'cadets': 'cadets',
+  'tasks': 'tasks',
+  'job-board': 'job_board',
+  'teams': 'teams',
+  'budget': 'budget',
+  'inventory': 'inventory',
+  'contacts': 'contacts',
+  'calendar': 'calendar',
+  'competitions': 'competitions',
+  'email-management': 'email',
+  'incidents': 'incidents',
+  'role-management': 'cadets', // Only admins should see this
+};
+
+const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean): MenuItem[] => {
+  const baseItems = [
+    { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
+  ];
+
+  const potentialItems = [
+    { id: 'user-admin', label: 'User Management', icon: 'UserCog', adminOnly: true },
+    { id: 'school-management', label: 'School Management', icon: 'Building2', adminOnly: true },
+    { id: 'role-management', label: 'Role Management', icon: 'Shield', adminOnly: true },
+    { id: 'cadets', label: 'Cadets', icon: 'User' },
+    { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+    { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+    { id: 'teams', label: 'Teams', icon: 'Users' },
+    { id: 'budget', label: 'Budget', icon: 'DollarSign' },
+    { id: 'inventory', label: 'Inventory', icon: 'Package' },
+    { id: 'contacts', label: 'Contacts', icon: 'Contact' },
+    { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
+    { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+    { id: 'email-management', label: 'Email', icon: 'Mails' },
+    { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
+    { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings', adminOnly: true },
+    { id: 'settings', label: 'Settings', icon: 'Settings' },
+  ];
+
+  const allowedItems = potentialItems.filter(item => {
+    // Admin-only items
+    if (item.adminOnly && role !== 'admin') {
+      return false;
+    }
+
+    // Special cases for admin items
+    if (item.adminOnly && role === 'admin') {
+      return true;
+    }
+
+    // Settings is always available
+    if (item.id === 'settings') {
+      return true;
+    }
+
+    // Check permissions for regular items
+    const moduleKey = MODULE_MAPPING[item.id];
+    if (moduleKey) {
+      return hasPermission(moduleKey, 'sidebar');
+    }
+
+    return false;
+  });
+
+  return [...baseItems, ...allowedItems];
+};
+
+// Fallback function for when permissions aren't loaded yet
 const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
@@ -20,6 +91,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         ...baseItems,
         { id: 'user-admin', label: 'User Management', icon: 'UserCog' },
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
+        { id: 'role-management', label: 'Role Management', icon: 'Shield' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
@@ -40,9 +112,9 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'documents', label: 'Documents', icon: 'FileText' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
+        { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
     case 'command_staff':
@@ -54,6 +126,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
     case 'cadet':
@@ -63,6 +136,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
     default:
@@ -72,6 +146,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
 
 export const useSidebarPreferences = () => {
   const { userProfile } = useAuth();
+  const { hasPermission, allRolePermissions } = usePermissions();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -91,7 +166,10 @@ export const useSidebarPreferences = () => {
         return;
       }
 
-      const defaultItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      // Use permission-based menu items if permissions are loaded
+      const defaultItems = allRolePermissions.length > 0 
+        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
+        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
       
       if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
         // Filter out invalid items and ensure all valid items are included
@@ -107,11 +185,12 @@ export const useSidebarPreferences = () => {
       }
     } catch (error) {
       console.error('Error loading sidebar preferences:', error);
-      setMenuItems(getDefaultMenuItemsForRole(userProfile.role || 'cadet'));
+      const fallbackItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      setMenuItems(fallbackItems);
     } finally {
       setIsLoading(false);
     }
-  }, [userProfile?.id, userProfile?.role]);
+  }, [userProfile?.id, userProfile?.role, hasPermission, allRolePermissions]);
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
     if (!userProfile?.id) {
@@ -156,7 +235,9 @@ export const useSidebarPreferences = () => {
         .delete()
         .eq('user_id', userProfile.id);
 
-      const defaultItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      const defaultItems = allRolePermissions.length > 0 
+        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
+        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
       setMenuItems(defaultItems);
       return true;
     } catch (error) {
@@ -173,12 +254,18 @@ export const useSidebarPreferences = () => {
     loadPreferences();
   }, [loadPreferences]);
 
+  const getDefaultMenuItems = () => {
+    return allRolePermissions.length > 0 
+      ? getMenuItemsFromPermissions(userProfile?.role || 'cadet', hasPermission)
+      : getDefaultMenuItemsForRole(userProfile?.role || 'cadet');
+  };
+
   return {
     menuItems,
     isLoading,
     savePreferences,
     resetToDefault,
     refreshPreferences,
-    getDefaultMenuItems: () => getDefaultMenuItemsForRole(userProfile?.role || 'cadet'),
+    getDefaultMenuItems,
   };
 };

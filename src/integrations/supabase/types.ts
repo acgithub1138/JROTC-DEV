@@ -474,6 +474,48 @@ export type Database = {
           },
         ]
       }
+      default_role_permissions: {
+        Row: {
+          action_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          module_id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_id: string
+          role: Database["public"]["Enums"]["user_role"]
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+        }
+        Relationships: [
+          {
+            foreignKeyName: "default_role_permissions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "permission_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "default_role_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_logs: {
         Row: {
           created_at: string
@@ -1368,6 +1410,60 @@ export type Database = {
           },
         ]
       }
+      permission_actions: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          label: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      permission_modules: {
+        Row: {
+          created_at: string
+          description: string | null
+          id: string
+          label: string
+          name: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label: string
+          name: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string | null
+          id?: string
+          label?: string
+          name?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profile_history: {
         Row: {
           changed_by: string | null
@@ -1478,6 +1574,51 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      role_permissions: {
+        Row: {
+          action_id: string
+          created_at: string
+          enabled: boolean
+          id: string
+          module_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at: string
+        }
+        Insert: {
+          action_id: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_id: string
+          role: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Update: {
+          action_id?: string
+          created_at?: string
+          enabled?: boolean
+          id?: string
+          module_id?: string
+          role?: Database["public"]["Enums"]["user_role"]
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "role_permissions_action_id_fkey"
+            columns: ["action_id"]
+            isOneToOne: false
+            referencedRelation: "permission_actions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_module_id_fkey"
+            columns: ["module_id"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
             referencedColumns: ["id"]
           },
         ]
@@ -2059,6 +2200,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_user_permission: {
+        Args: { user_id: string; module_name: string; action_name: string }
+        Returns: boolean
+      }
       decrypt_smtp_password: {
         Args: { encrypted_password: string }
         Returns: string
