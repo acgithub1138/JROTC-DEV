@@ -61,7 +61,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
             onCheckedChange={(checked) => onSelectTask(subtask.id, checked as boolean)}
           />
         </TableCell>
-        <TableCell className="font-mono text-sm py-2 pl-8">
+        <TableCell className="font-mono text-sm py-2 pl-8 text-right">
           <button
             onClick={() => onTaskSelect(subtask)}
             className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
