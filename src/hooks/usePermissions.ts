@@ -29,12 +29,17 @@ export const usePermissions = () => {
   const { data: modules = [] } = useQuery({
     queryKey: ['permission-modules'],
     queryFn: async () => {
+      console.log('Fetching permission modules...');
       const { data, error } = await supabase
         .from('permission_modules')
         .select('*')
         .order('label');
       
-      if (error) throw error;
+      if (error) {
+        console.error('Error fetching permission modules:', error);
+        throw error;
+      }
+      console.log('Permission modules fetched:', data);
       return data;
     },
   });

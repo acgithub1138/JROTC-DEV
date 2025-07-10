@@ -150,9 +150,16 @@ export const useSidebarPreferences = () => {
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const loadPreferences = useCallback(async () => {
-    if (!userProfile?.id) return;
+  console.log('useSidebarPreferences - User Profile:', userProfile);
+  console.log('useSidebarPreferences - Role Permissions:', allRolePermissions.length);
 
+  const loadPreferences = useCallback(async () => {
+    if (!userProfile?.id) {
+      console.log('No user profile found, skipping sidebar preferences load');
+      return;
+    }
+
+    console.log('Loading sidebar preferences for user:', userProfile.id, 'role:', userProfile.role);
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -163,24 +170,23 @@ export const useSidebarPreferences = () => {
 
       if (error && error.code !== 'PGRST116') {
         console.error('Error loading sidebar preferences:', error);
-        return;
       }
 
-      // Use permission-based menu items if permissions are loaded
-      const defaultItems = allRolePermissions.length > 0 
-        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
-        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      // Always use fallback for now until permissions are fully loaded
+      console.log('Using fallback menu items for role:', userProfile.role);
+      const defaultItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
       
       if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
+        console.log('Found saved preferences, filtering menu items');
         // Filter out invalid items and ensure all valid items are included
         const savedItemIds = data.menu_items;
-        const validItems = defaultItems.filter(item => savedItemIds.includes(item.id));
         const orderedItems = savedItemIds
           .map(id => defaultItems.find(item => item.id === id))
           .filter(Boolean) as MenuItem[];
         
         setMenuItems(orderedItems);
       } else {
+        console.log('No saved preferences, using default items');
         setMenuItems(defaultItems);
       }
     } catch (error) {
@@ -188,9 +194,10 @@ export const useSidebarPreferences = () => {
       const fallbackItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
       setMenuItems(fallbackItems);
     } finally {
+      console.log('Sidebar preferences loaded, setting loading to false');
       setIsLoading(false);
     }
-  }, [userProfile?.id, userProfile?.role, hasPermission, allRolePermissions]);
+  }, [userProfile?.id, userProfile?.role]);
 
   const savePreferences = async (newMenuItems: MenuItem[]) => {
     if (!userProfile?.id) {
