@@ -11,6 +11,7 @@ import { Edit, Trash2, Package, AlertTriangle, History, Eye } from 'lucide-react
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
@@ -42,6 +43,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('inventory');
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
     data: items,
@@ -329,23 +331,25 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                            <p>View history</p>
                          </TooltipContent>
                        </Tooltip>
-                      </TooltipProvider>
-                       <TooltipProvider>
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               onClick={() => handleView(item)}
-                             >
-                               <Eye className="w-4 h-4" />
-                             </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                             <p>View item</p>
-                           </TooltipContent>
-                         </Tooltip>
                        </TooltipProvider>
+                        {canViewDetails && (
+                          <TooltipProvider>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  onClick={() => handleView(item)}
+                                >
+                                  <Eye className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>View item</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </TooltipProvider>
+                        )}
                        {canUpdate('inventory') && (
                          <TooltipProvider>
                            <Tooltip>

@@ -5,6 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetCardsProps {
@@ -19,6 +20,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   onDelete,
 }) => {
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('budget');
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';
@@ -112,20 +114,22 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 pt-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onEdit(transaction)}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>View transaction</p>
-                </TooltipContent>
-              </Tooltip>
+              {canViewDetails && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(transaction)}
+                    >
+                      <Eye className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>View transaction</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
               {canUpdate('budget') && (
                 <Tooltip>
                   <TooltipTrigger asChild>

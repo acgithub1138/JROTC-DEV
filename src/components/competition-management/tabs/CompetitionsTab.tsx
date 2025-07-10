@@ -13,6 +13,7 @@ import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useColumnPreferences } from '@/hooks/useColumnPreferences';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import type { Database } from '@/integrations/supabase/types';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -39,6 +40,7 @@ const defaultColumns = [
 export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
   const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
+  const { canViewDetails } = useModulePermissions('competitions');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
@@ -150,7 +152,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
         onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onViewScoreSheets={handleViewScoreSheets}
+        onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         visibleColumns={visibleColumns}
       />
 

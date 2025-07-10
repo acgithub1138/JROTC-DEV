@@ -10,6 +10,7 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -28,6 +29,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
   const { canUpdate, canDelete } = useUserPermissions();
+  const { canViewDetails } = useModulePermissions('budget');
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
@@ -167,20 +169,22 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             </TableCell>
             <TableCell className={getPaddingClass()}>
               <div className="flex gap-2">
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onEdit(transaction)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>View transaction</p>
-                  </TooltipContent>
-                </Tooltip>
+                {canViewDetails && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(transaction)}
+                      >
+                        <Eye className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>View transaction</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
                 {canUpdate('budget') && (
                   <Tooltip>
                     <TooltipTrigger asChild>
