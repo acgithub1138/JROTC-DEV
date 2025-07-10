@@ -67,8 +67,10 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
     console.log('Prepared task data for submission:', taskData);
 
     if (mode === 'create') {
+      console.log('Calling createTask...');
       createTask(taskData);
     } else if (task) {
+      console.log('Calling updateTask...');
       updateTask({ id: task.id, ...taskData });
     }
     
@@ -76,9 +78,14 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
     form.reset();
   };
 
+  const onError = (errors: any) => {
+    console.log('Form validation errors:', errors);
+  };
+
   return {
     form,
     onSubmit,
+    onError,
     isSubmitting: isCreating || isUpdating,
     isLoading: statusLoading || priorityLoading,
     statusOptions,

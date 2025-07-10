@@ -24,6 +24,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
   const { 
     form, 
     onSubmit, 
+    onError,
     isSubmitting, 
     isLoading, 
     statusOptions, 
@@ -75,7 +76,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
         </DialogHeader>
 
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
             <TaskTitleField form={form} />
             
             <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} />
