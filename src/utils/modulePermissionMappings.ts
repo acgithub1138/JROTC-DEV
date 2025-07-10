@@ -7,7 +7,7 @@ export const modulePermissionMappings = {
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'activate_deactivate', 'bulk_import', 'reset_password'
   ],
-  'cadet_tasks': [
+  'tasks': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ],
@@ -24,7 +24,7 @@ export const modulePermissionMappings = {
   'email': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
-  'incident_management': [
+  'incidents': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign'
   ],
