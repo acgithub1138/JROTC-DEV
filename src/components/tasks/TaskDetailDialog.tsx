@@ -17,6 +17,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -28,6 +29,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
+  const { canUpdate, canAssign } = useUserPermissions();
   const [currentTask, setCurrentTask] = useState(task);
   const [editData, setEditData] = useState({
     title: task.title,
@@ -53,9 +55,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     });
   }, [task, tasks]);
 
-  const canEdit = userProfile?.role === 'instructor' || 
-                  userProfile?.role === 'command_staff' || 
-                  currentTask.assigned_to === userProfile?.id;
+  const canEdit = canUpdate('tasks') || currentTask.assigned_to === userProfile?.id;
 
   const handleSave = async () => {
     try {
@@ -120,11 +120,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                   {currentTask.task_number} -
                 </span>
               )}
-              <Input
+                <Input
                 value={editData.title}
                 onChange={(e) => setEditData({...editData, title: e.target.value})}
                 className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
                 disabled={!canEdit}
+                readOnly={!canEdit}
               />
             </DialogTitle>
             {canEdit && (
@@ -174,8 +175,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {canEdit ? (
-                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                   {canEdit ? (
+                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})} disabled={!canEdit}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -196,8 +197,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {canEdit ? (
-                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                   {canEdit ? (
+                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})} disabled={!canEdit}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -260,8 +261,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
-                  {canEdit && (userProfile?.role === 'instructor' || userProfile?.role === 'command_staff') ? (
-                    <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                   {canEdit && canAssign('tasks') ? (
+                    <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})} disabled={!canEdit || !canAssign('tasks')}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
@@ -311,6 +312,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 onChange={(e) => setEditData({...editData, description: e.target.value})}
                 rows={4}
                 placeholder="Detailed description of the task..."
+                disabled={!canEdit}
+                readOnly={!canEdit}
               />
             ) : (
               <p className="text-sm text-gray-700 whitespace-pre-wrap">
