@@ -2,7 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { X } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,7 +31,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
   onCancelIncident
 }) => {
   const { userProfile } = useAuth();
-  const { canEdit, canDelete } = useTablePermissions('incidents');
+  const { canUpdate, canDelete } = useUserPermissions();
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor';
 
@@ -63,16 +63,12 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
           {incidents.map((incident) => (
             <TableRow key={incident.id}>
               <TableCell className="font-medium">
-                {canEditIncident(incident) ? (
-                  <button
-                    onClick={() => onIncidentSelect(incident)}
-                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
-                  >
-                    {incident.incident_number || 'N/A'}
-                  </button>
-                ) : (
-                  incident.incident_number || 'N/A'
-                )}
+                <button
+                  onClick={() => onIncidentSelect(incident)}
+                  className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer"
+                >
+                  {incident.incident_number || 'N/A'}
+                </button>
               </TableCell>
               <TableCell className="max-w-xs truncate">
                 {incident.title}
@@ -109,8 +105,11 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell className="text-right">
                 <TableActionButtons
-                  canEdit={canEdit && canEditIncident(incident)}
-                  onEdit={canEditIncident(incident) ? () => onEditIncident(incident) : undefined}
+                  canView={true}
+                  canEdit={canUpdate('incidents') && canEditIncident(incident)}
+                  canDelete={canDelete('incidents')}
+                  onView={() => onIncidentSelect(incident)}
+                  onEdit={canEditIncident(incident) && canUpdate('incidents') ? () => onEditIncident(incident) : undefined}
                   customActions={[
                     {
                       icon: <X className="w-4 h-4" />,

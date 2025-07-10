@@ -1,10 +1,11 @@
 import React from 'react';
-import { Edit, Trash2 } from 'lucide-react';
+import { Edit, Trash2, Eye } from 'lucide-react';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Contact } from '../ContactManagementPage';
 
 interface ContactTableProps {
@@ -20,6 +21,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { canUpdate, canDelete } = useUserPermissions();
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -123,31 +125,52 @@ export const ContactTable: React.FC<ContactTableProps> = ({
                         onClick={() => onEdit(contact)}
                         className="h-8 w-8 p-0"
                       >
-                        <Edit className="h-4 w-4" />
+                        <Eye className="h-4 w-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Edit contact</p>
+                      <p>View contact</p>
                     </TooltipContent>
                   </Tooltip>
                 </TooltipProvider>
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => onDelete(contact.id)}
-                        className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Delete contact</p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
+                {canUpdate('contacts') && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(contact)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Edit className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit contact</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+                {canDelete('contacts') && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onDelete(contact.id)}
+                          className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                        >
+                          <Trash2 className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete contact</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
               </div>
             </TableCell>
           </TableRow>

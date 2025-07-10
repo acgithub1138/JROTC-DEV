@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Edit, Trash2, DollarSign } from 'lucide-react';
+import { Edit, Trash2, DollarSign, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -9,6 +9,7 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -26,6 +27,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 }) => {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
+  const { canUpdate, canDelete } = useUserPermissions();
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
@@ -172,27 +174,45 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                       size="icon"
                       onClick={() => onEdit(transaction)}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Eye className="w-4 h-4" />
                     </Button>
                   </TooltipTrigger>
                   <TooltipContent>
-                    <p>Edit transaction</p>
+                    <p>View transaction</p>
                   </TooltipContent>
                 </Tooltip>
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => onDelete(transaction.id)}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>Delete transaction</p>
-                  </TooltipContent>
-                </Tooltip>
+                {canUpdate('budget') && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onEdit(transaction)}
+                      >
+                        <Edit className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Edit transaction</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
+                {canDelete('budget') && (
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => onDelete(transaction.id)}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>
+                      <p>Delete transaction</p>
+                    </TooltipContent>
+                  </Tooltip>
+                )}
               </div>
             </TableCell>
           </TableRow>

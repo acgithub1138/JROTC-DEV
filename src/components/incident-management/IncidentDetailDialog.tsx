@@ -82,7 +82,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     assigned_to: incident.assigned_to || 'unassigned',
   });
 
-  const canEditIncident = canUpdate('incidents') || incident.submitted_by === userProfile?.id;
+  const canEditIncident = canUpdate('incidents');
 
   const handleSave = async () => {
     try {

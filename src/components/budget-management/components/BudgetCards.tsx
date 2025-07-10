@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, DollarSign, Calendar, CreditCard } from 'lucide-react';
+import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetCardsProps {
@@ -17,6 +18,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { canUpdate, canDelete } = useUserPermissions();
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';
@@ -117,28 +119,46 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
                     size="sm"
                     onClick={() => onEdit(transaction)}
                   >
-                    <Edit className="w-4 h-4" />
+                    <Eye className="w-4 h-4" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
-                  <p>Edit transaction</p>
+                  <p>View transaction</p>
                 </TooltipContent>
               </Tooltip>
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onDelete(transaction.id)}
-                    className="text-red-600 hover:text-red-700"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Delete transaction</p>
-                </TooltipContent>
-              </Tooltip>
+              {canUpdate('budget') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onEdit(transaction)}
+                    >
+                      <Edit className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Edit transaction</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
+              {canDelete('budget') && (
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => onDelete(transaction.id)}
+                      className="text-red-600 hover:text-red-700"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>
+                    <p>Delete transaction</p>
+                  </TooltipContent>
+                </Tooltip>
+              )}
             </div>
           </CardContent>
         </Card>

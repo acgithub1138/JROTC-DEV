@@ -7,10 +7,10 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, Package, AlertTriangle, History } from 'lucide-react';
+import { Edit, Trash2, Package, AlertTriangle, History, Eye } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
-import { useInventoryPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
@@ -41,7 +41,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
-  const { canUpdate, canDelete } = useInventoryPermissions();
+  const { canUpdate, canDelete } = useUserPermissions();
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
     data: items,
@@ -49,7 +49,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   });
 
   const handleEdit = (item: InventoryItem) => {
-    if (!canUpdate) return;
+    if (!canUpdate('inventory')) return;
     setEditingItem(item);
   };
 
@@ -59,7 +59,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   };
 
   const handleQtyEdit = (itemId: string, field: 'qty_total' | 'qty_issued', value: string) => {
-    if (!canUpdate) return;
+    if (!canUpdate('inventory')) return;
     const numValue = parseInt(value) || 0;
     if (numValue < 0) return;
     
@@ -259,10 +259,10 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                         onKeyDown={(e) => handleQtyKeyPress(e, item.id, 'qty_total')}
                         autoFocus
                       />
-                     ) : (
-                       <div 
-                         className={`p-1 rounded ${canUpdate ? 'cursor-pointer hover:bg-muted' : ''}`}
-                         onClick={canUpdate ? () => setEditingQty({itemId: item.id, field: 'qty_total'}) : undefined}
+                       ) : (
+                        <div 
+                          className={`p-1 rounded ${canUpdate('inventory') ? 'cursor-pointer hover:bg-muted' : ''}`}
+                          onClick={canUpdate('inventory') ? () => setEditingQty({itemId: item.id, field: 'qty_total'}) : undefined}
                        >
                          {item.qty_total || 0}
                        </div>
@@ -283,10 +283,10 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                         onKeyDown={(e) => handleQtyKeyPress(e, item.id, 'qty_issued')}
                         autoFocus
                       />
-                     ) : (
-                       <div 
-                         className={`p-1 rounded ${canUpdate ? 'cursor-pointer hover:bg-muted' : ''}`}
-                         onClick={canUpdate ? () => setEditingQty({itemId: item.id, field: 'qty_issued'}) : undefined}
+                      ) : (
+                        <div 
+                          className={`p-1 rounded ${canUpdate('inventory') ? 'cursor-pointer hover:bg-muted' : ''}`}
+                          onClick={canUpdate('inventory') ? () => setEditingQty({itemId: item.id, field: 'qty_issued'}) : undefined}
                        >
                          {item.qty_issued || 0}
                        </div>
@@ -325,44 +325,60 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                            <p>View history</p>
                          </TooltipContent>
                        </Tooltip>
-                     </TooltipProvider>
-                      {canUpdate && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => handleEdit(item)}
-                              >
-                                <Edit className="w-4 h-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Edit item</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
-                      {canDelete && (
-                        <TooltipProvider>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => onDelete(item.id)}
-                                className="hover:text-red-600"
-                              >
-                                <Trash2 className="w-4 h-4" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Delete item</p>
-                            </TooltipContent>
-                          </Tooltip>
-                        </TooltipProvider>
-                      )}
+                      </TooltipProvider>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(item)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View item</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TooltipProvider>
+                       {canUpdate('inventory') && (
+                         <TooltipProvider>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => handleEdit(item)}
+                               >
+                                 <Edit className="w-4 h-4" />
+                               </Button>
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>Edit item</p>
+                             </TooltipContent>
+                           </Tooltip>
+                         </TooltipProvider>
+                       )}
+                       {canDelete('inventory') && (
+                         <TooltipProvider>
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <Button
+                                 variant="ghost"
+                                 size="sm"
+                                 onClick={() => onDelete(item.id)}
+                                 className="hover:text-red-600"
+                               >
+                                 <Trash2 className="w-4 h-4" />
+                               </Button>
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>Delete item</p>
+                             </TooltipContent>
+                           </Tooltip>
+                         </TooltipProvider>
+                       )}
                 </div>
               </TableCell>
             </TableRow>

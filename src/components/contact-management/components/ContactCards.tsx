@@ -2,7 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Edit, Trash2, Phone, Mail, User } from 'lucide-react';
+import { Edit, Trash2, Phone, Mail, User, Eye } from 'lucide-react';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { Contact } from '../ContactManagementPage';
 
 interface ContactCardsProps {
@@ -18,6 +19,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
   onEdit,
   onDelete,
 }) => {
+  const { canUpdate, canDelete } = useUserPermissions();
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -133,16 +135,27 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
                 size="sm"
                 onClick={() => onEdit(contact)}
               >
-                <Edit className="w-4 h-4" />
+                <Eye className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(contact.id)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              {canUpdate('contacts') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(contact)}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+              {canDelete('contacts') && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(contact.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>

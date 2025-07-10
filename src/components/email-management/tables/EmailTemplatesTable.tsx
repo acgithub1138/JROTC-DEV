@@ -13,6 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { format } from 'date-fns';
 
 interface EmailTemplatesTableProps {
@@ -27,6 +28,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   onEdit,
 }) => {
   const { deleteTemplate } = useEmailTemplates();
+  const { canUpdate, canDelete } = useUserPermissions();
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
@@ -77,27 +79,45 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                         size="sm"
                         onClick={() => onEdit(template)}
                       >
-                        <Edit className="w-4 h-4" />
+                        <Eye className="w-4 h-4" />
                       </Button>
                     </TooltipTrigger>
                     <TooltipContent>
-                      <p>Edit template</p>
+                      <p>View template</p>
                     </TooltipContent>
                   </Tooltip>
-                  <Tooltip>
-                    <TooltipTrigger asChild>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDelete(template.id)}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>Delete template</p>
-                    </TooltipContent>
-                  </Tooltip>
+                  {canUpdate('email_templates') && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => onEdit(template)}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Edit template</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {canDelete('email_templates') && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => handleDelete(template.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Delete template</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
                 </div>
               </TableCell>
             </TableRow>

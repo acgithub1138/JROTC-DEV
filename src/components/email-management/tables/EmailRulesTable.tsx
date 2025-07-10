@@ -12,8 +12,9 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, Play, Pause } from 'lucide-react';
+import { Edit, Trash2, Play, Pause, Eye } from 'lucide-react';
 import { EmailRule } from '@/hooks/email/useEmailRules';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 interface EmailRulesTableProps {
   rules: (EmailRule & { email_templates: { name: string; subject: string } })[];
@@ -30,6 +31,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
   onDelete,
   onToggleActive,
 }) => {
+  const { canUpdate, canDelete: canDeletePerm } = useUserPermissions();
   if (isLoading) {
     return (
       <Card>
@@ -108,43 +110,63 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                           <Button
                             variant="ghost"
                             size="sm"
-                            onClick={() => onToggleActive(rule.id, !rule.is_active)}
-                          >
-                            {rule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>{rule.is_active ? 'Deactivate rule' : 'Activate rule'}</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
                             onClick={() => onEdit(rule)}
                           >
-                            <Edit className="h-4 w-4" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Edit rule</p>
+                          <p>View rule</p>
                         </TooltipContent>
                       </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => onDelete(rule.id)}
-                          >
-                            <Trash2 className="h-4 w-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete rule</p>
-                        </TooltipContent>
-                      </Tooltip>
+                      {canUpdate('email_rules') && (
+                        <>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onToggleActive(rule.id, !rule.is_active)}
+                              >
+                                {rule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>{rule.is_active ? 'Deactivate rule' : 'Activate rule'}</p>
+                            </TooltipContent>
+                          </Tooltip>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => onEdit(rule)}
+                              >
+                                <Edit className="h-4 w-4" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit rule</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </>
+                      )}
+                      {canDeletePerm('email_rules') && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => onDelete(rule.id)}
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Delete rule</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                     </div>
                   </TableCell>
                 </TableRow>
