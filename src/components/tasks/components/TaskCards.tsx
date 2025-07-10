@@ -3,29 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Trash2, Clock, User, Calendar } from 'lucide-react';
-
-interface Task {
-  id: string;
-  task_number: string;
-  title: string;
-  description?: string;
-  priority: string;
-  status: string;
-  due_date?: string;
-  assigned_to?: string;
-  assigned_by?: string;
-  created_at: string;
-  assigned_to_profile?: {
-    first_name: string;
-    last_name: string;
-  };
-}
+import { Task } from '@/hooks/useTasks';
+import { Subtask } from '@/hooks/tasks/types';
 
 interface TaskCardsProps {
-  tasks: Task[];
-  onView: (task: Task) => void;
-  onEdit: (task: Task) => void;
-  onDelete: (task: Task) => void;
+  tasks: (Task | Subtask)[];
+  onView: (task: Task | Subtask) => void;
+  onEdit: (task: Task | Subtask) => void;
+  onDelete: (task: Task | Subtask) => void;
 }
 
 export const TaskCards: React.FC<TaskCardsProps> = ({ 
@@ -72,7 +57,10 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">{task.title}</CardTitle>
+                <CardTitle className="text-lg">
+                  {'parent_task_id' in task && <span className="text-xs text-muted-foreground mr-2">SUBTASK:</span>}
+                  {task.title}
+                </CardTitle>
                 <p className="text-sm text-muted-foreground">{task.task_number}</p>
               </div>
               <div className="flex space-x-1">

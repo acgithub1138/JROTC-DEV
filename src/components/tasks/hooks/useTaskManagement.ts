@@ -2,12 +2,15 @@ import { useState, useEffect } from 'react';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { syncTaskOptions } from '@/utils/taskOptionValidator';
-import { getMyActiveTasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
+import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
+import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
+import { Subtask } from '@/hooks/tasks/types';
 
 export const useTaskManagement = () => {
   const { tasks } = useTasks();
+  const { data: mySubtasks = [] } = useMySubtasksQuery();
   const { userProfile } = useAuth();
   const [searchTerm, setSearchTerm] = useState('');
   const [overdueFilter, setOverdueFilter] = useState(false);
@@ -29,8 +32,9 @@ export const useTaskManagement = () => {
     );
   };
 
-  // Filter tasks based on search term and overdue filter
-  const myActiveTasks = filterTasks(getMyActiveTasks(tasks, userProfile?.id), searchTerm);
+  // Filter tasks and subtasks based on search term and overdue filter
+  const myActiveTasksAndSubtasks = getMyActiveTasksAndSubtasks(tasks, mySubtasks, userProfile?.id);
+  const myActiveTasks = filterTasks(myActiveTasksAndSubtasks, searchTerm) as (Task | Subtask)[];
   const allSchoolTasksFiltered = filterTasks(getAllSchoolTasks(tasks), searchTerm);
   const allSchoolTasks = filterOverdueTasks(allSchoolTasksFiltered);
   const completedTasks = filterTasks(getCompletedTasks(tasks), searchTerm);
@@ -56,7 +60,7 @@ export const useTaskManagement = () => {
     setSearchTerm,
     overdueFilter,
     setOverdueFilter,
-    myActiveTasks: paginatedMyTasks,
+    myActiveTasks: paginatedMyTasks as (Task | Subtask)[],
     allSchoolTasks: paginatedAllTasks,
     completedTasks: paginatedCompletedTasks,
     currentPageMyTasks,

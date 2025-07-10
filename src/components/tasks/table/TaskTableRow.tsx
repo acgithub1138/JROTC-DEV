@@ -23,7 +23,7 @@ interface EditState {
 }
 
 interface TaskTableRowProps {
-  task: Task;
+  task: Task | Subtask;
   isSelected: boolean;
   editState: EditState;
   setEditState: (state: EditState) => void;
@@ -31,12 +31,12 @@ interface TaskTableRowProps {
   priorityOptions: TaskPriorityOption[];
   users: any[];
   canEdit: boolean;
-  canEditTask: (task: Task) => boolean;
+  canEditTask: (task: Task | Subtask) => boolean;
   onTaskSelect: (task: Task | Subtask) => void;
   onSelectTask: (taskId: string, checked: boolean) => void;
   onSave: (task: Task | Subtask, field: string, newValue: any) => void;
   onCancel: () => void;
-  onEditTask: (task: Task) => void;
+  onEditTask: (task: Task | Subtask) => void;
   expandedTasks: Set<string>;
   onToggleExpanded: (taskId: string) => void;
   selectedTasks: string[];
@@ -63,10 +63,15 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 }) => {
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
-  const { subtasks, updateSubtask } = useSubtasks(task.id);
+  
+  // Check if this is a subtask (has parent_task_id property)
+  const isSubtask = 'parent_task_id' in task;
+  
+  // Only fetch subtasks if this is a task, not a subtask
+  const { subtasks, updateSubtask } = useSubtasks(isSubtask ? undefined : task.id);
   
   const isExpanded = expandedTasks.has(task.id);
-  const hasSubtasks = subtasks.length > 0;
+  const hasSubtasks = !isSubtask && subtasks.length > 0;
 
   const handleSubtaskSave = async (subtask: Subtask, field: string, newValue: any) => {
     console.log('Saving subtask update:', { subtaskId: subtask.id, field, newValue });
@@ -114,23 +119,30 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="font-mono text-sm py-2">
           <div className="flex items-center gap-2">
-            <Button
-              variant="ghost"
-              size="sm"
-              className="h-6 w-6 p-0"
-              onClick={() => onToggleExpanded(task.id)}
-              disabled={!hasSubtasks}
-            >
-              {hasSubtasks ? (
-                isExpanded ? (
-                  <ChevronDown className="h-4 w-4" />
+            {!isSubtask && (
+              <Button
+                variant="ghost"
+                size="sm"
+                className="h-6 w-6 p-0"
+                onClick={() => onToggleExpanded(task.id)}
+                disabled={!hasSubtasks}
+              >
+                {hasSubtasks ? (
+                  isExpanded ? (
+                    <ChevronDown className="h-4 w-4" />
+                  ) : (
+                    <ChevronRight className="h-4 w-4" />
+                  )
                 ) : (
-                  <ChevronRight className="h-4 w-4" />
-                )
-              ) : (
-                <div className="w-4 h-4" />
-              )}
-            </Button>
+                  <div className="w-4 h-4" />
+                )}
+              </Button>
+            )}
+            {isSubtask && (
+              <div className="w-6 h-6 flex items-center justify-center">
+                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
+              </div>
+            )}
             <button
               onClick={() => onTaskSelect(task)}
               className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
@@ -139,6 +151,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                   : ''
               }`}
             >
+              {isSubtask && <span className="text-xs opacity-60 mr-1">ST:</span>}
               {task.task_number || 'N/A'}
             </button>
           </div>
@@ -236,28 +249,30 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           {format(new Date(task.created_at), 'MMM d, yyyy')}
         </TableCell>
         <TableCell className="py-2">
-          <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={() => setIsCreateSubtaskOpen(true)}
-                  className="h-8 w-8 p-0"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>
-                <p>Add Subtask</p>
-              </TooltipContent>
-            </Tooltip>
-          </div>
+          {!isSubtask && (
+            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    onClick={() => setIsCreateSubtaskOpen(true)}
+                    className="h-8 w-8 p-0"
+                  >
+                    <Plus className="h-4 w-4" />
+                  </Button>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add Subtask</p>
+                </TooltipContent>
+              </Tooltip>
+            </div>
+          )}
         </TableCell>
       </TableRow>
 
-      {/* Render subtasks when expanded */}
-      {isExpanded && subtasks.map((subtask) => (
+      {/* Render subtasks when expanded (only for tasks, not subtasks) */}
+      {!isSubtask && isExpanded && subtasks.map((subtask) => (
         <SubtaskTableRow
           key={subtask.id}
           subtask={subtask}
@@ -284,12 +299,14 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         taskDescription={task.description}
       />
 
-      <CreateSubtaskDialog
-        isOpen={isCreateSubtaskOpen}
-        onClose={() => setIsCreateSubtaskOpen(false)}
-        parentTaskId={task.id}
-        parentTaskTitle={task.title}
-      />
+      {!isSubtask && (
+        <CreateSubtaskDialog
+          isOpen={isCreateSubtaskOpen}
+          onClose={() => setIsCreateSubtaskOpen(false)}
+          parentTaskId={task.id}
+          parentTaskTitle={task.title}
+        />
+      )}
     </>
   );
 };

@@ -6,9 +6,10 @@ import { TaskTable } from '../TaskTable';
 import { TaskCards } from './TaskCards';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { Task } from '@/hooks/useTasks';
+import { Subtask } from '@/hooks/tasks/types';
 
 interface TaskTabsProps {
-  myActiveTasks: Task[];
+  myActiveTasks: (Task | Subtask)[];
   allSchoolTasks: Task[];
   completedTasks: Task[];
   currentPageMyTasks: number;
@@ -46,7 +47,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
 }) => {
   const isMobile = useIsMobile();
 
-  const renderTaskContent = (tasks: Task[], isAllTasksTab = false) => {
+  const renderTaskContent = (tasks: (Task | Subtask)[], isAllTasksTab = false) => {
     if (isMobile) {
       return (
         <TaskCards 

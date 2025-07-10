@@ -2,6 +2,7 @@ import React from 'react';
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Task } from '@/hooks/useTasks';
+import { Subtask } from '@/hooks/tasks/types';
 
 interface TaskFiltersProps {
   searchTerm: string;
@@ -26,7 +27,7 @@ export const TaskFilters: React.FC<TaskFiltersProps> = ({
 };
 
 // Filter utility functions
-export const filterTasks = (taskList: Task[], searchTerm: string) => {
+export const filterTasks = (taskList: (Task | Subtask)[], searchTerm: string) => {
   if (!searchTerm) return taskList;
   
   return taskList.filter(task =>

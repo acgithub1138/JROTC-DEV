@@ -8,6 +8,7 @@ import { TaskFilters } from './components/TaskFilters';
 import { TaskTabs } from './components/TaskTabs';
 import { useTaskManagement } from './hooks/useTaskManagement';
 import { Task } from '@/hooks/useTasks';
+import { Subtask } from '@/hooks/tasks/types';
 
 const TaskManagementPage: React.FC = () => {
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
@@ -37,13 +38,13 @@ const TaskManagementPage: React.FC = () => {
     completedTasksCount
   } = useTaskManagement();
 
-  const handleTaskSelect = (task: Task) => {
-    setSelectedTask(task);
+  const handleTaskSelect = (task: Task | Subtask) => {
+    setSelectedTask(task as Task);
     setIsDetailDialogOpen(true);
   };
 
-  const handleEditTask = (task: Task) => {
-    setEditingTask(task);
+  const handleEditTask = (task: Task | Subtask) => {
+    setEditingTask(task as Task);
   };
 
   const handleCreateTask = () => {

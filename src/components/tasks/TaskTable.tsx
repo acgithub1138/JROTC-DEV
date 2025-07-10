@@ -4,6 +4,7 @@ import { Table, TableBody, TableHead, TableHeader, TableRow } from '@/components
 import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Task } from '@/hooks/useTasks';
+import { Subtask } from '@/hooks/tasks/types';
 import { TableHeader as TaskTableHeader } from './table/TableHeader';
 import { TaskTableRow } from './table/TaskTableRow';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
@@ -12,9 +13,9 @@ import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useSortableTable } from '@/hooks/useSortableTable';
 
 interface TaskTableProps {
-  tasks: Task[];
-  onTaskSelect: (task: Task) => void;
-  onEditTask: (task: Task) => void;
+  tasks: (Task | Subtask)[];
+  onTaskSelect: (task: Task | Subtask) => void;
+  onEditTask: (task: Task | Subtask) => void;
   showOverdueFilter?: boolean;
   overdueFilterChecked?: boolean;
   onOverdueFilterChange?: (checked: boolean) => void;
