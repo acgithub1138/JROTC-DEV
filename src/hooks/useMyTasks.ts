@@ -31,6 +31,7 @@ export const useMyTasks = () => {
           .select('id, title, task_number, status, priority, due_date, created_at')
           .eq('assigned_to', userProfile.id)
           .eq('school_id', userProfile.school_id)
+          .not('status', 'in', '(done,completed,canceled)')
           .order('created_at', { ascending: false })
           .limit(10);
 
