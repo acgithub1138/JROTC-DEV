@@ -138,11 +138,6 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                 )}
               </Button>
             )}
-            {isSubtask && (
-              <div className="w-6 h-6 flex items-center justify-center">
-                <div className="w-2 h-2 bg-muted-foreground rounded-full"></div>
-              </div>
-            )}
             <button
               onClick={() => onTaskSelect(task)}
               className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
