@@ -20,6 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { TeamWithMembers } from '../types';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 
 interface EditTeamDialogProps {
   open: boolean;
@@ -43,6 +44,8 @@ export const EditTeamDialog = ({
   });
   
   const { users } = useSchoolUsers(true); // Only get active users
+  const { canUpdate } = useUserPermissions();
+  const isReadOnly = !canUpdate('teams');
 
   useEffect(() => {
     if (team) {
@@ -106,74 +109,100 @@ export const EditTeamDialog = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Team Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-              required
-            />
+            {isReadOnly ? (
+              <div className="p-2 border rounded-md bg-muted">{formData.name}</div>
+            ) : (
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            )}
           </div>
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              rows={3}
-            />
+            {isReadOnly ? (
+              <div className="p-2 border rounded-md bg-muted min-h-[72px]">{formData.description || 'No description'}</div>
+            ) : (
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                rows={3}
+              />
+            )}
           </div>
 
           <div>
             <Label htmlFor="team_lead">Team Lead</Label>
-            <Select
-              value={formData.team_lead_id || "none"}
-              onValueChange={(value) => setFormData({ ...formData, team_lead_id: value === "none" ? "" : value })}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select team lead (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No team lead</SelectItem>
-                {users
-                  .filter(user => !formData.member_ids.includes(user.id))
-                  .map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.role})
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
+            {isReadOnly ? (
+              <div className="p-2 border rounded-md bg-muted">
+                {formData.team_lead_id ? 
+                  users.find(u => u.id === formData.team_lead_id)?.first_name + ' ' + 
+                  users.find(u => u.id === formData.team_lead_id)?.last_name || 'Unknown' 
+                  : 'No team lead'
+                }
+              </div>
+            ) : (
+              <Select
+                value={formData.team_lead_id || "none"}
+                onValueChange={(value) => setFormData({ ...formData, team_lead_id: value === "none" ? "" : value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select team lead (optional)" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">No team lead</SelectItem>
+                  {users
+                    .filter(user => !formData.member_ids.includes(user.id))
+                    .map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.first_name} {user.last_name} ({user.role})
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            )}
           </div>
 
           <div>
             <Label>Team Members</Label>
             <div className="space-y-2">
-              <Select onValueChange={addMember}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Add team members" />
-                </SelectTrigger>
-                <SelectContent>
-                  {getAvailableUsers().map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.role})
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
+              {!isReadOnly && (
+                <Select onValueChange={addMember}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Add team members" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {getAvailableUsers().map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.first_name} {user.last_name} ({user.role})
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
               
               {getSelectedMembers().length > 0 && (
                 <div className="flex flex-wrap gap-2 mt-2">
                   {getSelectedMembers().map((user) => (
                     <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
                       {user.first_name} {user.last_name}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeMember(user.id)}
-                      />
+                      {!isReadOnly && (
+                        <X
+                          className="h-3 w-3 cursor-pointer"
+                          onClick={() => removeMember(user.id)}
+                        />
+                      )}
                     </Badge>
                   ))}
                 </div>
+              )}
+              
+              {getSelectedMembers().length === 0 && (
+                <div className="text-sm text-muted-foreground">No team members</div>
               )}
             </div>
           </div>
@@ -184,11 +213,13 @@ export const EditTeamDialog = ({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {isReadOnly ? 'Close' : 'Cancel'}
             </Button>
-            <Button type="submit" disabled={loading || !formData.name.trim()}>
-              {loading ? 'Updating...' : 'Update Team'}
-            </Button>
+            {!isReadOnly && (
+              <Button type="submit" disabled={loading || !formData.name.trim()}>
+                {loading ? 'Updating...' : 'Update Team'}
+              </Button>
+            )}
           </div>
         </form>
       </DialogContent>

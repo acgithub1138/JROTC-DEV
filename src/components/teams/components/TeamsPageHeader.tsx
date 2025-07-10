@@ -4,9 +4,10 @@ import { Plus } from 'lucide-react';
 
 interface TeamsPageHeaderProps {
   onAddTeam: () => void;
+  canCreate: boolean;
 }
 
-export const TeamsPageHeader = ({ onAddTeam }: TeamsPageHeaderProps) => {
+export const TeamsPageHeader = ({ onAddTeam, canCreate }: TeamsPageHeaderProps) => {
   return (
     <div className="flex justify-between items-center">
       <div>
@@ -16,10 +17,12 @@ export const TeamsPageHeader = ({ onAddTeam }: TeamsPageHeaderProps) => {
         </p>
       </div>
       
-      <Button onClick={onAddTeam} className="flex items-center gap-2">
-        <Plus className="w-4 h-4" />
-        Add Team
-      </Button>
+      {canCreate && (
+        <Button onClick={onAddTeam} className="flex items-center gap-2">
+          <Plus className="w-4 h-4" />
+          Add Team
+        </Button>
+      )}
     </div>
   );
 };

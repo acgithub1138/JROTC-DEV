@@ -12,6 +12,8 @@ interface TeamCardsProps {
   onDelete: (id: string) => void;
   onViewMembers: (team: TeamWithMembers) => void;
   onSendEmail: (team: TeamWithMembers) => void;
+  canUpdate: boolean;
+  canDelete: boolean;
 }
 
 export const TeamCards: React.FC<TeamCardsProps> = ({
@@ -21,6 +23,8 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
   onDelete,
   onViewMembers,
   onSendEmail,
+  canUpdate,
+  canDelete: canDeleteProp,
 }) => {
   const getTypeColor = (type?: string) => {
     if (!type) return 'bg-gray-100 text-gray-800';
@@ -111,21 +115,25 @@ export const TeamCards: React.FC<TeamCardsProps> = ({
               >
                 <Mail className="w-4 h-4" />
               </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onEdit(team)}
-              >
-                <Edit className="w-4 h-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => onDelete(team.id)}
-                className="text-red-600 hover:text-red-700"
-              >
-                <Trash2 className="w-4 h-4" />
-              </Button>
+              {canUpdate && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onEdit(team)}
+                >
+                  <Edit className="w-4 h-4" />
+                </Button>
+              )}
+              {canDeleteProp && (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onDelete(team.id)}
+                  className="text-red-600 hover:text-red-700"
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              )}
             </div>
           </CardContent>
         </Card>
