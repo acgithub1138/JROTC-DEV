@@ -11,7 +11,7 @@ import { format } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { EventAssignmentSection } from './EventAssignmentSection';
 import { useEventTypes } from '../hooks/useEventTypes';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useEventPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AddressLookupField } from './AddressLookupField';
 
 interface EventFormProps {
@@ -29,7 +29,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   onCancel,
   onDelete,
 }) => {
-  const { canUpdate, canDelete, canCreate } = useUserPermissions();
+  const { canUpdate, canDelete, canCreate } = useEventPermissions();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -48,8 +48,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [newEventTypeName, setNewEventTypeName] = useState('');
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
 
-  const canEdit = event ? canUpdate('calendar') : canCreate('calendar');
-  const canDeleteEvent = event ? canDelete('calendar') : false;
+  const canEdit = event ? canUpdate : canCreate;
+  const canDeleteEvent = event ? canDelete : false;
 
   useEffect(() => {
     if (event) {

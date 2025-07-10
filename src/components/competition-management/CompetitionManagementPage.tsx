@@ -3,11 +3,11 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { TemplatesTab } from './tabs/TemplatesTab';
 import { ReportsTab } from './tabs/ReportsTab';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const CompetitionManagementPage = () => {
   const [activeTab, setActiveTab] = useState('competitions');
-  const { canCreate, canUpdate } = useUserPermissions();
+  const { canCreate, canUpdate } = useCompetitionPermissions();
 
   return (
     <div className="p-6 space-y-6">
@@ -26,11 +26,11 @@ const CompetitionManagementPage = () => {
         </TabsList>
         
         <TabsContent value="competitions" className="space-y-6">
-          <CompetitionsTab readOnly={!canUpdate('competitions')} />
+          <CompetitionsTab readOnly={!canUpdate} />
         </TabsContent>
         
         <TabsContent value="templates" className="space-y-6">
-          <TemplatesTab readOnly={!canUpdate('competitions')} />
+          <TemplatesTab readOnly={!canUpdate} />
         </TabsContent>
         
         <TabsContent value="reports" className="space-y-6">

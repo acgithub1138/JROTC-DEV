@@ -12,7 +12,7 @@ import { EditTeamDialog } from './components/EditTeamDialog';
 import { SendEmailDialog } from './components/SendEmailDialog';
 import { ViewTeamMembersDialog } from './components/ViewTeamMembersDialog';
 import { TeamWithMembers, NewTeam } from './types';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 const TeamsManagementPage = () => {
   const {
     teams,
@@ -25,7 +25,7 @@ const TeamsManagementPage = () => {
     deleteTeam
   } = useTeamMutations();
   const isMobile = useIsMobile();
-  const { canCreate, canUpdate, canDelete } = useUserPermissions();
+  const { canCreate, canUpdate, canDelete } = useModulePermissions('teams');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
@@ -95,7 +95,7 @@ const TeamsManagementPage = () => {
   return <div className="p-6 space-y-6">
       <TeamsPageHeader 
         onAddTeam={() => setAddDialogOpen(true)} 
-        canCreate={canCreate('teams')} 
+        canCreate={canCreate} 
       />
 
       <Card>
@@ -109,8 +109,8 @@ const TeamsManagementPage = () => {
               onDelete={handleDeleteTeam} 
               onViewMembers={handleViewMembers} 
               onSendEmail={handleSendEmail}
-              canUpdate={canUpdate('teams')}
-              canDelete={canDelete('teams')}
+              canUpdate={canUpdate}
+              canDelete={canDelete}
             />
           ) : (
             <TeamsTable 
@@ -119,8 +119,8 @@ const TeamsManagementPage = () => {
               onDeleteTeam={handleDeleteTeam} 
               onSendEmail={handleSendEmail} 
               onViewMembers={handleViewMembers}
-              canUpdate={canUpdate('teams')}
-              canDelete={canDelete('teams')}
+              canUpdate={canUpdate}
+              canDelete={canDelete}
             />
           )}
 
