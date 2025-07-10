@@ -125,6 +125,6 @@ export const useCalendarPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
-    canViewDetails: modulePermissions.canRead,
+    canViewDetails: hasPermission('calendar', 'view'),
   };
 };
