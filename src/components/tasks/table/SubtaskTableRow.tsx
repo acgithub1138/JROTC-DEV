@@ -165,6 +165,9 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         <TableCell className="py-2">
           {format(new Date(subtask.created_at), 'MMM d, yyyy')}
         </TableCell>
+        <TableCell className="py-2">
+          {/* Actions column - empty for subtasks */}
+        </TableCell>
       </TableRow>
       
       <TaskDescriptionModal

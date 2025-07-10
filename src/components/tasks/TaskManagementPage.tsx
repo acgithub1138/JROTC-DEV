@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { TaskForm } from './TaskForm';
 import { TaskDetailDialog } from './TaskDetailDialog';
+import { SubtaskDetailDialog } from './SubtaskDetailDialog';
 import { TaskFilters } from './components/TaskFilters';
 import { TaskTabs } from './components/TaskTabs';
 import { useTaskManagement } from './hooks/useTaskManagement';
@@ -42,6 +43,9 @@ const TaskManagementPage: React.FC = () => {
     setSelectedTask(task as Task);
     setIsDetailDialogOpen(true);
   };
+
+  // Check if selected task is actually a subtask
+  const isSubtaskSelected = selectedTask && 'parent_task_id' in selectedTask;
 
   const handleEditTask = (task: Task | Subtask) => {
     setEditingTask(task as Task);
@@ -111,9 +115,19 @@ const TaskManagementPage: React.FC = () => {
       )}
 
       {/* Task Detail Dialog */}
-      {selectedTask && (
+      {selectedTask && !isSubtaskSelected && (
         <TaskDetailDialog
           task={selectedTask}
+          open={isDetailDialogOpen}
+          onOpenChange={setIsDetailDialogOpen}
+          onEdit={handleEditTask}
+        />
+      )}
+
+      {/* Subtask Detail Dialog */}
+      {selectedTask && isSubtaskSelected && (
+        <SubtaskDetailDialog
+          subtask={selectedTask as Subtask}
           open={isDetailDialogOpen}
           onOpenChange={setIsDetailDialogOpen}
           onEdit={handleEditTask}

@@ -14,7 +14,7 @@ import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
-import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 
 interface EditState {
@@ -69,69 +69,12 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const isSubtask = 'parent_task_id' in task;
   
   // Only fetch subtasks if this is a task, not a subtask
-  const { subtasks, updateSubtask } = useSubtasks(isSubtask ? undefined : task.id);
-  const { handleSystemComment } = useSubtaskSystemComments();
+  const { subtasks } = useSubtasks(isSubtask ? undefined : task.id);
   
   const isExpanded = expandedTasks.has(task.id);
   const hasSubtasks = !isSubtask && subtasks.length > 0;
 
-  const handleSubtaskSave = async (subtask: Subtask, field: string, newValue: any) => {
-    console.log('Saving subtask update:', { subtaskId: subtask.id, field, newValue });
-
-    // Get the old value for comparison
-    const oldValue = subtask[field as keyof Subtask];
-
-    // Skip if values are the same
-    if (oldValue === newValue) {
-      // Clear edit state even if no change
-      setEditState({ taskId: null, field: null, value: null });
-      return;
-    }
-
-    const updateData: any = { id: subtask.id };
-    
-    // Handle date field conversion
-    if (field === 'due_date') {
-      updateData.due_date = newValue ? newValue.toISOString() : null;
-    } else {
-      updateData[field] = newValue;
-    }
-
-    console.log('Final subtask update data:', updateData);
-
-    try {
-      await updateSubtask(updateData);
-      
-      // Add system comment for the change
-      let commentText = '';
-      if (field === 'status') {
-        commentText = `Status changed from "${oldValue}" to "${newValue}"`;
-      } else if (field === 'priority') {
-        commentText = `Priority changed from "${oldValue}" to "${newValue}"`;
-      } else if (field === 'assigned_to') {
-        const oldAssignee = subtask.assigned_to_profile ? `${subtask.assigned_to_profile.first_name} ${subtask.assigned_to_profile.last_name}` : 'Unassigned';
-        const newAssignee = newValue ? users.find(u => u.id === newValue)?.first_name + ' ' + users.find(u => u.id === newValue)?.last_name : 'Unassigned';
-        commentText = `Assigned to changed from "${oldAssignee}" to "${newAssignee}"`;
-      } else if (field === 'due_date') {
-        const oldDate = oldValue ? format(new Date(oldValue as string), 'MMM d, yyyy') : 'No due date';
-        const newDate = newValue ? format(newValue, 'MMM d, yyyy') : 'No due date';
-        commentText = `Due date changed from "${oldDate}" to "${newDate}"`;
-      } else if (field === 'title') {
-        commentText = `Title changed from "${oldValue}" to "${newValue}"`;
-      }
-      
-      if (commentText) {
-        await handleSystemComment(subtask.id, commentText);
-      }
-      
-      // Clear edit state after successful update
-      setEditState({ taskId: null, field: null, value: null });
-    } catch (error) {
-      console.error('Failed to update subtask:', error);
-      // Also clear edit state on error to reset the UI
-      setEditState({ taskId: null, field: null, value: null });
-    }
-  };
+  // Remove the duplicate subtask handling - this is now handled in TaskTable.tsx
 
   return (
     <>
@@ -310,7 +253,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           canEditTask={(s) => canEditTask(s as any)}
           onTaskSelect={onTaskSelect}
           onSelectTask={onSelectTask}
-          onSave={handleSubtaskSave}
+          onSave={onSave}
           onCancel={onCancel}
           onEditTask={(s) => onEditTask(s as any)}
         />
