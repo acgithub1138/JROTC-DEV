@@ -110,7 +110,8 @@ export const RoleManagementPage: React.FC = () => {
     updatePermission, 
     resetToDefaults,
     isUpdating,
-    isResetting 
+    isResetting,
+    refreshData
   } = usePermissions();
   const { toast } = useToast();
   
@@ -243,6 +244,15 @@ export const RoleManagementPage: React.FC = () => {
           <CardTitle className="flex items-center justify-between">
             <span>Role Permissions</span>
             <div className="flex items-center gap-4">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={refreshData}
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
               <Button
                 variant="outline"
                 size="sm"
