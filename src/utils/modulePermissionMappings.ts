@@ -9,7 +9,7 @@ export const modulePermissionMappings = {
   ],
   'tasks': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'assign'
+    'assign', 'update_assigned'
   ],
   'calendar': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
