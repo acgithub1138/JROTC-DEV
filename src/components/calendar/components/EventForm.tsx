@@ -11,6 +11,7 @@ import { format } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { EventAssignmentSection } from './EventAssignmentSection';
 import { useEventTypes } from '../hooks/useEventTypes';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { AddressLookupField } from './AddressLookupField';
 
 interface EventFormProps {
@@ -28,6 +29,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   onCancel,
   onDelete,
 }) => {
+  const { canUpdate, canDelete, canCreate } = useUserPermissions();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -45,6 +47,9 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [showAddEventTypeDialog, setShowAddEventTypeDialog] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
+
+  const canEdit = event ? canUpdate('calendar') : canCreate('calendar');
+  const canDeleteEvent = event ? canDelete('calendar') : false;
 
   useEffect(() => {
     if (event) {
@@ -193,6 +198,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           onChange={(e) => handleChange('title', e.target.value)}
           placeholder="Enter event title"
           required
+          disabled={!canEdit}
         />
       </div>
 
@@ -204,6 +210,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           onChange={(e) => handleChange('description', e.target.value)}
           placeholder="Enter event description"
           rows={3}
+          disabled={!canEdit}
         />
       </div>
 
@@ -211,8 +218,8 @@ export const EventForm: React.FC<EventFormProps> = ({
         <div>
           <Label htmlFor="event_type">Event Type</Label>
           <div className="flex gap-2">
-            <Select value={formData.event_type} onValueChange={(value) => handleChange('event_type', value)}>
-              <SelectTrigger>
+            <Select value={formData.event_type} onValueChange={(value) => handleChange('event_type', value)} disabled={!canEdit}>
+              <SelectTrigger disabled={!canEdit}>
                 <SelectValue />
               </SelectTrigger>
               <SelectContent>
@@ -398,7 +405,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       )}
 
       <div className="flex justify-between pt-4 border-t">
-        {event && onDelete && (
+        {event && onDelete && canDeleteEvent && (
           <Button type="button" variant="destructive" onClick={onDelete}>
             Delete Event
           </Button>
@@ -407,7 +414,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           <Button type="button" variant="outline" onClick={onCancel}>
             Cancel
           </Button>
-          <Button type="submit" disabled={isSubmitting}>
+          <Button type="submit" disabled={isSubmitting || !canEdit}>
             {isSubmitting ? 'Saving...' : (event ? 'Update Event' : 'Create Event')}
           </Button>
         </div>

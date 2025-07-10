@@ -27,6 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact } from '../ContactManagementPage';
 
@@ -62,6 +63,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
   onSubmit,
 }) => {
   const { userProfile } = useAuth();
+  const { canUpdate } = useUserPermissions();
   const [cadets, setCadets] = useState<Cadet[]>([]);
   
   const form = useForm<ContactFormData>({
@@ -135,7 +137,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                   <FormItem className="col-span-2">
                     <FormLabel>Name</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter contact name" {...field} />
+                      <Input placeholder="Enter contact name" {...field} disabled={!canUpdate('contacts')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -148,9 +150,9 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate('contacts')}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={!canUpdate('contacts')}>
                           <SelectValue placeholder="Select contact type" />
                         </SelectTrigger>
                       </FormControl>
@@ -171,9 +173,9 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                 render={({ field }) => (
                   <FormItem>
                     <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate('contacts')}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={!canUpdate('contacts')}>
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                       </FormControl>
@@ -194,9 +196,9 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                 render={({ field }) => (
                   <FormItem className="col-span-2">
                     <FormLabel>Cadet (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate('contacts')}>
                       <FormControl>
-                        <SelectTrigger>
+                        <SelectTrigger disabled={!canUpdate('contacts')}>
                           <SelectValue placeholder="Select cadet" />
                         </SelectTrigger>
                       </FormControl>
@@ -221,7 +223,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                   <FormItem>
                     <FormLabel>Phone</FormLabel>
                     <FormControl>
-                      <Input placeholder="Phone number" {...field} />
+                      <Input placeholder="Phone number" {...field} disabled={!canUpdate('contacts')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -235,7 +237,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                   <FormItem>
                     <FormLabel>Email</FormLabel>
                     <FormControl>
-                      <Input type="email" placeholder="Email address" {...field} />
+                      <Input type="email" placeholder="Email address" {...field} disabled={!canUpdate('contacts')} />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
@@ -255,6 +257,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                       placeholder="Additional notes"
                       className="resize-none"
                       {...field}
+                      disabled={!canUpdate('contacts')}
                     />
                   </FormControl>
                   <FormMessage />
@@ -266,7 +269,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit">Update Contact</Button>
+              <Button type="submit" disabled={!canUpdate('contacts')}>Update Contact</Button>
             </div>
           </form>
         </Form>

@@ -12,7 +12,7 @@ import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useColumnPreferences } from '@/hooks/useColumnPreferences';
-import { useRolePermissions } from '@/hooks/useRolePermissions';
+import { useUserPermissions } from '@/hooks/useUserPermissions';
 import type { Database } from '@/integrations/supabase/types';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -38,7 +38,7 @@ const defaultColumns = [
 
 export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const navigate = useNavigate();
-  const { canManageCompetitions } = useRolePermissions();
+  const { canCreate, canUpdate, canDelete } = useUserPermissions();
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
@@ -135,7 +135,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
             onToggleColumn={toggleColumn}
             isLoading={columnsLoading}
           />
-          {!readOnly && canManageCompetitions() && (
+          {!readOnly && canCreate('competitions') && (
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Competition
@@ -147,14 +147,14 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       <BasicCompetitionTable 
         competitions={sortedData} 
         isLoading={isLoading} 
-        onEdit={readOnly || !canManageCompetitions() ? undefined : setEditingCompetition} 
-        onDelete={readOnly || !canManageCompetitions() ? undefined : deleteCompetition} 
-        onAddEvent={readOnly || !canManageCompetitions() ? undefined : handleAddEvent} 
+        onEdit={readOnly || !canUpdate('competitions') ? undefined : setEditingCompetition} 
+        onDelete={readOnly || !canDelete('competitions') ? undefined : deleteCompetition} 
+        onAddEvent={readOnly || !canCreate('competitions') ? undefined : handleAddEvent} 
         onViewScoreSheets={handleViewScoreSheets}
         visibleColumns={visibleColumns}
       />
 
-      {!readOnly && canManageCompetitions() && (
+      {!readOnly && canCreate('competitions') && (
         <>
           <CompetitionDialog open={showAddDialog || !!editingCompetition} onOpenChange={open => {
             if (!open) {
