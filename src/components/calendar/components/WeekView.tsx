@@ -84,10 +84,11 @@ export const WeekView: React.FC<WeekViewProps> = ({
                 <div
                   key={event.id}
                   className={cn(
-                    "text-xs px-2 py-1 rounded text-white cursor-pointer hover:opacity-80 truncate",
-                    getEventTypeColor(event.event_type).split(' ')[0]
+                    "text-xs px-2 py-1 rounded text-white truncate",
+                    getEventTypeColor(event.event_type).split(' ')[0],
+                    onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
                   )}
-                  onClick={() => onEventClick(event)}
+                  onClick={onEventClick ? () => onEventClick(event) : undefined}
                   title={event.title}
                 >
                   {event.title}
@@ -129,11 +130,12 @@ export const WeekView: React.FC<WeekViewProps> = ({
                   <div
                     key={event.id}
                     className={cn(
-                      "absolute left-1 right-1 rounded border-l-4 p-1 text-white cursor-pointer hover:opacity-90 transition-opacity z-10",
-                      getEventTypeColor(event.event_type)
+                      "absolute left-1 right-1 rounded border-l-4 p-1 text-white transition-opacity z-10",
+                      getEventTypeColor(event.event_type),
+                      onEventClick ? "cursor-pointer hover:opacity-90" : "cursor-default"
                     )}
                     style={position}
-                    onClick={() => onEventClick(event)}
+                    onClick={onEventClick ? () => onEventClick(event) : undefined}
                     title={`${event.title} - ${format(new Date(event.start_date), 'HH:mm')}`}
                   >
                     <div className="text-xs font-medium truncate">{event.title}</div>

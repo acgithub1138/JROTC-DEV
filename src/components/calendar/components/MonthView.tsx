@@ -84,13 +84,14 @@ export const MonthView: React.FC<MonthViewProps> = ({
                   <div
                     key={event.id}
                     className={cn(
-                      "text-xs px-2 py-1 rounded text-white cursor-pointer hover:opacity-80 truncate",
-                      getEventTypeColor(event.event_type)
+                      "text-xs px-2 py-1 rounded text-white truncate",
+                      getEventTypeColor(event.event_type),
+                      onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
                     )}
-                    onClick={(e) => {
+                    onClick={onEventClick ? (e) => {
                       e.stopPropagation();
                       onEventClick(event);
-                    }}
+                    } : undefined}
                     title={event.title}
                   >
                     {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'HH:mm')} ${event.title}`}

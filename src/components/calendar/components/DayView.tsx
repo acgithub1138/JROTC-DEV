@@ -85,10 +85,11 @@ export const DayView: React.FC<DayViewProps> = ({
               <div
                 key={event.id}
                 className={cn(
-                  "px-3 py-2 rounded text-white cursor-pointer hover:opacity-80",
-                  getEventTypeColor(event.event_type).split(' ')[0]
+                  "px-3 py-2 rounded text-white",
+                  getEventTypeColor(event.event_type).split(' ')[0],
+                  onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
                 )}
-                onClick={() => onEventClick(event)}
+                onClick={onEventClick ? () => onEventClick(event) : undefined}
                 title={event.title}
               >
                 <div className="font-medium">{event.title}</div>
@@ -138,16 +139,17 @@ export const DayView: React.FC<DayViewProps> = ({
             {getTimedEvents().map(event => {
               const position = getEventPosition(event);
               return (
-                <div
-                  key={event.id}
-                  className={cn(
-                    "absolute left-2 right-2 rounded border-l-4 p-3 text-white cursor-pointer hover:opacity-90 transition-opacity z-10",
-                    getEventTypeColor(event.event_type)
-                  )}
-                  style={position}
-                  onClick={() => onEventClick(event)}
-                  title={event.title}
-                >
+                  <div
+                    key={event.id}
+                    className={cn(
+                      "absolute left-2 right-2 rounded border-l-4 p-3 text-white transition-opacity z-10",
+                      getEventTypeColor(event.event_type),
+                      onEventClick ? "cursor-pointer hover:opacity-90" : "cursor-default"
+                    )}
+                    style={position}
+                    onClick={onEventClick ? () => onEventClick(event) : undefined}
+                    title={event.title}
+                  >
                   <div className="font-medium truncate">{event.title}</div>
                   <div className="text-sm opacity-90">
                      {format(new Date(event.start_date), 'HH:mm')}

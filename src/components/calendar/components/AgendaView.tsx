@@ -93,11 +93,12 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
                   <Card
                     key={event.id}
                     className={cn(
-                      "cursor-pointer hover:shadow-md transition-all border-l-4",
+                      "transition-all border-l-4",
                       getEventTypeColor(event.event_type),
-                      isPast && !isToday && "opacity-60"
+                      isPast && !isToday && "opacity-60",
+                      onEventClick ? "cursor-pointer hover:shadow-md" : "cursor-default"
                     )}
-                    onClick={() => onEventClick(event)}
+                    onClick={onEventClick ? () => onEventClick(event) : undefined}
                   >
                     <CardContent className="p-4">
                       <div className="flex items-start justify-between">
