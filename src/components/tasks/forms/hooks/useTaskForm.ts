@@ -10,9 +10,11 @@ interface UseTaskFormProps {
   mode: 'create' | 'edit';
   task?: Task;
   onOpenChange: (open: boolean) => void;
+  canAssignTasks: boolean;
+  currentUserId: string;
 }
 
-export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
+export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentUserId }: UseTaskFormProps) => {
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
@@ -22,14 +24,14 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
   const validPriorities = priorityOptions.map(option => option.value);
 
   // Create dynamic schema
-  const schema = createTaskSchema(validStatuses, validPriorities);
+  const schema = createTaskSchema(validStatuses, validPriorities, canAssignTasks);
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      assigned_to: task?.assigned_to || '',
+      assigned_to: task?.assigned_to || (canAssignTasks ? '' : currentUserId),
       priority: task?.priority || (validPriorities[0] || 'medium'),
       status: task?.status || (validStatuses[0] || 'not_started'),
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
@@ -59,7 +61,7 @@ export const useTaskForm = ({ mode, task, onOpenChange }: UseTaskFormProps) => {
       description: data.description || null,
       status: data.status,
       priority: data.priority,
-      assigned_to: data.assigned_to || null,
+      assigned_to: data.assigned_to || currentUserId,
       due_date: data.due_date ? data.due_date.toISOString() : null,
       team_id: null,
     };

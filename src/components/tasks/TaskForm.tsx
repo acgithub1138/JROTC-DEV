@@ -21,6 +21,9 @@ interface TaskFormProps {
 
 export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
   const { userProfile } = useAuth();
+  
+  const canAssignTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  
   const { 
     form, 
     onSubmit, 
@@ -33,9 +36,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     mode,
     task,
     onOpenChange,
+    canAssignTasks,
+    currentUserId: userProfile?.id || '',
   });
-
-  const canAssignTasks = userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isEditingAssignedTask = mode === 'edit' && task?.assigned_to === userProfile?.id;
 
   const getDialogTitle = () => {
