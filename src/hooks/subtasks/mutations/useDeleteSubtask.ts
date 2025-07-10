@@ -17,6 +17,7 @@ export const useDeleteSubtask = () => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subtasks'] });
+      queryClient.invalidateQueries({ queryKey: ['my-subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
       toast({
         title: "Subtask deleted",
