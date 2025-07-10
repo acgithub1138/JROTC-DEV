@@ -8,7 +8,6 @@ import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useModulePermissions } from '@/hooks/usePermissions';
-
 export interface Event {
   id: string;
   school_id: string;
@@ -23,7 +22,6 @@ export interface Event {
   created_at: string;
   updated_at: string;
 }
-
 const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
@@ -32,38 +30,34 @@ const CalendarManagementPage = () => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filters, setFilters] = useState({
     eventType: '',
-    assignedTo: '',
+    assignedTo: ''
   });
   const isMobile = useIsMobile();
-  const { canCreate: canCreateEvents } = useModulePermissions('calendar');
-
+  const {
+    canCreate: canCreateEvents
+  } = useModulePermissions('calendar');
   const {
     events,
     isLoading,
     createEvent,
     updateEvent,
-    deleteEvent,
+    deleteEvent
   } = useEvents(filters);
-
   const handleCreateEvent = () => {
     setEditingEvent(null);
     setShowEventDialog(true);
   };
-
   const handleEditEvent = (event: Event) => {
     setEditingEvent(event);
     setShowEventDialog(true);
   };
-
   const handleViewEvent = (event: Event) => {
     setViewingEvent(event);
     setShowEventDetailsDialog(true);
   };
-
   const handleDateSelect = (date: Date) => {
     setSelectedDate(date);
   };
-
   const handleCloseDialog = () => {
     setShowEventDialog(false);
     setShowEventDetailsDialog(false);
@@ -71,7 +65,6 @@ const CalendarManagementPage = () => {
     setViewingEvent(null);
     setSelectedDate(null);
   };
-
   const handleEventSubmit = async (eventData: any) => {
     if (editingEvent) {
       await updateEvent(editingEvent.id, eventData);
@@ -79,58 +72,23 @@ const CalendarManagementPage = () => {
       await createEvent(eventData);
     }
   };
-
   const handleDateDoubleClick = (date: Date) => {
     if (!canCreateEvents) return;
     setSelectedDate(date);
     setEditingEvent(null);
     setShowEventDialog(true);
   };
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Calendar</h1>
-        {canCreateEvents && (
-          <Button onClick={handleCreateEvent} className="flex items-center gap-2">
-            <Plus className="w-4 h-4" />
-            Create Event
-          </Button>
-        )}
+        {canCreateEvents}
       </div>
 
-      <CalendarView
-        events={events}
-        isLoading={isLoading}
-        onEventEdit={canCreateEvents ? handleEditEvent : undefined}
-        onEventView={!canCreateEvents ? handleViewEvent : undefined}
-        onEventDelete={canCreateEvents ? deleteEvent : undefined}
-        onDateSelect={handleDateSelect}
-        onDateDoubleClick={handleDateDoubleClick}
-        onCreateEvent={canCreateEvents ? handleCreateEvent : undefined}
-        filters={filters}
-        onFiltersChange={setFilters}
-        readOnly={!canCreateEvents}
-      />
+      <CalendarView events={events} isLoading={isLoading} onEventEdit={canCreateEvents ? handleEditEvent : undefined} onEventView={!canCreateEvents ? handleViewEvent : undefined} onEventDelete={canCreateEvents ? deleteEvent : undefined} onDateSelect={handleDateSelect} onDateDoubleClick={handleDateDoubleClick} onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} filters={filters} onFiltersChange={setFilters} readOnly={!canCreateEvents} />
 
-      {canCreateEvents && (
-        <EventDialog
-          open={showEventDialog}
-          onOpenChange={handleCloseDialog}
-          event={editingEvent}
-          selectedDate={selectedDate}
-          onSubmit={handleEventSubmit}
-          onDelete={deleteEvent}
-        />
-      )}
+      {canCreateEvents && <EventDialog open={showEventDialog} onOpenChange={handleCloseDialog} event={editingEvent} selectedDate={selectedDate} onSubmit={handleEventSubmit} onDelete={deleteEvent} />}
 
-      <EventDetailsDialog
-        open={showEventDetailsDialog}
-        onOpenChange={handleCloseDialog}
-        event={viewingEvent}
-      />
-    </div>
-  );
+      <EventDetailsDialog open={showEventDetailsDialog} onOpenChange={handleCloseDialog} event={viewingEvent} />
+    </div>;
 };
-
 export default CalendarManagementPage;
