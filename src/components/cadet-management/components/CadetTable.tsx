@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { CheckCircle } from 'lucide-react';
+import { CheckCircle, X } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
@@ -112,7 +112,7 @@ onSelectAll
                   onEdit={() => onEditProfile(profile)}
                   customActions={[
                     {
-                      icon: <CheckCircle className="w-4 h-4" />,
+                      icon: <X className="w-4 h-4" />,
                       label: "Deactivate profile",
                       onClick: () => onToggleStatus(profile),
                       show: true
