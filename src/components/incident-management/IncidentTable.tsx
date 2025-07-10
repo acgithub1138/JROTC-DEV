@@ -1,8 +1,8 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { X } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
 import { useAuth } from '@/contexts/AuthContext';
@@ -31,6 +31,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
   onCancelIncident
 }) => {
   const { userProfile } = useAuth();
+  const { canEdit, canDelete } = useTablePermissions('incidents');
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor';
 
@@ -107,27 +108,19 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
                 {new Date(incident.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex items-center justify-end gap-2">
-                  {canCancelIncident(incident) && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onCancelIncident(incident)}
-                            className="text-orange-600 hover:text-orange-700"
-                          >
-                            <X className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Cancel incident</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
+                <TableActionButtons
+                  canEdit={canEdit && canEditIncident(incident)}
+                  onEdit={canEditIncident(incident) ? () => onEditIncident(incident) : undefined}
+                  customActions={[
+                    {
+                      icon: <X className="w-4 h-4" />,
+                      label: "Cancel incident",
+                      onClick: () => onCancelIncident(incident),
+                      show: canCancelIncident(incident),
+                      className: "text-orange-600 hover:text-orange-700"
+                    }
+                  ]}
+                />
               </TableCell>
             </TableRow>
           ))}

@@ -1,9 +1,9 @@
 import React from 'react';
-import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus } from 'lucide-react';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { Plus } from 'lucide-react';
 import { Competition } from '../types';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 
@@ -20,6 +20,7 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
   onEdit,
   onDelete
 }) => {
+  const { canEdit, canDelete: canDeletePermission } = useTablePermissions('competitions');
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -64,56 +65,20 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
                 </Badge>
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex gap-2 justify-end">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEdit(competition)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit competition</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onDelete(competition.id)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete competition</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline" 
-                          size="sm"
-                          title="Add Event"
-                        >
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Add event</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                <TableActionButtons
+                  canEdit={canEdit}
+                  canDelete={canDeletePermission}
+                  onEdit={() => onEdit(competition)}
+                  onDelete={() => onDelete(competition.id)}
+                  customActions={[
+                    {
+                      icon: <Plus className="w-4 h-4" />,
+                      label: "Add event",
+                      onClick: () => {}, // TODO: Add event handler
+                      show: true
+                    }
+                  ]}
+                />
               </TableCell>
             </TableRow>
           ))}

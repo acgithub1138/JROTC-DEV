@@ -1,8 +1,7 @@
 import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2 } from 'lucide-react';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { JobBoardWithCadet } from '../types';
 interface JobBoardTableProps {
   jobs: JobBoardWithCadet[];
@@ -16,6 +15,8 @@ export const JobBoardTable = ({
   onDeleteJob,
   readOnly = false
 }: JobBoardTableProps) => {
+  const { canEdit, canDelete } = useTablePermissions('job_board');
+  
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
     return `${cadet.last_name}, ${cadet.first_name}`;
   };
@@ -39,38 +40,13 @@ export const JobBoardTable = ({
             <TableCell className="py-2">{job.reports_to || '-'}</TableCell>
             <TableCell className="py-2">{job.assistant || '-'}</TableCell>
             <TableCell className="text-right py-2">
-              {!readOnly && (
-                <div className="flex items-center justify-end gap-2">
-                  {onEditJob && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onEditJob(job)}>
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit job</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  {onDeleteJob && (
-                    <TooltipProvider>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onDeleteJob(job)}>
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete job</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    </TooltipProvider>
-                  )}
-                </div>
-              )}
+              <TableActionButtons
+                canEdit={canEdit}
+                canDelete={canDelete}
+                onEdit={onEditJob ? () => onEditJob(job) : undefined}
+                onDelete={onDeleteJob ? () => onDeleteJob(job) : undefined}
+                readOnly={readOnly}
+              />
             </TableCell>
           </TableRow>)}
         {jobs.length === 0 && <TableRow>

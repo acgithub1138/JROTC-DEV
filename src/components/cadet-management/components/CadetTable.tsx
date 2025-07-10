@@ -5,8 +5,9 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, CheckCircle, Eye } from 'lucide-react';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { CheckCircle } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
@@ -32,6 +33,7 @@ export const CadetTable = ({
   onSelectCadet,
 onSelectAll
 }: CadetTableProps) => {
+  const { canView, canEdit, canDelete } = useTablePermissions('cadets');
   const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
     data: profiles,
     defaultSort: { key: 'last_name', direction: 'asc' }
@@ -102,92 +104,34 @@ onSelectAll
             <TableCell className="py-2">{profile.flight || '-'}</TableCell>
             <TableCell className="text-right py-2">
               {activeTab === 'active' ? (
-                <div className="flex items-center justify-end gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onViewProfile(profile)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>View profile</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onEditProfile(profile)}
-                        >
-                          <Edit className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit profile</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onToggleStatus(profile)}
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Deactivate profile</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                <TableActionButtons
+                  canView={canView}
+                  canEdit={canEdit}
+                  canDelete={canDelete}
+                  onView={() => onViewProfile(profile)}
+                  onEdit={() => onEditProfile(profile)}
+                  customActions={[
+                    {
+                      icon: <CheckCircle className="w-4 h-4" />,
+                      label: "Deactivate profile",
+                      onClick: () => onToggleStatus(profile),
+                      show: true
+                    }
+                  ]}
+                />
               ) : (
-                <div className="flex items-center justify-end gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onViewProfile(profile)}
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>View profile</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => onToggleStatus(profile)}
-                        >
-                          <CheckCircle className="w-4 h-4 mr-1" />
-                          Activate
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Activate profile</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
-                </div>
+                <TableActionButtons
+                  canView={canView}
+                  onView={() => onViewProfile(profile)}
+                  customActions={[
+                    {
+                      icon: <><CheckCircle className="w-4 h-4 mr-1" />Activate</>,
+                      label: "Activate profile",
+                      onClick: () => onToggleStatus(profile),
+                      show: true
+                    }
+                  ]}
+                />
               )}
             </TableCell>
           </TableRow>
