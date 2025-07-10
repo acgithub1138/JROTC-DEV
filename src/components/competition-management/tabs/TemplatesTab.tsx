@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from 'react';
+import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -67,7 +68,8 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, showOnlyMyTemplates]);
-  const canManageTemplates = !readOnly && (userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff');
+  const { canManageTemplates } = useCompetitionPermissions();
+  const canManageTemplatesForUser = !readOnly && canManageTemplates;
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
       await updateTemplate(editingTemplate.id, data);

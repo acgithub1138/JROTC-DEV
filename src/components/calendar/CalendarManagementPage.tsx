@@ -7,7 +7,7 @@ import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useRolePermissions } from '@/hooks/useRolePermissions';
+import { useEventPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 export interface Event {
   id: string;
@@ -35,7 +35,7 @@ const CalendarManagementPage = () => {
     assignedTo: '',
   });
   const isMobile = useIsMobile();
-  const { canCreateEvents } = useRolePermissions();
+  const { canCreate: canCreateEvents } = useEventPermissions();
 
   const {
     events,
@@ -81,7 +81,7 @@ const CalendarManagementPage = () => {
   };
 
   const handleDateDoubleClick = (date: Date) => {
-    if (!canCreateEvents()) return;
+    if (!canCreateEvents) return;
     setSelectedDate(date);
     setEditingEvent(null);
     setShowEventDialog(true);
@@ -96,18 +96,18 @@ const CalendarManagementPage = () => {
       <CalendarView
         events={events}
         isLoading={isLoading}
-        onEventEdit={canCreateEvents() ? handleEditEvent : undefined}
-        onEventView={!canCreateEvents() ? handleViewEvent : undefined}
-        onEventDelete={canCreateEvents() ? deleteEvent : undefined}
+        onEventEdit={canCreateEvents ? handleEditEvent : undefined}
+        onEventView={!canCreateEvents ? handleViewEvent : undefined}
+        onEventDelete={canCreateEvents ? deleteEvent : undefined}
         onDateSelect={handleDateSelect}
         onDateDoubleClick={handleDateDoubleClick}
-        onCreateEvent={canCreateEvents() ? handleCreateEvent : undefined}
+        onCreateEvent={canCreateEvents ? handleCreateEvent : undefined}
         filters={filters}
         onFiltersChange={setFilters}
-        readOnly={!canCreateEvents()}
+        readOnly={!canCreateEvents}
       />
 
-      {canCreateEvents() && (
+      {canCreateEvents && (
         <EventDialog
           open={showEventDialog}
           onOpenChange={handleCloseDialog}

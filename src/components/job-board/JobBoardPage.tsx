@@ -14,7 +14,7 @@ import { DeleteJobDialog } from './components/DeleteJobDialog';
 import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
-import { useRolePermissions } from '@/hooks/useRolePermissions';
+import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const JobBoardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
@@ -23,7 +23,7 @@ const JobBoardPage = () => {
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
   
   const [activeTab, setActiveTab] = useState('table');
-  const { canManageJobBoard } = useRolePermissions();
+  const { canManageHierarchy } = useJobBoardPermissions();
 
   const {
     jobs,
@@ -87,7 +87,7 @@ const JobBoardPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
-          {canManageJobBoard() && (
+          {canManageHierarchy && (
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
@@ -119,9 +119,9 @@ const JobBoardPage = () => {
               <TabsContent value="table" className="mt-4">
                 <JobBoardTable
                   jobs={filteredJobs}
-                  onEditJob={canManageJobBoard() ? setEditingJob : undefined}
-                  onDeleteJob={canManageJobBoard() ? setDeletingJob : undefined}
-                  readOnly={!canManageJobBoard()}
+                  onEditJob={canManageHierarchy ? setEditingJob : undefined}
+                  onDeleteJob={canManageHierarchy ? setDeletingJob : undefined}
+                  readOnly={!canManageHierarchy}
                 />
               </TabsContent>
 
@@ -129,15 +129,15 @@ const JobBoardPage = () => {
                 <JobBoardChart
                   jobs={filteredJobs}
                   onRefresh={handleRefresh}
-                  onUpdateJob={canManageJobBoard() ? handleEditJob : undefined}
-                  readOnly={!canManageJobBoard()}
+                  onUpdateJob={canManageHierarchy ? handleEditJob : undefined}
+                  readOnly={!canManageHierarchy}
                 />
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
 
-        {canManageJobBoard() && (
+        {canManageHierarchy && (
           <>
             <AddJobDialog
               open={showAddDialog}

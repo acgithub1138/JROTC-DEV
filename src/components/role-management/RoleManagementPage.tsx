@@ -7,6 +7,7 @@ import { usePermissions, UserRole } from '@/hooks/usePermissions';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw } from 'lucide-react';
+import { isPermissionRelevantForModule } from '@/utils/modulePermissionMappings';
 
 const ROLES: { value: UserRole; label: string }[] = [
   { value: 'admin', label: 'Admin' },
@@ -152,23 +153,20 @@ export const RoleManagementPage: React.FC = () => {
                 {modules.map((module) => (
                   <tr key={module.id} className="border-b hover:bg-gray-50">
                     <td className="p-3 font-medium">
-                      <div>
-                        <div className="font-medium">{module.label}</div>
-                        {module.description && (
-                          <div className="text-sm text-gray-500">{module.description}</div>
-                        )}
-                      </div>
+                      <div className="font-medium">{module.label}</div>
                     </td>
                     {actions.map((action) => {
                       const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+                      const isRelevant = isPermissionRelevantForModule(module.name, action.name);
                       return (
                         <td key={action.id} className="p-3 text-center">
                           <Checkbox
                             checked={isEnabled}
-                            disabled={isUpdating}
+                            disabled={isUpdating || !isRelevant}
                             onCheckedChange={(checked) =>
                               handlePermissionChange(module.id, action.id, !!checked)
                             }
+                            className={!isRelevant ? 'opacity-30' : ''}
                           />
                         </td>
                       );
