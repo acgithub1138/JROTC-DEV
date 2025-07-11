@@ -1,10 +1,8 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
 import { toast } from 'sonner';
 
@@ -16,7 +14,6 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { canEdit, canDelete, canViewDetails } = useTablePermissions('competitions');
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
@@ -79,18 +76,9 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
           <TableRow>
             <TableHead className="text-center bg-muted/30 px-2 min-w-20">Field</TableHead>
             {events.map((event, index) => (
-              <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
-                <div className="space-y-1">
-                  <div className="font-medium text-sm">
-                    {event.score_sheet?.judge_number || `Judge ${index + 1}`}
-                  </div>
-                   <TableActionButtons
-                     canView={canViewDetails}
-                     canEdit={canEdit}
-                     canDelete={canDelete}
-                     onEdit={() => handleEditScoreSheet(event)}
-                     onDelete={() => handleDeleteEvent(event)}
-                   />
+               <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
+                <div className="font-medium text-sm">
+                  {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                 </div>
               </TableHead>
             ))}
@@ -153,14 +141,12 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
       </Table>
       </div>
 
-      {canEdit && (
-        <EditScoreSheetDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          event={selectedEvent}
-          onEventUpdated={handleEventUpdated}
-        />
-      )}
+      <EditScoreSheetDialog
+        open={isEditDialogOpen}
+        onOpenChange={setIsEditDialogOpen}
+        event={selectedEvent}
+        onEventUpdated={handleEventUpdated}
+      />
     </div>
   );
 };
