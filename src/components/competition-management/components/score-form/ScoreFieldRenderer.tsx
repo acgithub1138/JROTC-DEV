@@ -1,5 +1,6 @@
 import React from 'react';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -117,12 +118,28 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
           </div>;
       case 'text':
         return <div className="py-2 border-b space-y-2">
-            <div className="flex items-center justify-between">
+            <div className={field.textType === 'notes' ? "space-y-2" : "flex items-center justify-between"}>
               <Label htmlFor={field.id} className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
                 {field.name}
               </Label>
-              <div className="flex items-center gap-2">
-                <Input id={field.id} type="text" value={value || ''} onChange={e => onChange(field.id, e.target.value)} className="w-32" />
+              <div className={field.textType === 'notes' ? "w-full" : "flex items-center gap-2"}>
+                {field.textType === 'notes' ? (
+                  <Textarea 
+                    id={field.id} 
+                    value={value || ''} 
+                    onChange={e => onChange(field.id, e.target.value)} 
+                    placeholder="Enter notes..."
+                    className="min-h-[120px] resize-y"
+                  />
+                ) : (
+                  <Input 
+                    id={field.id} 
+                    type="text" 
+                    value={value || ''} 
+                    onChange={e => onChange(field.id, e.target.value)} 
+                    className="w-32" 
+                  />
+                )}
               </div>
             </div>
             {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
