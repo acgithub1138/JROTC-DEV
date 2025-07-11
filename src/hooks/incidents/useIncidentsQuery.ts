@@ -1,8 +1,19 @@
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Incident } from './types';
+import { useEffect } from 'react';
 
 export const useIncidentsQuery = () => {
+  const queryClient = useQueryClient();
+  
+  console.log('useIncidentsQuery hook called');
+  
+  // Invalidate cache on mount to ensure fresh data after RLS changes
+  useEffect(() => {
+    console.log('Invalidating incidents cache for fresh data');
+    queryClient.invalidateQueries({ queryKey: ['incidents'] });
+  }, [queryClient]);
+  
   return useQuery({
     queryKey: ['incidents'],
     queryFn: async () => {
@@ -19,10 +30,10 @@ export const useIncidentsQuery = () => {
         throw error;
       }
 
-      console.log(`Fetched ${data?.length || 0} total incidents`);
+      console.log(`Fetched ${data?.length || 0} total incidents:`, data);
       return data as unknown as Incident[];
     },
-    staleTime: 30000, // Consider data fresh for 30 seconds
+    staleTime: 0, // Always consider data stale to force fresh fetches
     gcTime: 300000, // Keep in cache for 5 minutes
   });
 };
