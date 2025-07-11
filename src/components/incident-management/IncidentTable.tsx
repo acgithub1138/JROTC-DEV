@@ -65,7 +65,8 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
-            <TableHead>School</TableHead>
+            <TableHead>Assigned To</TableHead>
+            <TableHead>Created By</TableHead>
             <TableHead>Created</TableHead>
             <TableHead>Actions</TableHead>
           </TableRow>
@@ -89,7 +90,14 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 </Badge>
               </TableCell>
               <TableCell>
-                {(incident as any).school?.name || 'Unknown'}
+                {(incident as any).assigned_to_admin_profile 
+                  ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
+                  : 'Unassigned'}
+              </TableCell>
+              <TableCell>
+                {(incident as any).created_by_profile 
+                  ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
+                  : 'Unknown'}
               </TableCell>
               <TableCell>
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
