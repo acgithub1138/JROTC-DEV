@@ -39,7 +39,7 @@ export interface BudgetFilters {
   budgetYear: string;
 }
 const BudgetManagementPage = () => {
-  const { canCreate } = useModulePermissions('budget');
+  const { canCreate, canUpdate } = useModulePermissions('budget');
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
@@ -86,7 +86,9 @@ const BudgetManagementPage = () => {
               Add Expense
             </Button>
           )}
-          <Button onClick={handleArchiveAll} variant="outline" className="hidden md:flex">Archive Expenses</Button>
+          {canUpdate && (
+            <Button onClick={handleArchiveAll} variant="outline" className="hidden md:flex">Archive Expenses</Button>
+          )}
         </div>
       </div>
 
