@@ -23,6 +23,7 @@ interface IncidentDetailDialogProps {
   incident: Incident;
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  readOnly?: boolean;
 }
 
 
@@ -57,6 +58,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   incident,
   open,
   onOpenChange,
+  readOnly = false,
 }) => {
   const { userProfile } = useAuth();
   const { comments, addComment, isAddingComment } = useIncidentComments(incident.id);
@@ -83,7 +85,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     assigned_to: incident.assigned_to || 'unassigned',
   });
 
-  const canEditIncident = canUpdate;
+  const canEditIncident = canUpdate && !readOnly;
 
   const handleSave = async () => {
     try {
