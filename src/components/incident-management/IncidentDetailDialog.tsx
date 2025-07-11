@@ -16,6 +16,7 @@ import { Calendar } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, AlertTriangle } from "lucide-react";
+import { IncidentCommentsSection } from "./components/IncidentCommentsSection";
 import { useIncidentComments } from "@/hooks/incidents/useIncidentComments";
 import { useIncidents } from "@/hooks/incidents/useIncidents";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
@@ -69,7 +70,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
   const { users, isLoading: usersLoading } = useSchoolUsers();
-  const { comments, isLoading: commentsLoading } = useIncidentComments(incident.id);
+  const { comments, isLoading: commentsLoading, addComment } = useIncidentComments(incident.id);
   const { canUpdate } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(false);
@@ -388,46 +389,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           <Separator />
 
           {/* Comments Section */}
-          <div>
-            <div className="flex items-center gap-2 mb-4">
-              <MessageSquare className="h-5 w-5" />
-              <h3 className="text-lg font-medium">Comments</h3>
-              <span className="text-sm text-muted-foreground">
-                ({comments.length})
-              </span>
-            </div>
-
-            {commentsLoading ? (
-              <p className="text-muted-foreground">Loading comments...</p>
-            ) : comments.length === 0 ? (
-              <p className="text-muted-foreground">No comments yet.</p>
-            ) : (
-              <div className="space-y-4">
-                {comments.map((comment) => (
-                  <div key={comment.id} className="border rounded-lg p-4">
-                    <div className="flex justify-between items-start mb-2">
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">
-                          {(comment as any).user
-                            ? `${(comment as any).user.first_name} ${(comment as any).user.last_name}`
-                            : 'Unknown User'}
-                        </span>
-                        {comment.is_system_comment && (
-                          <Badge variant="secondary" className="text-xs">
-                            System
-                          </Badge>
-                        )}
-                      </div>
-                      <span className="text-xs text-muted-foreground">
-                        {format(new Date(comment.created_at), "MMM d, yyyy 'at' h:mm a")}
-                      </span>
-                    </div>
-                    <p className="whitespace-pre-wrap">{comment.comment_text}</p>
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
+          <IncidentCommentsSection
+            comments={comments}
+            isAddingComment={addComment.isPending}
+            onAddComment={(comment) => addComment.mutate({ comment_text: comment })}
+          />
         </div>
       </DialogContent>
     </Dialog>
