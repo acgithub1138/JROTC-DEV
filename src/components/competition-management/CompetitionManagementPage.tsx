@@ -30,7 +30,7 @@ const CompetitionManagementPage = () => {
         </TabsContent>
         
         <TabsContent value="templates" className="space-y-6">
-          <TemplatesTab readOnly={!canUpdate} />
+          <TemplatesTab readOnly={!canCreate} />
         </TabsContent>
         
         <TabsContent value="reports" className="space-y-6">
