@@ -115,7 +115,8 @@ onSelectAll
                       icon: <X className="w-4 h-4" />,
                       label: "Deactivate profile",
                       onClick: () => onToggleStatus(profile),
-                      show: canDelete
+                      show: canDelete,
+                      className: "text-red-600 hover:text-red-700 hover:border-red-300"
                     }
                   ]}
                 />
