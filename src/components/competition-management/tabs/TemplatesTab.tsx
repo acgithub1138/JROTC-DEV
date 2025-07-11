@@ -92,7 +92,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
             <Switch id="my-templates" checked={showOnlyMyTemplates} onCheckedChange={toggleMyTemplatesFilter} />
             <Label htmlFor="my-templates">My Templates</Label>
           </div>
-          {!readOnly && canCreate && <Button onClick={() => setShowAddDialog(true)}>
+          {!readOnly && <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Template
             </Button>}
