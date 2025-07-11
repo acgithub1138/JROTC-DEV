@@ -127,7 +127,6 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                           variant="outline"
                           size="icon" className="h-6 w-6"
                           onClick={() => onSendEmail(team)}
-                          className="h-8 w-8 p-0"
                         >
                           <Mail className="w-3 h-3" />
                         </Button>
@@ -145,7 +144,6 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                             variant="outline"
                             size="icon" className="h-6 w-6"
                             onClick={() => onEditTeam(team)}
-                            className="h-8 w-8 p-0"
                           >
                             <Edit className="w-3 h-3" />
                           </Button>
