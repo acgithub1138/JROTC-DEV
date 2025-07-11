@@ -40,8 +40,7 @@ export const modulePermissionMappings = {
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
   'teams': [
-    'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'assign'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ]
 };
 
