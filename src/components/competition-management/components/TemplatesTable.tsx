@@ -6,7 +6,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { CompetitionTemplate } from '../types';
 import { SortConfig } from '@/components/ui/sortable-table';
-
 interface TemplatesTableProps {
   templates: CompetitionTemplate[];
   isLoading: boolean;
@@ -19,7 +18,6 @@ interface TemplatesTableProps {
   canEditTemplate?: (template: CompetitionTemplate) => boolean;
   canCopyTemplate?: (template: CompetitionTemplate) => boolean;
 }
-
 export const TemplatesTable: React.FC<TemplatesTableProps> = ({
   templates,
   isLoading,
@@ -36,45 +34,33 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
     if (!sortConfig || sortConfig.key !== columnKey) {
       return <ArrowUpDown className="w-4 h-4" />;
     }
-    return sortConfig.direction === 'asc' 
-      ? <ArrowUp className="w-4 h-4" />
-      : <ArrowDown className="w-4 h-4" />;
+    return sortConfig.direction === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
   };
-
-  const SortableHeader = ({ children, sortKey }: { children: React.ReactNode; sortKey: string }) => (
-    <TableHead>
-      <Button
-        variant="ghost"
-        className="h-auto p-0 font-semibold hover:bg-transparent"
-        onClick={() => onSort?.(sortKey)}
-      >
+  const SortableHeader = ({
+    children,
+    sortKey
+  }: {
+    children: React.ReactNode;
+    sortKey: string;
+  }) => <TableHead>
+      <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => onSort?.(sortKey)}>
         <div className="flex items-center gap-2">
           {children}
           {getSortIcon(sortKey)}
         </div>
       </Button>
-    </TableHead>
-  );
+    </TableHead>;
   if (isLoading) {
-    return (
-      <div className="space-y-2">
-        {[1, 2, 3].map((i) => (
-          <div key={i} className="h-12 bg-muted rounded animate-pulse" />
-        ))}
-      </div>
-    );
+    return <div className="space-y-2">
+        {[1, 2, 3].map(i => <div key={i} className="h-12 bg-muted rounded animate-pulse" />)}
+      </div>;
   }
-
   if (templates.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
+    return <div className="text-center py-8 text-muted-foreground">
         <p>No templates found</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="rounded-md border">
+  return <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -86,16 +72,13 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {templates.map((template) => (
-            <TableRow key={template.id}>
+          {templates.map(template => <TableRow key={template.id}>
               <TableCell className="font-medium">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2 py-[4px]">
                   {template.template_name}
-                  {template.is_global && (
-                    <div title="Global Template">
+                  {template.is_global && <div title="Global Template">
                       <Globe className="w-4 h-4 text-blue-500" />
-                    </div>
-                  )}
+                    </div>}
                 </div>
               </TableCell>
               <TableCell>
@@ -111,15 +94,10 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
               </TableCell>
               <TableCell className="text-right">
                 <div className="flex gap-2 justify-end">
-                  {onPreview && (
-                    <TooltipProvider>
+                  {onPreview && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onPreview(template)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => onPreview(template)}>
                             <Eye className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
@@ -127,17 +105,11 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                           <p>Preview template</p>
                         </TooltipContent>
                       </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  {onCopy && canCopyTemplate?.(template) && (
-                    <TooltipProvider>
+                    </TooltipProvider>}
+                  {onCopy && canCopyTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onCopy(template.id)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => onCopy(template.id)}>
                             <Copy className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
@@ -145,17 +117,11 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                           <p>Copy template</p>
                         </TooltipContent>
                       </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  {onEdit && canEditTemplate?.(template) && (
-                    <TooltipProvider>
+                    </TooltipProvider>}
+                  {onEdit && canEditTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onEdit(template)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => onEdit(template)}>
                             <Edit className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
@@ -163,17 +129,11 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                           <p>Edit template</p>
                         </TooltipContent>
                       </Tooltip>
-                    </TooltipProvider>
-                  )}
-                  {onDelete && canEditTemplate?.(template) && (
-                    <TooltipProvider>
+                    </TooltipProvider>}
+                  {onDelete && canEditTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => onDelete(template.id)}
-                          >
+                          <Button variant="outline" size="sm" onClick={() => onDelete(template.id)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
@@ -181,14 +141,11 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                           <p>Delete template</p>
                         </TooltipContent>
                       </Tooltip>
-                    </TooltipProvider>
-                  )}
+                    </TooltipProvider>}
                 </div>
               </TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)}
         </TableBody>
       </Table>
-    </div>
-  );
+    </div>;
 };
