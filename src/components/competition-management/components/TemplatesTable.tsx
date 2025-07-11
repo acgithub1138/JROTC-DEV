@@ -93,12 +93,12 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                 {new Date(template.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell className="text-right">
-                <div className="flex gap-2 justify-end">
+                <div className="flex items-center justify-center gap-2">
                   {onPreview && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onPreview(template)}>
-                            <Eye className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onPreview(template)}>
+                            <Eye className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -109,8 +109,8 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   {onCopy && canCopyTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onCopy(template.id)}>
-                            <Copy className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onCopy(template.id)}>
+                            <Copy className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -121,8 +121,8 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   {onEdit && canEditTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onEdit(template)}>
-                            <Edit className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(template)}>
+                            <Edit className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -133,8 +133,8 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   {onDelete && canEditTemplate?.(template) && <TooltipProvider>
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onDelete(template.id)}>
-                            <Trash2 className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(template.id)}>
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
