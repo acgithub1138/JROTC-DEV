@@ -21,9 +21,6 @@ export const ScoreSheetPage = () => {
   const { competitions } = useCompetitions();
   const competition = competitions.find(comp => comp.id === competitionId);
   const { canCreate } = useTablePermissions('competitions');
-  
-  // Debug permissions
-  console.log('ScoreSheetPage permissions:', { canCreate });
 
   const { events, isLoading, refetch } = useScoreSheetData(competition, true);
   const { createEvent } = useCompetitionEvents(competitionId);

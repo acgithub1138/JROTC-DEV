@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
-import { Edit, Trash2 } from 'lucide-react';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
@@ -18,9 +17,6 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { canEdit, canDelete } = useTablePermissions('competitions');
-  
-  // Debug permissions
-  console.log('ScoreSheetTable permissions:', { canEdit, canDelete });
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
@@ -88,28 +84,12 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                   <div className="font-medium text-sm">
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
-                  <div className="flex gap-1">
-                    {canEdit && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleEditScoreSheet(event)}
-                        className="h-6 w-6 p-0 hover:bg-muted"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    )}
-                    {canDelete && (
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => handleDeleteEvent(event)}
-                        className="h-6 w-6 p-0 hover:bg-muted hover:text-destructive"
-                      >
-                        <Trash2 className="h-3 w-3" />
-                      </Button>
-                    )}
-                  </div>
+                   <TableActionButtons
+                     canEdit={canEdit}
+                     canDelete={canDelete}
+                     onEdit={() => handleEditScoreSheet(event)}
+                     onDelete={() => handleDeleteEvent(event)}
+                   />
                 </div>
               </TableHead>
             ))}
