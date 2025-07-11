@@ -39,13 +39,7 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
   extraControls
 }, ref) => <div ref={ref} className="space-y-6">
     {/* Header Section */}
-    <div className="flex justify-between items-center">
-      <div>
-        <h1 className="text-3xl font-bold">{title}</h1>
-        {description}
-      </div>
-      {actions && <div className="flex gap-2">{actions}</div>}
-    </div>
+    
 
     {/* Search and Controls Section */}
     <div className="flex items-center justify-between gap-4">
