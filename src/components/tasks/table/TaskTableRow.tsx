@@ -144,16 +144,16 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         </TableCell>
         <TableCell className="py-2">
           {!isSubtask && canCreate && (
-            <div className="flex items-center gap-2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="flex items-center justify-center gap-2">
               <Tooltip>
                 <TooltipTrigger asChild>
                   <Button
-                    variant="ghost"
-                    size="sm"
+                    variant="outline"
+                    size="icon"
                     onClick={() => setIsCreateSubtaskOpen(true)}
-                    className="h-8 w-8 p-0"
+                    className="h-6 w-6"
                   >
-                    <Plus className="h-4 w-4" />
+                    <Plus className="h-3 w-3" />
                   </Button>
                 </TooltipTrigger>
                 <TooltipContent>
