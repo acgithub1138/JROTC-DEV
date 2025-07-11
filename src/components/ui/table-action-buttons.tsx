@@ -53,7 +53,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   }
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center justify-center gap-2">
       {/* View Action */}
       {onView && canView && (
         <TooltipProvider>
