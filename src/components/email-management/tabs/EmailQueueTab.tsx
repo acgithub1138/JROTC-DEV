@@ -1,14 +1,12 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, RefreshCw, X, Mail, AlertCircle, Play, Eye, Edit, Trash2 } from 'lucide-react';
+import { Clock, Mail, AlertCircle, Play } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
-import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useEmailProcessor } from '@/hooks/email/useEmailProcessor';
-import { EmailViewDialog } from '../dialogs/EmailViewDialog';
 import { format } from 'date-fns';
 
 const getStatusColor = (status: string) => {
@@ -27,28 +25,8 @@ const getStatusColor = (status: string) => {
 };
 
 export const EmailQueueTab: React.FC = () => {
-  const { queueItems, isLoading, retryEmail, cancelEmail, deleteEmail, isRetrying, isCancelling } = useEmailQueue();
-  const { canViewDetails, canUpdate, canDelete } = useEmailPermissions();
+  const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
   const { processEmailQueue, isProcessing } = useEmailProcessor();
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
-  const [showViewDialog, setShowViewDialog] = useState(false);
-
-  const handleViewEmail = (email: any) => {
-    setSelectedEmail(email);
-    setShowViewDialog(true);
-  };
-
-  const handleEditEmail = (email: any) => {
-    // For now, just open the view dialog - could be enhanced to edit mode
-    setSelectedEmail(email);
-    setShowViewDialog(true);
-  };
-
-  const handleDeleteEmail = (emailId: string) => {
-    if (window.confirm('Are you sure you want to delete this email from the queue?')) {
-      deleteEmail(emailId);
-    }
-  };
 
   if (isLoading) {
     return (
@@ -118,7 +96,6 @@ export const EmailQueueTab: React.FC = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Scheduled</TableHead>
                     <TableHead>Source</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -152,57 +129,6 @@ export const EmailQueueTab: React.FC = () => {
                       <TableCell className="text-sm py-2">
                         {item.email_templates?.name || item.email_rules?.name || 'Manual'}
                       </TableCell>
-                      <TableCell className="py-2">
-                        <div className="flex gap-2">
-                          {canViewDetails && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleViewEmail(item)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canUpdate && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditEmail(item)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canDelete && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteEmail(item.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {item.status === 'failed' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => retryEmail(item.id)}
-                              disabled={isRetrying}
-                            >
-                              <RefreshCw className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {item.status === 'pending' && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => cancelEmail(item.id)}
-                              disabled={isCancelling}
-                            >
-                              <X className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -211,14 +137,6 @@ export const EmailQueueTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
-
-      {selectedEmail && (
-        <EmailViewDialog
-          open={showViewDialog}
-          onOpenChange={setShowViewDialog}
-          email={selectedEmail}
-        />
-      )}
     </>
   );
 };

@@ -1,13 +1,10 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { BarChart3, Activity, Mail, AlertCircle, CheckCircle, MousePointer, Eye, Edit, Trash2 } from 'lucide-react';
+import { BarChart3, Activity, Mail, AlertCircle, CheckCircle, MousePointer, Eye } from 'lucide-react';
 import { useEmailLogs } from '@/hooks/email/useEmailLogs';
-import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { EmailViewDialog } from '../dialogs/EmailViewDialog';
 import { format } from 'date-fns';
 
 const getEventIcon = (eventType: string) => {
@@ -46,27 +43,6 @@ const getEventColor = (eventType: string) => {
 
 export const EmailLogsTab: React.FC = () => {
   const { logs, isLoading } = useEmailLogs();
-  const { canViewDetails, canUpdate, canDelete } = useEmailPermissions();
-  const [selectedEmail, setSelectedEmail] = useState<any>(null);
-  const [showViewDialog, setShowViewDialog] = useState(false);
-
-  const handleViewEmail = (email: any) => {
-    setSelectedEmail(email);
-    setShowViewDialog(true);
-  };
-
-  const handleEditEmail = (email: any) => {
-    // For now, just open the view dialog - could be enhanced to edit mode
-    setSelectedEmail(email);
-    setShowViewDialog(true);
-  };
-
-  const handleDeleteLog = (logId: string) => {
-    if (window.confirm('Are you sure you want to delete this log entry?')) {
-      console.log('Delete log:', logId);
-      // TODO: Implement delete log functionality
-    }
-  };
 
   if (isLoading) {
     return (
@@ -117,7 +93,6 @@ export const EmailLogsTab: React.FC = () => {
                     <TableHead>Subject</TableHead>
                     <TableHead>Timestamp</TableHead>
                     <TableHead>Details</TableHead>
-                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -150,37 +125,6 @@ export const EmailLogsTab: React.FC = () => {
                           </div>
                         )}
                       </TableCell>
-                      <TableCell className="py-2">
-                        <div className="flex gap-2">
-                          {canViewDetails && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleViewEmail(log.email_queue)}
-                            >
-                              <Eye className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canUpdate && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleEditEmail(log.email_queue)}
-                            >
-                              <Edit className="w-4 h-4" />
-                            </Button>
-                          )}
-                          {canDelete && (
-                            <Button
-                              size="sm"
-                              variant="outline"
-                              onClick={() => handleDeleteLog(log.id)}
-                            >
-                              <Trash2 className="w-4 h-4" />
-                            </Button>
-                          )}
-                        </div>
-                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -189,14 +133,6 @@ export const EmailLogsTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
-      
-      {selectedEmail && (
-        <EmailViewDialog
-          open={showViewDialog}
-          onOpenChange={setShowViewDialog}
-          email={selectedEmail}
-        />
-      )}
     </>
   );
 };
