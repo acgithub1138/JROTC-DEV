@@ -82,7 +82,8 @@ const IncidentManagementPage: React.FC = () => {
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
-    const canEdit = canUpdate || canUpdateAssigned;
+    const isAssignedToIncident = incident.assigned_to_admin === userProfile?.id;
+    const canEdit = canUpdate || (canUpdateAssigned && isAssignedToIncident);
     
     if (!canEdit) {
       setShowAccessDenied(true);

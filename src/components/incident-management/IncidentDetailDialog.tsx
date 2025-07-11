@@ -75,7 +75,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { comments, isLoading: commentsLoading, addComment, addSystemComment } = useIncidentComments(incident.id);
   const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
-  const { canUpdate, canAssign } = useIncidentPermissions();
+  const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(true); // Always start in edit mode
   const [editData, setEditData] = useState({
@@ -87,6 +87,9 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     due_date: incident.due_date ? new Date(incident.due_date) : null,
   });
 
+  // Determine if user can edit this incident
+  const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
+  const canEditIncident = canUpdate || (canUpdateAssigned && isAssignedToIncident);
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -214,7 +217,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   {currentIncident.incident_number} -
                 </span>
               )}
-              {isEditing ? (
+              {isEditing && canEditIncident ? (
                 <Input
                   value={editData.title}
                   onChange={(e) => setEditData({...editData, title: e.target.value})}
@@ -225,7 +228,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
-              {isEditing && canUpdate && (
+              {isEditing && canEditIncident && (
                 <>
                   <Button
                     variant="outline"
@@ -262,7 +265,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {isEditing && canUpdate ? (
+                  {isEditing && canEditIncident ? (
                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -284,7 +287,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {isEditing && canUpdate ? (
+                  {isEditing && canEditIncident ? (
                     <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -306,7 +309,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Due Date:</span>
-                  {isEditing && canUpdate ? (
+                  {isEditing && canEditIncident ? (
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="h-8 text-left">
@@ -397,7 +400,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            {isEditing && canUpdate ? (
+            {isEditing && canEditIncident ? (
               <Textarea
                 value={editData.description}
                 onChange={(e) => setEditData({...editData, description: e.target.value})}
