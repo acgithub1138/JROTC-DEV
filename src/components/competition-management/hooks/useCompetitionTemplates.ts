@@ -171,8 +171,8 @@ export const useCompetitionTemplates = () => {
   };
 
   const canCopyTemplate = (template: CompetitionTemplate) => {
-    // Can copy if it's not owned by current school or if it's global
-    return template.school_id !== userProfile?.school_id || template.is_global;
+    // Users can copy any template they have access to
+    return true;
   };
 
   const filteredTemplates = templates.filter(template => {
