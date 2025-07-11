@@ -24,6 +24,9 @@ const JobBoardPage = () => {
   
   const [activeTab, setActiveTab] = useState('table');
   const { canManageHierarchy, canCreate } = useJobBoardPermissions();
+  
+  // Debug permissions
+  console.log('Job Board Permissions:', { canManageHierarchy, canCreate });
 
   const {
     jobs,
@@ -137,16 +140,18 @@ const JobBoardPage = () => {
           </CardContent>
         </Card>
 
+        {canCreate && (
+          <AddJobDialog
+            open={showAddDialog}
+            onOpenChange={setShowAddDialog}
+            onSubmit={handleAddJob}
+            loading={createJob.isPending}
+            jobs={jobs}
+          />
+        )}
+
         {canManageHierarchy && (
           <>
-            <AddJobDialog
-              open={showAddDialog}
-              onOpenChange={setShowAddDialog}
-              onSubmit={handleAddJob}
-              loading={createJob.isPending}
-              jobs={jobs}
-            />
-
             <EditJobDialog
               open={!!editingJob}
               onOpenChange={(open) => !open && setEditingJob(null)}
