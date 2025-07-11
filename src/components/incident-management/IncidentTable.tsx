@@ -12,10 +12,12 @@ import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
+import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 
 interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
+  onIncidentEdit?: (incident: Incident) => void;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -51,7 +53,10 @@ const getPriorityBadgeClass = (priority: string) => {
 const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
+  onIncidentEdit,
 }) => {
+  const { canUpdate, canUpdateAssigned } = useIncidentPermissions();
+  const canEdit = canUpdate || canUpdateAssigned;
   if (incidents.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -79,7 +84,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableRow key={incident.id}>
               <TableCell className="text-center">
                 <button
-                  onClick={() => onIncidentSelect(incident)}
+                  onClick={() => canEdit && onIncidentEdit ? onIncidentEdit(incident) : onIncidentSelect(incident)}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
                 >
                   {incident.incident_number}

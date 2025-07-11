@@ -135,6 +135,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentEdit={handleEditIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -154,6 +155,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentEdit={handleEditIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -173,6 +175,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentEdit={handleEditIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -192,6 +195,7 @@ const IncidentManagementPage: React.FC = () => {
             <IncidentTable 
               incidents={filteredIncidents} 
               onIncidentSelect={handleIncidentSelect}
+              onIncidentEdit={handleEditIncident}
             />
           )}
         </StandardTableWrapper>
