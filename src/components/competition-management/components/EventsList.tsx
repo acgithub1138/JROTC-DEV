@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2, Eye } from 'lucide-react';
+import { useModulePermissions } from '@/hooks/usePermissions';
 
 interface EventsListProps {
   events: any[];
@@ -17,6 +18,7 @@ export const EventsList: React.FC<EventsListProps> = ({
   onDeleteEvent,
   onViewEvent
 }) => {
+  const { canViewDetails, canDelete } = useModulePermissions('competitions');
   if (isLoading) {
     return <div className="p-4">Loading events...</div>;
   }
@@ -48,24 +50,26 @@ export const EventsList: React.FC<EventsListProps> = ({
                   </Badge>
                 </div>
               </div>
-              <div className="flex gap-2">
-                {onViewEvent && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onViewEvent(event)}
-                  >
-                    <Eye className="w-4 h-4" />
-                  </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onDeleteEvent(event.id)}
-                >
-                  <Trash2 className="w-4 h-4" />
-                </Button>
-              </div>
+               <div className="flex gap-2">
+                 {onViewEvent && canViewDetails && (
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => onViewEvent(event)}
+                   >
+                     <Eye className="w-4 h-4" />
+                   </Button>
+                 )}
+                 {canDelete && (
+                   <Button
+                     variant="outline"
+                     size="sm"
+                     onClick={() => onDeleteEvent(event.id)}
+                   >
+                     <Trash2 className="w-4 h-4" />
+                   </Button>
+                 )}
+               </div>
             </div>
           </CardHeader>
           <CardContent className="pt-0">

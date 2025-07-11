@@ -15,7 +15,7 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { canUpdate } = useModulePermissions('competitions');
+  const { canUpdate, canDelete } = useModulePermissions('competitions');
   const fieldNames = getFieldNames(events);
 
   const handleEditScoreSheet = (event: CompetitionEvent) => {
