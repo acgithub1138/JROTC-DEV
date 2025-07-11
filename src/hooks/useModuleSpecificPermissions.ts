@@ -55,13 +55,11 @@ export const useEventPermissions = () => {
 // Competition-specific permissions
 export const useCompetitionPermissions = () => {
   const modulePermissions = useModulePermissions('competitions');
-  const { hasPermission } = usePermissions();
   
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
-    canManageTemplates: hasPermission('competitions', 'manage_templates'),
-    canManageScoring: hasPermission('competitions', 'manage_scoring'),
+    
   };
 };
 

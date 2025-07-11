@@ -68,8 +68,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, showOnlyMyTemplates]);
-  const { canManageTemplates, canCreate } = useCompetitionPermissions();
-  const canManageTemplatesForUser = !readOnly && canManageTemplates;
+  const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
       await updateTemplate(editingTemplate.id, data);
@@ -93,14 +92,14 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
             <Switch id="my-templates" checked={showOnlyMyTemplates} onCheckedChange={toggleMyTemplatesFilter} />
             <Label htmlFor="my-templates">My Templates</Label>
           </div>
-          {canManageTemplates && <Button onClick={() => setShowAddDialog(true)}>
+          {!readOnly && canCreate && <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Template
             </Button>}
         </div>
       </div>
 
-      <TemplatesTable templates={paginatedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={canManageTemplates ? (t: any) => setEditingTemplate(t) : undefined} onDelete={canManageTemplates ? deleteTemplate : undefined} onCopy={canCreate ? handleCopy : undefined} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCreate && canCopyTemplate(t)} />
+      <TemplatesTable templates={paginatedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={!readOnly && canUpdate ? (t: any) => setEditingTemplate(t) : undefined} onDelete={!readOnly && canDelete ? deleteTemplate : undefined} onCopy={canCreate ? handleCopy : undefined} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCreate && canCopyTemplate(t)} />
 
       {/* Pagination */}
       <TablePagination
@@ -110,7 +109,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
         onPageChange={setCurrentPage}
       />
 
-      {canManageTemplates && <TemplateDialog open={showAddDialog || !!editingTemplate} onOpenChange={open => {
+      {!readOnly && (canCreate || canUpdate) && <TemplateDialog open={showAddDialog || !!editingTemplate} onOpenChange={open => {
       if (!open) {
         setShowAddDialog(false);
         setEditingTemplate(null);
