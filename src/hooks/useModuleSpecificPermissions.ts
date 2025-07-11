@@ -22,7 +22,6 @@ export const useUserPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
-    canActivateDeactivate: hasPermission('users', 'activate_deactivate'),
     canResetPassword: hasPermission('users', 'reset_password'),
     canBulkImport: hasPermission('users', 'bulk_import'),
   };
@@ -36,7 +35,6 @@ export const useCadetPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
-    canActivateDeactivate: hasPermission('cadets', 'activate_deactivate'),
     canResetPassword: hasPermission('cadets', 'reset_password'),
     canBulkImport: hasPermission('cadets', 'bulk_import'),
   };

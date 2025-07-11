@@ -33,7 +33,7 @@ export const CadetTable = ({
   onSelectCadet,
 onSelectAll
 }: CadetTableProps) => {
-  const { canViewDetails: canView, canUpdate: canEdit, canDelete, canActivateDeactivate } = useCadetPermissions();
+  const { canViewDetails: canView, canUpdate: canEdit, canDelete } = useCadetPermissions();
   const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
     data: profiles,
     defaultSort: { key: 'last_name', direction: 'asc' }

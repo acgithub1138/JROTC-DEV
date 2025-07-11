@@ -5,7 +5,7 @@ export const modulePermissionMappings = {
   ],
   'cadets': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'activate_deactivate', 'bulk_import', 'reset_password'
+    'bulk_import', 'reset_password'
   ],
   'tasks': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
@@ -27,6 +27,10 @@ export const modulePermissionMappings = {
   'incidents': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign', 'update_assigned'
+  ],
+  'users': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete',
+    'bulk_import', 'reset_password'
   ],
   'inventory': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
