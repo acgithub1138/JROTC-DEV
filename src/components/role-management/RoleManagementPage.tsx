@@ -102,14 +102,20 @@ export const RoleManagementPage: React.FC = () => {
   const { toast } = useToast();
 
   // Use database-backed column ordering
-  const defaultActionIds = actions.map(action => action.id);
+  const defaultActionIds = React.useMemo(() => actions.map(action => action.id), [actions]);
   const { actionOrder, setActionOrder, isLoading: isLoadingOrder } = useRoleManagementColumnOrder(defaultActionIds);
   
   // Create ordered actions based on saved order
   const orderedActions = React.useMemo(() => {
-    if (actions.length === 0) return [];
+    if (actions.length === 0 || actionOrder.length === 0) return actions;
     
-    return actionOrder.map(id => actions.find(action => action.id === id)).filter(Boolean);
+    // Map action IDs to actual action objects
+    const orderedActionObjects = actionOrder.map(id => actions.find(action => action.id === id)).filter(Boolean);
+    
+    // Add any new actions that might not be in the saved order
+    const missingActions = actions.filter(action => !actionOrder.includes(action.id));
+    
+    return [...orderedActionObjects, ...missingActions];
   }, [actions, actionOrder]);
 
   // Drag and drop sensors

@@ -40,7 +40,11 @@ export const useRoleManagementColumnOrder = (defaultActions: string[]) => {
             !savedOrder.includes(action)
           );
           
-          setActionOrder([...savedOrder, ...missingActions]);
+          const finalOrder = [...savedOrder, ...missingActions];
+          setActionOrder(finalOrder);
+        } else {
+          // If no saved order, use the default order
+          setActionOrder(defaultActions);
         }
       } catch (error) {
         console.error('Error loading role management column order:', error);
