@@ -18,6 +18,9 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
   const { canEdit, canDelete } = useTablePermissions('competitions');
+  
+  // Debug permissions
+  console.log('ScoreSheetTable permissions:', { canEdit, canDelete });
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
