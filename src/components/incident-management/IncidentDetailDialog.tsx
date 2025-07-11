@@ -75,7 +75,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { comments, isLoading: commentsLoading, addComment, addSystemComment } = useIncidentComments(incident.id);
   const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
-  const { canUpdate } = useIncidentPermissions();
+  const { canUpdate, canAssign } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(true); // Always start in edit mode
   const [editData, setEditData] = useState({
@@ -348,7 +348,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
-                  {isEditing && canUpdate ? (
+                  {isEditing && canUpdate && canAssign ? (
                     usersLoading ? (
                       <div className="h-8 w-32 bg-muted animate-pulse rounded" />
                     ) : (
