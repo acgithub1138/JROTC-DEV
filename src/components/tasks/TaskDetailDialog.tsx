@@ -17,7 +17,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useModulePermissions, usePermissions } from '@/hooks/usePermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -30,7 +30,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { canUpdate, canDelete } = useModulePermissions('tasks');
-  const canAssign = (canUpdate); // For now, use update permission for assign
+  const { hasPermission } = usePermissions();
+  const canAssign = hasPermission('tasks', 'assign');
   const [currentTask, setCurrentTask] = useState(task);
   const canEdit = canUpdate || (task.assigned_to === userProfile?.id);
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
