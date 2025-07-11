@@ -17,7 +17,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -29,9 +29,10 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { canUpdate, canAssign } = useUserPermissions();
+  const { canUpdate, canDelete } = useModulePermissions('tasks');
+  const canAssign = (canUpdate); // For now, use update permission for assign
   const [currentTask, setCurrentTask] = useState(task);
-  const canEdit = canUpdate('tasks') || (task.assigned_to === userProfile?.id);
+  const canEdit = canUpdate || (task.assigned_to === userProfile?.id);
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
   const [editData, setEditData] = useState({
     title: task.title,
@@ -283,7 +284,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  <div className="flex items-center gap-2">
                    <User className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Assigned to:</span>
-                     {isEditing && canEdit && canAssign('tasks') ? (
+                     {isEditing && canEdit && canAssign ? (
                       usersLoading ? (
                         <div className="h-8 w-32 bg-muted animate-pulse rounded" />
                       ) : (
