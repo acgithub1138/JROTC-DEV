@@ -20,6 +20,7 @@ const IncidentManagementPage: React.FC = () => {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [isDetailDialogInEditMode, setIsDetailDialogInEditMode] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
 
@@ -74,6 +75,13 @@ const IncidentManagementPage: React.FC = () => {
 
   const handleIncidentSelect = (incident: Incident) => {
     setSelectedIncident(incident);
+    setIsDetailDialogInEditMode(false);
+    setShowDetailDialog(true);
+  };
+
+  const handleIncidentSelectForEdit = (incident: Incident) => {
+    setSelectedIncident(incident);
+    setIsDetailDialogInEditMode(true);
     setShowDetailDialog(true);
   };
 
@@ -136,6 +144,7 @@ const IncidentManagementPage: React.FC = () => {
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
+                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                 />
               )}
             </StandardTableWrapper>
@@ -156,6 +165,7 @@ const IncidentManagementPage: React.FC = () => {
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
+                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                 />
               )}
             </StandardTableWrapper>
@@ -176,6 +186,7 @@ const IncidentManagementPage: React.FC = () => {
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
+                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                 />
               )}
             </StandardTableWrapper>
@@ -196,6 +207,7 @@ const IncidentManagementPage: React.FC = () => {
               incidents={filteredIncidents} 
               onIncidentSelect={handleIncidentSelect}
               onIncidentEdit={handleEditIncident}
+              onIncidentSelectForEdit={handleIncidentSelectForEdit}
             />
           )}
         </StandardTableWrapper>
@@ -220,8 +232,12 @@ const IncidentManagementPage: React.FC = () => {
         <IncidentDetailDialog
           incident={selectedIncident}
           isOpen={showDetailDialog}
-          onClose={() => setShowDetailDialog(false)}
+          onClose={() => {
+            setShowDetailDialog(false);
+            setIsDetailDialogInEditMode(false);
+          }}
           onEdit={handleEditIncident}
+          initialEditMode={isDetailDialogInEditMode}
         />
       )}
     </div>

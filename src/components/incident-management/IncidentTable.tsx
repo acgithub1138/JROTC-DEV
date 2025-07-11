@@ -18,6 +18,7 @@ interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
   onIncidentEdit?: (incident: Incident) => void;
+  onIncidentSelectForEdit?: (incident: Incident) => void;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -54,6 +55,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
   onIncidentEdit,
+  onIncidentSelectForEdit,
 }) => {
   const { canUpdate, canUpdateAssigned } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
@@ -84,7 +86,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableRow key={incident.id}>
               <TableCell className="text-center">
                 <button
-                  onClick={() => canEdit && onIncidentEdit ? onIncidentEdit(incident) : onIncidentSelect(incident)}
+                  onClick={() => canEdit && onIncidentSelectForEdit ? onIncidentSelectForEdit(incident) : onIncidentSelect(incident)}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
                 >
                   {incident.incident_number}

@@ -31,6 +31,7 @@ interface IncidentDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: (incident: Incident) => void;
+  initialEditMode?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -68,6 +69,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   isOpen,
   onClose,
   onEdit,
+  initialEditMode = false
 }) => {
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
@@ -77,7 +79,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { canUpdate } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
-  const [isEditing, setIsEditing] = useState(false);
+  const [isEditing, setIsEditing] = useState(initialEditMode);
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
