@@ -2231,6 +2231,7 @@ export type Database = {
           id: string
           inventory_columns: Json | null
           menu_items: Json
+          role_management_columns: string[] | null
           updated_at: string
           user_id: string
         }
@@ -2240,6 +2241,7 @@ export type Database = {
           id?: string
           inventory_columns?: Json | null
           menu_items?: Json
+          role_management_columns?: string[] | null
           updated_at?: string
           user_id: string
         }
@@ -2249,6 +2251,7 @@ export type Database = {
           id?: string
           inventory_columns?: Json | null
           menu_items?: Json
+          role_management_columns?: string[] | null
           updated_at?: string
           user_id?: string
         }

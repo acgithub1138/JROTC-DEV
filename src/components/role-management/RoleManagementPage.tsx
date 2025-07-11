@@ -4,6 +4,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { usePermissions, UserRole } from '@/hooks/usePermissions';
+import { useRoleManagementColumnOrder } from '@/hooks/useRoleManagementColumnOrder';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw, GripVertical } from 'lucide-react';
@@ -98,53 +99,32 @@ export const RoleManagementPage: React.FC = () => {
     isResetting,
     refreshData
   } = usePermissions();
-  const {
-    toast
-  } = useToast();
+  const { toast } = useToast();
 
-  // State for column ordering with localStorage persistence
-  const [orderedActions, setOrderedActions] = useState(actions);
-
-  // Load saved column order from localStorage
-  React.useEffect(() => {
-    if (actions.length > 0) {
-      const savedOrder = localStorage.getItem('roleManagement-columnOrder');
-      if (savedOrder) {
-        try {
-          const savedActionIds = JSON.parse(savedOrder);
-          // Reorder actions based on saved order, keeping any new actions at the end
-          const reorderedActions = savedActionIds.map((id: string) => actions.find(action => action.id === id)).filter(Boolean).concat(actions.filter(action => !savedActionIds.includes(action.id)));
-          setOrderedActions(reorderedActions);
-        } catch (error) {
-          console.error('Failed to parse saved column order:', error);
-          setOrderedActions(actions);
-        }
-      } else {
-        setOrderedActions(actions);
-      }
-    }
-  }, [actions]);
+  // Use database-backed column ordering
+  const defaultActionIds = actions.map(action => action.id);
+  const { actionOrder, setActionOrder, isLoading: isLoadingOrder } = useRoleManagementColumnOrder(defaultActionIds);
+  
+  // Create ordered actions based on saved order
+  const orderedActions = React.useMemo(() => {
+    if (actions.length === 0) return [];
+    
+    return actionOrder.map(id => actions.find(action => action.id === id)).filter(Boolean);
+  }, [actions, actionOrder]);
 
   // Drag and drop sensors
   const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
     coordinateGetter: sortableKeyboardCoordinates
   }));
   const handleDragEnd = (event: DragEndEvent) => {
-    const {
-      active,
-      over
-    } = event;
+    const { active, over } = event;
     if (over && active.id !== over.id) {
-      setOrderedActions(actions => {
-        const oldIndex = actions.findIndex(action => action.id === active.id);
-        const newIndex = actions.findIndex(action => action.id === over.id);
-        const newOrder = arrayMove(actions, oldIndex, newIndex);
-
-        // Save the new order to localStorage
-        const actionIds = newOrder.map(action => action.id);
-        localStorage.setItem('roleManagement-columnOrder', JSON.stringify(actionIds));
-        return newOrder;
-      });
+      const oldIndex = actionOrder.findIndex(id => id === active.id);
+      const newIndex = actionOrder.findIndex(id => id === over.id);
+      const newOrder = arrayMove(actionOrder, oldIndex, newIndex);
+      
+      // Save the new order to database
+      setActionOrder(newOrder);
     }
   };
   const rolePermissions = getRolePermissions(selectedRole);
