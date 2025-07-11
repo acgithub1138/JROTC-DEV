@@ -1,9 +1,10 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { EventScoreForm } from '../EventScoreForm';
+import { CadetSelector } from '../add-event/CadetSelector';
 import { useCompetitionTemplates } from '../../hooks/useCompetitionTemplates';
 import type { CompetitionEvent } from './types';
 
@@ -23,10 +24,21 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
+  const [isCadetsOpen, setIsCadetsOpen] = useState(false);
   const { templates } = useCompetitionTemplates();
 
   // Find the template for this event
   const template = templates.find(t => t.id === event?.score_sheet?.template_id);
+
+  // Initialize state when event changes
+  useEffect(() => {
+    if (event) {
+      setSelectedCadetIds(event.cadet_ids || []);
+      setScores(event.score_sheet?.scores || {});
+      setTotalPoints(event.total_points || 0);
+    }
+  }, [event]);
 
   const handleScoreChange = (newScores: Record<string, any>, newTotal: number) => {
     setScores(newScores);
@@ -47,6 +59,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
       const { error } = await supabase
         .from('competition_events')
         .update({
+          cadet_ids: selectedCadetIds,
           score_sheet: updatedScoreSheet,
           total_points: totalPoints
         })
@@ -81,6 +94,14 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
         </DialogHeader>
 
         <div className="space-y-6">
+          <CadetSelector
+            selectedCadetIds={selectedCadetIds}
+            judgeNumber={judgeNumber}
+            isCadetsOpen={isCadetsOpen}
+            onSelectedCadetsChange={setSelectedCadetIds}
+            onToggleOpen={setIsCadetsOpen}
+          />
+
           {template && event ? (
             <EventScoreForm
               templateScores={template.scores as Record<string, any>}
