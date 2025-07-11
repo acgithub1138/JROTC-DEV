@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 // Dynamic schema that will be populated with database values
-export const createTaskSchema = (statusOptions: string[], priorityOptions: string[], canAssignTasks: boolean = true) => {
+export const createTaskSchema = (statusOptions: string[], priorityOptions: string[]) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow

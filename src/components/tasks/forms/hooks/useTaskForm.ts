@@ -24,14 +24,14 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const validPriorities = priorityOptions.map(option => option.value);
 
   // Create dynamic schema
-  const schema = createTaskSchema(validStatuses, validPriorities, canAssignTasks);
+  const schema = createTaskSchema(validStatuses, validPriorities);
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      assigned_to: task?.assigned_to || (canAssignTasks ? '' : currentUserId),
+      assigned_to: task?.assigned_to || '',
       priority: task?.priority || (validPriorities[0] || 'medium'),
       status: task?.status || (validStatuses[0] || 'not_started'),
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
@@ -61,7 +61,7 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
       description: data.description || null,
       status: data.status,
       priority: data.priority,
-      assigned_to: data.assigned_to || currentUserId,
+      assigned_to: data.assigned_to,
       due_date: data.due_date ? data.due_date.toISOString() : null,
       team_id: null,
     };
