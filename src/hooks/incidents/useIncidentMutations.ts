@@ -9,9 +9,26 @@ export const useIncidentMutations = () => {
 
   const createIncident = useMutation({
     mutationFn: async (data: CreateIncidentData) => {
+      // Get admin user ID
+      const { data: adminUser, error: adminError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("email", "admin@careyunlimited.com")
+        .single();
+
+      if (adminError) {
+        console.error("Error finding admin user:", adminError);
+      }
+
+      // Auto-assign to admin if found
+      const incidentData = {
+        ...data,
+        assigned_to_admin: adminUser?.id || data.assigned_to_admin,
+      };
+
       const { data: result, error } = await supabase
         .from("incidents")
-        .insert(data)
+        .insert(incidentData)
         .select()
         .single();
 

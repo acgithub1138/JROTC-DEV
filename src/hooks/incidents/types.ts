@@ -47,6 +47,7 @@ export interface CreateIncidentData {
   priority: string;
   school_id: string;
   created_by?: string;
+  assigned_to_admin?: string;
   due_date?: string;
 }
 
