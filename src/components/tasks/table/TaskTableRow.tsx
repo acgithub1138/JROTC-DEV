@@ -149,7 +149,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                 <TooltipTrigger asChild>
                   <Button
                     variant="outline"
-                    size="icon"
+                    size="icon" className="h-6 w-6"
                     onClick={() => setIsCreateSubtaskOpen(true)}
                     className="h-6 w-6"
                   >
