@@ -160,7 +160,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
             >
               Created
             </SortableTableHead>
-            <TableHead className="w-[80px]">Actions</TableHead>
+            <TableHead className="text-center"">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
