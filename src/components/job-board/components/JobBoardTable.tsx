@@ -39,7 +39,7 @@ export const JobBoardTable = ({
             <TableCell className="py-2">{job.role}</TableCell>
             <TableCell className="py-2">{job.reports_to || '-'}</TableCell>
             <TableCell className="py-2">{job.assistant || '-'}</TableCell>
-            <TableCell className="text-right py-2">
+            <TableCell className="text-center py-2">
               <TableActionButtons
                 canEdit={canEdit}
                 canDelete={canDelete}
