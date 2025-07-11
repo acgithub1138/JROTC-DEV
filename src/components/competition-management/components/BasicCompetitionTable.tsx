@@ -175,7 +175,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                       </Tooltip>}
                     {onDelete && <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" text-red-600 hover:text-red-700 hover:border-red-300 onClick={() => onDelete(competition.id)}>
+                          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
                             <Trash2 className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
