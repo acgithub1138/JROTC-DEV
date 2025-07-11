@@ -12,8 +12,7 @@ export const modulePermissionMappings = {
     'assign', 'update_assigned'
   ],
   'calendar': [
-    'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'assign'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
   'competitions': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
@@ -34,7 +33,7 @@ export const modulePermissionMappings = {
   ],
   'inventory': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
-    'assign', 'bulk_import'
+    'bulk_import'
   ],
   'job_board': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
