@@ -51,14 +51,10 @@ export const useIncidentsQuery = () => {
         throw new Error('Database authentication not available');
       }
 
-      // Build the incidents query
+      // Build the incidents query - simplified without profile joins for now
       const query = supabase
         .from('incidents')
-        .select(`
-          *,
-          submitted_by_profile:profiles!incidents_submitted_by_fkey(id, first_name, last_name, email),
-          assigned_to_profile:profiles!incidents_assigned_to_fkey(id, first_name, last_name, email)
-        `)
+        .select('*')
         .order('created_at', { ascending: false });
 
       const { data, error } = await query;
