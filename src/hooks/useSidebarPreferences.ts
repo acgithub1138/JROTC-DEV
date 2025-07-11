@@ -23,7 +23,7 @@ const MODULE_MAPPING: Record<string, string> = {
   'calendar': 'calendar',
   'competitions': 'competitions',
   'email-management': 'email',
-  'incident_management': 'incidents',
+  'incident_management': 'incident_management',
   
   'role-management': 'cadets', // Only admins should see this
 };
