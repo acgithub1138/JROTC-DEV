@@ -93,9 +93,6 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
              {events.map((event, index) => (
                 <TableHead key={event.id} className={`text-center border-r px-2 min-w-24 ${getJudgeColorClasses(index)}`}>
                   <div className="space-y-1">
-                    <div className="font-medium text-sm">
-                      {event.score_sheet?.judge_number || `Judge ${index + 1}`}
-                    </div>
                     <TableActionButtons
                       canView={canViewDetails}
                       canEdit={canUpdate}
@@ -103,6 +100,9 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                       onEdit={() => handleEditScoreSheet(event)}
                       onDelete={() => handleDeleteEvent(event)}
                     />
+                    <div className="font-medium text-xs">
+                      {event.score_sheet?.judge_number || `Judge ${index + 1}`}
+                    </div>
                   </div>
                 </TableHead>
               ))}

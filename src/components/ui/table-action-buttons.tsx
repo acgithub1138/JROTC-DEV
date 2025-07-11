@@ -49,14 +49,14 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   }
 
   return (
-    <div className="flex items-center justify-end gap-2">
+    <div className="flex items-center justify-center gap-1">
       {/* View Action */}
       {onView && canView && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={onView}>
-                <Eye className="w-4 h-4" />
+              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onView}>
+                <Eye className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -71,8 +71,8 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={onEdit}>
-                <Edit className="w-4 h-4" />
+              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onEdit}>
+                <Edit className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
@@ -87,8 +87,8 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={onDelete}>
-                <Trash2 className="w-4 h-4" />
+              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onDelete}>
+                <Trash2 className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>
