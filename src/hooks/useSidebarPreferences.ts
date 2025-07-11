@@ -23,7 +23,7 @@ const MODULE_MAPPING: Record<string, string> = {
   'calendar': 'calendar',
   'competitions': 'competitions',
   'email-management': 'email',
-  'incidents': 'incidents',
+  
   'role-management': 'cadets', // Only admins should see this
 };
 
@@ -46,7 +46,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
     { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
     { id: 'email-management', label: 'Email', icon: 'Mails' },
-    { id: 'incidents', label: role === 'instructor' ? 'Get Help' : 'Incident Management', icon: 'AlertTriangle' },
+    
     { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings', adminOnly: true },
     { id: 'settings', label: 'Settings', icon: 'Settings' },
   ];
@@ -93,7 +93,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'role-management', label: 'Role Management', icon: 'Shield' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
+        
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
@@ -113,7 +113,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'incidents', label: 'Get Help', icon: 'AlertTriangle' },
+        
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     

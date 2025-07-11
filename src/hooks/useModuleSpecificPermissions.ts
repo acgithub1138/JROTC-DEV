@@ -63,19 +63,6 @@ export const useCompetitionPermissions = () => {
   };
 };
 
-// Incident-specific permissions
-export const useIncidentPermissions = () => {
-  const modulePermissions = useModulePermissions('incidents');
-  const { hasPermission } = usePermissions();
-  
-  return {
-    ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
-    canSubmit: hasPermission('incidents', 'submit'),
-    canApprove: hasPermission('incidents', 'approve'),
-    canAssign: hasPermission('incidents', 'assign'),
-  };
-};
 
 // Job Board specific permissions
 export const useJobBoardPermissions = () => {

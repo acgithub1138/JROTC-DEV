@@ -10,19 +10,19 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
-import { IncidentForm } from '@/components/incident-management/IncidentForm';
+
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTaskPermissions, useEventPermissions, useIncidentPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { canCreate: canCreateTasks } = useTaskPermissions();
   const { canCreate: canCreateEvents } = useEventPermissions();
-  const { canSubmit: canCreateIncidents } = useIncidentPermissions();
+  
   const { canViewAnalytics } = useDashboardPermissions();
   const { canCreate: canCreateUsers } = useUserPermissions();
   
@@ -69,7 +69,7 @@ const DashboardOverview = () => {
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
-  const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
+  
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
   const handleCreateTransaction = (data: any) => {
@@ -80,37 +80,6 @@ const DashboardOverview = () => {
   const getStatsConfig = () => {
     const baseStats = [];
 
-    // Admin role gets incident stats widgets
-    if (userProfile?.role === 'admin') {
-      baseStats.push({
-        title: 'Active Incidents',
-        value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
-        change: statsLoading ? '...' : 'Currently open',
-        icon: AlertTriangle,
-        color: 'text-orange-600',
-        bgColor: 'bg-orange-100'
-      });
-
-      baseStats.push({
-        title: 'Overdue Incidents',
-        value: statsLoading ? '...' : stats?.incidents.overdue.toString() || '0',
-        change: statsLoading ? '...' : 'Past due date',
-        icon: AlertTriangle,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100'
-      });
-
-      baseStats.push({
-        title: 'Urgent & Critical',
-        value: statsLoading ? '...' : stats?.incidents.urgentCritical.toString() || '0',
-        change: statsLoading ? '...' : 'High priority',
-        icon: AlertTriangle,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100'
-      });
-
-      return baseStats;
-    }
 
     // For instructors, show Overdue Tasks instead of Total Cadets
     if (userProfile?.role === 'instructor') {
@@ -231,12 +200,6 @@ const DashboardOverview = () => {
                   </button>
                 </>
               )}
-              {canCreateIncidents && (
-                <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                  <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
-                  <p className="font-medium text-sm">Create Incident</p>
-                </button>
-              )}
             </div>
           </div>
         </CardContent>
@@ -352,14 +315,6 @@ const DashboardOverview = () => {
         }} />
       )}
 
-      {canCreateIncidents && (
-        <IncidentForm 
-          open={isCreateIncidentOpen} 
-          onOpenChange={setIsCreateIncidentOpen} 
-          mode="create" 
-          incident={null} 
-        />
-      )}
 
       {/* Admin-only modals */}
       {userProfile?.role === 'admin' && (
