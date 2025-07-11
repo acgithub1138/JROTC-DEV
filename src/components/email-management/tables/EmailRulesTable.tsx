@@ -85,7 +85,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                 <TableHead>Template</TableHead>
                 <TableHead>Recipient</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Actions</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
