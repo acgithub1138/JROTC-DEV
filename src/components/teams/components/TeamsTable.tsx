@@ -69,7 +69,7 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
             <TableHead>Team Lead</TableHead>
             <TableHead>Members</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-[150px]">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
