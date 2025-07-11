@@ -12,7 +12,7 @@ import { EditTeamDialog } from './components/EditTeamDialog';
 import { SendEmailDialog } from './components/SendEmailDialog';
 import { ViewTeamMembersDialog } from './components/ViewTeamMembersDialog';
 import { TeamWithMembers, NewTeam } from './types';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 const TeamsManagementPage = () => {
   const {
     teams,
@@ -25,7 +25,7 @@ const TeamsManagementPage = () => {
     deleteTeam
   } = useTeamMutations();
   const isMobile = useIsMobile();
-  const { canCreate, canUpdate, canDelete } = useModulePermissions('teams');
+  const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('teams');
   const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);

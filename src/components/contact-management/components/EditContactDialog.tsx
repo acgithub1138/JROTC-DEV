@@ -27,7 +27,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact } from '../ContactManagementPage';
 
@@ -63,7 +63,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
   onSubmit,
 }) => {
   const { userProfile } = useAuth();
-  const { canUpdate } = useModulePermissions('contacts');
+  const { canEdit: canUpdate } = useTablePermissions('contacts');
   const [cadets, setCadets] = useState<Cadet[]>([]);
   
   const form = useForm<ContactFormData>({

@@ -3,13 +3,13 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 
 export const EmailTemplatesTab: React.FC = () => {
-  const { canCreate } = useModulePermissions('email');
+  const { canCreate } = useTablePermissions('email');
   const { templates, isLoading } = useEmailTemplates();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);

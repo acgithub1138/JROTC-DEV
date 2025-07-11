@@ -130,8 +130,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user && !userProfile) {
-          fetchUserProfile(session.user.id);
+        if (session?.user) {
+          // Only fetch if we don't have profile data or it's for a different user
+          if (!userProfile || userProfile.id !== session.user.id) {
+            fetchUserProfile(session.user.id);
+          }
         } else if (!session?.user) {
           setUserProfile(null);
         }
@@ -147,8 +150,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user && !userProfile) {
-        fetchUserProfile(session.user.id);
+      if (session?.user) {
+        // Only fetch if we don't have profile data or it's for a different user
+        if (!userProfile || userProfile.id !== session.user.id) {
+          fetchUserProfile(session.user.id);
+        }
       }
       setLoading(false);
     });

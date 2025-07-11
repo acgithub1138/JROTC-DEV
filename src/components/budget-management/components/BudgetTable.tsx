@@ -9,7 +9,7 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -27,7 +27,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 }) => {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
-  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('budget');
+  const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions

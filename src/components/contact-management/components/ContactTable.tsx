@@ -3,7 +3,7 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { Contact } from '../ContactManagementPage';
 interface ContactTableProps {
   contacts: Contact[];
@@ -18,10 +18,10 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   onDelete
 }) => {
   const {
-    canUpdate,
+    canEdit: canUpdate,
     canDelete,
     canViewDetails
-  } = useModulePermissions('contacts');
+  } = useTablePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',

@@ -1,13 +1,13 @@
-import { useModulePermissions } from './usePermissions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 export const useTablePermissions = (module: string) => {
-  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = useModulePermissions(module);
+  const { hasPermission } = usePermissionContext();
   
   return {
-    canView: canRead, // Access to see table data
-    canViewDetails, // Access to view record details (Eye icon)
-    canEdit: canUpdate,
-    canDelete,
-    canCreate
+    canView: hasPermission(module, 'read'), // Access to see table data
+    canViewDetails: hasPermission(module, 'view'), // Access to view record details (Eye icon)
+    canEdit: hasPermission(module, 'update'),
+    canDelete: hasPermission(module, 'delete'),
+    canCreate: hasPermission(module, 'create'),
   };
 };

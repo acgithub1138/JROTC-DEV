@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { usePermissions, UserRole } from '@/hooks/usePermissions';
+import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
 import { useRoleManagementColumnOrder } from '@/hooks/useRoleManagementColumnOrder';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
@@ -98,7 +98,7 @@ export const RoleManagementPage: React.FC = () => {
     isUpdating,
     isResetting,
     refreshData
-  } = usePermissions();
+  } = useRoleManagement();
   const { toast } = useToast();
 
   // Use database-backed column ordering

@@ -1,18 +1,12 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
 import { Database } from '@/integrations/supabase/types';
 
 export type UserRole = Database['public']['Enums']['user_role'];
 export type PermissionModule = Database['public']['Tables']['permission_modules']['Row'];
 export type PermissionAction = Database['public']['Tables']['permission_actions']['Row'];
 export type RolePermission = Database['public']['Tables']['role_permissions']['Row'];
-
-interface PermissionCheck {
-  module: string;
-  action: string;
-}
 
 interface RolePermissions {
   [role: string]: {
@@ -22,25 +16,19 @@ interface RolePermissions {
   };
 }
 
-export const usePermissions = () => {
-  const { userProfile } = useAuth();
+export const useRoleManagement = () => {
   const queryClient = useQueryClient();
 
   // Fetch all modules
   const { data: modules = [] } = useQuery({
     queryKey: ['permission-modules'],
     queryFn: async () => {
-      console.log('Fetching permission modules...');
       const { data, error } = await supabase
         .from('permission_modules')
         .select('*')
         .order('label');
       
-      if (error) {
-        console.error('Error fetching permission modules:', error);
-        throw error;
-      }
-      console.log('Permission modules fetched:', data);
+      if (error) throw error;
       return data;
     },
   });
@@ -76,21 +64,8 @@ export const usePermissions = () => {
     },
   });
 
-  // Check if current user has specific permission - memoized to prevent recreation
-  const hasPermission = useCallback((module: string, action: string): boolean => {
-    if (!userProfile?.role) return false;
-    
-    const permission = allRolePermissions.find(
-      p => p.role === userProfile.role && 
-           p.module?.name === module && 
-           p.action?.name === action
-    );
-    
-    return permission?.enabled || false;
-  }, [userProfile?.role, allRolePermissions]);
-
   // Get all permissions for a specific role
-  const getRolePermissions = (role: UserRole): RolePermissions[string] => {
+  const getRolePermissions = useCallback((role: UserRole): RolePermissions[string] => {
     const rolePerms: { [module: string]: { [action: string]: boolean } } = {};
     
     modules.forEach(module => {
@@ -106,7 +81,7 @@ export const usePermissions = () => {
     });
     
     return rolePerms;
-  };
+  }, [modules, actions, allRolePermissions]);
 
   // Update permission mutation
   const updatePermissionMutation = useMutation({
@@ -116,8 +91,6 @@ export const usePermissions = () => {
       actionId: string;
       enabled: boolean;
     }) => {
-      console.log('Updating permission:', { role, moduleId, actionId, enabled });
-      
       const { data, error } = await supabase
         .from('role_permissions')
         .upsert({
@@ -130,11 +103,7 @@ export const usePermissions = () => {
         })
         .select();
       
-      if (error) {
-        console.error('Permission update error:', error);
-        throw error;
-      }
-      console.log('Permission updated successfully:', data);
+      if (error) throw error;
       return data;
     },
     onSuccess: () => {
@@ -179,35 +148,21 @@ export const usePermissions = () => {
     },
   });
 
+  const refreshData = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ['permission-actions'] });
+    queryClient.invalidateQueries({ queryKey: ['permission-modules'] });
+    queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
+  }, [queryClient]);
+
   return {
     modules,
     actions,
     allRolePermissions,
-    hasPermission,
     getRolePermissions,
     updatePermission: updatePermissionMutation.mutate,
     resetToDefaults: resetToDefaultsMutation.mutate,
     isUpdating: updatePermissionMutation.isPending,
     isResetting: resetToDefaultsMutation.isPending,
-    refreshData: () => {
-      queryClient.invalidateQueries({ queryKey: ['permission-actions'] });
-      queryClient.invalidateQueries({ queryKey: ['permission-modules'] });
-      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
-    },
-  };
-};
-
-// Helper hooks for common permission checks
-export const useModulePermissions = (module: string) => {
-  const { hasPermission } = usePermissions();
-  
-  return {
-    canAccess: hasPermission(module, 'sidebar'), // Module access via navigation
-    canRead: hasPermission(module, 'read'), // Access to see data in tables
-    canViewDetails: hasPermission(module, 'view'), // Access to view record details
-    canCreate: hasPermission(module, 'create'),
-    canUpdate: hasPermission(module, 'update'),
-    canDelete: hasPermission(module, 'delete'),
-    canSeeInSidebar: hasPermission(module, 'sidebar'), // Kept for backwards compatibility
+    refreshData,
   };
 };

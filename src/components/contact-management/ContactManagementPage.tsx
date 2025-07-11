@@ -8,7 +8,7 @@ import { AddContactDialog } from './components/AddContactDialog';
 import { EditContactDialog } from './components/EditContactDialog';
 import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export interface Contact {
   id: string;
@@ -26,7 +26,7 @@ export interface Contact {
 }
 
 const ContactManagementPage = () => {
-  const { canCreate } = useModulePermissions('contacts');
+  const { canCreate } = useTablePermissions('contacts');
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');

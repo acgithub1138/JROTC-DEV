@@ -1,7 +1,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { usePermissions } from './usePermissions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 export interface MenuItem {
   id: string;
@@ -148,18 +148,13 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
 
 export const useSidebarPreferences = () => {
   const { userProfile } = useAuth();
-  const { hasPermission, allRolePermissions } = usePermissions();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  console.log('useSidebarPreferences - User Profile:', userProfile);
-  console.log('useSidebarPreferences - User Profile ID:', userProfile?.id);
-  console.log('useSidebarPreferences - User Profile Role:', userProfile?.role);
-  console.log('useSidebarPreferences - Role Permissions:', allRolePermissions.length);
-
   // Memoize permission state to prevent unnecessary re-renders
-  const permissionsLoaded = useMemo(() => allRolePermissions.length > 0, [allRolePermissions.length]);
+  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
   const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
   const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
 

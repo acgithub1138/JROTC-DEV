@@ -3,7 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trash2, Eye } from 'lucide-react';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 interface EventsListProps {
   events: any[];
@@ -18,7 +18,7 @@ export const EventsList: React.FC<EventsListProps> = ({
   onDeleteEvent,
   onViewEvent
 }) => {
-  const { canViewDetails, canDelete } = useModulePermissions('competitions');
+  const { canViewDetails, canDelete } = useTablePermissions('competitions');
   if (isLoading) {
     return <div className="p-4">Loading events...</div>;
   }

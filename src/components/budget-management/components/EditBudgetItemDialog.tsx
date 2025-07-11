@@ -18,7 +18,7 @@ import {
 } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { Button } from '@/components/ui/button';
 import {
   Select,
@@ -54,7 +54,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
   item,
   onSubmit,
 }) => {
-  const { canUpdate } = useModulePermissions('budget');
+  const { canEdit: canUpdate } = useTablePermissions('budget');
   const form = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
   });

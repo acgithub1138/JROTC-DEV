@@ -10,7 +10,7 @@ import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { Package, AlertTriangle, History } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
@@ -41,7 +41,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
-  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('inventory');
+  const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('inventory');
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
     data: items,

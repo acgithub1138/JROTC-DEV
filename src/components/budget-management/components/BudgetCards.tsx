@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetCardsProps {
@@ -18,7 +18,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('budget');
+  const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';

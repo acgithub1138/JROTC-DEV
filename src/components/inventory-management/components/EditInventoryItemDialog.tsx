@@ -1,7 +1,7 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { InventoryItemForm } from './InventoryItemForm';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import type { Tables } from '@/integrations/supabase/types';
 
 interface EditInventoryItemDialogProps {
@@ -17,7 +17,7 @@ export const EditInventoryItemDialog: React.FC<EditInventoryItemDialogProps> = (
   onOpenChange,
   onSubmit,
 }) => {
-  const { canUpdate } = useModulePermissions('inventory');
+  const { canEdit: canUpdate } = useTablePermissions('inventory');
   const isReadOnly = !canUpdate;
 
   const handleSubmit = async (data: any) => {

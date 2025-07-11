@@ -11,7 +11,7 @@ import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
 import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 export interface BudgetTransaction {
   id: string;
   school_id: string;
@@ -39,7 +39,7 @@ export interface BudgetFilters {
   budgetYear: string;
 }
 const BudgetManagementPage = () => {
-  const { canCreate, canUpdate } = useModulePermissions('budget');
+  const { canCreate, canEdit: canUpdate } = useTablePermissions('budget');
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);

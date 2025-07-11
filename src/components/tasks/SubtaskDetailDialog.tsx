@@ -16,7 +16,7 @@ import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 
 interface SubtaskDetailDialogProps {
@@ -38,7 +38,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const { comments, addComment, addSystemComment, isAddingComment } = useSubtaskComments(subtask.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { canUpdate, canDelete } = useModulePermissions('tasks');
+  const { canEdit: canUpdate, canDelete } = useTablePermissions('tasks');
   const canAssign = canUpdate; // For now, use update permission for assign
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
   const [editData, setEditData] = useState({
