@@ -8,10 +8,12 @@ interface TableActionButtonsProps {
   canEdit?: boolean;
   canDelete?: boolean;
   canCreate?: boolean;
+  canCancel?: boolean;
   onView?: () => void;
   onEdit?: () => void;
   onDelete?: () => void;
   onCreate?: () => void;
+  onCancel?: () => void;
   // Custom actions for specific use cases
   customActions?: Array<{
     icon: React.ReactNode;
@@ -30,10 +32,12 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
   canEdit = true,
   canDelete = true,
   canCreate = true,
+  canCancel = true,
   onView,
   onEdit,
   onDelete,
   onCreate,
+  onCancel,
   customActions = [],
   readOnly = false
 }) => {
@@ -42,7 +46,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
     return null;
   }
 
-  const hasAnyAction = onView || onEdit || onDelete || onCreate || customActions.some(action => action.show !== false);
+  const hasAnyAction = onView || onEdit || onDelete || onCreate || onCancel || customActions.some(action => action.show !== false);
   
   if (!hasAnyAction) {
     return null;
@@ -87,7 +91,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onDelete}>
+              <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={onDelete}>
                 <Trash2 className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
@@ -98,13 +102,29 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
         </TooltipProvider>
       )}
 
+      {/* Cancel Action */}
+      {onCancel && canCancel && (
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={onCancel}>
+                <X className="w-3 h-3" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Cancel</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      )}
+
       {/* Create Action */}
       {onCreate && canCreate && (
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" onClick={onCreate}>
-                <Plus className="w-4 h-4" />
+              <Button variant="outline" size="icon" className="h-6 w-6" onClick={onCreate}>
+                <Plus className="w-3 h-3" />
               </Button>
             </TooltipTrigger>
             <TooltipContent>

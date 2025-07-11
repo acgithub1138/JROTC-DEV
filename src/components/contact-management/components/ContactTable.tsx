@@ -1,10 +1,8 @@
 import React from 'react';
-import { Edit, Trash2, Eye } from 'lucide-react';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { TableHead, TableRow, TableCell } from '@/components/ui/table';
-import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { Contact } from '../ContactManagementPage';
 interface ContactTableProps {
@@ -97,44 +95,14 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell>{contact.phone || '-'}</TableCell>
             <TableCell>{contact.email || '-'}</TableCell>
             <TableCell>
-              <div className="flex items-center gap-2">
-                {canViewDetails && <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                         <Button variant="ghost" size="sm" onClick={() => onEdit(contact)}>
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>View contact</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>}
-                {canUpdate && <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="sm" onClick={() => onEdit(contact)} className="h-8 w-8 p-0">
-                          <Edit className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Edit contact</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>}
-                {canDelete && <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="ghost" size="sm" onClick={() => onDelete(contact.id)} className="h-8 w-8 p-0 text-red-600 hover:text-red-700">
-                          <Trash2 className="h-4 w-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Delete contact</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>}
-              </div>
+               <TableActionButtons
+                 canView={canViewDetails}
+                 canEdit={canUpdate}
+                 canDelete={canDelete}
+                 onView={() => onEdit(contact)}
+                 onEdit={() => onEdit(contact)}
+                 onDelete={() => onDelete(contact.id)}
+               />
             </TableCell>
           </TableRow>)}
       </StandardTableBody>

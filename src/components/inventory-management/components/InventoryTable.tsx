@@ -6,8 +6,8 @@ import { StandardTable, StandardTableHeader, StandardTableBody } from '@/compone
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, Package, AlertTriangle, History, Eye } from 'lucide-react';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { Package, AlertTriangle, History } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useModulePermissions } from '@/hooks/usePermissions';
@@ -310,82 +310,27 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                  <TableCell className={getPaddingClass()}>{getUnitOfMeasureBadge(item.unit_of_measure)}</TableCell>
                )}
                <TableCell className={getPaddingClass()}>
-                 <div className="flex items-center justify-end gap-0.5">
-                   {item.issued_to && item.issued_to.length > 0 && (
-                     <IssuedUsersPopover issuedTo={item.issued_to} />
-                     )}
-                     <TooltipProvider>
-                       <Tooltip>
-                         <TooltipTrigger asChild>
-                           <Button
-                             variant="ghost"
-                             size="sm"
-                             onClick={() => setHistoryItem(item)}
-                           >
-                             <History className="w-4 h-4" />
-                           </Button>
-                         </TooltipTrigger>
-                         <TooltipContent>
-                           <p>View history</p>
-                         </TooltipContent>
-                       </Tooltip>
-                       </TooltipProvider>
-                        {canViewDetails && (
-                          <TooltipProvider>
-                            <Tooltip>
-                              <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="sm"
-                                  onClick={() => handleView(item)}
-                                >
-                                  <Eye className="w-4 h-4" />
-                                </Button>
-                              </TooltipTrigger>
-                              <TooltipContent>
-                                <p>View item</p>
-                              </TooltipContent>
-                            </Tooltip>
-                          </TooltipProvider>
-                        )}
-                       {canUpdate && (
-                         <TooltipProvider>
-                           <Tooltip>
-                             <TooltipTrigger asChild>
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => handleEdit(item)}
-                               >
-                                 <Edit className="w-4 h-4" />
-                               </Button>
-                             </TooltipTrigger>
-                             <TooltipContent>
-                               <p>Edit item</p>
-                             </TooltipContent>
-                           </Tooltip>
-                         </TooltipProvider>
-                       )}
-                       {canDelete && (
-                         <TooltipProvider>
-                           <Tooltip>
-                             <TooltipTrigger asChild>
-                               <Button
-                                 variant="ghost"
-                                 size="sm"
-                                 onClick={() => onDelete(item.id)}
-                                 className="hover:text-red-600"
-                               >
-                                 <Trash2 className="w-4 h-4" />
-                               </Button>
-                             </TooltipTrigger>
-                             <TooltipContent>
-                               <p>Delete item</p>
-                             </TooltipContent>
-                           </Tooltip>
-                         </TooltipProvider>
-                       )}
-                </div>
+                  <div className="flex items-center justify-end gap-0.5">
+                    {item.issued_to && item.issued_to.length > 0 && (
+                      <IssuedUsersPopover issuedTo={item.issued_to} />
+                    )}
+                    <TableActionButtons
+                      canView={canViewDetails}
+                      canEdit={canUpdate}
+                      canDelete={canDelete}
+                      onView={() => handleView(item)}
+                      onEdit={() => handleEdit(item)}
+                      onDelete={() => onDelete(item.id)}
+                      customActions={[
+                        {
+                          icon: <History className="w-3 h-3" />,
+                          label: "View history",
+                          onClick: () => setHistoryItem(item),
+                          show: true
+                        }
+                      ]}
+                    />
+                  </div>
               </TableCell>
             </TableRow>
           ))}
