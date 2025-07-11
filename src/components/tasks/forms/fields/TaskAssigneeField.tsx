@@ -30,6 +30,12 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
         <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
           {assignedUser ? `${assignedUser.first_name} ${assignedUser.last_name} (${assignedUser.role})` : 'No assignee'}
         </div>
+        {/* Hidden input to maintain form field value */}
+        <input
+          type="hidden"
+          {...form.register('assigned_to')}
+          value={assignedUserId || ''}
+        />
       </div>
     );
   }
