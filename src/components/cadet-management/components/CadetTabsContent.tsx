@@ -3,9 +3,10 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CadetTable } from './CadetTable';
 import { CadetCards } from './CadetCards';
-import { MassUpdateToolbar } from './MassUpdateToolbar';
+import { CadetActionsDropdown } from './CadetActionsDropdown';
 import { Profile } from '../types';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface CadetTabsContentProps {
   activeTab: string;
@@ -45,6 +46,7 @@ export const CadetTabsContent = ({
   onDeactivate
 }: CadetTabsContentProps) => {
   const isMobile = useIsMobile();
+  const { canUpdate } = useCadetPermissions();
   
   const renderCadetDisplay = () => {
     if (isMobile) {
@@ -87,22 +89,39 @@ export const CadetTabsContent = ({
       </TabsList>
       
       <TabsContent value="active" className="mt-4">
-        {!isMobile && (
-          <MassUpdateToolbar
-            selectedCount={selectedCadets.length}
-            onUpdateGrade={onUpdateGrade}
-            onUpdateRank={onUpdateRank}
-            onUpdateFlight={onUpdateFlight}
-            onUpdateRole={onUpdateRole}
-            onDeactivate={onDeactivate}
-            loading={massOperationLoading}
-          />
-        )}
         {renderCadetDisplay()}
+        {!isMobile && (
+          <div className="flex justify-end p-4 border-t">
+            <CadetActionsDropdown
+              selectedCount={selectedCadets.length}
+              onUpdateGrade={onUpdateGrade}
+              onUpdateRank={onUpdateRank}
+              onUpdateFlight={onUpdateFlight}
+              onUpdateRole={onUpdateRole}
+              onDeactivate={onDeactivate}
+              loading={massOperationLoading}
+              canUpdate={canUpdate}
+            />
+          </div>
+        )}
       </TabsContent>
 
       <TabsContent value="inactive" className="mt-4">
         {renderCadetDisplay()}
+        {!isMobile && (
+          <div className="flex justify-end p-4 border-t">
+            <CadetActionsDropdown
+              selectedCount={selectedCadets.length}
+              onUpdateGrade={onUpdateGrade}
+              onUpdateRank={onUpdateRank}
+              onUpdateFlight={onUpdateFlight}
+              onUpdateRole={onUpdateRole}
+              onDeactivate={onDeactivate}
+              loading={massOperationLoading}
+              canUpdate={canUpdate}
+            />
+          </div>
+        )}
       </TabsContent>
     </Tabs>
   );
