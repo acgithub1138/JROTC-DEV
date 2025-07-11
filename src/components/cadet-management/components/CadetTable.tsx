@@ -115,7 +115,7 @@ onSelectAll
                       icon: <X className="w-4 h-4" />,
                       label: "Deactivate profile",
                       onClick: () => onToggleStatus(profile),
-                      show: canActivateDeactivate
+                      show: canDelete
                     }
                   ]}
                 />
@@ -128,7 +128,7 @@ onSelectAll
                       icon: <><CheckCircle className="w-4 h-4 mr-1" />Activate</>,
                       label: "Activate profile",
                       onClick: () => onToggleStatus(profile),
-                      show: canActivateDeactivate
+                      show: canDelete
                     }
                   ]}
                 />
