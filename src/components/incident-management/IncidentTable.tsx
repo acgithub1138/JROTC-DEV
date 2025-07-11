@@ -9,6 +9,7 @@ import {
 } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
 
@@ -113,7 +114,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                   size="sm"
                   onClick={() => onIncidentSelect(incident)}
                 >
-                  View
+                  <Eye className="h-4 w-4" />
                 </Button>
               </TableCell>
             </TableRow>
