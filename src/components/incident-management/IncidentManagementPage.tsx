@@ -75,6 +75,7 @@ const IncidentManagementPage: React.FC = () => {
   }, [currentIncidents, searchValue]);
 
   const handleIncidentSelect = (incident: Incident) => {
+    console.log("handleIncidentSelect called - should open in READ-ONLY mode");
     setSelectedIncident(incident);
     setIsDetailDialogInEditMode(false);
     setIsDetailDialogReadOnly(true);
@@ -82,6 +83,7 @@ const IncidentManagementPage: React.FC = () => {
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
+    console.log("handleIncidentSelectForEdit called - should open in EDIT mode");
     setSelectedIncident(incident);
     setIsDetailDialogInEditMode(true);
     setIsDetailDialogReadOnly(false);

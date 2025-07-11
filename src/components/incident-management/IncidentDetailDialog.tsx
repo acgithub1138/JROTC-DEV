@@ -73,6 +73,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   initialEditMode = false,
   isReadOnly = false
 }) => {
+  console.log("IncidentDetailDialog props:", { initialEditMode, isReadOnly });
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
   const { users, isLoading: usersLoading } = useSchoolUsers();
