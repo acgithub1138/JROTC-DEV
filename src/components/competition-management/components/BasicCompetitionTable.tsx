@@ -121,7 +121,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
               {isColumnVisible('unarmed_exhibition') && <TableHead>Unarmed Exhibition</TableHead>}
               {isColumnVisible('unarmed_color_guard') && <TableHead>Unarmed Color Guard</TableHead>}
               {isColumnVisible('unarmed_inspection') && <TableHead>Unarmed Inspection</TableHead>}
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
