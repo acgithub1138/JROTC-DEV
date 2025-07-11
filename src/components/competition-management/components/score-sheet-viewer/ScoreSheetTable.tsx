@@ -1,9 +1,12 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
+import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { toast } from 'sonner';
@@ -16,6 +19,12 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [notesDialog, setNotesDialog] = useState<{
+    open: boolean;
+    fieldName: string;
+    notes: string;
+    judgeNumber?: string;
+  }>({ open: false, fieldName: '', notes: '', judgeNumber: '' });
   const { canViewDetails, canUpdate, canDelete } = useCompetitionPermissions();
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
@@ -51,6 +60,23 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
         console.error('Failed to delete event:', error);
       }
     }
+  };
+
+  // Function to check if a field value is a notes field (long text)
+  const isNotesField = (value: any, fieldName: string): boolean => {
+    if (typeof value !== 'string') return false;
+    // Check if it's likely a notes field based on length or field name
+    return value.length > 75 || fieldName.toLowerCase().includes('note');
+  };
+
+  // Function to handle viewing notes
+  const handleViewNotes = (fieldName: string, notes: string, judgeNumber?: string) => {
+    setNotesDialog({
+      open: true,
+      fieldName: getCleanFieldName(fieldName),
+      notes,
+      judgeNumber
+    });
   };
 
   // Get unique cadets from events
@@ -120,16 +146,38 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                 <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
                   {getCleanFieldName(fieldName)}
                 </TableCell>
-                 {events.map((event, eventIndex) => (
-                   <TableCell key={event.id} className={`text-center border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
-                     {(() => {
-                       const value = event.score_sheet?.scores?.[fieldName];
-                       if (value === null || value === undefined) return '-';
-                       if (typeof value === 'object') return JSON.stringify(value);
-                       return String(value);
-                     })()}
-                   </TableCell>
-                 ))}
+                 {events.map((event, eventIndex) => {
+                   const value = event.score_sheet?.scores?.[fieldName];
+                   const judgeNumber = event.score_sheet?.judge_number || `Judge ${eventIndex + 1}`;
+                   
+                   return (
+                     <TableCell key={event.id} className={`text-center border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                       {(() => {
+                         if (value === null || value === undefined) return '-';
+                         if (typeof value === 'object') return JSON.stringify(value);
+                         
+                         const stringValue = String(value);
+                         
+                         // Check if this is a notes field
+                         if (isNotesField(stringValue, fieldName)) {
+                           return (
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               className="h-6 px-2 text-xs"
+                               onClick={() => handleViewNotes(fieldName, stringValue, judgeNumber)}
+                             >
+                               <Eye className="w-3 h-3 mr-1" />
+                               VIEW
+                             </Button>
+                           );
+                         }
+                         
+                         return stringValue;
+                       })()}
+                     </TableCell>
+                   );
+                 })}
                 <TableCell className="text-center font-medium bg-muted/30 px-1 text-sm">
                   {average}
                 </TableCell>
@@ -173,6 +221,14 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
           onEventUpdated={handleEventUpdated}
         />
       )}
+
+      <NotesViewDialog
+        open={notesDialog.open}
+        onOpenChange={(open) => setNotesDialog(prev => ({ ...prev, open }))}
+        fieldName={notesDialog.fieldName}
+        notes={notesDialog.notes}
+        judgeNumber={notesDialog.judgeNumber}
+      />
     </div>
   );
 };
