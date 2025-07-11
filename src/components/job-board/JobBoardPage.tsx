@@ -27,6 +27,7 @@ const JobBoardPage = () => {
   
   // Debug permissions
   console.log('Job Board Permissions:', { canManageHierarchy, canCreate });
+  console.log('showAddDialog state:', showAddDialog);
 
   const {
     jobs,
@@ -91,7 +92,10 @@ const JobBoardPage = () => {
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
           {canCreate && (
-            <Button onClick={() => setShowAddDialog(true)}>
+            <Button onClick={() => {
+              console.log('Add Job button clicked, setting showAddDialog to true');
+              setShowAddDialog(true);
+            }}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
             </Button>
