@@ -16,7 +16,7 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { canEdit, canDelete } = useTablePermissions('competitions');
+  const { canEdit, canDelete, canViewDetails } = useTablePermissions('competitions');
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
@@ -85,6 +85,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
                    <TableActionButtons
+                     canView={canViewDetails}
                      canEdit={canEdit}
                      canDelete={canDelete}
                      onEdit={() => handleEditScoreSheet(event)}
