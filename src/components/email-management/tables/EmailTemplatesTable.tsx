@@ -78,8 +78,8 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon" className="h-6 w-6"
                           onClick={() => onView(template)}
                         >
                           <Eye className="w-4 h-4" />
@@ -94,8 +94,8 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon" className="h-6 w-6"
                           onClick={() => onEdit(template)}
                         >
                           <Edit className="w-4 h-4" />
@@ -110,8 +110,8 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                           onClick={() => handleDelete(template.id)}
                         >
                           <Trash2 className="w-4 h-4" />
