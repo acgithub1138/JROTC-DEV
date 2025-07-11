@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
-import { Edit } from 'lucide-react';
+import { Edit, Trash2 } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
+import { toast } from 'sonner';
 
 interface ScoreSheetTableProps {
   events: CompetitionEvent[];
@@ -15,7 +17,9 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { canUpdate, canDelete } = useModulePermissions('competitions');
+  const { canEdit, canDelete } = useTablePermissions('competitions');
+  const competitionId = (events[0] as any)?.competition_id; // Get from first event
+  const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
 
   const handleEditScoreSheet = (event: CompetitionEvent) => {
@@ -25,6 +29,17 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
 
   const handleEventUpdated = () => {
     onEventsRefresh?.();
+  };
+
+  const handleDeleteEvent = async (event: CompetitionEvent) => {
+    if (window.confirm(`Are you sure you want to delete this score sheet for ${event.event}?`)) {
+      try {
+        await deleteEvent(event.id);
+        onEventsRefresh?.();
+      } catch (error) {
+        console.error('Failed to delete event:', error);
+      }
+    }
   };
 
   // Get unique cadets from events
@@ -70,16 +85,28 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                   <div className="font-medium text-sm">
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
-                {canUpdate && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => handleEditScoreSheet(event)}
-                      className="h-6 w-6 p-0 hover:bg-muted"
-                    >
-                      <Edit className="h-3 w-3" />
-                    </Button>
-                  )}
+                  <div className="flex gap-1">
+                    {canEdit && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleEditScoreSheet(event)}
+                        className="h-6 w-6 p-0 hover:bg-muted"
+                      >
+                        <Edit className="h-3 w-3" />
+                      </Button>
+                    )}
+                    {canDelete && (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => handleDeleteEvent(event)}
+                        className="h-6 w-6 p-0 hover:bg-muted hover:text-destructive"
+                      >
+                        <Trash2 className="h-3 w-3" />
+                      </Button>
+                    )}
+                  </div>
                 </div>
               </TableHead>
             ))}
@@ -142,7 +169,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
       </Table>
       </div>
 
-      {canUpdate && (
+      {canEdit && (
         <EditScoreSheetDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}

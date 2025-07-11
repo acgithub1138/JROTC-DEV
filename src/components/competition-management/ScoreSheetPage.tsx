@@ -1,23 +1,29 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, RefreshCw } from 'lucide-react';
+import { ArrowLeft, RefreshCw, Plus } from 'lucide-react';
 import { EventSelector } from './components/score-sheet-viewer/EventSelector';
 import { ScoreSheetTable } from './components/score-sheet-viewer/ScoreSheetTable';
 import { useScoreSheetData } from './components/score-sheet-viewer/hooks/useScoreSheetData';
 import { useCompetitions } from './hooks/useCompetitions';
+import { useCompetitionEvents } from './hooks/useCompetitionEvents';
+import { AddEventDialog } from './components/AddEventDialog';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const ScoreSheetPage = () => {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
+  const [showAddEventDialog, setShowAddEventDialog] = useState(false);
 
   // Get competition data
   const { competitions } = useCompetitions();
   const competition = competitions.find(comp => comp.id === competitionId);
+  const { canCreate } = useTablePermissions('competitions');
 
   const { events, isLoading, refetch } = useScoreSheetData(competition, true);
+  const { createEvent } = useCompetitionEvents(competitionId);
 
   // Get unique event types from the events
   const uniqueEventTypes = [...new Set(events.map(event => event.event))];
@@ -33,6 +39,17 @@ export const ScoreSheetPage = () => {
 
   const handleBack = () => {
     navigate('/competitions');
+  };
+
+  const handleEventCreated = async (eventData: any) => {
+    try {
+      await createEvent(eventData);
+      setShowAddEventDialog(false);
+      refetch(); // Refresh the score sheet data
+    } catch (error) {
+      console.error('Failed to create event:', error);
+      // Keep dialog open on error so user can retry
+    }
   };
 
   if (!competition) {
@@ -58,10 +75,18 @@ export const ScoreSheetPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex items-center justify-between mb-6">
           <h1 className="text-2xl font-bold">Score Sheets for {competition.name}</h1>
-          <Button variant="outline" onClick={handleBack}>
-            <ArrowLeft className="w-4 h-4 mr-2" />
-            Back to Competitions
-          </Button>
+          <div className="flex gap-2">
+            {canCreate && (
+              <Button onClick={() => setShowAddEventDialog(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Score Sheet
+              </Button>
+            )}
+            <Button variant="outline" onClick={handleBack}>
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Competitions
+            </Button>
+          </div>
         </div>
 
         <div className="space-y-6">
@@ -110,6 +135,15 @@ export const ScoreSheetPage = () => {
             </div>
           )}
         </div>
+
+        {canCreate && competition && (
+          <AddEventDialog 
+            open={showAddEventDialog} 
+            onOpenChange={setShowAddEventDialog} 
+            competitionId={competition.id} 
+            onEventCreated={handleEventCreated} 
+          />
+        )}
       </div>
     </div>
   );
