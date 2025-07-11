@@ -111,10 +111,38 @@ export const useIncidentComments = (incidentId: string) => {
     },
   });
 
+  const addSystemComment = useMutation({
+    mutationFn: async (comment_text: string) => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) throw new Error("User not authenticated");
+
+      const { data, error } = await supabase
+        .from("incident_comments")
+        .insert({
+          incident_id: incidentId,
+          user_id: userData.user.id,
+          comment_text,
+          is_system_comment: true,
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["incident-comments", incidentId] });
+    },
+    onError: (error) => {
+      console.error("Error adding system comment:", error);
+    },
+  });
+
   return {
     comments: query.data || [],
     isLoading: query.isLoading,
     addComment,
+    addSystemComment,
     updateComment,
     deleteComment,
   };

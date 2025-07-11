@@ -17,8 +17,10 @@ import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover
 import { format } from "date-fns";
 import { Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, AlertTriangle } from "lucide-react";
 import { IncidentCommentsSection } from "./components/IncidentCommentsSection";
+import { formatIncidentFieldChangeComment } from "@/utils/incidentCommentUtils";
 import { useIncidentComments } from "@/hooks/incidents/useIncidentComments";
 import { useIncidents } from "@/hooks/incidents/useIncidents";
+import { useIncidentStatusOptions, useIncidentPriorityOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useSchoolUsers } from "@/hooks/useSchoolUsers";
 import { useAuth } from "@/contexts/AuthContext";
@@ -70,7 +72,9 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
   const { users, isLoading: usersLoading } = useSchoolUsers();
-  const { comments, isLoading: commentsLoading, addComment } = useIncidentComments(incident.id);
+  const { comments, isLoading: commentsLoading, addComment, addSystemComment } = useIncidentComments(incident.id);
+  const { data: statusOptions = [] } = useIncidentStatusOptions();
+  const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { canUpdate } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(false);
@@ -83,20 +87,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     due_date: incident.due_date ? new Date(incident.due_date) : null,
   });
 
-  // Status and priority options
-  const statusOptions = [
-    { value: 'open', label: 'Open' },
-    { value: 'in_progress', label: 'In Progress' },
-    { value: 'resolved', label: 'Resolved' },
-    { value: 'closed', label: 'Closed' },
-  ];
-
-  const priorityOptions = [
-    { value: 'low', label: 'Low' },
-    { value: 'medium', label: 'Medium' },
-    { value: 'high', label: 'High' },
-    { value: 'critical', label: 'Critical' },
-  ];
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -116,20 +106,64 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const handleSave = async () => {
     try {
       const updateData: any = {};
+      const trackedFields = ['title', 'status', 'priority', 'assigned_to_admin', 'due_date', 'description'];
       
-      if (editData.title !== currentIncident.title) updateData.title = editData.title;
-      if (editData.description !== (currentIncident.description || '')) updateData.description = editData.description || null;
-      if (editData.status !== currentIncident.status) updateData.status = editData.status;
-      if (editData.priority !== currentIncident.priority) updateData.priority = editData.priority;
+      // Track changes for system comments
+      const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
+      
+      if (editData.title !== currentIncident.title) {
+        updateData.title = editData.title;
+        changes.push({ field: 'title', oldValue: currentIncident.title, newValue: editData.title });
+      }
+      
+      if (editData.description !== (currentIncident.description || '')) {
+        updateData.description = editData.description || null;
+        changes.push({ field: 'description', oldValue: currentIncident.description || '', newValue: editData.description || '' });
+      }
+      
+      if (editData.status !== currentIncident.status) {
+        updateData.status = editData.status;
+        changes.push({ field: 'status', oldValue: currentIncident.status, newValue: editData.status });
+      }
+      
+      if (editData.priority !== currentIncident.priority) {
+        updateData.priority = editData.priority;
+        changes.push({ field: 'priority', oldValue: currentIncident.priority, newValue: editData.priority });
+      }
       
       const newAssignedTo = editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin;
-      if (newAssignedTo !== currentIncident.assigned_to_admin) updateData.assigned_to_admin = newAssignedTo;
+      if (newAssignedTo !== currentIncident.assigned_to_admin) {
+        updateData.assigned_to_admin = newAssignedTo;
+        changes.push({ field: 'assigned_to_admin', oldValue: currentIncident.assigned_to_admin, newValue: newAssignedTo });
+      }
       
-      if (editData.due_date !== (currentIncident.due_date ? new Date(currentIncident.due_date) : null)) {
-        updateData.due_date = editData.due_date ? editData.due_date.toISOString() : null;
+      const oldDueDate = currentIncident.due_date ? new Date(currentIncident.due_date) : null;
+      const newDueDate = editData.due_date;
+      const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
+                                   (!oldDueDate && newDueDate) ||
+                                   (oldDueDate && !newDueDate);
+      
+      if (dueDatesAreDifferent) {
+        updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
+        changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
       }
 
+      // Update the incident
       await updateIncident.mutateAsync({ id: currentIncident.id, data: updateData });
+      
+      // Add system comments for tracked changes
+      for (const change of changes) {
+        const commentText = formatIncidentFieldChangeComment(
+          change.field,
+          change.oldValue,
+          change.newValue,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        addSystemComment.mutate(commentText);
+      }
+      
       setIsEditing(false);
     } catch (error) {
       console.error('Error updating incident:', error);

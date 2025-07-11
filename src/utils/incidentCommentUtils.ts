@@ -1,0 +1,65 @@
+import { format } from 'date-fns';
+
+export const formatIncidentFieldChangeComment = (
+  field: string,
+  oldValue: any,
+  newValue: any,
+  statusOptions: any[],
+  priorityOptions: any[],
+  users: any[]
+): string => {
+  const getStatusLabel = (value: string) => {
+    const option = statusOptions.find(opt => opt.value === value);
+    return option ? option.label : value;
+  };
+
+  const getPriorityLabel = (value: string) => {
+    const option = priorityOptions.find(opt => opt.value === value);
+    return option ? option.label : value;
+  };
+
+  const getUserName = (userId: string | null) => {
+    if (!userId) return 'Unassigned';
+    const user = users.find(u => u.id === userId);
+    return user ? `${user.last_name}, ${user.first_name}` : 'Unknown User';
+  };
+
+  const formatDate = (date: string | Date | null) => {
+    if (!date) return 'No due date';
+    try {
+      const dateObj = typeof date === 'string' ? new Date(date) : date;
+      return format(dateObj, 'MMM d, yyyy');
+    } catch {
+      return 'Invalid date';
+    }
+  };
+
+  switch (field) {
+    case 'status':
+      return `Status changed from "${getStatusLabel(oldValue)}" to "${getStatusLabel(newValue)}"`;
+    
+    case 'priority':
+      return `Priority changed from "${getPriorityLabel(oldValue)}" to "${getPriorityLabel(newValue)}"`;
+    
+    case 'assigned_to_admin':
+      return `Assignment changed from "${getUserName(oldValue)}" to "${getUserName(newValue)}"`;
+    
+    case 'due_date':
+      return `Due date changed from "${formatDate(oldValue)}" to "${formatDate(newValue)}"`;
+    
+    case 'description':
+      const oldDesc = oldValue || 'No description';
+      const newDesc = newValue || 'No description';
+      const truncatedOld = oldDesc.length > 50 ? oldDesc.substring(0, 50) + '...' : oldDesc;
+      const truncatedNew = newDesc.length > 50 ? newDesc.substring(0, 50) + '...' : newDesc;
+      return `Description changed from "${truncatedOld}" to "${truncatedNew}"`;
+    
+    case 'title':
+      const truncatedOldTitle = oldValue.length > 50 ? oldValue.substring(0, 50) + '...' : oldValue;
+      const truncatedNewTitle = newValue.length > 50 ? newValue.substring(0, 50) + '...' : newValue;
+      return `Title changed from "${truncatedOldTitle}" to "${truncatedNewTitle}"`;
+    
+    default:
+      return `${field} changed`;
+  }
+};
