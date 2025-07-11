@@ -1,6 +1,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AddEventFormProps {
@@ -114,11 +115,20 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({
       {/* Team Name */}
       <div className="space-y-1">
         <Label>Team Name (Optional)</Label>
-        <Input 
-          value={teamName} 
-          onChange={e => onTeamNameChange(e.target.value)} 
-          placeholder="Enter team name..." 
-        />
+        {teamName.length >= 2500 ? (
+          <Textarea 
+            value={teamName} 
+            onChange={e => onTeamNameChange(e.target.value)} 
+            placeholder="Enter team name..." 
+            className="min-h-[120px] resize-y"
+          />
+        ) : (
+          <Input 
+            value={teamName} 
+            onChange={e => onTeamNameChange(e.target.value)} 
+            placeholder="Enter team name..." 
+          />
+        )}
       </div>
     </div>
   );
