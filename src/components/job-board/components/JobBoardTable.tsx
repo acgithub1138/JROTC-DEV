@@ -28,7 +28,7 @@ export const JobBoardTable = ({
           <TableHead>Reports To</TableHead>
           <TableHead>Assistant To
         </TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
