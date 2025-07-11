@@ -9,7 +9,6 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { StandardTable, StandardTableHeader, StandardTableBody } from '@/components/ui/standard-table';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
@@ -28,8 +27,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
 }) => {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('budget');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('budget');
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
@@ -185,7 +183,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-                {canUpdate('budget') && (
+                {canUpdate && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button
@@ -201,7 +199,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                     </TooltipContent>
                   </Tooltip>
                 )}
-                {canDelete('budget') && (
+                {canDelete && (
                   <Tooltip>
                     <TooltipTrigger asChild>
                       <Button

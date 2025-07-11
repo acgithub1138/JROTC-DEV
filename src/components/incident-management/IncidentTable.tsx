@@ -2,7 +2,6 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { X } from 'lucide-react';
 import { Incident } from '@/hooks/incidents/useIncidents';
@@ -32,8 +31,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
   onCancelIncident
 }) => {
   const { userProfile } = useAuth();
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('incidents');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('incidents');
   const isAdmin = userProfile?.role === 'admin';
   const isInstructor = userProfile?.role === 'instructor';
 
@@ -108,10 +106,10 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell className="text-right">
                 <TableActionButtons
                   canView={canViewDetails}
-                  canEdit={canUpdate('incidents') && canEditIncident(incident)}
-                  canDelete={canDelete('incidents')}
+                  canEdit={canUpdate && canEditIncident(incident)}
+                  canDelete={canDelete}
                   onView={() => onIncidentSelect(incident)}
-                  onEdit={canEditIncident(incident) && canUpdate('incidents') ? () => onEditIncident(incident) : undefined}
+                  onEdit={canEditIncident(incident) && canUpdate ? () => onEditIncident(incident) : undefined}
                   customActions={[
                     {
                       icon: <X className="w-4 h-4" />,

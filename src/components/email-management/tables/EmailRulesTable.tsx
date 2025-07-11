@@ -14,7 +14,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Play, Pause, Eye } from 'lucide-react';
 import { EmailRule } from '@/hooks/email/useEmailRules';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 
 interface EmailRulesTableProps {
@@ -32,8 +31,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
   onDelete,
   onToggleActive,
 }) => {
-  const { canUpdate, canDelete: canDeletePerm } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('email');
+  const { canUpdate, canDelete: canDeletePerm, canViewDetails } = useModulePermissions('email_management');
   if (isLoading) {
     return (
       <Card>
@@ -123,7 +121,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                           </TooltipContent>
                         </Tooltip>
                       )}
-                      {canUpdate('email_rules') && (
+                      {canUpdate && (
                         <>
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -155,7 +153,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                           </Tooltip>
                         </>
                       )}
-                      {canDeletePerm('email_rules') && (
+                      {canDeletePerm && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button

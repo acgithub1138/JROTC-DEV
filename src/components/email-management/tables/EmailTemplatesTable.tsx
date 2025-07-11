@@ -13,7 +13,6 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { format } from 'date-fns';
 
@@ -29,8 +28,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   onEdit,
 }) => {
   const { deleteTemplate } = useEmailTemplates();
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('email');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('email_management');
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
@@ -90,7 +88,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {canUpdate('email_templates') && (
+                  {canUpdate && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -106,7 +104,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {canDelete('email_templates') && (
+                  {canDelete && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button

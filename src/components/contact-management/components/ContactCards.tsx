@@ -3,7 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2, Phone, Mail, User, Eye } from 'lucide-react';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { Contact } from '../ContactManagementPage';
 
@@ -20,8 +19,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('contacts');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -141,7 +139,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
                   <Eye className="w-4 h-4" />
                 </Button>
               )}
-              {canUpdate('contacts') && (
+              {canUpdate && (
                 <Button
                   variant="outline"
                   size="sm"
@@ -150,7 +148,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
                   <Edit className="w-4 h-4" />
                 </Button>
               )}
-              {canDelete('contacts') && (
+              {canDelete && (
                 <Button
                   variant="outline"
                   size="sm"

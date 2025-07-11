@@ -4,7 +4,6 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
@@ -19,8 +18,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('budget');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('budget');
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';
@@ -130,7 +128,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
                   </TooltipContent>
                 </Tooltip>
               )}
-              {canUpdate('budget') && (
+              {canUpdate && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button
@@ -146,7 +144,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
                   </TooltipContent>
                 </Tooltip>
               )}
-              {canDelete('budget') && (
+              {canDelete && (
                 <Tooltip>
                   <TooltipTrigger asChild>
                     <Button

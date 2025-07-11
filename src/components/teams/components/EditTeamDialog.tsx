@@ -20,7 +20,7 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { TeamWithMembers } from '../types';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 
 interface EditTeamDialogProps {
   open: boolean;
@@ -44,8 +44,8 @@ export const EditTeamDialog = ({
   });
   
   const { users } = useSchoolUsers(true); // Only get active users
-  const { canUpdate } = useUserPermissions();
-  const isReadOnly = !canUpdate('teams');
+  const { canUpdate } = useModulePermissions('teams');
+  const isReadOnly = !canUpdate;
 
   useEffect(() => {
     if (team) {

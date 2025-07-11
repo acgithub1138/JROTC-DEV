@@ -16,7 +16,7 @@ import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOpt
 import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
 import { useIncidentEmailTemplates } from '@/hooks/incidents/useIncidentEmailTemplates';
 import { useIncidentNotifications } from '@/hooks/incidents/useIncidentNotifications';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface IncidentDetailDialogProps {
@@ -67,7 +67,8 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { categoryOptions } = useIncidentCategoryOptions();
   const { templates } = useIncidentEmailTemplates();
   const { sendNotification, isSending } = useIncidentNotifications();
-  const { canUpdate, canAssign } = useUserPermissions();
+  const { canUpdate, canDelete } = useModulePermissions('incidents');
+  const canAssign = canUpdate; // For now, use update permission for assign
   
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
@@ -82,7 +83,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     assigned_to: incident.assigned_to || 'unassigned',
   });
 
-  const canEditIncident = canUpdate('incidents');
+  const canEditIncident = canUpdate;
 
   const handleSave = async () => {
     try {
@@ -297,7 +298,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned To:</span>
-                  {canEditIncident && canAssign('incidents') ? (
+                  {canEditIncident && canAssign ? (
                     <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />

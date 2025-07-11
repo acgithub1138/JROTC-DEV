@@ -5,7 +5,6 @@ import { TableHead, TableRow, TableCell } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { Contact } from '../ContactManagementPage';
 
@@ -22,8 +21,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   onEdit,
   onDelete,
 }) => {
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('contacts');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('contacts');
   const getStatusBadge = (status: Contact['status']) => {
     const variants = {
       active: 'bg-green-100 text-green-800',
@@ -137,7 +135,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
                     </Tooltip>
                   </TooltipProvider>
                 )}
-                {canUpdate('contacts') && (
+                {canUpdate && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
@@ -156,7 +154,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
                     </Tooltip>
                   </TooltipProvider>
                 )}
-                {canDelete('contacts') && (
+                {canDelete && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>

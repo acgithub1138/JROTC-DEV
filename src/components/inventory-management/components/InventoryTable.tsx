@@ -10,7 +10,6 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Edit, Trash2, Package, AlertTriangle, History, Eye } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
@@ -42,8 +41,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
-  const { canUpdate, canDelete } = useUserPermissions();
-  const { canViewDetails } = useModulePermissions('inventory');
+  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('inventory');
   
   const { sortedData: sortedItems, sortConfig, handleSort } = useSortableTable({
     data: items,
@@ -51,7 +49,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   });
 
   const handleEdit = (item: InventoryItem) => {
-    if (!canUpdate('inventory')) return;
+    if (!canUpdate) return;
     setEditingItem(item);
   };
 
@@ -65,7 +63,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   };
 
   const handleQtyEdit = (itemId: string, field: 'qty_total' | 'qty_issued', value: string) => {
-    if (!canUpdate('inventory')) return;
+    if (!canUpdate) return;
     const numValue = parseInt(value) || 0;
     if (numValue < 0) return;
     
@@ -267,8 +265,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                       />
                        ) : (
                         <div 
-                          className={`p-1 rounded ${canUpdate('inventory') ? 'cursor-pointer hover:bg-muted' : ''}`}
-                          onClick={canUpdate('inventory') ? () => setEditingQty({itemId: item.id, field: 'qty_total'}) : undefined}
+                          className={`p-1 rounded ${canUpdate ? 'cursor-pointer hover:bg-muted' : ''}`}
+                          onClick={canUpdate ? () => setEditingQty({itemId: item.id, field: 'qty_total'}) : undefined}
                        >
                          {item.qty_total || 0}
                        </div>
@@ -291,8 +289,8 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                       />
                       ) : (
                         <div 
-                          className={`p-1 rounded ${canUpdate('inventory') ? 'cursor-pointer hover:bg-muted' : ''}`}
-                          onClick={canUpdate('inventory') ? () => setEditingQty({itemId: item.id, field: 'qty_issued'}) : undefined}
+                          className={`p-1 rounded ${canUpdate ? 'cursor-pointer hover:bg-muted' : ''}`}
+                          onClick={canUpdate ? () => setEditingQty({itemId: item.id, field: 'qty_issued'}) : undefined}
                        >
                          {item.qty_issued || 0}
                        </div>
@@ -350,7 +348,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                             </Tooltip>
                           </TooltipProvider>
                         )}
-                       {canUpdate('inventory') && (
+                       {canUpdate && (
                          <TooltipProvider>
                            <Tooltip>
                              <TooltipTrigger asChild>
@@ -368,7 +366,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                            </Tooltip>
                          </TooltipProvider>
                        )}
-                       {canDelete('inventory') && (
+                       {canDelete && (
                          <TooltipProvider>
                            <Tooltip>
                              <TooltipTrigger asChild>

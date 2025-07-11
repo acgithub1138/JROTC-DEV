@@ -5,7 +5,7 @@ import { Edit } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
-import { useUserPermissions } from '@/hooks/useUserPermissions';
+import { useModulePermissions } from '@/hooks/usePermissions';
 
 interface ScoreSheetTableProps {
   events: CompetitionEvent[];
@@ -15,7 +15,7 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
-  const { canUpdate } = useUserPermissions();
+  const { canUpdate } = useModulePermissions('competitions');
   const fieldNames = getFieldNames(events);
 
   const handleEditScoreSheet = (event: CompetitionEvent) => {
@@ -70,7 +70,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                   <div className="font-medium text-sm">
                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                   </div>
-                  {canUpdate('competitions') && (
+                {canUpdate && (
                     <Button
                       variant="ghost"
                       size="sm"
@@ -142,7 +142,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
       </Table>
       </div>
 
-      {canUpdate('competitions') && (
+      {canUpdate && (
         <EditScoreSheetDialog
           open={isEditDialogOpen}
           onOpenChange={setIsEditDialogOpen}
