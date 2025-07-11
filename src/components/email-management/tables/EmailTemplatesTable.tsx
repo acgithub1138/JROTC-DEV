@@ -13,7 +13,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Eye } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { format } from 'date-fns';
 
 interface EmailTemplatesTableProps {
@@ -28,7 +28,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   onEdit,
 }) => {
   const { deleteTemplate } = useEmailTemplates();
-  const { canUpdate, canDelete, canViewDetails } = useModulePermissions('email_management');
+  const { canUpdate, canDelete, canViewDetails } = useEmailPermissions();
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
