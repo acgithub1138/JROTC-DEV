@@ -73,7 +73,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                 {format(new Date(template.created_at), 'MMM dd, yyyy')}
               </TableCell>
               <TableCell className="py-2">
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   {canViewDetails && onView && (
                     <Tooltip>
                       <TooltipTrigger asChild>
