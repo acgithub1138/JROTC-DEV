@@ -9,6 +9,7 @@ import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
 interface TaskPriorityStatusFieldsProps {
   form: UseFormReturn<TaskFormData>;
   canAssignTasks: boolean;
+  canEditThisTask: boolean;
   isEditingAssignedTask: boolean;
   statusOptions: TaskStatusOption[];
   priorityOptions: TaskPriorityOption[];
@@ -17,6 +18,7 @@ interface TaskPriorityStatusFieldsProps {
 export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> = ({ 
   form, 
   canAssignTasks, 
+  canEditThisTask,
   isEditingAssignedTask,
   statusOptions,
   priorityOptions
@@ -47,7 +49,7 @@ export const TaskPriorityStatusFields: React.FC<TaskPriorityStatusFieldsProps> =
         <Select 
           value={form.watch('status')} 
           onValueChange={(value) => form.setValue('status', value)}
-          disabled={!canAssignTasks && !isEditingAssignedTask}
+          disabled={!canEditThisTask}
         >
           <SelectTrigger>
             <SelectValue />

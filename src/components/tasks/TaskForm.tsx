@@ -22,9 +22,10 @@ interface TaskFormProps {
 
 export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
   const { userProfile } = useAuth();
-  const { canAssign } = useTaskPermissions();
+  const { canAssign, canUpdate, canUpdateAssigned } = useTaskPermissions();
   
   const canAssignTasks = canAssign;
+  const canEditThisTask = canUpdate || (canUpdateAssigned && task?.assigned_to === userProfile?.id);
   
   const { 
     form, 
@@ -91,6 +92,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
             <TaskPriorityStatusFields 
               form={form} 
               canAssignTasks={canAssignTasks} 
+              canEditThisTask={canEditThisTask}
               isEditingAssignedTask={isEditingAssignedTask}
               statusOptions={statusOptions}
               priorityOptions={priorityOptions}
