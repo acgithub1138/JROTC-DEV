@@ -44,7 +44,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
 
   return (
     <TooltipProvider>
-      <div className="border rounded-lg">
+      <div className="border rounded-lg bg-background">
       <Table>
         <TableHeader>
           <TableRow>

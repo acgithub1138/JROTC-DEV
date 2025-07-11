@@ -99,9 +99,8 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                         <TooltipTrigger asChild>
                           <Button
                             variant="outline"
-                            size="icon" className="h-6 w-6"
+                            size="sm"
                             onClick={() => onViewMembers(team)}
-                            className="h-7 px-2"
                           >
                             <Eye className="w-3 h-3" />
                             View
