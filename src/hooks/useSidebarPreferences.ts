@@ -151,7 +151,9 @@ export const useSidebarPreferences = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  console.log('useSidebarPreferences - User Profile:', userProfile?.id);
+  console.log('useSidebarPreferences - User Profile:', userProfile);
+  console.log('useSidebarPreferences - User Profile ID:', userProfile?.id);
+  console.log('useSidebarPreferences - User Profile Role:', userProfile?.role);
   console.log('useSidebarPreferences - Role Permissions:', allRolePermissions.length);
 
   // Memoize permission state to prevent unnecessary re-renders

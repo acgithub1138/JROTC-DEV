@@ -128,7 +128,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
 
       if (data) {
-        console.log('User profile fetched:', data);
+        console.log('User profile fetched successfully:', {
+          id: data.id,
+          role: data.role,
+          school_id: data.school_id,
+          email: data.email
+        });
         console.log('School JROTC Program:', data.schools?.jrotc_program);
         setUserProfile(data);
       } else {
