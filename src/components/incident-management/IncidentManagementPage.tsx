@@ -9,6 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
 import IncidentDetailDialog_Readonly from "./IncidentDetailDialog_Readonly";
+import { AccessDeniedDialog } from "./AccessDeniedDialog";
 import IncidentTable from "./IncidentTable";
 import type { Incident } from "@/hooks/incidents/types";
 
@@ -21,6 +22,7 @@ const IncidentManagementPage: React.FC = () => {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showReadonlyDialog, setShowReadonlyDialog] = useState(false);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
@@ -80,6 +82,14 @@ const IncidentManagementPage: React.FC = () => {
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
+    const { canUpdate, canUpdateAssigned } = useIncidentPermissions();
+    const canEdit = canUpdate || canUpdateAssigned;
+    
+    if (!canEdit) {
+      setShowAccessDenied(true);
+      return;
+    }
+    
     setSelectedIncident(incident);
     setShowDetailDialog(true);
   };
@@ -243,6 +253,12 @@ const IncidentManagementPage: React.FC = () => {
           onClose={() => setShowReadonlyDialog(false)}
         />
       )}
+
+      <AccessDeniedDialog
+        isOpen={showAccessDenied}
+        onClose={() => setShowAccessDenied(false)}
+        message="You do not have permission to edit incidents."
+      />
     </div>
   );
 };

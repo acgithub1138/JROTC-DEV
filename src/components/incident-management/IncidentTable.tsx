@@ -57,7 +57,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   onIncidentEdit,
   onIncidentSelectForEdit,
 }) => {
-  const { canUpdate, canUpdateAssigned } = useIncidentPermissions();
+  const { canUpdate, canUpdateAssigned, canView } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
   if (incidents.length === 0) {
     return (
@@ -86,7 +86,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableRow key={incident.id}>
               <TableCell className="text-center">
                 <button
-                  onClick={() => canEdit && onIncidentSelectForEdit ? onIncidentSelectForEdit(incident) : onIncidentSelect(incident)}
+                  onClick={() => onIncidentSelectForEdit ? onIncidentSelectForEdit(incident) : onIncidentSelect(incident)}
                   className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
                 >
                   {incident.incident_number}
@@ -116,13 +116,15 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
               </TableCell>
               <TableCell>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => onIncidentSelect(incident)}
-                >
-                  <Eye className="h-4 w-4" />
-                </Button>
+                {canView && (
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={() => onIncidentSelect(incident)}
+                  >
+                    <Eye className="h-4 w-4" />
+                  </Button>
+                )}
               </TableCell>
             </TableRow>
           ))}
