@@ -99,11 +99,11 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                         <TooltipTrigger asChild>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="icon" className="h-6 w-6"
                             onClick={() => onViewMembers(team)}
                             className="h-7 px-2"
                           >
-                            <Eye className="w-3 h-3 mr-1" />
+                            <Eye className="w-3 h-3" />
                             View
                           </Button>
                         </TooltipTrigger>
@@ -119,17 +119,17 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                 {new Date(team.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell className="py-2">
-                <div className="flex items-center justify-center gap-1">
+                <div className="flex items-center justify-center gap-2">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="ghost"
-                          size="sm"
+                          variant="outline"
+                          size="icon" className="h-6 w-6"
                           onClick={() => onSendEmail(team)}
                           className="h-8 w-8 p-0"
                         >
-                          <Mail className="h-4 w-4" />
+                          <Mail className="w-3 h-3" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -142,12 +142,12 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
-                            variant="ghost"
-                            size="sm"
+                            variant="outline"
+                            size="icon" className="h-6 w-6"
                             onClick={() => onEditTeam(team)}
                             className="h-8 w-8 p-0"
                           >
-                            <Edit className="h-4 w-4" />
+                            <Edit className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -161,12 +161,11 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
-                            variant="ghost"
-                            size="sm"
+                            variant="outline"
+                            size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                             onClick={() => handleDeleteClick(team)}
-                            className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
                           >
-                            <Trash2 className="h-4 w-4" />
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
