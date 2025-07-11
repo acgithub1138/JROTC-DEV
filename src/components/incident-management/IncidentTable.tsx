@@ -115,7 +115,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
                       icon: <X className="w-4 h-4" />,
                       label: "Cancel incident",
                       onClick: () => onCancelIncident(incident),
-                      show: canCancelIncident(incident),
+                      show: canUpdate && canCancelIncident(incident),
                       className: "text-orange-600 hover:text-orange-700"
                     }
                   ]}
