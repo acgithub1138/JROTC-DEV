@@ -20,7 +20,7 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
   onEdit,
   onDelete
 }) => {
-  const { canEdit, canDelete: canDeletePermission } = useTablePermissions('competitions');
+  const { canEdit, canDelete: canDeletePermission, canCreate } = useTablePermissions('competitions');
   if (isLoading) {
     return (
       <div className="space-y-2">
@@ -68,6 +68,7 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
                 <TableActionButtons
                   canEdit={canEdit}
                   canDelete={canDeletePermission}
+                  canCreate={canCreate}
                   onEdit={() => onEdit(competition)}
                   onDelete={() => onDelete(competition.id)}
                   customActions={[
@@ -75,7 +76,7 @@ export const CompetitionsTable: React.FC<CompetitionsTableProps> = ({
                       icon: <Plus className="w-4 h-4" />,
                       label: "Add event",
                       onClick: () => {}, // TODO: Add event handler
-                      show: true
+                      show: canCreate
                     }
                   ]}
                 />
