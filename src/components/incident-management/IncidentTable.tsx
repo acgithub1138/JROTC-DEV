@@ -106,7 +106,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-1">
+                <div className="flex items-center justify-center gap-2">
                   {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentSelect(incident)}>
                       <Eye className="h-3 w-3" />
                     </Button>}
