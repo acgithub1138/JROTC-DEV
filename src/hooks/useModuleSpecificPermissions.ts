@@ -75,6 +75,7 @@ export const useIncidentPermissions = () => {
     canView: modulePermissions.canRead, // Backwards compatibility
     canSubmit: hasPermission('incidents', 'submit'),
     canApprove: hasPermission('incidents', 'approve'),
+    canAssign: hasPermission('incidents', 'assign'),
   };
 };
 

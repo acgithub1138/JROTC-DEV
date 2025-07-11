@@ -16,7 +16,7 @@ import { useIncidentStatusOptions } from '@/hooks/incidents/useIncidentStatusOpt
 import { useIncidentCategoryOptions } from '@/hooks/incidents/useIncidentCategoryOptions';
 import { useIncidentEmailTemplates } from '@/hooks/incidents/useIncidentEmailTemplates';
 import { useIncidentNotifications } from '@/hooks/incidents/useIncidentNotifications';
-import { useModulePermissions } from '@/hooks/usePermissions';
+import { useIncidentPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Checkbox } from '@/components/ui/checkbox';
 
 interface IncidentDetailDialogProps {
@@ -69,8 +69,7 @@ export const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { categoryOptions } = useIncidentCategoryOptions();
   const { templates } = useIncidentEmailTemplates();
   const { sendNotification, isSending } = useIncidentNotifications();
-  const { canUpdate, canDelete } = useModulePermissions('incidents');
-  const canAssign = canUpdate; // For now, use update permission for assign
+  const { canUpdate, canDelete, canAssign } = useIncidentPermissions();
   
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
