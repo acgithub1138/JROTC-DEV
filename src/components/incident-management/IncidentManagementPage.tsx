@@ -239,6 +239,15 @@ const IncidentManagementPage: React.FC = () => {
         mode="create"
       />
 
+      {/* Edit Incident Form */}
+      {editingIncident && (
+        <IncidentForm
+          open={true}
+          onOpenChange={(open) => !open && handleCloseEditForm()}
+          mode="edit"
+          incident={editingIncident}
+        />
+      )}
 
       {/* Incident Detail Dialog */}
       {selectedIncident && (
