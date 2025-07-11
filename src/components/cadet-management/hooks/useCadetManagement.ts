@@ -79,7 +79,7 @@ export const useCadetManagement = () => {
     }
   };
 
-  const handleAddCadet = async (e: React.FormEvent) => {
+  const handleAddCadet = async (e: React.FormEvent, onSuccess?: () => void) => {
     e.preventDefault();
 
     if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
@@ -124,11 +124,16 @@ export const useCadetManagement = () => {
       });
       
       fetchProfiles();
+      
+      // Close the modal on success
+      if (onSuccess) {
+        onSuccess();
+      }
     } catch (error) {
-      console.error('Error inviting cadet:', error);
+      console.error('Error creating cadet:', error);
       toast({
         title: "Error",
-        description: "Failed to send invitation",
+        description: "Failed to create cadet",
         variant: "destructive"
       });
     }

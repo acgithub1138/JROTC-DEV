@@ -117,6 +117,10 @@ const CadetManagementPage = () => {
     }
     return success;
   };
+
+  const handleAddCadetWrapper = (e: React.FormEvent) => {
+    handleAddCadet(e, () => setAddDialogOpen(false));
+  };
   const filteredProfiles = getFilteredProfiles(profiles, activeTab, searchTerm);
   const totalPages = getTotalPages(filteredProfiles.length);
   const paginatedProfiles = getPaginatedProfiles(filteredProfiles, currentPage);
@@ -161,7 +165,7 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadet} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
+      <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadetWrapper} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
       
       <ViewCadetDialog
         open={viewDialogOpen}
