@@ -31,7 +31,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { priorityOptions } = useTaskPriorityOptions();
   const { canUpdate, canAssign } = useUserPermissions();
   const [currentTask, setCurrentTask] = useState(task);
-  const [isEditing, setIsEditing] = useState(false);
+  const canEdit = canUpdate('tasks') || (task.assigned_to === userProfile?.id);
+  const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -55,8 +56,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       due_date: taskToUse.due_date ? new Date(taskToUse.due_date) : null,
     });
   }, [task, tasks]);
-
-  const canEdit = canUpdate('tasks');
 
   const handleSave = async () => {
     try {
@@ -150,29 +149,18 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
-              {!isEditing && canEdit && (
-                <>
-                  {currentTask.status !== 'done' && (
-                    <Button
-                      type="button"
-                      onClick={handleCompleteTask}
-                      className="flex items-center gap-2"
-                      variant="default"
-                    >
-                      <Check className="w-4 h-4" />
-                      Complete
-                    </Button>
-                  )}
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEdit}
-                  >
-                    Edit
-                  </Button>
-                </>
+              {canEdit && currentTask.status !== 'done' && (
+                <Button
+                  type="button"
+                  onClick={handleCompleteTask}
+                  className="flex items-center gap-2"
+                  variant="default"
+                >
+                  <Check className="w-4 h-4" />
+                  Complete
+                </Button>
               )}
-              {isEditing && (
+              {isEditing && canEdit && (
                 <>
                   <Button
                     variant="outline"
@@ -193,13 +181,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                   </Button>
                 </>
               )}
-              <Button
-                variant="ghost"
-                size="sm"
-                onClick={handleClose}
-              >
-                <X className="w-4 h-4" />
-              </Button>
             </div>
           </div>
         </DialogHeader>
