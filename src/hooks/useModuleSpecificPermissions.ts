@@ -106,12 +106,17 @@ export const useIncidentPermissions = () => {
   const modulePermissions = useModulePermissions('incident_management');
   const { hasPermission } = usePermissions();
   
-  return {
+  const permissions = {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
     canAssign: hasPermission('incident_management', 'assign'),
     canUpdateAssigned: hasPermission('incident_management', 'update_assigned'),
   };
+  
+  console.log('useIncidentPermissions - modulePermissions:', modulePermissions);
+  console.log('useIncidentPermissions - final permissions:', permissions);
+  
+  return permissions;
 };
 
 // Calendar-specific permissions
