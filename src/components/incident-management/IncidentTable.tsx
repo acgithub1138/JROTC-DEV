@@ -109,7 +109,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
                   canEdit={canUpdate && canEditIncident(incident)}
                   canDelete={canDelete}
                   onView={() => onIncidentSelect(incident)}
-                  onEdit={canEditIncident(incident) && canUpdate ? () => onEditIncident(incident) : undefined}
+                  onEdit={() => onEditIncident(incident)}
                   customActions={[
                     {
                       icon: <X className="w-4 h-4" />,
