@@ -59,9 +59,12 @@ export const useIncidentMutations = () => {
         .update(data)
         .eq("id", id)
         .select()
-        .single();
+        .maybeSingle();
 
       if (error) throw error;
+      if (!result) {
+        throw new Error("Incident not found or you don't have permission to update it");
+      }
       return result;
     },
     onSuccess: () => {
