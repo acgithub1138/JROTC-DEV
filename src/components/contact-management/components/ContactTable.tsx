@@ -84,7 +84,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
           <TableHead>Status</TableHead>
           <TableHead>Phone</TableHead>
           <TableHead>Email</TableHead>
-          <TableHead className="w-[100px]">Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>
       <StandardTableBody emptyMessage="No contacts found" colSpan={6}>
