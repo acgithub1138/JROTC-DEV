@@ -32,6 +32,7 @@ interface IncidentDetailDialogProps {
   onClose: () => void;
   onEdit: (incident: Incident) => void;
   initialEditMode?: boolean;
+  isReadOnly?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -69,7 +70,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   isOpen,
   onClose,
   onEdit,
-  initialEditMode = false
+  initialEditMode = false,
+  isReadOnly = false
 }) => {
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
@@ -248,7 +250,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   </Button>
                 </>
               )}
-              {!isEditing && canUpdate && (
+              {!isEditing && canUpdate && !isReadOnly && (
                 <Button
                   variant="outline"
                   size="sm"

@@ -21,6 +21,7 @@ const IncidentManagementPage: React.FC = () => {
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [isDetailDialogInEditMode, setIsDetailDialogInEditMode] = useState(false);
+  const [isDetailDialogReadOnly, setIsDetailDialogReadOnly] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
 
@@ -76,12 +77,14 @@ const IncidentManagementPage: React.FC = () => {
   const handleIncidentSelect = (incident: Incident) => {
     setSelectedIncident(incident);
     setIsDetailDialogInEditMode(false);
+    setIsDetailDialogReadOnly(true);
     setShowDetailDialog(true);
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
     setSelectedIncident(incident);
     setIsDetailDialogInEditMode(true);
+    setIsDetailDialogReadOnly(false);
     setShowDetailDialog(true);
   };
 
@@ -235,9 +238,11 @@ const IncidentManagementPage: React.FC = () => {
           onClose={() => {
             setShowDetailDialog(false);
             setIsDetailDialogInEditMode(false);
+            setIsDetailDialogReadOnly(false);
           }}
           onEdit={handleEditIncident}
           initialEditMode={isDetailDialogInEditMode}
+          isReadOnly={isDetailDialogReadOnly}
         />
       )}
     </div>
