@@ -4,6 +4,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
 import { StandardTableWrapper } from "@/components/ui/standard-table";
 import { useIncidents, useMyIncidents, useActiveIncidents, useCompletedIncidents } from "@/hooks/incidents/useIncidents";
+import { useIncidentMutations } from "@/hooks/incidents/useIncidentMutations";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
@@ -15,7 +16,7 @@ import type { Incident } from "@/hooks/incidents/types";
 
 const IncidentManagementPage: React.FC = () => {
   const { userProfile } = useAuth();
-  const { canCreate, canUpdate, canUpdateAssigned } = useIncidentPermissions();
+  const { canCreate, canUpdate, canUpdateAssigned, canDelete } = useIncidentPermissions();
   const isAdmin = userProfile?.role === 'admin';
   
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
@@ -31,6 +32,8 @@ const IncidentManagementPage: React.FC = () => {
   const { incidents: myIncidents, isLoading: myIncidentsLoading } = useMyIncidents();
   const { incidents: activeIncidents, isLoading: activeIncidentsLoading } = useActiveIncidents();
   const { incidents: completedIncidents, isLoading: completedIncidentsLoading } = useCompletedIncidents();
+  
+  const { updateIncident } = useIncidentMutations();
 
   // Get current incidents based on active tab
   const getCurrentIncidents = () => {
@@ -111,6 +114,18 @@ const IncidentManagementPage: React.FC = () => {
     setEditingIncident(null);
   };
 
+  const handleDeleteIncident = (incident: Incident) => {
+    if (canDelete) {
+      updateIncident.mutate({
+        id: incident.id,
+        data: {
+          status: 'canceled',
+          completed_at: new Date().toISOString()
+        }
+      });
+    }
+  };
+
   if (isLoading) {
     return <div className="p-6">Loading incidents...</div>;
   }
@@ -154,6 +169,7 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
                   onIncidentSelectForEdit={handleIncidentSelectForEdit}
+                  onIncidentDelete={handleDeleteIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -175,6 +191,7 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
                   onIncidentSelectForEdit={handleIncidentSelectForEdit}
+                  onIncidentDelete={handleDeleteIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -196,6 +213,7 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentEdit={handleEditIncident}
                   onIncidentSelectForEdit={handleIncidentSelectForEdit}
+                  onIncidentDelete={handleDeleteIncident}
                 />
               )}
             </StandardTableWrapper>
@@ -217,6 +235,7 @@ const IncidentManagementPage: React.FC = () => {
               onIncidentSelect={handleIncidentSelect}
               onIncidentEdit={handleEditIncident}
               onIncidentSelectForEdit={handleIncidentSelectForEdit}
+              onIncidentDelete={handleDeleteIncident}
             />
           )}
         </StandardTableWrapper>

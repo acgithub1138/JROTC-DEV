@@ -2,7 +2,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { Eye } from "lucide-react";
+import { Eye, X } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
@@ -11,6 +11,7 @@ interface IncidentTableProps {
   onIncidentSelect: (incident: Incident) => void;
   onIncidentEdit?: (incident: Incident) => void;
   onIncidentSelectForEdit?: (incident: Incident) => void;
+  onIncidentDelete?: (incident: Incident) => void;
 }
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
@@ -44,12 +45,14 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
   onIncidentEdit,
-  onIncidentSelectForEdit
+  onIncidentSelectForEdit,
+  onIncidentDelete
 }) => {
   const {
     canUpdate,
     canUpdateAssigned,
-    canView
+    canView,
+    canDelete
   } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
   if (incidents.length === 0) {
@@ -103,9 +106,19 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
               </TableCell>
               <TableCell>
-                {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentSelect(incident)}>
-                    <Eye className="h-3 w-3" />
-                  </Button>}
+                <div className="flex items-center gap-1">
+                  {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentSelect(incident)}>
+                      <Eye className="h-3 w-3" />
+                    </Button>}
+                  {canDelete && incident.status !== 'canceled' && <Button 
+                      variant="outline" 
+                      size="icon" 
+                      className="h-6 w-6 text-destructive hover:text-destructive" 
+                      onClick={() => onIncidentDelete && onIncidentDelete(incident)}
+                    >
+                      <X className="h-3 w-3" />
+                    </Button>}
+                </div>
               </TableCell>
             </TableRow>)}
         </TableBody>
