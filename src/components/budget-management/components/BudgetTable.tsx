@@ -166,7 +166,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
               {transaction.description || '-'}
             </TableCell>
             <TableCell className={getPaddingClass()}>
-              <div className="flex items-center justify-center gap-2">
+              <div className="flex items-center justify-center gap-1">
                 {canViewDetails && (
                   <Tooltip>
                     <TooltipTrigger asChild>
