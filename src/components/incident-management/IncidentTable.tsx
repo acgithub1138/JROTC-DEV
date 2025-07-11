@@ -1,26 +1,17 @@
 import React from "react";
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Eye } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
-
 interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
   onIncidentEdit?: (incident: Incident) => void;
   onIncidentSelectForEdit?: (incident: Incident) => void;
 }
-
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'open':
@@ -35,7 +26,6 @@ const getStatusBadgeClass = (status: string) => {
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   }
 };
-
 const getPriorityBadgeClass = (priority: string) => {
   switch (priority.toLowerCase()) {
     case 'low':
@@ -50,27 +40,30 @@ const getPriorityBadgeClass = (priority: string) => {
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   }
 };
-
 const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
   onIncidentEdit,
-  onIncidentSelectForEdit,
+  onIncidentSelectForEdit
 }) => {
-  const { canUpdate, canUpdateAssigned, canView } = useIncidentPermissions();
+  const {
+    canUpdate,
+    canUpdateAssigned,
+    canView
+  } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
-  
-  console.log('IncidentTable permissions:', { canView, canUpdate, canUpdateAssigned, canEdit });
+  console.log('IncidentTable permissions:', {
+    canView,
+    canUpdate,
+    canUpdateAssigned,
+    canEdit
+  });
   if (incidents.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
+    return <div className="text-center py-8 text-muted-foreground">
         No incidents found.
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="rounded-md border">
+  return <div className="rounded-md border">
       <Table>
         <TableHeader>
           <TableRow>
@@ -84,30 +77,20 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {incidents.map((incident) => (
-            <TableRow key={incident.id}>
-              <TableCell className="text-center">
-                <button
-                  onClick={() => onIncidentSelectForEdit ? onIncidentSelectForEdit(incident) : onIncidentSelect(incident)}
-                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
-                >
+          {incidents.map(incident => <TableRow key={incident.id}>
+              <TableCell className="text-center py-[8px]">
+                <button onClick={() => onIncidentSelectForEdit ? onIncidentSelectForEdit(incident) : onIncidentSelect(incident)} className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold">
                   {incident.incident_number}
                 </button>
               </TableCell>
               <TableCell>{incident.title}</TableCell>
               <TableCell>
-                <Badge 
-                  variant="secondary" 
-                  className={getStatusBadgeClass(incident.status)}
-                >
+                <Badge variant="secondary" className={getStatusBadgeClass(incident.status)}>
                   {incident.status.replace('_', ' ')}
                 </Badge>
               </TableCell>
               <TableCell>
-                <Badge 
-                  variant="secondary" 
-                  className={getPriorityBadgeClass(incident.priority)}
-                >
+                <Badge variant="secondary" className={getPriorityBadgeClass(incident.priority)}>
                   {incident.priority}
                 </Badge>
               </TableCell>
@@ -118,22 +101,13 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
               </TableCell>
               <TableCell>
-                {canView && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => onIncidentSelect(incident)}
-                  >
+                {canView && <Button variant="outline" size="sm" onClick={() => onIncidentSelect(incident)}>
                     <Eye className="h-4 w-4" />
-                  </Button>
-                )}
+                  </Button>}
               </TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)}
         </TableBody>
       </Table>
-    </div>
-  );
+    </div>;
 };
-
 export default IncidentTable;
