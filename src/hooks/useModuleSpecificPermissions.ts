@@ -108,7 +108,7 @@ export const useIncidentPermissions = () => {
   
   const permissions = {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canViewDetails, // Use 'view' permission, not 'read'
     canAssign: hasPermission('incident_management', 'assign'),
     canUpdateAssigned: hasPermission('incident_management', 'update_assigned'),
   };
