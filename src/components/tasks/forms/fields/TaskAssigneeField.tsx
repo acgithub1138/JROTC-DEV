@@ -23,22 +23,9 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
   const assignedUserId = form.watch('assigned_to');
   const assignedUser = users.find(user => user.id === assignedUserId);
   
-  // If user can't assign tasks but can edit, show read-only assigned user
+  // If user can't assign tasks, don't show the field at all - it will be auto-assigned
   if (!canAssignTasks) {
-    return (
-      <div className="space-y-2">
-        <Label htmlFor="assigned_to">Assigned To *</Label>
-        <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
-          {assignedUser ? `${assignedUser.first_name} ${assignedUser.last_name} (${assignedUser.role})` : 'No assignee'}
-        </div>
-        {/* Hidden input to maintain form field value */}
-        <input
-          type="hidden"
-          {...form.register('assigned_to')}
-          value={assignedUserId || ''}
-        />
-      </div>
-    );
+    return null;
   }
 
   // Show loading state

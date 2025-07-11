@@ -24,14 +24,14 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const validPriorities = priorityOptions.map(option => option.value);
 
   // Create dynamic schema
-  const schema = createTaskSchema(validStatuses, validPriorities);
+  const schema = createTaskSchema(validStatuses, validPriorities, canAssignTasks);
 
   const form = useForm<TaskFormData>({
     resolver: zodResolver(schema),
     defaultValues: {
       title: task?.title || '',
       description: task?.description || '',
-      assigned_to: task?.assigned_to || '',
+      assigned_to: task?.assigned_to || (canAssignTasks ? '' : currentUserId),
       priority: task?.priority || (validPriorities[0] || 'medium'),
       status: task?.status || (validStatuses[0] || 'not_started'),
       due_date: task?.due_date ? new Date(task.due_date) : undefined,
@@ -50,34 +50,53 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
       if (!validPriorities.includes(currentValues.priority)) {
         form.setValue('priority', validPriorities[0]);
       }
+      
+      // Auto-assign to current user if can't assign tasks and no assignment exists
+      if (!canAssignTasks && !currentValues.assigned_to && currentUserId) {
+        form.setValue('assigned_to', currentUserId);
+      }
     }
-  }, [validStatuses, validPriorities, form]);
+  }, [validStatuses, validPriorities, canAssignTasks, currentUserId, form]);
 
-  const onSubmit = (data: TaskFormData) => {
+  const onSubmit = async (data: TaskFormData) => {
     console.log('Form submitted with data:', data);
+
+    // Ensure assigned_to is set for users without assign permission
+    const finalAssignedTo = data.assigned_to || (canAssignTasks ? '' : currentUserId);
+    
+    if (!finalAssignedTo) {
+      console.error('No assigned user found');
+      return;
+    }
 
     const taskData = {
       title: data.title,
       description: data.description || null,
       status: data.status,
       priority: data.priority,
-      assigned_to: data.assigned_to,
+      assigned_to: finalAssignedTo,
       due_date: data.due_date ? data.due_date.toISOString() : null,
       team_id: null,
     };
 
     console.log('Prepared task data for submission:', taskData);
 
-    if (mode === 'create') {
-      console.log('Calling createTask...');
-      createTask(taskData);
-    } else if (task) {
-      console.log('Calling updateTask...');
-      updateTask({ id: task.id, ...taskData });
+    try {
+      if (mode === 'create') {
+        console.log('Calling createTask...');
+        await createTask(taskData);
+      } else if (task) {
+        console.log('Calling updateTask...');
+        await updateTask({ id: task.id, ...taskData });
+      }
+      
+      // Only close and reset if successful
+      onOpenChange(false);
+      form.reset();
+    } catch (error) {
+      console.error('Task submission failed:', error);
+      // Keep form open so user can try again
     }
-    
-    onOpenChange(false);
-    form.reset();
   };
 
   const onError = (errors: any) => {

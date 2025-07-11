@@ -2,7 +2,7 @@
 import { z } from 'zod';
 
 // Dynamic schema that will be populated with database values
-export const createTaskSchema = (statusOptions: string[], priorityOptions: string[]) => {
+export const createTaskSchema = (statusOptions: string[], priorityOptions: string[], canAssignTasks: boolean = true) => {
   const tomorrow = new Date();
   tomorrow.setDate(tomorrow.getDate() + 1);
   tomorrow.setHours(0, 0, 0, 0); // Start of tomorrow
@@ -10,7 +10,9 @@ export const createTaskSchema = (statusOptions: string[], priorityOptions: strin
   return z.object({
     title: z.string().min(1, 'Task name is required').max(150, 'Task name must be 150 characters or less'),
     description: z.string().min(1, 'Task details are required'),
-    assigned_to: z.string().min(1, 'Assigned to is required'),
+    assigned_to: canAssignTasks 
+      ? z.string().min(1, 'Assigned to is required')
+      : z.string(), // Not required if can't assign - will be auto-set
     priority: z.enum(priorityOptions as [string, ...string[]]),
     status: z.enum(statusOptions as [string, ...string[]]),
     due_date: z.date()
