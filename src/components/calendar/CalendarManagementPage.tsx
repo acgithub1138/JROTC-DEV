@@ -36,6 +36,7 @@ const CalendarManagementPage = () => {
   const {
     canCreate: canCreateEvents,
     canUpdate: canUpdateEvents,
+    canDelete: canDeleteEvents,
     canViewDetails
   } = useCalendarPermissions();
   const {
@@ -110,7 +111,16 @@ const CalendarManagementPage = () => {
         readOnly={!canCreateEvents} 
       />
 
-      {canCreateEvents && <EventDialog open={showEventDialog} onOpenChange={handleCloseDialog} event={editingEvent} selectedDate={selectedDate} onSubmit={handleEventSubmit} onDelete={deleteEvent} />}
+      {(canCreateEvents || canUpdateEvents) && (
+        <EventDialog 
+          open={showEventDialog} 
+          onOpenChange={handleCloseDialog} 
+          event={editingEvent} 
+          selectedDate={selectedDate} 
+          onSubmit={handleEventSubmit} 
+          onDelete={canDeleteEvents ? deleteEvent : undefined} 
+        />
+      )}
 
       <EventDetailsDialog open={showEventDetailsDialog} onOpenChange={handleCloseDialog} event={viewingEvent} />
     </div>;
