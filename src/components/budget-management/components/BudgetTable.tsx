@@ -133,7 +133,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             Status
           </SortableTableHead>
           <TableHead>Description</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>
       <StandardTableBody
