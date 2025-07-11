@@ -103,14 +103,14 @@ export const useDashboardPermissions = () => {
 
 // Incident-specific permissions
 export const useIncidentPermissions = () => {
-  const modulePermissions = useModulePermissions('incidents');
+  const modulePermissions = useModulePermissions('incident_management');
   const { hasPermission } = usePermissions();
   
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead, // Backwards compatibility
-    canAssign: hasPermission('incidents', 'assign'),
-    canUpdateAssigned: hasPermission('incidents', 'update_assigned'),
+    canAssign: hasPermission('incident_management', 'assign'),
+    canUpdateAssigned: hasPermission('incident_management', 'update_assigned'),
   };
 };
 

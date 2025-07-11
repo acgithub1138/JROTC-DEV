@@ -23,7 +23,7 @@ export const modulePermissionMappings = {
   'email': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ],
-  'incidents': [
+  'incident_management': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete',
     'assign', 'update_assigned'
   ],
