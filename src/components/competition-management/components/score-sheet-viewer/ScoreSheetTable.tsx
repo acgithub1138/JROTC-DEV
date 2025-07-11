@@ -21,6 +21,18 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const fieldNames = getFieldNames(events);
 
+  // Function to get judge column color classes
+  const getJudgeColorClasses = (index: number) => {
+    const judgeColorMap = [
+      'bg-judge-1 text-judge-1-foreground',
+      'bg-judge-2 text-judge-2-foreground',
+      'bg-judge-3 text-judge-3-foreground',
+      'bg-judge-4 text-judge-4-foreground',
+      'bg-judge-5 text-judge-5-foreground',
+    ];
+    return judgeColorMap[index % judgeColorMap.length] || 'bg-muted text-muted-foreground';
+  };
+
   const handleEditScoreSheet = (event: CompetitionEvent) => {
     setSelectedEvent(event);
     setIsEditDialogOpen(true);
@@ -79,21 +91,21 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
           <TableRow>
             <TableHead className="text-center bg-muted/30 px-2 min-w-20">Field</TableHead>
              {events.map((event, index) => (
-               <TableHead key={event.id} className="text-center border-r px-2 min-w-24">
-                 <div className="space-y-1">
-                   <div className="font-medium text-sm">
-                     {event.score_sheet?.judge_number || `Judge ${index + 1}`}
-                   </div>
-                   <TableActionButtons
-                     canView={canViewDetails}
-                     canEdit={canUpdate}
-                     canDelete={canDelete}
-                     onEdit={() => handleEditScoreSheet(event)}
-                     onDelete={() => handleDeleteEvent(event)}
-                   />
-                 </div>
-               </TableHead>
-             ))}
+                <TableHead key={event.id} className={`text-center border-r px-2 min-w-24 ${getJudgeColorClasses(index)}`}>
+                  <div className="space-y-1">
+                    <div className="font-medium text-sm">
+                      {event.score_sheet?.judge_number || `Judge ${index + 1}`}
+                    </div>
+                    <TableActionButtons
+                      canView={canViewDetails}
+                      canEdit={canUpdate}
+                      canDelete={canDelete}
+                      onEdit={() => handleEditScoreSheet(event)}
+                      onDelete={() => handleDeleteEvent(event)}
+                    />
+                  </div>
+                </TableHead>
+              ))}
             <TableHead className="text-center bg-muted/30 px-2 min-w-20">
               <div className="font-medium text-sm">Average</div>
             </TableHead>
@@ -108,16 +120,16 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
                 <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
                   {getCleanFieldName(fieldName)}
                 </TableCell>
-                {events.map((event) => (
-                  <TableCell key={event.id} className="text-center border-r px-1 text-sm">
-                    {(() => {
-                      const value = event.score_sheet?.scores?.[fieldName];
-                      if (value === null || value === undefined) return '-';
-                      if (typeof value === 'object') return JSON.stringify(value);
-                      return String(value);
-                    })()}
-                  </TableCell>
-                ))}
+                 {events.map((event, eventIndex) => (
+                   <TableCell key={event.id} className={`text-center border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                     {(() => {
+                       const value = event.score_sheet?.scores?.[fieldName];
+                       if (value === null || value === undefined) return '-';
+                       if (typeof value === 'object') return JSON.stringify(value);
+                       return String(value);
+                     })()}
+                   </TableCell>
+                 ))}
                 <TableCell className="text-center font-medium bg-muted/30 px-1 text-sm">
                   {average}
                 </TableCell>
@@ -130,11 +142,11 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
             <TableCell className="sticky left-0 bg-muted/50 font-bold border-r px-2 text-sm">
               Total Points
             </TableCell>
-            {events.map((event) => (
-              <TableCell key={event.id} className="text-center font-bold border-r px-1 text-sm">
-                {event.total_points || 0}
-              </TableCell>
-            ))}
+             {events.map((event, eventIndex) => (
+               <TableCell key={event.id} className={`text-center font-bold border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                 {event.total_points || 0}
+               </TableCell>
+             ))}
             <TableCell className="text-center font-bold bg-muted/50 px-1 text-sm">
               {calculateTotalAverage(events)}
             </TableCell>

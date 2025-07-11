@@ -51,6 +51,18 @@
     --sidebar-border: 220 13% 91%;
 
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Judge column colors */
+    --judge-1: 200 95% 95%;
+    --judge-1-foreground: 200 95% 26%;
+    --judge-2: 120 60% 95%;
+    --judge-2-foreground: 120 60% 20%;
+    --judge-3: 45 93% 95%;
+    --judge-3-foreground: 45 93% 20%;
+    --judge-4: 280 87% 95%;
+    --judge-4-foreground: 280 87% 25%;
+    --judge-5: 15 86% 95%;
+    --judge-5-foreground: 15 86% 25%;
   }
 
   .dark {
@@ -89,6 +101,18 @@
     --sidebar-accent-foreground: 240 4.8% 95.9%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 217.2 91.2% 59.8%;
+
+    /* Judge column colors - dark mode */
+    --judge-1: 200 50% 15%;
+    --judge-1-foreground: 200 50% 85%;
+    --judge-2: 120 30% 15%;
+    --judge-2-foreground: 120 30% 85%;
+    --judge-3: 45 50% 15%;
+    --judge-3-foreground: 45 50% 85%;
+    --judge-4: 280 40% 15%;
+    --judge-4-foreground: 280 40% 85%;
+    --judge-5: 15 40% 15%;
+    --judge-5-foreground: 15 40% 85%;
   }
 }
 

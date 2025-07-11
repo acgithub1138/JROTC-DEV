@@ -61,6 +61,18 @@ export default {
 					'accent-foreground': 'hsl(var(--sidebar-accent-foreground))',
 					border: 'hsl(var(--sidebar-border))',
 					ring: 'hsl(var(--sidebar-ring))'
+				},
+				judge: {
+					1: 'hsl(var(--judge-1))',
+					'1-foreground': 'hsl(var(--judge-1-foreground))',
+					2: 'hsl(var(--judge-2))',
+					'2-foreground': 'hsl(var(--judge-2-foreground))',
+					3: 'hsl(var(--judge-3))',
+					'3-foreground': 'hsl(var(--judge-3-foreground))',
+					4: 'hsl(var(--judge-4))',
+					'4-foreground': 'hsl(var(--judge-4-foreground))',
+					5: 'hsl(var(--judge-5))',
+					'5-foreground': 'hsl(var(--judge-5-foreground))'
 				}
 			},
 			borderRadius: {
