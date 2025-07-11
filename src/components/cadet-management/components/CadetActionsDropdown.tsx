@@ -2,6 +2,7 @@ import React from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { ChevronDown, GraduationCap, Award, Plane, Shield, UserX, Users } from 'lucide-react';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface CadetActionsDropdownProps {
   selectedCount: number;
@@ -24,6 +25,8 @@ export const CadetActionsDropdown = ({
   loading,
   canUpdate
 }: CadetActionsDropdownProps) => {
+  const { canDelete } = useCadetPermissions();
+  
   // Don't render if no cadets selected or user doesn't have update permission
   if (selectedCount === 0 || !canUpdate) return null;
 
@@ -57,10 +60,12 @@ export const CadetActionsDropdown = ({
             <Shield className="w-4 h-4 mr-2" />
             Update Role
           </DropdownMenuItem>
-          <DropdownMenuItem onClick={onDeactivate} disabled={loading} className="text-destructive">
-            <UserX className="w-4 h-4 mr-2" />
-            Deactivate
-          </DropdownMenuItem>
+          {canDelete && (
+            <DropdownMenuItem onClick={onDeactivate} disabled={loading} className="text-destructive">
+              <UserX className="w-4 h-4 mr-2" />
+              Deactivate
+            </DropdownMenuItem>
+          )}
         </DropdownMenuContent>
       </DropdownMenu>
     </div>
