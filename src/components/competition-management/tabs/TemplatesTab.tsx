@@ -68,7 +68,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
   React.useEffect(() => {
     setCurrentPage(1);
   }, [searchQuery, showOnlyMyTemplates]);
-  const { canManageTemplates } = useCompetitionPermissions();
+  const { canManageTemplates, canCreate } = useCompetitionPermissions();
   const canManageTemplatesForUser = !readOnly && canManageTemplates;
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
@@ -100,7 +100,7 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
         </div>
       </div>
 
-      <TemplatesTable templates={paginatedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={canManageTemplates ? (t: any) => setEditingTemplate(t) : undefined} onDelete={canManageTemplates ? deleteTemplate : undefined} onCopy={handleCopy} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCopyTemplate(t)} />
+      <TemplatesTable templates={paginatedTemplates as any} isLoading={isLoading} sortConfig={sortConfig} onSort={handleSort} onEdit={canManageTemplates ? (t: any) => setEditingTemplate(t) : undefined} onDelete={canManageTemplates ? deleteTemplate : undefined} onCopy={canCreate ? handleCopy : undefined} onPreview={(t: any) => setPreviewTemplate(t)} canEditTemplate={(t: any) => canEditTemplate(t)} canCopyTemplate={(t: any) => canCreate && canCopyTemplate(t)} />
 
       {/* Pagination */}
       <TablePagination
