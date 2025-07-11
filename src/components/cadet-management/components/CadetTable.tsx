@@ -68,7 +68,7 @@ onSelectAll
           <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={handleSort}>
             Flight
           </SortableTableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
