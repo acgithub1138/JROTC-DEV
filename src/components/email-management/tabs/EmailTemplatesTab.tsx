@@ -6,20 +6,30 @@ import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
+import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 
 export const EmailTemplatesTab: React.FC = () => {
   const { canCreate } = useModulePermissions('email');
   const { templates, isLoading } = useEmailTemplates();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [previewingTemplate, setPreviewingTemplate] = useState<any>(null);
 
   const handleEdit = (template: any) => {
     setEditingTemplate(template);
   };
 
+  const handleView = (template: any) => {
+    setPreviewingTemplate(template);
+  };
+
   const handleCloseDialog = () => {
     setShowCreateDialog(false);
     setEditingTemplate(null);
+  };
+
+  const handleClosePreviewDialog = () => {
+    setPreviewingTemplate(null);
   };
 
   return (
@@ -38,6 +48,7 @@ export const EmailTemplatesTab: React.FC = () => {
         templates={templates}
         isLoading={isLoading}
         onEdit={handleEdit}
+        onView={handleView}
       />
 
       <EmailTemplateDialog
@@ -45,6 +56,14 @@ export const EmailTemplatesTab: React.FC = () => {
         onOpenChange={handleCloseDialog}
         template={editingTemplate}
         mode={editingTemplate ? 'edit' : 'create'}
+      />
+
+      <EmailPreviewDialog
+        open={!!previewingTemplate}
+        onOpenChange={handleClosePreviewDialog}
+        subject={previewingTemplate?.subject || ''}
+        body={previewingTemplate?.body || ''}
+        sourceTable={previewingTemplate?.source_table || ''}
       />
     </div>
   );

@@ -20,12 +20,14 @@ interface EmailTemplatesTableProps {
   templates: EmailTemplate[];
   isLoading: boolean;
   onEdit: (template: EmailTemplate) => void;
+  onView?: (template: EmailTemplate) => void;
 }
 
 export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   templates,
   isLoading,
   onEdit,
+  onView,
 }) => {
   const { deleteTemplate } = useEmailTemplates();
   const { canUpdate, canDelete, canViewDetails } = useEmailPermissions();
@@ -72,13 +74,13 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
               </TableCell>
               <TableCell className="py-2">
                 <div className="flex items-center gap-2">
-                  {canViewDetails && (
+                  {canViewDetails && onView && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="ghost"
                           size="sm"
-                          onClick={() => onEdit(template)}
+                          onClick={() => onView(template)}
                         >
                           <Eye className="w-4 h-4" />
                         </Button>
