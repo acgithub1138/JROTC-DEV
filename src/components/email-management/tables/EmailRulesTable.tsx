@@ -106,16 +106,16 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                     </Badge>
                   </TableCell>
                   <TableCell className="py-2">
-                    <div className="flex items-center space-x-2">
+                    <div className="flex items-center justify-center gap-2">
                       {canViewDetails && onView && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              variant="ghost"
-                              size="sm"
+                              variant="outline"
+                              size="icon" className="h-6 w-6"
                               onClick={() => onView(rule)}
                             >
-                              <Eye className="h-4 w-4" />
+                              <Eye className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -128,11 +128,11 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
-                                variant="ghost"
-                                size="sm"
+                                variant="outline"
+                                size="icon" className="h-6 w-6"
                                 onClick={() => onToggleActive(rule.id, !rule.is_active)}
                               >
-                                {rule.is_active ? <Pause className="h-4 w-4" /> : <Play className="h-4 w-4" />}
+                                {rule.is_active ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -142,11 +142,11 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button
-                                variant="ghost"
-                                size="sm"
+                                variant="outline"
+                                size="icon" className="h-6 w-6"
                                 onClick={() => onEdit(rule)}
                               >
-                                <Edit className="h-4 w-4" />
+                                <Edit className="w-3 h-3" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -159,11 +159,11 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              variant="ghost"
-                              size="sm"
+                              variant="outline"
+                              size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                               onClick={() => onDelete(rule.id)}
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
