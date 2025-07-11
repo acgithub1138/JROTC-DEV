@@ -68,7 +68,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
             <SortableHeader sortKey="event">Event Type</SortableHeader>
             <SortableHeader sortKey="jrotc_program">JROTC Program</SortableHeader>
             <SortableHeader sortKey="created_at">Created</SortableHeader>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
