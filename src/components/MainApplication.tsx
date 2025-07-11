@@ -34,7 +34,7 @@ const MainApplication = () => {
     const path = location.pathname;
     if (path === '/') return 'dashboard';
     if (path.startsWith('/tasks')) return 'tasks';
-    if (path.startsWith('/incidents')) return 'incidents';
+    if (path.startsWith('/incidents')) return 'incident_management';
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
     if (path.startsWith('/email')) return 'email-management';
@@ -59,7 +59,7 @@ const MainApplication = () => {
     const routes: { [key: string]: string } = {
       'dashboard': '/',
       'tasks': '/tasks',
-      'incidents': '/incidents',
+      'incident_management': '/incidents',
       'school-management': '/school',
       'user-admin': '/users',
       'email-management': '/email',
