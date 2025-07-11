@@ -9,13 +9,29 @@ import { TaskFormData } from '../schemas/taskFormSchema';
 interface TaskAssigneeFieldProps {
   form: UseFormReturn<TaskFormData>;
   canAssignTasks: boolean;
+  canEditThisTask: boolean;
 }
 
-export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canAssignTasks }) => {
+export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canAssignTasks, canEditThisTask }) => {
   const { users } = useSchoolUsers();
-
-  if (!canAssignTasks) {
+  
+  if (!canEditThisTask) {
     return null;
+  }
+
+  const assignedUserId = form.watch('assigned_to');
+  const assignedUser = users.find(user => user.id === assignedUserId);
+  
+  // If user can't assign tasks but can edit, show read-only assigned user
+  if (!canAssignTasks) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="assigned_to">Assigned To *</Label>
+        <div className="flex h-10 w-full rounded-md border border-input bg-muted px-3 py-2 text-sm text-muted-foreground">
+          {assignedUser ? `${assignedUser.first_name} ${assignedUser.last_name} (${assignedUser.role})` : 'No assignee'}
+        </div>
+      </div>
+    );
   }
 
   return (

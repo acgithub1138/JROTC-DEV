@@ -85,7 +85,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
           <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
             <TaskTitleField form={form} />
             
-            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} />
+            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
             
             <TaskDescriptionField form={form} />
             
