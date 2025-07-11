@@ -26,6 +26,84 @@ export const useIncidentsQuery = () => {
   });
 };
 
+export const useMyIncidentsQuery = () => {
+  return useQuery({
+    queryKey: ["my-incidents"],
+    queryFn: async (): Promise<Incident[]> => {
+      const { data: userData } = await supabase.auth.getUser();
+      if (!userData.user) return [];
+
+      const { data, error } = await supabase
+        .from("incidents")
+        .select(`
+          *,
+          created_by_profile:profiles!incidents_created_by_fkey(first_name, last_name, email),
+          assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
+          school:schools(name)
+        `)
+        .eq("assigned_to_admin", userData.user.id)
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching my incidents:", error);
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};
+
+export const useActiveIncidentsQuery = () => {
+  return useQuery({
+    queryKey: ["active-incidents"],
+    queryFn: async (): Promise<Incident[]> => {
+      const { data, error } = await supabase
+        .from("incidents")
+        .select(`
+          *,
+          created_by_profile:profiles!incidents_created_by_fkey(first_name, last_name, email),
+          assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
+          school:schools(name)
+        `)
+        .in("status", ["open", "in_progress"])
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching active incidents:", error);
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};
+
+export const useCompletedIncidentsQuery = () => {
+  return useQuery({
+    queryKey: ["completed-incidents"],
+    queryFn: async (): Promise<Incident[]> => {
+      const { data, error } = await supabase
+        .from("incidents")
+        .select(`
+          *,
+          created_by_profile:profiles!incidents_created_by_fkey(first_name, last_name, email),
+          assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
+          school:schools(name)
+        `)
+        .in("status", ["resolved", "closed"])
+        .order("created_at", { ascending: false });
+
+      if (error) {
+        console.error("Error fetching completed incidents:", error);
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};
+
 export const useIncidentStatusOptions = () => {
   return useQuery({
     queryKey: ["incident-status-options"],
