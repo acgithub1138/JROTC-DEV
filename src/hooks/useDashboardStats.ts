@@ -40,7 +40,6 @@ export const useDashboardStats = () => {
         supabase
           .from('incidents')
           .select('id, status, priority, created_at')
-          .eq('active', true)
       ]);
 
       // Calculate overdue tasks

@@ -101,6 +101,19 @@ export const useDashboardPermissions = () => {
   };
 };
 
+// Incident-specific permissions
+export const useIncidentPermissions = () => {
+  const modulePermissions = useModulePermissions('incidents');
+  const { hasPermission } = usePermissions();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
+    canAssign: hasPermission('incidents', 'assign'),
+    canUpdateAssigned: hasPermission('incidents', 'update_assigned'),
+  };
+};
+
 // Calendar-specific permissions
 export const useCalendarPermissions = () => {
   const modulePermissions = useModulePermissions('calendar');

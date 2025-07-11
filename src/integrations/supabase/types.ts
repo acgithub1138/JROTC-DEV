@@ -959,7 +959,6 @@ export type Database = {
           incident_id: string
           is_system_comment: boolean
           user_id: string
-          user_name: string | null
         }
         Insert: {
           comment_text: string
@@ -968,7 +967,6 @@ export type Database = {
           incident_id: string
           is_system_comment?: boolean
           user_id: string
-          user_name?: string | null
         }
         Update: {
           comment_text?: string
@@ -977,7 +975,6 @@ export type Database = {
           incident_id?: string
           is_system_comment?: boolean
           user_id?: string
-          user_name?: string | null
         }
         Relationships: [
           {
@@ -996,68 +993,138 @@ export type Database = {
           },
         ]
       }
+      incident_priority_options: {
+        Row: {
+          color_class: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
+      incident_status_options: {
+        Row: {
+          color_class: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       incidents: {
         Row: {
-          active: boolean | null
-          assigned_to: string | null
-          category: string
+          assigned_to_admin: string | null
+          completed_at: string | null
           created_at: string
+          created_by: string | null
           description: string | null
+          due_date: string | null
           id: string
           incident_number: string | null
           priority: string
-          resolved_at: string | null
           school_id: string
           status: string
-          submitted_by: string | null
           title: string
           updated_at: string
         }
         Insert: {
-          active?: boolean | null
-          assigned_to?: string | null
-          category?: string
+          assigned_to_admin?: string | null
+          completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          due_date?: string | null
           id?: string
           incident_number?: string | null
           priority?: string
-          resolved_at?: string | null
           school_id: string
           status?: string
-          submitted_by?: string | null
           title: string
           updated_at?: string
         }
         Update: {
-          active?: boolean | null
-          assigned_to?: string | null
-          category?: string
+          assigned_to_admin?: string | null
+          completed_at?: string | null
           created_at?: string
+          created_by?: string | null
           description?: string | null
+          due_date?: string | null
           id?: string
           incident_number?: string | null
           priority?: string
-          resolved_at?: string | null
           school_id?: string
           status?: string
-          submitted_by?: string | null
           title?: string
           updated_at?: string
         }
         Relationships: [
           {
-            foreignKeyName: "incidents_assigned_to_fkey"
-            columns: ["assigned_to"]
+            foreignKeyName: "incidents_assigned_to_admin_fkey"
+            columns: ["assigned_to_admin"]
             isOneToOne: false
             referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "incidents_submitted_by_fkey"
-            columns: ["submitted_by"]
+            foreignKeyName: "incidents_created_by_fkey"
+            columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "incidents_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
@@ -2267,6 +2334,14 @@ export type Database = {
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
+      }
+      validate_incident_priority: {
+        Args: { priority_value: string }
+        Returns: boolean
+      }
+      validate_incident_status: {
+        Args: { status_value: string }
+        Returns: boolean
       }
       validate_task_priority: {
         Args: { priority_value: string }

@@ -23,6 +23,7 @@ const MODULE_MAPPING: Record<string, string> = {
   'calendar': 'calendar',
   'competitions': 'competitions',
   'email-management': 'email',
+  'incidents': 'incidents',
   
   'role-management': 'cadets', // Only admins should see this
 };
@@ -38,6 +39,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'role-management', label: 'Role Management', icon: 'Shield', adminOnly: true },
     { id: 'cadets', label: 'Cadets', icon: 'User' },
     { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+    { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
     { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
     { id: 'teams', label: 'Teams', icon: 'Users' },
     { id: 'budget', label: 'Budget', icon: 'DollarSign' },
@@ -93,6 +95,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'role-management', label: 'Role Management', icon: 'Shield' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+        { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
         
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
@@ -107,6 +110,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+        { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
@@ -122,6 +126,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+        { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
@@ -133,6 +138,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
       return [
         ...baseItems,
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
+        { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },

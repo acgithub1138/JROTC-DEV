@@ -6,6 +6,7 @@ import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
+import IncidentManagementPage from './incident-management/IncidentManagementPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
@@ -33,6 +34,7 @@ const MainApplication = () => {
     const path = location.pathname;
     if (path === '/') return 'dashboard';
     if (path.startsWith('/tasks')) return 'tasks';
+    if (path.startsWith('/incidents')) return 'incidents';
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
     if (path.startsWith('/email')) return 'email-management';
@@ -57,6 +59,7 @@ const MainApplication = () => {
     const routes: { [key: string]: string } = {
       'dashboard': '/',
       'tasks': '/tasks',
+      'incidents': '/incidents',
       'school-management': '/school',
       'user-admin': '/users',
       'email-management': '/email',
@@ -98,6 +101,7 @@ const MainApplication = () => {
           <Routes>
             <Route path="/" element={<DashboardOverview />} />
             <Route path="/tasks" element={<TaskManagementPage />} />
+            <Route path="/incidents" element={<IncidentManagementPage />} />
             <Route path="/school" element={<SchoolManagementPage />} />
             <Route path="/users" element={<UserAdminPage />} />
             <Route path="/email" element={<EmailManagementPage />} />

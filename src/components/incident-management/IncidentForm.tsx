@@ -1,0 +1,229 @@
+import React from "react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import * as z from "zod";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { useIncidents } from "@/hooks/incidents/useIncidents";
+import { useIncidentStatusOptions, useIncidentPriorityOptions } from "@/hooks/incidents/useIncidentsQuery";
+import { useAuth } from "@/contexts/AuthContext";
+import type { Incident } from "@/hooks/incidents/types";
+
+const formSchema = z.object({
+  title: z.string().min(1, "Title is required"),
+  description: z.string().optional(),
+  priority: z.string().min(1, "Priority is required"),
+  status: z.string().optional(),
+  assigned_to_admin: z.string().optional(),
+  due_date: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
+
+interface IncidentFormProps {
+  incident?: Incident | null;
+  isOpen: boolean;
+  onClose: () => void;
+}
+
+const IncidentForm: React.FC<IncidentFormProps> = ({
+  incident,
+  isOpen,
+  onClose,
+}) => {
+  const { createIncident, updateIncident } = useIncidents();
+  const { data: statusOptions = [] } = useIncidentStatusOptions();
+  const { data: priorityOptions = [] } = useIncidentPriorityOptions();
+  const { userProfile } = useAuth();
+
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      title: incident?.title || "",
+      description: incident?.description || "",
+      priority: incident?.priority || "medium",
+      status: incident?.status || "open",
+      assigned_to_admin: incident?.assigned_to_admin || "",
+      due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
+    },
+  });
+
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (incident) {
+        await updateIncident.mutateAsync({
+          id: incident.id,
+          data: {
+            ...data,
+            due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+          },
+        });
+      } else {
+        await createIncident.mutateAsync({
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          school_id: userProfile?.school_id || "",
+          created_by: userProfile?.id,
+          due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+        });
+      }
+      onClose();
+      form.reset();
+    } catch (error) {
+      console.error("Error saving incident:", error);
+    }
+  };
+
+  return (
+    <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="max-w-2xl">
+        <DialogHeader>
+          <DialogTitle>
+            {incident ? "Edit Incident" : "Create New Incident"}
+          </DialogTitle>
+        </DialogHeader>
+
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="title"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Title</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter incident title" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <FormField
+              control={form.control}
+              name="description"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Description</FormLabel>
+                  <FormControl>
+                    <Textarea
+                      placeholder="Enter incident description"
+                      rows={4}
+                      {...field}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="grid grid-cols-2 gap-4">
+              <FormField
+                control={form.control}
+                name="priority"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Priority</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {priorityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {incident && (
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                      <Select onValueChange={field.onChange} defaultValue={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          {statusOptions.map((option) => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              )}
+            </div>
+
+            <FormField
+              control={form.control}
+              name="due_date"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Due Date</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
+            <div className="flex justify-end space-x-2">
+              <Button type="button" variant="outline" onClick={onClose}>
+                Cancel
+              </Button>
+              <Button 
+                type="submit" 
+                disabled={createIncident.isPending || updateIncident.isPending}
+              >
+                {incident ? "Update" : "Create"}
+              </Button>
+            </div>
+          </form>
+        </Form>
+      </DialogContent>
+    </Dialog>
+  );
+};
+
+export default IncidentForm;
