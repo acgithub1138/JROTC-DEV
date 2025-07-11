@@ -20,6 +20,7 @@ interface EmailRulesTableProps {
   rules: (EmailRule & { email_templates: { name: string; subject: string } })[];
   isLoading: boolean;
   onEdit: (rule: EmailRule) => void;
+  onView?: (rule: EmailRule) => void;
   onDelete: (id: string) => void;
   onToggleActive: (id: string, isActive: boolean) => void;
 }
@@ -28,6 +29,7 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
   rules,
   isLoading,
   onEdit,
+  onView,
   onDelete,
   onToggleActive,
 }) => {
@@ -105,13 +107,13 @@ export const EmailRulesTable: React.FC<EmailRulesTableProps> = ({
                   </TableCell>
                   <TableCell className="py-2">
                     <div className="flex items-center space-x-2">
-                      {canViewDetails && (
+                      {canViewDetails && onView && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => onEdit(rule)}
+                              onClick={() => onView(rule)}
                             >
                               <Eye className="h-4 w-4" />
                             </Button>

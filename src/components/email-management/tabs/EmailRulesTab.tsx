@@ -6,15 +6,21 @@ import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useModulePermissions } from '@/hooks/usePermissions';
 import { EmailRuleDialog } from '../dialogs/EmailRuleDialog';
 import { EmailRulesTable } from '../tables/EmailRulesTable';
+import { EmailRulePreviewDialog } from '../dialogs/EmailRulePreviewDialog';
 
 export const EmailRulesTab: React.FC = () => {
   const { canCreate } = useModulePermissions('email');
   const { rules, isLoading, deleteRule, updateRule } = useEmailRules();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingRule, setEditingRule] = useState<any>(null);
+  const [previewingRule, setPreviewingRule] = useState<any>(null);
 
   const handleEdit = (rule: any) => {
     setEditingRule(rule);
+  };
+
+  const handleView = (rule: any) => {
+    setPreviewingRule(rule);
   };
 
   const handleDelete = (id: string) => {
@@ -30,6 +36,10 @@ export const EmailRulesTab: React.FC = () => {
   const handleCloseDialog = () => {
     setShowCreateDialog(false);
     setEditingRule(null);
+  };
+
+  const handleClosePreviewDialog = () => {
+    setPreviewingRule(null);
   };
 
   return (
@@ -53,6 +63,7 @@ export const EmailRulesTab: React.FC = () => {
         rules={rules}
         isLoading={isLoading}
         onEdit={handleEdit}
+        onView={handleView}
         onDelete={handleDelete}
         onToggleActive={handleToggleActive}
       />
@@ -62,6 +73,12 @@ export const EmailRulesTab: React.FC = () => {
         onOpenChange={handleCloseDialog}
         rule={editingRule}
         mode={editingRule ? 'edit' : 'create'}
+      />
+
+      <EmailRulePreviewDialog
+        open={!!previewingRule}
+        onOpenChange={handleClosePreviewDialog}
+        rule={previewingRule}
       />
     </div>
   );
