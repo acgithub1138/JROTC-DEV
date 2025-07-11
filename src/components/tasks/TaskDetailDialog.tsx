@@ -31,6 +31,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { priorityOptions } = useTaskPriorityOptions();
   const { canUpdate, canAssign } = useUserPermissions();
   const [currentTask, setCurrentTask] = useState(task);
+  const [isEditing, setIsEditing] = useState(false);
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -74,13 +75,31 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       }
 
       await updateTask(updateData);
-      onOpenChange(false);
+      setIsEditing(false);
     } catch (error) {
       console.error('Error updating task:', error);
     }
   };
 
   const handleCancel = () => {
+    setIsEditing(false);
+    // Reset edit data to current task values
+    setEditData({
+      title: currentTask.title,
+      description: currentTask.description || '',
+      status: currentTask.status,
+      priority: currentTask.priority,
+      assigned_to: currentTask.assigned_to || 'unassigned',
+      due_date: currentTask.due_date ? new Date(currentTask.due_date) : null,
+    });
+  };
+
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+
+  const handleClose = () => {
+    setIsEditing(false);
     onOpenChange(false);
   };
 
@@ -120,46 +139,68 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                   {currentTask.task_number} -
                 </span>
               )}
+              {isEditing ? (
                 <Input
-                value={editData.title}
-                onChange={(e) => setEditData({...editData, title: e.target.value})}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                disabled={!canEdit}
-                readOnly={!canEdit}
-              />
+                  value={editData.title}
+                  onChange={(e) => setEditData({...editData, title: e.target.value})}
+                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                />
+              ) : (
+                <span className="text-lg font-semibold">{currentTask.title}</span>
+              )}
             </DialogTitle>
-            {canEdit && (
-              <div className="flex items-center gap-2">
-                {currentTask.status !== 'done' && (
+            <div className="flex items-center gap-2">
+              {!isEditing && canEdit && (
+                <>
+                  {currentTask.status !== 'done' && (
+                    <Button
+                      type="button"
+                      onClick={handleCompleteTask}
+                      className="flex items-center gap-2"
+                      variant="default"
+                    >
+                      <Check className="w-4 h-4" />
+                      Complete
+                    </Button>
+                  )}
                   <Button
-                    type="button"
-                    onClick={handleCompleteTask}
-                    className="flex items-center gap-2"
-                    variant="default"
+                    variant="outline"
+                    size="sm"
+                    onClick={handleEdit}
                   >
-                    <Check className="w-4 h-4" />
-                    Complete
+                    Edit
                   </Button>
-                )}
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleCancel}
-                  disabled={isUpdating}
-                >
-                  <X className="w-4 h-4 mr-2" />
-                  Cancel
-                </Button>
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={isUpdating}
-                >
-                  <Save className="w-4 h-4 mr-2" />
-                  Save
-                </Button>
-              </div>
-            )}
+                </>
+              )}
+              {isEditing && (
+                <>
+                  <Button
+                    variant="outline"
+                    size="sm"
+                    onClick={handleCancel}
+                    disabled={isUpdating}
+                  >
+                    <X className="w-4 h-4 mr-2" />
+                    Cancel
+                  </Button>
+                  <Button
+                    size="sm"
+                    onClick={handleSave}
+                    disabled={isUpdating}
+                  >
+                    <Save className="w-4 h-4 mr-2" />
+                    Save
+                  </Button>
+                </>
+              )}
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={handleClose}
+              >
+                <X className="w-4 h-4" />
+              </Button>
+            </div>
           </div>
         </DialogHeader>
 
@@ -172,83 +213,83 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 <CardTitle className="text-sm font-medium">Task Information</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <Flag className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Priority:</span>
-                   {canEdit ? (
-                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})} disabled={!canEdit}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {priorityOptions.filter(p => p.is_active).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                      {currentPriorityOption?.label || editData.priority}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <MessageSquare className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Status:</span>
-                   {canEdit ? (
-                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})} disabled={!canEdit}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {statusOptions.filter(s => s.is_active).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                      {currentStatusOption?.label || editData.status.replace('_', ' ')}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Due Date:</span>
-                  {canEdit ? (
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <Button variant="outline" className="h-8 text-left">
-                          <CalendarIcon className="mr-2 h-4 w-4" />
-                          {editData.due_date ? format(editData.due_date, 'PPP') : 'Set date'}
-                        </Button>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={editData.due_date}
-                          onSelect={(date) => setEditData({...editData, due_date: date})}
-                          disabled={(date) => {
-                            const tomorrow = new Date();
-                            tomorrow.setDate(tomorrow.getDate() + 1);
-                            tomorrow.setHours(0, 0, 0, 0);
-                            return date < tomorrow;
-                          }}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
-                      </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <span className="text-sm font-medium">
-                      {editData.due_date ? format(editData.due_date, 'PPP') : 'No due date'}
-                    </span>
-                  )}
-                </div>
+                 <div className="flex items-center gap-2">
+                   <Flag className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Priority:</span>
+                    {isEditing && canEdit ? (
+                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {priorityOptions.filter(p => p.is_active).map((option) => (
+                           <SelectItem key={option.value} value={option.value}>
+                             {option.label}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   ) : (
+                     <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                       {currentPriorityOption?.label || currentTask.priority}
+                     </Badge>
+                   )}
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <MessageSquare className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Status:</span>
+                    {isEditing && canEdit ? (
+                     <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {statusOptions.filter(s => s.is_active).map((option) => (
+                           <SelectItem key={option.value} value={option.value}>
+                             {option.label}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   ) : (
+                     <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                       {currentStatusOption?.label || currentTask.status.replace('_', ' ')}
+                     </Badge>
+                   )}
+                 </div>
+                 <div className="flex items-center gap-2">
+                   <CalendarIcon className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Due Date:</span>
+                   {isEditing && canEdit ? (
+                     <Popover>
+                       <PopoverTrigger asChild>
+                         <Button variant="outline" className="h-8 text-left">
+                           <CalendarIcon className="mr-2 h-4 w-4" />
+                           {editData.due_date ? format(editData.due_date, 'PPP') : 'Set date'}
+                         </Button>
+                       </PopoverTrigger>
+                       <PopoverContent className="w-auto p-0">
+                         <Calendar
+                           mode="single"
+                           selected={editData.due_date}
+                           onSelect={(date) => setEditData({...editData, due_date: date})}
+                           disabled={(date) => {
+                             const tomorrow = new Date();
+                             tomorrow.setDate(tomorrow.getDate() + 1);
+                             tomorrow.setHours(0, 0, 0, 0);
+                             return date < tomorrow;
+                           }}
+                           initialFocus
+                           className="pointer-events-auto"
+                         />
+                       </PopoverContent>
+                     </Popover>
+                   ) : (
+                     <span className="text-sm font-medium">
+                       {currentTask.due_date ? format(new Date(currentTask.due_date), 'PPP') : 'No due date'}
+                     </span>
+                   )}
+                 </div>
               </CardContent>
             </Card>
 
@@ -258,31 +299,31 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 <CardTitle className="text-sm font-medium">Assignment Details</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center gap-2">
-                  <User className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Assigned to:</span>
-                   {canEdit && canAssign('tasks') ? (
-                    <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})} disabled={!canEdit || !canAssign('tasks')}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {users.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
-                            {user.last_name}, {user.first_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <span className="text-sm font-medium">
-                      {currentTask.assigned_to_profile 
-                        ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` 
-                        : 'Unassigned'}
-                    </span>
-                  )}
-                </div>
+                 <div className="flex items-center gap-2">
+                   <User className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Assigned to:</span>
+                    {isEditing && canEdit && canAssign('tasks') ? (
+                     <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="unassigned">Unassigned</SelectItem>
+                         {users.map((user) => (
+                           <SelectItem key={user.id} value={user.id}>
+                             {user.last_name}, {user.first_name}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   ) : (
+                     <span className="text-sm font-medium">
+                       {currentTask.assigned_to_profile 
+                         ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` 
+                         : 'Unassigned'}
+                     </span>
+                   )}
+                 </div>
                 {currentTask.assigned_by_profile && (
                   <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
@@ -306,18 +347,16 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            {canEdit ? (
+            {isEditing && canEdit ? (
               <Textarea
                 value={editData.description}
                 onChange={(e) => setEditData({...editData, description: e.target.value})}
                 rows={4}
                 placeholder="Detailed description of the task..."
-                disabled={!canEdit}
-                readOnly={!canEdit}
               />
             ) : (
               <p className="text-sm text-gray-700 whitespace-pre-wrap">
-                {editData.description || 'No description'}
+                {currentTask.description || 'No description'}
               </p>
             )}
           </div>
