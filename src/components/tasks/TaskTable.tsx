@@ -11,6 +11,8 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTaskSorting } from '@/hooks/useTaskSorting';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTasks } from '@/hooks/useTasks';
 
 interface TaskTableProps {
   tasks: (Task | Subtask)[];
@@ -34,6 +36,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
+  const { canDelete } = useTaskPermissions();
+  const { deleteTask } = useTasks();
   
   const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
     data: tasks,
@@ -64,14 +68,28 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     });
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedTasks.length === 0) return;
+    
+    try {
+      // Delete selected tasks
+      await Promise.all(selectedTasks.map(taskId => deleteTask(taskId)));
+      
+      // Clear selection after successful delete
+      setSelectedTasks([]);
+    } catch (error) {
+      console.error('Failed to delete tasks:', error);
+    }
+  };
+
   return (
     <div className="bg-card rounded-lg border">
       <TaskTableHeader
         selectedTasks={selectedTasks}
         totalTasks={sortedTasks.length}
         onSelectAll={(checked) => handleSelectAll(checked, sortedTasks)}
-        onBulkDelete={() => {}} // Remove bulk delete functionality 
-        canEdit={false} // Remove editing capability
+        onBulkDelete={handleBulkDelete}
+        canEdit={canDelete} // Use delete permission for showing actions
         showOverdueFilter={showOverdueFilter}
         overdueFilterChecked={overdueFilterChecked}
         onOverdueFilterChange={onOverdueFilterChange}
