@@ -94,10 +94,8 @@ serve(async (req) => {
       }
     }
 
-    // Start profile update in background
-    updateProfile().catch(error => {
-      console.error('Final profile update error:', error)
-    })
+    // Wait for profile update to complete before returning
+    await updateProfile()
 
     return new Response(
       JSON.stringify({ 
