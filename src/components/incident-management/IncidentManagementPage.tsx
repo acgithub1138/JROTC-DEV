@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
+import { StandardTableWrapper } from "@/components/ui/standard-table";
 import { useIncidents } from "@/hooks/incidents/useIncidents";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import IncidentForm from "./IncidentForm";
@@ -16,6 +17,21 @@ const IncidentManagementPage: React.FC = () => {
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [searchValue, setSearchValue] = useState("");
+
+  // Filter incidents based on search
+  const filteredIncidents = useMemo(() => {
+    if (!searchValue.trim()) return incidents;
+    
+    const searchTerm = searchValue.toLowerCase();
+    return incidents.filter(incident => 
+      incident.title?.toLowerCase().includes(searchTerm) ||
+      incident.description?.toLowerCase().includes(searchTerm) ||
+      incident.incident_number?.toLowerCase().includes(searchTerm) ||
+      incident.status?.toLowerCase().includes(searchTerm) ||
+      incident.priority?.toLowerCase().includes(searchTerm)
+    );
+  }, [incidents, searchValue]);
 
   const handleIncidentSelect = (incident: Incident) => {
     setSelectedIncident(incident);
@@ -40,25 +56,31 @@ const IncidentManagementPage: React.FC = () => {
   };
 
   if (isLoading) {
-    return <div>Loading incidents...</div>;
+    return <div className="p-6">Loading incidents...</div>;
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Incident Management</h1>
-        {canCreate && (
-          <Button onClick={handleCreateIncident}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Incident
-          </Button>
-        )}
-      </div>
-
-      <IncidentTable 
-        incidents={incidents} 
-        onIncidentSelect={handleIncidentSelect}
-      />
+    <div className="p-6 space-y-6">
+      <StandardTableWrapper
+        title="Incident Management"
+        description="Track and manage help requests from schools"
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search incidents..."
+        actions={
+          canCreate && (
+            <Button onClick={handleCreateIncident}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Incident
+            </Button>
+          )
+        }
+      >
+        <IncidentTable 
+          incidents={filteredIncidents} 
+          onIncidentSelect={handleIncidentSelect}
+        />
+      </StandardTableWrapper>
 
       {showCreateForm && (
         <IncidentForm
