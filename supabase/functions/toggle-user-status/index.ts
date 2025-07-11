@@ -8,7 +8,8 @@ const corsHeaders = {
 }
 
 interface ToggleUserStatusRequest {
-  userId: string
+  userId?: string
+  userIds?: string[]
   active: boolean
 }
 
@@ -50,47 +51,89 @@ serve(async (req) => {
       throw new Error('Insufficient permissions - admin or instructor role required')
     }
 
-    const { userId, active }: ToggleUserStatusRequest = await req.json()
+    const { userId, userIds, active }: ToggleUserStatusRequest = await req.json()
 
-    if (!userId) {
-      throw new Error('User ID is required')
+    // Determine which users to process
+    let usersToProcess: string[] = []
+    if (userId) {
+      usersToProcess = [userId]
+    } else if (userIds && userIds.length > 0) {
+      usersToProcess = userIds
+    } else {
+      throw new Error('Either userId or userIds is required')
     }
 
-    console.log('User', user.id, 'toggling status for user:', userId, 'to active:', active)
+    console.log('User', user.id, 'toggling status for users:', usersToProcess, 'to active:', active)
 
-    // Update the user's ban status using admin API
-    const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(userId, {
-      ban_duration: active ? "none" : "876600h", // 100 years for inactive users
-    })
+    // Process each user
+    const results = []
+    const errors = []
 
-    if (authUpdateError) {
-      console.error('Auth update error:', authUpdateError)
-      throw authUpdateError
+    for (const targetUserId of usersToProcess) {
+      try {
+        // Update the user's ban status using admin API
+        const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
+          ban_duration: active ? "none" : "876600h", // 100 years for inactive users
+        })
+
+        if (authUpdateError) {
+          console.error('Auth update error for user', targetUserId, ':', authUpdateError)
+          errors.push({ userId: targetUserId, error: authUpdateError.message })
+          continue
+        }
+
+        // Update profile active status
+        const { error: profileUpdateError } = await supabaseAdmin
+          .from('profiles')
+          .update({ active: active })
+          .eq('id', targetUserId)
+
+        if (profileUpdateError) {
+          console.error('Profile update error for user', targetUserId, ':', profileUpdateError)
+          errors.push({ userId: targetUserId, error: profileUpdateError.message })
+          continue
+        }
+
+        results.push({ userId: targetUserId, success: true })
+        console.log('User status toggled successfully for user:', targetUserId)
+      } catch (error) {
+        console.error('Error processing user', targetUserId, ':', error)
+        errors.push({ userId: targetUserId, error: error.message })
+      }
     }
 
-    // Update profile active status
-    const { error: profileUpdateError } = await supabaseAdmin
-      .from('profiles')
-      .update({ active: active })
-      .eq('id', userId)
+    const successCount = results.length
+    const errorCount = errors.length
+    const totalCount = usersToProcess.length
 
-    if (profileUpdateError) {
-      console.error('Profile update error:', profileUpdateError)
-      throw profileUpdateError
+    if (errorCount === 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `${successCount} user(s) ${active ? 'activated' : 'deactivated'} successfully`,
+          results
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    } else if (successCount > 0) {
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: `${successCount} user(s) ${active ? 'activated' : 'deactivated'} successfully, ${errorCount} failed`,
+          results,
+          errors
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        },
+      )
+    } else {
+      throw new Error(`Failed to ${active ? 'activate' : 'deactivate'} all users`)
     }
-
-    console.log('User status toggled successfully for user:', userId)
-
-    return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: `User ${active ? 'activated' : 'deactivated'} successfully`
-      }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 200,
-      },
-    )
 
   } catch (error) {
     console.error('Function error:', error)
