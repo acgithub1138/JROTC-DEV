@@ -60,7 +60,7 @@ export const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Submitted By</TableHead>
             <TableHead>Assigned To</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
