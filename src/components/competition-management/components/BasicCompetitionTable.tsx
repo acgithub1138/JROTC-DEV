@@ -142,11 +142,11 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 {isColumnVisible('unarmed_color_guard') && <TableCell><PlacementCell placement={competition.unarmed_color_guard} /></TableCell>}
                 {isColumnVisible('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
                 <TableCell className="text-right">
-                  <div className="flex gap-2 justify-end">
+                  <div className="flex items-center justify-center gap-2">
                     {onAddEvent && <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="default" size="sm" onClick={() => onAddEvent(competition)}>
-                            <Plus className="w-4 h-4" />
+                          <Button variant="default" size="icon" className="h-6 w-6" onClick={() => onAddEvent(competition)}>
+                            <Plus className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -155,8 +155,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                       </Tooltip>}
                     {onViewScoreSheets && <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onViewScoreSheets(competition)}>
-                            <Eye className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
+                            <Eye className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -165,8 +165,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                       </Tooltip>}
                     {onEdit && <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
-                            <Edit className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(competition)}>
+                            <Edit className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -175,8 +175,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                       </Tooltip>}
                     {onDelete && <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
-                            <Trash2 className="w-4 h-4" />
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onDelete(competition.id)}>
+                            <Trash2 className="w-3 h-3" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
