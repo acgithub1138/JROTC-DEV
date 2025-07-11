@@ -52,12 +52,6 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
     canView
   } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
-  console.log('IncidentTable permissions:', {
-    canView,
-    canUpdate,
-    canUpdateAssigned,
-    canEdit
-  });
   if (incidents.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">
         No incidents found.

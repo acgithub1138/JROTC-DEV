@@ -55,20 +55,15 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isProfileLoading, setIsProfileLoading] = useState(false);
   const { toast } = useToast();
 
-  const fetchUserProfile = async (userId: string, retryCount = 0) => {
+  const fetchUserProfile = async (userId: string) => {
+    // Prevent multiple simultaneous calls
+    if (isProfileLoading) return;
+    setIsProfileLoading(true);
     try {
-      console.log('Fetching user profile for:', userId, 'Retry:', retryCount);
-      
-      // Debug session context before making query
-      const { data: { session: currentSession } } = await supabase.auth.getSession();
-      console.log('Current session before profile query:', {
-        userId: currentSession?.user?.id,
-        accessToken: currentSession?.access_token ? 'present' : 'missing',
-        refreshToken: currentSession?.refresh_token ? 'present' : 'missing',
-        expiresAt: currentSession?.expires_at ? new Date(currentSession.expires_at * 1000) : 'unknown'
-      });
+      console.log('Fetching user profile for:', userId);
 
       const { data, error } = await supabase
         .from('profiles')
@@ -92,31 +87,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Error fetching user profile:', error);
-        
-        // Check if this is a JWT/auth context error and retry
-        if (error.message?.includes('JWT') || error.code === 'PGRST301' || retryCount < 2) {
-          console.log('Potential JWT context issue detected, attempting session refresh...');
-          
-          try {
-            // Force refresh the session
-            const { data: refreshData, error: refreshError } = await supabase.auth.refreshSession();
-            
-            if (refreshData.session && !refreshError && retryCount < 2) {
-              console.log('Session refreshed, retrying profile fetch...');
-              // Update session state immediately
-              setSession(refreshData.session);
-              setUser(refreshData.session.user);
-              
-              // Retry profile fetch with new session
-              setTimeout(() => fetchUserProfile(userId, retryCount + 1), 100);
-              return;
-            }
-          } catch (refreshError) {
-            console.error('Session refresh failed:', refreshError);
-          }
-        }
-        
-        // Don't show toast for missing profile, just log it
         if (error.code !== 'PGRST116') {
           toast({
             title: "Profile Error",
@@ -124,6 +94,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             variant: "destructive",
           });
         }
+        setIsProfileLoading(false);
         return;
       }
 
@@ -134,7 +105,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           school_id: data.school_id,
           email: data.email
         });
-        console.log('School JROTC Program:', data.schools?.jrotc_program);
         setUserProfile(data);
       } else {
         console.log('No profile found for user:', userId);
@@ -142,6 +112,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       }
     } catch (error) {
       console.error('Error fetching user profile:', error);
+    } finally {
+      setIsProfileLoading(false);
     }
   };
 
@@ -158,14 +130,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Use setTimeout to defer the profile fetch and avoid blocking
-          setTimeout(() => {
-            if (mounted) {
-              fetchUserProfile(session.user.id);
-            }
-          }, 0);
-        } else {
+        if (session?.user && !userProfile) {
+          fetchUserProfile(session.user.id);
+        } else if (!session?.user) {
           setUserProfile(null);
         }
         setLoading(false);
@@ -180,7 +147,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
+      if (session?.user && !userProfile) {
         fetchUserProfile(session.user.id);
       }
       setLoading(false);

@@ -1,13 +1,27 @@
-import { useModulePermissions, usePermissions } from './usePermissions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
+
+// Helper hook for module permissions
+const useModulePermissions = (module: string) => {
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    canAccess: hasPermission(module, 'sidebar'),
+    canRead: hasPermission(module, 'read'),
+    canViewDetails: hasPermission(module, 'view'),
+    canCreate: hasPermission(module, 'create'),
+    canUpdate: hasPermission(module, 'update'),
+    canDelete: hasPermission(module, 'delete'),
+  };
+};
 
 // Task-specific permissions
 export const useTaskPermissions = () => {
   const modulePermissions = useModulePermissions('tasks');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canAssign: hasPermission('tasks', 'assign'),
     canManageOptions: hasPermission('tasks', 'manage_options'),
     canUpdateAssigned: hasPermission('tasks', 'update_assigned'),
@@ -17,11 +31,11 @@ export const useTaskPermissions = () => {
 // User management specific permissions
 export const useUserPermissions = () => {
   const modulePermissions = useModulePermissions('users');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canResetPassword: hasPermission('users', 'reset_password'),
     canBulkImport: hasPermission('users', 'bulk_import'),
   };
@@ -30,11 +44,11 @@ export const useUserPermissions = () => {
 // Cadet management specific permissions
 export const useCadetPermissions = () => {
   const modulePermissions = useModulePermissions('cadets');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canResetPassword: hasPermission('cadets', 'reset_password'),
     canBulkImport: hasPermission('cadets', 'bulk_import'),
   };
@@ -43,11 +57,11 @@ export const useCadetPermissions = () => {
 // Event-specific permissions
 export const useEventPermissions = () => {
   const modulePermissions = useModulePermissions('events');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canAssign: hasPermission('events', 'assign'),
   };
 };
@@ -58,8 +72,7 @@ export const useCompetitionPermissions = () => {
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
-    
+    canView: modulePermissions.canRead,
   };
 };
 
@@ -67,11 +80,11 @@ export const useCompetitionPermissions = () => {
 // Job Board specific permissions
 export const useJobBoardPermissions = () => {
   const modulePermissions = useModulePermissions('job_board');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canManageHierarchy: hasPermission('job_board', 'manage_hierarchy'),
   };
 };
@@ -79,11 +92,11 @@ export const useJobBoardPermissions = () => {
 // Inventory-specific permissions
 export const useInventoryPermissions = () => {
   const modulePermissions = useModulePermissions('inventory');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canAssign: hasPermission('inventory', 'assign'),
     canBulkImport: hasPermission('inventory', 'bulk_import'),
   };
@@ -92,11 +105,11 @@ export const useInventoryPermissions = () => {
 // Dashboard-specific permissions
 export const useDashboardPermissions = () => {
   const modulePermissions = useModulePermissions('dashboard');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canViewAnalytics: hasPermission('dashboard', 'view_analytics'),
   };
 };
@@ -104,29 +117,24 @@ export const useDashboardPermissions = () => {
 // Incident-specific permissions
 export const useIncidentPermissions = () => {
   const modulePermissions = useModulePermissions('incident_management');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
-  const permissions = {
+  return {
     ...modulePermissions,
-    canView: modulePermissions.canViewDetails, // Use 'view' permission, not 'read'
+    canView: modulePermissions.canViewDetails,
     canAssign: hasPermission('incident_management', 'assign'),
     canUpdateAssigned: hasPermission('incident_management', 'update_assigned'),
   };
-  
-  console.log('useIncidentPermissions - modulePermissions:', modulePermissions);
-  console.log('useIncidentPermissions - final permissions:', permissions);
-  
-  return permissions;
 };
 
 // Calendar-specific permissions
 export const useCalendarPermissions = () => {
   const modulePermissions = useModulePermissions('calendar');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canViewDetails: hasPermission('calendar', 'view'),
   };
 };
@@ -134,11 +142,11 @@ export const useCalendarPermissions = () => {
 // Email Management specific permissions
 export const useEmailPermissions = () => {
   const modulePermissions = useModulePermissions('email');
-  const { hasPermission } = usePermissions();
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead, // Backwards compatibility
+    canView: modulePermissions.canRead,
     canManageTemplates: hasPermission('email', 'manage_templates'),
     canManageRules: hasPermission('email', 'manage_rules'),
     canProcessQueue: hasPermission('email', 'process_queue'),
