@@ -8,6 +8,7 @@ import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
+import IncidentDetailDialog_Readonly from "./IncidentDetailDialog_Readonly";
 import IncidentTable from "./IncidentTable";
 import type { Incident } from "@/hooks/incidents/types";
 
@@ -19,9 +20,8 @@ const IncidentManagementPage: React.FC = () => {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
   const [showDetailDialog, setShowDetailDialog] = useState(false);
+  const [showReadonlyDialog, setShowReadonlyDialog] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [isDetailDialogInEditMode, setIsDetailDialogInEditMode] = useState(false);
-  const [isDetailDialogReadOnly, setIsDetailDialogReadOnly] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
 
@@ -77,16 +77,12 @@ const IncidentManagementPage: React.FC = () => {
   const handleIncidentSelect = (incident: Incident) => {
     console.log("handleIncidentSelect called - should open in READ-ONLY mode");
     setSelectedIncident(incident);
-    setIsDetailDialogInEditMode(false);
-    setIsDetailDialogReadOnly(true);
-    setShowDetailDialog(true);
+    setShowReadonlyDialog(true);
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
     console.log("handleIncidentSelectForEdit called - should open in EDIT mode");
     setSelectedIncident(incident);
-    setIsDetailDialogInEditMode(true);
-    setIsDetailDialogReadOnly(false);
     setShowDetailDialog(true);
   };
 
@@ -233,18 +229,21 @@ const IncidentManagementPage: React.FC = () => {
         />
       )}
 
-      {selectedIncident && (
+      {selectedIncident && showDetailDialog && (
         <IncidentDetailDialog
           incident={selectedIncident}
           isOpen={showDetailDialog}
-          onClose={() => {
-            setShowDetailDialog(false);
-            setIsDetailDialogInEditMode(false);
-            setIsDetailDialogReadOnly(false);
-          }}
+          onClose={() => setShowDetailDialog(false)}
           onEdit={handleEditIncident}
-          initialEditMode={isDetailDialogInEditMode}
-          isReadOnly={isDetailDialogReadOnly}
+          initialEditMode={true}
+        />
+      )}
+
+      {selectedIncident && showReadonlyDialog && (
+        <IncidentDetailDialog_Readonly
+          incident={selectedIncident}
+          isOpen={showReadonlyDialog}
+          onClose={() => setShowReadonlyDialog(false)}
         />
       )}
     </div>
