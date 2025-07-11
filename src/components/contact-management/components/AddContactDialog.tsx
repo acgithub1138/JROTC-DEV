@@ -84,6 +84,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
         .select('id, first_name, last_name')
         .eq('school_id', userProfile.school_id)
         .eq('role', 'cadet')
+        .eq('active', true)
         .order('last_name');
 
       setCadets(data || []);
