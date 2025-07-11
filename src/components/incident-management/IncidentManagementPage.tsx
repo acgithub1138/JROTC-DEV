@@ -15,7 +15,7 @@ import type { Incident } from "@/hooks/incidents/types";
 
 const IncidentManagementPage: React.FC = () => {
   const { userProfile } = useAuth();
-  const { canCreate } = useIncidentPermissions();
+  const { canCreate, canUpdate, canUpdateAssigned } = useIncidentPermissions();
   const isAdmin = userProfile?.role === 'admin';
   
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
@@ -82,7 +82,6 @@ const IncidentManagementPage: React.FC = () => {
   };
 
   const handleIncidentSelectForEdit = (incident: Incident) => {
-    const { canUpdate, canUpdateAssigned } = useIncidentPermissions();
     const canEdit = canUpdate || canUpdateAssigned;
     
     if (!canEdit) {
