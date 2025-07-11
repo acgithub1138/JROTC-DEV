@@ -109,12 +109,39 @@ export const useEmailQueue = () => {
     },
   });
 
+  const deleteEmail = useMutation({
+    mutationFn: async (id: string) => {
+      const { error } = await supabase
+        .from('email_queue')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+      toast({
+        title: "Email deleted",
+        description: "The email has been deleted from the queue.",
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to delete email.",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     queueItems,
     isLoading,
     retryEmail: retryEmail.mutate,
     cancelEmail: cancelEmail.mutate,
+    deleteEmail: deleteEmail.mutate,
     isRetrying: retryEmail.isPending,
     isCancelling: cancelEmail.isPending,
+    isDeleting: deleteEmail.isPending,
   };
 };

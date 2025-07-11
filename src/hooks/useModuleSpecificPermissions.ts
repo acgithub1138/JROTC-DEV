@@ -126,3 +126,17 @@ export const useCalendarPermissions = () => {
     canViewDetails: hasPermission('calendar', 'view'),
   };
 };
+
+// Email Management specific permissions
+export const useEmailPermissions = () => {
+  const modulePermissions = useModulePermissions('email_management');
+  const { hasPermission } = usePermissions();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead, // Backwards compatibility
+    canManageTemplates: hasPermission('email_management', 'manage_templates'),
+    canManageRules: hasPermission('email_management', 'manage_rules'),
+    canProcessQueue: hasPermission('email_management', 'process_queue'),
+  };
+};
