@@ -53,7 +53,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
             <TableHead>Source Table</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead>Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
