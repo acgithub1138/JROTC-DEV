@@ -46,7 +46,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
     { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
     { id: 'email-management', label: 'Email', icon: 'Mails' },
-    { id: 'incidents', label: 'Incident Management', icon: 'AlertTriangle' },
+    { id: 'incidents', label: role === 'instructor' ? 'Get Help' : 'Incident Management', icon: 'AlertTriangle' },
     { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings', adminOnly: true },
     { id: 'settings', label: 'Settings', icon: 'Settings' },
   ];
