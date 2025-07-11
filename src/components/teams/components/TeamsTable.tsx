@@ -119,7 +119,7 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                 {new Date(team.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell className="py-2">
-                <div className="flex items-center justify-center gap-2">
+                <div className="flex items-center justify-center gap-1">
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
