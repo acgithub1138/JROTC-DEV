@@ -31,8 +31,6 @@ interface IncidentDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: (incident: Incident) => void;
-  initialEditMode?: boolean;
-  isReadOnly?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -70,10 +68,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   isOpen,
   onClose,
   onEdit,
-  initialEditMode = false,
-  isReadOnly = false
 }) => {
-  console.log("IncidentDetailDialog props:", { initialEditMode, isReadOnly });
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
   const { users, isLoading: usersLoading } = useSchoolUsers();
@@ -82,7 +77,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { canUpdate } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
-  const [isEditing, setIsEditing] = useState(initialEditMode);
+  const [isEditing, setIsEditing] = useState(true); // Always start in edit mode
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
@@ -250,15 +245,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                     Save
                   </Button>
                 </>
-              )}
-              {!isEditing && canUpdate && !isReadOnly && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={handleEdit}
-                >
-                  Edit
-                </Button>
               )}
             </div>
           </div>
