@@ -27,7 +27,9 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
     // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
     pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField,
     // Map dropdown options from 'options' to 'values' for ScoreFieldRenderer compatibility
-    values: field.options || field.values
+    values: field.options || field.values,
+    // Preserve textType for text fields
+    textType: field.textType
   }));
 
   const { scores, totalPoints, handleFieldChange } = useScoreCalculation({
