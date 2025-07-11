@@ -63,7 +63,6 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
       <TaskTable 
         tasks={tasks}
         onTaskSelect={onTaskSelect}
-        onEditTask={onEditTask}
         showOverdueFilter={isAllTasksTab}
         overdueFilterChecked={overdueFilter}
         onOverdueFilterChange={onOverdueFilterChange}

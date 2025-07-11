@@ -82,7 +82,6 @@ export const TaskList: React.FC<TaskListProps> = ({ tasks, onTaskSelect, onEditT
       <TaskTable
         tasks={filteredTasks}
         onTaskSelect={onTaskSelect}
-        onEditTask={onEditTask}
       />
     </div>
   );

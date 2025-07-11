@@ -9,7 +9,6 @@ import { format } from 'date-fns';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
-import { EditableCell } from './EditableCell';
 import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
@@ -17,27 +16,14 @@ import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 
-interface EditState {
-  taskId: string | null;
-  field: string | null;
-  value: any;
-}
-
 interface TaskTableRowProps {
   task: Task | Subtask;
   isSelected: boolean;
-  editState: EditState;
-  setEditState: (state: EditState) => void;
   statusOptions: TaskStatusOption[];
   priorityOptions: TaskPriorityOption[];
   users: any[];
-  canEdit: boolean;
-  canEditTask: (task: Task | Subtask) => boolean;
   onTaskSelect: (task: Task | Subtask) => void;
   onSelectTask: (taskId: string, checked: boolean) => void;
-  onSave: (task: Task | Subtask, field: string, newValue: any) => void;
-  onCancel: () => void;
-  onEditTask: (task: Task | Subtask) => void;
   expandedTasks: Set<string>;
   onToggleExpanded: (taskId: string) => void;
   selectedTasks: string[];
@@ -46,18 +32,11 @@ interface TaskTableRowProps {
 export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   task,
   isSelected,
-  editState,
-  setEditState,
   statusOptions,
   priorityOptions,
   users,
-  canEdit,
-  canEditTask,
   onTaskSelect,
   onSelectTask,
-  onSave,
-  onCancel,
-  onEditTask,
   expandedTasks,
   onToggleExpanded,
   selectedTasks,
@@ -125,17 +104,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           </div>
         </TableCell>
         <TableCell className="font-medium py-2">
-          <EditableCell
-            task={task}
-            field="title"
-            value={task.title}
-            displayValue={task.title}
-            editState={editState}
-            setEditState={setEditState}
-            onSave={onSave}
-            onCancel={onCancel}
-            canEdit={canEditTask(task)}
-          />
+          <span>{task.title}</span>
         </TableCell>
         <TableCell className="py-2">
           <Button
@@ -149,69 +118,26 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           </Button>
         </TableCell>
         <TableCell className="py-2">
-          <EditableCell
-            task={task}
-            field="status"
-            value={task.status}
-            displayValue={<Badge className={getStatusColorClass(task.status, statusOptions)}>{getStatusLabel(task.status, statusOptions)}</Badge>}
-            editState={editState}
-            setEditState={setEditState}
-            onSave={onSave}
-            onCancel={onCancel}
-            canEdit={canEditTask(task)}
-          />
+          <Badge className={getStatusColorClass(task.status, statusOptions)}>
+            {getStatusLabel(task.status, statusOptions)}
+          </Badge>
         </TableCell>
         <TableCell className="py-2">
-          <EditableCell
-            task={task}
-            field="priority"
-            value={task.priority}
-            displayValue={<Badge className={getPriorityColorClass(task.priority, priorityOptions)}>{getPriorityLabel(task.priority, priorityOptions)}</Badge>}
-            editState={editState}
-            setEditState={setEditState}
-            onSave={onSave}
-            onCancel={onCancel}
-            canEdit={canEditTask(task)}
-          />
+          <Badge className={getPriorityColorClass(task.priority, priorityOptions)}>
+            {getPriorityLabel(task.priority, priorityOptions)}
+          </Badge>
         </TableCell>
         <TableCell className="py-2">
-          {canEdit ? (
-            <EditableCell
-              task={task}
-              field="assigned_to"
-              value={task.assigned_to}
-              displayValue={
-                task.assigned_to_profile
-                  ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
-                  : 'Unassigned'
-              }
-              editState={editState}
-              setEditState={setEditState}
-              onSave={onSave}
-              onCancel={onCancel}
-              canEdit={canEdit}
-              users={users}
-            />
-          ) : (
-            <span>
-              {task.assigned_to_profile
-                ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
-                : 'Unassigned'}
-            </span>
-          )}
+          <span>
+            {task.assigned_to_profile
+              ? `${task.assigned_to_profile.last_name}, ${task.assigned_to_profile.first_name}`
+              : 'Unassigned'}
+          </span>
         </TableCell>
         <TableCell className="py-2">
-          <EditableCell
-            task={task}
-            field="due_date"
-            value={task.due_date ? new Date(task.due_date) : null}
-            displayValue={task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'}
-            editState={editState}
-            setEditState={setEditState}
-            onSave={onSave}
-            onCancel={onCancel}
-            canEdit={canEditTask(task)}
-          />
+          <span>
+            {task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'}
+          </span>
         </TableCell>
         <TableCell className="py-2">
           {format(new Date(task.created_at), 'MMM d, yyyy')}
@@ -245,18 +171,11 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           key={subtask.id}
           subtask={subtask}
           isSelected={selectedTasks.includes(subtask.id)}
-          editState={editState}
-          setEditState={setEditState}
           statusOptions={statusOptions}
           priorityOptions={priorityOptions}
           users={users}
-          canEdit={canEdit}
-          canEditTask={(s) => canEditTask(s as any)}
           onTaskSelect={onTaskSelect}
           onSelectTask={onSelectTask}
-          onSave={onSave}
-          onCancel={onCancel}
-          onEditTask={(s) => onEditTask(s as any)}
         />
       ))}
       
