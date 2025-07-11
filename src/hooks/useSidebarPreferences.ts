@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissions } from './usePermissions';
@@ -149,63 +149,78 @@ export const useSidebarPreferences = () => {
   const { hasPermission, allRolePermissions } = usePermissions();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  console.log('useSidebarPreferences - User Profile:', userProfile);
+  console.log('useSidebarPreferences - User Profile:', userProfile?.id);
   console.log('useSidebarPreferences - Role Permissions:', allRolePermissions.length);
 
+  // Memoize permission state to prevent unnecessary re-renders
+  const permissionsLoaded = useMemo(() => allRolePermissions.length > 0, [allRolePermissions.length]);
+  const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
+  const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
+
+  // Debounced load function to prevent rapid successive calls
   const loadPreferences = useCallback(async () => {
-    if (!userProfile?.id) {
+    if (!userId) {
       console.log('No user profile found, skipping sidebar preferences load');
       return;
     }
 
-    console.log('Loading sidebar preferences for user:', userProfile.id, 'role:', userProfile.role);
-    console.log('Permission system loaded:', allRolePermissions.length > 0);
-    setIsLoading(true);
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_sidebar_preferences')
-        .select('menu_items')
-        .eq('user_id', userProfile.id)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading sidebar preferences:', error);
-      }
-
-      // Use database permissions if loaded, otherwise fallback to hardcoded
-      const defaultItems = allRolePermissions.length > 0 
-        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
-        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
-      
-      console.log('Using', allRolePermissions.length > 0 ? 'database permissions' : 'fallback permissions', 'for role:', userProfile.role);
-      
-      if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
-        console.log('Found saved preferences, filtering menu items');
-        // Filter out invalid items and ensure all valid items are included
-        const savedItemIds = data.menu_items;
-        const orderedItems = savedItemIds
-          .map(id => defaultItems.find(item => item.id === id))
-          .filter(Boolean) as MenuItem[];
-        
-        setMenuItems(orderedItems);
-      } else {
-        console.log('No saved preferences, using default items');
-        setMenuItems(defaultItems);
-      }
-    } catch (error) {
-      console.error('Error loading sidebar preferences:', error);
-      const fallbackItems = getDefaultMenuItemsForRole(userProfile.role || 'cadet');
-      setMenuItems(fallbackItems);
-    } finally {
-      console.log('Sidebar preferences loaded, setting loading to false');
-      setIsLoading(false);
+    // Clear any existing timeout
+    if (loadingTimeoutRef.current) {
+      clearTimeout(loadingTimeoutRef.current);
     }
-  }, [userProfile?.id, userProfile?.role, allRolePermissions.length]);
 
-  const savePreferences = async (newMenuItems: MenuItem[]) => {
-    if (!userProfile?.id) {
+    // Debounce the actual loading
+    loadingTimeoutRef.current = setTimeout(async () => {
+      console.log('Loading sidebar preferences for user:', userId, 'role:', userRole);
+      console.log('Permission system loaded:', permissionsLoaded);
+      setIsLoading(true);
+      
+      try {
+        const { data, error } = await supabase
+          .from('user_sidebar_preferences')
+          .select('menu_items')
+          .eq('user_id', userId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading sidebar preferences:', error);
+        }
+
+        // Use database permissions if loaded, otherwise fallback to hardcoded
+        const defaultItems = permissionsLoaded 
+          ? getMenuItemsFromPermissions(userRole, hasPermission)
+          : getDefaultMenuItemsForRole(userRole);
+        
+        console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
+        
+        if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
+          console.log('Found saved preferences, filtering menu items');
+          // Filter out invalid items and ensure all valid items are included
+          const savedItemIds = data.menu_items;
+          const orderedItems = savedItemIds
+            .map(id => defaultItems.find(item => item.id === id))
+            .filter(Boolean) as MenuItem[];
+          
+          setMenuItems(orderedItems);
+        } else {
+          console.log('No saved preferences, using default items');
+          setMenuItems(defaultItems);
+        }
+      } catch (error) {
+        console.error('Error loading sidebar preferences:', error);
+        const fallbackItems = getDefaultMenuItemsForRole(userRole);
+        setMenuItems(fallbackItems);
+      } finally {
+        console.log('Sidebar preferences loaded, setting loading to false');
+        setIsLoading(false);
+      }
+    }, 100); // 100ms debounce
+  }, [userId, userRole, permissionsLoaded, hasPermission]);
+
+  const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
+    if (!userId) {
       console.error('No user profile found');
       return false;
     }
@@ -213,12 +228,12 @@ export const useSidebarPreferences = () => {
     try {
       const menuItemIds = newMenuItems.map(item => item.id);
       
-      console.log('Saving sidebar preferences for user:', userProfile.id, 'with items:', menuItemIds);
+      console.log('Saving sidebar preferences for user:', userId, 'with items:', menuItemIds);
       
       const { error } = await supabase
         .from('user_sidebar_preferences')
         .upsert({
-          user_id: userProfile.id,
+          user_id: userId,
           menu_items: menuItemIds,
         }, { 
           onConflict: 'user_id' 
@@ -236,27 +251,27 @@ export const useSidebarPreferences = () => {
       console.error('Exception while saving sidebar preferences:', error);
       return false;
     }
-  };
+  }, [userId]);
 
-  const resetToDefault = async () => {
-    if (!userProfile?.id) return false;
+  const resetToDefault = useCallback(async () => {
+    if (!userId) return false;
 
     try {
       await supabase
         .from('user_sidebar_preferences')
         .delete()
-        .eq('user_id', userProfile.id);
+        .eq('user_id', userId);
 
-      const defaultItems = allRolePermissions.length > 0 
-        ? getMenuItemsFromPermissions(userProfile.role || 'cadet', hasPermission)
-        : getDefaultMenuItemsForRole(userProfile.role || 'cadet');
+      const defaultItems = permissionsLoaded 
+        ? getMenuItemsFromPermissions(userRole, hasPermission)
+        : getDefaultMenuItemsForRole(userRole);
       setMenuItems(defaultItems);
       return true;
     } catch (error) {
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  };
+  }, [userId, permissionsLoaded, userRole, hasPermission]);
 
   const refreshPreferences = useCallback(async () => {
     await loadPreferences();
@@ -266,11 +281,20 @@ export const useSidebarPreferences = () => {
     loadPreferences();
   }, [loadPreferences]);
 
-  const getDefaultMenuItems = () => {
-    return allRolePermissions.length > 0 
-      ? getMenuItemsFromPermissions(userProfile?.role || 'cadet', hasPermission)
-      : getDefaultMenuItemsForRole(userProfile?.role || 'cadet');
-  };
+  const getDefaultMenuItems = useCallback(() => {
+    return permissionsLoaded 
+      ? getMenuItemsFromPermissions(userRole, hasPermission)
+      : getDefaultMenuItemsForRole(userRole);
+  }, [permissionsLoaded, userRole, hasPermission]);
+
+  // Cleanup timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (loadingTimeoutRef.current) {
+        clearTimeout(loadingTimeoutRef.current);
+      }
+    };
+  }, []);
 
   return {
     menuItems,

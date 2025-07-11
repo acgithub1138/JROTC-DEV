@@ -1,4 +1,5 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Database } from '@/integrations/supabase/types';
@@ -75,8 +76,8 @@ export const usePermissions = () => {
     },
   });
 
-  // Check if current user has specific permission
-  const hasPermission = (module: string, action: string): boolean => {
+  // Check if current user has specific permission - memoized to prevent recreation
+  const hasPermission = useCallback((module: string, action: string): boolean => {
     if (!userProfile?.role) return false;
     
     const permission = allRolePermissions.find(
@@ -86,7 +87,7 @@ export const usePermissions = () => {
     );
     
     return permission?.enabled || false;
-  };
+  }, [userProfile?.role, allRolePermissions]);
 
   // Get all permissions for a specific role
   const getRolePermissions = (role: UserRole): RolePermissions[string] => {
