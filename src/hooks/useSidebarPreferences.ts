@@ -23,7 +23,7 @@ const MODULE_MAPPING: Record<string, string> = {
   'calendar': 'calendar',
   'competitions': 'competitions',
   'email-management': 'email',
-  'incidents': 'incidents',
+  'incident_management': 'incidents',
   
   'role-management': 'cadets', // Only admins should see this
 };
@@ -39,7 +39,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'role-management', label: 'Role Management', icon: 'Shield', adminOnly: true },
     { id: 'cadets', label: 'Cadets', icon: 'User' },
     { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-    { id: 'incidents', label: 'Get Help', icon: 'AlertTriangle' },
+    { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
     { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
     { id: 'teams', label: 'Teams', icon: 'Users' },
     { id: 'budget', label: 'Budget', icon: 'DollarSign' },
@@ -95,7 +95,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'school-management', label: 'School Management', icon: 'Building2' },
         { id: 'role-management', label: 'Role Management', icon: 'Shield' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'incidents', label: 'Incidents', icon: 'AlertTriangle' },
+        { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
@@ -115,7 +115,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'incidents', label: 'Get Help', icon: 'AlertTriangle' },
+        { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
