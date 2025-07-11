@@ -16,7 +16,7 @@ export interface SchoolUser {
 export const useSchoolUsers = (activeOnly?: boolean) => {
   const { userProfile } = useAuth();
 
-  const { data: users = [], isLoading } = useQuery({
+  const { data: users = [], isLoading, error } = useQuery({
     queryKey: ['school-users', userProfile?.school_id, activeOnly],
     queryFn: async () => {
       let query = supabase
@@ -38,7 +38,11 @@ export const useSchoolUsers = (activeOnly?: boolean) => {
       return data as SchoolUser[];
     },
     enabled: !!userProfile?.school_id,
+    staleTime: 5 * 60 * 1000, // 5 minutes - keep data fresh
+    gcTime: 10 * 60 * 1000, // 10 minutes - keep in cache (renamed from cacheTime in v5)
+    refetchOnWindowFocus: false, // Don't refetch when window regains focus
+    retry: 2, // Retry failed requests twice
   });
 
-  return { users, isLoading };
+  return { users, isLoading, error };
 };

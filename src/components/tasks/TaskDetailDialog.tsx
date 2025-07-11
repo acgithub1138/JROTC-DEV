@@ -25,7 +25,7 @@ import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
   const { updateTask, tasks, isUpdating } = useTasks();
-  const { users } = useSchoolUsers();
+  const { users, isLoading: usersLoading } = useSchoolUsers();
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
@@ -283,27 +283,31 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  <div className="flex items-center gap-2">
                    <User className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Assigned to:</span>
-                    {isEditing && canEdit && canAssign('tasks') ? (
-                     <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
-                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="unassigned">Unassigned</SelectItem>
-                         {users.map((user) => (
-                           <SelectItem key={user.id} value={user.id}>
-                             {user.last_name}, {user.first_name}
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
-                   ) : (
-                     <span className="text-sm font-medium">
-                       {currentTask.assigned_to_profile 
-                         ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` 
-                         : 'Unassigned'}
-                     </span>
-                   )}
+                     {isEditing && canEdit && canAssign('tasks') ? (
+                      usersLoading ? (
+                        <div className="h-8 w-32 bg-muted animate-pulse rounded" />
+                      ) : (
+                        <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                          <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                            <SelectValue placeholder={usersLoading ? "Loading..." : "Select user"} />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                            {users.map((user) => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.last_name}, {user.first_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )
+                    ) : (
+                      <span className="text-sm font-medium">
+                        {currentTask.assigned_to_profile 
+                          ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` 
+                          : 'Unassigned'}
+                      </span>
+                    )}
                  </div>
                 {currentTask.assigned_by_profile && (
                   <div className="flex items-center gap-2">

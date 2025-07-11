@@ -2,6 +2,7 @@
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Skeleton } from '@/components/ui/skeleton';
 import { UseFormReturn } from 'react-hook-form';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { TaskFormData } from '../schemas/taskFormSchema';
@@ -13,7 +14,7 @@ interface TaskAssigneeFieldProps {
 }
 
 export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canAssignTasks, canEditThisTask }) => {
-  const { users } = useSchoolUsers();
+  const { users, isLoading, error } = useSchoolUsers();
   
   if (!canEditThisTask) {
     return null;
@@ -40,12 +41,34 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
     );
   }
 
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="assigned_to">Assigned To *</Label>
+        <Skeleton className="h-10 w-full" />
+      </div>
+    );
+  }
+
+  // Show error state
+  if (error) {
+    return (
+      <div className="space-y-2">
+        <Label htmlFor="assigned_to">Assigned To *</Label>
+        <div className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm text-muted-foreground">
+          Error loading users
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-2">
       <Label htmlFor="assigned_to">Assigned To *</Label>
       <Select value={form.watch('assigned_to')} onValueChange={(value) => form.setValue('assigned_to', value)}>
         <SelectTrigger>
-          <SelectValue placeholder="Select assignee" />
+          <SelectValue placeholder={isLoading ? "Loading users..." : "Select assignee"} />
         </SelectTrigger>
         <SelectContent>
           {users.map((user) => (
