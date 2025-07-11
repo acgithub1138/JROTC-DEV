@@ -109,11 +109,11 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="py-2">
           <Button
             variant="outline"
-            size="sm"
+            size="icon" className="h-6 w-6"
             onClick={() => setIsDescriptionModalOpen(true)}
             className="flex items-center gap-2"
           >
-            <Eye className="w-4 h-4" />
+            <Eye className="w-3 h-3" />
             View
           </Button>
         </TableCell>
@@ -151,7 +151,6 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                     variant="outline"
                     size="icon" className="h-6 w-6"
                     onClick={() => setIsCreateSubtaskOpen(true)}
-                    className="h-6 w-6"
                   >
                     <Plus className="h-3 w-3" />
                   </Button>
