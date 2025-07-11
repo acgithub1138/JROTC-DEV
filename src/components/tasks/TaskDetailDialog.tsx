@@ -17,7 +17,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useModulePermissions, usePermissions } from '@/hooks/usePermissions';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -29,11 +29,9 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { canUpdate, canDelete } = useModulePermissions('tasks');
-  const { hasPermission } = usePermissions();
-  const canAssign = hasPermission('tasks', 'assign');
+  const { canView, canUpdate, canUpdateAssigned, canAssign } = useTaskPermissions();
   const [currentTask, setCurrentTask] = useState(task);
-  const canEdit = canUpdate || (task.assigned_to === userProfile?.id);
+  const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
   const [editData, setEditData] = useState({
     title: task.title,
@@ -128,6 +126,20 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
+
+  // If user doesn't have view permission, don't show the dialog content
+  if (!canView) {
+    return (
+      <Dialog open={open} onOpenChange={onOpenChange}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Access Denied</DialogTitle>
+          </DialogHeader>
+          <p className="text-sm text-gray-600">You don't have permission to view task details.</p>
+        </DialogContent>
+      </Dialog>
+    );
+  }
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
