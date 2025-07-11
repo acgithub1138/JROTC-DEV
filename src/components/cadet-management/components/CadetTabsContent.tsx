@@ -89,9 +89,8 @@ export const CadetTabsContent = ({
       </TabsList>
       
       <TabsContent value="active" className="mt-4">
-        {renderCadetDisplay()}
         {!isMobile && (
-          <div className="flex justify-end p-4 border-t">
+          <div className="flex justify-end p-4 border-b">
             <CadetActionsDropdown
               selectedCount={selectedCadets.length}
               onUpdateGrade={onUpdateGrade}
@@ -104,12 +103,12 @@ export const CadetTabsContent = ({
             />
           </div>
         )}
+        {renderCadetDisplay()}
       </TabsContent>
 
       <TabsContent value="inactive" className="mt-4">
-        {renderCadetDisplay()}
         {!isMobile && (
-          <div className="flex justify-end p-4 border-t">
+          <div className="flex justify-end p-4 border-b">
             <CadetActionsDropdown
               selectedCount={selectedCadets.length}
               onUpdateGrade={onUpdateGrade}
@@ -122,6 +121,7 @@ export const CadetTabsContent = ({
             />
           </div>
         )}
+        {renderCadetDisplay()}
       </TabsContent>
     </Tabs>
   );
