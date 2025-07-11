@@ -143,3 +143,23 @@ export const useIncidentPriorityOptions = () => {
     },
   });
 };
+
+export const useIncidentCategoryOptions = () => {
+  return useQuery({
+    queryKey: ["incident-category-options"],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from("incident_category_options")
+        .select("*")
+        .eq("is_active", true)
+        .order("sort_order");
+
+      if (error) {
+        console.error("Error fetching incident category options:", error);
+        throw error;
+      }
+
+      return data || [];
+    },
+  });
+};

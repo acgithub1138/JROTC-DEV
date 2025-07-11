@@ -5,6 +5,7 @@ export interface Incident {
   description?: string;
   status: string;
   priority: string;
+  category: string;
   school_id: string;
   created_by?: string;
   assigned_to_admin?: string;
@@ -41,10 +42,20 @@ export interface IncidentPriorityOption {
   is_active: boolean;
 }
 
+export interface IncidentCategoryOption {
+  id: string;
+  value: string;
+  label: string;
+  color_class: string;
+  sort_order: number;
+  is_active: boolean;
+}
+
 export interface CreateIncidentData {
   title: string;
   description?: string;
   priority: string;
+  category?: string;
   school_id: string;
   created_by?: string;
   assigned_to_admin?: string;
@@ -56,6 +67,7 @@ export interface UpdateIncidentData {
   description?: string;
   status?: string;
   priority?: string;
+  category?: string;
   assigned_to_admin?: string;
   due_date?: string;
   completed_at?: string;

@@ -951,6 +951,39 @@ export type Database = {
           },
         ]
       }
+      incident_category_options: {
+        Row: {
+          color_class: string
+          created_at: string
+          id: string
+          is_active: boolean
+          label: string
+          sort_order: number
+          updated_at: string
+          value: string
+        }
+        Insert: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label: string
+          sort_order?: number
+          updated_at?: string
+          value: string
+        }
+        Update: {
+          color_class?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          label?: string
+          sort_order?: number
+          updated_at?: string
+          value?: string
+        }
+        Relationships: []
+      }
       incident_comments: {
         Row: {
           comment_text: string
@@ -1062,6 +1095,7 @@ export type Database = {
       incidents: {
         Row: {
           assigned_to_admin: string | null
+          category: string
           completed_at: string | null
           created_at: string
           created_by: string | null
@@ -1077,6 +1111,7 @@ export type Database = {
         }
         Insert: {
           assigned_to_admin?: string | null
+          category?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -1092,6 +1127,7 @@ export type Database = {
         }
         Update: {
           assigned_to_admin?: string | null
+          category?: string
           completed_at?: string | null
           created_at?: string
           created_by?: string | null
@@ -2337,6 +2373,10 @@ export type Database = {
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
+      }
+      validate_incident_category: {
+        Args: { category_value: string }
+        Returns: boolean
       }
       validate_incident_priority: {
         Args: { priority_value: string }

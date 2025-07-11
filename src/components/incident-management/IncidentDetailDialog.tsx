@@ -20,7 +20,7 @@ import { IncidentCommentsSection } from "./components/IncidentCommentsSection";
 import { formatIncidentFieldChangeComment } from "@/utils/incidentCommentUtils";
 import { useIncidentComments } from "@/hooks/incidents/useIncidentComments";
 import { useIncidents } from "@/hooks/incidents/useIncidents";
-import { useIncidentStatusOptions, useIncidentPriorityOptions } from "@/hooks/incidents/useIncidentsQuery";
+import { useIncidentStatusOptions, useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useSchoolUsers } from "@/hooks/useSchoolUsers";
 import { useAuth } from "@/contexts/AuthContext";
@@ -63,6 +63,21 @@ const getPriorityBadgeClass = (priority: string) => {
   }
 };
 
+const getCategoryBadgeClass = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'issue':
+      return 'bg-red-100 text-red-800';
+    case 'request':
+      return 'bg-blue-100 text-blue-800';
+    case 'enhancement':
+      return 'bg-green-100 text-green-800';
+    case 'maintenance':
+      return 'bg-yellow-100 text-yellow-800';
+    default:
+      return 'bg-gray-100 text-gray-800';
+  }
+};
+
 const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   incident,
   isOpen,
@@ -75,6 +90,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { comments, isLoading: commentsLoading, addComment, addSystemComment } = useIncidentComments(incident.id);
   const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
+  const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(true); // Always start in edit mode
@@ -83,6 +99,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     description: incident.description || '',
     status: incident.status,
     priority: incident.priority,
+    category: incident.category,
     assigned_to_admin: incident.assigned_to_admin || 'unassigned',
     due_date: incident.due_date ? new Date(incident.due_date) : null,
   });
@@ -101,6 +118,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       description: incidentToUse.description || '',
       status: incidentToUse.status,
       priority: incidentToUse.priority,
+      category: incidentToUse.category,
       assigned_to_admin: incidentToUse.assigned_to_admin || 'unassigned',
       due_date: incidentToUse.due_date ? new Date(incidentToUse.due_date) : null,
     });
@@ -132,6 +150,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       if (editData.priority !== currentIncident.priority) {
         updateData.priority = editData.priority;
         changes.push({ field: 'priority', oldValue: currentIncident.priority, newValue: editData.priority });
+      }
+      
+      if (editData.category !== currentIncident.category) {
+        updateData.category = editData.category;
+        changes.push({ field: 'category', oldValue: currentIncident.category, newValue: editData.category });
       }
       
       const newAssignedTo = editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin;
@@ -181,6 +204,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       description: currentIncident.description || '',
       status: currentIncident.status,
       priority: currentIncident.priority,
+      category: currentIncident.category,
       assigned_to_admin: currentIncident.assigned_to_admin || 'unassigned',
       due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null,
     });
@@ -205,6 +229,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
+  const currentCategoryOption = categoryOptions.find(option => option.value === editData.category);
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
@@ -303,6 +328,28 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   ) : (
                     <Badge className={getStatusBadgeClass(currentIncident.status)}>
                       {currentStatusOption?.label || currentIncident.status.replace('_', ' ')}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Category:</span>
+                  {isEditing && canEditIncident ? (
+                    <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getCategoryBadgeClass(currentIncident.category)}>
+                      {currentCategoryOption?.label || currentIncident.category}
                     </Badge>
                   )}
                 </div>

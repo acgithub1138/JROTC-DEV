@@ -27,7 +27,7 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useIncidents } from "@/hooks/incidents/useIncidents";
-import { useIncidentStatusOptions, useIncidentPriorityOptions } from "@/hooks/incidents/useIncidentsQuery";
+import { useIncidentStatusOptions, useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useAuth } from "@/contexts/AuthContext";
 import type { Incident } from "@/hooks/incidents/types";
 
@@ -35,6 +35,7 @@ const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   priority: z.string().min(1, "Priority is required"),
+  category: z.string().min(1, "Category is required"),
   status: z.string().optional(),
   assigned_to_admin: z.string().optional(),
   due_date: z.string().optional(),
@@ -56,6 +57,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   const { createIncident, updateIncident } = useIncidents();
   const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
+  const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { userProfile } = useAuth();
 
   const form = useForm<FormData>({
@@ -64,6 +66,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       title: incident?.title || "",
       description: incident?.description || "",
       priority: incident?.priority || "medium",
+      category: incident?.category || "issue",
       status: incident?.status || "open",
       assigned_to_admin: incident?.assigned_to_admin || "",
       due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
@@ -85,6 +88,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           title: data.title,
           description: data.description,
           priority: data.priority,
+          category: data.category,
           school_id: userProfile?.school_id || "",
           created_by: userProfile?.id,
           due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
@@ -140,7 +144,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               )}
             />
 
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-3 gap-4">
               <FormField
                 control={form.control}
                 name="priority"
@@ -155,6 +159,31 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                       </FormControl>
                       <SelectContent>
                         {priorityOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              <FormField
+                control={form.control}
+                name="category"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Category</FormLabel>
+                    <Select onValueChange={field.onChange} defaultValue={field.value}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
                           <SelectItem key={option.value} value={option.value}>
                             {option.label}
                           </SelectItem>

@@ -40,6 +40,21 @@ const getPriorityBadgeClass = (priority: string) => {
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   }
 };
+
+const getCategoryBadgeClass = (category: string) => {
+  switch (category.toLowerCase()) {
+    case 'issue':
+      return 'bg-red-100 text-red-800 hover:bg-red-200';
+    case 'request':
+      return 'bg-blue-100 text-blue-800 hover:bg-blue-200';
+    case 'enhancement':
+      return 'bg-green-100 text-green-800 hover:bg-green-200';
+    case 'maintenance':
+      return 'bg-yellow-100 text-yellow-800 hover:bg-yellow-200';
+    default:
+      return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
+  }
+};
 const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
@@ -65,6 +80,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Priority</TableHead>
+            <TableHead>Category</TableHead>
             <TableHead>Assigned To</TableHead>
             <TableHead>Created By</TableHead>
             <TableHead>Created</TableHead>
@@ -87,6 +103,11 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell>
                 <Badge variant="secondary" className={getPriorityBadgeClass(incident.priority)}>
                   {incident.priority}
+                </Badge>
+              </TableCell>
+              <TableCell>
+                <Badge variant="secondary" className={getCategoryBadgeClass(incident.category)}>
+                  {incident.category}
                 </Badge>
               </TableCell>
               <TableCell>
