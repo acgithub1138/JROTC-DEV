@@ -9,7 +9,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 import type { ColumnPreference } from '@/hooks/useColumnPreferences';
-
 interface BasicCompetitionTableProps {
   competitions: any[];
   isLoading: boolean;
@@ -19,56 +18,61 @@ interface BasicCompetitionTableProps {
   onViewScoreSheets?: (competition: any) => void;
   visibleColumns?: string[];
 }
-
 const getPlacementColor = (placement: string | null) => {
   if (!placement || placement === '-') return '';
-  
   const num = placement.toLowerCase();
   switch (num) {
     case '1st':
     case 'first':
-      return 'bg-yellow-100 text-yellow-800 font-semibold'; // Gold
+      return 'bg-yellow-100 text-yellow-800 font-semibold';
+    // Gold
     case '2nd':
     case 'second':
-      return 'bg-gray-100 text-gray-800 font-semibold'; // Silver
+      return 'bg-gray-100 text-gray-800 font-semibold';
+    // Silver
     case '3rd':
     case 'third':
-      return 'bg-orange-100 text-orange-800 font-semibold'; // Bronze
+      return 'bg-orange-100 text-orange-800 font-semibold';
+    // Bronze
     case '4th':
     case 'fourth':
-      return 'bg-blue-100 text-blue-800 font-medium'; // Blue
+      return 'bg-blue-100 text-blue-800 font-medium';
+    // Blue
     case '5th':
     case 'fifth':
-      return 'bg-green-100 text-green-800 font-medium'; // Green
+      return 'bg-green-100 text-green-800 font-medium';
+    // Green
     case '6th':
     case 'sixth':
-      return 'bg-purple-100 text-purple-800 font-medium'; // Purple
+      return 'bg-purple-100 text-purple-800 font-medium';
+    // Purple
     case '7th':
     case 'seventh':
-      return 'bg-pink-100 text-pink-800 font-medium'; // Pink
+      return 'bg-pink-100 text-pink-800 font-medium';
+    // Pink
     case '8th':
     case 'eighth':
-      return 'bg-indigo-100 text-indigo-800 font-medium'; // Indigo
+      return 'bg-indigo-100 text-indigo-800 font-medium';
+    // Indigo
     default:
-      return 'bg-muted text-muted-foreground font-medium'; // Default for other placements
+      return 'bg-muted text-muted-foreground font-medium';
+    // Default for other placements
   }
 };
-
-const PlacementCell = ({ placement }: { placement: string | null }) => {
+const PlacementCell = ({
+  placement
+}: {
+  placement: string | null;
+}) => {
   const colorClass = getPlacementColor(placement);
   const displayValue = placement || '-';
-  
   if (placement && placement !== '-') {
-    return (
-      <span className={cn('px-2 py-1 rounded-md text-sm', colorClass)}>
+    return <span className={cn('px-2 py-1 rounded-md text-sm', colorClass)}>
         {displayValue}
-      </span>
-    );
+      </span>;
   }
-  
   return <span>{displayValue}</span>;
 };
-
 export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   competitions,
   isLoading,
@@ -79,7 +83,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   visibleColumns = []
 }) => {
   const isMobile = useIsMobile();
-  
+
   // Helper function to check if a column is visible
   const isColumnVisible = (columnKey: string) => {
     if (!visibleColumns || visibleColumns.length === 0) {
@@ -90,28 +94,15 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
-    return (
-      <CompetitionCards
-        competitions={competitions}
-        isLoading={isLoading}
-        onEdit={onEdit}
-        onDelete={onDelete}
-        onAddEvent={onAddEvent}
-        onViewScoreSheets={onViewScoreSheets}
-      />
-    );
+    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} />;
   }
-
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
   }
-
   if (competitions.length === 0) {
     return <div className="p-4 text-center text-muted-foreground">No competitions found</div>;
   }
-
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <Card>
         <CardContent className="p-0">
           <Table>
@@ -134,14 +125,11 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
             </TableRow>
           </TableHeader>
           <TableBody>
-            {competitions.map((competition) => (
-              <TableRow key={competition.id}>
-                {isColumnVisible('name') && <TableCell className="font-medium">{competition.name}</TableCell>}
-                {isColumnVisible('date') && (
-                  <TableCell>
+            {competitions.map(competition => <TableRow key={competition.id}>
+                {isColumnVisible('name') && <TableCell className="font-medium py-[8px]">{competition.name}</TableCell>}
+                {isColumnVisible('date') && <TableCell>
                     {formatCompetitionDateFull(competition.competition_date)}
-                  </TableCell>
-                )}
+                  </TableCell>}
                 {isColumnVisible('overall_placement') && <TableCell><PlacementCell placement={competition.overall_placement} /></TableCell>}
                 {isColumnVisible('overall_armed_placement') && <TableCell><PlacementCell placement={competition.overall_armed_placement} /></TableCell>}
                 {isColumnVisible('overall_unarmed_placement') && <TableCell><PlacementCell placement={competition.overall_unarmed_placement} /></TableCell>}
@@ -155,8 +143,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 {isColumnVisible('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
                 <TableCell className="text-right">
                   <div className="flex gap-2 justify-end">
-                    {onAddEvent && (
-                      <Tooltip>
+                    {onAddEvent && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="default" size="sm" onClick={() => onAddEvent(competition)}>
                             <Plus className="w-4 h-4" />
@@ -165,10 +152,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         <TooltipContent>
                           <p>Add Event Score Sheet</p>
                         </TooltipContent>
-                      </Tooltip>
-                    )}
-                    {onViewScoreSheets && (
-                      <Tooltip>
+                      </Tooltip>}
+                    {onViewScoreSheets && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="sm" onClick={() => onViewScoreSheets(competition)}>
                             <Eye className="w-4 h-4" />
@@ -177,10 +162,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         <TooltipContent>
                           <p>View Score Sheets</p>
                         </TooltipContent>
-                      </Tooltip>
-                    )}
-                    {onEdit && (
-                      <Tooltip>
+                      </Tooltip>}
+                    {onEdit && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
                             <Edit className="w-4 h-4" />
@@ -189,10 +172,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         <TooltipContent>
                           <p>Edit Competition</p>
                         </TooltipContent>
-                      </Tooltip>
-                    )}
-                    {onDelete && (
-                      <Tooltip>
+                      </Tooltip>}
+                    {onDelete && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
                             <Trash2 className="w-4 h-4" />
@@ -201,16 +182,13 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         <TooltipContent>
                           <p>Delete Competition</p>
                         </TooltipContent>
-                      </Tooltip>
-                    )}
+                      </Tooltip>}
                   </div>
                 </TableCell>
-              </TableRow>
-            ))}
+              </TableRow>)}
           </TableBody>
           </Table>
         </CardContent>
       </Card>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
