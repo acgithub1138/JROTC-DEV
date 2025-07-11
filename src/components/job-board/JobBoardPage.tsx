@@ -23,7 +23,7 @@ const JobBoardPage = () => {
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
   
   const [activeTab, setActiveTab] = useState('table');
-  const { canManageHierarchy, canCreate } = useJobBoardPermissions();
+  const { canManageHierarchy, canCreate, canUpdate, canDelete } = useJobBoardPermissions();
 
   const {
     jobs,
@@ -119,9 +119,9 @@ const JobBoardPage = () => {
               <TabsContent value="table" className="mt-4">
                 <JobBoardTable
                   jobs={filteredJobs}
-                  onEditJob={canManageHierarchy ? setEditingJob : undefined}
-                  onDeleteJob={canManageHierarchy ? setDeletingJob : undefined}
-                  readOnly={!canManageHierarchy}
+                  onEditJob={canUpdate ? setEditingJob : undefined}
+                  onDeleteJob={canDelete ? setDeletingJob : undefined}
+                  readOnly={!canUpdate && !canDelete}
                 />
               </TabsContent>
 
@@ -147,25 +147,25 @@ const JobBoardPage = () => {
           />
         )}
 
-        {canManageHierarchy && (
-          <>
-            <EditJobDialog
-              open={!!editingJob}
-              onOpenChange={(open) => !open && setEditingJob(null)}
-              job={editingJob}
-              onSubmit={handleEditJob}
-              loading={updateJob.isPending}
-              jobs={jobs}
-            />
+        {canUpdate && (
+          <EditJobDialog
+            open={!!editingJob}
+            onOpenChange={(open) => !open && setEditingJob(null)}
+            job={editingJob}
+            onSubmit={handleEditJob}
+            loading={updateJob.isPending}
+            jobs={jobs}
+          />
+        )}
 
-            <DeleteJobDialog
-              open={!!deletingJob}
-              onOpenChange={(open) => !open && setDeletingJob(null)}
-              job={deletingJob}
-              onConfirm={handleDeleteJob}
-              loading={deleteJob.isPending}
-            />
-          </>
+        {canDelete && (
+          <DeleteJobDialog
+            open={!!deletingJob}
+            onOpenChange={(open) => !open && setDeletingJob(null)}
+            job={deletingJob}
+            onConfirm={handleDeleteJob}
+            loading={deleteJob.isPending}
+          />
         )}
 
       </div>
