@@ -42,6 +42,7 @@ export const useMyIncidentsQuery = () => {
           school:schools(name)
         `)
         .eq("assigned_to_admin", userData.user.id)
+        .is("completed_at", null)
         .order("created_at", { ascending: false });
 
       if (error) {
@@ -67,6 +68,7 @@ export const useActiveIncidentsQuery = () => {
           school:schools(name)
         `)
         .in("status", ["open", "in_progress"])
+        .is("completed_at", null)
         .order("created_at", { ascending: false });
 
       if (error) {
