@@ -33,7 +33,14 @@ export const useMyIncidentsQuery = () => {
       const { data: userData } = await supabase.auth.getUser();
       if (!userData.user) return [];
 
-      const { data, error } = await supabase
+      // Get user profile to check their role
+      const { data: userProfile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", userData.user.id)
+        .single();
+
+      let query = supabase
         .from("incidents")
         .select(`
           *,
@@ -41,9 +48,21 @@ export const useMyIncidentsQuery = () => {
           assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
           school:schools(name)
         `)
-        .or(`assigned_to_admin.eq.${userData.user.id},created_by.eq.${userData.user.id}`)
-        .is("completed_at", null)
-        .order("created_at", { ascending: false });
+        .is("completed_at", null);
+
+      // If user is instructor, command_staff, or admin, show all incidents for their school
+      // Otherwise, show only incidents they created or are assigned to
+      if (userProfile?.role && ['instructor', 'command_staff', 'admin'].includes(userProfile.role)) {
+        // Show all incidents for the school (will be filtered by RLS)
+        query = query.order("created_at", { ascending: false });
+      } else {
+        // For cadets and other roles, show only their own incidents
+        query = query
+          .or(`assigned_to_admin.eq.${userData.user.id},created_by.eq.${userData.user.id}`)
+          .order("created_at", { ascending: false });
+      }
+
+      const { data, error } = await query;
 
       if (error) {
         console.error("Error fetching my incidents:", error);
