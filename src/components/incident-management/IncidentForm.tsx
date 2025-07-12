@@ -165,6 +165,14 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                         ))}
                       </SelectContent>
                     </Select>
+                    {field.value && (
+                      <div className="text-sm text-muted-foreground mt-1">
+                        {field.value === 'issue' && "Something is broken"}
+                        {field.value === 'request' && "Ask a question"}
+                        {field.value === 'enhancement' && "Request new functionality"}
+                        {field.value === 'maintenance' && "System Update"}
+                      </div>
+                    )}
                     <FormMessage />
                   </FormItem>
                 )}
