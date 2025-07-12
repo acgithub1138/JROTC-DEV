@@ -18,12 +18,13 @@ export const useIncidentMutations = () => {
 
       if (adminError) {
         console.error("Error finding admin user:", adminError);
+        throw new Error("Admin user not found");
       }
 
-      // Auto-assign to admin if found
+      // Always assign to admin@careyunlimited.com
       const incidentData = {
         ...data,
-        assigned_to_admin: adminUser?.id || data.assigned_to_admin,
+        assigned_to_admin: adminUser.id,
       };
 
       const { data: result, error } = await supabase

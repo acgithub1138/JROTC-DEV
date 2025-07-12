@@ -93,9 +93,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 </Badge>
               </TableCell>
               <TableCell>
-                {(incident as any).assigned_to_admin_profile 
-                  ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
-                  : 'Unassigned'}
+                {incident.assigned_to_admin ? 'Admin' : 'Unassigned'}
               </TableCell>
               <TableCell>
                 {(incident as any).created_by_profile 
