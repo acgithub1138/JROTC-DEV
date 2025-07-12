@@ -6,6 +6,8 @@ import { Eye, X } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
+import { useAuth } from "@/contexts/AuthContext";
+
 interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
@@ -13,6 +15,7 @@ interface IncidentTableProps {
   onIncidentSelectForEdit?: (incident: Incident) => void;
   onIncidentDelete?: (incident: Incident) => void;
 }
+
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'open':
@@ -27,6 +30,7 @@ const getStatusBadgeClass = (status: string) => {
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   }
 };
+
 const getPriorityBadgeClass = (priority: string) => {
   switch (priority.toLowerCase()) {
     case 'low':
@@ -41,6 +45,7 @@ const getPriorityBadgeClass = (priority: string) => {
       return 'bg-gray-100 text-gray-800 hover:bg-gray-200';
   }
 };
+
 const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
@@ -48,6 +53,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   onIncidentSelectForEdit,
   onIncidentDelete
 }) => {
+  const { userProfile } = useAuth();
   const {
     canUpdate,
     canUpdateAssigned,
@@ -55,11 +61,13 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
     canDelete
   } = useIncidentPermissions();
   const canEdit = canUpdate || canUpdateAssigned;
+
   if (incidents.length === 0) {
     return <div className="text-center py-8 text-muted-foreground">
         No incidents found.
       </div>;
   }
+
   return <div className="rounded-md border">
       <Table>
         <TableHeader>
@@ -93,7 +101,13 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 </Badge>
               </TableCell>
               <TableCell>
-                {incident.assigned_to_admin ? 'Admin' : 'Unassigned'}
+                {incident.assigned_to_admin 
+                  ? (userProfile?.role === 'admin' 
+                      ? ((incident as any).assigned_to_admin_profile 
+                          ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
+                          : 'Admin')
+                      : 'Admin')
+                  : 'Unassigned'}
               </TableCell>
               <TableCell>
                 {(incident as any).created_by_profile 
@@ -123,4 +137,5 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
       </Table>
     </div>;
 };
+
 export default IncidentTable;
