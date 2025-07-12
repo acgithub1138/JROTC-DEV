@@ -80,13 +80,6 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   });
 
   const onSubmit = (data: FormData) => {
-    const onSettled = (data: any, error: any) => {
-      if (!error) {
-        form.reset();
-        onClose();
-      }
-    };
-
     if (incident) {
       updateIncident.mutate({
         id: incident.id,
@@ -94,7 +87,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           ...data,
           due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
         },
-      }, { onSettled });
+      });
     } else {
       createIncident.mutate({
         title: data.title,
@@ -104,8 +97,12 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
         school_id: userProfile?.school_id || "",
         created_by: userProfile?.id,
         due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
-      }, { onSettled });
+      });
     }
+    
+    // Close modal and reset form immediately after mutation is called
+    form.reset();
+    onClose();
   };
 
   return (

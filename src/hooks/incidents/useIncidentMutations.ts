@@ -36,7 +36,7 @@ export const useIncidentMutations = () => {
       if (error) throw error;
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       // Invalidate all incident-related queries
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
       queryClient.invalidateQueries({ queryKey: ["my-incidents"] });
@@ -72,7 +72,7 @@ export const useIncidentMutations = () => {
       }
       return result;
     },
-    onSuccess: () => {
+    onSuccess: (data, variables, context) => {
       // Invalidate all incident-related queries
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
       queryClient.invalidateQueries({ queryKey: ["my-incidents"] });
