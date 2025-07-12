@@ -41,7 +41,7 @@ export const useMyIncidentsQuery = () => {
           assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
           school:schools(name)
         `)
-        .eq("assigned_to_admin", userData.user.id)
+        .or(`assigned_to_admin.eq.${userData.user.id},created_by.eq.${userData.user.id}`)
         .is("completed_at", null)
         .order("created_at", { ascending: false });
 
