@@ -79,31 +79,30 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     },
   });
 
-  const onSubmit = async (data: FormData) => {
-    try {
-      if (incident) {
-        await updateIncident.mutateAsync({
-          id: incident.id,
-          data: {
-            ...data,
-            due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
-          },
-        });
-      } else {
-        await createIncident.mutateAsync({
-          title: data.title,
-          description: data.description,
-          priority: data.priority,
-          category: data.category,
-          school_id: userProfile?.school_id || "",
-          created_by: userProfile?.id,
-          due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
-        });
-      }
+  const onSubmit = (data: FormData) => {
+    const onSuccess = () => {
       form.reset();
       onClose();
-    } catch (error) {
-      console.error("Error saving incident:", error);
+    };
+
+    if (incident) {
+      updateIncident.mutate({
+        id: incident.id,
+        data: {
+          ...data,
+          due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+        },
+      }, { onSuccess });
+    } else {
+      createIncident.mutate({
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        category: data.category,
+        school_id: userProfile?.school_id || "",
+        created_by: userProfile?.id,
+        due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+      }, { onSuccess });
     }
   };
 
