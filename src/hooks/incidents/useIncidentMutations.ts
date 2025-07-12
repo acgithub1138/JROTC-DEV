@@ -9,21 +9,35 @@ export const useIncidentMutations = () => {
 
   const createIncident = useMutation({
     mutationFn: async (data: CreateIncidentData) => {
-      // Get admin user ID
-      const { data: adminUser, error: adminError } = await supabase
+      // Get current user's school to find an admin from the same school
+      const { data: currentUser } = await supabase.auth.getUser();
+      if (!currentUser.user) throw new Error("User not authenticated");
+
+      const { data: userProfile } = await supabase
         .from("profiles")
-        .select("id")
-        .eq("email", "admin@careyunlimited.com")
+        .select("school_id")
+        .eq("id", currentUser.user.id)
         .single();
 
+      if (!userProfile) throw new Error("User profile not found");
+
+      // Find an admin from the same school
+      const { data: schoolAdmin, error: adminError } = await supabase
+        .from("profiles")
+        .select("id")
+        .eq("school_id", userProfile.school_id)
+        .eq("role", "admin")
+        .limit(1)
+        .maybeSingle();
+
       if (adminError) {
-        console.error("Error finding admin user:", adminError);
+        console.error("Error finding school admin:", adminError);
       }
 
-      // Auto-assign to admin if found
+      // Auto-assign to school admin if found, otherwise leave unassigned
       const incidentData = {
         ...data,
-        assigned_to_admin: adminUser?.id || data.assigned_to_admin,
+        assigned_to_admin: schoolAdmin?.id || data.assigned_to_admin,
       };
 
       const { data: result, error } = await supabase
