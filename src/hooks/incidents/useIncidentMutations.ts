@@ -36,7 +36,11 @@ export const useIncidentMutations = () => {
       return result;
     },
     onSuccess: () => {
+      // Invalidate all incident-related queries
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["my-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["active-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["completed-incidents"] });
       toast({
         title: "Success",
         description: "Incident created successfully",
@@ -68,7 +72,11 @@ export const useIncidentMutations = () => {
       return result;
     },
     onSuccess: () => {
+      // Invalidate all incident-related queries
       queryClient.invalidateQueries({ queryKey: ["incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["my-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["active-incidents"] });
+      queryClient.invalidateQueries({ queryKey: ["completed-incidents"] });
       toast({
         title: "Success",
         description: "Incident updated successfully",
