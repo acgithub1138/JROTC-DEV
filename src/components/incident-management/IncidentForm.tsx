@@ -80,9 +80,11 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   });
 
   const onSubmit = (data: FormData) => {
-    const onSuccess = () => {
-      form.reset();
-      onClose();
+    const onSettled = (data: any, error: any) => {
+      if (!error) {
+        form.reset();
+        onClose();
+      }
     };
 
     if (incident) {
@@ -92,7 +94,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           ...data,
           due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
         },
-      }, { onSuccess });
+      }, { onSettled });
     } else {
       createIncident.mutate({
         title: data.title,
@@ -102,7 +104,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
         school_id: userProfile?.school_id || "",
         created_by: userProfile?.id,
         due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
-      }, { onSuccess });
+      }, { onSettled });
     }
   };
 
