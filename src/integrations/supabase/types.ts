@@ -2363,6 +2363,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
+      is_current_user_admin: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       process_email_queue: {
         Args: { batch_size?: number }
         Returns: {
