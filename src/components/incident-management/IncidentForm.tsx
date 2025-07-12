@@ -100,8 +100,8 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
           due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
         });
       }
-      onClose();
       form.reset();
+      onClose();
     } catch (error) {
       console.error("Error saving incident:", error);
     }
