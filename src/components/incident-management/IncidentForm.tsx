@@ -38,7 +38,13 @@ const formSchema = z.object({
   category: z.string().min(1, "Category is required"),
   status: z.string().optional(),
   assigned_to_admin: z.string().optional(),
-  due_date: z.string().optional(),
+  due_date: z.string().optional().refine((date) => {
+    if (!date) return true; // Optional field, so empty is valid
+    const selectedDate = new Date(date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0); // Reset time to start of day
+    return selectedDate >= today;
+  }, "Due date must be today or in the future"),
 });
 
 type FormData = z.infer<typeof formSchema>;
