@@ -112,7 +112,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell>
                 {(incident as any).created_by_profile 
                   ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
-                  : 'Unknown'}
+                  : (userProfile?.role === 'admin' ? 'Unknown' : 'User')}
               </TableCell>
               <TableCell>
                 {format(new Date(incident.created_at), "MMM d, yyyy")}
