@@ -6,6 +6,7 @@ export const formatIncidentFieldChangeComment = (
   newValue: any,
   statusOptions: any[],
   priorityOptions: any[],
+  categoryOptions: any[],
   users: any[]
 ): string => {
   const getStatusLabel = (value: string) => {
@@ -15,6 +16,11 @@ export const formatIncidentFieldChangeComment = (
 
   const getPriorityLabel = (value: string) => {
     const option = priorityOptions.find(opt => opt.value === value);
+    return option ? option.label : value;
+  };
+
+  const getCategoryLabel = (value: string) => {
+    const option = categoryOptions.find(opt => opt.value === value);
     return option ? option.label : value;
   };
 
@@ -43,6 +49,9 @@ export const formatIncidentFieldChangeComment = (
     
     case 'assigned_to_admin':
       return `Assignment changed from "${getUserName(oldValue)}" to "${getUserName(newValue)}"`;
+    
+    case 'category':
+      return `Category changed from "${getCategoryLabel(oldValue)}" to "${getCategoryLabel(newValue)}"`;
     
     case 'due_date':
       return `Due date changed from "${formatDate(oldValue)}" to "${formatDate(newValue)}"`;

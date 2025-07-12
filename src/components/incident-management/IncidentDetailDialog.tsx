@@ -185,6 +185,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           change.newValue,
           statusOptions,
           priorityOptions,
+          categoryOptions,
           users
         );
         addSystemComment.mutate(commentText);
