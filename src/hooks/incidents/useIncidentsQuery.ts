@@ -91,8 +91,8 @@ export const useCompletedIncidentsQuery = () => {
           assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(first_name, last_name, email),
           school:schools(name)
         `)
-        .in("status", ["resolved", "closed"])
-        .order("created_at", { ascending: false });
+        .not("completed_at", "is", null)
+        .order("completed_at", { ascending: false });
 
       if (error) {
         console.error("Error fetching completed incidents:", error);
