@@ -153,6 +153,35 @@ class QueueProcessor {
 }
 
 serve(async (req) => {
+  console.log('🚀 Process Email Queue function started');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  
+  // Validate environment variables
+  const supabaseUrl = Deno.env.get('SUPABASE_URL');
+  const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  
+  console.log('Environment check:');
+  console.log('- SUPABASE_URL:', supabaseUrl ? '✅ Set' : '❌ Missing');
+  console.log('- SUPABASE_SERVICE_ROLE_KEY:', serviceRoleKey ? '✅ Set' : '❌ Missing');
+  
+  if (!supabaseUrl || !serviceRoleKey) {
+    console.error('❌ Missing required environment variables');
+    return new Response(
+      JSON.stringify({ 
+        success: false, 
+        error: 'Server configuration error: Missing environment variables',
+        processed: 0,
+        failed: 0,
+        total: 0
+      }),
+      {
+        status: 500,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    );
+  }
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
