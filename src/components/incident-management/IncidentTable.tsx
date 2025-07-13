@@ -130,7 +130,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
-                            <Eye className="h-3 w-3" />
+                            <Eye className="h-4 w-4" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
