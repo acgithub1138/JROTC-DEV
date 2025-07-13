@@ -2318,14 +2318,6 @@ export type Database = {
         Args: { password_text: string }
         Returns: string
       }
-      generate_incident_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_subtask_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       generate_task_number: {
         Args: Record<PropertyKey, never>
         Returns: string
