@@ -278,7 +278,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               {currentIncident.incident_number && (
                 <span className="text-blue-600 font-mono text-xl mr-2">
                   {currentIncident.incident_number}
-                </span>
+                </span> - 
               )}
               {isEditing && canEditIncident ? (
                 <Input
@@ -287,7 +287,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   className="text-xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
                 />
               ) : (
-                <span className="text-xl font-semibold">{currentIncident.title}</span>
+                <span className="font-semibold mb-2">{currentIncident.title}</span>
+      font-semibold mb-2
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
