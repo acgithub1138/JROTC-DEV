@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,9 +26,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useIncidents } from "@/hooks/incidents/useIncidents";
 import { useIncidentStatusOptions, useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useAuth } from "@/contexts/AuthContext";
+import { supabase } from "@/integrations/supabase/client";
+import { useToast } from "@/hooks/use-toast";
 import type { Incident } from "@/hooks/incidents/types";
 
 const formSchema = z.object({
@@ -60,11 +61,11 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   isOpen,
   onClose,
 }) => {
-  const { createIncident, updateIncident } = useIncidents();
   const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { userProfile } = useAuth();
+  const { toast } = useToast();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -79,44 +80,60 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     },
   });
 
-  // Reset form when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      form.reset({
-        title: incident?.title || "",
-        description: incident?.description || "",
-        priority: incident?.priority || "medium",
-        category: incident?.category || "issue",
-        status: incident?.status || "open",
-        assigned_to_admin: incident?.assigned_to_admin || "",
-        due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
-      });
-    }
-  }, [isOpen, incident, form]);
+  const onSubmit = async (data: FormData) => {
+    try {
+      if (incident) {
+        // Update existing incident
+        const { error } = await supabase
+          .from('incidents')
+          .update({
+            title: data.title,
+            description: data.description,
+            priority: data.priority,
+            category: data.category,
+            status: data.status,
+            assigned_to_admin: data.assigned_to_admin || null,
+            due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
+          })
+          .eq('id', incident.id);
 
-  const onSubmit = (data: FormData) => {
-    if (incident) {
-      updateIncident.mutate({
-        id: incident.id,
-        data: {
-          ...data,
-          due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
-        },
-      });
-    } else {
-      createIncident.mutate({
-        title: data.title,
-        description: data.description,
-        priority: data.priority,
-        category: data.category,
-        school_id: userProfile?.school_id || "",
-        created_by: userProfile?.id,
-        due_date: data.due_date ? new Date(data.due_date).toISOString() : undefined,
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Incident updated successfully",
+        });
+      } else {
+        // Create new incident
+        const { error } = await supabase
+          .from('incidents')
+          .insert({
+            title: data.title,
+            description: data.description,
+            priority: data.priority,
+            category: data.category,
+            school_id: userProfile?.school_id || "",
+            created_by: userProfile?.id,
+            due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
+          });
+
+        if (error) throw error;
+
+        toast({
+          title: "Success",
+          description: "Incident created successfully",
+        });
+      }
+
+      onClose();
+    } catch (error) {
+      console.error('Error saving incident:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save incident. Please try again.",
+        variant: "destructive",
       });
     }
-    
-    // Close modal immediately after mutation is called
-    onClose();
   };
 
   return (
@@ -267,10 +284,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button 
-                type="submit" 
-                disabled={createIncident.isPending || updateIncident.isPending}
-              >
+              <Button type="submit">
                 {incident ? "Update" : "Create"}
               </Button>
             </div>
