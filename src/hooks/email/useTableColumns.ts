@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getColumnLabel, getEnhancedVariables, getExpandedFields, getProfileReferenceFields } from '@/utils/columnLabels';
+import { getColumnLabel, getEnhancedVariables, getGroupedReferenceFields, getNonReferenceFields } from '@/utils/columnLabels';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface TableColumn {
@@ -27,25 +27,30 @@ export const useTableColumns = (tableName: string) => {
 
       if (error) throw error;
       
-      const profileReferenceFields = getProfileReferenceFields(tableName);
-      const expandedFields = getExpandedFields(tableName);
-      
-      // Filter out the reference ID fields and add expanded fields
-      const filteredColumns = data
-        .filter((column: any) => !profileReferenceFields.includes(column.column_name))
-        .map((column: any) => ({
-          ...column,
-          display_label: getColumnLabel(column.column_name, tableName)
-        }));
-      
-      // Add expanded reference fields
-      const expandedColumns = expandedFields.map(field => ({
-        column_name: field.name,
-        data_type: 'text',
-        display_label: field.label
+      // Get non-reference fields only
+      const allColumns = data.map((column: any) => ({
+        column_name: column.column_name,
+        display_label: getColumnLabel(column.column_name, tableName)
       }));
       
-      return [...filteredColumns, ...expandedColumns] as TableColumn[];
+      const nonReferenceFields = getNonReferenceFields(tableName, allColumns);
+      
+      return nonReferenceFields.map(field => ({
+        column_name: field.column_name,
+        data_type: 'text',
+        display_label: field.display_label
+      })) as TableColumn[];
+    },
+    enabled: !!tableName,
+  });
+};
+
+export const useGroupedReferenceFields = (tableName: string) => {
+  return useQuery({
+    queryKey: ['grouped-reference-fields', tableName],
+    queryFn: async () => {
+      if (!tableName) return [];
+      return getGroupedReferenceFields(tableName);
     },
     enabled: !!tableName,
   });

@@ -9,7 +9,7 @@ import {
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useAvailableTables, useTableColumns, useEnhancedVariables } from '@/hooks/email/useTableColumns';
+import { useAvailableTables, useTableColumns, useEnhancedVariables, useGroupedReferenceFields } from '@/hooks/email/useTableColumns';
 import { TemplateBasicFields } from './components/TemplateBasicFields';
 import { SubjectField } from './components/SubjectField';
 import { RichTextBodyField } from './components/RichTextBodyField';
@@ -47,6 +47,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
   const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
+  const { data: groupedReferenceFields = [] } = useGroupedReferenceFields(formData.source_table);
 
   useEffect(() => {
     if (template && mode === 'edit') {
@@ -173,6 +174,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
                     label: ev.label,
                     description: 'Profile reference'
                   }))}
+                  groupedReferenceFields={groupedReferenceFields}
                   onVariableInsert={insertVariableAtCursor}
                 />
               </div>

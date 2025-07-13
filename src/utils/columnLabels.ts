@@ -154,10 +154,14 @@ export const getEnhancedVariables = (tableName: string): Array<{ variable: strin
   return [...profileVariables, ...commentsVariables];
 };
 
-// Get expanded fields for reference fields (shows the actual profile fields instead of just IDs)
-export const getExpandedFields = (tableName: string): Array<{ name: string; label: string; isReference?: boolean }> => {
+// Get grouped reference fields for collapsible display
+export const getGroupedReferenceFields = (tableName: string): Array<{ 
+  group: string; 
+  groupLabel: string; 
+  fields: Array<{ name: string; label: string }> 
+}> => {
   const profileFields = getProfileReferenceFields(tableName);
-  const expanded: Array<{ name: string; label: string; isReference?: boolean }> = [];
+  const groups: Array<{ group: string; groupLabel: string; fields: Array<{ name: string; label: string }> }> = [];
   
   // Profile fields that we want to show for each reference
   const profileFieldsToShow = [
@@ -169,17 +173,26 @@ export const getExpandedFields = (tableName: string): Array<{ name: string; labe
     { field: 'role', label: 'Role' }
   ];
   
-  // For each profile reference field, add the expanded profile fields
+  // For each profile reference field, create a group
   profileFields.forEach(refField => {
     const refLabel = getColumnLabel(refField, tableName);
-    profileFieldsToShow.forEach(profileField => {
-      expanded.push({
-        name: `${refField}_${profileField.field}`,
-        label: `${refLabel} ${profileField.label}`,
-        isReference: true
-      });
+    const fields = profileFieldsToShow.map(profileField => ({
+      name: `${refField}_${profileField.field}`,
+      label: profileField.label
+    }));
+    
+    groups.push({
+      group: refField,
+      groupLabel: refLabel,
+      fields
     });
   });
   
-  return expanded;
+  return groups;
+};
+
+// Get non-reference fields (regular table columns)
+export const getNonReferenceFields = (tableName: string, allColumns: Array<{ column_name: string; display_label: string }>) => {
+  const profileFields = getProfileReferenceFields(tableName);
+  return allColumns.filter(col => !profileFields.includes(col.column_name));
 };

@@ -1,20 +1,40 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { ChevronDown, ChevronRight } from 'lucide-react';
 
 interface VariablesPanelProps {
   columns: Array<{ name: string; label: string }>;
   enhancedVariables: Array<{ name: string; label: string; description?: string }>;
+  groupedReferenceFields?: Array<{ 
+    group: string; 
+    groupLabel: string; 
+    fields: Array<{ name: string; label: string }> 
+  }>;
   onVariableInsert: (variableName: string) => void;
 }
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
   enhancedVariables,
+  groupedReferenceFields = [],
   onVariableInsert,
 }) => {
+  const [openGroups, setOpenGroups] = useState<Set<string>>(new Set());
+
+  const toggleGroup = (group: string) => {
+    const newOpenGroups = new Set(openGroups);
+    if (newOpenGroups.has(group)) {
+      newOpenGroups.delete(group);
+    } else {
+      newOpenGroups.add(group);
+    }
+    setOpenGroups(newOpenGroups);
+  };
+
   return (
     <Card className="w-full">
       <CardHeader className="pb-3">
@@ -47,6 +67,51 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                         )}
                       </div>
                     </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {groupedReferenceFields.length > 0 && (
+              <div>
+                <h4 className="text-xs font-medium mb-2">Reference Fields</h4>
+                <div className="space-y-1">
+                  {groupedReferenceFields.map((group) => (
+                    <Collapsible 
+                      key={group.group}
+                      open={openGroups.has(group.group)}
+                      onOpenChange={() => toggleGroup(group.group)}
+                    >
+                      <CollapsibleTrigger asChild>
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          className="w-full justify-start text-xs h-auto p-2 hover:bg-muted"
+                        >
+                          {openGroups.has(group.group) ? (
+                            <ChevronDown className="h-3 w-3 mr-2" />
+                          ) : (
+                            <ChevronRight className="h-3 w-3 mr-2" />
+                          )}
+                          <span className="font-medium">{group.groupLabel}</span>
+                        </Button>
+                      </CollapsibleTrigger>
+                      <CollapsibleContent className="ml-5">
+                        <div className="space-y-1 pt-1">
+                          {group.fields.map((field) => (
+                            <Button
+                              key={field.name}
+                              variant="outline"
+                              size="sm"
+                              className="w-full justify-start text-xs h-auto p-2"
+                              onClick={() => onVariableInsert(field.name)}
+                            >
+                              <span className="truncate">{field.label}</span>
+                            </Button>
+                          ))}
+                        </div>
+                      </CollapsibleContent>
+                    </Collapsible>
                   ))}
                 </div>
               </div>
