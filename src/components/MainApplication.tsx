@@ -10,6 +10,7 @@ import IncidentManagementPage from './incident-management/IncidentManagementPage
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
+import IncidentOptionsManagement from './incident-management/IncidentOptionsManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
 import SmtpSettingsPage from './smtp-settings/SmtpSettingsPage';
 import NotFound from '@/pages/NotFound';
@@ -126,13 +127,16 @@ const MainApplication = () => {
   );
 };
 
-// Settings Page component with Task Options Management
+// Settings Page component with Task and Incident Options Management
 const SettingsPage = () => {
   return (
     <div className="p-6">
       <div className="max-w-4xl mx-auto">
         <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-        <TaskOptionsManagement />
+        <div className="space-y-6">
+          <TaskOptionsManagement />
+          <IncidentOptionsManagement />
+        </div>
       </div>
     </div>
   );

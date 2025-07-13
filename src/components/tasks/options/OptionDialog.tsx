@@ -20,7 +20,7 @@ interface OptionDialogProps {
   setFormData: (data: OptionFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   isEditing: boolean;
-  type: 'status' | 'priority';
+  type: 'status' | 'priority' | 'incident status' | 'incident priority' | 'incident category';
   optionsLength: number;
   onAddClick: () => void;
 }

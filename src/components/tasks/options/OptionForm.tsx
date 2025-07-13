@@ -18,7 +18,7 @@ interface OptionFormProps {
   setFormData: (data: OptionFormData) => void;
   onSubmit: (e: React.FormEvent) => void;
   isEditing: boolean;
-  type: 'status' | 'priority';
+  type: 'status' | 'priority' | 'incident status' | 'incident priority' | 'incident category';
 }
 
 const colorOptions = [
