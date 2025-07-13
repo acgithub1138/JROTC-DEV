@@ -163,6 +163,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         if (editData.status === 'resolved' && !currentIncident.completed_at) {
           updateData.completed_at = new Date().toISOString();
         }
+        
+        // Clear completed_at when status changes from resolved/canceled to another status
+        if ((currentIncident.status === 'resolved' || currentIncident.status === 'canceled') && 
+            editData.status !== 'resolved' && editData.status !== 'canceled') {
+          updateData.completed_at = null;
+        }
       }
       
       if (editData.priority !== currentIncident.priority) {
