@@ -34,7 +34,7 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
           <TableHead>Value</TableHead>
           <TableHead>Color</TableHead>
           <TableHead>Sort Order</TableHead>
-          <TableHead>Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -47,11 +47,11 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
             </TableCell>
             <TableCell>{option.sort_order}</TableCell>
             <TableCell>
-              <div className="flex space-x-2">
+              <div className="flex items-center justify-center gap-2">
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={() => onEdit(option)}>
+                      <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(option)}>
                         <Edit className="w-3 h-3" />
                       </Button>
                     </TooltipTrigger>
@@ -63,7 +63,7 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
                 <TooltipProvider>
                   <Tooltip>
                     <TooltipTrigger asChild>
-                      <Button variant="outline" size="sm" onClick={() => onDelete(option.id)}>
+                      <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(option.id)}>
                         <Trash2 className="w-3 h-3" />
                       </Button>
                     </TooltipTrigger>
