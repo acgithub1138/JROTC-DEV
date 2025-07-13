@@ -109,6 +109,8 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['assigned_to.last_name'] = record.assigned_to_profile.last_name;
           flattened['assigned_to.email'] = record.assigned_to_profile.email;
           flattened['assigned_to.full_name'] = `${record.assigned_to_profile.first_name} ${record.assigned_to_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['assigned_to_name'] = `${record.assigned_to_profile.first_name} ${record.assigned_to_profile.last_name}`;
         }
         
         if (record.assigned_by_profile) {
@@ -117,6 +119,8 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['assigned_by.last_name'] = record.assigned_by_profile.last_name;
           flattened['assigned_by.email'] = record.assigned_by_profile.email;
           flattened['assigned_by.full_name'] = `${record.assigned_by_profile.first_name} ${record.assigned_by_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['assigned_by_name'] = `${record.assigned_by_profile.first_name} ${record.assigned_by_profile.last_name}`;
         }
         
         if (record.created_by_profile) {
@@ -125,12 +129,16 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['created_by.last_name'] = record.created_by_profile.last_name;
           flattened['created_by.email'] = record.created_by_profile.email;
           flattened['created_by.full_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['created_by_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
           // Also provide as submitted_by for template compatibility
           flattened['submitted_by.id'] = record.created_by_profile.id;
           flattened['submitted_by.first_name'] = record.created_by_profile.first_name;
           flattened['submitted_by.last_name'] = record.created_by_profile.last_name;
           flattened['submitted_by.email'] = record.created_by_profile.email;
           flattened['submitted_by.full_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['submitted_by_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
         }
         
         if (record.assigned_to_admin_profile) {
@@ -139,12 +147,16 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['assigned_to_admin.last_name'] = record.assigned_to_admin_profile.last_name;
           flattened['assigned_to_admin.email'] = record.assigned_to_admin_profile.email;
           flattened['assigned_to_admin.full_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['assigned_to_admin_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
           // Also provide as assigned_to for template compatibility
           flattened['assigned_to.id'] = record.assigned_to_admin_profile.id;
           flattened['assigned_to.first_name'] = record.assigned_to_admin_profile.first_name;
           flattened['assigned_to.last_name'] = record.assigned_to_admin_profile.last_name;
           flattened['assigned_to.email'] = record.assigned_to_admin_profile.email;
           flattened['assigned_to.full_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['assigned_to_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
         }
         
         if (record.approved_by_profile) {
@@ -153,6 +165,8 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['approved_by.last_name'] = record.approved_by_profile.last_name;
           flattened['approved_by.email'] = record.approved_by_profile.email;
           flattened['approved_by.full_name'] = `${record.approved_by_profile.first_name} ${record.approved_by_profile.last_name}`;
+          // Enhanced variable for templates
+          flattened['approved_by_name'] = `${record.approved_by_profile.first_name} ${record.approved_by_profile.last_name}`;
         }
         
         if (record.profile) {
