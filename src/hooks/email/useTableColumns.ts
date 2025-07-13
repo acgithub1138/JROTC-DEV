@@ -81,13 +81,11 @@ export const useAvailableTables = () => {
         'incidents': 'Incidents'
       };
       
-      // Map to table objects with labels
-      let availableTables = uniqueTables
-        .filter(tableName => tableLabels[tableName]) // Only include tables we have labels for
-        .map(tableName => ({
-          name: tableName,
-          label: tableLabels[tableName]
-        }));
+      // Only include tasks and incidents tables
+      let availableTables = [
+        { name: 'tasks', label: 'Tasks' },
+        { name: 'incidents', label: 'Incidents' }
+      ];
       
       // Filter out incidents table unless user is admin
       if (userProfile?.role !== 'admin') {
