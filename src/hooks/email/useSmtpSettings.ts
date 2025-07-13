@@ -108,82 +108,58 @@ export const useSmtpSettings = () => {
     },
   });
 
-  const testConnection = useMutation({
-    mutationFn: async (testSettings: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at' | 'is_global'>) => {
-      console.log('🔧 Starting SMTP connection test');
-
-      // Validate and clean the test data
-      const cleanTestData = {
-        smtp_host: String(testSettings.smtp_host || '').trim(),
-        smtp_port: Number(testSettings.smtp_port) || 587,
-        smtp_username: String(testSettings.smtp_username || '').trim(),
-        smtp_password: String(testSettings.smtp_password || '').trim(),
-        from_email: String(testSettings.from_email || '').trim(),
-        from_name: String(testSettings.from_name || '').trim(),
-        use_tls: Boolean(testSettings.use_tls)
-      };
-
-      console.log('🔧 Cleaned test data:', {
-        ...cleanTestData,
-        smtp_password: '[REDACTED]'
-      });
-
-      // Basic validation
-      if (!cleanTestData.smtp_host || !cleanTestData.smtp_username || !cleanTestData.smtp_password || !cleanTestData.from_email) {
-        throw new Error('Missing required SMTP configuration fields');
+  const sendTestEmail = useMutation({
+    mutationFn: async (testEmail: string) => {
+      console.log('📧 Sending test email to:', testEmail);
+      
+      if (!testEmail || !testEmail.includes('@')) {
+        throw new Error('Please provide a valid email address');
       }
 
-      try {
-        console.log('🔧 Calling edge function with cleaned data...');
-        
-        const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
-          body: cleanTestData
-        });
+      // Create a test email in the queue
+      const { data, error } = await supabase
+        .from('email_queue')
+        .insert({
+          recipient_email: testEmail,
+          subject: 'SMTP Test Email - System Configuration',
+          body: `
+            <h2>SMTP Configuration Test</h2>
+            <p>This is a test email sent from your JROTC system to verify that the SMTP configuration is working correctly.</p>
+            <p><strong>Test sent at:</strong> ${new Date().toLocaleString()}</p>
+            <p>If you received this email, your SMTP settings are working properly!</p>
+            <hr>
+            <p><small>This is an automated test message from the JROTC system.</small></p>
+          `,
+          school_id: settings?.school_id || 'c0bae42f-9369-4575-b158-926246145b0a', // Fallback to current school
+          status: 'pending',
+          scheduled_at: new Date().toISOString()
+        })
+        .select()
+        .single();
 
-        console.log('🔧 Edge function response received:', { 
-          hasData: !!data, 
-          hasError: !!error,
-          errorMessage: error?.message 
-        });
+      if (error) throw error;
 
-        if (error) {
-          console.error('🔧 Edge function returned error:', error);
-          throw new Error(error.message || 'Failed to connect to SMTP server');
-        }
+      console.log('📧 Test email queued:', data.id);
 
-        if (data && !data.success) {
-          console.error('🔧 SMTP test failed on server:', data.message);
-          throw new Error(data.message || 'SMTP connection test failed');
-        }
-
-        console.log('🔧 SMTP connection test successful');
-        return data;
-      } catch (err: any) {
-        console.error('🔧 SMTP test exception:', {
-          message: err.message,
-          name: err.name,
-          stack: err.stack?.substring(0, 200)
-        });
-        
-        // Provide more specific error messages
-        if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
-          throw new Error('Network error: Unable to connect to SMTP testing service. Please check your internet connection and try again.');
-        }
-        
-        throw err;
-      }
+      // Process the email queue to send the test email
+      const { data: processResult, error: processError } = await supabase.functions.invoke('process-email-queue');
+      
+      if (processError) throw processError;
+      
+      console.log('📧 Email processing result:', processResult);
+      return { emailId: data.id, processResult };
     },
     onSuccess: (data) => {
       toast({
-        title: "Connection successful",
-        description: data?.message || "SMTP connection test passed successfully.",
+        title: "Test email sent",
+        description: `Test email has been sent successfully. Check your inbox!`,
       });
     },
     onError: (error: any) => {
-      console.error('SMTP connection test failed:', error);
+      console.error('Failed to send test email:', error);
       toast({
-        title: "Connection failed",
-        description: error.message || "SMTP connection test failed.",
+        title: "Test email failed",
+        description: error.message || "Failed to send test email.",
         variant: "destructive",
       });
     },
@@ -194,7 +170,7 @@ export const useSmtpSettings = () => {
     isLoading,
     createOrUpdateSettings: createOrUpdateSettings.mutate,
     isSaving: createOrUpdateSettings.isPending,
-    testConnection: testConnection.mutate,
-    isTesting: testConnection.isPending,
+    sendTestEmail: sendTestEmail.mutate,
+    isTesting: sendTestEmail.isPending,
   };
 };

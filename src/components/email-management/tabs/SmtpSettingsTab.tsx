@@ -6,11 +6,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Settings, TestTube, Save, Globe } from 'lucide-react';
+import { Settings, Mail, Save, Globe, CheckCircle } from 'lucide-react';
 import { useSmtpSettings } from '@/hooks/email/useSmtpSettings';
 
 export const SmtpSettingsTab: React.FC = () => {
-  const { settings, isLoading, createOrUpdateSettings, isSaving, testConnection, isTesting } = useSmtpSettings();
+  const { settings, isLoading, createOrUpdateSettings, isSaving, sendTestEmail, isTesting } = useSmtpSettings();
   
   const [formData, setFormData] = useState({
     smtp_host: '',
@@ -22,6 +22,8 @@ export const SmtpSettingsTab: React.FC = () => {
     use_tls: true,
     is_active: false,
   });
+
+  const [testEmail, setTestEmail] = useState('');
 
   useEffect(() => {
     if (settings) {
@@ -49,8 +51,9 @@ export const SmtpSettingsTab: React.FC = () => {
     createOrUpdateSettings(formData);
   };
 
-  const handleTest = () => {
-    testConnection(formData);
+  const handleSendTestEmail = () => {
+    if (!testEmail) return;
+    sendTestEmail(testEmail);
   };
 
   if (isLoading) {
@@ -188,15 +191,6 @@ export const SmtpSettingsTab: React.FC = () => {
 
           <div className="flex gap-3 pt-4">
             <Button
-              onClick={handleTest}
-              variant="outline"
-              disabled={isTesting || !formData.smtp_host || !formData.smtp_username}
-              className="flex items-center gap-2"
-            >
-              <TestTube className="w-4 h-4" />
-              {isTesting ? 'Testing...' : 'Test Connection'}
-            </Button>
-            <Button
               onClick={handleSave}
               disabled={isSaving || !formData.smtp_host || !formData.from_email}
               className="flex items-center gap-2"
@@ -207,6 +201,49 @@ export const SmtpSettingsTab: React.FC = () => {
           </div>
         </CardContent>
       </Card>
+
+      {settings && settings.is_active && (
+        <Card>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2">
+              <Mail className="w-5 h-5" />
+              Test Email Configuration
+            </CardTitle>
+            <CardDescription>
+              Send a test email to verify your SMTP settings are working correctly.
+            </CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
+            <div className="flex items-center gap-2 text-sm text-green-600 bg-green-50 p-3 rounded-lg">
+              <CheckCircle className="w-4 h-4" />
+              <span>SMTP settings are configured and active</span>
+            </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="test_email">Test Email Address</Label>
+              <Input
+                id="test_email"
+                type="email"
+                value={testEmail}
+                onChange={(e) => setTestEmail(e.target.value)}
+                placeholder="your-email@example.com"
+              />
+              <p className="text-sm text-muted-foreground">
+                Enter your email address to receive a test email
+              </p>
+            </div>
+
+            <Button
+              onClick={handleSendTestEmail}
+              disabled={isTesting || !testEmail || !testEmail.includes('@')}
+              className="flex items-center gap-2"
+            >
+              <Mail className="w-4 h-4" />
+              {isTesting ? 'Sending...' : 'Send Test Email'}
+            </Button>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
