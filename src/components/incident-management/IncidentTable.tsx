@@ -129,8 +129,8 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                     {canView && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
-                            <Eye className="h-4 w-4" />
+                          <Button variant="outline" size="sm" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
+                            <Eye className="h-6 w-6" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
@@ -147,7 +147,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                             className="h-6 w-6 text-destructive hover:text-destructive" 
                             onClick={() => onIncidentDelete && onIncidentDelete(incident)}
                           >
-                            <X className="h-3 w-3" />
+                            <X className="h-6 w-6" />
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
