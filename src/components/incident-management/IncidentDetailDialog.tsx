@@ -191,7 +191,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         addSystemComment.mutate(commentText);
       }
       
-      setIsEditing(false);
+      // Close the modal after successful save
+      onClose();
     } catch (error) {
       console.error('Error updating incident:', error);
     }
