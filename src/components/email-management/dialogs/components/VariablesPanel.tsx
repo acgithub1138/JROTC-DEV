@@ -64,9 +64,6 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                       className="w-full justify-start text-xs h-auto p-2"
                       onClick={() => onVariableInsert(column.name)}
                     >
-                      <Badge variant="secondary" className="mr-2 text-xs">
-                        {column.name}
-                      </Badge>
                       <span className="truncate">{column.label}</span>
                     </Button>
                   ))}

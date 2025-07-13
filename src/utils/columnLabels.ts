@@ -153,3 +153,33 @@ export const getEnhancedVariables = (tableName: string): Array<{ variable: strin
 
   return [...profileVariables, ...commentsVariables];
 };
+
+// Get expanded fields for reference fields (shows the actual profile fields instead of just IDs)
+export const getExpandedFields = (tableName: string): Array<{ name: string; label: string; isReference?: boolean }> => {
+  const profileFields = getProfileReferenceFields(tableName);
+  const expanded: Array<{ name: string; label: string; isReference?: boolean }> = [];
+  
+  // Profile fields that we want to show for each reference
+  const profileFieldsToShow = [
+    { field: 'first_name', label: 'First Name' },
+    { field: 'last_name', label: 'Last Name' },
+    { field: 'email', label: 'Email' },
+    { field: 'phone', label: 'Phone' },
+    { field: 'rank', label: 'Rank' },
+    { field: 'role', label: 'Role' }
+  ];
+  
+  // For each profile reference field, add the expanded profile fields
+  profileFields.forEach(refField => {
+    const refLabel = getColumnLabel(refField, tableName);
+    profileFieldsToShow.forEach(profileField => {
+      expanded.push({
+        name: `${refField}_${profileField.field}`,
+        label: `${refLabel} ${profileField.label}`,
+        isReference: true
+      });
+    });
+  });
+  
+  return expanded;
+};

@@ -1,7 +1,7 @@
 
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
-import { getColumnLabel, getEnhancedVariables } from '@/utils/columnLabels';
+import { getColumnLabel, getEnhancedVariables, getExpandedFields, getProfileReferenceFields } from '@/utils/columnLabels';
 import { useAuth } from '@/contexts/AuthContext';
 
 export interface TableColumn {
@@ -27,10 +27,25 @@ export const useTableColumns = (tableName: string) => {
 
       if (error) throw error;
       
-      return data.map((column: any) => ({
-        ...column,
-        display_label: getColumnLabel(column.column_name, tableName)
-      })) as TableColumn[];
+      const profileReferenceFields = getProfileReferenceFields(tableName);
+      const expandedFields = getExpandedFields(tableName);
+      
+      // Filter out the reference ID fields and add expanded fields
+      const filteredColumns = data
+        .filter((column: any) => !profileReferenceFields.includes(column.column_name))
+        .map((column: any) => ({
+          ...column,
+          display_label: getColumnLabel(column.column_name, tableName)
+        }));
+      
+      // Add expanded reference fields
+      const expandedColumns = expandedFields.map(field => ({
+        column_name: field.name,
+        data_type: 'text',
+        display_label: field.label
+      }));
+      
+      return [...filteredColumns, ...expandedColumns] as TableColumn[];
     },
     enabled: !!tableName,
   });
