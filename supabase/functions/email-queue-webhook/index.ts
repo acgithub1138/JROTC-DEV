@@ -16,15 +16,7 @@ interface EmailQueueItem {
   scheduled_at: string;
 }
 
-interface SmtpSettings {
-  smtp_host: string;
-  smtp_port: number;
-  smtp_username: string;
-  smtp_password: string;
-  from_email: string;
-  from_name: string;
-  use_tls: boolean;
-}
+// Removed SmtpSettings interface - only using Resend now
 
 class EmailProcessor {
   private supabase;
@@ -60,51 +52,36 @@ class EmailProcessor {
     return data;
   }
 
-  async getGlobalSmtpSettings(): Promise<SmtpSettings | null> {
-    const { data, error } = await this.supabase
-      .from('smtp_settings')
-      .select('*')
-      .eq('is_global', true)
-      .eq('is_active', true)
-      .single();
-
-    if (error) {
-      if (error.code === 'PGRST116') {
-        return null;
-      }
-      throw new Error(`Failed to fetch SMTP settings: ${error.message}`);
-    }
-
-    return data;
-  }
+// Removed getGlobalSmtpSettings - only using Resend now
 
   async sendEmailWithResend(item: EmailQueueItem): Promise<void> {
     if (!this.resend) {
-      throw new Error('Resend API key not configured');
+      throw new Error('Resend API key not configured - check RESEND_API_KEY secret in Supabase');
     }
 
+    console.log(`Attempting to send email via Resend to ${item.recipient_email}`);
+    console.log(`Subject: ${item.subject}`);
+
     const result = await this.resend.emails.send({
-      from: 'JROTC System <noreply@resend.dev>',
+      from: 'JROTC System <onboarding@resend.dev>', // Using Resend's verified domain
       to: [item.recipient_email],
       subject: item.subject,
       html: item.body,
     });
 
     if (result.error) {
+      console.error('Resend API error details:', result.error);
       throw new Error(`Resend error: ${result.error.message}`);
     }
 
-    console.log(`Email sent via Resend to ${item.recipient_email}, ID: ${result.data?.id}`);
+    if (!result.data?.id) {
+      throw new Error('Resend did not return a message ID');
+    }
+
+    console.log(`✅ Email sent successfully via Resend to ${item.recipient_email}, Resend ID: ${result.data.id}`);
   }
 
-  async simulateSmtpSend(item: EmailQueueItem, smtpSettings: SmtpSettings): Promise<void> {
-    console.log(`Simulating SMTP email send to ${item.recipient_email}`);
-    console.log(`Subject: ${item.subject}`);
-    console.log(`SMTP Host: ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
-    
-    // Simulate a small delay
-    await new Promise(resolve => setTimeout(resolve, 100));
-  }
+// Removed simulateSmtpSend - only using Resend now
 
   async processEmail(emailId: string): Promise<{ success: boolean; error?: string }> {
     try {
@@ -120,33 +97,16 @@ class EmailProcessor {
         return { success: true };
       }
 
-      // Try Resend first, fallback to SMTP simulation
-      let emailSent = false;
-      let sendError: string | null = null;
-
-      if (this.resend) {
-        try {
-          await this.sendEmailWithResend(email);
-          emailSent = true;
-        } catch (error) {
-          console.error('Resend failed, trying SMTP fallback:', error);
-          sendError = error.message;
-        }
+      // Validate Resend is available
+      if (!this.resend) {
+        throw new Error('RESEND_API_KEY is not configured in Supabase secrets');
       }
 
-      if (!emailSent) {
-        // Fallback to SMTP
-        const smtpSettings = await this.getGlobalSmtpSettings();
-        if (!smtpSettings) {
-          throw new Error('No email service available (no Resend API key and no SMTP settings)');
-        }
+      // Send email via Resend (no fallback)
+      await this.sendEmailWithResend(email);
 
-        await this.simulateSmtpSend(email, smtpSettings);
-        emailSent = true;
-      }
-
-      // Mark as sent
-      await this.supabase
+      // Mark as sent only after successful delivery
+      const updateResult = await this.supabase
         .from('email_queue')
         .update({
           status: 'sent',
@@ -156,13 +116,18 @@ class EmailProcessor {
         })
         .eq('id', emailId);
 
-      console.log(`Email ${emailId} processed successfully`);
+      if (updateResult.error) {
+        console.error('Failed to update email status:', updateResult.error);
+        throw new Error(`Database update failed: ${updateResult.error.message}`);
+      }
+
+      console.log(`✅ Email ${emailId} sent successfully via Resend and marked as sent`);
       return { success: true };
 
     } catch (error) {
-      console.error(`Failed to process email ${emailId}:`, error);
+      console.error(`❌ Failed to process email ${emailId}:`, error);
       
-      // Mark as failed with exponential backoff logic
+      // Mark as failed with detailed error message
       const errorMessage = error.message || 'Unknown error';
       
       await this.supabase
