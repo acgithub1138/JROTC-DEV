@@ -218,64 +218,79 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         addSystemComment.mutate(commentText);
       }
       
-      // Send notification email if requested
+      // Send notification email if requested - moved after successful update
       if (sendNotification && selectedTemplate && currentIncident.created_by) {
-        const template = templates.find(t => t.id === selectedTemplate);
-        if (template) {
-          const createdByUser = users.find(u => u.id === currentIncident.created_by);
-          const assignedAdmin = currentIncident.assigned_to_admin ? 
-            users.find(u => u.id === currentIncident.assigned_to_admin) : null;
-          
-          if (createdByUser?.email) {
-            // Prepare incident data with flattened profile information for template processing
-            const incidentData = {
-              ...currentIncident,
-              // Add flattened created_by profile data
-              'created_by.id': createdByUser.id,
-              'created_by.first_name': createdByUser.first_name,
-              'created_by.last_name': createdByUser.last_name,
-              'created_by.email': createdByUser.email,
-              'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-              // Add flattened assigned_to_admin profile data if exists
-              ...(assignedAdmin && {
-                'assigned_to_admin.id': assignedAdmin.id,
-                'assigned_to_admin.first_name': assignedAdmin.first_name,
-                'assigned_to_admin.last_name': assignedAdmin.last_name,
-                'assigned_to_admin.email': assignedAdmin.email,
-                'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
-              })
-            };
+        try {
+          const template = templates.find(t => t.id === selectedTemplate);
+          if (template) {
+            const createdByUser = users.find(u => u.id === currentIncident.created_by);
+            const assignedAdmin = currentIncident.assigned_to_admin ? 
+              users.find(u => u.id === currentIncident.assigned_to_admin) : null;
+            
+            if (createdByUser?.email) {
+              // Prepare incident data with flattened profile information for template processing
+              const incidentData = {
+                ...currentIncident,
+                // Merge any updates from the form
+                ...updateData,
+                // Add flattened created_by profile data
+                'created_by.id': createdByUser.id,
+                'created_by.first_name': createdByUser.first_name,
+                'created_by.last_name': createdByUser.last_name,
+                'created_by.email': createdByUser.email,
+                'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
+                // Add flattened assigned_to_admin profile data if exists
+                ...(assignedAdmin && {
+                  'assigned_to_admin.id': assignedAdmin.id,
+                  'assigned_to_admin.first_name': assignedAdmin.first_name,
+                  'assigned_to_admin.last_name': assignedAdmin.last_name,
+                  'assigned_to_admin.email': assignedAdmin.email,
+                  'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
+                })
+              };
 
-            // Process template variables
-            const processedSubject = processTemplate(template.subject, incidentData);
-            const processedBody = processTemplate(template.body, incidentData);
+              // Process template variables
+              const processedSubject = processTemplate(template.subject, incidentData);
+              const processedBody = processTemplate(template.body, incidentData);
 
-            const { error } = await supabase
-              .from('email_queue')
-              .insert({
-                recipient_email: createdByUser.email,
-                subject: processedSubject,
-                body: processedBody,
-                template_id: template.id,
-                record_id: currentIncident.id,
-                source_table: 'incidents',
-                school_id: userProfile?.school_id,
-                scheduled_at: new Date().toISOString(),
-                status: 'pending'
-              });
+              const { error } = await supabase
+                .from('email_queue')
+                .insert({
+                  recipient_email: createdByUser.email,
+                  subject: processedSubject,
+                  body: processedBody,
+                  template_id: template.id,
+                  record_id: currentIncident.id,
+                  source_table: 'incidents',
+                  school_id: userProfile?.school_id,
+                  scheduled_at: new Date().toISOString(),
+                  status: 'pending'
+                });
 
-            if (error) {
-              console.error('Error queuing notification email:', error);
-              toast({
-                title: "Warning",
-                description: "Incident was updated but notification email failed to queue.",
-                variant: "destructive",
-              });
-            } else {
-              // Add system comment about the queued email
-              addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template.name}"`);
+              if (error) {
+                console.error('Error queuing notification email:', error);
+                toast({
+                  title: "Warning",
+                  description: "Incident was updated but notification email failed to queue.",
+                  variant: "destructive",
+                });
+              } else {
+                // Add system comment about the queued email
+                addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template.name}"`);
+                toast({
+                  title: "Success",
+                  description: `Incident updated and notification sent to ${createdByUser.email}`,
+                });
+              }
             }
           }
+        } catch (emailError) {
+          console.error('Error sending notification:', emailError);
+          toast({
+            title: "Warning",
+            description: "Incident was updated but notification failed to send.",
+            variant: "destructive",
+          });
         }
       }
       
