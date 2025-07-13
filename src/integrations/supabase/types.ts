@@ -2171,7 +2171,6 @@ export type Database = {
           email_id: string
           error_message: string | null
           id: string
-          request_id: string | null
           response_status: number | null
           status: string
           trigger_fired_at: string | null
@@ -2180,7 +2179,6 @@ export type Database = {
           email_id: string
           error_message?: string | null
           id?: string
-          request_id?: string | null
           response_status?: number | null
           status: string
           trigger_fired_at?: string | null
@@ -2189,7 +2187,6 @@ export type Database = {
           email_id?: string
           error_message?: string | null
           id?: string
-          request_id?: string | null
           response_status?: number | null
           status?: string
           trigger_fired_at?: string | null
