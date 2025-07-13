@@ -280,15 +280,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   {currentIncident.incident_number}
                 </span>
               )}
-              {isEditing && canEditIncident ? (
-                <Input
-                  value={editData.title}
-                  onChange={(e) => setEditData({...editData, title: e.target.value})}
-                  className="text-2xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                />
-              ) : (
-                <span className="mb-2">{currentIncident.title}</span>
-              )}
+              <span className="text-2xl mb-2">{currentIncident.title}</span>
             </DialogTitle>
             <div className="flex items-center gap-2">
               {isEditing && canEditIncident && (
