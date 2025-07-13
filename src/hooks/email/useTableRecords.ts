@@ -24,8 +24,8 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           case 'incidents':
             selectQuery = `
               *,
-              submitted_by_profile:profiles!incidents_submitted_by_fkey(id, first_name, last_name, email),
-              assigned_to_profile:profiles!incidents_assigned_to_fkey(id, first_name, last_name, email)
+              created_by_profile:profiles!incidents_created_by_fkey(id, first_name, last_name, email),
+              assigned_to_admin_profile:profiles!incidents_assigned_to_admin_fkey(id, first_name, last_name, email)
             `;
             break;
           case 'cadets':
@@ -95,20 +95,32 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
           flattened['assigned_by.full_name'] = `${record.assigned_by_profile.first_name} ${record.assigned_by_profile.last_name}`;
         }
         
-        if (record.submitted_by_profile) {
-          flattened['submitted_by.id'] = record.submitted_by_profile.id;
-          flattened['submitted_by.first_name'] = record.submitted_by_profile.first_name;
-          flattened['submitted_by.last_name'] = record.submitted_by_profile.last_name;
-          flattened['submitted_by.email'] = record.submitted_by_profile.email;
-          flattened['submitted_by.full_name'] = `${record.submitted_by_profile.first_name} ${record.submitted_by_profile.last_name}`;
-        }
-        
         if (record.created_by_profile) {
           flattened['created_by.id'] = record.created_by_profile.id;
           flattened['created_by.first_name'] = record.created_by_profile.first_name;
           flattened['created_by.last_name'] = record.created_by_profile.last_name;
           flattened['created_by.email'] = record.created_by_profile.email;
           flattened['created_by.full_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
+          // Also provide as submitted_by for template compatibility
+          flattened['submitted_by.id'] = record.created_by_profile.id;
+          flattened['submitted_by.first_name'] = record.created_by_profile.first_name;
+          flattened['submitted_by.last_name'] = record.created_by_profile.last_name;
+          flattened['submitted_by.email'] = record.created_by_profile.email;
+          flattened['submitted_by.full_name'] = `${record.created_by_profile.first_name} ${record.created_by_profile.last_name}`;
+        }
+        
+        if (record.assigned_to_admin_profile) {
+          flattened['assigned_to_admin.id'] = record.assigned_to_admin_profile.id;
+          flattened['assigned_to_admin.first_name'] = record.assigned_to_admin_profile.first_name;
+          flattened['assigned_to_admin.last_name'] = record.assigned_to_admin_profile.last_name;
+          flattened['assigned_to_admin.email'] = record.assigned_to_admin_profile.email;
+          flattened['assigned_to_admin.full_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
+          // Also provide as assigned_to for template compatibility
+          flattened['assigned_to.id'] = record.assigned_to_admin_profile.id;
+          flattened['assigned_to.first_name'] = record.assigned_to_admin_profile.first_name;
+          flattened['assigned_to.last_name'] = record.assigned_to_admin_profile.last_name;
+          flattened['assigned_to.email'] = record.assigned_to_admin_profile.email;
+          flattened['assigned_to.full_name'] = `${record.assigned_to_admin_profile.first_name} ${record.assigned_to_admin_profile.last_name}`;
         }
         
         if (record.approved_by_profile) {
