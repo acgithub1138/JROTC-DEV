@@ -157,6 +157,22 @@ serve(async (req) => {
   console.log('Method:', req.method);
   console.log('URL:', req.url);
   
+  // Add health check endpoint
+  if (req.method === 'GET') {
+    console.log('✅ Health check endpoint accessed');
+    return new Response(
+      JSON.stringify({ 
+        status: 'healthy',
+        message: 'Email queue processor is running',
+        timestamp: new Date().toISOString()
+      }),
+      {
+        status: 200,
+        headers: { 'Content-Type': 'application/json', ...corsHeaders },
+      }
+    );
+  }
+  
   // Validate environment variables
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');

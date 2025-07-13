@@ -22,9 +22,24 @@ export const useEmailProcessor = () => {
     },
     onError: (error: any) => {
       console.error('Error processing email queue:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        context: error.context,
+        stack: error.stack
+      });
+      
+      let errorMessage = "Failed to process email queue.";
+      
+      if (error.name === 'FunctionsFetchError') {
+        errorMessage = "Unable to connect to email service. Please check your connection and try again.";
+      } else if (error.message) {
+        errorMessage = error.message;
+      }
+      
       toast({
         title: "Error",
-        description: error.message || "Failed to process email queue.",
+        description: errorMessage,
         variant: "destructive",
       });
     },
