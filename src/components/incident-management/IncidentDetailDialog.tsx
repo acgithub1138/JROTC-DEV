@@ -287,8 +287,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   className="text-xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
                 />
               ) : (
-                <span className="font-semibold mb-2">{currentIncident.title}</span>
-      font-semibold mb-2
+                <span className="mb-2">{currentIncident.title}</span>
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
