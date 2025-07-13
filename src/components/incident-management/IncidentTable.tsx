@@ -151,7 +151,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Delete Incident</p>
+                          <p>Cancle Incident</p>
                         </TooltipContent>
                       </Tooltip>
                     )}
