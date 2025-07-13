@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -79,6 +79,34 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
     },
   });
+
+  // Reset form when incident prop changes
+  useEffect(() => {
+    form.reset({
+      title: incident?.title || "",
+      description: incident?.description || "",
+      priority: incident?.priority || "medium",
+      category: incident?.category || "issue",
+      status: incident?.status || "open",
+      assigned_to_admin: incident?.assigned_to_admin || "",
+      due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
+    });
+  }, [incident, form]);
+
+  // Reset form when modal opens
+  useEffect(() => {
+    if (isOpen) {
+      form.reset({
+        title: incident?.title || "",
+        description: incident?.description || "",
+        priority: incident?.priority || "medium",
+        category: incident?.category || "issue",
+        status: incident?.status || "open",
+        assigned_to_admin: incident?.assigned_to_admin || "",
+        due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
+      });
+    }
+  }, [isOpen, incident, form]);
 
   const onSubmit = async (data: FormData) => {
     try {
