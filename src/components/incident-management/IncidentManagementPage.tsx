@@ -21,6 +21,7 @@ const IncidentManagementPage: React.FC = () => {
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
   const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showViewDialog, setShowViewDialog] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
@@ -86,6 +87,12 @@ const IncidentManagementPage: React.FC = () => {
     }
   };
 
+  const handleIncidentView = (incident: Incident) => {
+    // View mode - always accessible if user has view permissions
+    setSelectedIncident(incident);
+    setShowViewDialog(true);
+  };
+
   const handleCreateIncident = () => {
     setShowCreateForm(true);
   };
@@ -147,6 +154,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -167,6 +175,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -187,6 +196,7 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
+                  onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -207,6 +217,7 @@ const IncidentManagementPage: React.FC = () => {
             <IncidentTable 
               incidents={filteredIncidents} 
               onIncidentSelect={handleIncidentSelect}
+              onIncidentView={handleIncidentView}
               onIncidentDelete={handleDeleteIncident}
             />
           )}
@@ -229,6 +240,19 @@ const IncidentManagementPage: React.FC = () => {
             setSelectedIncident(null);
           }}
           onEdit={() => {}} // Not needed since the dialog handles updates internally
+        />
+      )}
+
+      {selectedIncident && showViewDialog && (
+        <IncidentDetailDialog
+          incident={selectedIncident}
+          isOpen={showViewDialog}
+          onClose={() => {
+            setShowViewDialog(false);
+            setSelectedIncident(null);
+          }}
+          onEdit={() => {}} // Not needed for view-only mode
+          readOnly={true}
         />
       )}
 

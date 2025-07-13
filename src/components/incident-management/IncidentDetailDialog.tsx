@@ -31,6 +31,7 @@ interface IncidentDetailDialogProps {
   isOpen: boolean;
   onClose: () => void;
   onEdit: (incident: Incident) => void;
+  readOnly?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -83,6 +84,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   isOpen,
   onClose,
   onEdit,
+  readOnly = false,
 }) => {
   const { userProfile } = useAuth();
   const { updateIncident, incidents } = useIncidents();
@@ -93,7 +95,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
-  const [isEditing, setIsEditing] = useState(true); // Always start in edit mode
+  const [isEditing, setIsEditing] = useState(!readOnly); // Start in edit mode unless read-only
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
@@ -106,7 +108,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   // Determine if user can edit this incident
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
-  const canEditIncident = canUpdate || (canUpdateAssigned && isAssignedToIncident);
+  const canEditIncident = !readOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -275,6 +277,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                     Save
                   </Button>
                 </>
+              )}
+              {!isEditing && !readOnly && canEditIncident && (
+                <Button size="sm" onClick={handleEdit}>
+                  Edit
+                </Button>
               )}
             </div>
           </div>

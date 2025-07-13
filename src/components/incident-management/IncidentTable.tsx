@@ -11,6 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 interface IncidentTableProps {
   incidents: Incident[];
   onIncidentSelect: (incident: Incident) => void;
+  onIncidentView?: (incident: Incident) => void;
   onIncidentEdit?: (incident: Incident) => void;
   onIncidentSelectForEdit?: (incident: Incident) => void;
   onIncidentDelete?: (incident: Incident) => void;
@@ -49,6 +50,7 @@ const getPriorityBadgeClass = (priority: string) => {
 const IncidentTable: React.FC<IncidentTableProps> = ({
   incidents,
   onIncidentSelect,
+  onIncidentView,
   onIncidentEdit,
   onIncidentSelectForEdit,
   onIncidentDelete
@@ -122,7 +124,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentSelect(incident)}>
+                  {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
                       <Eye className="h-3 w-3" />
                     </Button>}
                   {canDelete && incident.status !== 'canceled' && <Button 
