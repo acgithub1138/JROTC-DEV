@@ -331,6 +331,28 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               </CardHeader>
               <CardContent className="space-y-3">
                 <div className="flex items-center gap-2">
+                  <AlertTriangle className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-600">Category:</span>
+                  {isEditing && canEditIncident ? (
+                    <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value})}>
+                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                        <SelectValue />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {categoryOptions.map((option) => (
+                          <SelectItem key={option.value} value={option.value}>
+                            {option.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <Badge className={getCategoryBadgeClass(currentIncident.category)}>
+                      {currentCategoryOption?.label || currentIncident.category}
+                    </Badge>
+                  )}
+                </div>
+                <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
                   {isEditing && canEditIncident ? (
@@ -371,28 +393,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   ) : (
                     <Badge className={getStatusBadgeClass(currentIncident.status)}>
                       {currentStatusOption?.label || currentIncident.status.replace('_', ' ')}
-                    </Badge>
-                  )}
-                </div>
-                <div className="flex items-center gap-2">
-                  <AlertTriangle className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Category:</span>
-                  {isEditing && canEditIncident ? (
-                    <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value})}>
-                      <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {categoryOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getCategoryBadgeClass(currentIncident.category)}>
-                      {currentCategoryOption?.label || currentIncident.category}
                     </Badge>
                   )}
                 </div>
