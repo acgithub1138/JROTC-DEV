@@ -2,6 +2,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, X } from "lucide-react";
 import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
@@ -124,17 +125,37 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {canView && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
-                      <Eye className="h-3 w-3" />
-                    </Button>}
-                  {canDelete && incident.status !== 'canceled' && <Button 
-                      variant="outline" 
-                      size="icon" 
-                      className="h-6 w-6 text-destructive hover:text-destructive" 
-                      onClick={() => onIncidentDelete && onIncidentDelete(incident)}
-                    >
-                      <X className="h-3 w-3" />
-                    </Button>}
+                  <TooltipProvider>
+                    {canView && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
+                            <Eye className="h-3 w-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Incident</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {canDelete && incident.status !== 'canceled' && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button 
+                            variant="outline" 
+                            size="icon" 
+                            className="h-6 w-6 text-destructive hover:text-destructive" 
+                            onClick={() => onIncidentDelete && onIncidentDelete(incident)}
+                          >
+                            <X className="h-3 w-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete Incident</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                  </TooltipProvider>
                 </div>
               </TableCell>
             </TableRow>)}
