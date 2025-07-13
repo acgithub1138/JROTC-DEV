@@ -110,39 +110,66 @@ export const useSmtpSettings = () => {
 
   const testConnection = useMutation({
     mutationFn: async (testSettings: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at' | 'is_global'>) => {
-      console.log('🔧 Starting SMTP connection test with settings:', {
-        smtp_host: testSettings.smtp_host,
-        smtp_port: testSettings.smtp_port,
-        smtp_username: testSettings.smtp_username,
-        from_email: testSettings.from_email,
-        use_tls: testSettings.use_tls,
-        // Don't log password for security
-        hasPassword: !!testSettings.smtp_password
+      console.log('🔧 Starting SMTP connection test');
+
+      // Validate and clean the test data
+      const cleanTestData = {
+        smtp_host: String(testSettings.smtp_host || '').trim(),
+        smtp_port: Number(testSettings.smtp_port) || 587,
+        smtp_username: String(testSettings.smtp_username || '').trim(),
+        smtp_password: String(testSettings.smtp_password || '').trim(),
+        from_email: String(testSettings.from_email || '').trim(),
+        from_name: String(testSettings.from_name || '').trim(),
+        use_tls: Boolean(testSettings.use_tls)
+      };
+
+      console.log('🔧 Cleaned test data:', {
+        ...cleanTestData,
+        smtp_password: '[REDACTED]'
       });
 
+      // Basic validation
+      if (!cleanTestData.smtp_host || !cleanTestData.smtp_username || !cleanTestData.smtp_password || !cleanTestData.from_email) {
+        throw new Error('Missing required SMTP configuration fields');
+      }
+
       try {
-        console.log('🔧 Invoking test-smtp-connection edge function...');
+        console.log('🔧 Calling edge function with cleaned data...');
+        
         const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
-          body: testSettings,
+          body: cleanTestData
         });
 
-        console.log('🔧 Edge function response:', { data, error });
+        console.log('🔧 Edge function response received:', { 
+          hasData: !!data, 
+          hasError: !!error,
+          errorMessage: error?.message 
+        });
 
         if (error) {
-          console.error('🔧 Edge function error:', error);
-          throw new Error(error.message || 'Failed to test SMTP connection');
+          console.error('🔧 Edge function returned error:', error);
+          throw new Error(error.message || 'Failed to connect to SMTP server');
         }
 
-        // Check if the response indicates failure even with successful HTTP request
         if (data && !data.success) {
-          console.error('🔧 SMTP test failed:', data);
+          console.error('🔧 SMTP test failed on server:', data.message);
           throw new Error(data.message || 'SMTP connection test failed');
         }
 
-        console.log('🔧 SMTP connection test successful:', data);
+        console.log('🔧 SMTP connection test successful');
         return data;
-      } catch (err) {
-        console.error('🔧 Exception during SMTP test:', err);
+      } catch (err: any) {
+        console.error('🔧 SMTP test exception:', {
+          message: err.message,
+          name: err.name,
+          stack: err.stack?.substring(0, 200)
+        });
+        
+        // Provide more specific error messages
+        if (err.message?.includes('Failed to fetch') || err.name === 'TypeError') {
+          throw new Error('Network error: Unable to connect to SMTP testing service. Please check your internet connection and try again.');
+        }
+        
         throw err;
       }
     },
