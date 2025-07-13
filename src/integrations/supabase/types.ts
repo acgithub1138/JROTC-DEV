@@ -2390,6 +2390,10 @@ export type Database = {
         Args: { status_value: string }
         Returns: boolean
       }
+      validate_role_transition: {
+        Args: { user_id: string; old_role: string; new_role: string }
+        Returns: boolean
+      }
       validate_task_priority: {
         Args: { priority_value: string }
         Returns: boolean
