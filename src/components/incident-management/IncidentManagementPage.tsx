@@ -249,22 +249,6 @@ const IncidentManagementPage: React.FC = () => {
       )}
 
 
-      {selectedIncident && showDetailDialog && (
-        <IncidentDetailDialog
-          incident={selectedIncident}
-          isOpen={showDetailDialog}
-          onClose={() => setShowDetailDialog(false)}
-          onEdit={handleEditIncident}
-        />
-      )}
-
-      {selectedIncident && showReadonlyDialog && (
-        <IncidentDetailDialog_Readonly
-          incident={selectedIncident}
-          isOpen={showReadonlyDialog}
-          onClose={() => setShowReadonlyDialog(false)}
-        />
-      )}
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
