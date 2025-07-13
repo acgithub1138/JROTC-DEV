@@ -59,7 +59,7 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                   {columns.map((column) => (
                     <Button
                       key={column.name}
-                      variant="ghost"
+                      variant="outline"
                       size="sm"
                       className="w-full justify-start text-xs h-auto p-2"
                       onClick={() => onVariableInsert(column.name)}
