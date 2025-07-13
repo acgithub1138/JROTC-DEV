@@ -233,19 +233,29 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 ...currentIncident,
                 // Merge any updates from the form
                 ...updateData,
-                // Add flattened created_by profile data
+                // Add flattened created_by profile data (also as submitted_by for template compatibility)
                 'created_by.id': createdByUser.id,
                 'created_by.first_name': createdByUser.first_name,
                 'created_by.last_name': createdByUser.last_name,
                 'created_by.email': createdByUser.email,
                 'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-                // Add flattened assigned_to_admin profile data if exists
+                'submitted_by.id': createdByUser.id,
+                'submitted_by.first_name': createdByUser.first_name,
+                'submitted_by.last_name': createdByUser.last_name,
+                'submitted_by.email': createdByUser.email,
+                'submitted_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
+                // Add flattened assigned_to_admin profile data (also as assigned_to for template compatibility)
                 ...(assignedAdmin && {
                   'assigned_to_admin.id': assignedAdmin.id,
                   'assigned_to_admin.first_name': assignedAdmin.first_name,
                   'assigned_to_admin.last_name': assignedAdmin.last_name,
                   'assigned_to_admin.email': assignedAdmin.email,
                   'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
+                  'assigned_to.id': assignedAdmin.id,
+                  'assigned_to.first_name': assignedAdmin.first_name,
+                  'assigned_to.last_name': assignedAdmin.last_name,
+                  'assigned_to.email': assignedAdmin.email,
+                  'assigned_to.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
                 })
               };
 
@@ -262,7 +272,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   template_id: template.id,
                   record_id: currentIncident.id,
                   source_table: 'incidents',
-                  school_id: userProfile?.school_id,
+                  school_id: currentIncident.school_id, // Use incident's school_id instead of user's
                   scheduled_at: new Date().toISOString(),
                   status: 'pending'
                 });
