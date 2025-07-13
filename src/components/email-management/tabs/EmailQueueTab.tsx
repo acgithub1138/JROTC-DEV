@@ -29,25 +29,8 @@ export const EmailQueueTab: React.FC = () => {
   const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
   const queryClient = useQueryClient();
 
-  // Fetch last processing log entry
-  const { data: lastProcessingLog } = useQuery({
-    queryKey: ['email-processing-log'],
-    queryFn: async () => {
-      const { data, error } = await supabase
-        .from('email_processing_log')
-        .select('*')
-        .order('processed_at', { ascending: false })
-        .limit(1)
-        .single();
-
-      if (error && error.code !== 'PGRST116') throw error; // PGRST116 is "no rows returned"
-      return data;
-    },
-  });
-
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['email-queue'] });
-    queryClient.invalidateQueries({ queryKey: ['email-processing-log'] });
   };
 
   if (isLoading) {
@@ -88,11 +71,6 @@ export const EmailQueueTab: React.FC = () => {
                   </Badge>
                 )}
               </div>
-              {lastProcessingLog?.processed_at && (
-                <div className="text-sm text-muted-foreground mt-1">
-                  Last ran: {format(new Date(lastProcessingLog.processed_at), 'MMM dd, yyyy HH:mm:ss')}
-                </div>
-              )}
             </div>
             <Button
               onClick={handleRefresh}
