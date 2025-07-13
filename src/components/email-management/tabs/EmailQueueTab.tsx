@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, Mail, AlertCircle, RefreshCw } from 'lucide-react';
+import { Clock, Mail, AlertCircle, RefreshCw, Play } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -28,9 +28,31 @@ const getStatusColor = (status: string) => {
 export const EmailQueueTab: React.FC = () => {
   const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
   const queryClient = useQueryClient();
+  const [isProcessing, setIsProcessing] = React.useState(false);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+  };
+
+  const handleManualProcess = async () => {
+    setIsProcessing(true);
+    try {
+      console.log('Manually triggering email processing...');
+      const { data, error } = await supabase.functions.invoke('manual-process-emails');
+      
+      if (error) {
+        console.error('Error processing emails:', error);
+        throw error;
+      }
+      
+      console.log('Manual processing result:', data);
+      // Refresh the queue after processing
+      queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+    } catch (error) {
+      console.error('Failed to process emails:', error);
+    } finally {
+      setIsProcessing(false);
+    }
   };
 
   if (isLoading) {
@@ -72,15 +94,28 @@ export const EmailQueueTab: React.FC = () => {
                 )}
               </div>
             </div>
-            <Button
-              onClick={handleRefresh}
-              variant="outline"
-              size="sm"
-              className="flex items-center gap-2"
-            >
-              <RefreshCw className="w-4 h-4" />
-              Refresh
-            </Button>
+            <div className="flex items-center gap-2">
+              {pendingCount > 0 && (
+                <Button
+                  onClick={handleManualProcess}
+                  disabled={isProcessing}
+                  size="sm"
+                  className="flex items-center gap-2"
+                >
+                  <Play className="w-4 h-4" />
+                  {isProcessing ? 'Processing...' : 'Process Now'}
+                </Button>
+              )}
+              <Button
+                onClick={handleRefresh}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <RefreshCw className="w-4 h-4" />
+                Refresh
+              </Button>
+            </div>
           </CardTitle>
         </CardHeader>
         <CardContent>
