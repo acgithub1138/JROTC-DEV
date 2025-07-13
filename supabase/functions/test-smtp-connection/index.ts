@@ -10,6 +10,8 @@ const corsHeaders = {
 };
 
 serve(async (req) => {
+  console.log('SMTP test function invoked:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
