@@ -110,20 +110,41 @@ export const useSmtpSettings = () => {
 
   const testConnection = useMutation({
     mutationFn: async (testSettings: Omit<SmtpSettings, 'id' | 'school_id' | 'created_at' | 'updated_at' | 'is_global'>) => {
-      const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
-        body: testSettings,
+      console.log('🔧 Starting SMTP connection test with settings:', {
+        smtp_host: testSettings.smtp_host,
+        smtp_port: testSettings.smtp_port,
+        smtp_username: testSettings.smtp_username,
+        from_email: testSettings.from_email,
+        use_tls: testSettings.use_tls,
+        // Don't log password for security
+        hasPassword: !!testSettings.smtp_password
       });
 
-      if (error) {
-        throw new Error(error.message || 'Failed to test SMTP connection');
-      }
+      try {
+        console.log('🔧 Invoking test-smtp-connection edge function...');
+        const { data, error } = await supabase.functions.invoke('test-smtp-connection', {
+          body: testSettings,
+        });
 
-      // Check if the response indicates failure even with successful HTTP request
-      if (data && !data.success) {
-        throw new Error(data.message || 'SMTP connection test failed');
-      }
+        console.log('🔧 Edge function response:', { data, error });
 
-      return data;
+        if (error) {
+          console.error('🔧 Edge function error:', error);
+          throw new Error(error.message || 'Failed to test SMTP connection');
+        }
+
+        // Check if the response indicates failure even with successful HTTP request
+        if (data && !data.success) {
+          console.error('🔧 SMTP test failed:', data);
+          throw new Error(data.message || 'SMTP connection test failed');
+        }
+
+        console.log('🔧 SMTP connection test successful:', data);
+        return data;
+      } catch (err) {
+        console.error('🔧 Exception during SMTP test:', err);
+        throw err;
+      }
     },
     onSuccess: (data) => {
       toast({
