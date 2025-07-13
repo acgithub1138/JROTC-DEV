@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
@@ -26,19 +26,16 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
-import { useIncidentStatusOptions, useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
+import { useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useAuth } from "@/contexts/AuthContext";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import type { Incident } from "@/hooks/incidents/types";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
   description: z.string().optional(),
   priority: z.string().min(1, "Priority is required"),
   category: z.string().min(1, "Category is required"),
-  status: z.string().optional(),
-  assigned_to_admin: z.string().optional(),
   due_date: z.string().optional().refine((date) => {
     if (!date) return true; // Optional field, so empty is valid
     const selectedDate = new Date(date);
@@ -51,17 +48,14 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 interface IncidentFormProps {
-  incident?: Incident | null;
   isOpen: boolean;
   onClose: () => void;
 }
 
 const IncidentForm: React.FC<IncidentFormProps> = ({
-  incident,
   isOpen,
   onClose,
 }) => {
-  const { data: statusOptions = [] } = useIncidentStatusOptions();
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { userProfile } = useAuth();
@@ -70,95 +64,43 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      title: incident?.title || "",
-      description: incident?.description || "",
-      priority: incident?.priority || "medium",
-      category: incident?.category || "issue",
-      status: incident?.status || "open",
-      assigned_to_admin: incident?.assigned_to_admin || "",
-      due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
+      title: "",
+      description: "",
+      priority: "medium",
+      category: "issue",
+      due_date: "",
     },
   });
 
-  // Reset form when incident prop changes
-  useEffect(() => {
-    form.reset({
-      title: incident?.title || "",
-      description: incident?.description || "",
-      priority: incident?.priority || "medium",
-      category: incident?.category || "issue",
-      status: incident?.status || "open",
-      assigned_to_admin: incident?.assigned_to_admin || "",
-      due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
-    });
-  }, [incident, form]);
-
-  // Reset form when modal opens
-  useEffect(() => {
-    if (isOpen) {
-      form.reset({
-        title: incident?.title || "",
-        description: incident?.description || "",
-        priority: incident?.priority || "medium",
-        category: incident?.category || "issue",
-        status: incident?.status || "open",
-        assigned_to_admin: incident?.assigned_to_admin || "",
-        due_date: incident?.due_date ? new Date(incident.due_date).toISOString().split('T')[0] : "",
-      });
-    }
-  }, [isOpen, incident, form]);
-
   const onSubmit = async (data: FormData) => {
     try {
-      if (incident) {
-        // Update existing incident
-        const { error } = await supabase
-          .from('incidents')
-          .update({
-            title: data.title,
-            description: data.description,
-            priority: data.priority,
-            category: data.category,
-            status: data.status,
-            assigned_to_admin: data.assigned_to_admin || null,
-            due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
-          })
-          .eq('id', incident.id);
-
-        if (error) throw error;
-
-        toast({
-          title: "Success",
-          description: "Incident updated successfully",
+      // Create new incident only
+      const { error } = await supabase
+        .from('incidents')
+        .insert({
+          title: data.title,
+          description: data.description,
+          priority: data.priority,
+          category: data.category,
+          school_id: userProfile?.school_id || "",
+          created_by: userProfile?.id,
+          due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
         });
-      } else {
-        // Create new incident
-        const { error } = await supabase
-          .from('incidents')
-          .insert({
-            title: data.title,
-            description: data.description,
-            priority: data.priority,
-            category: data.category,
-            school_id: userProfile?.school_id || "",
-            created_by: userProfile?.id,
-            due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
-          });
 
-        if (error) throw error;
+      if (error) throw error;
 
-        toast({
-          title: "Success",
-          description: "Incident created successfully",
-        });
-      }
+      toast({
+        title: "Success",
+        description: "Incident created successfully",
+      });
 
+      form.reset();
       onClose();
     } catch (error) {
-      console.error('Error saving incident:', error);
+      console.error('Error creating incident:', error);
       toast({
         title: "Error",
-        description: "Failed to save incident. Please try again.",
+        description: "Failed to create incident. Please try again.",
         variant: "destructive",
       });
     }
@@ -168,9 +110,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl">
         <DialogHeader>
-          <DialogTitle>
-            {incident ? "Edit Incident" : "Create New Incident"}
-          </DialogTitle>
+          <DialogTitle>Create New Incident</DialogTitle>
         </DialogHeader>
 
         <Form {...form}>
@@ -281,40 +221,11 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               />
             </div>
 
-            {incident && (
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                    <Select onValueChange={field.onChange} defaultValue={field.value}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
-                            {option.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            )}
-
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>
                 Cancel
               </Button>
-              <Button type="submit">
-                {incident ? "Update" : "Create"}
-              </Button>
+              <Button type="submit">Create</Button>
             </div>
           </form>
         </Form>

@@ -248,13 +248,6 @@ const IncidentManagementPage: React.FC = () => {
         />
       )}
 
-      {editingIncident && (
-        <IncidentForm
-          incident={editingIncident}
-          isOpen={!!editingIncident}
-          onClose={handleCloseEditForm}
-        />
-      )}
 
       {selectedIncident && showDetailDialog && (
         <IncidentDetailDialog
