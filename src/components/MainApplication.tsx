@@ -12,7 +12,7 @@ import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import IncidentOptionsManagement from './incident-management/IncidentOptionsManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
-import SmtpSettingsPage from './smtp-settings/SmtpSettingsPage';
+
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
 import JobBoardPage from '@/components/job-board/JobBoardPage';
@@ -39,7 +39,7 @@ const MainApplication = () => {
     if (path.startsWith('/school')) return 'school-management';
     if (path.startsWith('/users')) return 'user-admin';
     if (path.startsWith('/email')) return 'email-management';
-    if (path.startsWith('/smtp')) return 'smtp-settings';
+    
     if (path.startsWith('/cadets')) return 'cadets';
     if (path.startsWith('/job-board')) return 'job-board';
     if (path.startsWith('/teams')) return 'teams';
@@ -64,7 +64,7 @@ const MainApplication = () => {
       'school-management': '/school',
       'user-admin': '/users',
       'email-management': '/email',
-      'smtp-settings': '/smtp',
+      
       'cadets': '/cadets',
       'job-board': '/job-board',
       'teams': '/teams',
@@ -106,7 +106,7 @@ const MainApplication = () => {
             <Route path="/school" element={<SchoolManagementPage />} />
             <Route path="/users" element={<UserAdminPage />} />
             <Route path="/email" element={<EmailManagementPage />} />
-            <Route path="/smtp" element={<SmtpSettingsPage />} />
+            
             <Route path="/settings" element={<SettingsPage />} />
             <Route path="/cadets" element={<CadetManagementPage />} />
             <Route path="/job-board" element={<JobBoardPage />} />

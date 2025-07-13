@@ -49,7 +49,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
     { id: 'email-management', label: 'Email', icon: 'Mails' },
     
-    { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings', adminOnly: true },
+    
     { id: 'settings', label: 'Settings', icon: 'Settings' },
   ];
 
@@ -98,7 +98,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
-        { id: 'smtp-settings', label: 'SMTP Settings', icon: 'Settings' },
+        
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
