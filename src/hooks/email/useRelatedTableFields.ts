@@ -13,6 +13,7 @@ const getRelatedTableName = (columnName: string): string | null => {
   // Map common foreign key patterns to their related tables
   const relationshipMap: Record<string, string> = {
     'assigned_to': 'profiles',
+    'assigned_to_admin': 'profiles',
     'assigned_by': 'profiles',
     'created_by': 'profiles',
     'approved_by': 'profiles',

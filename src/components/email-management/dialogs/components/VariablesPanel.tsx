@@ -8,6 +8,7 @@ import { useRelatedTableFields } from '@/hooks/email/useRelatedTableFields';
 
 interface VariablesPanelProps {
   columns: TableColumn[];
+  enhancedVariables?: Array<{ variable: string; label: string; type: string }>;
   onVariableInsert: (variableName: string) => void;
 }
 
@@ -44,6 +45,7 @@ const VariableWithRelatedFields: React.FC<{
 
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
+  enhancedVariables = [],
   onVariableInsert,
 }) => {
   return (
@@ -60,6 +62,23 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
             onVariableInsert={onVariableInsert}
           />
         ))}
+        
+        {enhancedVariables.length > 0 && (
+          <>
+            <div className="border-t pt-2 mt-2">
+              <p className="text-xs text-gray-500 mb-2">Enhanced Variables</p>
+            </div>
+            {enhancedVariables.map((variable) => (
+              <VariableButton
+                key={variable.variable}
+                label={variable.label}
+                variableName={variable.variable}
+                dataType="text"
+                onClick={onVariableInsert}
+              />
+            ))}
+          </>
+        )}
       </CardContent>
     </Card>
   );
