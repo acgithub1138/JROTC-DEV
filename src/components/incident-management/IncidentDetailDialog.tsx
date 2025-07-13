@@ -284,7 +284,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <Input
                   value={editData.title}
                   onChange={(e) => setEditData({...editData, title: e.target.value})}
-                  className="text-xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                  className="text-2xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
                 />
               ) : (
                 <span className="mb-2">{currentIncident.title}</span>
