@@ -152,8 +152,19 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   const sendNotificationEmail = async () => {
     if (!sendNotification || !selectedTemplate || !currentIncident.created_by) {
+      console.log('Notification requirements not met:', {
+        sendNotification,
+        selectedTemplate,
+        createdBy: currentIncident.created_by
+      });
       return;
     }
+
+    console.log('Attempting to send notification for incident:', {
+      incidentId: currentIncident.id,
+      createdBy: currentIncident.created_by,
+      availableUsers: users.map(u => ({ id: u.id, email: u.email, name: `${u.first_name} ${u.last_name}` }))
+    });
 
     try {
       const template = templates.find(t => t.id === selectedTemplate);
@@ -166,8 +177,38 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         return;
       }
 
-      const createdByUser = users.find(u => u.id === currentIncident.created_by);
+      let createdByUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentIncident.created_by);
+      console.log('Found created by user in school users:', createdByUser);
+      
+      // If user not found in school users (could be from different school), fetch directly
+      if (!createdByUser) {
+        console.log('User not found in school users, fetching directly from database');
+        const { data: userData, error: userError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .eq('id', currentIncident.created_by)
+          .single();
+          
+        if (userError || !userData) {
+          console.error('Error fetching user data:', userError);
+          toast({
+            title: "Error",
+            description: "Could not find the incident creator's information.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        createdByUser = userData as { id: string; first_name: string; last_name: string; email: string };
+        console.log('Fetched user directly:', createdByUser);
+      }
+      
       if (!createdByUser?.email) {
+        console.log('No email found for user:', {
+          userId: currentIncident.created_by,
+          userFound: !!createdByUser,
+          userEmail: createdByUser?.email
+        });
         toast({
           title: "Error", 
           description: "No email address found for the incident creator.",
