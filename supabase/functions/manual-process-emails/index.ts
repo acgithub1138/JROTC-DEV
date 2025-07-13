@@ -1,5 +1,6 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,8 +16,10 @@ serve(async (req) => {
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
+    const resendApiKey = Deno.env.get('RESEND_API_KEY')!;
     
     const supabase = createClient(supabaseUrl, supabaseServiceRoleKey);
+    const resend = new Resend(resendApiKey);
 
     console.log('Starting manual email processing...');
 
@@ -49,30 +52,52 @@ serve(async (req) => {
     let processed = 0;
     let failed = 0;
 
-    // Process each email using Supabase's built-in email service
+    // Process each email using Resend
     for (const email of pendingEmails) {
       try {
-        console.log(`Processing email ${email.id} to ${email.recipient_email}`);
+        console.log(`Sending email ${email.id} to ${email.recipient_email}`);
         
-        // Since we're using Supabase's built-in SMTP, we'll simulate successful processing
-        // In a real implementation, you would send the email here
-        
-        // Mark as sent
-        const { error: updateError } = await supabase
-          .from('email_queue')
-          .update({
-            status: 'sent',
-            sent_at: new Date().toISOString(),
-            updated_at: new Date().toISOString()
-          })
-          .eq('id', email.id);
+        // Send email via Resend
+        const result = await resend.emails.send({
+          from: 'JROTC System <onboarding@resend.dev>',
+          to: [email.recipient_email],
+          subject: email.subject,
+          html: email.body,
+        });
 
-        if (updateError) {
-          console.error(`Failed to update email ${email.id}:`, updateError);
+        if (result.error) {
+          console.error(`Resend error for ${email.id}:`, result.error);
+          
+          // Mark as failed
+          await supabase
+            .from('email_queue')
+            .update({
+              status: 'failed',
+              error_message: `Resend error: ${result.error.message}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', email.id);
+          
           failed++;
         } else {
-          console.log(`Successfully processed email ${email.id}`);
-          processed++;
+          console.log(`Email ${email.id} sent successfully. Resend ID: ${result.data?.id}`);
+          
+          // Mark as sent
+          const { error: updateError } = await supabase
+            .from('email_queue')
+            .update({
+              status: 'sent',
+              sent_at: new Date().toISOString(),
+              updated_at: new Date().toISOString(),
+              error_message: null
+            })
+            .eq('id', email.id);
+
+          if (updateError) {
+            console.error(`Failed to update email ${email.id}:`, updateError);
+          } else {
+            processed++;
+          }
         }
       } catch (error) {
         console.error(`Error processing email ${email.id}:`, error);
