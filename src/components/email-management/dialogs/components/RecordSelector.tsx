@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -15,53 +14,38 @@ export const RecordSelector: React.FC<RecordSelectorProps> = ({
   selectedRecordId,
   onRecordSelect,
 }) => {
-  // Enable relations to get joined data for template processing
-  const { data: rawRecords = [], isLoading } = useTableRecords(tableName, 20, true);
-  
-  // Type the records as any[] to handle dynamic table queries
-  const records: any[] = Array.isArray(rawRecords) ? rawRecords : [];
+  const { data: records = [], isLoading } = useTableRecords(tableName);
 
-  const getRecordDisplayName = (record: any) => {
-    // Try to find a meaningful display name
-    if (record.name) return record.name;
-    if (record.title) return record.title;
-    if (record.first_name && record.last_name) return `${record.first_name} ${record.last_name}`;
-    if (record.email) return record.email;
-    if (record.task_number) return record.task_number;
-    if (record.cadet_id) return record.cadet_id;
-    return record.id?.slice(0, 8) || 'Unknown';
-  };
-
-  const handleValueChange = (recordId: string) => {
-    const selectedRecord = records.find(record => record.id === recordId);
+  const handleRecordChange = (recordId: string) => {
+    const selectedRecord = records.find(r => r.id === recordId);
     if (selectedRecord) {
       onRecordSelect(recordId, selectedRecord);
     }
   };
 
+  const getRecordLabel = (record: any) => {
+    // Try common display fields
+    const displayFields = ['title', 'name', 'subject', 'item', 'description'];
+    for (const field of displayFields) {
+      if (record[field]) {
+        return record[field];
+      }
+    }
+    // Fallback to ID
+    return record.id.slice(0, 8);
+  };
+
   return (
     <div className="space-y-2">
       <Label>Select Record for Preview</Label>
-      <Select
-        value={selectedRecordId || ''}
-        onValueChange={handleValueChange}
-        disabled={isLoading || records.length === 0}
-      >
+      <Select value={selectedRecordId || ''} onValueChange={handleRecordChange}>
         <SelectTrigger>
-          <SelectValue 
-            placeholder={
-              isLoading 
-                ? 'Loading records...' 
-                : records.length === 0 
-                  ? 'No records found' 
-                  : 'Select a record'
-            } 
-          />
+          <SelectValue placeholder={isLoading ? "Loading records..." : "Select a record"} />
         </SelectTrigger>
         <SelectContent>
           {records.map((record) => (
             <SelectItem key={record.id} value={record.id}>
-              {getRecordDisplayName(record)}
+              {getRecordLabel(record)}
             </SelectItem>
           ))}
         </SelectContent>

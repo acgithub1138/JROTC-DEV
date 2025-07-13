@@ -1,12 +1,11 @@
-
 import React from 'react';
-import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Input } from '@/components/ui/input';
 
 interface SubjectFieldProps {
   value: string;
   onChange: (value: string) => void;
-  inputRef?: React.RefObject<HTMLInputElement>;
+  inputRef: React.RefObject<HTMLInputElement>;
 }
 
 export const SubjectField: React.FC<SubjectFieldProps> = ({
@@ -16,13 +15,13 @@ export const SubjectField: React.FC<SubjectFieldProps> = ({
 }) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="subject">Email Subject</Label>
+      <Label htmlFor="subject">Subject</Label>
       <Input
-        id="subject"
         ref={inputRef}
+        id="subject"
         value={value}
         onChange={(e) => onChange(e.target.value)}
-        placeholder="Enter email subject (use {{variable}} for dynamic content)"
+        placeholder="Enter email subject"
         required
       />
     </div>

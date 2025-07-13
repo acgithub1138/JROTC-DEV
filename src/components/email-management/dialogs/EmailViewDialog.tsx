@@ -84,12 +84,6 @@ export const EmailViewDialog: React.FC<EmailViewDialogProps> = ({
                     <div className="text-sm">{email.email_templates.name}</div>
                   </div>
                 )}
-                {email.email_rules?.name && (
-                  <div>
-                    <div className="text-sm font-medium text-gray-700">Rule:</div>
-                    <div className="text-sm">{email.email_rules.name}</div>
-                  </div>
-                )}
               </div>
               
               {email.error_message && (

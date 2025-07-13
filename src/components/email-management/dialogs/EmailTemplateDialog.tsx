@@ -164,8 +164,15 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
               <div className="space-y-2">
                 <VariablesPanel
-                  columns={columns}
-                  enhancedVariables={enhancedVariables}
+                  columns={columns.map(col => ({ 
+                    name: col.column_name, 
+                    label: col.display_label 
+                  }))}
+                  enhancedVariables={enhancedVariables.map(ev => ({ 
+                    name: ev.variable, 
+                    label: ev.label,
+                    description: 'Profile reference'
+                  }))}
                   onVariableInsert={insertVariableAtCursor}
                 />
               </div>

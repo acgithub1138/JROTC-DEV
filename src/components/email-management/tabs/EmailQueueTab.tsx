@@ -83,7 +83,7 @@ export const EmailQueueTab: React.FC = () => {
               <Mail className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No emails in queue</h3>
               <p className="text-muted-foreground">
-                Email queue is empty. Emails will appear here when triggered by rules.
+                Email queue is empty. Manually sent emails will appear here.
               </p>
             </div>
           ) : (
@@ -127,7 +127,7 @@ export const EmailQueueTab: React.FC = () => {
                         )}
                       </TableCell>
                       <TableCell className="text-sm py-2">
-                        {item.email_templates?.name || item.email_rules?.name || 'Manual'}
+                        {item.email_templates?.name || 'Manual'}
                       </TableCell>
                     </TableRow>
                   ))}

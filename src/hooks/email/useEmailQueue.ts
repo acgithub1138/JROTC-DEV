@@ -20,7 +20,6 @@ export interface EmailQueueItem {
   created_at: string;
   updated_at: string;
   email_templates?: { name: string; subject: string } | null;
-  email_rules?: { name: string } | null;
 }
 
 export const useEmailQueue = () => {
@@ -37,9 +36,6 @@ export const useEmailQueue = () => {
           email_templates:template_id (
             name,
             subject
-          ),
-          email_rules:rule_id (
-            name
           )
         `)
         .order('created_at', { ascending: false });

@@ -1,84 +1,80 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { VariableButton } from './VariableButton';
-import { ExpandableVariableButton } from './ExpandableVariableButton';
-import { TableColumn } from '@/hooks/email/useTableColumns';
-import { useRelatedTableFields } from '@/hooks/email/useRelatedTableFields';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
+import { Badge } from '@/components/ui/badge';
+import { ScrollArea } from '@/components/ui/scroll-area';
 
 interface VariablesPanelProps {
-  columns: TableColumn[];
-  enhancedVariables?: Array<{ variable: string; label: string; type: string }>;
+  columns: Array<{ name: string; label: string }>;
+  enhancedVariables: Array<{ name: string; label: string; description?: string }>;
   onVariableInsert: (variableName: string) => void;
 }
 
-const VariableWithRelatedFields: React.FC<{
-  column: TableColumn;
-  onVariableInsert: (variableName: string) => void;
-}> = ({ column, onVariableInsert }) => {
-  const { data: relatedFields = [] } = useRelatedTableFields(
-    column.column_name,
-    column.data_type === 'uuid'
-  );
-
-  if (column.data_type === 'uuid' && relatedFields.length > 0) {
-    return (
-      <ExpandableVariableButton
-        label={column.display_label}
-        variableName={column.column_name}
-        dataType={column.data_type}
-        relatedFields={relatedFields}
-        onClick={onVariableInsert}
-      />
-    );
-  }
-
-  return (
-    <VariableButton
-      label={column.display_label}
-      variableName={column.column_name}
-      dataType={column.data_type}
-      onClick={onVariableInsert}
-    />
-  );
-};
-
 export const VariablesPanel: React.FC<VariablesPanelProps> = ({
   columns,
-  enhancedVariables = [],
+  enhancedVariables,
   onVariableInsert,
 }) => {
   return (
-    <Card>
-      <CardHeader className="pb-2">
+    <Card className="w-full">
+      <CardHeader className="pb-3">
         <CardTitle className="text-sm">Available Variables</CardTitle>
-        <p className="text-xs text-gray-500">Click to insert at cursor position</p>
+        <p className="text-xs text-muted-foreground">
+          Click to insert into template
+        </p>
       </CardHeader>
-      <CardContent className="space-y-2 max-h-96 overflow-y-auto">
-        {columns.map((column) => (
-          <VariableWithRelatedFields
-            key={column.column_name}
-            column={column}
-            onVariableInsert={onVariableInsert}
-          />
-        ))}
-        
-        {enhancedVariables.length > 0 && (
-          <>
-            <div className="border-t pt-2 mt-2">
-              <p className="text-xs text-gray-500 mb-2">Enhanced Variables</p>
-            </div>
-            {enhancedVariables.map((variable) => (
-              <VariableButton
-                key={variable.variable}
-                label={variable.label}
-                variableName={variable.variable}
-                dataType="text"
-                onClick={onVariableInsert}
-              />
-            ))}
-          </>
-        )}
+      <CardContent className="space-y-4">
+        <ScrollArea className="h-96">
+          <div className="space-y-4">
+            {enhancedVariables.length > 0 && (
+              <div>
+                <h4 className="text-xs font-medium mb-2">Enhanced Variables</h4>
+                <div className="space-y-1">
+                  {enhancedVariables.map((variable) => (
+                    <Button
+                      key={variable.name}
+                      variant="outline"
+                      size="sm"
+                      className="w-full justify-start text-xs h-auto p-2"
+                      onClick={() => onVariableInsert(variable.name)}
+                    >
+                      <div className="text-left">
+                        <div className="font-medium">{variable.label}</div>
+                        {variable.description && (
+                          <div className="text-muted-foreground text-xs">
+                            {variable.description}
+                          </div>
+                        )}
+                      </div>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {columns.length > 0 && (
+              <div>
+                <h4 className="text-xs font-medium mb-2">Basic Fields</h4>
+                <div className="space-y-1">
+                  {columns.map((column) => (
+                    <Button
+                      key={column.name}
+                      variant="ghost"
+                      size="sm"
+                      className="w-full justify-start text-xs h-auto p-2"
+                      onClick={() => onVariableInsert(column.name)}
+                    >
+                      <Badge variant="secondary" className="mr-2 text-xs">
+                        {column.name}
+                      </Badge>
+                      <span className="truncate">{column.label}</span>
+                    </Button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </ScrollArea>
       </CardContent>
     </Card>
   );

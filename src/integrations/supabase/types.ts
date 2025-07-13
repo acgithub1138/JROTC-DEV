@@ -516,38 +516,6 @@ export type Database = {
           },
         ]
       }
-      email_logs: {
-        Row: {
-          created_at: string
-          event_data: Json | null
-          event_type: Database["public"]["Enums"]["email_log_event"]
-          id: string
-          queue_id: string
-        }
-        Insert: {
-          created_at?: string
-          event_data?: Json | null
-          event_type: Database["public"]["Enums"]["email_log_event"]
-          id?: string
-          queue_id: string
-        }
-        Update: {
-          created_at?: string
-          event_data?: Json | null
-          event_type?: Database["public"]["Enums"]["email_log_event"]
-          id?: string
-          queue_id?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_logs_queue_id_fkey"
-            columns: ["queue_id"]
-            isOneToOne: false
-            referencedRelation: "email_queue"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       email_queue: {
         Row: {
           body: string
@@ -602,13 +570,6 @@ export type Database = {
         }
         Relationships: [
           {
-            foreignKeyName: "email_queue_rule_id_fkey"
-            columns: ["rule_id"]
-            isOneToOne: false
-            referencedRelation: "email_rules"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "email_queue_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -617,73 +578,6 @@ export type Database = {
           },
           {
             foreignKeyName: "email_queue_template_id_fkey"
-            columns: ["template_id"]
-            isOneToOne: false
-            referencedRelation: "email_templates"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      email_rules: {
-        Row: {
-          created_at: string
-          created_by: string | null
-          id: string
-          is_active: boolean
-          name: string
-          recipient_config: Json
-          school_id: string
-          source_table: string
-          template_id: string
-          trigger_conditions: Json | null
-          trigger_event: Database["public"]["Enums"]["email_trigger_event"]
-          updated_at: string
-        }
-        Insert: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_active?: boolean
-          name: string
-          recipient_config: Json
-          school_id: string
-          source_table: string
-          template_id: string
-          trigger_conditions?: Json | null
-          trigger_event: Database["public"]["Enums"]["email_trigger_event"]
-          updated_at?: string
-        }
-        Update: {
-          created_at?: string
-          created_by?: string | null
-          id?: string
-          is_active?: boolean
-          name?: string
-          recipient_config?: Json
-          school_id?: string
-          source_table?: string
-          template_id?: string
-          trigger_conditions?: Json | null
-          trigger_event?: Database["public"]["Enums"]["email_trigger_event"]
-          updated_at?: string
-        }
-        Relationships: [
-          {
-            foreignKeyName: "email_rules_created_by_fkey"
-            columns: ["created_by"]
-            isOneToOne: false
-            referencedRelation: "profiles"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_rules_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "email_rules_template_id_fkey"
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "email_templates"

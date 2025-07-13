@@ -1,8 +1,6 @@
-
 import React from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Separator } from '@/components/ui/separator';
-import { useEmailPreview } from '@/hooks/email/useEmailPreview';
+import { Card, CardHeader, CardTitle, CardContent } from '@/components/ui/card';
+import { processTemplate } from '@/utils/templateProcessor';
 
 interface PreviewContentProps {
   subject: string;
@@ -15,83 +13,43 @@ export const PreviewContent: React.FC<PreviewContentProps> = ({
   body,
   recordData,
 }) => {
-  const { data: previewData, isLoading, error } = useEmailPreview(subject, body, recordData);
-
-  if (isLoading) {
+  if (!recordData) {
     return (
       <Card>
         <CardContent className="p-6">
-          <div className="text-center text-gray-500">Loading preview...</div>
-        </CardContent>
-      </Card>
-    );
-  }
-
-  if (error) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-red-500">
-            Error generating preview: {error.message}
+          <div className="text-center text-muted-foreground">
+            Select a record to preview the email content
           </div>
         </CardContent>
       </Card>
     );
   }
 
-  if (!previewData) {
-    return (
-      <Card>
-        <CardContent className="p-6">
-          <div className="text-center text-gray-500">
-            Select a record to see the email preview
-          </div>
-        </CardContent>
-      </Card>
-    );
-  }
+  const processedSubject = processTemplate(subject, recordData);
+  const processedBody = processTemplate(body, recordData);
 
   return (
     <Card>
       <CardHeader>
-        <CardTitle className="text-lg">Email Preview</CardTitle>
+        <CardTitle>Email Preview</CardTitle>
       </CardHeader>
       <CardContent className="space-y-4">
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">Subject:</div>
-          <div className="p-3 bg-gray-50 rounded border text-sm">
-            {previewData.processedSubject || '(No subject)'}
+          <strong>Subject:</strong>
+          <div className="mt-1 p-2 bg-muted rounded border">
+            {processedSubject}
           </div>
         </div>
-        
-        <Separator />
         
         <div>
-          <div className="text-sm font-medium text-gray-700 mb-1">Body:</div>
-          <div className="p-3 bg-gray-50 rounded border text-sm min-h-[200px]">
-            {previewData.processedBody ? (
-              <div 
-                dangerouslySetInnerHTML={{ 
-                  __html: previewData.processedBody 
-                }}
-                className="prose prose-sm max-w-none"
-              />
-            ) : (
-              '(No body content)'
-            )}
+          <strong>Body:</strong>
+          <div className="mt-1 p-4 bg-muted rounded border">
+            <div 
+              dangerouslySetInnerHTML={{ __html: processedBody }}
+              className="prose prose-sm max-w-none"
+            />
           </div>
         </div>
-
-        {/* Show unresolved variables if any */}
-        {(previewData.processedSubject?.includes('{{') || previewData.processedBody?.includes('{{')) && (
-          <div className="mt-4 p-3 bg-yellow-50 border border-yellow-200 rounded">
-            <div className="text-sm font-medium text-yellow-800 mb-1">⚠️ Unresolved Variables</div>
-            <div className="text-xs text-yellow-700">
-              Some variables in your template could not be resolved with the selected record data.
-              Please check your variable names and ensure they match available fields.
-            </div>
-          </div>
-        )}
       </CardContent>
     </Card>
   );

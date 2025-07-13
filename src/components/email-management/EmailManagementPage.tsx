@@ -2,11 +2,9 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Settings, Clock, BarChart3 } from 'lucide-react';
+import { Mail, Clock } from 'lucide-react';
 import { EmailTemplatesTab } from './tabs/EmailTemplatesTab';
-import { EmailRulesTab } from './tabs/EmailRulesTab';
 import { EmailQueueTab } from './tabs/EmailQueueTab';
-import { EmailLogsTab } from './tabs/EmailLogsTab';
 
 const EmailManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('templates');
@@ -19,22 +17,14 @@ const EmailManagementPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-4">
+        <TabsList className="grid w-full grid-cols-2">
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Mail className="w-4 h-4" />
             Templates
           </TabsTrigger>
-          <TabsTrigger value="rules" className="flex items-center gap-2">
-            <Settings className="w-4 h-4" />
-            Rules
-          </TabsTrigger>
           <TabsTrigger value="queue" className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
             Queue
-          </TabsTrigger>
-          <TabsTrigger value="logs" className="flex items-center gap-2">
-            <BarChart3 className="w-4 h-4" />
-            Logs
           </TabsTrigger>
         </TabsList>
 
@@ -42,16 +32,8 @@ const EmailManagementPage: React.FC = () => {
           <EmailTemplatesTab />
         </TabsContent>
 
-        <TabsContent value="rules" className="space-y-4">
-          <EmailRulesTab />
-        </TabsContent>
-
         <TabsContent value="queue" className="space-y-4">
           <EmailQueueTab />
-        </TabsContent>
-
-        <TabsContent value="logs" className="space-y-4">
-          <EmailLogsTab />
         </TabsContent>
       </Tabs>
     </div>
