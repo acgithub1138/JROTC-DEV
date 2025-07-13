@@ -37,15 +37,39 @@ export const EmailQueueTab: React.FC = () => {
   const handleManualProcess = async () => {
     setIsProcessing(true);
     try {
-      console.log('Manually triggering email processing...');
-      const { data, error } = await supabase.functions.invoke('manual-process-emails');
+      console.log('Manually triggering webhook-based email processing...');
       
-      if (error) {
-        console.error('Error processing emails:', error);
-        throw error;
+      // Get pending emails and trigger webhook for each
+      const { data: pendingEmails, error: fetchError } = await supabase
+        .from('email_queue')
+        .select('id')
+        .eq('status', 'pending')
+        .lte('scheduled_at', new Date().toISOString());
+
+      if (fetchError) {
+        throw fetchError;
       }
+
+      if (!pendingEmails || pendingEmails.length === 0) {
+        console.log('No pending emails to process');
+        queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+        return;
+      }
+
+      // Process each email via webhook
+      const results = await Promise.allSettled(
+        pendingEmails.map(email => 
+          supabase.functions.invoke('email-queue-webhook', {
+            body: { email_id: email.id }
+          })
+        )
+      );
+
+      const processed = results.filter(r => r.status === 'fulfilled').length;
+      const failed = results.filter(r => r.status === 'rejected').length;
+
+      console.log(`Manual processing result: ${processed} processed, ${failed} failed`);
       
-      console.log('Manual processing result:', data);
       // Refresh the queue after processing
       queryClient.invalidateQueries({ queryKey: ['email-queue'] });
     } catch (error) {
