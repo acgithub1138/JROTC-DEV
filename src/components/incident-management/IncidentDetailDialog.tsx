@@ -158,6 +158,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       if (editData.status !== currentIncident.status) {
         updateData.status = editData.status;
         changes.push({ field: 'status', oldValue: currentIncident.status, newValue: editData.status });
+        
+        // Auto-set completed_at when status changes to "resolved"
+        if (editData.status === 'resolved' && !currentIncident.completed_at) {
+          updateData.completed_at = new Date().toISOString();
+        }
       }
       
       if (editData.priority !== currentIncident.priority) {
