@@ -108,10 +108,11 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
       category: 'Category',
       priority: 'Priority',
       status: 'Status',
-      submitted_by: 'Submitted By',
+      created_by: 'Submitted By',
+      assigned_to_admin: 'Assigned To',
       assigned_to: 'Assigned To',
-      active: 'Active',
-      resolved_at: 'Resolved At',
+      due_date: 'Due Date',
+      completed_at: 'Completed At',
       school_id: 'School',
       created_at: 'Created Date',
       updated_at: 'Updated Date'
@@ -127,7 +128,7 @@ export const getProfileReferenceFields = (tableName: string): string[] => {
     cadets: ['profile_id'],
     teams: ['team_lead_id'],
     expenses: ['created_by', 'approved_by'],
-    incidents: ['submitted_by', 'assigned_to']
+    incidents: ['created_by', 'assigned_to']
   };
 
   return profileFields[tableName] || [];
@@ -136,8 +137,19 @@ export const getProfileReferenceFields = (tableName: string): string[] => {
 export const getEnhancedVariables = (tableName: string): Array<{ variable: string; label: string }> => {
   const profileFields = getProfileReferenceFields(tableName);
   
-  return profileFields.map(field => ({
+  const profileVariables = profileFields.map(field => ({
     variable: `${field}_name`,
     label: `${getColumnLabel(field, tableName)} Name`
   }));
+
+  // Add comments variable for tasks and incidents
+  const commentsVariables = [];
+  if (tableName === 'tasks' || tableName === 'incidents') {
+    commentsVariables.push({
+      variable: 'last_comment',
+      label: 'Last User Comment'
+    });
+  }
+
+  return [...profileVariables, ...commentsVariables];
 };

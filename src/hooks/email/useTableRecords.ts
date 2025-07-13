@@ -74,8 +74,32 @@ export const useTableRecords = (tableName: string, limit: number = 20, includeRe
 
       if (error) throw error;
       
+      // Process records and add last user comment for tasks and incidents
+      const processedRecords = await Promise.all((data || []).map(async (record: any) => {
+        if (tableName === 'tasks' || tableName === 'incidents') {
+          try {
+            const commentTable = tableName === 'tasks' ? 'task_comments' : 'incident_comments';
+            const foreignKey = tableName === 'tasks' ? 'task_id' : 'incident_id';
+            
+            const { data: commentData } = await supabase
+              .from(commentTable as any)
+              .select('comment_text')
+              .eq(foreignKey, record.id)
+              .eq('is_system_comment', false)
+              .order('created_at', { ascending: false })
+              .limit(1)
+              .maybeSingle();
+              
+            record.last_comment = (commentData as any)?.comment_text || 'No comments yet';
+          } catch (commentError) {
+            record.last_comment = 'No comments yet';
+          }
+        }
+        return record;
+      }));
+      
       // Flatten the related data for easier template processing
-      const processedData = (data || []).map((record: any) => {
+      const processedData = processedRecords.map((record: any) => {
         const flattened: any = { ...record };
         
         // Flatten profile relations
