@@ -2166,6 +2166,36 @@ export type Database = {
           },
         ]
       }
+      webhook_trigger_log: {
+        Row: {
+          email_id: string
+          error_message: string | null
+          id: string
+          request_id: string | null
+          response_status: number | null
+          status: string
+          trigger_fired_at: string | null
+        }
+        Insert: {
+          email_id: string
+          error_message?: string | null
+          id?: string
+          request_id?: string | null
+          response_status?: number | null
+          status: string
+          trigger_fired_at?: string | null
+        }
+        Update: {
+          email_id?: string
+          error_message?: string | null
+          id?: string
+          request_id?: string | null
+          response_status?: number | null
+          status?: string
+          trigger_fired_at?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
