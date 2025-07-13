@@ -85,9 +85,12 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
         <TableBody>
           {incidents.map(incident => <TableRow key={incident.id}>
               <TableCell className="text-center py-[8px]">
-                <span className="font-bold text-foreground">
+                <button 
+                  onClick={() => onIncidentSelect(incident)} 
+                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
+                >
                   {incident.incident_number}
-                </span>
+                </button>
               </TableCell>
               <TableCell>{incident.title}</TableCell>
               <TableCell>

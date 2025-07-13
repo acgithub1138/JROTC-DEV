@@ -9,7 +9,6 @@ import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
-import IncidentDetailDialog_Readonly from "./IncidentDetailDialog_Readonly";
 import { AccessDeniedDialog } from "./AccessDeniedDialog";
 import IncidentTable from "./IncidentTable";
 import type { Incident } from "@/hooks/incidents/types";
@@ -20,11 +19,9 @@ const IncidentManagementPage: React.FC = () => {
   const isAdmin = userProfile?.role === 'admin';
   
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
-  const [editingIncident, setEditingIncident] = useState<Incident | null>(null);
-  const [showDetailDialog, setShowDetailDialog] = useState(false);
-  const [showReadonlyDialog, setShowReadonlyDialog] = useState(false);
-  const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showEditDialog, setShowEditDialog] = useState(false);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
 
@@ -80,26 +77,13 @@ const IncidentManagementPage: React.FC = () => {
   }, [currentIncidents, searchValue]);
 
   const handleIncidentSelect = (incident: Incident) => {
-    setSelectedIncident(incident);
-    setShowReadonlyDialog(true);
-  };
-
-  const handleIncidentSelectForEdit = (incident: Incident) => {
-    const isAssignedToIncident = incident.assigned_to_admin === userProfile?.id;
-    const canEdit = canUpdate || (canUpdateAssigned && isAssignedToIncident);
-    
-    if (!canEdit) {
+    // Check if user has update permissions
+    if (canUpdate || canUpdateAssigned) {
+      setSelectedIncident(incident);
+      setShowEditDialog(true);
+    } else {
       setShowAccessDenied(true);
-      return;
     }
-    
-    setSelectedIncident(incident);
-    setShowDetailDialog(true);
-  };
-
-  const handleEditIncident = (incident: Incident) => {
-    setEditingIncident(incident);
-    setShowDetailDialog(false);
   };
 
   const handleCreateIncident = () => {
@@ -108,10 +92,6 @@ const IncidentManagementPage: React.FC = () => {
 
   const handleCloseCreateForm = () => {
     setShowCreateForm(false);
-  };
-
-  const handleCloseEditForm = () => {
-    setEditingIncident(null);
   };
 
   const handleDeleteIncident = (incident: Incident) => {
@@ -167,8 +147,6 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
-                  onIncidentEdit={handleEditIncident}
-                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -189,8 +167,6 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
-                  onIncidentEdit={handleEditIncident}
-                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -211,8 +187,6 @@ const IncidentManagementPage: React.FC = () => {
                 <IncidentTable 
                   incidents={filteredIncidents} 
                   onIncidentSelect={handleIncidentSelect}
-                  onIncidentEdit={handleEditIncident}
-                  onIncidentSelectForEdit={handleIncidentSelectForEdit}
                   onIncidentDelete={handleDeleteIncident}
                 />
               )}
@@ -233,8 +207,6 @@ const IncidentManagementPage: React.FC = () => {
             <IncidentTable 
               incidents={filteredIncidents} 
               onIncidentSelect={handleIncidentSelect}
-              onIncidentEdit={handleEditIncident}
-              onIncidentSelectForEdit={handleIncidentSelectForEdit}
               onIncidentDelete={handleDeleteIncident}
             />
           )}
@@ -248,7 +220,17 @@ const IncidentManagementPage: React.FC = () => {
         />
       )}
 
-
+      {selectedIncident && showEditDialog && (
+        <IncidentDetailDialog
+          incident={selectedIncident}
+          isOpen={showEditDialog}
+          onClose={() => {
+            setShowEditDialog(false);
+            setSelectedIncident(null);
+          }}
+          onEdit={() => {}} // Not needed since the dialog handles updates internally
+        />
+      )}
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
