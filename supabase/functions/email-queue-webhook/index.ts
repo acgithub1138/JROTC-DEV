@@ -181,17 +181,28 @@ class EmailProcessor {
 
 serve(async (req) => {
   console.log('🚀 Email Queue Webhook function started');
+  console.log('Timestamp:', new Date().toISOString());
   console.log('Method:', req.method);
   console.log('URL:', req.url);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
+    console.log('✅ Handling CORS preflight request');
     return new Response(null, { headers: corsHeaders });
   }
 
   // Validate environment variables
   const supabaseUrl = Deno.env.get('SUPABASE_URL');
   const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const resendApiKey = Deno.env.get('RESEND_API_KEY');
+  
+  console.log('🔍 Environment check:', {
+    hasSupabaseUrl: !!supabaseUrl,
+    hasServiceRoleKey: !!serviceRoleKey,
+    hasResendApiKey: !!resendApiKey,
+    supabaseUrl: supabaseUrl?.substring(0, 30) + '...' || 'missing'
+  });
   
   if (!supabaseUrl || !serviceRoleKey) {
     console.error('❌ Missing required environment variables');
@@ -208,9 +219,29 @@ serve(async (req) => {
   }
 
   try {
-    const { email_id } = await req.json();
+    console.log('📥 Parsing request body...');
+    const body = await req.text();
+    console.log('Raw body:', body);
+    
+    let parsedBody;
+    try {
+      parsedBody = JSON.parse(body);
+      console.log('✅ Parsed body:', parsedBody);
+    } catch (parseError) {
+      console.error('❌ JSON parse error:', parseError);
+      return new Response(
+        JSON.stringify({ success: false, error: 'Invalid JSON in request body' }),
+        {
+          status: 400,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        }
+      );
+    }
+    
+    const { email_id } = parsedBody;
     
     if (!email_id) {
+      console.error('❌ Missing email_id in request');
       return new Response(
         JSON.stringify({ success: false, error: 'email_id is required' }),
         {
@@ -220,8 +251,16 @@ serve(async (req) => {
       );
     }
 
+    console.log(`📧 Processing email ID: ${email_id}`);
+    console.log('🏭 Creating EmailProcessor...');
+    
     const processor = new EmailProcessor();
+    console.log('✅ EmailProcessor created successfully');
+    
+    console.log('⚡ Starting email processing...');
     const result = await processor.processEmail(email_id);
+    
+    console.log('✅ Email processing completed:', result);
 
     return new Response(JSON.stringify(result), {
       status: result.success ? 200 : 500,
@@ -232,12 +271,17 @@ serve(async (req) => {
     });
 
   } catch (error) {
-    console.error('Error in email-queue-webhook function:', error);
+    console.error('💥 Critical error in email-queue-webhook function:', error);
+    console.error('Error name:', error.name);
+    console.error('Error message:', error.message);
+    console.error('Error stack:', error.stack);
     
     return new Response(
       JSON.stringify({
         success: false,
-        error: error.message || 'Unknown error occurred'
+        error: error.message || 'Unknown error occurred',
+        errorName: error.name,
+        timestamp: new Date().toISOString()
       }),
       {
         status: 500,

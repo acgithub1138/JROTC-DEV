@@ -37,7 +37,7 @@ export const EmailQueueTab: React.FC = () => {
   const handleManualProcess = async () => {
     setIsProcessing(true);
     try {
-      console.log('Manually triggering webhook-based email processing...');
+      console.log('🔄 Manually triggering webhook-based email processing...');
       
       // Get pending emails and trigger webhook for each
       const { data: pendingEmails, error: fetchError } = await supabase
@@ -47,33 +47,82 @@ export const EmailQueueTab: React.FC = () => {
         .lte('scheduled_at', new Date().toISOString());
 
       if (fetchError) {
+        console.error('❌ Error fetching pending emails:', fetchError);
         throw fetchError;
       }
 
       if (!pendingEmails || pendingEmails.length === 0) {
-        console.log('No pending emails to process');
+        console.log('ℹ️ No pending emails to process');
         queryClient.invalidateQueries({ queryKey: ['email-queue'] });
         return;
       }
 
-      // Process each email via webhook
-      const results = await Promise.allSettled(
-        pendingEmails.map(email => 
-          supabase.functions.invoke('email-queue-webhook', {
+      console.log(`📧 Found ${pendingEmails.length} pending emails to process`);
+
+      // Process each email individually with better error tracking
+      let processed = 0;
+      let failed = 0;
+      const errors: Array<{ emailId: string; error: any }> = [];
+
+      for (const email of pendingEmails) {
+        try {
+          console.log(`📤 Processing email ID: ${email.id}`);
+          
+          const { data, error } = await supabase.functions.invoke('email-queue-webhook', {
             body: { email_id: email.id }
-          })
-        )
-      );
+          });
 
-      const processed = results.filter(r => r.status === 'fulfilled').length;
-      const failed = results.filter(r => r.status === 'rejected').length;
+          if (error) {
+            console.error(`❌ Function error for email ${email.id}:`, error);
+            errors.push({ emailId: email.id, error });
+            failed++;
+          } else {
+            console.log(`✅ Successfully processed email ${email.id}:`, data);
+            processed++;
+          }
+        } catch (networkError) {
+          console.error(`🌐 Network error for email ${email.id}:`, networkError);
+          console.error('Network error details:', {
+            name: networkError.name,
+            message: networkError.message,
+            stack: networkError.stack
+          });
+          errors.push({ emailId: email.id, error: networkError });
+          failed++;
+        }
 
-      console.log(`Manual processing result: ${processed} processed, ${failed} failed`);
+        // Small delay between requests
+        await new Promise(resolve => setTimeout(resolve, 200));
+      }
+
+      // Log detailed results
+      console.log(`📊 Manual processing complete: ${processed} processed, ${failed} failed`);
+      
+      if (errors.length > 0) {
+        console.error('❌ Detailed error summary:');
+        errors.forEach(({ emailId, error }) => {
+          console.error(`  - Email ${emailId}:`, error);
+        });
+      }
       
       // Refresh the queue after processing
       queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+
+      // Show user-friendly result
+      if (processed > 0) {
+        console.log(`✅ Success: ${processed} emails processed`);
+      }
+      if (failed > 0) {
+        console.error(`❌ Failed: ${failed} emails failed to process`);
+      }
+
     } catch (error) {
-      console.error('Failed to process emails:', error);
+      console.error('💥 Critical error in manual processing:', error);
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
     } finally {
       setIsProcessing(false);
     }
