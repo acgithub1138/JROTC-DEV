@@ -24,6 +24,9 @@ import { useIncidentStatusOptions, useIncidentPriorityOptions, useIncidentCatego
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useSchoolUsers } from "@/hooks/useSchoolUsers";
 import { useAuth } from "@/contexts/AuthContext";
+import { useEmailTemplates } from "@/hooks/email/useEmailTemplates";
+import { Checkbox } from "@/components/ui/checkbox";
+import { supabase } from "@/integrations/supabase/client";
 import type { Incident } from "@/hooks/incidents/types";
 
 interface IncidentDetailDialogProps {
@@ -105,6 +108,14 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     assigned_to_admin: incident.assigned_to_admin || 'unassigned',
     due_date: incident.due_date ? new Date(incident.due_date) : null,
   });
+  
+  // Email notification state
+  const [sendNotification, setSendNotification] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const { templates } = useEmailTemplates();
+  
+  // Filter templates for incidents table
+  const incidentTemplates = templates.filter(template => template.source_table === 'incidents' && template.is_active);
 
   // Determine if user can edit this incident
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
@@ -193,6 +204,29 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         addSystemComment.mutate(commentText);
       }
       
+      // Send notification email if requested
+      if (sendNotification && selectedTemplate && currentIncident.created_by) {
+        const template = templates.find(t => t.id === selectedTemplate);
+        if (template) {
+          const createdByUser = users.find(u => u.id === currentIncident.created_by);
+          if (createdByUser?.email) {
+            await supabase
+              .from('email_queue')
+              .insert({
+                recipient_email: createdByUser.email,
+                subject: template.subject,
+                body: template.body,
+                template_id: template.id,
+                record_id: currentIncident.id,
+                source_table: 'incidents',
+                school_id: userProfile?.school_id,
+                scheduled_at: new Date().toISOString(),
+                status: 'pending'
+              });
+          }
+        }
+      }
+      
       // Close the modal after successful save
       onClose();
     } catch (error) {
@@ -240,20 +274,20 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
-            <DialogTitle className="text-xl">
+            <DialogTitle className="text-xl flex items-center">
               {currentIncident.incident_number && (
-                <span className="text-blue-600 font-mono mr-2">
-                  {currentIncident.incident_number} -
+                <span className="text-blue-600 font-mono text-xl mr-2">
+                  {currentIncident.incident_number}
                 </span>
               )}
               {isEditing && canEditIncident ? (
                 <Input
                   value={editData.title}
                   onChange={(e) => setEditData({...editData, title: e.target.value})}
-                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
+                  className="text-xl font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
                 />
               ) : (
-                <span className="text-lg font-semibold">{currentIncident.title}</span>
+                <span className="text-xl font-semibold">{currentIncident.title}</span>
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
@@ -469,6 +503,47 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               </p>
             )}
           </div>
+
+          {/* Send Notification Section - Only show in edit mode */}
+          {isEditing && canEditIncident && incidentTemplates.length > 0 && (
+            <Card>
+              <CardHeader className="pb-3">
+                <CardTitle className="text-sm font-medium">Send Notification</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-3">
+                <div className="flex items-center space-x-2">
+                  <Checkbox 
+                    id="send-notification" 
+                    checked={sendNotification}
+                    onCheckedChange={(checked) => {
+                      setSendNotification(checked as boolean);
+                      if (!checked) setSelectedTemplate('');
+                    }}
+                  />
+                  <label 
+                    htmlFor="send-notification"
+                    className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                  >
+                    Send Notification
+                  </label>
+                </div>
+                {sendNotification && (
+                  <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                    <SelectTrigger className="w-full">
+                      <SelectValue placeholder="Select email template" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {incidentTemplates.map((template) => (
+                        <SelectItem key={template.id} value={template.id}>
+                          {template.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              </CardContent>
+            </Card>
+          )}
 
           <Separator />
 
