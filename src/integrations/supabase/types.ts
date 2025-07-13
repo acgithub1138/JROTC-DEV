@@ -1728,62 +1728,6 @@ export type Database = {
         }
         Relationships: []
       }
-      smtp_settings: {
-        Row: {
-          created_at: string
-          from_email: string
-          from_name: string
-          id: string
-          is_active: boolean
-          is_global: boolean
-          school_id: string | null
-          smtp_host: string
-          smtp_password: string
-          smtp_port: number
-          smtp_username: string
-          updated_at: string
-          use_tls: boolean
-        }
-        Insert: {
-          created_at?: string
-          from_email: string
-          from_name?: string
-          id?: string
-          is_active?: boolean
-          is_global?: boolean
-          school_id?: string | null
-          smtp_host: string
-          smtp_password: string
-          smtp_port?: number
-          smtp_username: string
-          updated_at?: string
-          use_tls?: boolean
-        }
-        Update: {
-          created_at?: string
-          from_email?: string
-          from_name?: string
-          id?: string
-          is_active?: boolean
-          is_global?: boolean
-          school_id?: string | null
-          smtp_host?: string
-          smtp_password?: string
-          smtp_port?: number
-          smtp_username?: string
-          updated_at?: string
-          use_tls?: boolean
-        }
-        Relationships: [
-          {
-            foreignKeyName: "smtp_settings_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
       subtask_comments: {
         Row: {
           comment_text: string
