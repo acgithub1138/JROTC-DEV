@@ -140,174 +140,228 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     });
   }, [incident, incidents]);
 
+  const hasChanges = () => {
+    return editData.title !== currentIncident.title ||
+           editData.description !== (currentIncident.description || '') ||
+           editData.status !== currentIncident.status ||
+           editData.priority !== currentIncident.priority ||
+           editData.category !== currentIncident.category ||
+           (editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin) !== currentIncident.assigned_to_admin ||
+           (editData.due_date?.getTime() !== (currentIncident.due_date ? new Date(currentIncident.due_date).getTime() : null));
+  };
+
+  const sendNotificationEmail = async () => {
+    if (!sendNotification || !selectedTemplate || !currentIncident.created_by) {
+      return;
+    }
+
+    try {
+      const template = templates.find(t => t.id === selectedTemplate);
+      if (!template) {
+        toast({
+          title: "Error",
+          description: "Selected email template not found.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const createdByUser = users.find(u => u.id === currentIncident.created_by);
+      if (!createdByUser?.email) {
+        toast({
+          title: "Error", 
+          description: "No email address found for the incident creator.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      const assignedAdmin = currentIncident.assigned_to_admin ? 
+        users.find(u => u.id === currentIncident.assigned_to_admin) : null;
+      
+      // Prepare incident data with flattened profile information for template processing
+      const incidentData = {
+        ...currentIncident,
+        // Add flattened created_by profile data (also as submitted_by for template compatibility)
+        'created_by.id': createdByUser.id,
+        'created_by.first_name': createdByUser.first_name,
+        'created_by.last_name': createdByUser.last_name,
+        'created_by.email': createdByUser.email,
+        'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
+        'submitted_by.id': createdByUser.id,
+        'submitted_by.first_name': createdByUser.first_name,
+        'submitted_by.last_name': createdByUser.last_name,
+        'submitted_by.email': createdByUser.email,
+        'submitted_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
+        // Add flattened assigned_to_admin profile data (also as assigned_to for template compatibility)
+        ...(assignedAdmin && {
+          'assigned_to_admin.id': assignedAdmin.id,
+          'assigned_to_admin.first_name': assignedAdmin.first_name,
+          'assigned_to_admin.last_name': assignedAdmin.last_name,
+          'assigned_to_admin.email': assignedAdmin.email,
+          'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
+          'assigned_to.id': assignedAdmin.id,
+          'assigned_to.first_name': assignedAdmin.first_name,
+          'assigned_to.last_name': assignedAdmin.last_name,
+          'assigned_to.email': assignedAdmin.email,
+          'assigned_to.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
+        })
+      };
+
+      // Process template variables
+      const processedSubject = processTemplate(template.subject, incidentData);
+      const processedBody = processTemplate(template.body, incidentData);
+
+      const { error } = await supabase
+        .from('email_queue')
+        .insert({
+          recipient_email: createdByUser.email,
+          subject: processedSubject,
+          body: processedBody,
+          template_id: template.id,
+          record_id: currentIncident.id,
+          source_table: 'incidents',
+          school_id: currentIncident.school_id,
+          scheduled_at: new Date().toISOString(),
+          status: 'pending'
+        });
+
+      if (error) {
+        console.error('Error queuing notification email:', error);
+        toast({
+          title: "Error",
+          description: "Failed to queue notification email.",
+          variant: "destructive",
+        });
+        throw error;
+      } else {
+        // Add system comment about the queued email
+        addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template.name}"`);
+        toast({
+          title: "Success",
+          description: `Notification sent to ${createdByUser.email}`,
+        });
+      }
+    } catch (emailError) {
+      console.error('Error sending notification:', emailError);
+      toast({
+        title: "Error",
+        description: "Failed to send notification email.",
+        variant: "destructive",
+      });
+      throw emailError;
+    }
+  };
+
   const handleSave = async () => {
     try {
-      const updateData: any = {};
-      const trackedFields = ['title', 'status', 'priority', 'assigned_to_admin', 'due_date', 'description'];
-      
-      // Track changes for system comments
-      const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
-      
-      if (editData.title !== currentIncident.title) {
-        updateData.title = editData.title;
-        changes.push({ field: 'title', oldValue: currentIncident.title, newValue: editData.title });
+      // Validate notification requirements
+      if (sendNotification && !selectedTemplate) {
+        toast({
+          title: "Error",
+          description: "Please select an email template to send notification.",
+          variant: "destructive",
+        });
+        return;
       }
+
+      const changesExist = hasChanges();
       
-      if (editData.description !== (currentIncident.description || '')) {
-        updateData.description = editData.description || null;
-        changes.push({ field: 'description', oldValue: currentIncident.description || '', newValue: editData.description || '' });
+      // If no changes and no notification, just close the modal
+      if (!changesExist && !sendNotification) {
+        onClose();
+        return;
       }
-      
-      if (editData.status !== currentIncident.status) {
-        updateData.status = editData.status;
-        changes.push({ field: 'status', oldValue: currentIncident.status, newValue: editData.status });
+
+      // Update incident if there are changes
+      if (changesExist) {
+        const updateData: any = {};
+        const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
         
-        // Auto-set completed_at when status changes to "resolved"
-        if (editData.status === 'resolved' && !currentIncident.completed_at) {
-          updateData.completed_at = new Date().toISOString();
+        if (editData.title !== currentIncident.title) {
+          updateData.title = editData.title;
+          changes.push({ field: 'title', oldValue: currentIncident.title, newValue: editData.title });
         }
         
-        // Clear completed_at when status changes from resolved/canceled to another status
-        if ((currentIncident.status === 'resolved' || currentIncident.status === 'canceled') && 
-            editData.status !== 'resolved' && editData.status !== 'canceled') {
-          updateData.completed_at = null;
+        if (editData.description !== (currentIncident.description || '')) {
+          updateData.description = editData.description || null;
+          changes.push({ field: 'description', oldValue: currentIncident.description || '', newValue: editData.description || '' });
         }
-      }
-      
-      if (editData.priority !== currentIncident.priority) {
-        updateData.priority = editData.priority;
-        changes.push({ field: 'priority', oldValue: currentIncident.priority, newValue: editData.priority });
-      }
-      
-      if (editData.category !== currentIncident.category) {
-        updateData.category = editData.category;
-        changes.push({ field: 'category', oldValue: currentIncident.category, newValue: editData.category });
-      }
-      
-      const newAssignedTo = editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin;
-      if (newAssignedTo !== currentIncident.assigned_to_admin) {
-        updateData.assigned_to_admin = newAssignedTo;
-        changes.push({ field: 'assigned_to_admin', oldValue: currentIncident.assigned_to_admin, newValue: newAssignedTo });
-      }
-      
-      const oldDueDate = currentIncident.due_date ? new Date(currentIncident.due_date) : null;
-      const newDueDate = editData.due_date;
-      const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
-                                   (!oldDueDate && newDueDate) ||
-                                   (oldDueDate && !newDueDate);
-      
-      if (dueDatesAreDifferent) {
-        updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
-        changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
-      }
-
-      // Update the incident
-      await updateIncident.mutateAsync({ id: currentIncident.id, data: updateData });
-      
-      // Add system comments for tracked changes
-      for (const change of changes) {
-        const commentText = formatIncidentFieldChangeComment(
-          change.field,
-          change.oldValue,
-          change.newValue,
-          statusOptions,
-          priorityOptions,
-          categoryOptions,
-          users
-        );
-        addSystemComment.mutate(commentText);
-      }
-      
-      // Send notification email if requested - moved after successful update
-      if (sendNotification && selectedTemplate && currentIncident.created_by) {
-        try {
-          const template = templates.find(t => t.id === selectedTemplate);
-          if (template) {
-            const createdByUser = users.find(u => u.id === currentIncident.created_by);
-            const assignedAdmin = currentIncident.assigned_to_admin ? 
-              users.find(u => u.id === currentIncident.assigned_to_admin) : null;
-            
-            if (createdByUser?.email) {
-              // Prepare incident data with flattened profile information for template processing
-              const incidentData = {
-                ...currentIncident,
-                // Merge any updates from the form
-                ...updateData,
-                // Add flattened created_by profile data (also as submitted_by for template compatibility)
-                'created_by.id': createdByUser.id,
-                'created_by.first_name': createdByUser.first_name,
-                'created_by.last_name': createdByUser.last_name,
-                'created_by.email': createdByUser.email,
-                'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-                'submitted_by.id': createdByUser.id,
-                'submitted_by.first_name': createdByUser.first_name,
-                'submitted_by.last_name': createdByUser.last_name,
-                'submitted_by.email': createdByUser.email,
-                'submitted_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-                // Add flattened assigned_to_admin profile data (also as assigned_to for template compatibility)
-                ...(assignedAdmin && {
-                  'assigned_to_admin.id': assignedAdmin.id,
-                  'assigned_to_admin.first_name': assignedAdmin.first_name,
-                  'assigned_to_admin.last_name': assignedAdmin.last_name,
-                  'assigned_to_admin.email': assignedAdmin.email,
-                  'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
-                  'assigned_to.id': assignedAdmin.id,
-                  'assigned_to.first_name': assignedAdmin.first_name,
-                  'assigned_to.last_name': assignedAdmin.last_name,
-                  'assigned_to.email': assignedAdmin.email,
-                  'assigned_to.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
-                })
-              };
-
-              // Process template variables
-              const processedSubject = processTemplate(template.subject, incidentData);
-              const processedBody = processTemplate(template.body, incidentData);
-
-              const { error } = await supabase
-                .from('email_queue')
-                .insert({
-                  recipient_email: createdByUser.email,
-                  subject: processedSubject,
-                  body: processedBody,
-                  template_id: template.id,
-                  record_id: currentIncident.id,
-                  source_table: 'incidents',
-                  school_id: currentIncident.school_id, // Use incident's school_id instead of user's
-                  scheduled_at: new Date().toISOString(),
-                  status: 'pending'
-                });
-
-              if (error) {
-                console.error('Error queuing notification email:', error);
-                toast({
-                  title: "Warning",
-                  description: "Incident was updated but notification email failed to queue.",
-                  variant: "destructive",
-                });
-              } else {
-                // Add system comment about the queued email
-                addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template.name}"`);
-                toast({
-                  title: "Success",
-                  description: `Incident updated and notification sent to ${createdByUser.email}`,
-                });
-              }
-            }
+        
+        if (editData.status !== currentIncident.status) {
+          updateData.status = editData.status;
+          changes.push({ field: 'status', oldValue: currentIncident.status, newValue: editData.status });
+          
+          // Auto-set completed_at when status changes to "resolved"
+          if (editData.status === 'resolved' && !currentIncident.completed_at) {
+            updateData.completed_at = new Date().toISOString();
           }
-        } catch (emailError) {
-          console.error('Error sending notification:', emailError);
-          toast({
-            title: "Warning",
-            description: "Incident was updated but notification failed to send.",
-            variant: "destructive",
-          });
+          
+          // Clear completed_at when status changes from resolved/canceled to another status
+          if ((currentIncident.status === 'resolved' || currentIncident.status === 'canceled') && 
+              editData.status !== 'resolved' && editData.status !== 'canceled') {
+            updateData.completed_at = null;
+          }
         }
+        
+        if (editData.priority !== currentIncident.priority) {
+          updateData.priority = editData.priority;
+          changes.push({ field: 'priority', oldValue: currentIncident.priority, newValue: editData.priority });
+        }
+        
+        if (editData.category !== currentIncident.category) {
+          updateData.category = editData.category;
+          changes.push({ field: 'category', oldValue: currentIncident.category, newValue: editData.category });
+        }
+        
+        const newAssignedTo = editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin;
+        if (newAssignedTo !== currentIncident.assigned_to_admin) {
+          updateData.assigned_to_admin = newAssignedTo;
+          changes.push({ field: 'assigned_to_admin', oldValue: currentIncident.assigned_to_admin, newValue: newAssignedTo });
+        }
+        
+        const oldDueDate = currentIncident.due_date ? new Date(currentIncident.due_date) : null;
+        const newDueDate = editData.due_date;
+        const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
+                                     (!oldDueDate && newDueDate) ||
+                                     (oldDueDate && !newDueDate);
+        
+        if (dueDatesAreDifferent) {
+          updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
+          changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
+        }
+
+        // Update the incident
+        await updateIncident.mutateAsync({ id: currentIncident.id, data: updateData });
+        
+        // Add system comments for tracked changes
+        for (const change of changes) {
+          const commentText = formatIncidentFieldChangeComment(
+            change.field,
+            change.oldValue,
+            change.newValue,
+            statusOptions,
+            priorityOptions,
+            categoryOptions,
+            users
+          );
+          addSystemComment.mutate(commentText);
+        }
+
+        // Update currentIncident with the new data for the notification
+        setCurrentIncident(prev => ({ ...prev, ...updateData }));
       }
       
-      // Close the modal after successful save
+      // Send notification email if requested
+      if (sendNotification) {
+        await sendNotificationEmail();
+      }
+      
+      // Close the modal after successful operations
       onClose();
     } catch (error) {
-      console.error('Error updating incident:', error);
+      console.error('Error in handleSave:', error);
+      // Don't close the modal if there was an error
     }
   };
 
