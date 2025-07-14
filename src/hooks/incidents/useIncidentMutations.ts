@@ -42,6 +42,17 @@ export const useIncidentMutations = () => {
       queryClient.invalidateQueries({ queryKey: ["my-incidents"] });
       queryClient.invalidateQueries({ queryKey: ["active-incidents"] });
       queryClient.invalidateQueries({ queryKey: ["completed-incidents"] });
+      
+      // Also invalidate with a broader pattern to catch any missed queries
+      queryClient.invalidateQueries({ 
+        predicate: (query) => {
+          return query.queryKey[0] === 'incidents' || 
+                 query.queryKey[0] === 'my-incidents' || 
+                 query.queryKey[0] === 'active-incidents' || 
+                 query.queryKey[0] === 'completed-incidents';
+        }
+      });
+      
       toast({
         title: "Success",
         description: "Incident created successfully",
