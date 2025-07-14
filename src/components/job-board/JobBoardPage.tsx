@@ -129,8 +129,8 @@ const JobBoardPage = () => {
                 <JobBoardChart
                   jobs={filteredJobs}
                   onRefresh={handleRefresh}
-                  onUpdateJob={canManageHierarchy ? handleEditJob : undefined}
-                  readOnly={!canManageHierarchy}
+                  onUpdateJob={canUpdate ? handleEditJob : undefined}
+                  readOnly={!canUpdate}
                 />
               </TabsContent>
             </Tabs>
