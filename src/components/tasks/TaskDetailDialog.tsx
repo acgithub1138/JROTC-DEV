@@ -514,6 +514,44 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                     {format(new Date(currentTask.created_at), 'PPP')}
                   </span>
                 </div>
+                
+                {/* Send Notification - Only show in edit mode */}
+                {isEditing && canEdit && taskTemplates.length > 0 && (
+                  <div className="space-y-3 pt-3 border-t">
+                    <div className="flex items-center space-x-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox 
+                          id="send-notification" 
+                          checked={sendNotification}
+                          onCheckedChange={(checked) => {
+                            setSendNotification(checked as boolean);
+                            if (!checked) setSelectedTemplate('');
+                          }}
+                        />
+                        <label 
+                          htmlFor="send-notification"
+                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
+                        >
+                          Send Notification
+                        </label>
+                      </div>
+                      {sendNotification && (
+                        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                          <SelectTrigger className="w-64">
+                            <SelectValue placeholder="Select email template" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {taskTemplates.map((template) => (
+                              <SelectItem key={template.id} value={template.id}>
+                                {template.name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -535,48 +573,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
             )}
           </div>
 
-          {/* Send Notification Section - Only show in edit mode */}
-          {isEditing && canEdit && taskTemplates.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Send Notification</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center space-x-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox 
-                      id="send-notification" 
-                      checked={sendNotification}
-                      onCheckedChange={(checked) => {
-                        setSendNotification(checked as boolean);
-                        if (!checked) setSelectedTemplate('');
-                      }}
-                    />
-                    <label 
-                      htmlFor="send-notification"
-                      className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                    >
-                      Send Notification
-                    </label>
-                  </div>
-                  {sendNotification && (
-                    <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                      <SelectTrigger className="w-64">
-                        <SelectValue placeholder="Select email template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taskTemplates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <Separator />
 
