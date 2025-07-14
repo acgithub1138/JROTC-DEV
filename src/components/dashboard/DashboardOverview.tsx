@@ -146,7 +146,7 @@ const DashboardOverview = () => {
   
   // Render Quick Actions as a widget for Admin and Command Staff
   const renderQuickActionsWidget = () => {
-    if (!isCommandStaffOrAbove && userProfile?.role !== 'admin') return null;
+    if (!isCommandStaffOrAbove) return null;
     
     return (
       <Card className="hover:shadow-md transition-shadow col-span-2">
