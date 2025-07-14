@@ -107,6 +107,7 @@ const JobBoardPage = () => {
                   className="pl-10"
                 />
               </div>
+              Test 123
             </div>
           </CardHeader>
           <CardContent>
