@@ -14,7 +14,7 @@ export const RecordSelector: React.FC<RecordSelectorProps> = ({
   selectedRecordId,
   onRecordSelect,
 }) => {
-  const { data: records = [], isLoading } = useTableRecords(tableName);
+  const { data: records = [], isLoading } = useTableRecords(tableName, 20, true);
 
   const handleRecordChange = (recordId: string) => {
     const selectedRecord = records.find(r => r.id === recordId);
