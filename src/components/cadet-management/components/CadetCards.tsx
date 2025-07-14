@@ -6,6 +6,9 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2, CheckCircle, Mail, Phone, Eye } from 'lucide-react';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
+import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
+import { useAuth } from '@/contexts/AuthContext';
+import { JROTCProgram } from '@/utils/jrotcRanks';
 
 interface CadetCardsProps {
   profiles: Profile[];
@@ -26,6 +29,7 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
   selectedCadets,
   onSelectCadet
 }) => {
+  const { userProfile } = useAuth();
   if (profiles.length === 0) {
     return (
       <div className="text-center py-8 text-gray-500">
@@ -65,7 +69,9 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
               <div className="grid grid-cols-2 gap-2 text-sm">
                 <div>
                   <span className="text-gray-500">Rank:</span>
-                  <p className="font-medium">{profile.rank || '-'}</p>
+                  <p className="font-medium">
+                    {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
+                  </p>
                 </div>
                 <div>
                   <span className="text-gray-500">Flight:</span>

@@ -11,6 +11,9 @@ import { CheckCircle, X } from 'lucide-react';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
+import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
+import { useAuth } from '@/contexts/AuthContext';
+import { JROTCProgram } from '@/utils/jrotcRanks';
 
 interface CadetTableProps {
   profiles: Profile[];
@@ -34,6 +37,7 @@ export const CadetTable = ({
 onSelectAll
 }: CadetTableProps) => {
   const { canViewDetails: canView, canUpdate: canEdit, canDelete } = useCadetPermissions();
+  const { userProfile } = useAuth();
   const { sortedData: sortedProfiles, sortConfig, handleSort } = useSortableTable({
     data: profiles,
     defaultSort: { key: 'last_name', direction: 'asc' }
@@ -100,7 +104,9 @@ onSelectAll
                 '-'
               )}
             </TableCell>
-            <TableCell className="py-2">{profile.rank || '-'}</TableCell>
+            <TableCell className="py-2">
+              {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
+            </TableCell>
             <TableCell className="py-2">{profile.flight || '-'}</TableCell>
             <TableCell className="text-right py-2">
               {activeTab === 'active' ? (

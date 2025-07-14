@@ -9,6 +9,9 @@ import { ProfileHistoryTab } from './ProfileHistoryTab';
 import { ProfileEquipmentTab } from './ProfileEquipmentTab';
 import { ProfileCompetitionsTab } from './ProfileCompetitionsTab';
 import { useJobRole } from '../hooks/useJobRole';
+import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
+import { useAuth } from '@/contexts/AuthContext';
+import { JROTCProgram } from '@/utils/jrotcRanks';
 
 interface ViewCadetDialogProps {
   open: boolean;
@@ -18,6 +21,7 @@ interface ViewCadetDialogProps {
 
 export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialogProps) => {
   const { jobRole } = useJobRole(profile?.id);
+  const { userProfile } = useAuth();
 
   if (!profile) return null;
 
@@ -58,7 +62,9 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Rank</p>
-                  <p className="text-sm">{profile.rank || '-'}</p>
+                  <p className="text-sm">
+                    {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
+                  </p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Flight</p>
