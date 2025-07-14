@@ -94,13 +94,18 @@ export const useInventoryPermissions = () => {
   const modulePermissions = useModulePermissions('inventory');
   const { hasPermission } = usePermissionContext();
   
-  return {
+  const permissions = {
     ...modulePermissions,
     canView: modulePermissions.canRead,
-    canCreate: modulePermissions.canCreate,
     canAssign: hasPermission('inventory', 'assign'),
     canBulkImport: hasPermission('inventory', 'bulk_import'),
   };
+
+  // Debug logging for inventory permissions
+  console.log('Inventory permissions:', permissions);
+  console.log('Module permissions:', modulePermissions);
+  
+  return permissions;
 };
 
 // Dashboard-specific permissions
