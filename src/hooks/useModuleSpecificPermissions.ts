@@ -92,7 +92,7 @@ export const useJobBoardPermissions = () => {
 // Inventory-specific permissions
 export const useInventoryPermissions = () => {
   const modulePermissions = useModulePermissions('inventory');
-  const { hasPermission } = usePermissionContext();
+  const { hasPermission, isLoading } = usePermissionContext();
   
   const permissions = {
     ...modulePermissions,
@@ -102,7 +102,11 @@ export const useInventoryPermissions = () => {
   };
 
   // Debug logging for inventory permissions
-  console.log('Inventory permissions:', permissions);
+  console.log('Inventory permissions:', {
+    ...permissions,
+    isLoading,
+    timestamp: new Date().toISOString()
+  });
   console.log('Module permissions:', modulePermissions);
   
   return permissions;
