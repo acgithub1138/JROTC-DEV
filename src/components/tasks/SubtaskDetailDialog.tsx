@@ -120,11 +120,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         return;
       }
 
-      // Use the queue_email RPC function (subtasks will use the tasks source table)
+      // Use the queue_email RPC function (subtasks will use the subtasks source table)
       const { data: queueId, error } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
         recipient_email_param: createdByUser.email,
-        source_table_param: 'tasks',
+        source_table_param: 'subtasks',
         record_id_param: currentSubtask.id,
         school_id_param: currentSubtask.school_id
       });
@@ -430,34 +430,35 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                 <CardTitle className="text-sm font-medium">Send Notification</CardTitle>
               </CardHeader>
               <CardContent className="space-y-3">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="send-notification"
-                    checked={sendNotification}
-                    onCheckedChange={(checked) => setSendNotification(checked === true)}
-                  />
-                  <label htmlFor="send-notification" className="text-sm">
-                    Send notification email
-                  </label>
-                </div>
-                
-                {sendNotification && (
-                  <div className="space-y-2">
-                    <label className="text-sm font-medium">Select Template</label>
-                    <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Choose email template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {subtaskTemplates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
+                <div className="flex items-center gap-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="send-notification"
+                      checked={sendNotification}
+                      onCheckedChange={(checked) => setSendNotification(checked === true)}
+                    />
+                    <label htmlFor="send-notification" className="text-sm">
+                      Send notification email
+                    </label>
                   </div>
-                )}
+                  
+                  {sendNotification && (
+                    <div className="flex-1">
+                      <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Choose email template" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {subtaskTemplates.map((template) => (
+                            <SelectItem key={template.id} value={template.id}>
+                              {template.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  )}
+                </div>
               </CardContent>
             </Card>
           )}
