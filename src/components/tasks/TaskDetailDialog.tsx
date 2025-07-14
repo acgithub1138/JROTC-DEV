@@ -30,7 +30,7 @@ import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
   const { updateTask, tasks, isUpdating } = useTasks();
-  const { users, isLoading: usersLoading } = useSchoolUsers();
+  const { users, isLoading: usersLoading } = useSchoolUsers(true); // Only fetch active users
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
@@ -283,10 +283,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
   const assigneeOptions = [
     { value: 'unassigned', label: 'Unassigned' },
-    ...users.map(user => ({
-      value: user.id,
-      label: `${user.last_name}, ${user.first_name}`
-    }))
+    ...users
+      .sort((a, b) => a.last_name.localeCompare(b.last_name))
+      .map(user => ({
+        value: user.id,
+        label: `${user.last_name}, ${user.first_name}`
+      }))
   ];
 
   const handleCompleteTask = async () => {

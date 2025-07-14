@@ -39,7 +39,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const { updateSubtask, subtasks, isUpdating } = useSubtasks(subtask.parent_task_id);
-  const { users } = useSchoolUsers();
+  const { users } = useSchoolUsers(true); // Only fetch active users
   const { comments, addComment, addSystemComment, isAddingComment } = useSubtaskComments(subtask.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
@@ -233,10 +233,12 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
 
   const assigneeOptions = [
     { value: 'unassigned', label: 'Unassigned' },
-    ...users.map(user => ({
-      value: user.id,
-      label: `${user.last_name}, ${user.first_name}`
-    }))
+    ...users
+      .sort((a, b) => a.last_name.localeCompare(b.last_name))
+      .map(user => ({
+        value: user.id,
+        label: `${user.last_name}, ${user.first_name}`
+      }))
   ];
 
   const handleCompleteSubtask = async () => {
