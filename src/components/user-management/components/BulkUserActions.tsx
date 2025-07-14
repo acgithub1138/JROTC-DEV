@@ -25,12 +25,12 @@ export const BulkUserActions = ({ selectedCount, activeTab, onBulkAction }: Bulk
         {activeTab === 'active' ? (
           <>
             <UserX className="w-4 h-4 mr-2" />
-            Disable Cadets
+            Disable Selected
           </>
         ) : (
           <>
             <UserPlus className="w-4 h-4 mr-2" />
-            Enable Cadets
+            Enable Selected
           </>
         )}
       </Button>
