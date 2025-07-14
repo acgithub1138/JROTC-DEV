@@ -3,7 +3,7 @@ import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CadetTable } from './CadetTable';
 import { CadetCards } from './CadetCards';
-import { CadetActionsDropdown } from './CadetActionsDropdown';
+import { BulkCadetActions } from './BulkCadetActions';
 import { Profile } from '../types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -20,11 +20,7 @@ interface CadetTabsContentProps {
   onToggleStatus: (profile: Profile) => void;
   onSelectCadet: (cadetId: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
-  onUpdateGrade: () => void;
-  onUpdateRank: () => void;
-  onUpdateFlight: () => void;
-  onUpdateRole: () => void;
-  onDeactivate: () => void;
+  onRefresh: () => void;
 }
 
 export const CadetTabsContent = ({
@@ -39,14 +35,10 @@ export const CadetTabsContent = ({
   onToggleStatus,
   onSelectCadet,
   onSelectAll,
-  onUpdateGrade,
-  onUpdateRank,
-  onUpdateFlight,
-  onUpdateRole,
-  onDeactivate
+  onRefresh
 }: CadetTabsContentProps) => {
   const isMobile = useIsMobile();
-  const { canUpdate } = useCadetPermissions();
+  const { canUpdate, canDelete } = useCadetPermissions();
   
   const renderCadetDisplay = () => {
     if (isMobile) {
@@ -91,15 +83,12 @@ export const CadetTabsContent = ({
       <TabsContent value="active" className="mt-4">
         {!isMobile && (
           <div className="flex justify-end p-4 border-b">
-            <CadetActionsDropdown
-              selectedCount={selectedCadets.length}
-              onUpdateGrade={onUpdateGrade}
-              onUpdateRank={onUpdateRank}
-              onUpdateFlight={onUpdateFlight}
-              onUpdateRole={onUpdateRole}
-              onDeactivate={onDeactivate}
-              loading={massOperationLoading}
-              canUpdate={canUpdate}
+            <BulkCadetActions
+              selectedCadets={selectedCadets}
+              onSelectionClear={() => onSelectAll(false)}
+              canEdit={canUpdate}
+              canDelete={canDelete}
+              onRefresh={onRefresh}
             />
           </div>
         )}
@@ -109,15 +98,12 @@ export const CadetTabsContent = ({
       <TabsContent value="inactive" className="mt-4">
         {!isMobile && (
           <div className="flex justify-end p-4 border-b">
-            <CadetActionsDropdown
-              selectedCount={selectedCadets.length}
-              onUpdateGrade={onUpdateGrade}
-              onUpdateRank={onUpdateRank}
-              onUpdateFlight={onUpdateFlight}
-              onUpdateRole={onUpdateRole}
-              onDeactivate={onDeactivate}
-              loading={massOperationLoading}
-              canUpdate={canUpdate}
+            <BulkCadetActions
+              selectedCadets={selectedCadets}
+              onSelectionClear={() => onSelectAll(false)}
+              canEdit={canUpdate}
+              canDelete={canDelete}
+              onRefresh={onRefresh}
             />
           </div>
         )}

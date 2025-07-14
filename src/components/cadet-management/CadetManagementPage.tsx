@@ -155,7 +155,7 @@ const CadetManagementPage = () => {
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
           setProfileToToggle(profile);
           setStatusDialogOpen(true);
-        }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onUpdateGrade={() => setGradeDialogOpen(true)} onUpdateRank={() => setRankDialogOpen(true)} onUpdateFlight={() => setFlightDialogOpen(true)} onUpdateRole={() => setRoleDialogOpen(true)} onDeactivate={() => setDeactivateDialogOpen(true)} />
+        }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onRefresh={fetchProfiles} />
 
           {filteredProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No cadets found
