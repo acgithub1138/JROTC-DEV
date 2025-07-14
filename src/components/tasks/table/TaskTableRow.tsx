@@ -119,7 +119,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="font-medium py-2">
           <span>{task.title}</span>
         </TableCell>
-        <TableCell className="text-center py-2">
+        <TableCell className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="icon"
