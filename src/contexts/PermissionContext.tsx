@@ -68,7 +68,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   const value: PermissionContextType = {
     hasPermission,
-    isLoading: isLoading || !userProfile,
+    isLoading,
   };
 
   return (
