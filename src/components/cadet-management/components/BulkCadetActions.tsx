@@ -6,6 +6,8 @@ import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { gradeOptions as gradeConstants, flightOptions as flightConstants, roleOptions as roleConstants } from '../constants';
+import { useAuth } from '@/contexts/AuthContext';
+import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 
 interface BulkCadetActionsProps {
   selectedCadets: string[];
@@ -23,6 +25,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
   onRefresh
 }) => {
   const { toast } = useToast();
+  const { userProfile } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
 
   if (selectedCadets.length === 0 || !canEdit) {
@@ -35,22 +38,13 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     { value: '', label: 'Clear Grade' }
   ];
 
-  // Rank options (common JROTC ranks)
+  // Rank options based on school's JROTC program
+  const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
   const rankOptions = [
-    { value: 'Cadet', label: 'Cadet' },
-    { value: 'Cadet Private', label: 'Cadet Private' },
-    { value: 'Cadet Private First Class', label: 'Cadet Private First Class' },
-    { value: 'Cadet Corporal', label: 'Cadet Corporal' },
-    { value: 'Cadet Sergeant', label: 'Cadet Sergeant' },
-    { value: 'Cadet Staff Sergeant', label: 'Cadet Staff Sergeant' },
-    { value: 'Cadet Master Sergeant', label: 'Cadet Master Sergeant' },
-    { value: 'Cadet First Sergeant', label: 'Cadet First Sergeant' },
-    { value: 'Cadet Second Lieutenant', label: 'Cadet Second Lieutenant' },
-    { value: 'Cadet First Lieutenant', label: 'Cadet First Lieutenant' },
-    { value: 'Cadet Captain', label: 'Cadet Captain' },
-    { value: 'Cadet Major', label: 'Cadet Major' },
-    { value: 'Cadet Lieutenant Colonel', label: 'Cadet Lieutenant Colonel' },
-    { value: 'Cadet Colonel', label: 'Cadet Colonel' },
+    ...ranks.map(rank => ({ 
+      value: rank.rank || "none", 
+      label: `${rank.rank} ${rank.abbreviation ? `(${rank.abbreviation})` : ''}` 
+    })),
     { value: '', label: 'Clear Rank' }
   ];
 
