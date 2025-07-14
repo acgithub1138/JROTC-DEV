@@ -58,11 +58,13 @@ export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canA
           <SelectValue placeholder={isLoading ? "Loading users..." : "Select assignee"} />
         </SelectTrigger>
         <SelectContent>
-          {users.map((user) => (
-            <SelectItem key={user.id} value={user.id}>
-              {user.first_name} {user.last_name} ({user.role})
-            </SelectItem>
-          ))}
+          {users
+            .sort((a, b) => a.last_name.localeCompare(b.last_name))
+            .map((user) => (
+              <SelectItem key={user.id} value={user.id}>
+                {user.last_name}, {user.first_name} ({user.role})
+              </SelectItem>
+            ))}
         </SelectContent>
       </Select>
       {form.formState.errors.assigned_to && (
