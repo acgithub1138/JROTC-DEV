@@ -33,6 +33,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const [currentTask, setCurrentTask] = useState(task);
   const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
+  const [sendNotification, setSendNotification] = useState(false);
+  const [notificationTemplate, setNotificationTemplate] = useState('');
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -380,23 +382,27 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                        type="checkbox"
                        id="send-notification"
                        className="rounded border-gray-300"
+                       checked={sendNotification}
+                       onChange={(e) => setSendNotification(e.target.checked)}
                      />
                      <label htmlFor="send-notification" className="text-sm font-medium">
                        Send Notification
                      </label>
                    </div>
-                   <div className="ml-6">
-                     <Select>
-                       <SelectTrigger className="h-8 w-full">
-                         <SelectValue placeholder="Select template" />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="assignment">Task Assignment</SelectItem>
-                         <SelectItem value="update">Task Update</SelectItem>
-                         <SelectItem value="completion">Task Completion</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
+                   {sendNotification && (
+                     <div className="ml-6">
+                       <Select value={notificationTemplate} onValueChange={setNotificationTemplate}>
+                         <SelectTrigger className="h-8 w-full">
+                           <SelectValue placeholder="Select template" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="assignment">Task Assignment</SelectItem>
+                           <SelectItem value="update">Task Update</SelectItem>
+                           <SelectItem value="completion">Task Completion</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
+                   )}
                  </div>
                </CardContent>
              </Card>

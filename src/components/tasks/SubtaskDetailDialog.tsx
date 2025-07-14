@@ -41,6 +41,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const { canEdit: canUpdate, canDelete } = useTablePermissions('tasks');
   const canAssign = canUpdate; // For now, use update permission for assign
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
+  const [sendNotification, setSendNotification] = useState(false);
+  const [notificationTemplate, setNotificationTemplate] = useState('');
   const [editData, setEditData] = useState({
     title: subtask.title,
     description: subtask.description || '',
@@ -306,23 +308,27 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                        type="checkbox"
                        id="send-notification-subtask"
                        className="rounded border-gray-300"
+                       checked={sendNotification}
+                       onChange={(e) => setSendNotification(e.target.checked)}
                      />
                      <label htmlFor="send-notification-subtask" className="text-sm font-medium">
                        Send Notification
                      </label>
                    </div>
-                   <div className="ml-6">
-                     <Select>
-                       <SelectTrigger className="h-8 w-full">
-                         <SelectValue placeholder="Select template" />
-                       </SelectTrigger>
-                       <SelectContent>
-                         <SelectItem value="assignment">Subtask Assignment</SelectItem>
-                         <SelectItem value="update">Subtask Update</SelectItem>
-                         <SelectItem value="completion">Subtask Completion</SelectItem>
-                       </SelectContent>
-                     </Select>
-                   </div>
+                   {sendNotification && (
+                     <div className="ml-6">
+                       <Select value={notificationTemplate} onValueChange={setNotificationTemplate}>
+                         <SelectTrigger className="h-8 w-full">
+                           <SelectValue placeholder="Select template" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="assignment">Subtask Assignment</SelectItem>
+                           <SelectItem value="update">Subtask Update</SelectItem>
+                           <SelectItem value="completion">Subtask Completion</SelectItem>
+                         </SelectContent>
+                       </Select>
+                     </div>
+                   )}
                  </div>
                </CardContent>
              </Card>
