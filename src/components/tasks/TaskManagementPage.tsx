@@ -11,13 +11,15 @@ import { useTaskManagement } from './hooks/useTaskManagement';
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { AccessDeniedDialog } from '../incident-management/AccessDeniedDialog';
 
 const TaskManagementPage: React.FC = () => {
-  const { canCreate } = useTaskPermissions();
+  const { canCreate, canView } = useTaskPermissions();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
   const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showAccessDenied, setShowAccessDenied] = useState(false);
 
   const {
     searchTerm,
@@ -42,8 +44,13 @@ const TaskManagementPage: React.FC = () => {
   } = useTaskManagement();
 
   const handleTaskSelect = (task: Task | Subtask) => {
-    setSelectedTask(task as Task);
-    setIsDetailDialogOpen(true);
+    // Check if user has view permissions
+    if (canView) {
+      setSelectedTask(task as Task);
+      setIsDetailDialogOpen(true);
+    } else {
+      setShowAccessDenied(true);
+    }
   };
 
   // Check if selected task is actually a subtask
@@ -137,6 +144,12 @@ const TaskManagementPage: React.FC = () => {
           onEdit={handleEditTask}
         />
       )}
+
+      <AccessDeniedDialog
+        isOpen={showAccessDenied}
+        onClose={() => setShowAccessDenied(false)}
+        message="You do not have permission to view task details."
+      />
     </div>
   );
 };
