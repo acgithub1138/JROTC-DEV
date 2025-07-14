@@ -107,7 +107,9 @@ const JobBoardPage = () => {
                   className="pl-10"
                 />
               </div>
-              Test 123
+              <div className="flex items-center gap-2">
+                TEST123
+              </div>
             </div>
           </CardHeader>
           <CardContent>
