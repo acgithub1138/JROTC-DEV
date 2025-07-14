@@ -100,10 +100,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
             
             <TaskDueDateField form={form} />
 
-            <div className="flex justify-end space-x-2 pt-4">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
+            <div className="flex justify-end pt-4">
               <Button type="submit" disabled={isSubmitting}>
                 {mode === 'create' ? 'Create Task' : 'Update Task'}
               </Button>
