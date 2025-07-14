@@ -2,6 +2,7 @@ import React from "react";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Eye, X } from "lucide-react";
 import { format } from "date-fns";
@@ -16,6 +17,9 @@ interface IncidentTableProps {
   onIncidentEdit?: (incident: Incident) => void;
   onIncidentSelectForEdit?: (incident: Incident) => void;
   onIncidentDelete?: (incident: Incident) => void;
+  selectedIncidents?: string[];
+  onIncidentToggle?: (incidentId: string) => void;
+  showBulkSelect?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -54,7 +58,10 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   onIncidentView,
   onIncidentEdit,
   onIncidentSelectForEdit,
-  onIncidentDelete
+  onIncidentDelete,
+  selectedIncidents = [],
+  onIncidentToggle,
+  showBulkSelect = false
 }) => {
   const { userProfile } = useAuth();
   const {
@@ -75,6 +82,22 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
+            {showBulkSelect && (
+              <TableHead className="w-12">
+                <Checkbox
+                  checked={selectedIncidents.length === incidents.length}
+                  onCheckedChange={(checked) => {
+                    if (checked) {
+                      incidents.forEach(incident => 
+                        !selectedIncidents.includes(incident.id) && onIncidentToggle?.(incident.id)
+                      );
+                    } else {
+                      selectedIncidents.forEach(id => onIncidentToggle?.(id));
+                    }
+                  }}
+                />
+              </TableHead>
+            )}
             <TableHead className="text-center">Incident #</TableHead>
             <TableHead>Title</TableHead>
             <TableHead>Status</TableHead>
@@ -87,6 +110,14 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
         </TableHeader>
         <TableBody>
           {incidents.map(incident => <TableRow key={incident.id}>
+              {showBulkSelect && (
+                <TableCell>
+                  <Checkbox
+                    checked={selectedIncidents.includes(incident.id)}
+                    onCheckedChange={() => onIncidentToggle?.(incident.id)}
+                  />
+                </TableCell>
+              )}
               <TableCell className="text-center py-[8px]">
                 <button 
                   onClick={() => onIncidentSelect(incident)} 

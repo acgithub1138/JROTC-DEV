@@ -11,6 +11,7 @@ import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
 import { AccessDeniedDialog } from "./AccessDeniedDialog";
 import IncidentTable from "./IncidentTable";
+import { BulkEditToolbar } from "./BulkEditToolbar";
 import type { Incident } from "@/hooks/incidents/types";
 
 const IncidentManagementPage: React.FC = () => {
@@ -25,6 +26,7 @@ const IncidentManagementPage: React.FC = () => {
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
+  const [selectedIncidents, setSelectedIncidents] = useState<string[]>([]);
 
   // Different queries for different tabs
   const { incidents: myIncidents, isLoading: myIncidentsLoading } = useMyIncidents();
@@ -113,6 +115,18 @@ const IncidentManagementPage: React.FC = () => {
     }
   };
 
+  const handleIncidentToggle = (incidentId: string) => {
+    setSelectedIncidents(prev => 
+      prev.includes(incidentId)
+        ? prev.filter(id => id !== incidentId)
+        : [...prev, incidentId]
+    );
+  };
+
+  const handleClearSelection = () => {
+    setSelectedIncidents([]);
+  };
+
   if (isLoading) {
     return <div className="p-6">Loading incidents...</div>;
   }
@@ -148,6 +162,12 @@ const IncidentManagementPage: React.FC = () => {
               onSearchChange={setSearchValue}
               searchPlaceholder="Search my incidents..."
             >
+              {isAdmin && (
+                <BulkEditToolbar
+                  selectedIncidents={selectedIncidents}
+                  onClearSelection={handleClearSelection}
+                />
+              )}
               {myIncidentsLoading ? (
                 <div>Loading incidents...</div>
               ) : (
@@ -156,6 +176,9 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
+                  selectedIncidents={selectedIncidents}
+                  onIncidentToggle={handleIncidentToggle}
+                  showBulkSelect={isAdmin}
                 />
               )}
             </StandardTableWrapper>
@@ -169,6 +192,12 @@ const IncidentManagementPage: React.FC = () => {
               onSearchChange={setSearchValue}
               searchPlaceholder="Search all incidents..."
             >
+              {isAdmin && (
+                <BulkEditToolbar
+                  selectedIncidents={selectedIncidents}
+                  onClearSelection={handleClearSelection}
+                />
+              )}
               {activeIncidentsLoading ? (
                 <div>Loading incidents...</div>
               ) : (
@@ -177,6 +206,9 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
+                  selectedIncidents={selectedIncidents}
+                  onIncidentToggle={handleIncidentToggle}
+                  showBulkSelect={isAdmin}
                 />
               )}
             </StandardTableWrapper>
@@ -190,6 +222,12 @@ const IncidentManagementPage: React.FC = () => {
               onSearchChange={setSearchValue}
               searchPlaceholder="Search completed incidents..."
             >
+              {isAdmin && (
+                <BulkEditToolbar
+                  selectedIncidents={selectedIncidents}
+                  onClearSelection={handleClearSelection}
+                />
+              )}
               {completedIncidentsLoading ? (
                 <div>Loading incidents...</div>
               ) : (
@@ -198,6 +236,9 @@ const IncidentManagementPage: React.FC = () => {
                   onIncidentSelect={handleIncidentSelect}
                   onIncidentView={handleIncidentView}
                   onIncidentDelete={handleDeleteIncident}
+                  selectedIncidents={selectedIncidents}
+                  onIncidentToggle={handleIncidentToggle}
+                  showBulkSelect={isAdmin}
                 />
               )}
             </StandardTableWrapper>
