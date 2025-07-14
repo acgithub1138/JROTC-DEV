@@ -26,10 +26,15 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Fetch all permission data in a single query
   const { data: permissionData, isLoading } = useQuery({
-    queryKey: ['all-permissions', userProfile?.role],
+    queryKey: ['all-permissions', userProfile?.role, userProfile?.id],
     queryFn: async () => {
-      if (!userProfile?.role) return null;
+      if (!userProfile?.role) {
+        console.log('Permission query: No user role available');
+        return null;
+      }
 
+      console.log('Fetching permissions for role:', userProfile.role);
+      
       const { data, error } = await supabase
         .from('role_permissions')
         .select(`
@@ -39,7 +44,10 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         `)
         .eq('role', userProfile.role);
       
-      if (error) throw error;
+      if (error) {
+        console.error('Permission query error:', error);
+        throw error;
+      }
       
       // Transform into a lookup map for O(1) access
       const permissionMap: Record<string, boolean> = {};
@@ -50,11 +58,15 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         }
       });
       
+      console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
       return permissionMap;
     },
     enabled: !!userProfile?.role,
-    staleTime: 5 * 60 * 1000, // 5 minutes
-    gcTime: 10 * 60 * 1000, // 10 minutes
+    staleTime: 10 * 60 * 1000, // 10 minutes
+    gcTime: 15 * 60 * 1000, // 15 minutes
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    retry: 2,
   });
 
   // Memoized permission checker for optimal performance

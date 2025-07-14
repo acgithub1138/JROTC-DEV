@@ -119,6 +119,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   useEffect(() => {
     let mounted = true;
+    let lastFetchedUserId: string | null = null;
 
     // Set up auth state listener
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
@@ -131,12 +132,14 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Only fetch if we don't have profile data or it's for a different user
-          if (!userProfile || userProfile.id !== session.user.id) {
+          // Only fetch if we haven't fetched for this user yet
+          if (lastFetchedUserId !== session.user.id) {
+            lastFetchedUserId = session.user.id;
             fetchUserProfile(session.user.id);
           }
-        } else if (!session?.user) {
+        } else {
           setUserProfile(null);
+          lastFetchedUserId = null;
         }
         setLoading(false);
       }
@@ -150,11 +153,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user) {
-        // Only fetch if we don't have profile data or it's for a different user
-        if (!userProfile || userProfile.id !== session.user.id) {
-          fetchUserProfile(session.user.id);
-        }
+      if (session?.user && lastFetchedUserId !== session.user.id) {
+        lastFetchedUserId = session.user.id;
+        fetchUserProfile(session.user.id);
       }
       setLoading(false);
     });

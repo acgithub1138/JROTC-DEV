@@ -18,14 +18,6 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   const { canCreate, canBulkImport } = useInventoryPermissions();
   const { isLoading } = usePermissionContext();
 
-  // Debug logging for button visibility
-  console.log('InventoryActions render:', { 
-    canCreate, 
-    canBulkImport, 
-    isLoading,
-    timestamp: new Date().toISOString()
-  });
-
   return (
     <>
       <Button variant="outline" onClick={onExport}>
