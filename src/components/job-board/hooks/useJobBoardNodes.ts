@@ -1,4 +1,4 @@
-import { useMemo, useCallback, useEffect } from 'react';
+import { useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNodesState, useEdgesState, NodeChange } from '@xyflow/react';
 import { JobBoardWithCadet } from '../types';
 import { buildJobHierarchy } from '../utils/hierarchyBuilder';
@@ -7,20 +7,15 @@ import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
 
 interface UseJobBoardNodesProps {
   jobs: JobBoardWithCadet[];
-  getSavedPositions: () => Map<string, { x: number; y: number }>;
+  savedPositionsMap: Map<string, { x: number; y: number }>;
   handleNodesChange: (changes: NodeChange[], nodes: any[]) => void;
-  layoutPreferences: any[];
 }
 
 export const useJobBoardNodes = ({
   jobs,
-  getSavedPositions,
+  savedPositionsMap,
   handleNodesChange,
-  layoutPreferences
 }: UseJobBoardNodesProps) => {
-  // Memoize the saved positions separately to avoid frequent recalculations
-  const savedPositions = useMemo(() => getSavedPositions(), [layoutPreferences]);
-
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
       return { nodes: [], edges: [] };
@@ -31,8 +26,8 @@ export const useJobBoardNodes = ({
     // Build the hierarchy
     const hierarchyResult = buildJobHierarchy(jobs);
     
-    // Use memoized saved positions
-    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
+    // Use stabilized saved positions
+    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
     
     // Create React Flow elements
     const flowNodes = createFlowNodes(jobs, positions);
@@ -44,7 +39,7 @@ export const useJobBoardNodes = ({
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, savedPositions]);
+  }, [jobs, savedPositionsMap]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
@@ -55,11 +50,20 @@ export const useJobBoardNodes = ({
     handleNodesChange(changes, nodes);
   }, [onNodesChange, handleNodesChange, nodes]);
 
-  // Update nodes when initialNodesAndEdges changes (for saved positions)
+  // Only update nodes and edges when jobs actually change, not when layout preferences change
+  const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
   useEffect(() => {
-    setNodes(initialNodesAndEdges.nodes);
-    setEdges(initialNodesAndEdges.edges);
-  }, [initialNodesAndEdges, setNodes, setEdges]);
+    // Compare jobs by ID to see if they actually changed
+    const jobsChanged = jobs.length !== previousJobsRef.current.length || 
+      jobs.some((job, index) => job.id !== previousJobsRef.current[index]?.id);
+    
+    if (jobsChanged) {
+      console.log('🔄 Jobs changed, updating nodes and edges');
+      setNodes(initialNodesAndEdges.nodes);
+      setEdges(initialNodesAndEdges.edges);
+      previousJobsRef.current = jobs;
+    }
+  }, [jobs, initialNodesAndEdges, setNodes, setEdges]);
 
   return {
     nodes,

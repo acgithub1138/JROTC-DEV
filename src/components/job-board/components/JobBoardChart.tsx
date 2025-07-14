@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState, useEffect } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
@@ -22,7 +22,7 @@ const nodeTypes = {
 };
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
-  const { getSavedPositions, handleNodesChange, resetLayout, isResetting, layoutPreferences } = useJobBoardLayout();
+  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [connectionEditModal, setConnectionEditModal] = useState<{
@@ -44,12 +44,11 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const { nodes, edges, handleNodeChange, onEdgesChange } = useJobBoardNodes({
     jobs,
-    getSavedPositions,
+    savedPositionsMap,
     handleNodesChange,
-    layoutPreferences
   });
 
-  // Simplified fitView function that triggers after initialization
+  // Stabilized fitView function 
   const triggerFitView = useCallback(() => {
     if (isReactFlowInitialized && nodes.length > 0) {
       setTimeout(() => {
@@ -58,18 +57,24 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     }
   }, [isReactFlowInitialized, nodes.length, fitView]);
 
-  // Trigger fitView when ReactFlow is initialized and nodes are available
+  // Trigger fitView only when ReactFlow is first initialized and when jobs change
+  const hasTriggeredInitialFitView = useRef(false);
   useEffect(() => {
-    triggerFitView();
-  }, [triggerFitView]);
+    if (isReactFlowInitialized && nodes.length > 0 && !hasTriggeredInitialFitView.current) {
+      triggerFitView();
+      hasTriggeredInitialFitView.current = true;
+    }
+  }, [isReactFlowInitialized, nodes.length, triggerFitView]);
 
-  // Additional fitView trigger when exiting fullscreen
+  // Trigger fitView when exiting fullscreen (but not when entering)
+  const previousFullscreenState = useRef(isFullscreen);
   useEffect(() => {
-    if (!isFullscreen && isReactFlowInitialized && nodes.length > 0) {
+    if (previousFullscreenState.current && !isFullscreen && isReactFlowInitialized && nodes.length > 0) {
       setTimeout(() => {
         fitView({ padding: 0.2, duration: 300 });
       }, 200);
     }
+    previousFullscreenState.current = isFullscreen;
   }, [isFullscreen, isReactFlowInitialized, nodes.length, fitView]);
 
   const handleToggleFullscreen = () => {

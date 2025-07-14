@@ -3,7 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Node } from '@xyflow/react';
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 
 interface LayoutPreference {
   id: string;
@@ -109,7 +109,7 @@ export const useJobBoardLayout = () => {
     },
   });
 
-  // Get saved positions as a map
+  // Get saved positions as a map - memoized to prevent unnecessary recalculations
   const getSavedPositions = useCallback((): Map<string, SavedPosition> => {
     const positionsMap = new Map<string, SavedPosition>();
     layoutPreferences.forEach(pref => {
@@ -120,6 +120,9 @@ export const useJobBoardLayout = () => {
     });
     return positionsMap;
   }, [layoutPreferences]);
+
+  // Memoize the saved positions map to stabilize references
+  const savedPositionsMap = useMemo(() => getSavedPositions(), [getSavedPositions]);
 
   // Debounced save position function
   const savePosition = useCallback((jobId: string, position: { x: number; y: number }) => {
@@ -151,6 +154,7 @@ export const useJobBoardLayout = () => {
     layoutPreferences,
     isLoading,
     getSavedPositions,
+    savedPositionsMap,
     savePosition,
     resetLayout,
     handleNodesChange,
