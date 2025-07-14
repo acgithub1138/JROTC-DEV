@@ -77,9 +77,12 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
-    if (readOnly) return; // Don't allow editing in read-only mode
+    console.log('🔥 EDGE DOUBLE CLICK FIRED!', { readOnly, edgeId: edge.id, edge });
     
-    console.log('Edge double-clicked:', edge);
+    if (readOnly) {
+      console.log('❌ Read-only mode, cancelling edge edit');
+      return;
+    }
     event.stopPropagation();
     
     // Find the source and target jobs

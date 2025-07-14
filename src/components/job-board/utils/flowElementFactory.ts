@@ -60,10 +60,12 @@ export const createFlowEdges = (
   hierarchyResult: HierarchyResult,
   jobs: JobBoardWithCadet[]
 ): Edge[] => {
+  console.log('🔗 Creating flow edges:', { hierarchyEdgesCount: hierarchyResult.edges.length });
+  
   // Create a map for quick job lookup
   const jobMap = new Map(jobs.map(job => [job.id, job]));
   
-  return hierarchyResult.edges.map((edge) => {
+  const flowEdges = hierarchyResult.edges.map((edge) => {
     const sourceJob = jobMap.get(edge.source);
     
     if (edge.type === 'assistant') {
@@ -71,7 +73,7 @@ export const createFlowEdges = (
       const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
       const targetHandle = sourceJob?.assistant_target_handle || 'left-target';
       
-      return {
+      const edgeObj = {
         id: edge.id,
         source: edge.source,
         target: edge.target,
@@ -79,13 +81,18 @@ export const createFlowEdges = (
         targetHandle,
         type: 'smoothstep',
         animated: false,
+        style: { pointerEvents: 'all' as const },
+        data: { connectionType: 'assistant' }
       };
+      
+      console.log('📎 Created assistant edge:', edgeObj);
+      return edgeObj;
     } else {
       // Reports_to relationships: use stored handle preferences or defaults
       const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
       const targetHandle = sourceJob?.reports_to_target_handle || 'top-target';
       
-      return {
+      const edgeObj = {
         id: edge.id,
         source: edge.source,
         target: edge.target,
@@ -93,7 +100,15 @@ export const createFlowEdges = (
         targetHandle,
         type: 'smoothstep',
         animated: false,
+        style: { pointerEvents: 'all' as const },
+        data: { connectionType: 'reports_to' }
       };
+      
+      console.log('📎 Created reports_to edge:', edgeObj);
+      return edgeObj;
     }
   });
+  
+  console.log('✅ Flow edges created:', flowEdges.length);
+  return flowEdges;
 };

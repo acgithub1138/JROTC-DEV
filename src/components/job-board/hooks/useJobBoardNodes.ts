@@ -18,27 +18,33 @@ export const useJobBoardNodes = ({
   handleNodesChange,
   layoutPreferences
 }: UseJobBoardNodesProps) => {
+  // Memoize the saved positions separately to avoid frequent recalculations
+  const savedPositions = useMemo(() => getSavedPositions(), [layoutPreferences]);
+
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
       return { nodes: [], edges: [] };
     }
 
+    console.log('🔄 Recreating nodes and edges...', { jobsLength: jobs.length });
+
     // Build the hierarchy
     const hierarchyResult = buildJobHierarchy(jobs);
     
-    // Get saved positions and merge with automatic layout
-    const savedPositions = getSavedPositions();
+    // Use memoized saved positions
     const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositions);
     
     // Create React Flow elements
     const flowNodes = createFlowNodes(jobs, positions);
     const flowEdges = createFlowEdges(hierarchyResult, jobs);
 
+    console.log('✅ Created nodes and edges:', { nodesCount: flowNodes.length, edgesCount: flowEdges.length });
+
     return {
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, layoutPreferences, getSavedPositions]);
+  }, [jobs, savedPositions]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
