@@ -140,9 +140,22 @@ const InventoryManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
+      <div className="flex justify-between items-start">
+        <div>
+          <h1 className="text-3xl font-bold">Inventory Management</h1>
+          <p className="text-muted-foreground">Manage school inventory items and assignments</p>
+        </div>
+        <div className="flex gap-2">
+          <InventoryActions
+            onAddItem={() => setIsAddDialogOpen(true)}
+            onBulkOperations={() => setIsBulkDialogOpen(true)}
+            onExport={exportToCSV}
+          />
+        </div>
+      </div>
+
       <StandardTableWrapper
-        title="Inventory Management"
-        description="Manage school inventory items and assignments"
+        title=""
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search by item, category, item ID, size, or stock number..."
@@ -151,13 +164,6 @@ const InventoryManagementPage = () => {
         visibleColumns={enabledColumns.map(col => col.key)}
         onToggleColumn={toggleColumn}
         columnsLoading={columnsLoading}
-        actions={
-          <InventoryActions
-            onAddItem={() => setIsAddDialogOpen(true)}
-            onBulkOperations={() => setIsBulkDialogOpen(true)}
-            onExport={exportToCSV}
-          />
-        }
         extraControls={
           <InventoryFilters
             showOutOfStockOnly={showOutOfStockOnly}
