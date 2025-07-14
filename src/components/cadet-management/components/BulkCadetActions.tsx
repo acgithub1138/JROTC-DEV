@@ -60,10 +60,10 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     { value: '', label: 'Clear Flight' }
   ];
 
-  // Role options
+  // Role options - only Cadet and Command Staff
   const roleOptions = [
-    ...roleConstants,
-    { value: 'instructor', label: 'Instructor' }
+    { value: 'cadet', label: 'Cadet' },
+    { value: 'command_staff', label: 'Command Staff' }
   ];
 
   const handleBulkUpdate = async (field: string, value: any) => {
