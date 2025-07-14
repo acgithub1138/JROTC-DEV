@@ -90,7 +90,7 @@ const JobBoardPage = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input placeholder="Search by cadet name or role..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
-              <div className="flex items-right gap-2">IF the Job board Chart disappears, click the Job board tab then Job Board Chart tab again.</div>
+              <div className="flex text-right">If the Job board Chart disappears, click the Job board tab then Job Board Chart tab again.</div>
             </div>
           </CardHeader>
           <CardContent>
