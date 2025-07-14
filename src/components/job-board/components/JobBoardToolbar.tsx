@@ -22,16 +22,17 @@ export const JobBoardToolbar = ({
       {onRefresh && (
         <Button
           variant="outline"
-          size="sm"
+          size="icon"
           onClick={onRefresh}
           className="bg-white/90 backdrop-blur-sm"
+          title="Refresh Data"
         >
           <RefreshCcw className="w-4 h-4" />
         </Button>
       )}
       <Button
         variant="outline"
-        size="sm"
+        size="icon"
         onClick={onResetLayout}
         disabled={isResetting}
         className="bg-white/90 backdrop-blur-sm"
@@ -41,7 +42,7 @@ export const JobBoardToolbar = ({
       </Button>
       <Button
         variant="outline"
-        size="sm"
+        size="icon"
         onClick={onToggleFullscreen}
         className="bg-white/90 backdrop-blur-sm"
         title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
