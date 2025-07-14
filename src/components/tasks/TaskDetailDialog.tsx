@@ -10,6 +10,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -18,6 +20,9 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -30,11 +35,15 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { canView, canUpdate, canUpdateAssigned, canAssign } = useTaskPermissions();
+  const { templates } = useEmailTemplates();
+  const { toast } = useToast();
   const [currentTask, setCurrentTask] = useState(task);
   const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
   const [sendNotification, setSendNotification] = useState(false);
-  const [notificationTemplate, setNotificationTemplate] = useState('');
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -43,6 +52,24 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     assigned_to: task.assigned_to || 'unassigned',
     due_date: task.due_date ? new Date(task.due_date) : null,
   });
+
+  // Filter templates for tasks
+  const taskTemplates = templates.filter(template => 
+    template.is_active && template.source_table === 'tasks'
+  );
+
+  // Track changes for unsaved warning
+  useEffect(() => {
+    const hasChanges = 
+      editData.title !== currentTask.title ||
+      editData.description !== (currentTask.description || '') ||
+      editData.status !== currentTask.status ||
+      editData.priority !== currentTask.priority ||
+      editData.assigned_to !== (currentTask.assigned_to || 'unassigned') ||
+      (editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null));
+    
+    setHasUnsavedChanges(hasChanges || sendNotification);
+  }, [editData, currentTask, sendNotification]);
 
   // Update currentTask and editData when the task prop changes or when tasks are refetched
   useEffect(() => {
@@ -59,7 +86,91 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     });
   }, [task, tasks]);
 
+  const sendNotificationEmail = async () => {
+    if (!sendNotification || !selectedTemplate || !currentTask.assigned_to) {
+      return;
+    }
+
+    try {
+      // Find the assigned user
+      let assignedUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentTask.assigned_to);
+      
+      // If user not found in school users, fetch directly
+      if (!assignedUser) {
+        const { data: userData, error: userError } = await supabase
+          .from('profiles')
+          .select('id, first_name, last_name, email')
+          .eq('id', currentTask.assigned_to)
+          .single();
+          
+        if (userError || !userData) {
+          console.error('Error fetching user data:', userError);
+          toast({
+            title: "Error",
+            description: "Could not find the assigned user's information.",
+            variant: "destructive",
+          });
+          return;
+        }
+        
+        assignedUser = userData as { id: string; first_name: string; last_name: string; email: string };
+      }
+      
+      if (!assignedUser?.email) {
+        toast({
+          title: "Error", 
+          description: "No email address found for the assigned user.",
+          variant: "destructive",
+        });
+        return;
+      }
+
+      // Use the queue_email RPC function
+      const { data: queueId, error } = await supabase.rpc('queue_email', {
+        template_id_param: selectedTemplate,
+        recipient_email_param: assignedUser.email,
+        source_table_param: 'tasks',
+        record_id_param: currentTask.id,
+        school_id_param: currentTask.school_id
+      });
+
+      if (error) {
+        console.error('Error queuing notification email:', error);
+        toast({
+          title: "Error",
+          description: "Failed to queue notification email.",
+          variant: "destructive",
+        });
+        throw error;
+      } else {
+        addSystemComment(`Email sent to ${assignedUser.email} [Preview Email](${queueId})`);
+        toast({
+          title: "Success",
+          description: `Notification sent to ${assignedUser.email}`,
+        });
+      }
+    } catch (emailError) {
+      console.error('Error sending notification:', emailError);
+      toast({
+        title: "Error",
+        description: "Failed to send notification email.",
+        variant: "destructive",
+      });
+      throw emailError;
+    }
+  };
+
   const handleSave = async () => {
+    // Validate notification requirements
+    if (sendNotification && !selectedTemplate) {
+      toast({
+        title: "Template Required",
+        description: "Please select an email template to send notification.",
+        variant: "destructive",
+      });
+      return;
+    }
+
     try {
       const updateData: any = { id: currentTask.id };
       const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
@@ -116,6 +227,10 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         );
         addSystemComment(commentText);
       }
+      // Send notification email if requested
+      if (sendNotification) {
+        await sendNotificationEmail();
+      }
       
       // Close the modal after successful save
       onOpenChange(false);
@@ -142,8 +257,27 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      setIsEditing(false);
+      onOpenChange(false);
+    }
+  };
+
+  const confirmClose = () => {
     setIsEditing(false);
+    setShowConfirmDialog(false);
     onOpenChange(false);
+  };
+
+  const saveAndClose = async () => {
+    setShowConfirmDialog(false);
+    await handleSave();
+  };
+
+  const stayOnForm = () => {
+    setShowConfirmDialog(false);
   };
 
 
@@ -186,7 +320,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -376,37 +511,42 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  </div>
                  
                  {/* Send Notification Section */}
-                 <div className="pt-3 border-t space-y-3">
-                   <div className="flex items-center gap-2">
-                     <input
-                       type="checkbox"
-                       id="send-notification"
-                       className="rounded border-gray-300"
-                       checked={sendNotification}
-                       onChange={(e) => setSendNotification(e.target.checked)}
-                     />
-                     <label htmlFor="send-notification" className="text-sm font-medium">
-                       Send Notification
-                     </label>
-                   </div>
-                   {sendNotification && (
-                     <div className="ml-6">
-                       <Select value={notificationTemplate} onValueChange={setNotificationTemplate}>
-                         <SelectTrigger className="h-8 w-full">
-                           <SelectValue placeholder="Select template" />
-                         </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="assignment">Task Assignment</SelectItem>
-                           <SelectItem value="update">Task Update</SelectItem>
-                           <SelectItem value="completion">Task Completion</SelectItem>
-                         </SelectContent>
-                       </Select>
+                 {isEditing && canEdit && taskTemplates.length > 0 && (
+                   <div className="pt-3 border-t space-y-3">
+                     <div className="flex items-center gap-2">
+                       <Checkbox
+                         id="send-notification"
+                         checked={sendNotification}
+                         onCheckedChange={(checked) => {
+                           setSendNotification(checked as boolean);
+                           if (!checked) setSelectedTemplate('');
+                         }}
+                       />
+                       <label htmlFor="send-notification" className="text-sm font-medium">
+                         Send Notification
+                       </label>
                      </div>
-                   )}
-                 </div>
+                     {sendNotification && (
+                       <div className="ml-6">
+                         <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                           <SelectTrigger className="h-8 w-full">
+                             <SelectValue placeholder="Select template" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {taskTemplates.map((template) => (
+                               <SelectItem key={template.id} value={template.id}>
+                                 {template.name}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       </div>
+                     )}
+                   </div>
+                 )}
                </CardContent>
              </Card>
-          </div>
+           </div>
 
           {/* Description */}
           <div>
@@ -435,5 +575,27 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog for Unsaved Changes */}
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. What would you like to do?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={stayOnForm}>Stay on Form</AlertDialogCancel>
+          <Button onClick={confirmClose} variant="outline">
+            Close Without Saving
+          </Button>
+          <AlertDialogAction onClick={saveAndClose}>
+            Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
   );
 };
