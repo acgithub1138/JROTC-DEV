@@ -14,6 +14,8 @@ interface ToggleUserStatusRequest {
 }
 
 serve(async (req) => {
+  console.log('Toggle user status function started, method:', req.method)
+  
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
   }
