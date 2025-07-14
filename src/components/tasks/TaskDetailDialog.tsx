@@ -365,15 +365,41 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="w-4 h-4 text-gray-500" />
-                  <span className="text-sm text-gray-600">Created:</span>
-                  <span className="text-sm font-medium">
-                    {format(new Date(currentTask.created_at), 'PPP')}
-                  </span>
-                </div>
-              </CardContent>
-            </Card>
+                 <div className="flex items-center gap-2">
+                   <CalendarIcon className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Created:</span>
+                   <span className="text-sm font-medium">
+                     {format(new Date(currentTask.created_at), 'PPP')}
+                   </span>
+                 </div>
+                 
+                 {/* Send Notification Section */}
+                 <div className="pt-3 border-t space-y-3">
+                   <div className="flex items-center gap-2">
+                     <input
+                       type="checkbox"
+                       id="send-notification"
+                       className="rounded border-gray-300"
+                     />
+                     <label htmlFor="send-notification" className="text-sm font-medium">
+                       Send Notification
+                     </label>
+                   </div>
+                   <div className="ml-6">
+                     <Select>
+                       <SelectTrigger className="h-8 w-full">
+                         <SelectValue placeholder="Select template" />
+                       </SelectTrigger>
+                       <SelectContent>
+                         <SelectItem value="assignment">Task Assignment</SelectItem>
+                         <SelectItem value="update">Task Update</SelectItem>
+                         <SelectItem value="completion">Task Completion</SelectItem>
+                       </SelectContent>
+                     </Select>
+                   </div>
+                 </div>
+               </CardContent>
+             </Card>
           </div>
 
           {/* Description */}
