@@ -14,7 +14,7 @@ interface TaskAssigneeFieldProps {
 }
 
 export const TaskAssigneeField: React.FC<TaskAssigneeFieldProps> = ({ form, canAssignTasks, canEditThisTask }) => {
-  const { users, isLoading, error } = useSchoolUsers();
+  const { users, isLoading, error } = useSchoolUsers(true); // Only fetch active users
   
   if (!canEditThisTask) {
     return null;
