@@ -211,8 +211,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         });
         throw error;
       } else {
-        const template = templates.find(t => t.id === selectedTemplate);
-        addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template?.name || 'Unknown'}"`);
+        addSystemComment.mutate(`Email sent to ${createdByUser.email} [Preview Email](${queueId})`);
         toast({
           title: "Success",
           description: `Notification sent to ${createdByUser.email}`,
