@@ -66,6 +66,18 @@ serve(async (req) => {
 
     if (authError) {
       console.error('Auth invitation error:', authError)
+      // Check if it's a duplicate email error
+      if (authError.message && authError.message.includes('already been registered')) {
+        return new Response(
+          JSON.stringify({ 
+            error: 'User email already exists. Please change it and try again.' 
+          }),
+          {
+            headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+            status: 400,
+          },
+        )
+      }
       throw authError
     }
 

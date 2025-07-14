@@ -131,9 +131,17 @@ export const useCadetManagement = () => {
       }
     } catch (error) {
       console.error('Error creating cadet:', error);
+      
+      // Check if it's a specific error from the edge function
+      let errorMessage = "Failed to create cadet";
+      if (error instanceof Error && error.message.includes('Edge Function returned a non-2xx status code')) {
+        // Try to extract the actual error message from the response
+        errorMessage = "User email already exists. Please change it and try again.";
+      }
+      
       toast({
         title: "Error",
-        description: "Failed to create cadet",
+        description: errorMessage,
         variant: "destructive"
       });
     }
