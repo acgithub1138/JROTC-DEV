@@ -17,6 +17,7 @@ export const useBudgetYears = () => {
         .from('budget_transactions')
         .select('budget_year')
         .eq('school_id', userProfile.school_id)
+        .eq('active', true)
         .eq('archive', true)
         .not('budget_year', 'is', null)
         .order('budget_year', { ascending: false });
@@ -44,7 +45,8 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
       let query = supabase
         .from('budget_transactions')
         .select('*')
-        .eq('school_id', userProfile.school_id);
+        .eq('school_id', userProfile.school_id)
+        .eq('active', true);
 
       // Apply filters
       if (!filters.showArchived) {
@@ -153,7 +155,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     mutationFn: async (id: string) => {
       const { error } = await supabase
         .from('budget_transactions')
-        .delete()
+        .update({ active: false })
         .eq('id', id);
 
       if (error) throw error;
@@ -187,6 +189,7 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
           budget_year: budgetYear,
         })
         .eq('school_id', userProfile.school_id)
+        .eq('active', true)
         .eq('archive', false);
 
       if (error) throw error;

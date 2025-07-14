@@ -16,6 +16,7 @@ export type Database = {
     Tables: {
       budget_transactions: {
         Row: {
+          active: boolean | null
           amount: number
           archive: boolean
           budget_year: string | null
@@ -33,6 +34,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
+          active?: boolean | null
           amount: number
           archive?: boolean
           budget_year?: string | null
@@ -50,6 +52,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
+          active?: boolean | null
           amount?: number
           archive?: boolean
           budget_year?: string | null

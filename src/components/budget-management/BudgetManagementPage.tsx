@@ -25,6 +25,7 @@ export interface BudgetTransaction {
   status?: 'pending' | 'paid' | 'not_paid';
   archive: boolean;
   budget_year?: string;
+  active?: boolean;
   created_at: string;
   updated_at: string;
   created_by?: string;
