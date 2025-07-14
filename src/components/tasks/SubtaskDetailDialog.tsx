@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -50,6 +51,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [editData, setEditData] = useState({
     title: subtask.title,
     description: subtask.description || '',
@@ -72,7 +75,21 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       assigned_to: subtaskToUse.assigned_to || 'unassigned',
       due_date: subtaskToUse.due_date ? new Date(subtaskToUse.due_date) : null,
     });
+    setHasUnsavedChanges(false);
   }, [subtask, subtasks]);
+
+  // Check for unsaved changes
+  useEffect(() => {
+    const hasChanges = 
+      editData.title !== currentSubtask.title ||
+      editData.description !== (currentSubtask.description || '') ||
+      editData.status !== currentSubtask.status ||
+      editData.priority !== currentSubtask.priority ||
+      editData.assigned_to !== (currentSubtask.assigned_to || 'unassigned') ||
+      (editData.due_date?.toDateString() !== (currentSubtask.due_date ? new Date(currentSubtask.due_date).toDateString() : undefined));
+    
+    setHasUnsavedChanges(hasChanges);
+  }, [editData, currentSubtask]);
 
   const canEdit = canUpdate || currentSubtask.assigned_to === userProfile?.id;
 
@@ -195,7 +212,25 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   };
 
   const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleCloseWithoutSaving = () => {
+    setShowUnsavedDialog(false);
     onOpenChange(false);
+  };
+
+  const handleStayOnForm = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  const handleSaveAndClose = async () => {
+    await handleSave();
+    setShowUnsavedDialog(false);
   };
 
   const assigneeOptions = [
@@ -223,7 +258,14 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={(isOpen) => {
+        if (!isOpen && hasUnsavedChanges) {
+          setShowUnsavedDialog(true);
+        } else if (!isOpen) {
+          onOpenChange(false);
+        }
+      }}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -395,13 +437,48 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                     </span>
                   </div>
                 )}
-                <div className="flex items-center gap-2">
+                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Created:</span>
                   <span className="text-sm font-medium">
                     {format(new Date(currentSubtask.created_at), 'PPP')}
                   </span>
                 </div>
+                
+                {/* Send Notification */}
+                {canEdit && subtaskTemplates.length > 0 && (
+                  <div className="pt-3 border-t border-gray-200">
+                    <div className="flex items-center gap-4">
+                      <div className="flex items-center space-x-2">
+                        <Checkbox
+                          id="send-notification"
+                          checked={sendNotification}
+                          onCheckedChange={(checked) => setSendNotification(checked === true)}
+                        />
+                        <label htmlFor="send-notification" className="text-sm">
+                          Send notification email
+                        </label>
+                      </div>
+                      
+                      {sendNotification && (
+                        <div className="flex-1">
+                          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Choose email template" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {subtaskTemplates.map((template) => (
+                                <SelectItem key={template.id} value={template.id}>
+                                  {template.name}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -423,45 +500,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
             )}
           </div>
 
-          {/* Send Notification Section */}
-          {canEdit && subtaskTemplates.length > 0 && (
-            <Card>
-              <CardHeader className="pb-3">
-                <CardTitle className="text-sm font-medium">Send Notification</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div className="flex items-center gap-4">
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="send-notification"
-                      checked={sendNotification}
-                      onCheckedChange={(checked) => setSendNotification(checked === true)}
-                    />
-                    <label htmlFor="send-notification" className="text-sm">
-                      Send notification email
-                    </label>
-                  </div>
-                  
-                  {sendNotification && (
-                    <div className="flex-1">
-                      <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choose email template" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {subtaskTemplates.map((template) => (
-                            <SelectItem key={template.id} value={template.id}>
-                              {template.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                    </div>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          )}
 
           <Separator />
 
@@ -473,5 +511,28 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         </div>
       </DialogContent>
     </Dialog>
+
+    <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes that will be lost if you close this dialog. What would you like to do?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row">
+          <Button variant="outline" onClick={handleCloseWithoutSaving}>
+            Close without saving
+          </Button>
+          <Button variant="secondary" onClick={handleStayOnForm}>
+            Stay on form
+          </Button>
+          <Button onClick={handleSaveAndClose} disabled={isUpdating}>
+            Save and close
+          </Button>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
