@@ -51,19 +51,30 @@ export const useJobBoardNodes = ({
   }, [onNodesChange, handleNodesChange, nodes]);
 
   // Only update nodes and edges when jobs actually change, not when layout preferences change
-  const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
+  const previousJobsRef = useRef<string>('');
+  const previousPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  
   useEffect(() => {
-    // Compare jobs by ID to see if they actually changed
-    const jobsChanged = jobs.length !== previousJobsRef.current.length || 
-      jobs.some((job, index) => job.id !== previousJobsRef.current[index]?.id);
+    // Create a stable string representation of jobs
+    const jobsSignature = jobs.map(job => job.id + job.updated_at).join('|');
+    const positionsSignature = Array.from(savedPositionsMap.entries()).map(([id, pos]) => `${id}:${pos.x},${pos.y}`).join('|');
     
-    if (jobsChanged) {
-      console.log('🔄 Jobs changed, updating nodes and edges');
+    // Only update if jobs actually changed, not just their positions
+    const jobsChanged = jobsSignature !== previousJobsRef.current;
+    const positionsChanged = positionsSignature !== Array.from(previousPositionsRef.current.entries()).map(([id, pos]) => `${id}:${pos.x},${pos.y}`).join('|');
+    
+    if (jobsChanged || (positionsChanged && jobs.length > 0)) {
+      console.log('🔄 Jobs or positions changed, updating nodes and edges', { 
+        jobsChanged, 
+        positionsChanged,
+        jobsLength: jobs.length 
+      });
       setNodes(initialNodesAndEdges.nodes);
       setEdges(initialNodesAndEdges.edges);
-      previousJobsRef.current = jobs;
+      previousJobsRef.current = jobsSignature;
+      previousPositionsRef.current = new Map(savedPositionsMap);
     }
-  }, [jobs, initialNodesAndEdges, setNodes, setEdges]);
+  }, [jobs, savedPositionsMap, initialNodesAndEdges, setNodes, setEdges]);
 
   return {
     nodes,

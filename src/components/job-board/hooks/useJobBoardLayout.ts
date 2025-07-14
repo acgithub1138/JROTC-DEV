@@ -8,6 +8,8 @@ import { useCallback, useMemo } from 'react';
 interface LayoutPreference {
   id: string;
   job_id: string;
+  user_id: string;
+  school_id: string;
   position_x: number;
   position_y: number;
 }
@@ -43,7 +45,7 @@ export const useJobBoardLayout = () => {
     enabled: !!userProfile?.id && !!userProfile?.school_id,
   });
 
-  // Save position mutation
+  // Save position mutation with better error handling and immediate cache update
   const savePositionMutation = useMutation({
     mutationFn: async ({ jobId, position }: { jobId: string; position: { x: number; y: number } }) => {
       if (!userProfile?.id || !userProfile?.school_id) {
@@ -63,9 +65,37 @@ export const useJobBoardLayout = () => {
         });
 
       if (error) throw error;
+      return position; // Return the position to indicate success
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['job-board-layout'] });
+    onSuccess: (position) => {
+      // Optimistically update the cache instead of invalidating
+      queryClient.setQueryData(['job-board-layout', userProfile?.id, userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
+        const existingIndex = oldData.findIndex(pref => 
+          pref.job_id === savePositionMutation.variables?.jobId && 
+          pref.user_id === userProfile?.id
+        );
+        
+        if (existingIndex >= 0) {
+          // Update existing preference
+          const updated = [...oldData];
+          updated[existingIndex] = {
+            ...updated[existingIndex],
+            position_x: position?.x || 0,
+            position_y: position?.y || 0,
+          };
+          return updated;
+        } else {
+          // Add new preference
+          return [...oldData, {
+            id: `temp-${Date.now()}`,
+            job_id: savePositionMutation.variables?.jobId || '',
+            user_id: userProfile?.id || '',
+            school_id: userProfile?.school_id || '',
+            position_x: position?.x || 0,
+            position_y: position?.y || 0,
+          }];
+        }
+      });
     },
     onError: (error) => {
       console.error('Error saving position:', error);
@@ -124,10 +154,28 @@ export const useJobBoardLayout = () => {
   // Memoize the saved positions map to stabilize references
   const savedPositionsMap = useMemo(() => getSavedPositions(), [getSavedPositions]);
 
-  // Debounced save position function
+  // Debounced save position function with immediate visual feedback
   const savePosition = useCallback((jobId: string, position: { x: number; y: number }) => {
+    // Optimistically update local state immediately for smooth UX
+    queryClient.setQueryData(['job-board-layout', userProfile?.id, userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
+      const existingIndex = oldData.findIndex(pref => pref.job_id === jobId);
+      if (existingIndex >= 0) {
+        const updated = [...oldData];
+        updated[existingIndex] = { ...updated[existingIndex], position_x: position.x, position_y: position.y };
+        return updated;
+      } else {
+        return [...oldData, {
+          id: `temp-${jobId}-${Date.now()}`,
+          job_id: jobId,
+          position_x: position.x,
+          position_y: position.y,
+        } as LayoutPreference];
+      }
+    });
+    
+    // Then persist to database
     savePositionMutation.mutate({ jobId, position });
-  }, [savePositionMutation]);
+  }, [savePositionMutation, queryClient, userProfile?.id, userProfile?.school_id]);
 
   // Reset layout to default
   const resetLayout = useCallback(() => {

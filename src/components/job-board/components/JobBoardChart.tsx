@@ -8,7 +8,8 @@ import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
 import { JobBoardToolbar } from './JobBoardToolbar';
 import { ConnectionEditModal } from './ConnectionEditModal';
-import { Dialog, DialogContent } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface JobBoardChartProps {
   jobs: JobBoardWithCadet[];
@@ -199,55 +200,13 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   return (
     <>
-      {chartContent}
+      {!isFullscreen && chartContent}
       <Dialog open={isFullscreen} onOpenChange={setIsFullscreen}>
         <DialogContent className="max-w-none h-screen w-screen p-0 m-0">
-          <div 
-            className="relative h-screen w-screen border rounded-lg"
-            data-testid="job-board-chart-fullscreen"
-          >
-            <JobBoardToolbar
-              onRefresh={onRefresh}
-              onResetLayout={resetLayout}
-              onToggleFullscreen={handleToggleFullscreen}
-              isResetting={isResetting}
-              isFullscreen={isFullscreen}
-            />
-            
-            <ReactFlow
-              nodes={nodes}
-              edges={edges}
-              onNodesChange={handleNodeChange}
-              onEdgesChange={onEdgesChange}
-              onEdgeDoubleClick={handleEdgeDoubleClick}
-              nodeTypes={nodeTypes}
-              fitView={false}
-              minZoom={0.1}
-              maxZoom={2}
-              defaultViewport={{ x: 0, y: 0, zoom: 0.8 }}
-              connectionMode={ConnectionMode.Strict}
-              connectOnClick={false}
-              onConnect={() => {}}
-              edgesReconnectable={false}
-              edgesFocusable={true}
-            >
-              <Background />
-              <Controls />
-            </ReactFlow>
-            
-            {connectionEditModal.sourceJob && connectionEditModal.targetJob && (
-              <ConnectionEditModal
-                isOpen={connectionEditModal.isOpen}
-                onClose={() => setConnectionEditModal(prev => ({ ...prev, isOpen: false }))}
-                sourceJob={connectionEditModal.sourceJob}
-                targetJob={connectionEditModal.targetJob}
-                connectionType={connectionEditModal.connectionType!}
-                currentSourceHandle={connectionEditModal.currentSourceHandle}
-                currentTargetHandle={connectionEditModal.currentTargetHandle}
-                onSave={handleConnectionSave}
-              />
-            )}
-          </div>
+          <VisuallyHidden>
+            <DialogTitle>Job Board Chart - Fullscreen View</DialogTitle>
+          </VisuallyHidden>
+          {chartContent}
         </DialogContent>
       </Dialog>
     </>
