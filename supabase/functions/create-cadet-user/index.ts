@@ -25,11 +25,18 @@ serve(async (req) => {
   }
 
   try {
+    console.log('Function started')
+    
     // Create admin client with service role key
     const supabaseAdmin = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     )
+
+    console.log('Supabase admin client created')
+
+    const requestBody = await req.json()
+    console.log('Request body:', JSON.stringify(requestBody))
 
     const { 
       email, 
@@ -40,7 +47,7 @@ serve(async (req) => {
       rank, 
       flight, 
       school_id 
-    }: CreateCadetRequest = await req.json()
+    }: CreateCadetRequest = requestBody
 
     console.log('Creating user:', email, 'with role:', role)
 
