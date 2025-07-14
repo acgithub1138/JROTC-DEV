@@ -15,7 +15,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   onBulkOperations,
   onExport
 }) => {
-  const { canBulkImport } = useInventoryPermissions();
+  const { canCreate, canBulkImport } = useInventoryPermissions();
   const { isLoading } = usePermissionContext();
 
   return (
@@ -30,10 +30,12 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
           Bulk Operations
         </Button>
       )}
-      <Button onClick={onAddItem}>
-        <Plus className="w-4 h-4 mr-2" />
-        Add Item
-      </Button>
+      {(canCreate || isLoading) && (
+        <Button onClick={onAddItem} disabled={isLoading}>
+          <Plus className="w-4 h-4 mr-2" />
+          Add Item
+        </Button>
+      )}
     </>
   );
 };
