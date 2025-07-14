@@ -128,7 +128,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         throw error;
       } else {
         const template = templates.find(t => t.id === selectedTemplate);
-        addSystemComment(`Email notification queued for ${createdByUser.email} using template "${template?.name || 'Unknown'}"`);
+        addSystemComment(`Email sent to ${createdByUser.email} [Preview Email](${queueId})`);
         toast({
           title: "Success",
           description: `Notification sent to ${createdByUser.email}`,
