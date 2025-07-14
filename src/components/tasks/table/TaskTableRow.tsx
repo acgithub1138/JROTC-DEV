@@ -119,10 +119,10 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         <TableCell className="font-medium py-2">
           <span>{task.title}</span>
         </TableCell>
-        <TableCell className="py-2">
+        <TableCell className="text-center py-2">
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={() => setIsDescriptionModalOpen(true)}
             className="flex items-center gap-2"
           >
