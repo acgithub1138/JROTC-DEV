@@ -246,7 +246,7 @@ const SchoolManagementPage = () => {
                 <TableHead>City</TableHead>
                 <TableHead>Phone</TableHead>
                 <TableHead>Email</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
+                <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -257,16 +257,16 @@ const SchoolManagementPage = () => {
                   <TableCell className="py-2">{school.phone}</TableCell>
                   <TableCell className="py-2">{school.email}</TableCell>
                   <TableCell className="text-right py-2">
-                    <div className="flex items-center justify-end gap-2">
+                    <div className="flex items-center justify-center gap-2">
                       <TooltipProvider>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
                               variant="outline"
-                              size="sm"
+                              size="icon" className="h-6 w-6"
                               onClick={() => handleEditSchool(school)}
                             >
-                              <Edit className="w-4 h-4" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -279,13 +279,13 @@ const SchoolManagementPage = () => {
                           <TooltipTrigger asChild>
                             <Button
                               variant="outline"
-                              size="sm"
+                              size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                               onClick={() => {
                                 setSchoolToDelete(school);
                                 setDeleteDialogOpen(true);
                               }}
                             >
-                              <Trash2 className="w-4 h-4" />
+                              <Trash2 className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
