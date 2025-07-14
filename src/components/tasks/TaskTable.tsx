@@ -36,7 +36,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
-  const { canDelete } = useTaskPermissions();
+  const { canDelete, canUpdate } = useTaskPermissions();
   const { deleteTask } = useTasks();
   
   const { sortedData: sortedTasks, sortConfig, handleSort } = useSortableTable({
@@ -89,7 +89,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         totalTasks={sortedTasks.length}
         onSelectAll={(checked) => handleSelectAll(checked, sortedTasks)}
         onBulkDelete={handleBulkDelete}
-        canEdit={canDelete} // Use delete permission for showing actions
+        canEdit={canUpdate} // Use update permission for showing actions
         showOverdueFilter={showOverdueFilter}
         overdueFilterChecked={overdueFilterChecked}
         onOverdueFilterChange={onOverdueFilterChange}
