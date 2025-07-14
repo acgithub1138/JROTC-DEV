@@ -60,21 +60,63 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const handleSave = async () => {
     try {
       const updateData: any = { id: currentTask.id };
+      const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
       
-      if (editData.title !== currentTask.title) updateData.title = editData.title;
-      if (editData.description !== (currentTask.description || '')) updateData.description = editData.description || null;
-      if (editData.status !== currentTask.status) updateData.status = editData.status;
-      if (editData.priority !== currentTask.priority) updateData.priority = editData.priority;
+      if (editData.title !== currentTask.title) {
+        updateData.title = editData.title;
+        changes.push({ field: 'title', oldValue: currentTask.title, newValue: editData.title });
+      }
+      
+      if (editData.description !== (currentTask.description || '')) {
+        updateData.description = editData.description || null;
+        changes.push({ field: 'description', oldValue: currentTask.description || '', newValue: editData.description || '' });
+      }
+      
+      if (editData.status !== currentTask.status) {
+        updateData.status = editData.status;
+        changes.push({ field: 'status', oldValue: currentTask.status, newValue: editData.status });
+      }
+      
+      if (editData.priority !== currentTask.priority) {
+        updateData.priority = editData.priority;
+        changes.push({ field: 'priority', oldValue: currentTask.priority, newValue: editData.priority });
+      }
       
       const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
-      if (newAssignedTo !== currentTask.assigned_to) updateData.assigned_to = newAssignedTo;
+      if (newAssignedTo !== currentTask.assigned_to) {
+        updateData.assigned_to = newAssignedTo;
+        changes.push({ field: 'assigned_to', oldValue: currentTask.assigned_to, newValue: newAssignedTo });
+      }
       
-      if (editData.due_date !== (currentTask.due_date ? new Date(currentTask.due_date) : null)) {
-        updateData.due_date = editData.due_date ? editData.due_date.toISOString() : null;
+      const oldDueDate = currentTask.due_date ? new Date(currentTask.due_date) : null;
+      const newDueDate = editData.due_date;
+      const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
+                                   (!oldDueDate && newDueDate) ||
+                                   (oldDueDate && !newDueDate);
+      
+      if (dueDatesAreDifferent) {
+        updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
+        changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
       }
 
+      // Update the task
       await updateTask(updateData);
-      setIsEditing(false);
+      
+      // Add system comments for tracked changes
+      for (const change of changes) {
+        const commentText = formatFieldChangeComment(
+          change.field,
+          change.oldValue,
+          change.newValue,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        addSystemComment(commentText);
+      }
+      
+      // Close the modal after successful save
+      onOpenChange(false);
     } catch (error) {
       console.error('Error updating task:', error);
     }
