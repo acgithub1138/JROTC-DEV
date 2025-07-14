@@ -5,6 +5,16 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -115,6 +125,9 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const { templates } = useEmailTemplates();
+
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   // Filter templates for incidents table
   const incidentTemplates = templates.filter(template => template.source_table === 'incidents' && template.is_active);
@@ -359,8 +372,25 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   };
 
   const handleClose = () => {
+    // Check if there are unsaved changes when in edit mode
+    if (isEditing && hasChanges()) {
+      setShowConfirmDialog(true);
+      return;
+    }
+    
     setIsEditing(false);
     onClose();
+  };
+
+  const confirmClose = () => {
+    setShowConfirmDialog(false);
+    setIsEditing(false);
+    onClose();
+  };
+
+  const handleSaveAndClose = async () => {
+    setShowConfirmDialog(false);
+    await handleSave();
   };
 
   const adminOptions = [
@@ -376,7 +406,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const currentCategoryOption = categoryOptions.find(option => option.value === editData.category);
 
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -664,6 +695,30 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog for Unsaved Changes */}
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. What would you like to do?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
+            Stay on Form
+          </AlertDialogCancel>
+          <Button variant="outline" onClick={confirmClose}>
+            Close without Saving
+          </Button>
+          <AlertDialogAction onClick={handleSaveAndClose}>
+            Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
 
