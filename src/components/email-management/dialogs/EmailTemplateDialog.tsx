@@ -14,7 +14,7 @@ import { TemplateBasicFields } from './components/TemplateBasicFields';
 import { SubjectField } from './components/SubjectField';
 import { RichTextBodyField } from './components/RichTextBodyField';
 import { VariablesPanel } from './components/VariablesPanel';
-
+import { EmailPreviewDialog } from './EmailPreviewDialog';
 import { extractVariables } from '@/utils/templateProcessor';
 
 interface EmailTemplateDialogProps {
@@ -43,7 +43,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
   const subjectRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<ReactQuill>(null);
-  
+  const [showPreview, setShowPreview] = useState(false);
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
   const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
@@ -129,7 +129,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     }
   };
 
-  
+  const canPreview = formData.source_table && (formData.subject || formData.body);
 
   return (
     <>
@@ -180,17 +180,36 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
               </div>
             </div>
 
-            <div className="flex justify-end space-x-2">
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+            <div className="flex justify-between">
+              <Button 
+                type="button" 
+                variant="outline" 
+                onClick={() => setShowPreview(true)}
+                disabled={!canPreview}
+              >
+                Preview Email
               </Button>
-              <Button type="submit">
-                {mode === 'edit' ? 'Update Template' : 'Create Template'}
-              </Button>
+              
+              <div className="flex space-x-2">
+                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {mode === 'edit' ? 'Update Template' : 'Create Template'}
+                </Button>
+              </div>
             </div>
           </form>
         </DialogContent>
       </Dialog>
+
+      <EmailPreviewDialog
+        open={showPreview}
+        onOpenChange={setShowPreview}
+        subject={formData.subject}
+        body={formData.body}
+        sourceTable={formData.source_table}
+      />
 
     </>
   );
