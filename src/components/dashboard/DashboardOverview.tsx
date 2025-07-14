@@ -192,6 +192,10 @@ const DashboardOverview = () => {
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
+                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <Users className="w-4 h-4 text-blue-600 mr-2" />
+                    <p className="font-medium text-sm">Add Cadet</p>
+                  </button>
                   <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
@@ -199,10 +203,6 @@ const DashboardOverview = () => {
                   <button onClick={() => setIsAddExpenseOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <DollarSign className="w-4 h-4 text-red-600 mr-2" />
                     <p className="font-medium text-sm">Add Expense</p>
-                  </button>
-                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                    <Users className="w-4 h-4 text-blue-600 mr-2" />
-                    <p className="font-medium text-sm">Add Cadet</p>
                   </button>
                 </>
               )}
