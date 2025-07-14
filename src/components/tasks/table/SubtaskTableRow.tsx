@@ -72,7 +72,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         <TableCell className="font-medium py-2 pl-4">
           <span>{subtask.title}</span>
         </TableCell>
-        <TableCell className="justify-center py-2">
+        <TableCell className="flex items-center justify-center gap-2">
           <Button
             variant="outline"
             size="icon"
