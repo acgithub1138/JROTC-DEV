@@ -27,9 +27,8 @@ import {
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
 import { useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
+import { useIncidentMutations } from "@/hooks/incidents/useIncidentMutations";
 import { useAuth } from "@/contexts/AuthContext";
-import { supabase } from "@/integrations/supabase/client";
-import { useToast } from "@/hooks/use-toast";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -59,7 +58,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   const { data: priorityOptions = [] } = useIncidentPriorityOptions();
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { userProfile } = useAuth();
-  const { toast } = useToast();
+  const { createIncident } = useIncidentMutations();
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -73,37 +72,20 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   });
 
   const onSubmit = async (data: FormData) => {
-    try {
-      // Create new incident only
-      const { error } = await supabase
-        .from('incidents')
-        .insert({
-          title: data.title,
-          description: data.description,
-          priority: data.priority,
-          category: data.category,
-          school_id: userProfile?.school_id || "",
-          created_by: userProfile?.id,
-          due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
-        });
-
-      if (error) throw error;
-
-      toast({
-        title: "Success",
-        description: "Incident created successfully",
-      });
-
-      form.reset();
-      onClose();
-    } catch (error) {
-      console.error('Error creating incident:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create incident. Please try again.",
-        variant: "destructive",
-      });
-    }
+    createIncident.mutate({
+      title: data.title,
+      description: data.description,
+      priority: data.priority,
+      category: data.category,
+      school_id: userProfile?.school_id || "",
+      created_by: userProfile?.id,
+      due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
+    }, {
+      onSuccess: () => {
+        form.reset();
+        onClose();
+      }
+    });
   };
 
   return (
