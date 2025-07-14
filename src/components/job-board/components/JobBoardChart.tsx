@@ -172,7 +172,6 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         }}
         edgesReconnectable={false}
         edgesFocusable={true}
-        key={`reactflow-${jobs.length}`}
       >
         <Background />
         <Controls />
@@ -260,7 +259,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob, readOnly = false }
   }
 
   return (
-    <ReactFlowProvider key={`chart-${jobs.length}`}>
+    <ReactFlowProvider>
       <JobBoardChartInner 
         jobs={jobs}
         onRefresh={onRefresh}
