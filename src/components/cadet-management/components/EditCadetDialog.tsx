@@ -191,7 +191,10 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <SelectContent>
                 <SelectItem value="none">No rank</SelectItem>
                 {ranks.map((rank) => (
-                  <SelectItem key={rank.id} value={rank.rank || "none"}>
+                  <SelectItem 
+                    key={rank.id} 
+                    value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}
+                  >
                     {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                   </SelectItem>
                 ))}

@@ -42,7 +42,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
   const rankOptions = [
     ...ranks.map(rank => ({ 
-      value: rank.rank || "none", 
+      value: rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none", 
       label: `${rank.rank} ${rank.abbreviation ? `(${rank.abbreviation})` : ''}` 
     })),
     { value: '', label: 'Clear Rank' }

@@ -12,6 +12,12 @@ export const formatRankWithAbbreviation = (
 ): string => {
   if (!rank) return '-';
   
+  // If rank already contains abbreviation in parentheses, return as is
+  if (rank.includes('(') && rank.includes(')')) {
+    return rank;
+  }
+  
+  // Otherwise, try to find the abbreviation from the program ranks
   if (!jrotcProgram) return rank;
   
   const ranks = getRanksForProgram(jrotcProgram);
