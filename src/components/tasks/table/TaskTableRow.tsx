@@ -127,7 +127,6 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             className="flex items-center gap-2"
           >
             <Eye className="w-4 h-4" />
-            View
           </Button>
         </TableCell>
         <TableCell className="py-2">
