@@ -30,7 +30,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
   const { createSubtask } = useSubtasks();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { users } = useSchoolUsers();
+  const { users } = useSchoolUsers(true); // Only fetch active users
 
   const [formData, setFormData] = useState({
     title: '',
@@ -148,11 +148,13 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {users.map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name}
-                    </SelectItem>
-                  ))}
+                  {users
+                    .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                    .map((user) => (
+                      <SelectItem key={user.id} value={user.id}>
+                        {user.last_name}, {user.first_name}
+                      </SelectItem>
+                    ))}
                 </SelectContent>
               </Select>
             </div>
