@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Trash2, CheckCircle, Clock, User, Calendar } from 'lucide-react';
+import { ChevronDown, X, CheckCircle, Clock, User, Calendar } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -18,9 +18,9 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
   selectedTasks,
   onSelectionClear,
   canEdit,
-  canDelete
+  canDelete: canCancel // Renamed since we're canceling, not deleting
 }) => {
-  const { updateTask, deleteTask } = useTasks();
+  const { updateTask } = useTasks();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
@@ -64,27 +64,37 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     }
   };
 
-  const handleBulkDelete = async () => {
+  const handleBulkCancel = async () => {
     if (selectedTasks.length === 0) return;
     
-    const confirmMessage = `Are you sure you want to delete ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
+    const confirmMessage = `Are you sure you want to cancel ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
     if (!confirm(confirmMessage)) return;
     
     setIsUpdating(true);
     try {
-      await Promise.all(selectedTasks.map(taskId => deleteTask(taskId)));
+      const now = new Date().toISOString();
+      
+      await Promise.all(
+        selectedTasks.map(taskId => 
+          updateTask({ 
+            id: taskId, 
+            status: 'canceled',
+            completed_at: now
+          })
+        )
+      );
       
       toast({
-        title: "Tasks Deleted",
-        description: `Successfully deleted ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}`,
+        title: "Tasks Canceled",
+        description: `Successfully canceled ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}`,
       });
       
       onSelectionClear();
     } catch (error) {
-      console.error('Failed to delete tasks:', error);
+      console.error('Failed to cancel tasks:', error);
       toast({
-        title: "Delete Failed",
-        description: "Failed to delete selected tasks. Please try again.",
+        title: "Cancel Failed",
+        description: "Failed to cancel selected tasks. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -176,13 +186,13 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
           Clear Due Date
         </DropdownMenuItem>
 
-        {/* Delete Action - Only show if user has delete permission */}
-        {canDelete && (
+        {/* Cancel Action - Only show if user has delete permission */}
+        {canCancel && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleBulkDelete} className="text-red-600">
-              <Trash2 className="w-4 h-4 mr-2" />
-              Delete Selected
+            <DropdownMenuItem onClick={handleBulkCancel} className="text-red-600">
+              <X className="w-4 h-4 mr-2" />
+              Cancel Selected
             </DropdownMenuItem>
           </>
         )}
