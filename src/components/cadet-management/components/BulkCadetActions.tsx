@@ -236,7 +236,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
               <DropdownMenuSeparator />
               <DropdownMenuItem onClick={handleBulkDeactivate} className="text-red-600">
                 <UserX className="w-4 h-4 mr-2" />
-                Deactivate Selected
+                Deactivate Cadets
               </DropdownMenuItem>
             </>
           )}
