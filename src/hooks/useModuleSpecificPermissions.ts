@@ -21,7 +21,7 @@ export const useTaskPermissions = () => {
   
   return {
     ...modulePermissions,
-    canView: modulePermissions.canRead,
+    canView: modulePermissions.canViewDetails,
     canAssign: hasPermission('tasks', 'assign'),
     canManageOptions: hasPermission('tasks', 'manage_options'),
     canUpdateAssigned: hasPermission('tasks', 'update_assigned'),
