@@ -61,9 +61,9 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     due_date: subtask.due_date ? new Date(subtask.due_date) : null,
   });
 
-  // Filter templates for subtasks
+  // Filter templates for subtasks (use task templates)
   const subtaskTemplates = templates.filter(template => 
-    template.is_active && template.source_table === 'subtasks'
+    template.is_active && template.source_table === 'tasks'
   );
 
   // Track changes for unsaved warning
