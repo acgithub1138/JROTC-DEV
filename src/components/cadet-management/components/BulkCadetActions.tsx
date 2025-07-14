@@ -99,7 +99,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
       });
       
       onSelectionClear();
-      onRefresh();
+      if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Failed to update cadets:', error);
       toast({
@@ -135,7 +135,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
       });
       
       onSelectionClear();
-      onRefresh();
+      if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Failed to deactivate cadets:', error);
       toast({
