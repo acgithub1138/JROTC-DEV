@@ -50,31 +50,32 @@ export const useJobBoardNodes = ({
     handleNodesChange(changes, nodes);
   }, [onNodesChange, handleNodesChange, nodes]);
 
-  // Only update nodes and edges when jobs actually change, not when layout preferences change
-  const previousJobsRef = useRef<string>('');
-  const previousPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  // Only update when jobs actually change (not layout/positions)
+  const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
   
   useEffect(() => {
-    // Create a stable string representation of jobs
-    const jobsSignature = jobs.map(job => job.id + job.updated_at).join('|');
-    const positionsSignature = Array.from(savedPositionsMap.entries()).map(([id, pos]) => `${id}:${pos.x},${pos.y}`).join('|');
+    // Compare actual job changes, not string signatures
+    const jobsChanged = jobs.length !== previousJobsRef.current.length || 
+      jobs.some((job, index) => {
+        const prevJob = previousJobsRef.current[index];
+        return !prevJob || 
+          job.id !== prevJob.id || 
+          job.updated_at !== prevJob.updated_at ||
+          job.role !== prevJob.role ||
+          job.reports_to !== prevJob.reports_to ||
+          job.assistant !== prevJob.assistant;
+      });
     
-    // Only update if jobs actually changed, not just their positions
-    const jobsChanged = jobsSignature !== previousJobsRef.current;
-    const positionsChanged = positionsSignature !== Array.from(previousPositionsRef.current.entries()).map(([id, pos]) => `${id}:${pos.x},${pos.y}`).join('|');
-    
-    if (jobsChanged || (positionsChanged && jobs.length > 0)) {
-      console.log('🔄 Jobs or positions changed, updating nodes and edges', { 
-        jobsChanged, 
-        positionsChanged,
-        jobsLength: jobs.length 
+    if (jobsChanged) {
+      console.log('🔄 Jobs changed, updating nodes and edges', { 
+        jobsLength: jobs.length,
+        previousLength: previousJobsRef.current.length
       });
       setNodes(initialNodesAndEdges.nodes);
       setEdges(initialNodesAndEdges.edges);
-      previousJobsRef.current = jobsSignature;
-      previousPositionsRef.current = new Map(savedPositionsMap);
+      previousJobsRef.current = [...jobs];
     }
-  }, [jobs, savedPositionsMap, initialNodesAndEdges, setNodes, setEdges]);
+  }, [jobs, initialNodesAndEdges, setNodes, setEdges]);
 
   return {
     nodes,
