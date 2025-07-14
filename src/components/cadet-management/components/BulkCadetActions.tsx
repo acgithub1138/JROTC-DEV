@@ -5,6 +5,7 @@ import { ChevronDown, GraduationCap, Award, Plane, Shield, UserX, Users } from '
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { gradeOptions as gradeConstants, flightOptions as flightConstants, roleOptions as roleConstants } from '../constants';
 
 interface BulkCadetActionsProps {
   selectedCadets: string[];
@@ -30,10 +31,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
 
   // Grade options
   const gradeOptions = [
-    { value: '9', label: '9th Grade' },
-    { value: '10', label: '10th Grade' },
-    { value: '11', label: '11th Grade' },
-    { value: '12', label: '12th Grade' },
+    ...gradeConstants.map(grade => ({ value: grade, label: grade })),
     { value: '', label: 'Clear Grade' }
   ];
 
@@ -56,42 +54,45 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     { value: '', label: 'Clear Rank' }
   ];
 
-  // Flight options (common flight names)
+  // Flight options - only Alpha, Bravo, Charlie, Delta
   const flightOptions = [
-    { value: 'Alpha', label: 'Alpha Flight' },
-    { value: 'Bravo', label: 'Bravo Flight' },
-    { value: 'Charlie', label: 'Charlie Flight' },
-    { value: 'Delta', label: 'Delta Flight' },
-    { value: 'Echo', label: 'Echo Flight' },
-    { value: 'Foxtrot', label: 'Foxtrot Flight' },
-    { value: 'Golf', label: 'Golf Flight' },
-    { value: 'Hotel', label: 'Hotel Flight' },
+    ...flightConstants.map(flight => ({ value: flight, label: `${flight} Flight` })),
     { value: '', label: 'Clear Flight' }
   ];
 
   // Role options
   const roleOptions = [
-    { value: 'cadet', label: 'Cadet' },
-    { value: 'command_staff', label: 'Command Staff' },
+    ...roleConstants,
     { value: 'instructor', label: 'Instructor' }
   ];
 
   const handleBulkUpdate = async (field: string, value: any) => {
     if (selectedCadets.length === 0) return;
     
+    console.log('Bulk update starting:', { field, value, selectedCadets });
     setIsUpdating(true);
+    
     try {
       const updateData = { 
         [field]: value || null,
         updated_at: new Date().toISOString()
       };
       
-      const { error } = await supabase
+      console.log('Update data:', updateData);
+      console.log('Selected cadet IDs:', selectedCadets);
+      
+      const { data, error } = await supabase
         .from('profiles')
         .update(updateData)
-        .in('id', selectedCadets);
+        .in('id', selectedCadets)
+        .select('id, first_name, last_name, ' + field);
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Update successful, affected rows:', data);
       
       toast({
         title: "Cadets Updated",
@@ -102,9 +103,10 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
       if (onRefresh) onRefresh();
     } catch (error) {
       console.error('Failed to update cadets:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
       toast({
         title: "Update Failed",
-        description: "Failed to update selected cadets. Please try again.",
+        description: `Failed to update selected cadets: ${errorMessage}`,
         variant: "destructive",
       });
     } finally {
