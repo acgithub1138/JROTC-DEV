@@ -141,7 +141,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button 
-                  variant={action.variant || "outline"} 
+                  variant={action.variant || "ghost"} 
                   size="icon" 
                   onClick={action.onClick}
                   className={`h-6 w-6 ${action.className || ''}`}
