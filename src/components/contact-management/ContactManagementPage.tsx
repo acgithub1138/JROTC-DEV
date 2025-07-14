@@ -42,20 +42,29 @@ const ContactManagementPage = () => {
 
   return (
     <div className="p-6 space-y-6">
-      <StandardTableWrapper
-        title="Contact Management"
-        description="Manage school contacts including parents, relatives, and friends"
-        searchValue={searchValue}
-        onSearchChange={setSearchValue}
-        searchPlaceholder="Search contacts by name, email, or phone..."
-        actions={
-          canCreate ? (
+      <div className="flex items-center justify-between">
+        <div>
+          <h2 className="text-3xl font-bold tracking-tight">Contact Management</h2>
+          <p className="text-muted-foreground">
+            Manage school contacts including parents, relatives, and friends
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {canCreate && (
             <Button onClick={() => setShowAddContact(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Contact
             </Button>
-          ) : undefined
-        }
+          )}
+        </div>
+      </div>
+
+      <StandardTableWrapper
+        title=""
+        description=""
+        searchValue={searchValue}
+        onSearchChange={setSearchValue}
+        searchPlaceholder="Search contacts by name, email, or phone..."
       >
         {isMobile ? (
           <ContactCards
