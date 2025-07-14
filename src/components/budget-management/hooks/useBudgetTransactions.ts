@@ -189,7 +189,6 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
           budget_year: budgetYear,
         })
         .eq('school_id', userProfile.school_id)
-        .eq('active', true)
         .eq('archive', false);
 
       if (error) throw error;
