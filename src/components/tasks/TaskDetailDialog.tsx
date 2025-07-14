@@ -1,6 +1,16 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -51,6 +61,9 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const { templates } = useEmailTemplates();
+
+  // Confirmation dialog state
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   // Filter templates for tasks table
   const taskTemplates = templates.filter(template => template.source_table === 'tasks' && template.is_active);
@@ -69,6 +82,15 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       due_date: taskToUse.due_date ? new Date(taskToUse.due_date) : null,
     });
   }, [task, tasks]);
+
+  const hasChanges = () => {
+    return editData.title !== currentTask.title ||
+           editData.description !== (currentTask.description || '') ||
+           editData.status !== currentTask.status ||
+           editData.priority !== currentTask.priority ||
+           (editData.assigned_to === 'unassigned' ? null : editData.assigned_to) !== currentTask.assigned_to ||
+           (editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null));
+  };
 
   const sendNotificationEmail = async () => {
     if (!selectedTemplate || !currentTask.assigned_by) {
@@ -242,8 +264,25 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleClose = () => {
+    // Check if there are unsaved changes when in edit mode
+    if (isEditing && hasChanges()) {
+      setShowConfirmDialog(true);
+      return;
+    }
+    
     setIsEditing(false);
     onOpenChange(false);
+  };
+
+  const confirmClose = () => {
+    setShowConfirmDialog(false);
+    setIsEditing(false);
+    onOpenChange(false);
+  };
+
+  const handleSaveAndClose = async () => {
+    setShowConfirmDialog(false);
+    await handleSave();
   };
 
 
@@ -286,7 +325,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   }
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -548,5 +588,29 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         </div>
       </DialogContent>
     </Dialog>
+
+    {/* Confirmation Dialog for Unsaved Changes */}
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. What would you like to do?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
+          <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
+            Stay on Form
+          </AlertDialogCancel>
+          <Button variant="outline" onClick={confirmClose}>
+            Close without Saving
+          </Button>
+          <AlertDialogAction onClick={handleSaveAndClose}>
+            Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+    </>
   );
 };
