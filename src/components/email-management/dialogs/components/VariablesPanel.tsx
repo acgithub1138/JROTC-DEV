@@ -56,7 +56,12 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                       variant="outline"
                       size="sm"
                       className="w-full justify-start text-xs h-auto p-2"
-                      onClick={() => onVariableInsert(variable.name)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onVariableInsert(variable.name);
+                      }}
                     >
                       <div className="text-left">
                         <div className="font-medium">{variable.label}</div>
@@ -104,7 +109,12 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                               variant="outline"
                               size="sm"
                               className="w-full justify-start text-xs h-auto p-2"
-                              onClick={() => onVariableInsert(field.name)}
+                              type="button"
+                              onClick={(e) => {
+                                e.preventDefault();
+                                e.stopPropagation();
+                                onVariableInsert(field.name);
+                              }}
                             >
                               <span className="truncate">{field.label}</span>
                             </Button>
@@ -127,7 +137,12 @@ export const VariablesPanel: React.FC<VariablesPanelProps> = ({
                       variant="outline"
                       size="sm"
                       className="w-full justify-start text-xs h-auto p-2"
-                      onClick={() => onVariableInsert(column.name)}
+                      type="button"
+                      onClick={(e) => {
+                        e.preventDefault();
+                        e.stopPropagation();
+                        onVariableInsert(column.name);
+                      }}
                     >
                       <span className="truncate">{column.label}</span>
                     </Button>
