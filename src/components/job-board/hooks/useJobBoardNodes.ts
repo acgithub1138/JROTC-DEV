@@ -9,12 +9,14 @@ interface UseJobBoardNodesProps {
   jobs: JobBoardWithCadet[];
   getSavedPositions: () => Map<string, { x: number; y: number }>;
   handleNodesChange: (changes: NodeChange[], nodes: any[]) => void;
+  layoutPreferences: any[];
 }
 
 export const useJobBoardNodes = ({
   jobs,
   getSavedPositions,
-  handleNodesChange
+  handleNodesChange,
+  layoutPreferences
 }: UseJobBoardNodesProps) => {
   const initialNodesAndEdges = useMemo(() => {
     if (jobs.length === 0) {
@@ -36,7 +38,7 @@ export const useJobBoardNodes = ({
       nodes: flowNodes,
       edges: flowEdges,
     };
-  }, [jobs, getSavedPositions]);
+  }, [jobs, layoutPreferences, getSavedPositions]);
 
   const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
   const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);

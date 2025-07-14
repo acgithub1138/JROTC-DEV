@@ -22,7 +22,7 @@ const nodeTypes = {
 };
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
-  const { getSavedPositions, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+  const { getSavedPositions, handleNodesChange, resetLayout, isResetting, layoutPreferences } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [connectionEditModal, setConnectionEditModal] = useState<{
@@ -45,7 +45,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   const { nodes, edges, handleNodeChange, onEdgesChange } = useJobBoardNodes({
     jobs,
     getSavedPositions,
-    handleNodesChange
+    handleNodesChange,
+    layoutPreferences
   });
 
   // Simplified fitView function that triggers after initialization
