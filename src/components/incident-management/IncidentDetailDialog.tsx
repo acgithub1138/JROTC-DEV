@@ -28,7 +28,6 @@ import { useEmailTemplates } from "@/hooks/email/useEmailTemplates";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
-import { processTemplate } from "@/utils/templateProcessor";
 import type { Incident } from "@/hooks/incidents/types";
 
 interface IncidentDetailDialogProps {
@@ -160,29 +159,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       return;
     }
 
-    console.log('Attempting to send notification for incident:', {
-      incidentId: currentIncident.id,
-      createdBy: currentIncident.created_by,
-      availableUsers: users.map(u => ({ id: u.id, email: u.email, name: `${u.first_name} ${u.last_name}` }))
-    });
-
     try {
-      const template = templates.find(t => t.id === selectedTemplate);
-      if (!template) {
-        toast({
-          title: "Error",
-          description: "Selected email template not found.",
-          variant: "destructive",
-        });
-        return;
-      }
-
+      // Find the user who created the incident
       let createdByUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentIncident.created_by);
-      console.log('Found created by user in school users:', createdByUser);
       
       // If user not found in school users (could be from different school), fetch directly
       if (!createdByUser) {
-        console.log('User not found in school users, fetching directly from database');
         const { data: userData, error: userError } = await supabase
           .from('profiles')
           .select('id, first_name, last_name, email')
@@ -200,15 +182,9 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         }
         
         createdByUser = userData as { id: string; first_name: string; last_name: string; email: string };
-        console.log('Fetched user directly:', createdByUser);
       }
       
       if (!createdByUser?.email) {
-        console.log('No email found for user:', {
-          userId: currentIncident.created_by,
-          userFound: !!createdByUser,
-          userEmail: createdByUser?.email
-        });
         toast({
           title: "Error", 
           description: "No email address found for the incident creator.",
@@ -217,55 +193,14 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         return;
       }
 
-      const assignedAdmin = currentIncident.assigned_to_admin ? 
-        users.find(u => u.id === currentIncident.assigned_to_admin) : null;
-      
-      // Prepare incident data with flattened profile information for template processing
-      const incidentData = {
-        ...currentIncident,
-        // Add flattened created_by profile data (also as submitted_by for template compatibility)
-        'created_by.id': createdByUser.id,
-        'created_by.first_name': createdByUser.first_name,
-        'created_by.last_name': createdByUser.last_name,
-        'created_by.email': createdByUser.email,
-        'created_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-        'submitted_by.id': createdByUser.id,
-        'submitted_by.first_name': createdByUser.first_name,
-        'submitted_by.last_name': createdByUser.last_name,
-        'submitted_by.email': createdByUser.email,
-        'submitted_by.full_name': `${createdByUser.first_name} ${createdByUser.last_name}`,
-        // Add flattened assigned_to_admin profile data (also as assigned_to for template compatibility)
-        ...(assignedAdmin && {
-          'assigned_to_admin.id': assignedAdmin.id,
-          'assigned_to_admin.first_name': assignedAdmin.first_name,
-          'assigned_to_admin.last_name': assignedAdmin.last_name,
-          'assigned_to_admin.email': assignedAdmin.email,
-          'assigned_to_admin.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
-          'assigned_to.id': assignedAdmin.id,
-          'assigned_to.first_name': assignedAdmin.first_name,
-          'assigned_to.last_name': assignedAdmin.last_name,
-          'assigned_to.email': assignedAdmin.email,
-          'assigned_to.full_name': `${assignedAdmin.first_name} ${assignedAdmin.last_name}`,
-        })
-      };
-
-      // Process template variables
-      const processedSubject = processTemplate(template.subject, incidentData);
-      const processedBody = processTemplate(template.body, incidentData);
-
-      const { error } = await supabase
-        .from('email_queue')
-        .insert({
-          recipient_email: createdByUser.email,
-          subject: processedSubject,
-          body: processedBody,
-          template_id: template.id,
-          record_id: currentIncident.id,
-          source_table: 'incidents',
-          school_id: currentIncident.school_id,
-          scheduled_at: new Date().toISOString(),
-          status: 'pending'
-        });
+      // Use the queue_email RPC function instead of manual processing
+      const { data: queueId, error } = await supabase.rpc('queue_email', {
+        template_id_param: selectedTemplate,
+        recipient_email_param: createdByUser.email,
+        source_table_param: 'incidents',
+        record_id_param: currentIncident.id,
+        school_id_param: currentIncident.school_id
+      });
 
       if (error) {
         console.error('Error queuing notification email:', error);
@@ -276,8 +211,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         });
         throw error;
       } else {
-        // Add system comment about the queued email
-        addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template.name}"`);
+        const template = templates.find(t => t.id === selectedTemplate);
+        addSystemComment.mutate(`Email notification queued for ${createdByUser.email} using template "${template?.name || 'Unknown'}"`);
         toast({
           title: "Success",
           description: `Notification sent to ${createdByUser.email}`,
