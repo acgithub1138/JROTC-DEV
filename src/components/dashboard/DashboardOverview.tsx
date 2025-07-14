@@ -10,6 +10,7 @@ import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
+import IncidentForm from '@/components/incident-management/IncidentForm';
 
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
@@ -69,6 +70,7 @@ const DashboardOverview = () => {
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
+  const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
@@ -186,6 +188,10 @@ const DashboardOverview = () => {
               {/* Instructor-only actions */}
               {userProfile?.role === 'instructor' && (
                 <>
+                  <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                    <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
+                    <p className="font-medium text-sm">Create Incident</p>
+                  </button>
                   <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
@@ -302,6 +308,11 @@ const DashboardOverview = () => {
           <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
 
           <AddExpenseDialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} onSubmit={handleCreateTransaction} />
+
+          <IncidentForm 
+            isOpen={isCreateIncidentOpen} 
+            onClose={() => setIsCreateIncidentOpen(false)} 
+          />
         </>
       )}
 
