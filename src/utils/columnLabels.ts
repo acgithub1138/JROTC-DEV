@@ -9,7 +9,7 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
       status: 'Status',
       priority: 'Priority',
       assigned_to: 'Assigned To',
-      assigned_by: 'Assigned By',
+      assigned_by: 'Created By',
       team_id: 'Team',
       due_date: 'Due Date',
       completed_at: 'Completed At',
