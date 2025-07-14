@@ -56,13 +56,13 @@ export const useCadetPermissions = () => {
 
 // Event-specific permissions
 export const useEventPermissions = () => {
-  const modulePermissions = useModulePermissions('events');
+  const modulePermissions = useModulePermissions('calendar');
   const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead,
-    canAssign: hasPermission('events', 'assign'),
+    canAssign: hasPermission('calendar', 'assign'),
   };
 };
 
