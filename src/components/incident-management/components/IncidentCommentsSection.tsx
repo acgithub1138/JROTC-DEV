@@ -4,6 +4,8 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
+import { useEmailQueue } from '@/hooks/email/useEmailQueue';
+import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 
 interface IncidentCommentsSectionProps {
   comments: any[];
@@ -18,6 +20,9 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
 }) => {
   const [newComment, setNewComment] = useState('');
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
+  const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
+  const [showEmailPreview, setShowEmailPreview] = useState(false);
+  const { queueItems } = useEmailQueue();
 
   const handleAddComment = () => {
     if (newComment.trim()) {
@@ -29,6 +34,37 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
   const toggleSortOrder = () => {
     setCommentsSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
+
+  const handleEmailPreviewClick = (emailId: string) => {
+    setSelectedEmailId(emailId);
+    setShowEmailPreview(true);
+  };
+
+  const renderCommentText = (text: string) => {
+    // Check if the comment contains an email preview link
+    const emailLinkMatch = text.match(/\[Preview Email\]\(([^)]+)\)/);
+    
+    if (emailLinkMatch) {
+      const emailId = emailLinkMatch[1];
+      const textBeforeLink = text.substring(0, emailLinkMatch.index);
+      
+      return (
+        <span>
+          {textBeforeLink}
+          <button
+            onClick={() => handleEmailPreviewClick(emailId)}
+            className="text-blue-600 hover:text-blue-800 underline"
+          >
+            Preview Email
+          </button>
+        </span>
+      );
+    }
+    
+    return text;
+  };
+
+  const selectedEmail = selectedEmailId ? queueItems.find(item => item.id === selectedEmailId) : null;
 
   const sortedComments = [...comments].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
@@ -99,7 +135,7 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
               </span>
             </div>
             <p className="text-sm text-gray-700 whitespace-pre-wrap">
-              {comment.comment_text}
+              {renderCommentText(comment.comment_text)}
             </p>
           </div>
         ))}
@@ -110,6 +146,15 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
           </p>
         )}
       </div>
+      
+      {/* Email View Dialog */}
+      {selectedEmail && (
+        <EmailViewDialog
+          email={selectedEmail}
+          open={showEmailPreview}
+          onOpenChange={setShowEmailPreview}
+        />
+      )}
     </div>
   );
 };
