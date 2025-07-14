@@ -5,6 +5,7 @@ import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTria
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
+import { useToast } from '@/hooks/use-toast';
 import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
@@ -21,6 +22,7 @@ import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUs
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const { toast } = useToast();
   const { canCreate: canCreateTasks } = useTaskPermissions();
   const { canCreate: canCreateEvents } = useEventPermissions();
   
@@ -30,20 +32,35 @@ const DashboardOverview = () => {
   // Derived permissions for UI logic
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isCadet = userProfile?.role === 'cadet';
-  const {
-    data: stats,
-    isLoading: statsLoading
-  } = useDashboardStats();
-
+  
   // Memoize filters to prevent infinite re-renders
   const eventFilters = useMemo(() => ({
     eventType: '',
     assignedTo: ''
   }), []);
+  
+  const {
+    data: stats,
+    isLoading: statsLoading
+  } = useDashboardStats();
+
   const {
     events,
-    isLoading: eventsLoading
+    isLoading: eventsLoading,
+    createEvent
   } = useEvents(eventFilters);
+  
+  // Import budget hooks for transaction creation
+  const budgetFilters = useMemo(() => ({
+    search: '',
+    category: '',
+    type: '',
+    paymentMethod: '',
+    status: '',
+    showArchived: false,
+    budgetYear: ''
+  }), []);
+  const { createTransaction } = useBudgetTransactions(budgetFilters);
 
   // Filter and sort upcoming events
   const upcomingEvents = useMemo(() => {
@@ -74,9 +91,21 @@ const DashboardOverview = () => {
   
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
-  const handleCreateTransaction = (data: any) => {
-    // This will be handled by the individual dialogs
-    console.log('Transaction created:', data);
+
+  const handleCreateTransaction = async (data: any) => {
+    try {
+      await createTransaction(data);
+      toast({
+        title: "Success",
+        description: `${data.category === 'income' ? 'Income' : 'Expense'} created successfully`,
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: `Failed to create ${data.category === 'income' ? 'income' : 'expense'}`,
+        variant: "destructive",
+      });
+    }
   };
   // Configure stats based on user role
   const getStatsConfig = () => {
@@ -295,15 +324,21 @@ const DashboardOverview = () => {
       {/* Modals - Only show for roles that can use them */}
       {userProfile?.role === 'instructor' && (
         <>
-          <AddCadetDialog open={isAddCadetOpen} onOpenChange={setIsAddCadetOpen} newCadet={{
-            first_name: '',
-            last_name: '',
-            email: '',
-            grade: '',
-            rank: '',
-            flight: '',
-            role: 'cadet'
-          }} setNewCadet={() => {}} onSubmit={() => {}} />
+          <AddCadetDialog 
+            open={isAddCadetOpen} 
+            onOpenChange={setIsAddCadetOpen}
+            newCadet={{
+              first_name: '',
+              last_name: '',
+              email: '',
+              grade: '',
+              rank: '',
+              flight: '',
+              role: 'cadet'
+            }}
+            setNewCadet={() => {}}
+            onSubmit={() => {}}
+          />
 
           <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
 
@@ -321,9 +356,28 @@ const DashboardOverview = () => {
       )}
 
       {canCreateEvents && (
-        <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async () => {
-          setIsCreateEventOpen(false);
-        }} />
+        <EventDialog 
+          open={isCreateEventOpen} 
+          onOpenChange={setIsCreateEventOpen} 
+          event={null} 
+          selectedDate={null} 
+          onSubmit={async (eventData: any) => {
+            try {
+              await createEvent(eventData);
+              toast({
+                title: "Success",
+                description: "Event created successfully",
+              });
+              setIsCreateEventOpen(false);
+            } catch (error) {
+              toast({
+                title: "Error",
+                description: "Failed to create event",
+                variant: "destructive",
+              });
+            }
+          }} 
+        />
       )}
 
 
