@@ -97,6 +97,7 @@ export const useInventoryPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead,
+    canCreate: modulePermissions.canCreate,
     canAssign: hasPermission('inventory', 'assign'),
     canBulkImport: hasPermission('inventory', 'bulk_import'),
   };
