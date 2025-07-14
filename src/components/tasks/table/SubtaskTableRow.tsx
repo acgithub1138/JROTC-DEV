@@ -72,15 +72,14 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         <TableCell className="font-medium py-2 pl-4">
           <span>{subtask.title}</span>
         </TableCell>
-        <TableCell className="py-2">
+        <TableCell className="justify-center py-2">
           <Button
             variant="outline"
-            size="sm"
+            size="icon"
             onClick={() => setIsDescriptionModalOpen(true)}
             className="flex items-center gap-2"
           >
             <Eye className="w-4 h-4" />
-            View
           </Button>
         </TableCell>
         <TableCell className="py-2">
