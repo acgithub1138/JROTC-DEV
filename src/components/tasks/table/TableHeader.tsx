@@ -7,6 +7,7 @@ interface TableHeaderProps {
   onSelectAll: (checked: boolean) => void;
   onSelectionClear: () => void;
   canEdit: boolean;
+  canDelete: boolean;
   showOverdueFilter?: boolean;
   overdueFilterChecked?: boolean;
   onOverdueFilterChange?: (checked: boolean) => void;
@@ -17,6 +18,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   onSelectAll,
   onSelectionClear,
   canEdit,
+  canDelete,
   showOverdueFilter = false,
   overdueFilterChecked = false,
   onOverdueFilterChange
@@ -37,6 +39,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
           selectedTasks={selectedTasks}
           onSelectionClear={onSelectionClear}
           canEdit={canEdit}
+          canDelete={canDelete}
         />
       </div>
     </div>;

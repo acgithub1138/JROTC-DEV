@@ -79,7 +79,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         totalTasks={sortedTasks.length}
         onSelectAll={(checked) => handleSelectAll(checked, sortedTasks)}
         onSelectionClear={handleSelectionClear}
-        canEdit={canUpdate} // Use update permission for showing actions
+        canEdit={canUpdate}
+        canDelete={canDelete}
         showOverdueFilter={showOverdueFilter}
         overdueFilterChecked={overdueFilterChecked}
         onOverdueFilterChange={onOverdueFilterChange}

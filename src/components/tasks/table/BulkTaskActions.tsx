@@ -11,12 +11,14 @@ interface BulkTaskActionsProps {
   selectedTasks: string[];
   onSelectionClear: () => void;
   canEdit: boolean;
+  canDelete: boolean;
 }
 
 export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
   selectedTasks,
   onSelectionClear,
-  canEdit
+  canEdit,
+  canDelete
 }) => {
   const { updateTask, deleteTask } = useTasks();
   const { statusOptions } = useTaskStatusOptions();
@@ -174,13 +176,16 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
           Clear Due Date
         </DropdownMenuItem>
 
-        <DropdownMenuSeparator />
-        
-        {/* Delete Action */}
-        <DropdownMenuItem onClick={handleBulkDelete} className="text-red-600">
-          <Trash2 className="w-4 h-4 mr-2" />
-          Delete Selected
-        </DropdownMenuItem>
+        {/* Delete Action - Only show if user has delete permission */}
+        {canDelete && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem onClick={handleBulkDelete} className="text-red-600">
+              <Trash2 className="w-4 h-4 mr-2" />
+              Delete Selected
+            </DropdownMenuItem>
+          </>
+        )}
       </DropdownMenuContent>
     </DropdownMenu>
   );
