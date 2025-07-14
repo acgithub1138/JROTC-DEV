@@ -167,6 +167,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onInit={() => {
           setIsReactFlowInitialized(true);
         }}
+        edgesReconnectable={false}
+        edgesFocusable={true}
         key={`reactflow-${jobs.length}`}
       >
         <Background />
@@ -219,6 +221,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
               connectionMode={ConnectionMode.Strict}
               connectOnClick={false}
               onConnect={() => {}}
+              edgesReconnectable={false}
+              edgesFocusable={true}
             >
               <Background />
               <Controls />
