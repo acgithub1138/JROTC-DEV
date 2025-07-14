@@ -68,18 +68,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
     });
   };
 
-  const handleBulkDelete = async () => {
-    if (selectedTasks.length === 0) return;
-    
-    try {
-      // Delete selected tasks
-      await Promise.all(selectedTasks.map(taskId => deleteTask(taskId)));
-      
-      // Clear selection after successful delete
-      setSelectedTasks([]);
-    } catch (error) {
-      console.error('Failed to delete tasks:', error);
-    }
+  const handleSelectionClear = () => {
+    setSelectedTasks([]);
   };
 
   return (
@@ -88,7 +78,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         selectedTasks={selectedTasks}
         totalTasks={sortedTasks.length}
         onSelectAll={(checked) => handleSelectAll(checked, sortedTasks)}
-        onBulkDelete={handleBulkDelete}
+        onSelectionClear={handleSelectionClear}
         canEdit={canUpdate} // Use update permission for showing actions
         showOverdueFilter={showOverdueFilter}
         overdueFilterChecked={overdueFilterChecked}

@@ -1,13 +1,11 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Button } from '@/components/ui/button';
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, Trash2 } from 'lucide-react';
+import { BulkTaskActions } from './BulkTaskActions';
 interface TableHeaderProps {
   selectedTasks: string[];
   totalTasks: number;
   onSelectAll: (checked: boolean) => void;
-  onBulkDelete: () => void;
+  onSelectionClear: () => void;
   canEdit: boolean;
   showOverdueFilter?: boolean;
   overdueFilterChecked?: boolean;
@@ -17,7 +15,7 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   selectedTasks,
   totalTasks,
   onSelectAll,
-  onBulkDelete,
+  onSelectionClear,
   canEdit,
   showOverdueFilter = false,
   overdueFilterChecked = false,
@@ -35,19 +33,11 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             <Checkbox checked={overdueFilterChecked} onCheckedChange={onOverdueFilterChange} />
             <span className="text-sm text-gray-600">Overdue Tasks</span>
           </div>}
-        {selectedTasks.length > 0 && canEdit && <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm">
-                Actions <ChevronDown className="w-4 h-4 ml-2" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="bg-white">
-              <DropdownMenuItem onClick={onBulkDelete} className="text-red-600">
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete Selected
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>}
+        <BulkTaskActions
+          selectedTasks={selectedTasks}
+          onSelectionClear={onSelectionClear}
+          canEdit={canEdit}
+        />
       </div>
     </div>;
 };
