@@ -6,7 +6,7 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { useToast } from '@/hooks/use-toast';
-import { AddCadetDialog } from '@/components/cadet-management/components/AddCadetDialog';
+
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
@@ -82,7 +82,7 @@ const DashboardOverview = () => {
     console.log('Filtered upcoming events:', filtered);
     return filtered;
   }, [events, eventsLoading]);
-  const [isAddCadetOpen, setIsAddCadetOpen] = useState(false);
+  
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
@@ -221,10 +221,6 @@ const DashboardOverview = () => {
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
-                  <button onClick={() => setIsAddCadetOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                    <Users className="w-4 h-4 text-blue-600 mr-2" />
-                    <p className="font-medium text-sm">Add Cadet</p>
-                  </button>
                   <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
@@ -324,21 +320,6 @@ const DashboardOverview = () => {
       {/* Modals - Only show for roles that can use them */}
       {userProfile?.role === 'instructor' && (
         <>
-          <AddCadetDialog 
-            open={isAddCadetOpen} 
-            onOpenChange={setIsAddCadetOpen}
-            newCadet={{
-              first_name: '',
-              last_name: '',
-              email: '',
-              grade: '',
-              rank: '',
-              flight: '',
-              role: 'cadet'
-            }}
-            setNewCadet={() => {}}
-            onSubmit={() => {}}
-          />
 
           <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
 
