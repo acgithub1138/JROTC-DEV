@@ -16,6 +16,7 @@ import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
+import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 
 interface TaskTableRowProps {
   task: Task | Subtask;
@@ -44,6 +45,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 }) => {
   const { canCreate, canUpdate } = useTaskPermissions();
   const { updateTask } = useTasks();
+  const { handleSystemComment } = useTaskSystemComments();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
   
@@ -64,6 +66,9 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
       status: 'canceled',
       completed_at: now
     });
+    
+    // Add system comment for cancellation
+    await handleSystemComment(task.id, 'Task was canceled');
   };
 
   // Check if task can be canceled (not already done or canceled)

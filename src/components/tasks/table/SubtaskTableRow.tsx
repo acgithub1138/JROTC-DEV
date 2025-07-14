@@ -11,6 +11,7 @@ import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColor
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
 
 interface SubtaskTableRowProps {
   subtask: Subtask;
@@ -33,6 +34,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
 }) => {
   const { canUpdate } = useTaskPermissions();
   const { updateSubtask } = useSubtasks();
+  const { handleSystemComment } = useSubtaskSystemComments();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
 
   // Handle subtask cancellation
@@ -43,6 +45,9 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
       status: 'canceled',
       completed_at: now
     });
+    
+    // Add system comment for cancellation
+    await handleSystemComment(subtask.id, 'Subtask was canceled');
   };
 
   // Check if subtask can be canceled (not already done or canceled)
