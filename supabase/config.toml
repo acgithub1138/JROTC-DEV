@@ -1,5 +1,14 @@
 project_id = "vpiwfabbzaebfkadmmgd"
 
+[functions.create-cadet-user]
+verify_jwt = true
+
+[functions.toggle-user-status]
+verify_jwt = true
+
+[functions.reset-user-password]
+verify_jwt = true
+
 [functions.process-email-queue]
 verify_jwt = false
 
