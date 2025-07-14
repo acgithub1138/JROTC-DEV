@@ -2,10 +2,9 @@
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 
-// Helper function to check if a task is active (not completed/canceled)
+// Helper function to check if a task is active (not completed)
 export const isTaskActive = (task: Task | Subtask): boolean => {
-  const completedStatuses = ['done', 'completed', 'canceled'];
-  return !completedStatuses.includes(task.status.toLowerCase());
+  return !task.completed_at; // If completed_at is null, task is active
 };
 
 // Helper function to check if a subtask is active
@@ -44,12 +43,12 @@ export const getMyActiveTasksAndSubtasks = (
   );
 };
 
-// Get all tasks from school (regardless of status)
+// Get all active tasks from school (tasks without completed_at)
 export const getAllSchoolTasks = (tasks: Task[]): Task[] => {
-  return tasks; // Already filtered by school_id in the query
+  return tasks.filter(task => !task.completed_at); // Only show tasks that are not completed
 };
 
-// Get completed/canceled tasks
+// Get completed tasks (tasks with completed_at set)
 export const getCompletedTasks = (tasks: Task[]): Task[] => {
-  return tasks.filter(task => !isTaskActive(task));
+  return tasks.filter(task => !!task.completed_at);
 };

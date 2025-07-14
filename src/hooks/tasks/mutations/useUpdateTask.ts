@@ -24,6 +24,13 @@ export const useUpdateTask = () => {
       if (taskData.team_id !== undefined) updateData.team_id = taskData.team_id;
       if (taskData.completed_at !== undefined) updateData.completed_at = taskData.completed_at;
 
+      // Auto-set completed_at when status changes to "done" or "canceled"
+      if (taskData.status === 'done' || taskData.status === 'canceled') {
+        if (!taskData.completed_at) {
+          updateData.completed_at = new Date().toISOString();
+        }
+      }
+
       console.log('Final update data:', updateData);
 
       const { data, error } = await supabase

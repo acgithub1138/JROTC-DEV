@@ -9,6 +9,14 @@ export const useUpdateSubtask = () => {
   return useMutation({
     mutationFn: async (updateData: { id: string; [key: string]: any }) => {
       const { id, ...updates } = updateData;
+      
+      // Auto-set completed_at when status changes to "done" or "canceled"
+      if (updates.status === 'done' || updates.status === 'canceled') {
+        if (!updates.completed_at) {
+          updates.completed_at = new Date().toISOString();
+        }
+      }
+      
       const { error } = await supabase
         .from('subtasks')
         .update(updates)
