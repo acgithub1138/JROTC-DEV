@@ -103,7 +103,7 @@ export const UserTable = ({
               {getSortIcon('created')}
             </div>
           </TableHead>
-          <TableHead className="text-right">Actions</TableHead>
+          <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -135,17 +135,17 @@ export const UserTable = ({
               {new Date(user.created_at).toLocaleDateString()}
             </TableCell>
             <TableCell className="text-right py-2">
-              <div className="flex items-center justify-end gap-2">
+              <div className="flex items-center justify-center gap-2">
                 {canEditUser(user) && (
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon" className="h-6 w-6"
                           onClick={() => onEditUser(user)}
                         >
-                          <Edit className="w-4 h-4" />
+                          <Edit className="w-3 h-3" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -160,10 +160,10 @@ export const UserTable = ({
                       <TooltipTrigger asChild>
                         <Button
                           variant="outline"
-                          size="sm"
+                          size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                           onClick={() => onDisableUser(user)}
                         >
-                          <X className="w-4 h-4" />
+                          <X className="w-3 h-3" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
@@ -177,11 +177,11 @@ export const UserTable = ({
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
-                          variant="default"
-                          size="sm"
+                          variant="outline"
+                          size="icon" className="h-6 w-6"
                           onClick={() => onEnableUser(user)}
                         >
-                          <UserPlus className="w-4 h-4" />
+                          <UserPlus className="w-3 h-3" />
                         </Button>
                       </TooltipTrigger>
                       <TooltipContent>
