@@ -1,6 +1,5 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -10,7 +9,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
@@ -19,9 +17,6 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 
 interface SubtaskDetailDialogProps {
@@ -44,15 +39,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { canEdit: canUpdate, canDelete } = useTablePermissions('tasks');
-  const { templates } = useEmailTemplates();
-  const { toast } = useToast();
-  
   const canAssign = canUpdate; // For now, use update permission for assign
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
-  const [sendNotification, setSendNotification] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState('');
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [editData, setEditData] = useState({
     title: subtask.title,
     description: subtask.description || '',
@@ -75,115 +63,12 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       assigned_to: subtaskToUse.assigned_to || 'unassigned',
       due_date: subtaskToUse.due_date ? new Date(subtaskToUse.due_date) : null,
     });
-    setHasUnsavedChanges(false);
   }, [subtask, subtasks]);
-
-  // Check for unsaved changes
-  useEffect(() => {
-    const hasChanges = 
-      editData.title !== currentSubtask.title ||
-      editData.description !== (currentSubtask.description || '') ||
-      editData.status !== currentSubtask.status ||
-      editData.priority !== currentSubtask.priority ||
-      editData.assigned_to !== (currentSubtask.assigned_to || 'unassigned') ||
-      (editData.due_date?.toDateString() !== (currentSubtask.due_date ? new Date(currentSubtask.due_date).toDateString() : undefined));
-    
-    setHasUnsavedChanges(hasChanges);
-  }, [editData, currentSubtask]);
 
   const canEdit = canUpdate || currentSubtask.assigned_to === userProfile?.id;
 
-  // Filter templates for subtasks (using tasks source table since subtasks are part of tasks)
-  const subtaskTemplates = templates.filter(template => 
-    template.source_table === 'tasks' && template.is_active
-  );
-
-  const sendNotificationEmail = async () => {
-    if (!selectedTemplate || !currentSubtask.assigned_by) {
-      return;
-    }
-
-    try {
-      // Find the user who created the subtask (assigned_by)
-      let createdByUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentSubtask.assigned_by);
-      
-      // If user not found in school users, fetch directly
-      if (!createdByUser) {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, email')
-          .eq('id', currentSubtask.assigned_by)
-          .single();
-          
-        if (userError || !userData) {
-          console.error('Error fetching user data:', userError);
-          toast({
-            title: "Error",
-            description: "Could not find the subtask creator's information.",
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        createdByUser = userData as { id: string; first_name: string; last_name: string; email: string };
-      }
-      
-      if (!createdByUser?.email) {
-        toast({
-          title: "Error", 
-          description: "No email address found for the subtask creator.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Use the queue_email RPC function (subtasks will use the subtasks source table)
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
-        template_id_param: selectedTemplate,
-        recipient_email_param: createdByUser.email,
-        source_table_param: 'subtasks',
-        record_id_param: currentSubtask.id,
-        school_id_param: currentSubtask.school_id
-      });
-
-      if (error) {
-        console.error('Error queuing notification email:', error);
-        toast({
-          title: "Error",
-          description: "Failed to queue notification email.",
-          variant: "destructive",
-        });
-        throw error;
-      } else {
-        addSystemComment(`Email sent to ${createdByUser.email} [Preview Email](${queueId})`);
-        toast({
-          title: "Success",
-          description: `Notification sent to ${createdByUser.email}`,
-        });
-      }
-    } catch (emailError) {
-      console.error('Error sending notification:', emailError);
-      toast({
-        title: "Error",
-        description: "Failed to send notification email.",
-        variant: "destructive",
-      });
-      throw emailError;
-    }
-  };
-
   const handleSave = async () => {
     try {
-      // Validate notification requirements
-      if (sendNotification && !selectedTemplate) {
-        toast({
-          title: "Template Required",
-          description: "Please select a template to send notification.",
-          variant: "destructive",
-        });
-        return;
-      }
-
       const updateData: any = { id: currentSubtask.id };
       
       if (editData.title !== currentSubtask.title) updateData.title = editData.title;
@@ -199,12 +84,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       }
 
       await updateSubtask(updateData);
-
-      // Send notification email if requested
-      if (sendNotification) {
-        await sendNotificationEmail();
-      }
-      
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating subtask:', error);
@@ -212,25 +91,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   };
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-    } else {
-      onOpenChange(false);
-    }
-  };
-
-  const handleCloseWithoutSaving = () => {
-    setShowUnsavedDialog(false);
     onOpenChange(false);
-  };
-
-  const handleStayOnForm = () => {
-    setShowUnsavedDialog(false);
-  };
-
-  const handleSaveAndClose = async () => {
-    await handleSave();
-    setShowUnsavedDialog(false);
   };
 
   const assigneeOptions = [
@@ -258,14 +119,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={(isOpen) => {
-        if (!isOpen && hasUnsavedChanges) {
-          setShowUnsavedDialog(true);
-        } else if (!isOpen) {
-          onOpenChange(false);
-        }
-      }}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -292,7 +146,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                     variant="default"
                   >
                     <Check className="w-4 h-4" />
-                    Complete
+                    Mark Complete
                   </Button>
                 )}
                 <Button
@@ -437,48 +291,13 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                     </span>
                   </div>
                 )}
-                 <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Created:</span>
                   <span className="text-sm font-medium">
                     {format(new Date(currentSubtask.created_at), 'PPP')}
                   </span>
                 </div>
-                
-                {/* Send Notification */}
-                {canEdit && subtaskTemplates.length > 0 && (
-                  <div className="pt-3 border-t border-gray-200">
-                    <div className="flex items-center gap-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox
-                          id="send-notification"
-                          checked={sendNotification}
-                          onCheckedChange={(checked) => setSendNotification(checked === true)}
-                        />
-                        <label htmlFor="send-notification" className="text-sm">
-                          Send notification email
-                        </label>
-                      </div>
-                      
-                      {sendNotification && (
-                        <div className="flex-1">
-                          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Choose email template" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {subtaskTemplates.map((template) => (
-                                <SelectItem key={template.id} value={template.id}>
-                                  {template.name}
-                                </SelectItem>
-                              ))}
-                            </SelectContent>
-                          </Select>
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -500,7 +319,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
             )}
           </div>
 
-
           <Separator />
 
           <TaskCommentsSection
@@ -511,28 +329,5 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         </div>
       </DialogContent>
     </Dialog>
-
-    <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes that will be lost if you close this dialog. What would you like to do?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex flex-col gap-2 sm:flex-row">
-          <Button variant="outline" onClick={handleCloseWithoutSaving}>
-            Close without saving
-          </Button>
-          <Button variant="secondary" onClick={handleStayOnForm}>
-            Stay on form
-          </Button>
-          <Button onClick={handleSaveAndClose} disabled={isUpdating}>
-            Save and close
-          </Button>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-    </>
   );
 };
