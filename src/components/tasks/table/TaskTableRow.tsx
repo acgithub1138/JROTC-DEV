@@ -5,9 +5,10 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { format } from 'date-fns';
 import { Eye, ChevronRight, ChevronDown, Plus } from 'lucide-react';
-import { Task } from '@/hooks/useTasks';
+import { Task, useTasks } from '@/hooks/useTasks';
 import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { SubtaskTableRow } from './SubtaskTableRow';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
@@ -41,7 +42,8 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onToggleExpanded,
   selectedTasks,
 }) => {
-  const { canCreate } = useTaskPermissions();
+  const { canCreate, canUpdate } = useTaskPermissions();
+  const { updateTask } = useTasks();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
   
@@ -54,7 +56,18 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const isExpanded = expandedTasks.has(task.id);
   const hasSubtasks = !isSubtask && subtasks.length > 0;
 
-  // Remove the duplicate subtask handling - this is now handled in TaskTable.tsx
+  // Handle task cancellation
+  const handleCancel = async () => {
+    const now = new Date().toISOString();
+    await updateTask({
+      id: task.id,
+      status: 'canceled',
+      completed_at: now
+    });
+  };
+
+  // Check if task can be canceled (not already done or canceled)
+  const canCancel = canUpdate && task.status !== 'done' && task.status !== 'canceled';
 
   return (
     <>
@@ -143,24 +156,12 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           {format(new Date(task.created_at), 'MMM d, yyyy')}
         </TableCell>
         <TableCell className="py-2">
-          {!isSubtask && canCreate && (
-            <div className="flex items-center justify-center gap-2">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="outline"
-                    size="icon" className="h-6 w-6"
-                    onClick={() => setIsCreateSubtaskOpen(true)}
-                  >
-                    <Plus className="h-3 w-3" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>
-                  <p>Add Subtask</p>
-                </TooltipContent>
-              </Tooltip>
-            </div>
-          )}
+          <TableActionButtons
+            canCreate={!isSubtask && canCreate}
+            canCancel={canCancel}
+            onCreate={() => setIsCreateSubtaskOpen(true)}
+            onCancel={handleCancel}
+          />
         </TableCell>
       </TableRow>
 

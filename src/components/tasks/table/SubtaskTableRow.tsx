@@ -3,12 +3,14 @@ import { TableCell, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { format } from 'date-fns';
 import { Eye } from 'lucide-react';
-import { Subtask } from '@/hooks/useSubtasks';
+import { Subtask, useSubtasks } from '@/hooks/useSubtasks';
 import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColorClass } from '@/utils/taskTableHelpers';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface SubtaskTableRowProps {
   subtask: Subtask;
@@ -29,7 +31,22 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
   onTaskSelect,
   onSelectTask,
 }) => {
+  const { canUpdate } = useTaskPermissions();
+  const { updateSubtask } = useSubtasks();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+
+  // Handle subtask cancellation
+  const handleCancel = async () => {
+    const now = new Date().toISOString();
+    await updateSubtask({
+      id: subtask.id,
+      status: 'canceled',
+      completed_at: now
+    });
+  };
+
+  // Check if subtask can be canceled (not already done or canceled)
+  const canCancel = canUpdate && subtask.status !== 'done' && subtask.status !== 'canceled';
 
   return (
     <>
@@ -92,7 +109,10 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
           {format(new Date(subtask.created_at), 'MMM d, yyyy')}
         </TableCell>
         <TableCell className="py-2">
-          {/* Actions column - empty for subtasks */}
+          <TableActionButtons
+            canCancel={canCancel}
+            onCancel={handleCancel}
+          />
         </TableCell>
       </TableRow>
       
