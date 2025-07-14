@@ -128,7 +128,7 @@ export const getProfileReferenceFields = (tableName: string): string[] => {
     cadets: ['profile_id'],
     teams: ['team_lead_id'],
     expenses: ['created_by', 'approved_by'],
-    incidents: ['created_by', 'assigned_to']
+    incidents: ['created_by', 'assigned_to_admin']
   };
 
   return profileFields[tableName] || [];
