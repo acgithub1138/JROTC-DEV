@@ -2251,15 +2251,18 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      process_email_queue: {
-        Args: { batch_size?: number }
-        Returns: {
-          processed_count: number
-          failed_count: number
-        }[]
-      }
       process_email_template: {
         Args: { template_content: string; record_data: Json }
+        Returns: string
+      }
+      queue_email: {
+        Args: {
+          template_id_param: string
+          recipient_email_param: string
+          source_table_param: string
+          record_id_param: string
+          school_id_param: string
+        }
         Returns: string
       }
       validate_incident_category: {

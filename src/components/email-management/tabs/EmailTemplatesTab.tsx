@@ -64,6 +64,7 @@ export const EmailTemplatesTab: React.FC = () => {
         subject={previewingTemplate?.subject || ''}
         body={previewingTemplate?.body || ''}
         sourceTable={previewingTemplate?.source_table || ''}
+        templateId={previewingTemplate?.id}
       />
     </div>
   );
