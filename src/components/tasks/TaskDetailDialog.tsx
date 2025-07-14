@@ -219,15 +219,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
               {isEditing && canEdit && (
                 <>
                   <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancel}
-                    disabled={isUpdating}
-                  >
-                    <X className="w-4 h-4 mr-2" />
-                    Cancel
-                  </Button>
-                  <Button
                     size="sm"
                     onClick={handleSave}
                     disabled={isUpdating}
