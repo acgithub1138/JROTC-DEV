@@ -1,16 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -20,7 +10,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
-import { Checkbox } from '@/components/ui/checkbox';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -29,16 +18,12 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
-  const { toast } = useToast();
   const { updateTask, tasks, isUpdating } = useTasks();
   const { users, isLoading: usersLoading } = useSchoolUsers();
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
@@ -57,17 +42,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     due_date: task.due_date ? new Date(task.due_date) : null,
   });
 
-  // Email notification state
-  const [sendNotification, setSendNotification] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const { templates } = useEmailTemplates();
-
-  // Confirmation dialog state
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  
-  // Filter templates for tasks table
-  const taskTemplates = templates.filter(template => template.source_table === 'tasks' && template.is_active);
-
   // Update currentTask and editData when the task prop changes or when tasks are refetched
   useEffect(() => {
     const updatedTask = tasks.find(t => t.id === task.id);
@@ -83,101 +57,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     });
   }, [task, tasks]);
 
-  const hasChanges = () => {
-    return editData.title !== currentTask.title ||
-           editData.description !== (currentTask.description || '') ||
-           editData.status !== currentTask.status ||
-           editData.priority !== currentTask.priority ||
-           (editData.assigned_to === 'unassigned' ? null : editData.assigned_to) !== currentTask.assigned_to ||
-           (editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null));
-  };
-
-  const sendNotificationEmail = async () => {
-    if (!selectedTemplate || !currentTask.assigned_by) {
-      return;
-    }
-
-    try {
-      // Find the user who created the task (assigned_by)
-      let createdByUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentTask.assigned_by);
-      
-      // If user not found in school users, fetch directly
-      if (!createdByUser) {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name, email')
-          .eq('id', currentTask.assigned_by)
-          .single();
-          
-        if (userError || !userData) {
-          console.error('Error fetching user data:', userError);
-          toast({
-            title: "Error",
-            description: "Could not find the task creator's information.",
-            variant: "destructive",
-          });
-          return;
-        }
-        
-        createdByUser = userData as { id: string; first_name: string; last_name: string; email: string };
-      }
-      
-      if (!createdByUser?.email) {
-        toast({
-          title: "Error", 
-          description: "No email address found for the task creator.",
-          variant: "destructive",
-        });
-        return;
-      }
-
-      // Use the queue_email RPC function
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
-        template_id_param: selectedTemplate,
-        recipient_email_param: createdByUser.email,
-        source_table_param: 'tasks',
-        record_id_param: currentTask.id,
-        school_id_param: currentTask.school_id
-      });
-
-      if (error) {
-        console.error('Error queuing notification email:', error);
-        toast({
-          title: "Error",
-          description: "Failed to queue notification email.",
-          variant: "destructive",
-        });
-        throw error;
-      } else {
-        const template = templates.find(t => t.id === selectedTemplate);
-        addSystemComment(`Email sent to ${createdByUser.email} [Preview Email](${queueId})`);
-        toast({
-          title: "Success",
-          description: `Notification sent to ${createdByUser.email}`,
-        });
-      }
-    } catch (emailError) {
-      console.error('Error sending notification:', emailError);
-      toast({
-        title: "Error",
-        description: "Failed to send notification email.",
-        variant: "destructive",
-      });
-      throw emailError;
-    }
-  };
-
   const handleSave = async () => {
     try {
-      // Validate notification requirements
-      if (sendNotification && !selectedTemplate) {
-        toast({
-          title: "Error",
-          description: "Please select an email template to send notification.",
-          variant: "destructive",
-        });
-        return;
-      }
       const updateData: any = { id: currentTask.id };
       const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
       
@@ -234,11 +115,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         addSystemComment(commentText);
       }
       
-      // Send notification email if requested
-      if (sendNotification) {
-        await sendNotificationEmail();
-      }
-      
       // Close the modal after successful save
       onOpenChange(false);
     } catch (error) {
@@ -264,25 +140,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleClose = () => {
-    // Check if there are unsaved changes when in edit mode
-    if (isEditing && hasChanges()) {
-      setShowConfirmDialog(true);
-      return;
-    }
-    
     setIsEditing(false);
     onOpenChange(false);
-  };
-
-  const confirmClose = () => {
-    setShowConfirmDialog(false);
-    setIsEditing(false);
-    onOpenChange(false);
-  };
-
-  const handleSaveAndClose = async () => {
-    setShowConfirmDialog(false);
-    await handleSave();
   };
 
 
@@ -325,8 +184,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   }
 
   return (
-    <>
-      <Dialog open={open} onOpenChange={handleClose}>
+    <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -355,7 +213,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                   variant="default"
                 >
                   <Check className="w-4 h-4" />
-                  Complete
+                  Mark Complete
                 </Button>
               )}
               {isEditing && canEdit && (
@@ -514,44 +372,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                     {format(new Date(currentTask.created_at), 'PPP')}
                   </span>
                 </div>
-                
-                {/* Send Notification - Only show in edit mode */}
-                {isEditing && canEdit && taskTemplates.length > 0 && (
-                  <div className="space-y-3 pt-3 border-t">
-                    <div className="flex items-center space-x-4">
-                      <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="send-notification" 
-                          checked={sendNotification}
-                          onCheckedChange={(checked) => {
-                            setSendNotification(checked as boolean);
-                            if (!checked) setSelectedTemplate('');
-                          }}
-                        />
-                        <label 
-                          htmlFor="send-notification"
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
-                          Send Notification
-                        </label>
-                      </div>
-                      {sendNotification && (
-                        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                          <SelectTrigger className="w-64">
-                            <SelectValue placeholder="Select email template" />
-                          </SelectTrigger>
-                          <SelectContent>
-                            {taskTemplates.map((template) => (
-                              <SelectItem key={template.id} value={template.id}>
-                                {template.name}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      )}
-                    </div>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
@@ -573,7 +393,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
             )}
           </div>
 
-
           <Separator />
 
           <TaskCommentsSection
@@ -584,29 +403,5 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         </div>
       </DialogContent>
     </Dialog>
-
-    {/* Confirmation Dialog for Unsaved Changes */}
-    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. What would you like to do?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
-            Stay on Form
-          </AlertDialogCancel>
-          <Button variant="outline" onClick={confirmClose}>
-            Close without Saving
-          </Button>
-          <AlertDialogAction onClick={handleSaveAndClose}>
-            Save Changes
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-    </>
   );
 };
