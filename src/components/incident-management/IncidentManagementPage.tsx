@@ -204,24 +204,54 @@ const IncidentManagementPage: React.FC = () => {
           </TabsContent>
         </Tabs>
       ) : (
-        <StandardTableWrapper
-          title="Incidents"
-          description="Your incidents and help requests"
-          searchValue={searchValue}
-          onSearchChange={setSearchValue}
-          searchPlaceholder="Search incidents..."
-        >
-          {myIncidentsLoading ? (
-            <div>Loading incidents...</div>
-          ) : (
-            <IncidentTable 
-              incidents={filteredIncidents} 
-              onIncidentSelect={handleIncidentSelect}
-              onIncidentView={handleIncidentView}
-              onIncidentDelete={handleDeleteIncident}
-            />
-          )}
-        </StandardTableWrapper>
+        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="my-incidents">Open Incidents</TabsTrigger>
+            <TabsTrigger value="completed-incidents">Completed Incidents</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="my-incidents" className="space-y-4">
+            <StandardTableWrapper
+              title="Open Incidents"
+              description="Your open and active incidents"
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              searchPlaceholder="Search open incidents..."
+            >
+              {myIncidentsLoading ? (
+                <div>Loading incidents...</div>
+              ) : (
+                <IncidentTable 
+                  incidents={filteredIncidents} 
+                  onIncidentSelect={handleIncidentSelect}
+                  onIncidentView={handleIncidentView}
+                  onIncidentDelete={handleDeleteIncident}
+                />
+              )}
+            </StandardTableWrapper>
+          </TabsContent>
+          
+          <TabsContent value="completed-incidents" className="space-y-4">
+            <StandardTableWrapper
+              title="Completed Incidents"
+              description="Your resolved and closed incidents"
+              searchValue={searchValue}
+              onSearchChange={setSearchValue}
+              searchPlaceholder="Search completed incidents..."
+            >
+              {completedIncidentsLoading ? (
+                <div>Loading incidents...</div>
+              ) : (
+                <IncidentTable 
+                  incidents={filteredIncidents} 
+                  onIncidentSelect={handleIncidentSelect}
+                  onIncidentView={handleIncidentView}
+                  onIncidentDelete={handleDeleteIncident}
+                />
+              )}
+            </StandardTableWrapper>
+          </TabsContent>
+        </Tabs>
       )}
 
       {showCreateForm && (
