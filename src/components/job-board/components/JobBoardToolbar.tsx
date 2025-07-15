@@ -1,5 +1,5 @@
 import React from 'react';
-import { RefreshCcw, RotateCcw, Expand, Minimize } from 'lucide-react';
+import { RefreshCcw, RotateCcw, Expand, Minimize, Grid3X3 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface JobBoardToolbarProps {
@@ -8,6 +8,8 @@ interface JobBoardToolbarProps {
   onToggleFullscreen: () => void;
   isResetting: boolean;
   isFullscreen: boolean;
+  snapToGrid?: boolean;
+  onToggleSnapToGrid?: () => void;
 }
 
 export const JobBoardToolbar = ({ 
@@ -15,7 +17,9 @@ export const JobBoardToolbar = ({
   onResetLayout, 
   onToggleFullscreen, 
   isResetting,
-  isFullscreen
+  isFullscreen,
+  snapToGrid = true,
+  onToggleSnapToGrid
 }: JobBoardToolbarProps) => {
   return (
     <div className="absolute top-2 right-2 z-10 flex gap-2">
@@ -40,6 +44,17 @@ export const JobBoardToolbar = ({
       >
         <RotateCcw className="w-4 h-4" />
       </Button>
+      {onToggleSnapToGrid && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onToggleSnapToGrid}
+          className={`bg-white/90 backdrop-blur-sm ${snapToGrid ? 'bg-primary/10 border-primary' : ''}`}
+          title={snapToGrid ? "Disable snap to grid" : "Enable snap to grid"}
+        >
+          <Grid3X3 className="w-4 h-4" />
+        </Button>
+      )}
       <Button
         variant="outline"
         size="icon"

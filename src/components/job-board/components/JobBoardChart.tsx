@@ -26,6 +26,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
+  const [snapToGrid, setSnapToGrid] = useState(true);
   const [connectionEditModal, setConnectionEditModal] = useState<{
     isOpen: boolean;
     sourceJob: JobBoardWithCadet | null;
@@ -162,6 +163,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onToggleFullscreen={handleToggleFullscreen}
         isResetting={isResetting}
         isFullscreen={isFullscreen}
+        snapToGrid={snapToGrid}
+        onToggleSnapToGrid={() => setSnapToGrid(!snapToGrid)}
       />
       
       <ReactFlow
@@ -183,6 +186,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         }}
         edgesReconnectable={false}
         edgesFocusable={true}
+        snapToGrid={snapToGrid}
+        snapGrid={[20, 20]}
       >
         <Background />
         <Controls />
