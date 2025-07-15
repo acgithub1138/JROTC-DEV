@@ -10,6 +10,7 @@ import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
+import { PTTestDialog } from './components/PTTestDialog';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
@@ -53,6 +54,7 @@ const CadetManagementPage = () => {
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingProfile, setViewingProfile] = useState<Profile | null>(null);
+  const [ptTestDialogOpen, setPTTestDialogOpen] = useState(false);
 
   // Mass operation dialog states
   const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
@@ -157,10 +159,7 @@ const CadetManagementPage = () => {
           <div className="flex items-center justify-between gap-4 mb-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             {canCreate && (
-              <Button variant="outline" onClick={() => {
-                // TODO: Implement PT Test dialog
-                console.log('Add PT Test clicked');
-              }}>
+              <Button variant="outline" onClick={() => setPTTestDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 PT Test
               </Button>
@@ -186,6 +185,15 @@ const CadetManagementPage = () => {
         open={viewDialogOpen}
         onOpenChange={setViewDialogOpen}
         profile={viewingProfile}
+      />
+      
+      <PTTestDialog
+        open={ptTestDialogOpen}
+        onOpenChange={setPTTestDialogOpen}
+        onSuccess={() => {
+          // Refresh any PT test related data if needed
+          fetchProfiles();
+        }}
       />
     </div>;
 };
