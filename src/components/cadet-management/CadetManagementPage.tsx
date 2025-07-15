@@ -143,7 +143,14 @@ const CadetManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
+      <CadetPageHeader 
+        onAddCadet={() => setAddDialogOpen(true)} 
+        onBulkImport={() => setBulkImportDialogOpen(true)}
+        onAddPTTest={() => {
+          // TODO: Implement PT Test dialog
+          console.log('Add PT Test clicked');
+        }}
+      />
 
       <Card>
         <CardHeader>

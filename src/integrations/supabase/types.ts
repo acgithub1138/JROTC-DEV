@@ -1646,6 +1646,60 @@ export type Database = {
           },
         ]
       }
+      pt_tests: {
+        Row: {
+          cadet_id: string
+          created_at: string
+          date: string
+          id: string
+          mile_time: number | null
+          plank_time: number | null
+          push_ups: number | null
+          school_id: string
+          sit_ups: number | null
+          updated_at: string
+        }
+        Insert: {
+          cadet_id: string
+          created_at?: string
+          date: string
+          id?: string
+          mile_time?: number | null
+          plank_time?: number | null
+          push_ups?: number | null
+          school_id: string
+          sit_ups?: number | null
+          updated_at?: string
+        }
+        Update: {
+          cadet_id?: string
+          created_at?: string
+          date?: string
+          id?: string
+          mile_time?: number | null
+          plank_time?: number | null
+          push_ups?: number | null
+          school_id?: string
+          sit_ups?: number | null
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "pt_tests_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "pt_tests_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       role_permissions: {
         Row: {
           action_id: string
