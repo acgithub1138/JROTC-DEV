@@ -150,7 +150,6 @@ const CadetManagementPage = () => {
       <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        
         <CardContent>
           <div className="flex items-center justify-between gap-4 mb-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
