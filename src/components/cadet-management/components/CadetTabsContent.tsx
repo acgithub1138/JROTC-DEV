@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CadetTable } from './CadetTable';
@@ -7,7 +6,6 @@ import { BulkCadetActions } from './BulkCadetActions';
 import { Profile } from '../types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 interface CadetTabsContentProps {
   activeTab: string;
   onTabChange: (value: string) => void;
@@ -22,7 +20,6 @@ interface CadetTabsContentProps {
   onSelectAll: (checked: boolean) => void;
   onRefresh: () => void;
 }
-
 export const CadetTabsContent = ({
   activeTab,
   onTabChange,
@@ -38,39 +35,17 @@ export const CadetTabsContent = ({
   onRefresh
 }: CadetTabsContentProps) => {
   const isMobile = useIsMobile();
-  const { canUpdate, canDelete } = useCadetPermissions();
-  
+  const {
+    canUpdate,
+    canDelete
+  } = useCadetPermissions();
   const renderCadetDisplay = () => {
     if (isMobile) {
-      return (
-        <CadetCards
-          profiles={paginatedProfiles}
-          activeTab={activeTab}
-          onEditProfile={onEditProfile}
-          onViewProfile={onViewProfile}
-          onToggleStatus={onToggleStatus}
-          selectedCadets={selectedCadets}
-          onSelectCadet={onSelectCadet}
-        />
-      );
+      return <CadetCards profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} />;
     }
-    
-      return (
-        <CadetTable
-          profiles={paginatedProfiles}
-          activeTab={activeTab}
-          onEditProfile={onEditProfile}
-          onViewProfile={onViewProfile}
-          onToggleStatus={onToggleStatus}
-          selectedCadets={selectedCadets}
-          onSelectCadet={onSelectCadet}
-          onSelectAll={(checked) => onSelectAll(checked)}
-        />
-      );
+    return <CadetTable profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
   };
-
-  return (
-    <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
+  return <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className="grid w-full grid-cols-2">
         <TabsTrigger value="active">
           Active ({profiles.filter(p => p.active).length})
@@ -81,34 +56,17 @@ export const CadetTabsContent = ({
       </TabsList>
       
       <TabsContent value="active" className="mt-4">
-        {!isMobile && (
-          <div className="flex justify-end p-4 border-b">
-            <BulkCadetActions
-              selectedCadets={selectedCadets}
-              onSelectionClear={() => onSelectAll(false)}
-              canEdit={canUpdate}
-              canDelete={canDelete}
-              onRefresh={onRefresh}
-            />
-          </div>
-        )}
+        {!isMobile && <div className="flex justify-end p-4 border-b py-[4px]">
+            <BulkCadetActions selectedCadets={selectedCadets} onSelectionClear={() => onSelectAll(false)} canEdit={canUpdate} canDelete={canDelete} onRefresh={onRefresh} />
+          </div>}
         {renderCadetDisplay()}
       </TabsContent>
 
       <TabsContent value="inactive" className="mt-4">
-        {!isMobile && (
-          <div className="flex justify-end p-4 border-b">
-            <BulkCadetActions
-              selectedCadets={selectedCadets}
-              onSelectionClear={() => onSelectAll(false)}
-              canEdit={canUpdate}
-              canDelete={canDelete}
-              onRefresh={onRefresh}
-            />
-          </div>
-        )}
+        {!isMobile && <div className="flex justify-end p-4 border-b">
+            <BulkCadetActions selectedCadets={selectedCadets} onSelectionClear={() => onSelectAll(false)} canEdit={canUpdate} canDelete={canDelete} onRefresh={onRefresh} />
+          </div>}
         {renderCadetDisplay()}
       </TabsContent>
-    </Tabs>
-  );
+    </Tabs>;
 };
