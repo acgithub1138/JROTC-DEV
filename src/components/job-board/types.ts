@@ -21,7 +21,7 @@ export interface JobBoardWithCadet extends JobBoard {
     last_name: string;
     rank?: string;
     grade?: string;
-  };
+  } | null;
 }
 
 export interface NewJobBoard {

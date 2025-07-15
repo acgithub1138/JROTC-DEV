@@ -18,6 +18,7 @@ export const JobBoardTable = ({
   const { canEdit, canDelete } = useTablePermissions('job_board');
   
   const formatCadetName = (cadet: JobBoardWithCadet['cadet']) => {
+    if (!cadet) return 'Unassigned';
     return `${cadet.last_name}, ${cadet.first_name}`;
   };
   return <Table>

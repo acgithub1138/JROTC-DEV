@@ -1368,7 +1368,7 @@ export type Database = {
           assistant: string | null
           assistant_source_handle: string | null
           assistant_target_handle: string | null
-          cadet_id: string
+          cadet_id: string | null
           created_at: string
           id: string
           reports_to: string | null
@@ -1382,7 +1382,7 @@ export type Database = {
           assistant?: string | null
           assistant_source_handle?: string | null
           assistant_target_handle?: string | null
-          cadet_id: string
+          cadet_id?: string | null
           created_at?: string
           id?: string
           reports_to?: string | null
@@ -1396,7 +1396,7 @@ export type Database = {
           assistant?: string | null
           assistant_source_handle?: string | null
           assistant_target_handle?: string | null
-          cadet_id?: string
+          cadet_id?: string | null
           created_at?: string
           id?: string
           reports_to?: string | null
