@@ -112,14 +112,21 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             <Label htmlFor="reports_to">Reports To</Label>
             <Select
               value={formData.reports_to}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, reports_to: value }))}
+              onValueChange={(value) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  reports_to: value,
+                  // If setting reports_to to non-NA, set assistant to NA
+                  assistant: value !== 'NA' ? 'NA' : prev.assistant
+                }));
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="NA">NA</SelectItem>
-                {roles.map((role) => (
+                {[...roles].sort().map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
                   </SelectItem>
@@ -132,14 +139,21 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             <Label htmlFor="assistant">Assistant</Label>
             <Select
               value={formData.assistant}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, assistant: value }))}
+              onValueChange={(value) => {
+                setFormData(prev => ({ 
+                  ...prev, 
+                  assistant: value,
+                  // If setting assistant to non-NA, set reports_to to NA
+                  reports_to: value !== 'NA' ? 'NA' : prev.reports_to
+                }));
+              }}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role..." />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="NA">NA</SelectItem>
-                {roles.map((role) => (
+                {[...roles].sort().map((role) => (
                   <SelectItem key={role} value={role}>
                     {role}
                   </SelectItem>
