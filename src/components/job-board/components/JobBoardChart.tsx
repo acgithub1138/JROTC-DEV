@@ -133,17 +133,22 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       return;
     }
 
-    const updates: Partial<JobBoardWithCadet> = {};
+    // Update source job with source handle
+    const sourceUpdates: Partial<JobBoardWithCadet> = {};
+    // Update target job with target handle  
+    const targetUpdates: Partial<JobBoardWithCadet> = {};
     
     if (connectionEditModal.connectionType === 'reports_to') {
-      updates.reports_to_source_handle = sourceHandle;
-      updates.reports_to_target_handle = targetHandle;
+      sourceUpdates.reports_to_source_handle = sourceHandle;
+      targetUpdates.reports_to_target_handle = targetHandle;
     } else {
-      updates.assistant_source_handle = sourceHandle;
-      updates.assistant_target_handle = targetHandle;
+      sourceUpdates.assistant_source_handle = sourceHandle;
+      targetUpdates.assistant_target_handle = targetHandle;
     }
 
-    onUpdateJob(connectionEditModal.sourceJob.id, updates);
+    // Update both jobs - only the specific fields that changed
+    onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
+    onUpdateJob(connectionEditModal.targetJob.id, targetUpdates);
   }, [connectionEditModal, onUpdateJob]);
 
   const chartContent = (
