@@ -1690,8 +1690,8 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          contact: string | null
           created_at: string
-          district: string | null
           email: string | null
           id: string
           jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
@@ -1704,8 +1704,8 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          contact?: string | null
           created_at?: string
-          district?: string | null
           email?: string | null
           id?: string
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
@@ -1718,8 +1718,8 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          contact?: string | null
           created_at?: string
-          district?: string | null
           email?: string | null
           id?: string
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null

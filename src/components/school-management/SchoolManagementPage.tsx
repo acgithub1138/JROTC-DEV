@@ -31,7 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 interface School {
   id: string;
   name: string;
-  district?: string;
+  contact?: string;
   address?: string;
   city?: string;
   state?: string;
@@ -58,7 +58,7 @@ const SchoolManagementPage = () => {
 
   const emptySchool: Omit<School, 'id' | 'created_at'> = {
     name: '',
-    district: '',
+    contact: '',
     address: '',
     city: '',
     state: '',
@@ -110,7 +110,7 @@ const SchoolManagementPage = () => {
         .from('schools')
         .update({
           name: editingSchool.name,
-          district: editingSchool.district,
+          contact: editingSchool.contact,
           address: editingSchool.address,
           city: editingSchool.city,
           state: editingSchool.state,
@@ -386,13 +386,13 @@ const SchoolManagementPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="district">District</Label>
+                  <Label htmlFor="contact">Contact</Label>
                   <Input
-                    id="district"
-                    value={editingSchool.district || ''}
+                    id="contact"
+                    value={editingSchool.contact || ''}
                     onChange={(e) => setEditingSchool({
                       ...editingSchool,
-                      district: e.target.value
+                      contact: e.target.value
                     })}
                   />
                 </div>
@@ -496,7 +496,7 @@ const SchoolManagementPage = () => {
             {schoolToDelete && (
               <div className="bg-gray-50 p-3 rounded">
                 <p><strong>Name:</strong> {schoolToDelete.name}</p>
-                <p><strong>District:</strong> {schoolToDelete.district}</p>
+                <p><strong>Contact:</strong> {schoolToDelete.contact}</p>
                 <p><strong>City:</strong> {schoolToDelete.city}</p>
               </div>
             )}
