@@ -31,38 +31,54 @@ export const useJobBoardNodes = ({
     handleNodesChange(changes, nodes);
   }, [onNodesChange, handleNodesChange, nodes]);
 
-  // Helper function to identify changed jobs
+  // Helper function to identify changed jobs using ID-based comparison
   const getChangedJobs = useCallback((currentJobs: JobBoardWithCadet[], previousJobs: JobBoardWithCadet[]) => {
     const changedJobIds = new Set<string>();
     
-    // Check for new/removed jobs
-    if (currentJobs.length !== previousJobs.length) {
-      currentJobs.forEach(job => changedJobIds.add(job.id));
-      return changedJobIds;
-    }
-
-    // Check for modified jobs
-    currentJobs.forEach((job, index) => {
-      const prevJob = previousJobs[index];
-      if (!prevJob || 
-          job.id !== prevJob.id || 
-          job.updated_at !== prevJob.updated_at ||
-          job.role !== prevJob.role ||
-          job.cadet_id !== prevJob.cadet_id ||
-          job.reports_to !== prevJob.reports_to ||
-          job.assistant !== prevJob.assistant ||
-          job.reports_to_source_handle !== prevJob.reports_to_source_handle ||
-          job.reports_to_target_handle !== prevJob.reports_to_target_handle ||
-          job.assistant_source_handle !== prevJob.assistant_source_handle ||
-          job.assistant_target_handle !== prevJob.assistant_target_handle) {
-        changedJobIds.add(job.id);
+    // Create maps for efficient lookup
+    const currentJobsMap = new Map(currentJobs.map(job => [job.id, job]));
+    const previousJobsMap = new Map(previousJobs.map(job => [job.id, job]));
+    
+    // Check for new jobs
+    currentJobsMap.forEach((job, id) => {
+      if (!previousJobsMap.has(id)) {
+        changedJobIds.add(id);
       }
     });
+    
+    // Check for removed jobs (not needed for updates, but track length change)
+    const hasRemovedJobs = previousJobsMap.size > currentJobsMap.size;
+    
+    // Check for modified jobs by comparing specific fields
+    currentJobsMap.forEach((currentJob, id) => {
+      const previousJob = previousJobsMap.get(id);
+      if (previousJob) {
+        // Only check fields that affect visual representation
+        const fieldsToCheck = [
+          'role', 'cadet_id', 'reports_to', 'assistant',
+          'reports_to_source_handle', 'reports_to_target_handle',
+          'assistant_source_handle', 'assistant_target_handle'
+        ] as const;
+        
+        const hasChanges = fieldsToCheck.some(field => 
+          currentJob[field] !== previousJob[field]
+        );
+        
+        if (hasChanges) {
+          changedJobIds.add(id);
+        }
+      }
+    });
+
+    // If jobs were removed, mark all as changed to trigger full rebuild
+    if (hasRemovedJobs) {
+      currentJobs.forEach(job => changedJobIds.add(job.id));
+    }
 
     return changedJobIds;
   }, []);
 
-  // Helper function to update specific nodes
+  // Helper function to update specific nodes efficiently
   const updateSpecificNodes = useCallback((changedJobIds: Set<string>, allJobs: JobBoardWithCadet[], positions: Map<string, { x: number; y: number }>) => {
     if (changedJobIds.size === 0) return;
 
@@ -76,21 +92,30 @@ export const useJobBoardNodes = ({
         return flowNodes;
       }
 
-      // Otherwise, update only the changed nodes
+      // Create a map of current nodes for efficient lookup
+      const currentNodesMap = new Map(currentNodes.map(node => [node.id, node]));
+      
+      // Only update changed nodes, preserve others exactly as they are
       return currentNodes.map(node => {
         if (changedJobIds.has(node.id)) {
           const job = allJobs.find(j => j.id === node.id);
           if (job) {
-            const position = positions.get(job.id) || { x: node.position.x, y: node.position.y };
+            // Use saved position if available, otherwise keep current position
+            const savedPosition = positions.get(job.id);
+            const position = savedPosition || { x: node.position.x, y: node.position.y };
+            
+            // Create new node data but preserve position and other React Flow properties
             const [updatedNode] = createFlowNodes([job], new Map([[job.id, position]]));
-            console.log('🔄 Updated node:', node.id);
+            console.log('🔄 Updated node data for:', node.id);
+            
             return {
-              ...updatedNode,
-              position // Preserve current position if not changed
+              ...node, // Preserve React Flow internals
+              ...updatedNode, // Apply new data
+              position, // Ensure position is correctly set
             };
           }
         }
-        return node;
+        return node; // Return unchanged node
       });
     });
   }, []);
