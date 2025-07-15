@@ -188,6 +188,10 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         edgesFocusable={true}
         snapToGrid={snapToGrid}
         snapGrid={[20, 20]}
+        multiSelectionKeyCode={['Control', 'Meta']}
+        selectionOnDrag={true}
+        panOnDrag={[1, 2]}
+        selectNodesOnDrag={false}
       >
         <Background />
         <Controls />
