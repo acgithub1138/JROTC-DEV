@@ -52,6 +52,7 @@ export const useJobBoardNodes = ({
 
   // Only update when jobs actually change (not layout/positions)
   const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
+  const previousSavedPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
   
   useEffect(() => {
     // Compare actual job changes, not string signatures
@@ -69,17 +70,33 @@ export const useJobBoardNodes = ({
           job.assistant_source_handle !== prevJob.assistant_source_handle ||
           job.assistant_target_handle !== prevJob.assistant_target_handle;
       });
+
+    // Check if saved positions changed (for position loading after refresh)
+    const savedPositionsChanged = savedPositionsMap.size !== previousSavedPositionsRef.current.size ||
+      Array.from(savedPositionsMap.entries()).some(([id, position]) => {
+        const prevPosition = previousSavedPositionsRef.current.get(id);
+        return !prevPosition || prevPosition.x !== position.x || prevPosition.y !== position.y;
+      });
     
-    if (jobsChanged) {
-      console.log('🔄 Jobs changed, updating nodes and edges', { 
+    if (jobsChanged || (savedPositionsChanged && !jobsChanged)) {
+      console.log('🔄 Updating nodes and edges', { 
+        jobsChanged,
+        savedPositionsChanged,
         jobsLength: jobs.length,
-        previousLength: previousJobsRef.current.length
+        previousLength: previousJobsRef.current.length,
+        savedPositionsSize: savedPositionsMap.size
       });
       setNodes(initialNodesAndEdges.nodes);
       setEdges(initialNodesAndEdges.edges);
-      previousJobsRef.current = [...jobs];
+      
+      if (jobsChanged) {
+        previousJobsRef.current = [...jobs];
+      }
+      if (savedPositionsChanged) {
+        previousSavedPositionsRef.current = new Map(savedPositionsMap);
+      }
     }
-  }, [jobs, initialNodesAndEdges, setNodes, setEdges]);
+  }, [jobs, savedPositionsMap, initialNodesAndEdges, setNodes, setEdges]);
 
   return {
     nodes,
