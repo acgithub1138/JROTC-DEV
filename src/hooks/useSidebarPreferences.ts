@@ -24,7 +24,6 @@ const MODULE_MAPPING: Record<string, string> = {
   'competitions': 'competitions',
   'email-management': 'email',
   'incident_management': 'incident_management',
-  
   'role-management': 'cadets', // Only admins should see this
 };
 
@@ -48,8 +47,6 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
     { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
     { id: 'email-management', label: 'Email', icon: 'Mails' },
-    
-    
     { id: 'settings', label: 'Settings', icon: 'Settings' },
   ];
 
