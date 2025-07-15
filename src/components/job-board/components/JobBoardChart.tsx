@@ -190,8 +190,16 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       
       {connectionEditModal.sourceJob && connectionEditModal.targetJob && (
         <ConnectionEditModal
+          key={`${connectionEditModal.sourceJob.id}-${connectionEditModal.targetJob.id}-${connectionEditModal.connectionType}`}
           isOpen={connectionEditModal.isOpen}
-          onClose={() => setConnectionEditModal(prev => ({ ...prev, isOpen: false }))}
+          onClose={() => setConnectionEditModal({
+            isOpen: false,
+            sourceJob: null,
+            targetJob: null,
+            connectionType: null,
+            currentSourceHandle: '',
+            currentTargetHandle: '',
+          })}
           sourceJob={connectionEditModal.sourceJob}
           targetJob={connectionEditModal.targetJob}
           connectionType={connectionEditModal.connectionType!}
