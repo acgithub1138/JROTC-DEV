@@ -31,7 +31,10 @@ import {
   Trash2, 
   Search, 
   Plus,
-  CalendarIcon
+  CalendarIcon,
+  ChevronUp,
+  ChevronDown,
+  ChevronsUpDown
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -54,6 +57,9 @@ interface School {
   created_at: string;
 }
 
+type SortField = 'name' | 'contact' | 'competition_module' | 'subscription_start' | 'subscription_end';
+type SortDirection = 'asc' | 'desc';
+
 const SchoolManagementPage = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
@@ -66,6 +72,8 @@ const SchoolManagementPage = () => {
   const [createSchoolOpen, setCreateSchoolOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
+  const [sortField, setSortField] = useState<SortField>('name');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   const RECORDS_PER_PAGE = 25;
 
@@ -193,6 +201,52 @@ const SchoolManagementPage = () => {
     }
   };
 
+  // Sorting functions
+  const handleSort = (field: SortField) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: SortField) => {
+    if (sortField !== field) {
+      return <ChevronsUpDown className="w-4 h-4" />;
+    }
+    return sortDirection === 'asc' 
+      ? <ChevronUp className="w-4 h-4" />
+      : <ChevronDown className="w-4 h-4" />;
+  };
+
+  const sortSchools = (schools: School[]) => {
+    return [...schools].sort((a, b) => {
+      let aValue: any = a[sortField];
+      let bValue: any = b[sortField];
+
+      // Handle null/undefined values
+      if (aValue === null || aValue === undefined) aValue = '';
+      if (bValue === null || bValue === undefined) bValue = '';
+
+      // Handle different data types
+      if (sortField === 'competition_module') {
+        aValue = aValue ? 1 : 0;
+        bValue = bValue ? 1 : 0;
+      } else if (sortField === 'subscription_start' || sortField === 'subscription_end') {
+        aValue = aValue ? new Date(aValue).getTime() : 0;
+        bValue = bValue ? new Date(bValue).getTime() : 0;
+      } else {
+        aValue = String(aValue).toLowerCase();
+        bValue = String(bValue).toLowerCase();
+      }
+
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
+  };
+
   const filteredSchools = schools.filter(school =>
     // Filter out the admin school
     school.name !== 'Carey Unlimited' &&
@@ -200,10 +254,13 @@ const SchoolManagementPage = () => {
     school.city?.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const totalPages = Math.ceil(filteredSchools.length / RECORDS_PER_PAGE);
+  // Apply sorting to filtered schools
+  const sortedSchools = sortSchools(filteredSchools);
+
+  const totalPages = Math.ceil(sortedSchools.length / RECORDS_PER_PAGE);
   const startIndex = (currentPage - 1) * RECORDS_PER_PAGE;
   const endIndex = startIndex + RECORDS_PER_PAGE;
-  const paginatedSchools = filteredSchools.slice(startIndex, endIndex);
+  const paginatedSchools = sortedSchools.slice(startIndex, endIndex);
 
   // Reset to first page when search term changes
   useEffect(() => {
@@ -225,6 +282,7 @@ const SchoolManagementPage = () => {
     const subscriptionEnd = new Date(endDate);
     return subscriptionEnd <= threeMonthsFromNow && subscriptionEnd >= today;
   };
+
 
   if (loading) {
     return (
@@ -279,11 +337,66 @@ const SchoolManagementPage = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Name</TableHead>
-                <TableHead>Contact</TableHead>
-                <TableHead>Comp Module</TableHead>
-                <TableHead>Subscription Start</TableHead>
-                <TableHead>Subscription End</TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    onClick={() => handleSort('name')}
+                  >
+                    <span className="flex items-center gap-2">
+                      Name
+                      {getSortIcon('name')}
+                    </span>
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    onClick={() => handleSort('contact')}
+                  >
+                    <span className="flex items-center gap-2">
+                      Contact
+                      {getSortIcon('contact')}
+                    </span>
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    onClick={() => handleSort('competition_module')}
+                  >
+                    <span className="flex items-center gap-2">
+                      Comp Module
+                      {getSortIcon('competition_module')}
+                    </span>
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    onClick={() => handleSort('subscription_start')}
+                  >
+                    <span className="flex items-center gap-2">
+                      Subscription Start
+                      {getSortIcon('subscription_start')}
+                    </span>
+                  </Button>
+                </TableHead>
+                <TableHead>
+                  <Button 
+                    variant="ghost" 
+                    className="h-auto p-0 font-semibold hover:bg-transparent"
+                    onClick={() => handleSort('subscription_end')}
+                  >
+                    <span className="flex items-center gap-2">
+                      Subscription End
+                      {getSortIcon('subscription_end')}
+                    </span>
+                  </Button>
+                </TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
