@@ -63,7 +63,11 @@ export const useJobBoardNodes = ({
           job.updated_at !== prevJob.updated_at ||
           job.role !== prevJob.role ||
           job.reports_to !== prevJob.reports_to ||
-          job.assistant !== prevJob.assistant;
+          job.assistant !== prevJob.assistant ||
+          job.reports_to_source_handle !== prevJob.reports_to_source_handle ||
+          job.reports_to_target_handle !== prevJob.reports_to_target_handle ||
+          job.assistant_source_handle !== prevJob.assistant_source_handle ||
+          job.assistant_target_handle !== prevJob.assistant_target_handle;
       });
     
     if (jobsChanged) {
