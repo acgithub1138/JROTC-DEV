@@ -10,9 +10,10 @@ const corsHeaders = {
 
 interface CreateCadetRequest {
   email: string
+  password?: string
   first_name: string
   last_name: string
-  role?: 'cadet' | 'command_staff'
+  role?: 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent'
   grade?: string
   rank?: string
   flight?: string
@@ -40,6 +41,7 @@ serve(async (req) => {
 
     const { 
       email, 
+      password,
       first_name, 
       last_name, 
       role = 'cadet',
@@ -51,10 +53,10 @@ serve(async (req) => {
 
     console.log('Creating user:', email, 'with role:', role)
 
-    // Create user directly with default password
+    // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
-      password: 'Sh0wc@se', // Default password
+      password: password || 'Sh0wc@se', // Use provided password or default
       email_confirm: true, // Skip email verification
       user_metadata: {
         first_name,
@@ -97,7 +99,7 @@ serve(async (req) => {
             grade: grade || null,
             rank: rank || null,
             flight: flight || null,
-            password_change_required: true, // Force password change on first login
+            password_change_required: password ? false : true, // Only require password change if using default password
           })
           .eq('id', authUser.user!.id)
 

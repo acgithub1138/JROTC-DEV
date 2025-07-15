@@ -236,49 +236,38 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const createUser = async (email: string, password: string, userData?: any) => {
     try {
-      // Store current session to preserve it
-      const currentSession = session;
-      
-      // Use admin API to create user without triggering auth state change
-      const { data, error } = await supabase.auth.admin.createUser({
-        email,
-        password,
-        user_metadata: userData,
-        email_confirm: false // Auto-confirm the user
+      // Call the edge function to create the user
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
+        body: {
+          email,
+          password, // Pass the actual password
+          first_name: userData?.first_name,
+          last_name: userData?.last_name,
+          role: userData?.role,
+          school_id: userData?.school_id,
+          grade: userData?.grade,
+          rank: userData?.rank,
+          flight: userData?.flight,
+        },
       });
 
       if (error) {
+        console.error('Edge function error:', error);
         toast({
           title: "User creation failed",
-          description: error.message,
+          description: error.message || "Failed to create user",
           variant: "destructive",
         });
         return { error };
       }
 
-      // Create profile record for the new user
-      if (data.user && userData) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            email: email,
-            first_name: userData.first_name,
-            last_name: userData.last_name,
-            role: userData.role,
-            school_id: userData.school_id,
-            password_change_required: false
-          });
-
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          // Don't fail the whole operation for profile errors
-        }
-      }
-
-      // Restore the current session if it was changed
-      if (currentSession && (!session || session.user.id !== currentSession.user.id)) {
-        await supabase.auth.setSession(currentSession);
+      if (data?.error) {
+        toast({
+          title: "User creation failed",
+          description: data.error,
+          variant: "destructive",
+        });
+        return { error: data.error };
       }
 
       toast({
