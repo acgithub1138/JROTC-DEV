@@ -214,6 +214,18 @@ const SchoolManagementPage = () => {
     setCurrentPage(page);
   };
 
+  // Helper function to check if subscription expires within 3 months
+  const isSubscriptionExpiringSoon = (endDate: string | undefined) => {
+    if (!endDate) return false;
+    
+    const today = new Date();
+    const threeMonthsFromNow = new Date();
+    threeMonthsFromNow.setMonth(today.getMonth() + 3);
+    
+    const subscriptionEnd = new Date(endDate);
+    return subscriptionEnd <= threeMonthsFromNow && subscriptionEnd >= today;
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -278,7 +290,9 @@ const SchoolManagementPage = () => {
             <TableBody>
               {paginatedSchools.map((school) => (
                 <TableRow key={school.id}>
-                  <TableCell className="font-medium py-2">{school.name}</TableCell>
+                  <TableCell className={`font-medium py-2 ${isSubscriptionExpiringSoon(school.subscription_end) ? 'text-red-600' : ''}`}>
+                    {school.name}
+                  </TableCell>
                   <TableCell className="py-2">{school.contact || '-'}</TableCell>
                   <TableCell className="py-2">{school.competition_module ? 'Yes' : 'No'}</TableCell>
                   <TableCell className="py-2">
