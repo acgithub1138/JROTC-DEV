@@ -129,22 +129,6 @@ const DashboardOverview = () => {
         color: 'text-red-600',
         bgColor: 'bg-red-100'
       });
-      baseStats.push({
-        title: 'Total Cadets',
-        value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
-        change: statsLoading ? '...' : stats?.cadets.change || 'No data',
-        icon: Users,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100'
-      });
-      baseStats.push({
-        title: 'Net Budget',
-        value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
-        change: statsLoading ? '...' : `${(stats?.budget.totalIncome || 0).toLocaleString()} income, ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
-        icon: DollarSign,
-        color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
-        bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
-      });
       return baseStats;
     }
 
