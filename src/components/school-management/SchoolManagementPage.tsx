@@ -257,9 +257,10 @@ const SchoolManagementPage = () => {
             <TableHeader>
               <TableRow>
                 <TableHead>Name</TableHead>
-                <TableHead>City</TableHead>
-                <TableHead>Phone</TableHead>
-                <TableHead>Email</TableHead>
+                <TableHead>Contact</TableHead>
+                <TableHead>Comp Module</TableHead>
+                <TableHead>Subscription Start</TableHead>
+                <TableHead>Subscription End</TableHead>
                 <TableHead className="text-center">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -267,9 +268,20 @@ const SchoolManagementPage = () => {
               {paginatedSchools.map((school) => (
                 <TableRow key={school.id}>
                   <TableCell className="font-medium py-2">{school.name}</TableCell>
-                  <TableCell className="py-2">{school.city}</TableCell>
-                  <TableCell className="py-2">{school.phone}</TableCell>
-                  <TableCell className="py-2">{school.email}</TableCell>
+                  <TableCell className="py-2">{school.contact || '-'}</TableCell>
+                  <TableCell className="py-2">{school.competition_module ? 'Yes' : 'No'}</TableCell>
+                  <TableCell className="py-2">
+                    {school.subscription_start 
+                      ? format(new Date(school.subscription_start), "MM/dd/yyyy")
+                      : '-'
+                    }
+                  </TableCell>
+                  <TableCell className="py-2">
+                    {school.subscription_end 
+                      ? format(new Date(school.subscription_end), "MM/dd/yyyy")
+                      : '-'
+                    }
+                  </TableCell>
                   <TableCell className="text-right py-2">
                     <div className="flex items-center justify-center gap-2">
                       <TooltipProvider>
