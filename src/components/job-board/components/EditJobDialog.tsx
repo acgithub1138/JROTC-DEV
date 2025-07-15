@@ -85,6 +85,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
                 <SelectValue placeholder="Select cadet..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {activeCadets.map((cadet) => (
                   <SelectItem key={cadet.id} value={cadet.id}>
                     {formatCadetName(cadet)}
