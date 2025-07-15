@@ -102,7 +102,7 @@ export const RoleManagementPage: React.FC = () => {
     if (!allRoles?.length) return [];
     
     return allRoles
-      .filter(role => !['admin', 'parent'].includes(role.role_name))
+      .filter(role => !['admin'].includes(role.role_name))
       .map(role => ({
         value: role.role_name as UserRole,
         label: role.role_label
