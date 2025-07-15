@@ -47,9 +47,9 @@ export const createFlowNodes = (
       data: {
         job,
         role: job.role,
-        cadetName: `${job.cadet.last_name}, ${job.cadet.first_name}`,
-        rank: job.cadet.rank || '',
-        grade: job.cadet.grade || '',
+        cadetName: job.cadet ? `${job.cadet.last_name}, ${job.cadet.first_name}` : 'Unassigned',
+        rank: job.cadet?.rank || '',
+        grade: job.cadet?.grade || '',
         occupiedHandles,
       },
     };
