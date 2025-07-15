@@ -1701,6 +1701,8 @@ export type Database = {
           state: string | null
           subscription_end: string | null
           subscription_start: string | null
+          subtask_number: string | null
+          task_number: string | null
           updated_at: string
           zip_code: string | null
         }
@@ -1718,6 +1720,8 @@ export type Database = {
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
+          subtask_number?: string | null
+          task_number?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -1735,6 +1739,8 @@ export type Database = {
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
+          subtask_number?: string | null
+          task_number?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -1781,6 +1787,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      subtask_number_backup: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          school_id: string | null
+          task_number: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          school_id?: string | null
+          task_number?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          school_id?: string | null
+          task_number?: string | null
+        }
+        Relationships: []
       }
       subtasks: {
         Row: {
@@ -1906,6 +1933,27 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      task_number_backup: {
+        Row: {
+          created_at: string | null
+          id: string | null
+          school_id: string | null
+          task_number: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string | null
+          school_id?: string | null
+          task_number?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string | null
+          school_id?: string | null
+          task_number?: string | null
+        }
+        Relationships: []
       }
       task_priority_options: {
         Row: {
@@ -2255,6 +2303,14 @@ export type Database = {
           value: string
           label: string
         }[]
+      }
+      get_next_subtask_number: {
+        Args: { school_uuid: string }
+        Returns: string
+      }
+      get_next_task_number: {
+        Args: { school_uuid: string }
+        Returns: string
       }
       get_table_columns: {
         Args: { table_name: string }
