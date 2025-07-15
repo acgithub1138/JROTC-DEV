@@ -164,6 +164,7 @@ const CadetManagementPage = () => {
                 PT Test
               </Button>
             )}
+            New cadets default password: Sh0wc@se
           </div>
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
