@@ -17,6 +17,7 @@ import { format } from 'date-fns';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useSubtasks } from '@/hooks/useSubtasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -32,6 +33,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { updateTask, duplicateTask, tasks, isUpdating, isDuplicating } = useTasks();
   const { users, isLoading: usersLoading } = useSchoolUsers(true); // Only fetch active users
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
+  const { subtasks, updateSubtask } = useSubtasks(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { canView, canUpdate, canUpdateAssigned, canAssign, canCreate } = useTaskPermissions();
@@ -44,6 +46,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [showCompleteConfirmDialog, setShowCompleteConfirmDialog] = useState(false);
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -292,16 +295,60 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   ];
 
   const handleCompleteTask = async () => {
-    await updateTask({ 
-      id: currentTask.id, 
-      status: 'done',
-      completed_at: new Date().toISOString()
-    });
+    // Check if there are incomplete subtasks
+    const incompleteSubtasks = subtasks?.filter(subtask => subtask.status !== 'done') || [];
     
-    // Add system comment
-    addSystemComment('Task completed');
+    if (incompleteSubtasks.length > 0) {
+      // Show confirmation dialog
+      setShowCompleteConfirmDialog(true);
+      return;
+    }
     
-    onOpenChange(false);
+    // No incomplete subtasks, proceed with completion
+    await completeTaskAndSubtasks();
+  };
+
+  const completeTaskAndSubtasks = async (includeSubtasks = false) => {
+    try {
+      // Update the main task
+      await updateTask({ 
+        id: currentTask.id, 
+        status: 'done',
+        completed_at: new Date().toISOString()
+      });
+      
+      // Update subtasks if requested
+      if (includeSubtasks && subtasks) {
+        const incompleteSubtasks = subtasks.filter(subtask => subtask.status !== 'done');
+        for (const subtask of incompleteSubtasks) {
+          await updateSubtask({
+            id: subtask.id,
+            status: 'done',
+            completed_at: new Date().toISOString()
+          });
+        }
+      }
+      
+      // Add system comment
+      const commentText = includeSubtasks && subtasks?.some(s => s.status !== 'done') 
+        ? 'Task and all subtasks completed' 
+        : 'Task completed';
+      addSystemComment(commentText);
+      
+      onOpenChange(false);
+    } catch (error) {
+      console.error('Error completing task:', error);
+    }
+  };
+
+  const handleCompleteConfirm = () => {
+    setShowCompleteConfirmDialog(false);
+    completeTaskAndSubtasks(true);
+  };
+
+  const handleCompleteCancel = () => {
+    setShowCompleteConfirmDialog(false);
+    // Do nothing - don't change the task status
   };
 
   const handleDuplicateTask = () => {
@@ -616,6 +663,24 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           </Button>
           <AlertDialogAction onClick={saveAndClose}>
             Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    {/* Confirmation Dialog for Completing Task with Incomplete Subtasks */}
+    <AlertDialog open={showCompleteConfirmDialog} onOpenChange={setShowCompleteConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Complete Task with Subtasks</AlertDialogTitle>
+          <AlertDialogDescription>
+            This task has incomplete subtasks. Do you want to complete the subtasks too?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={handleCompleteCancel}>No</AlertDialogCancel>
+          <AlertDialogAction onClick={handleCompleteConfirm}>
+            Yes, Complete All
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
