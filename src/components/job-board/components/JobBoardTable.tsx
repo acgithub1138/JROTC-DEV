@@ -26,9 +26,9 @@ export const JobBoardTable = ({
         <TableRow>
           <TableHead>Cadet</TableHead>
           <TableHead>Role</TableHead>
-          <TableHead>Email</TableHead>
           <TableHead>Reports To</TableHead>
           <TableHead>Assistant To</TableHead>
+          <TableHead>Email</TableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -38,9 +38,9 @@ export const JobBoardTable = ({
               {formatCadetName(job.cadet)}
             </TableCell>
             <TableCell className="py-2">{job.role}</TableCell>
-            <TableCell className="py-2">{job.email_address || '-'}</TableCell>
             <TableCell className="py-2">{job.reports_to || '-'}</TableCell>
             <TableCell className="py-2">{job.assistant || '-'}</TableCell>
+            <TableCell className="py-2">{job.email_address || '-'}</TableCell>
             <TableCell className="text-center py-2">
               <TableActionButtons
                 canEdit={canEdit}
