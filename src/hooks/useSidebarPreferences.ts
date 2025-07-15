@@ -61,9 +61,9 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       return true;
     }
 
-    // Settings is always available
+    // Settings is only available to admins
     if (item.id === 'settings') {
-      return true;
+      return role === 'admin';
     }
 
     // Special case for competitions - requires both permission and school setting
