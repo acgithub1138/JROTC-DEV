@@ -598,17 +598,33 @@ const SchoolManagementPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="referred_by">Referred By</Label>
-                <Input
-                  id="referred_by"
-                  value={editingSchool.referred_by || ''}
-                  onChange={(e) => setEditingSchool({
-                    ...editingSchool,
-                    referred_by: e.target.value
-                  })}
-                  placeholder="Who referred this school?"
-                />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="referred_by">Referred By</Label>
+                  <Input
+                    id="referred_by"
+                    value={editingSchool.referred_by || ''}
+                    onChange={(e) => setEditingSchool({
+                      ...editingSchool,
+                      referred_by: e.target.value
+                    })}
+                    placeholder="Who referred this school?"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="competition_module">Competition Module</Label>
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox
+                      id="competition_module"
+                      checked={editingSchool.competition_module || false}
+                      onCheckedChange={(checked) => setEditingSchool({
+                        ...editingSchool,
+                        competition_module: checked as boolean
+                      })}
+                    />
+                    <Label htmlFor="competition_module">Enable Competition Module</Label>
+                  </div>
+                </div>
               </div>
 
               <div className="space-y-2">
@@ -623,20 +639,6 @@ const SchoolManagementPage = () => {
                   placeholder="Additional notes about this school..."
                   rows={3}
                 />
-              </div>
-
-              <div className="space-y-2">
-                <div className="flex items-center space-x-2">
-                  <Checkbox
-                    id="competition_module"
-                    checked={editingSchool.competition_module || false}
-                    onCheckedChange={(checked) => setEditingSchool({
-                      ...editingSchool,
-                      competition_module: checked as boolean
-                    })}
-                  />
-                  <Label htmlFor="competition_module">Competition Module</Label>
-                </div>
               </div>
               
               <div className="flex justify-end space-x-2">

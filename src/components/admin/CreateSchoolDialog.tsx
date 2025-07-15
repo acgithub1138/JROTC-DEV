@@ -267,14 +267,30 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
             </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="referred_by">Referred By</Label>
-            <Input
-              id="referred_by"
-              value={newSchool.referred_by}
-              onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
-              placeholder="Who referred this school?"
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="referred_by">Referred By</Label>
+              <Input
+                id="referred_by"
+                value={newSchool.referred_by}
+                onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
+                placeholder="Who referred this school?"
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="competition_module">Competition Module</Label>
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="competition_module"
+                  checked={newSchool.competition_module}
+                  onCheckedChange={(checked) => setNewSchool({ 
+                    ...newSchool, 
+                    competition_module: checked as boolean 
+                  })}
+                />
+                <Label htmlFor="competition_module">Enable Competition Module</Label>
+              </div>
+            </div>
           </div>
 
           <div className="space-y-2">
@@ -286,20 +302,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
               placeholder="Additional notes about this school..."
               rows={3}
             />
-          </div>
-
-          <div className="space-y-2">
-            <div className="flex items-center space-x-2">
-              <Checkbox
-                id="competition_module"
-                checked={newSchool.competition_module}
-                onCheckedChange={(checked) => setNewSchool({ 
-                  ...newSchool, 
-                  competition_module: checked as boolean 
-                })}
-              />
-              <Label htmlFor="competition_module">Competition Module</Label>
-            </div>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
