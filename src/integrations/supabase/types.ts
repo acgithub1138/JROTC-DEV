@@ -1701,8 +1701,8 @@ export type Database = {
           state: string | null
           subscription_end: string | null
           subscription_start: string | null
-          subtask_number: string | null
-          task_number: string | null
+          subtask_number: number | null
+          task_number: number | null
           updated_at: string
           zip_code: string | null
         }
@@ -1720,8 +1720,8 @@ export type Database = {
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
-          subtask_number?: string | null
-          task_number?: string | null
+          subtask_number?: number | null
+          task_number?: number | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -1739,8 +1739,8 @@ export type Database = {
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
-          subtask_number?: string | null
-          task_number?: string | null
+          subtask_number?: number | null
+          task_number?: number | null
           updated_at?: string
           zip_code?: string | null
         }
