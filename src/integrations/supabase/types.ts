@@ -1370,6 +1370,7 @@ export type Database = {
           assistant_target_handle: string | null
           cadet_id: string | null
           created_at: string
+          email_address: string | null
           id: string
           reports_to: string | null
           reports_to_source_handle: string | null
@@ -1384,6 +1385,7 @@ export type Database = {
           assistant_target_handle?: string | null
           cadet_id?: string | null
           created_at?: string
+          email_address?: string | null
           id?: string
           reports_to?: string | null
           reports_to_source_handle?: string | null
@@ -1398,6 +1400,7 @@ export type Database = {
           assistant_target_handle?: string | null
           cadet_id?: string | null
           created_at?: string
+          email_address?: string | null
           id?: string
           reports_to?: string | null
           reports_to_source_handle?: string | null

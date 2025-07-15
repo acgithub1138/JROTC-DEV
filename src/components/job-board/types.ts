@@ -3,6 +3,7 @@ export interface JobBoard {
   id: string;
   cadet_id: string;
   role: string;
+  email_address?: string;
   reports_to?: string;
   assistant?: string;
   reports_to_source_handle?: string;
@@ -27,6 +28,7 @@ export interface JobBoardWithCadet extends JobBoard {
 export interface NewJobBoard {
   cadet_id: string;
   role: string;
+  email_address?: string;
   reports_to?: string;
   assistant?: string;
   reports_to_source_handle?: string;

@@ -23,6 +23,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
   const [formData, setFormData] = useState<NewJobBoard>({
     cadet_id: '',
     role: '',
+    email_address: '',
     reports_to: '',
     assistant: '',
   });
@@ -38,6 +39,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
       setFormData({
         cadet_id: '',
         role: '',
+        email_address: '',
         reports_to: '',
         assistant: '',
       });
@@ -62,6 +64,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
     setFormData({
       cadet_id: '',
       role: '',
+      email_address: '',
       reports_to: '',
       assistant: '',
     });
@@ -115,6 +118,17 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
               onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
               placeholder="Enter job role..."
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email_address">Email Address</Label>
+            <Input
+              id="email_address"
+              type="email"
+              value={formData.email_address}
+              onChange={(e) => setFormData(prev => ({ ...prev, email_address: e.target.value }))}
+              placeholder="Enter email address..."
             />
           </div>
 

@@ -26,18 +26,19 @@ export const JobBoardTable = ({
         <TableRow>
           <TableHead>Cadet</TableHead>
           <TableHead>Role</TableHead>
+          <TableHead>Email</TableHead>
           <TableHead>Reports To</TableHead>
-          <TableHead>Assistant To
-        </TableHead>
+          <TableHead>Assistant To</TableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
       <TableBody>
-        {jobs.map(job => <TableRow key={job.id}>
+         {jobs.map(job => <TableRow key={job.id}>
             <TableCell className="font-medium py-2">
               {formatCadetName(job.cadet)}
             </TableCell>
             <TableCell className="py-2">{job.role}</TableCell>
+            <TableCell className="py-2">{job.email_address || '-'}</TableCell>
             <TableCell className="py-2">{job.reports_to || '-'}</TableCell>
             <TableCell className="py-2">{job.assistant || '-'}</TableCell>
             <TableCell className="text-center py-2">
@@ -51,7 +52,7 @@ export const JobBoardTable = ({
             </TableCell>
           </TableRow>)}
         {jobs.length === 0 && <TableRow>
-            <TableCell colSpan={5} className="text-center text-muted-foreground py-2">
+            <TableCell colSpan={6} className="text-center text-muted-foreground py-2">
               No jobs found
             </TableCell>
           </TableRow>}
