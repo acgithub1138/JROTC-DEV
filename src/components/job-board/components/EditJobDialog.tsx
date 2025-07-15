@@ -33,7 +33,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
   useEffect(() => {
     if (job) {
       setFormData({
-        cadet_id: job.cadet_id,
+        cadet_id: job.cadet_id || 'unassigned',
         role: job.role,
         email_address: job.email_address || '',
         reports_to: job.reports_to || '',
@@ -44,10 +44,14 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!job || !formData.cadet_id || !formData.role) return;
+    if (!job || !formData.role) return;
+    
+    // Convert "unassigned" to null for database
+    const cadetId = formData.cadet_id === 'unassigned' ? null : formData.cadet_id;
     
     onSubmit(job.id, {
       ...formData,
+      cadet_id: cadetId,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
     });
@@ -177,7 +181,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !formData.cadet_id || !formData.role}
+              disabled={loading || !formData.role}
             >
               {loading ? 'Updating...' : 'Update Job'}
             </Button>
