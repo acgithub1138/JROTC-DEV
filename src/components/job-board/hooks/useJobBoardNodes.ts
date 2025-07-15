@@ -1,5 +1,5 @@
 import { useMemo, useCallback, useEffect, useRef } from 'react';
-import { useNodesState, useEdgesState, NodeChange } from '@xyflow/react';
+import { useNodesState, useEdgesState, NodeChange, Node, Edge } from '@xyflow/react';
 import { JobBoardWithCadet } from '../types';
 import { buildJobHierarchy } from '../utils/hierarchyBuilder';
 import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePositioning';
@@ -16,33 +16,14 @@ export const useJobBoardNodes = ({
   savedPositionsMap,
   handleNodesChange,
 }: UseJobBoardNodesProps) => {
-  const initialNodesAndEdges = useMemo(() => {
-    if (jobs.length === 0) {
-      return { nodes: [], edges: [] };
-    }
+  // Initialize with empty nodes/edges
+  const [nodes, setNodes, onNodesChange] = useNodesState([]);
+  const [edges, setEdges, onEdgesChange] = useEdgesState([]);
 
-    console.log('🔄 Recreating nodes and edges...', { jobsLength: jobs.length });
-
-    // Build the hierarchy
-    const hierarchyResult = buildJobHierarchy(jobs);
-    
-    // Use stabilized saved positions
-    const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
-    
-    // Create React Flow elements
-    const flowNodes = createFlowNodes(jobs, positions);
-    const flowEdges = createFlowEdges(hierarchyResult, jobs);
-
-    console.log('✅ Created nodes and edges:', { nodesCount: flowNodes.length, edgesCount: flowEdges.length });
-
-    return {
-      nodes: flowNodes,
-      edges: flowEdges,
-    };
-  }, [jobs, savedPositionsMap]);
-
-  const [nodes, setNodes, onNodesChange] = useNodesState(initialNodesAndEdges.nodes);
-  const [edges, setEdges, onEdgesChange] = useEdgesState(initialNodesAndEdges.edges);
+  // Refs to track previous state for change detection
+  const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
+  const previousSavedPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const isInitializedRef = useRef(false);
 
   // Handle node changes with position persistence
   const handleNodeChange = useCallback((changes: NodeChange[]) => {
@@ -50,53 +31,123 @@ export const useJobBoardNodes = ({
     handleNodesChange(changes, nodes);
   }, [onNodesChange, handleNodesChange, nodes]);
 
-  // Only update when jobs actually change (not layout/positions)
-  const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
-  const previousSavedPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
-  
-  useEffect(() => {
-    // Compare actual job changes, not string signatures
-    const jobsChanged = jobs.length !== previousJobsRef.current.length || 
-      jobs.some((job, index) => {
-        const prevJob = previousJobsRef.current[index];
-        return !prevJob || 
+  // Helper function to identify changed jobs
+  const getChangedJobs = useCallback((currentJobs: JobBoardWithCadet[], previousJobs: JobBoardWithCadet[]) => {
+    const changedJobIds = new Set<string>();
+    
+    // Check for new/removed jobs
+    if (currentJobs.length !== previousJobs.length) {
+      currentJobs.forEach(job => changedJobIds.add(job.id));
+      return changedJobIds;
+    }
+
+    // Check for modified jobs
+    currentJobs.forEach((job, index) => {
+      const prevJob = previousJobs[index];
+      if (!prevJob || 
           job.id !== prevJob.id || 
           job.updated_at !== prevJob.updated_at ||
           job.role !== prevJob.role ||
+          job.cadet_id !== prevJob.cadet_id ||
           job.reports_to !== prevJob.reports_to ||
           job.assistant !== prevJob.assistant ||
           job.reports_to_source_handle !== prevJob.reports_to_source_handle ||
           job.reports_to_target_handle !== prevJob.reports_to_target_handle ||
           job.assistant_source_handle !== prevJob.assistant_source_handle ||
-          job.assistant_target_handle !== prevJob.assistant_target_handle;
-      });
+          job.assistant_target_handle !== prevJob.assistant_target_handle) {
+        changedJobIds.add(job.id);
+      }
+    });
 
-    // Check if saved positions changed (for position loading after refresh)
-    const savedPositionsChanged = savedPositionsMap.size !== previousSavedPositionsRef.current.size ||
+    return changedJobIds;
+  }, []);
+
+  // Helper function to update specific nodes
+  const updateSpecificNodes = useCallback((changedJobIds: Set<string>, allJobs: JobBoardWithCadet[], positions: Map<string, { x: number; y: number }>) => {
+    if (changedJobIds.size === 0) return;
+
+    console.log('🔄 Updating specific nodes:', Array.from(changedJobIds));
+
+    setNodes(currentNodes => {
+      // If we have no nodes or need to add/remove nodes, recreate all
+      if (currentNodes.length !== allJobs.length) {
+        const flowNodes = createFlowNodes(allJobs, positions);
+        console.log('✅ Recreated all nodes due to length change');
+        return flowNodes;
+      }
+
+      // Otherwise, update only the changed nodes
+      return currentNodes.map(node => {
+        if (changedJobIds.has(node.id)) {
+          const job = allJobs.find(j => j.id === node.id);
+          if (job) {
+            const position = positions.get(job.id) || { x: node.position.x, y: node.position.y };
+            const [updatedNode] = createFlowNodes([job], new Map([[job.id, position]]));
+            console.log('🔄 Updated node:', node.id);
+            return {
+              ...updatedNode,
+              position // Preserve current position if not changed
+            };
+          }
+        }
+        return node;
+      });
+    });
+  }, []);
+
+  // Main effect for handling job and position changes
+  useEffect(() => {
+    if (jobs.length === 0) {
+      setNodes([]);
+      setEdges([]);
+      return;
+    }
+
+    // Check for job changes
+    const changedJobIds = getChangedJobs(jobs, previousJobsRef.current);
+    const hasJobChanges = changedJobIds.size > 0;
+
+    // Check for position changes
+    const hasPositionChanges = savedPositionsMap.size !== previousSavedPositionsRef.current.size ||
       Array.from(savedPositionsMap.entries()).some(([id, position]) => {
         const prevPosition = previousSavedPositionsRef.current.get(id);
         return !prevPosition || prevPosition.x !== position.x || prevPosition.y !== position.y;
       });
-    
-    if (jobsChanged || (savedPositionsChanged && !jobsChanged)) {
-      console.log('🔄 Updating nodes and edges', { 
-        jobsChanged,
-        savedPositionsChanged,
-        jobsLength: jobs.length,
-        previousLength: previousJobsRef.current.length,
-        savedPositionsSize: savedPositionsMap.size
-      });
-      setNodes(initialNodesAndEdges.nodes);
-      setEdges(initialNodesAndEdges.edges);
+
+    // Initial load - create everything
+    if (!isInitializedRef.current || (hasPositionChanges && !hasJobChanges)) {
+      console.log('🔄 Initial load or position-only changes');
+      const hierarchyResult = buildJobHierarchy(jobs);
+      const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
+      const flowNodes = createFlowNodes(jobs, positions);
+      const flowEdges = createFlowEdges(hierarchyResult, jobs);
       
-      if (jobsChanged) {
-        previousJobsRef.current = [...jobs];
-      }
-      if (savedPositionsChanged) {
-        previousSavedPositionsRef.current = new Map(savedPositionsMap);
-      }
+      setNodes(flowNodes);
+      setEdges(flowEdges);
+      isInitializedRef.current = true;
     }
-  }, [jobs, savedPositionsMap, initialNodesAndEdges, setNodes, setEdges]);
+    // Job changes - update selectively
+    else if (hasJobChanges) {
+      console.log('🔄 Job changes detected, updating selectively');
+      const hierarchyResult = buildJobHierarchy(jobs);
+      const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
+      
+      // Update specific nodes
+      updateSpecificNodes(changedJobIds, jobs, positions);
+      
+      // Always update edges when jobs change (connections might have changed)
+      const flowEdges = createFlowEdges(hierarchyResult, jobs);
+      setEdges(flowEdges);
+    }
+
+    // Update refs
+    if (hasJobChanges) {
+      previousJobsRef.current = [...jobs];
+    }
+    if (hasPositionChanges) {
+      previousSavedPositionsRef.current = new Map(savedPositionsMap);
+    }
+  }, [jobs, savedPositionsMap, getChangedJobs, updateSpecificNodes]);
 
   return {
     nodes,
