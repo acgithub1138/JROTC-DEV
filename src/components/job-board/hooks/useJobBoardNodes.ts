@@ -60,17 +60,11 @@ export const useJobBoardNodes = ({
           'assistant_source_handle', 'assistant_target_handle'
         ] as const;
         
-        const changedFields: string[] = [];
-        const hasChanges = fieldsToCheck.some(field => {
-          const isChanged = currentJob[field] !== previousJob[field];
-          if (isChanged) {
-            changedFields.push(`${field}: ${previousJob[field]} -> ${currentJob[field]}`);
-          }
-          return isChanged;
-        });
+        const hasChanges = fieldsToCheck.some(field => 
+          currentJob[field] !== previousJob[field]
+        );
         
         if (hasChanges) {
-          console.log(`🔄 Job ${id} (${currentJob.role}) has changes:`, changedFields);
           changedJobIds.add(id);
         }
       }
@@ -88,13 +82,10 @@ export const useJobBoardNodes = ({
   const updateSpecificNodes = useCallback((changedJobIds: Set<string>, allJobs: JobBoardWithCadet[], positions: Map<string, { x: number; y: number }>) => {
     if (changedJobIds.size === 0) return;
 
-    console.log('🔄 Updating specific nodes:', Array.from(changedJobIds));
-
     setNodes(currentNodes => {
       // If we have no nodes or need to add/remove nodes, recreate all
       if (currentNodes.length !== allJobs.length) {
         const flowNodes = createFlowNodes(allJobs, positions);
-        console.log('✅ Recreated all nodes due to length change');
         return flowNodes;
       }
 
@@ -112,7 +103,6 @@ export const useJobBoardNodes = ({
             
             // Create new node data but preserve position and other React Flow properties
             const [updatedNode] = createFlowNodes([job], new Map([[job.id, position]]));
-            console.log('🔄 Updated node data for:', node.id);
             
             return {
               ...node, // Preserve React Flow internals
@@ -147,7 +137,6 @@ export const useJobBoardNodes = ({
 
     // Initial load - create everything
     if (!isInitializedRef.current || (hasPositionChanges && !hasJobChanges)) {
-      console.log('🔄 Initial load or position-only changes');
       const hierarchyResult = buildJobHierarchy(jobs);
       const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
       const flowNodes = createFlowNodes(jobs, positions);
@@ -159,7 +148,6 @@ export const useJobBoardNodes = ({
     }
     // Job changes - update selectively
     else if (hasJobChanges) {
-      console.log('🔄 Job changes detected, updating selectively');
       const hierarchyResult = buildJobHierarchy(jobs);
       const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
       

@@ -42,17 +42,12 @@ const JobBoardPage = () => {
     });
   };
   const handleEditJob = (id: string, updates: any) => {
-    console.log('🎯 handleEditJob called with:', { id, updates });
     updateJob.mutate({
       id,
       updates
     }, {
       onSuccess: () => {
-        console.log('🎯 handleEditJob success for id:', id);
         setEditingJob(null);
-      },
-      onError: (error) => {
-        console.error('🎯 handleEditJob error for id:', id, error);
       }
     });
   };
