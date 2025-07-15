@@ -150,15 +150,17 @@ const CadetManagementPage = () => {
       <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        <CardContent>
-          <div className="flex items-center justify-between gap-4 mb-4">
+        <CardHeader>
+          <div className="flex items-center justify-between gap-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
-            New cadets default password: Sh0wc@se
+            <div className="text-sm text-muted-foreground">New cadets default password: Sh0wc@se</div>
             {canCreate && <Button variant="outline" onClick={() => setPTTestDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 PT Test
               </Button>}
           </div>
+        </CardHeader>
+        <CardContent>
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
           setProfileToToggle(profile);
