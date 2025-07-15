@@ -9,6 +9,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
@@ -48,6 +49,8 @@ interface School {
   competition_module?: boolean;
   subscription_start?: string;
   subscription_end?: string;
+  referred_by?: string;
+  notes?: string;
   created_at: string;
 }
 
@@ -79,6 +82,8 @@ const SchoolManagementPage = () => {
     competition_module: false,
     subscription_start: undefined,
     subscription_end: undefined,
+    referred_by: '',
+    notes: '',
   };
 
   const fetchSchools = async () => {
@@ -135,6 +140,8 @@ const SchoolManagementPage = () => {
           competition_module: editingSchool.competition_module,
           subscription_start: editingSchool.subscription_start,
           subscription_end: editingSchool.subscription_end,
+          referred_by: editingSchool.referred_by,
+          notes: editingSchool.notes,
         })
         .eq('id', editingSchool.id);
 
@@ -589,6 +596,33 @@ const SchoolManagementPage = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="referred_by">Referred By</Label>
+                <Input
+                  id="referred_by"
+                  value={editingSchool.referred_by || ''}
+                  onChange={(e) => setEditingSchool({
+                    ...editingSchool,
+                    referred_by: e.target.value
+                  })}
+                  placeholder="Who referred this school?"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="notes">Notes</Label>
+                <Textarea
+                  id="notes"
+                  value={editingSchool.notes || ''}
+                  onChange={(e) => setEditingSchool({
+                    ...editingSchool,
+                    notes: e.target.value
+                  })}
+                  placeholder="Additional notes about this school..."
+                  rows={3}
+                />
               </div>
 
               <div className="space-y-2">

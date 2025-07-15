@@ -1697,7 +1697,9 @@ export type Database = {
           id: string
           jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
+          notes: string | null
           phone: string | null
+          referred_by: string | null
           state: string | null
           subscription_end: string | null
           subscription_start: string | null
@@ -1716,7 +1718,9 @@ export type Database = {
           id?: string
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
+          notes?: string | null
           phone?: string | null
+          referred_by?: string | null
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null
@@ -1735,7 +1739,9 @@ export type Database = {
           id?: string
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name?: string
+          notes?: string | null
           phone?: string | null
+          referred_by?: string | null
           state?: string | null
           subscription_end?: string | null
           subscription_start?: string | null

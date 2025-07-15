@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
@@ -29,6 +30,8 @@ interface NewSchool {
   competition_module: boolean;
   subscription_start?: string;
   subscription_end?: string;
+  referred_by: string;
+  notes: string;
 }
 
 export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
@@ -44,7 +47,9 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     jrotc_program: 'air_force',
     competition_module: false,
     subscription_start: undefined,
-    subscription_end: undefined
+    subscription_end: undefined,
+    referred_by: '',
+    notes: ''
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -77,7 +82,9 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         jrotc_program: 'air_force',
         competition_module: false,
         subscription_start: undefined,
-        subscription_end: undefined
+        subscription_end: undefined,
+        referred_by: '',
+        notes: ''
       });
       
       onOpenChange(false);
@@ -258,6 +265,27 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
                 </PopoverContent>
               </Popover>
             </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="referred_by">Referred By</Label>
+            <Input
+              id="referred_by"
+              value={newSchool.referred_by}
+              onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
+              placeholder="Who referred this school?"
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="notes">Notes</Label>
+            <Textarea
+              id="notes"
+              value={newSchool.notes}
+              onChange={(e) => setNewSchool({ ...newSchool, notes: e.target.value })}
+              placeholder="Additional notes about this school..."
+              rows={3}
+            />
           </div>
 
           <div className="space-y-2">
