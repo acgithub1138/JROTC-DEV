@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionTemplate } from '../types';
 import { JsonFieldBuilder } from './JsonFieldBuilder';
+import { EventTypeSelect } from './EventTypeSelect';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
@@ -42,7 +43,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   const [jsonError, setJsonError] = useState<string | null>(null);
   
   const isAdmin = userProfile?.role === 'admin';
-  const eventOptions = ['Armed Inspection', 'Armed Color Guard', 'Armed Exhibition', 'Armed Dual Exhibition', 'Armed Regulation', 'Armed Solo Exhibition', 'Unarmed Inspection', 'Unarmed Color Guard', 'Unarmed Exhibition', 'Unarmed Dual Exhibition', 'Unarmed Regulation'];
   const programOptions = [{
     value: 'air_force',
     label: 'Air Force'
@@ -179,16 +179,11 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
 
         <div className="space-y-1">
           <Label htmlFor="event">Event Type *</Label>
-          <Select value={formData.event} onValueChange={value => updateFormData('event', value)}>
-            <SelectTrigger>
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              {eventOptions.map(event => <SelectItem key={event} value={event}>
-                  {event}
-                </SelectItem>)}
-            </SelectContent>
-          </Select>
+          <EventTypeSelect
+            value={formData.event}
+            onValueChange={value => updateFormData('event', value)}
+            placeholder="Select event type..."
+          />
         </div>
       </div>
 
