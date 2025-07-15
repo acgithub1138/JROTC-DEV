@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Users, Plus } from 'lucide-react';
 import { useCadetManagement } from './hooks/useCadetManagement';
 import { useCadetMassOperations } from './hooks/useCadetMassOperations';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -13,7 +14,7 @@ import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
-  const { canUpdate } = useCadetPermissions();
+  const { canUpdate, canCreate } = useCadetPermissions();
   const {
     profiles,
     loading,
@@ -146,10 +147,6 @@ const CadetManagementPage = () => {
       <CadetPageHeader 
         onAddCadet={() => setAddDialogOpen(true)} 
         onBulkImport={() => setBulkImportDialogOpen(true)}
-        onAddPTTest={() => {
-          // TODO: Implement PT Test dialog
-          console.log('Add PT Test clicked');
-        }}
       />
 
       <Card>
@@ -157,6 +154,18 @@ const CadetManagementPage = () => {
           New cadets default password: Sh0wc@se
         </CardHeader>
         <CardContent>
+          <div className="flex justify-end mb-4">
+            {canCreate && (
+              <Button variant="outline" onClick={() => {
+                // TODO: Implement PT Test dialog
+                console.log('Add PT Test clicked');
+              }}>
+                <Plus className="w-4 h-4 mr-2" />
+                PT Test
+              </Button>
+            )}
+          </div>
+          
           <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {

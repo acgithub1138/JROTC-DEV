@@ -7,10 +7,9 @@ import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 interface CadetPageHeaderProps {
   onAddCadet: () => void;
   onBulkImport: () => void;
-  onAddPTTest: () => void;
 }
 
-export const CadetPageHeader = ({ onAddCadet, onBulkImport, onAddPTTest }: CadetPageHeaderProps) => {
+export const CadetPageHeader = ({ onAddCadet, onBulkImport }: CadetPageHeaderProps) => {
   const { canCreate, canBulkImport } = useCadetPermissions();
 
   return (
@@ -22,12 +21,6 @@ export const CadetPageHeader = ({ onAddCadet, onBulkImport, onAddPTTest }: Cadet
         </p>
       </div>
       <div className="flex gap-2">
-        {canCreate && (
-          <Button variant="outline" onClick={onAddPTTest}>
-            <Plus className="w-4 h-4 mr-2" />
-            PT Test
-          </Button>
-        )}
         {canBulkImport && (
           <Button variant="outline" onClick={onBulkImport} className="hidden md:flex">
             <Upload className="w-4 h-4 mr-2" />
