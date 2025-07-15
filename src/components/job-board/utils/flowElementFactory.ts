@@ -67,11 +67,12 @@ export const createFlowEdges = (
   
   const flowEdges = hierarchyResult.edges.map((edge) => {
     const sourceJob = jobMap.get(edge.source);
+    const targetJob = jobMap.get(edge.target);
     
     if (edge.type === 'assistant') {
       // Assistant relationships: use stored handle preferences or defaults
       const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
-      const targetHandle = sourceJob?.assistant_target_handle || 'left-target';
+      const targetHandle = targetJob?.assistant_target_handle || 'left-target';
       
       const edgeObj = {
         id: edge.id,
@@ -90,7 +91,7 @@ export const createFlowEdges = (
     } else {
       // Reports_to relationships: use stored handle preferences or defaults
       const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
-      const targetHandle = sourceJob?.reports_to_target_handle || 'top-target';
+      const targetHandle = targetJob?.reports_to_target_handle || 'top-target';
       
       const edgeObj = {
         id: edge.id,
