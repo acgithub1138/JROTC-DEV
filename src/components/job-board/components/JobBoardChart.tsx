@@ -130,6 +130,12 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
     if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
+      console.log('🚨 Connection save failed - missing requirements:', {
+        hasSourceJob: !!connectionEditModal.sourceJob,
+        hasTargetJob: !!connectionEditModal.targetJob,
+        hasConnectionType: !!connectionEditModal.connectionType,
+        hasOnUpdateJob: !!onUpdateJob
+      });
       return;
     }
 
@@ -156,9 +162,16 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
     console.log('🔧 Updates to apply:', { sourceUpdates, targetUpdates });
 
-    // Update both jobs - only the specific fields that changed
-    onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
-    onUpdateJob(connectionEditModal.targetJob.id, targetUpdates);
+    try {
+      // Update both jobs - only the specific fields that changed
+      console.log('🔧 Calling onUpdateJob for source job...');
+      onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
+      console.log('🔧 Calling onUpdateJob for target job...');
+      onUpdateJob(connectionEditModal.targetJob.id, targetUpdates);
+      console.log('🔧 Both updates called successfully');
+    } catch (error) {
+      console.error('🚨 Error calling onUpdateJob:', error);
+    }
   }, [connectionEditModal, onUpdateJob]);
 
   const chartContent = (
