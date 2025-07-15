@@ -64,9 +64,9 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       return true;
     }
 
-    // Settings is only available for admins
+    // Settings is always available
     if (item.id === 'settings') {
-      return role === 'admin';
+      return true;
     }
 
     // Special case for competitions - requires both permission and school setting
@@ -108,7 +108,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
-        
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -146,6 +145,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
+
       ];
     
     default:
