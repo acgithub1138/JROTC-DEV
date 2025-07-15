@@ -24,6 +24,7 @@ import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -95,14 +96,14 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     }
 
     try {
-      // Find the assigned user
-      let assignedUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentTask.assigned_to);
+      // Find the assigned user for name information
+      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === currentTask.assigned_to);
       
       // If user not found in school users, fetch directly
       if (!assignedUser) {
         const { data: userData, error: userError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, email')
+          .select('id, first_name, last_name')
           .eq('id', currentTask.assigned_to)
           .single();
           
@@ -116,10 +117,13 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           return;
         }
         
-        assignedUser = userData as { id: string; first_name: string; last_name: string; email: string };
+        assignedUser = userData as { id: string; first_name: string; last_name: string };
       }
       
-      if (!assignedUser?.email) {
+      // Resolve email with job board priority
+      const emailResult = await resolveUserEmail(currentTask.assigned_to, currentTask.school_id);
+      
+      if (!emailResult?.email) {
         toast({
           title: "Error", 
           description: "No email address found for the assigned user.",
@@ -131,7 +135,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       // Use the queue_email RPC function
       const { data: queueId, error } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
-        recipient_email_param: assignedUser.email,
+        recipient_email_param: emailResult.email,
         source_table_param: 'tasks',
         record_id_param: currentTask.id,
         school_id_param: currentTask.school_id
@@ -146,10 +150,11 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         });
         throw error;
       } else {
-        addSystemComment(`Email sent to ${assignedUser.email} [Preview Email](${queueId})`);
+        const emailSource = emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)';
+        addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${assignedUser.email}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)'}`,
         });
       }
     } catch (emailError) {

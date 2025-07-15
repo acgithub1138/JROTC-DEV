@@ -22,6 +22,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 
 interface SubtaskDetailDialogProps {
@@ -102,14 +103,14 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     }
 
     try {
-      // Find the assigned user
-      let assignedUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentSubtask.assigned_to);
+      // Find the assigned user for name information
+      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === currentSubtask.assigned_to);
       
       // If user not found in school users, fetch directly
       if (!assignedUser) {
         const { data: userData, error: userError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, email')
+          .select('id, first_name, last_name')
           .eq('id', currentSubtask.assigned_to)
           .single();
           
@@ -123,10 +124,13 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
           return;
         }
         
-        assignedUser = userData as { id: string; first_name: string; last_name: string; email: string };
+        assignedUser = userData as { id: string; first_name: string; last_name: string };
       }
       
-      if (!assignedUser?.email) {
+      // Resolve email with job board priority
+      const emailResult = await resolveUserEmail(currentSubtask.assigned_to, currentSubtask.school_id);
+      
+      if (!emailResult?.email) {
         toast({
           title: "Error", 
           description: "No email address found for the assigned user.",
@@ -138,7 +142,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       // Use the queue_email RPC function
       const { data: queueId, error } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
-        recipient_email_param: assignedUser.email,
+        recipient_email_param: emailResult.email,
         source_table_param: 'subtasks',
         record_id_param: currentSubtask.id,
         school_id_param: currentSubtask.school_id
@@ -153,10 +157,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         });
         throw error;
       } else {
-        addSystemComment(`Email sent to ${assignedUser.email} [Preview Email](${queueId})`);
+        const emailSource = emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)';
+        addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${assignedUser.email}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)'}`,
         });
       }
     } catch (emailError) {

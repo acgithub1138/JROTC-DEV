@@ -37,6 +37,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useEmailTemplates } from "@/hooks/email/useEmailTemplates";
 import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
+import { resolveUserEmail } from "@/hooks/useEmailResolution";
 import { useToast } from "@/hooks/use-toast";
 import type { Incident } from "@/hooks/incidents/types";
 
@@ -173,14 +174,14 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     }
 
     try {
-      // Find the user who created the incident
-      let createdByUser: { id: string; first_name: string; last_name: string; email: string } | undefined = users.find(u => u.id === currentIncident.created_by);
+      // Find the user who created the incident for name information
+      let createdByUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === currentIncident.created_by);
       
       // If user not found in school users (could be from different school), fetch directly
       if (!createdByUser) {
         const { data: userData, error: userError } = await supabase
           .from('profiles')
-          .select('id, first_name, last_name, email')
+          .select('id, first_name, last_name')
           .eq('id', currentIncident.created_by)
           .single();
           
@@ -194,10 +195,13 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           return;
         }
         
-        createdByUser = userData as { id: string; first_name: string; last_name: string; email: string };
+        createdByUser = userData as { id: string; first_name: string; last_name: string };
       }
       
-      if (!createdByUser?.email) {
+      // Resolve email with job board priority
+      const emailResult = await resolveUserEmail(currentIncident.created_by, currentIncident.school_id);
+      
+      if (!emailResult?.email) {
         toast({
           title: "Error", 
           description: "No email address found for the incident creator.",
@@ -209,7 +213,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       // Use the queue_email RPC function instead of manual processing
       const { data: queueId, error } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
-        recipient_email_param: createdByUser.email,
+        recipient_email_param: emailResult.email,
         source_table_param: 'incidents',
         record_id_param: currentIncident.id,
         school_id_param: currentIncident.school_id
@@ -224,10 +228,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         });
         throw error;
       } else {
-        addSystemComment.mutate(`Email sent to ${createdByUser.email} [Preview Email](${queueId})`);
+        const emailSource = emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)';
+        addSystemComment.mutate(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${createdByUser.email}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)'}`,
         });
       }
     } catch (emailError) {
