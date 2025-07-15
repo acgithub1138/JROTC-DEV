@@ -10,7 +10,8 @@ export const useDashboardStats = () => {
         tasksResult,
         budgetResult,
         inventoryResult,
-        incidentsResult
+        incidentsResult,
+        schoolsResult
       ] = await Promise.all([
         // Total cadets count
         supabase
@@ -39,7 +40,12 @@ export const useDashboardStats = () => {
         // Incidents data
         supabase
           .from('incidents')
-          .select('id, status, priority, created_at')
+          .select('id, status, priority, created_at'),
+        
+        // Total schools count (for admin dashboard)
+        supabase
+          .from('schools')
+          .select('id', { count: 'exact' })
       ]);
 
       // Calculate overdue tasks
@@ -102,6 +108,9 @@ export const useDashboardStats = () => {
           active: activeIncidents.length,
           overdue: overdueIncidents.length,
           urgentCritical: urgentCriticalIncidents.length
+        },
+        schools: {
+          total: schoolsResult.count || 0
         }
       };
     },

@@ -111,6 +111,42 @@ const DashboardOverview = () => {
   const getStatsConfig = () => {
     const baseStats = [];
 
+    // Admin-specific dashboard
+    if (userProfile?.role === 'admin') {
+      baseStats.push({
+        title: 'Total Schools',
+        value: statsLoading ? '...' : stats?.schools.total.toString() || '0',
+        change: statsLoading ? '...' : 'Registered schools',
+        icon: Building,
+        color: 'text-blue-600',
+        bgColor: 'bg-blue-100'
+      });
+      baseStats.push({
+        title: 'Active Incidents',
+        value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.incidents.urgentCritical || 0} urgent/critical`,
+        icon: AlertTriangle,
+        color: 'text-red-600',
+        bgColor: 'bg-red-100'
+      });
+      baseStats.push({
+        title: 'Total Cadets',
+        value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
+        change: statsLoading ? '...' : stats?.cadets.change || 'No data',
+        icon: Users,
+        color: 'text-green-600',
+        bgColor: 'bg-green-100'
+      });
+      baseStats.push({
+        title: 'Net Budget',
+        value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
+        change: statsLoading ? '...' : `${(stats?.budget.totalIncome || 0).toLocaleString()} income, ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
+        icon: DollarSign,
+        color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
+        bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
+      });
+      return baseStats;
+    }
 
     // For instructors, show Overdue Tasks instead of Total Cadets
     if (userProfile?.role === 'instructor') {
