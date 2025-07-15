@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,6 +37,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 interface School {
   id: string;
   name: string;
+  jrotc_program?: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   contact?: string;
   address?: string;
   city?: string;
@@ -66,6 +68,7 @@ const SchoolManagementPage = () => {
 
   const emptySchool: Omit<School, 'id' | 'created_at'> = {
     name: '',
+    jrotc_program: undefined,
     contact: '',
     address: '',
     city: '',
@@ -121,6 +124,7 @@ const SchoolManagementPage = () => {
         .from('schools')
         .update({
           name: editingSchool.name,
+          jrotc_program: editingSchool.jrotc_program,
           contact: editingSchool.contact,
           address: editingSchool.address,
           city: editingSchool.city,
@@ -412,16 +416,39 @@ const SchoolManagementPage = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="contact">Contact</Label>
-                  <Input
-                    id="contact"
-                    value={editingSchool.contact || ''}
-                    onChange={(e) => setEditingSchool({
+                  <Label htmlFor="jrotc_program">JROTC Program</Label>
+                  <Select 
+                    value={editingSchool.jrotc_program || ''} 
+                    onValueChange={(value) => setEditingSchool({
                       ...editingSchool,
-                      contact: e.target.value
+                      jrotc_program: value as School['jrotc_program']
                     })}
-                  />
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select JROTC Program" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                      <SelectItem value="army">Army JROTC</SelectItem>
+                      <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                      <SelectItem value="navy">Navy JROTC</SelectItem>
+                      <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                      <SelectItem value="space_force">Space Force JROTC</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="contact">Contact</Label>
+                <Input
+                  id="contact"
+                  value={editingSchool.contact || ''}
+                  onChange={(e) => setEditingSchool({
+                    ...editingSchool,
+                    contact: e.target.value
+                  })}
+                />
               </div>
               
               <div className="space-y-2">
