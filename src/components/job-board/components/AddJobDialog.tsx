@@ -52,7 +52,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
     
     onSubmit({
       ...formData,
-      cadet_id: formData.cadet_id || undefined,
+      cadet_id: formData.cadet_id === 'unassigned' ? undefined : formData.cadet_id,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
     });
@@ -97,7 +97,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
                 <SelectValue placeholder="Select cadet..." />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {activeCadets.map((cadet) => (
                   <SelectItem key={cadet.id} value={cadet.id}>
                     {formatCadetName(cadet)}
