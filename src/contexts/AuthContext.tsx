@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 interface School {
   id: string;
   name: string;
-  district?: string;
+  contact?: string;
   address?: string;
   city?: string;
   state?: string;
@@ -72,7 +72,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           schools (
             id,
             name,
-            district,
+            contact,
             address,
             city,
             state,

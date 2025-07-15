@@ -1690,6 +1690,7 @@ export type Database = {
         Row: {
           address: string | null
           city: string | null
+          competition_module: boolean | null
           contact: string | null
           created_at: string
           email: string | null
@@ -1704,6 +1705,7 @@ export type Database = {
         Insert: {
           address?: string | null
           city?: string | null
+          competition_module?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
@@ -1718,6 +1720,7 @@ export type Database = {
         Update: {
           address?: string | null
           city?: string | null
+          competition_module?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
