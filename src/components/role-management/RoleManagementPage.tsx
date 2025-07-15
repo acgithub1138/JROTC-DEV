@@ -18,9 +18,6 @@ const ROLES: {
   value: UserRole;
   label: string;
 }[] = [{
-  value: 'admin',
-  label: 'Admin'
-}, {
   value: 'instructor',
   label: 'Instructor'
 }, {
@@ -88,7 +85,7 @@ const SortableColumnHeader: React.FC<SortableColumnHeaderProps> = ({
     </TooltipProvider>;
 };
 export const RoleManagementPage: React.FC = () => {
-  const [selectedRole, setSelectedRole] = useState<UserRole>('admin');
+  const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const {
     modules,
     actions,
