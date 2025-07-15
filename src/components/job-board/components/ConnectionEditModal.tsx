@@ -61,7 +61,7 @@ export const ConnectionEditModal = ({
           <div className="space-y-4">
             <div>
               <h4 className="font-semibold text-sm mb-2">
-                From: {sourceJob.role} ({sourceJob.cadet.last_name}, {sourceJob.cadet.first_name})
+                From: {sourceJob.role} {sourceJob.cadet ? `(${sourceJob.cadet.last_name}, ${sourceJob.cadet.first_name})` : '(Unassigned)'}
               </h4>
               <Select value={sourceHandle} onValueChange={setSourceHandle}>
                 <SelectTrigger>
@@ -79,7 +79,7 @@ export const ConnectionEditModal = ({
 
             <div>
               <h4 className="font-semibold text-sm mb-2">
-                To: {targetJob.role} ({targetJob.cadet.last_name}, {targetJob.cadet.first_name})
+                To: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
               </h4>
               <Select value={targetHandle} onValueChange={setTargetHandle}>
                 <SelectTrigger>
