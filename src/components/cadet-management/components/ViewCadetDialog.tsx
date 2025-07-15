@@ -8,6 +8,7 @@ import { getGradeColor } from '@/utils/gradeColors';
 import { ProfileHistoryTab } from './ProfileHistoryTab';
 import { ProfileEquipmentTab } from './ProfileEquipmentTab';
 import { ProfileCompetitionsTab } from './ProfileCompetitionsTab';
+import { ProfilePTTestsTab } from './ProfilePTTestsTab';
 import { useJobRole } from '../hooks/useJobRole';
 import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
 import { useAuth } from '@/contexts/AuthContext';
@@ -87,10 +88,11 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
           {/* Tabs Section */}
           <div className="flex-1 overflow-hidden">
             <Tabs defaultValue="history" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-3">
+              <TabsList className="grid w-full grid-cols-4">
                 <TabsTrigger value="history">History</TabsTrigger>
                 <TabsTrigger value="equipment">Equipment</TabsTrigger>
                 <TabsTrigger value="competitions">Competitions</TabsTrigger>
+                <TabsTrigger value="pt-tests">PT Tests</TabsTrigger>
               </TabsList>
               
               <div className="flex-1 overflow-hidden">
@@ -109,6 +111,12 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
                 <TabsContent value="competitions" className="h-full overflow-auto mt-0 p-0">
                   <div className="h-full overflow-y-auto">
                     <ProfileCompetitionsTab profileId={profile.id} />
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="pt-tests" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfilePTTestsTab profileId={profile.id} />
                   </div>
                 </TabsContent>
               </div>
