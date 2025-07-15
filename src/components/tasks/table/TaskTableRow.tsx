@@ -83,7 +83,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             onCheckedChange={(checked) => onSelectTask(task.id, checked as boolean)}
           />
         </TableCell>
-        <TableCell className="font-mono text-sm py-2">
+        <TableCell className="font-medium py-2">
           <div className="flex items-center gap-2">
             {!isSubtask && (
               <Button
