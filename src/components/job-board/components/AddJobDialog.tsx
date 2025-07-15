@@ -48,10 +48,11 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.cadet_id || !formData.role || !formData.reports_to || !formData.assistant) return;
+    if (!formData.role || !formData.reports_to || !formData.assistant) return;
     
     onSubmit({
       ...formData,
+      cadet_id: formData.cadet_id || undefined,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
     });
@@ -87,7 +88,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
-            <Label htmlFor="cadet">Cadet *</Label>
+            <Label htmlFor="cadet">Cadet</Label>
             <Select
               value={formData.cadet_id}
               onValueChange={(value) => setFormData(prev => ({ ...prev, cadet_id: value }))}
@@ -96,6 +97,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
                 <SelectValue placeholder="Select cadet..." />
               </SelectTrigger>
               <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
                 {activeCadets.map((cadet) => (
                   <SelectItem key={cadet.id} value={cadet.id}>
                     {formatCadetName(cadet)}
@@ -162,7 +164,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
             </Button>
             <Button 
               type="submit" 
-              disabled={loading || !formData.cadet_id || !formData.role || !formData.reports_to || !formData.assistant}
+              disabled={loading || !formData.role || !formData.reports_to || !formData.assistant}
             >
               {loading ? 'Adding...' : 'Add Job'}
             </Button>
