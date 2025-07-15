@@ -154,7 +154,8 @@ const CadetManagementPage = () => {
           New cadets default password: Sh0wc@se
         </CardHeader>
         <CardContent>
-          <div className="flex justify-end mb-4">
+          <div className="flex items-center justify-between gap-4 mb-4">
+            <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             {canCreate && (
               <Button variant="outline" onClick={() => {
                 // TODO: Implement PT Test dialog
@@ -165,8 +166,6 @@ const CadetManagementPage = () => {
               </Button>
             )}
           </div>
-          
-          <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
           setProfileToToggle(profile);
