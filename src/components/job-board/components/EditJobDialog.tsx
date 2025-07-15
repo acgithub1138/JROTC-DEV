@@ -111,17 +111,6 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email_address">Email Address</Label>
-            <Input
-              id="email_address"
-              type="email"
-              value={formData.email_address}
-              onChange={(e) => setFormData(prev => ({ ...prev, email_address: e.target.value }))}
-              placeholder="Enter email address..."
-            />
-          </div>
-
-          <div className="space-y-2">
             <Label htmlFor="reports_to">Reports To</Label>
             <Select
               value={formData.reports_to}
@@ -146,6 +135,17 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
                 ))}
               </SelectContent>
             </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="email_address">Email Address</Label>
+            <Input
+              id="email_address"
+              type="email"
+              value={formData.email_address}
+              onChange={(e) => setFormData(prev => ({ ...prev, email_address: e.target.value }))}
+              placeholder="Enter email address..."
+            />
           </div>
 
           <div className="space-y-2">
