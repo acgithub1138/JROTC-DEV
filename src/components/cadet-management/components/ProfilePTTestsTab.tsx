@@ -2,8 +2,8 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
-import { Calendar, Timer, TrendingUp } from 'lucide-react';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { TrendingUp } from 'lucide-react';
 import { formatDistanceToNow } from 'date-fns';
 
 interface PTTest {
@@ -69,52 +69,35 @@ export const ProfilePTTestsTab = ({ profileId }: ProfilePTTestsTabProps) => {
   }
 
   return (
-    <div className="p-4 space-y-4">
-      {ptTests.map((test) => (
-        <Card key={test.id} className="animate-fade-in">
-          <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <CardTitle className="text-lg flex items-center gap-2">
-                <Calendar className="h-4 w-4" />
+    <div className="p-4">
+      <Table>
+        <TableHeader>
+          <TableRow>
+            <TableHead>Date</TableHead>
+            <TableHead>Push-ups</TableHead>
+            <TableHead>Sit-ups</TableHead>
+            <TableHead>Plank Time</TableHead>
+            <TableHead>Mile Time</TableHead>
+            <TableHead>Recorded</TableHead>
+          </TableRow>
+        </TableHeader>
+        <TableBody>
+          {ptTests.map((test) => (
+            <TableRow key={test.id}>
+              <TableCell className="font-medium">
                 {new Date(test.date).toLocaleDateString()}
-              </CardTitle>
-              <Badge variant="outline">
+              </TableCell>
+              <TableCell>{test.push_ups || '-'}</TableCell>
+              <TableCell>{test.sit_ups || '-'}</TableCell>
+              <TableCell>{formatTime(test.plank_time)}</TableCell>
+              <TableCell>{formatTime(test.mile_time)}</TableCell>
+              <TableCell className="text-muted-foreground text-sm">
                 {formatDistanceToNow(new Date(test.created_at), { addSuffix: true })}
-              </Badge>
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">
-                  {test.push_ups || '-'}
-                </p>
-                <p className="text-sm text-muted-foreground">Push-ups</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary">
-                  {test.sit_ups || '-'}
-                </p>
-                <p className="text-sm text-muted-foreground">Sit-ups</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
-                  <Timer className="h-4 w-4" />
-                  {formatTime(test.plank_time)}
-                </p>
-                <p className="text-sm text-muted-foreground">Plank</p>
-              </div>
-              <div className="text-center">
-                <p className="text-2xl font-bold text-primary flex items-center justify-center gap-1">
-                  <Timer className="h-4 w-4" />
-                  {formatTime(test.mile_time)}
-                </p>
-                <p className="text-sm text-muted-foreground">Mile Run</p>
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-      ))}
+              </TableCell>
+            </TableRow>
+          ))}
+        </TableBody>
+      </Table>
     </div>
   );
 };
