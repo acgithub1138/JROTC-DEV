@@ -133,6 +133,14 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       return;
     }
 
+    console.log('🔧 Connection save triggered:', {
+      sourceHandle,
+      targetHandle,
+      connectionType: connectionEditModal.connectionType,
+      sourceJobId: connectionEditModal.sourceJob.id,
+      targetJobId: connectionEditModal.targetJob.id
+    });
+
     // Update source job with source handle
     const sourceUpdates: Partial<JobBoardWithCadet> = {};
     // Update target job with target handle  
@@ -145,6 +153,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       sourceUpdates.assistant_source_handle = sourceHandle;
       targetUpdates.assistant_target_handle = targetHandle;
     }
+
+    console.log('🔧 Updates to apply:', { sourceUpdates, targetUpdates });
 
     // Update both jobs - only the specific fields that changed
     onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
