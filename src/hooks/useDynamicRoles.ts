@@ -46,12 +46,19 @@ export const useDynamicRoles = () => {
       displayLabel?: string;
       isAdminOnly?: boolean;
     }) => {
-      const { error } = await supabase.rpc('add_user_role', {
+      // First, add the role to the enum
+      const { error: addRoleError } = await supabase.rpc('add_user_role', {
         role_name: roleName,
         display_label: displayLabel,
         is_admin_only: isAdminOnly || false
       });
-      if (error) throw error;
+      if (addRoleError) throw addRoleError;
+
+      // Then, set up permissions for the role (this needs to happen after the enum is committed)
+      const { error: setupError } = await supabase.rpc('setup_role_permissions', {
+        role_name: roleName
+      });
+      if (setupError) throw setupError;
     },
     onSuccess: () => {
       // Invalidate and refetch role-related queries

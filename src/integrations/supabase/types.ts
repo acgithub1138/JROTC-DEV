@@ -2423,6 +2423,10 @@ export type Database = {
         }
         Returns: string
       }
+      setup_role_permissions: {
+        Args: { role_name: string }
+        Returns: undefined
+      }
       validate_incident_category: {
         Args: { category_value: string }
         Returns: boolean
