@@ -1699,6 +1699,8 @@ export type Database = {
           name: string
           phone: string | null
           state: string | null
+          subscription_end: string | null
+          subscription_start: string | null
           updated_at: string
           zip_code: string | null
         }
@@ -1714,6 +1716,8 @@ export type Database = {
           name: string
           phone?: string | null
           state?: string | null
+          subscription_end?: string | null
+          subscription_start?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -1729,6 +1733,8 @@ export type Database = {
           name?: string
           phone?: string | null
           state?: string | null
+          subscription_end?: string | null
+          subscription_start?: string | null
           updated_at?: string
           zip_code?: string | null
         }

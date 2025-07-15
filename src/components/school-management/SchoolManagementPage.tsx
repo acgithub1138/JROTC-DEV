@@ -9,6 +9,9 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Calendar } from '@/components/ui/calendar';
+import { format } from 'date-fns';
 import { 
   Pagination,
   PaginationContent,
@@ -25,7 +28,8 @@ import {
   Edit, 
   Trash2, 
   Search, 
-  Plus 
+  Plus,
+  CalendarIcon
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 
@@ -40,6 +44,8 @@ interface School {
   phone?: string;
   email?: string;
   competition_module?: boolean;
+  subscription_start?: string;
+  subscription_end?: string;
   created_at: string;
 }
 
@@ -68,6 +74,8 @@ const SchoolManagementPage = () => {
     phone: '',
     email: '',
     competition_module: false,
+    subscription_start: undefined,
+    subscription_end: undefined,
   };
 
   const fetchSchools = async () => {
@@ -121,6 +129,8 @@ const SchoolManagementPage = () => {
           phone: editingSchool.phone,
           email: editingSchool.email,
           competition_module: editingSchool.competition_module,
+          subscription_start: editingSchool.subscription_start,
+          subscription_end: editingSchool.subscription_end,
         })
         .eq('id', editingSchool.id);
 
@@ -473,6 +483,67 @@ const SchoolManagementPage = () => {
                       email: e.target.value
                     })}
                   />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="subscription_start">Subscription Start</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingSchool.subscription_start 
+                          ? format(new Date(editingSchool.subscription_start), "PPP")
+                          : <span>Pick a date</span>
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editingSchool.subscription_start ? new Date(editingSchool.subscription_start) : undefined}
+                        onSelect={(date) => setEditingSchool({
+                          ...editingSchool,
+                          subscription_start: date ? date.toISOString().split('T')[0] : undefined
+                        })}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="subscription_end">Subscription End</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className="w-full justify-start text-left font-normal"
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {editingSchool.subscription_end 
+                          ? format(new Date(editingSchool.subscription_end), "PPP")
+                          : <span>Pick a date</span>
+                        }
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={editingSchool.subscription_end ? new Date(editingSchool.subscription_end) : undefined}
+                        onSelect={(date) => setEditingSchool({
+                          ...editingSchool,
+                          subscription_end: date ? date.toISOString().split('T')[0] : undefined
+                        })}
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
