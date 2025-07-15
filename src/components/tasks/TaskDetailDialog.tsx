@@ -12,7 +12,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
+import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
@@ -29,12 +29,12 @@ import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
-  const { updateTask, tasks, isUpdating } = useTasks();
+  const { updateTask, duplicateTask, tasks, isUpdating, isDuplicating } = useTasks();
   const { users, isLoading: usersLoading } = useSchoolUsers(true); // Only fetch active users
   const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
-  const { canView, canUpdate, canUpdateAssigned, canAssign } = useTaskPermissions();
+  const { canView, canUpdate, canUpdateAssigned, canAssign, canCreate } = useTaskPermissions();
   const { templates } = useEmailTemplates();
   const { toast } = useToast();
   const [currentTask, setCurrentTask] = useState(task);
@@ -304,6 +304,16 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     onOpenChange(false);
   };
 
+  const handleDuplicateTask = () => {
+    if (!currentTask) return;
+    
+    duplicateTask(currentTask.id, {
+      onSuccess: () => {
+        onOpenChange(false);
+      }
+    });
+  };
+
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
@@ -353,6 +363,18 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                 >
                   <Check className="w-4 h-4" />
                   Mark Complete
+                </Button>
+              )}
+              
+              {canCreate && (
+                <Button
+                  variant="outline"
+                  onClick={handleDuplicateTask}
+                  disabled={isDuplicating}
+                  className="flex items-center gap-2"
+                >
+                  <Copy className="w-4 h-4" />
+                  {isDuplicating ? 'Duplicating...' : 'Duplicate'}
                 </Button>
               )}
               {isEditing && canEdit && (
