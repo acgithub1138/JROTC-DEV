@@ -78,7 +78,6 @@ export const ProfilePTTestsTab = ({ profileId }: ProfilePTTestsTabProps) => {
             <TableHead>Sit-ups</TableHead>
             <TableHead>Plank Time</TableHead>
             <TableHead>Mile Time</TableHead>
-            <TableHead>Recorded</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -91,9 +90,6 @@ export const ProfilePTTestsTab = ({ profileId }: ProfilePTTestsTabProps) => {
               <TableCell>{test.sit_ups || '-'}</TableCell>
               <TableCell>{formatTime(test.plank_time)}</TableCell>
               <TableCell>{formatTime(test.mile_time)}</TableCell>
-              <TableCell className="text-muted-foreground text-sm">
-                {formatDistanceToNow(new Date(test.created_at), { addSuffix: true })}
-              </TableCell>
             </TableRow>
           ))}
         </TableBody>
