@@ -15,7 +15,10 @@ import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
-  const { canUpdate, canCreate } = useCadetPermissions();
+  const {
+    canUpdate,
+    canCreate
+  } = useCadetPermissions();
   const {
     profiles,
     loading,
@@ -67,7 +70,6 @@ const CadetManagementPage = () => {
     setEditingProfile(profile);
     setEditDialogOpen(true);
   };
-
   const handleViewProfile = (profile: Profile) => {
     setViewingProfile(profile);
     setViewDialogOpen(true);
@@ -120,7 +122,6 @@ const CadetManagementPage = () => {
     }
     return success;
   };
-
   const handleAddCadetWrapper = (e: React.FormEvent) => {
     handleAddCadet(e, () => setAddDialogOpen(false));
   };
@@ -146,25 +147,18 @@ const CadetManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <CadetPageHeader 
-        onAddCadet={() => setAddDialogOpen(true)} 
-        onBulkImport={() => setBulkImportDialogOpen(true)}
-      />
+      <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
-        <CardHeader>
-          New cadets default password: Sh0wc@se
-        </CardHeader>
+        
         <CardContent>
           <div className="flex items-center justify-between gap-4 mb-4">
             <CadetSearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
             New cadets default password: Sh0wc@se
-            {canCreate && (
-              <Button variant="outline" onClick={() => setPTTestDialogOpen(true)}>
+            {canCreate && <Button variant="outline" onClick={() => setPTTestDialogOpen(true)}>
                 <Plus className="w-4 h-4 mr-2" />
                 PT Test
-              </Button>
-            )}
+              </Button>}
           </div>
 
           <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
@@ -182,20 +176,12 @@ const CadetManagementPage = () => {
 
       <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadetWrapper} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onSaveProfile={handleSaveProfileWrapper} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
       
-      <ViewCadetDialog
-        open={viewDialogOpen}
-        onOpenChange={setViewDialogOpen}
-        profile={viewingProfile}
-      />
+      <ViewCadetDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} profile={viewingProfile} />
       
-      <PTTestDialog
-        open={ptTestDialogOpen}
-        onOpenChange={setPTTestDialogOpen}
-        onSuccess={() => {
-          // Refresh any PT test related data if needed
-          fetchProfiles();
-        }}
-      />
+      <PTTestDialog open={ptTestDialogOpen} onOpenChange={setPTTestDialogOpen} onSuccess={() => {
+      // Refresh any PT test related data if needed
+      fetchProfiles();
+    }} />
     </div>;
 };
 export default CadetManagementPage;
