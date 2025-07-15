@@ -60,11 +60,17 @@ export const useJobBoardNodes = ({
           'assistant_source_handle', 'assistant_target_handle'
         ] as const;
         
-        const hasChanges = fieldsToCheck.some(field => 
-          currentJob[field] !== previousJob[field]
-        );
+        const changedFields: string[] = [];
+        const hasChanges = fieldsToCheck.some(field => {
+          const isChanged = currentJob[field] !== previousJob[field];
+          if (isChanged) {
+            changedFields.push(`${field}: ${previousJob[field]} -> ${currentJob[field]}`);
+          }
+          return isChanged;
+        });
         
         if (hasChanges) {
+          console.log(`🔄 Job ${id} (${currentJob.role}) has changes:`, changedFields);
           changedJobIds.add(id);
         }
       }
