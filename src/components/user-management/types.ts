@@ -1,4 +1,6 @@
-export type UserRole = 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+import { Database } from '@/integrations/supabase/types';
+
+export type UserRole = Database['public']['Enums']['user_role'];
 
 export interface User {
   id: string;

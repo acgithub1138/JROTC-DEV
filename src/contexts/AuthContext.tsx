@@ -2,6 +2,7 @@ import React, { createContext, useContext, useEffect, useState } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { Database } from '@/integrations/supabase/types';
 
 interface School {
   id: string;
@@ -22,7 +23,7 @@ interface Profile {
   email: string;
   first_name: string;
   last_name: string;
-  role: 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent';
+  role: Database['public']['Enums']['user_role'];
   school_id: string;
   phone?: string;
   rank?: string;

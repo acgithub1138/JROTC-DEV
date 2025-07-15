@@ -2552,7 +2552,13 @@ export type Database = {
         | "cadet_major"
         | "cadet_lieutenant_colonel"
         | "cadet_colonel"
-      user_role: "admin" | "instructor" | "command_staff" | "cadet" | "parent"
+      user_role:
+        | "admin"
+        | "instructor"
+        | "command_staff"
+        | "cadet"
+        | "parent"
+        | "special_staff"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -2788,7 +2794,14 @@ export const Constants = {
         "cadet_lieutenant_colonel",
         "cadet_colonel",
       ],
-      user_role: ["admin", "instructor", "command_staff", "cadet", "parent"],
+      user_role: [
+        "admin",
+        "instructor",
+        "command_staff",
+        "cadet",
+        "parent",
+        "special_staff",
+      ],
     },
   },
 } as const
