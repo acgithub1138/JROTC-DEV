@@ -75,12 +75,9 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
     return `${cadet.last_name}, ${cadet.first_name}${cadet.rank ? ` - ${cadet.rank}` : ''}`;
   };
 
-  // Get assigned cadet IDs
-  const assignedCadetIds = new Set(jobs.map(job => job.cadet_id));
-  
-  // Filter for active cadets only, exclude already assigned, and sort by last name
+  // Filter for active cadets only and sort by last name
   const activeCadets = cadets
-    .filter(cadet => cadet.active && !assignedCadetIds.has(cadet.id))
+    .filter(cadet => cadet.active)
     .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
   return (
