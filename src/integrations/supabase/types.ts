@@ -1788,27 +1788,6 @@ export type Database = {
           },
         ]
       }
-      subtask_number_backup: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          school_id: string | null
-          task_number: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          school_id?: string | null
-          task_number?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          school_id?: string | null
-          task_number?: string | null
-        }
-        Relationships: []
-      }
       subtasks: {
         Row: {
           assigned_by: string | null
@@ -1933,27 +1912,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
-      }
-      task_number_backup: {
-        Row: {
-          created_at: string | null
-          id: string | null
-          school_id: string | null
-          task_number: string | null
-        }
-        Insert: {
-          created_at?: string | null
-          id?: string | null
-          school_id?: string | null
-          task_number?: string | null
-        }
-        Update: {
-          created_at?: string | null
-          id?: string | null
-          school_id?: string | null
-          task_number?: string | null
-        }
-        Relationships: []
       }
       task_priority_options: {
         Row: {
