@@ -8,7 +8,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { CalendarIcon } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addYears } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -214,10 +214,15 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
                   <Calendar
                     mode="single"
                     selected={newSchool.subscription_start ? new Date(newSchool.subscription_start) : undefined}
-                    onSelect={(date) => setNewSchool({
-                      ...newSchool,
-                      subscription_start: date ? date.toISOString().split('T')[0] : undefined
-                    })}
+                    onSelect={(date) => {
+                      const startDate = date ? date.toISOString().split('T')[0] : undefined;
+                      const endDate = date ? addYears(date, 1).toISOString().split('T')[0] : undefined;
+                      setNewSchool({
+                        ...newSchool,
+                        subscription_start: startDate,
+                        subscription_end: endDate
+                      });
+                    }}
                     initialFocus
                     className="p-3 pointer-events-auto"
                   />

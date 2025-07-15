@@ -11,7 +11,7 @@ import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
-import { format } from 'date-fns';
+import { format, addYears } from 'date-fns';
 import { 
   Pagination,
   PaginationContent,
@@ -518,10 +518,15 @@ const SchoolManagementPage = () => {
                       <Calendar
                         mode="single"
                         selected={editingSchool.subscription_start ? new Date(editingSchool.subscription_start) : undefined}
-                        onSelect={(date) => setEditingSchool({
-                          ...editingSchool,
-                          subscription_start: date ? date.toISOString().split('T')[0] : undefined
-                        })}
+                        onSelect={(date) => {
+                          const startDate = date ? date.toISOString().split('T')[0] : undefined;
+                          const endDate = date ? addYears(date, 1).toISOString().split('T')[0] : undefined;
+                          setEditingSchool({
+                            ...editingSchool,
+                            subscription_start: startDate,
+                            subscription_end: endDate
+                          });
+                        }}
                         initialFocus
                         className="p-3 pointer-events-auto"
                       />
