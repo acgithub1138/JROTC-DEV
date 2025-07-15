@@ -403,7 +403,7 @@ const SchoolManagementPage = () => {
             <TableBody>
               {paginatedSchools.map((school) => (
                 <TableRow key={school.id}>
-                  <TableCell className={`font-medium py-2 ${isSubscriptionExpiringSoon(school.subscription_end) ? 'text-red-600' : ''}`}>
+                  <TableCell className={`font-medium py-2 ${isSubscriptionExpiringSoon(school.subscription_end) ? 'bg-red-100 text-black' : ''}`}>
                     {school.name}
                   </TableCell>
                   <TableCell className="py-2">{school.contact || '-'}</TableCell>
