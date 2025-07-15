@@ -99,11 +99,10 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
                         <TooltipTrigger asChild>
                           <Button
                             variant="outline"
-                            size="sm"
+                            size="icon" className="h-6 w-6"
                             onClick={() => onViewMembers(team)}
                           >
                             <Eye className="w-3 h-3" />
-                            View
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
