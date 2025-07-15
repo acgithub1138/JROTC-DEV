@@ -13,7 +13,8 @@ import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Profile } from '../types';
-import { gradeOptions, flightOptions, roleOptions } from '../constants';
+import { gradeOptions, flightOptions } from '../constants';
+import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface EditCadetDialogProps {
   open: boolean;
@@ -28,6 +29,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
   const { canResetPassword, canUpdate } = useCadetPermissions();
   const { toast } = useToast();
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+  const { roleOptions } = useCadetRoles();
   
   // Password reset state
   const [newPassword, setNewPassword] = useState('');

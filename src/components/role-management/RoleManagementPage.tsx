@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
 import { useRoleManagementColumnOrder } from '@/hooks/useRoleManagementColumnOrder';
+import { useDynamicRoles } from '@/hooks/useDynamicRoles';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw, GripVertical } from 'lucide-react';
@@ -14,19 +15,16 @@ import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, us
 import { arrayMove, SortableContext, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
-const ROLES: {
-  value: UserRole;
-  label: string;
-}[] = [{
-  value: 'instructor',
-  label: 'Instructor'
-}, {
-  value: 'command_staff',
-  label: 'Command Staff'
-}, {
-  value: 'cadet',
-  label: 'Cadet'
-}];
+import { AddRoleDialog } from './AddRoleDialog';
+// Helper function to get role colors
+const getRoleColor = (roleName: string): string => {
+  const colorMap: Record<string, string> = {
+    instructor: 'bg-purple-100 text-purple-800',
+    command_staff: 'bg-blue-100 text-blue-800',
+    cadet: 'bg-green-100 text-green-800',
+  };
+  return colorMap[roleName] || 'bg-gray-100 text-gray-800';
+};
 interface SortableColumnHeaderProps {
   action: any;
   children: React.ReactNode;
@@ -96,7 +94,20 @@ export const RoleManagementPage: React.FC = () => {
     isResetting,
     refreshData
   } = useRoleManagement();
+  const { allRoles, isLoadingAllRoles } = useDynamicRoles();
   const { toast } = useToast();
+
+  // Convert dynamic roles to the expected format, excluding admin and parent for role management UI
+  const availableRoles = useMemo(() => {
+    if (!allRoles?.length) return [];
+    
+    return allRoles
+      .filter(role => !['admin', 'parent'].includes(role.role_name))
+      .map(role => ({
+        value: role.role_name as UserRole,
+        label: role.role_label
+      }));
+  }, [allRoles]);
 
   // Use database-backed column ordering
   const defaultActionIds = React.useMemo(() => actions.map(action => action.id), [actions]);
@@ -204,9 +215,14 @@ export const RoleManagementPage: React.FC = () => {
           <CardTitle className="flex items-center justify-between">
             <span>Role Permissions</span>
             <div className="flex items-center gap-4">
+              <AddRoleDialog />
               <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Refresh
+              </Button>
+              <Button variant="outline" size="sm" onClick={handleResetToDefaults} disabled={isResetting} className="flex items-center gap-2">
+                <RotateCcw className="w-4 h-4" />
+                Reset to Defaults
               </Button>
               
             </div>
@@ -223,20 +239,24 @@ export const RoleManagementPage: React.FC = () => {
                   <SelectValue placeholder="Select a role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {ROLES.map(role => {
-                  const {
-                    enabled,
-                    total
-                  } = getPermissionCount(role.value);
-                  return <SelectItem key={role.value} value={role.value}>
-                        <div className="flex items-center justify-between w-full">
-                          <span>{role.label}</span>
-                          <Badge variant="secondary" className="ml-2">
-                            {enabled}/{total}
-                          </Badge>
-                        </div>
-                      </SelectItem>;
-                })}
+                  {isLoadingAllRoles ? (
+                    <SelectItem value="loading" disabled>
+                      Loading roles...
+                    </SelectItem>
+                  ) : availableRoles.map(role => {
+                    const {
+                      enabled,
+                      total
+                    } = getPermissionCount(role.value);
+                    return <SelectItem key={role.value} value={role.value}>
+                          <div className="flex items-center justify-between w-full">
+                            <span>{role.label}</span>
+                            <Badge variant="secondary" className="ml-2">
+                              {enabled}/{total}
+                            </Badge>
+                          </div>
+                        </SelectItem>;
+                  })}
                 </SelectContent>
               </Select>
             </div>

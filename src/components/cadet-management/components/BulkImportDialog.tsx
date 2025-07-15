@@ -12,8 +12,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { parseCSV, validateCadetData } from '../utils/csvProcessor';
 import { NewCadet } from '../types';
-import { gradeOptions, flightOptions, roleOptions } from '../constants';
+import { gradeOptions, flightOptions } from '../constants';
 import { getGradeColor } from '@/utils/gradeColors';
+import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface BulkImportDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ type ImportStep = 'upload' | 'preview' | 'import' | 'complete';
 export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImportDialogProps) => {
   const { userProfile } = useAuth();
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+  const { roleOptions } = useCadetRoles();
   
   const [step, setStep] = useState<ImportStep>('upload');
   const [file, setFile] = useState<File | null>(null);

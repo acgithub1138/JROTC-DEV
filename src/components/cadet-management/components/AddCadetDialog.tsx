@@ -8,7 +8,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { NewCadet } from '../types';
-import { gradeOptions, flightOptions, roleOptions } from '../constants';
+import { gradeOptions, flightOptions } from '../constants';
+import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface AddCadetDialogProps {
   open: boolean;
@@ -21,6 +22,7 @@ interface AddCadetDialogProps {
 export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSubmit }: AddCadetDialogProps) => {
   const { userProfile } = useAuth();
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+  const { roleOptions } = useCadetRoles();
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>

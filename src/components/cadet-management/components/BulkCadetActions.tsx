@@ -5,9 +5,10 @@ import { ChevronDown, GraduationCap, Award, Plane, Shield, UserX, Users } from '
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { gradeOptions as gradeConstants, flightOptions as flightConstants, roleOptions as roleConstants } from '../constants';
+import { gradeOptions as gradeConstants, flightOptions as flightConstants } from '../constants';
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
+import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface BulkCadetActionsProps {
   selectedCadets: string[];
@@ -27,6 +28,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const [isUpdating, setIsUpdating] = useState(false);
+  const { roleOptions } = useCadetRoles();
 
   if (selectedCadets.length === 0 || !canEdit) {
     return null;
@@ -54,11 +56,6 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     { value: '', label: 'Clear Flight' }
   ];
 
-  // Role options - only Cadet and Command Staff
-  const roleOptions = [
-    { value: 'cadet', label: 'Cadet' },
-    { value: 'command_staff', label: 'Command Staff' }
-  ];
 
   const handleBulkUpdate = async (field: string, value: any) => {
     if (selectedCadets.length === 0) return;

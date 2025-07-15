@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { roleOptions } from '../constants';
+import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface MassUpdateRoleDialogProps {
   open: boolean;
@@ -22,6 +22,7 @@ export const MassUpdateRoleDialog = ({
   loading
 }: MassUpdateRoleDialogProps) => {
   const [role, setRole] = useState('');
+  const { roleOptions } = useCadetRoles();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();

@@ -2317,6 +2317,14 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      add_user_role: {
+        Args: {
+          role_name: string
+          display_label?: string
+          is_admin_only?: boolean
+        }
+        Returns: undefined
+      }
       check_user_permission: {
         Args: { user_id: string; module_name: string; action_name: string }
         Returns: boolean
@@ -2340,6 +2348,21 @@ export type Database = {
       generate_task_number: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      get_all_roles: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          role_name: string
+          role_label: string
+          can_be_assigned: boolean
+        }[]
+      }
+      get_assignable_roles: {
+        Args: { current_user_role?: string }
+        Returns: {
+          role_name: string
+          role_label: string
+        }[]
       }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
