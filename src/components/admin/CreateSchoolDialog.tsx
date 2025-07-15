@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -21,6 +22,7 @@ interface NewSchool {
   phone: string;
   email: string;
   jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
+  competition_module: boolean;
 }
 
 export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
@@ -33,7 +35,8 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     zip_code: '',
     phone: '',
     email: '',
-    jrotc_program: 'air_force'
+    jrotc_program: 'air_force',
+    competition_module: false
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -63,7 +66,8 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         zip_code: '',
         phone: '',
         email: '',
-        jrotc_program: 'air_force'
+        jrotc_program: 'air_force',
+        competition_module: false
       });
       
       onOpenChange(false);
@@ -177,6 +181,20 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
                 onChange={(e) => setNewSchool({ ...newSchool, email: e.target.value })}
                 placeholder="Enter email address"
               />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <div className="flex items-center space-x-2">
+              <Checkbox
+                id="competition_module"
+                checked={newSchool.competition_module}
+                onCheckedChange={(checked) => setNewSchool({ 
+                  ...newSchool, 
+                  competition_module: checked as boolean 
+                })}
+              />
+              <Label htmlFor="competition_module">Competition Module</Label>
             </div>
           </div>
 

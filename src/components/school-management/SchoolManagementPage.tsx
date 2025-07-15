@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
@@ -38,6 +39,7 @@ interface School {
   zip_code?: string;
   phone?: string;
   email?: string;
+  competition_module?: boolean;
   created_at: string;
 }
 
@@ -65,6 +67,7 @@ const SchoolManagementPage = () => {
     zip_code: '',
     phone: '',
     email: '',
+    competition_module: false,
   };
 
   const fetchSchools = async () => {
@@ -117,6 +120,7 @@ const SchoolManagementPage = () => {
           zip_code: editingSchool.zip_code,
           phone: editingSchool.phone,
           email: editingSchool.email,
+          competition_module: editingSchool.competition_module,
         })
         .eq('id', editingSchool.id);
 
@@ -469,6 +473,20 @@ const SchoolManagementPage = () => {
                       email: e.target.value
                     })}
                   />
+                </div>
+              </div>
+
+              <div className="space-y-2">
+                <div className="flex items-center space-x-2">
+                  <Checkbox
+                    id="competition_module"
+                    checked={editingSchool.competition_module || false}
+                    onCheckedChange={(checked) => setEditingSchool({
+                      ...editingSchool,
+                      competition_module: checked as boolean
+                    })}
+                  />
+                  <Label htmlFor="competition_module">Competition Module</Label>
                 </div>
               </div>
               
