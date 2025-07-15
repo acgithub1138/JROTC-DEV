@@ -33,6 +33,7 @@ export const useUpdateTask = () => {
 
       console.log('Final update data:', updateData);
 
+      // Update the main task
       const { data, error } = await supabase
         .from('tasks')
         .update(updateData)
@@ -42,12 +43,35 @@ export const useUpdateTask = () => {
         console.error('Update error:', error);
         throw error;
       }
+
+      // If task is being canceled, cancel all its subtasks as well
+      if (taskData.status === 'canceled') {
+        console.log('Task canceled, canceling all subtasks...');
+        
+        const { error: subtaskError } = await supabase
+          .from('subtasks')
+          .update({ 
+            status: 'canceled',
+            completed_at: new Date().toISOString()
+          })
+          .eq('parent_task_id', id)
+          .neq('status', 'canceled'); // Only update subtasks that aren't already canceled
+
+        if (subtaskError) {
+          console.error('Error canceling subtasks:', subtaskError);
+          // Don't throw here - the main task update was successful
+        } else {
+          console.log('All subtasks canceled successfully');
+        }
+      }
       
       console.log('Task updated successfully');
       return data;
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      queryClient.invalidateQueries({ queryKey: ['subtasks'] });
+      queryClient.invalidateQueries({ queryKey: ['my-subtasks'] });
       toast({
         title: "Task updated",
         description: "The task has been updated successfully.",
