@@ -28,7 +28,7 @@ const MODULE_MAPPING: Record<string, string> = {
   'role-management': 'cadets', // Only admins should see this
 };
 
-const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean): MenuItem[] => {
+const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -69,6 +69,14 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       return true;
     }
 
+    // Special case for competitions - requires both permission and school setting
+    if (item.id === 'competitions') {
+      const moduleKey = MODULE_MAPPING[item.id];
+      const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
+      const hasCompetitionModule = userProfile?.schools?.competition_module === true;
+      return hasModulePermission && hasCompetitionModule;
+    }
+
     // Check permissions for regular items
     const moduleKey = MODULE_MAPPING[item.id];
     if (moduleKey) {
@@ -82,10 +90,12 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
 };
 
 // Fallback function for when permissions aren't loaded yet
-const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
+const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[] => {
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
+
+  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
 
   switch (role) {
     case 'admin':
@@ -97,7 +107,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
@@ -112,7 +122,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
@@ -127,7 +137,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -137,7 +147,7 @@ const getDefaultMenuItemsForRole = (role: string): MenuItem[] => {
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -189,8 +199,8 @@ export const useSidebarPreferences = () => {
 
         // Use database permissions if loaded, otherwise fallback to hardcoded
         const defaultItems = permissionsLoaded 
-          ? getMenuItemsFromPermissions(userRole, hasPermission)
-          : getDefaultMenuItemsForRole(userRole);
+          ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
+          : getDefaultMenuItemsForRole(userRole, userProfile);
         
         console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
         
@@ -262,8 +272,8 @@ export const useSidebarPreferences = () => {
         .eq('user_id', userId);
 
       const defaultItems = permissionsLoaded 
-        ? getMenuItemsFromPermissions(userRole, hasPermission)
-        : getDefaultMenuItemsForRole(userRole);
+        ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
+        : getDefaultMenuItemsForRole(userRole, userProfile);
       setMenuItems(defaultItems);
       return true;
     } catch (error) {
@@ -282,9 +292,9 @@ export const useSidebarPreferences = () => {
 
   const getDefaultMenuItems = useCallback(() => {
     return permissionsLoaded 
-      ? getMenuItemsFromPermissions(userRole, hasPermission)
-      : getDefaultMenuItemsForRole(userRole);
-  }, [permissionsLoaded, userRole, hasPermission]);
+      ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
+      : getDefaultMenuItemsForRole(userRole, userProfile);
+  }, [permissionsLoaded, userRole, hasPermission, userProfile]);
 
   // Cleanup timeout on unmount
   useEffect(() => {

@@ -14,6 +14,7 @@ interface School {
   phone?: string;
   email?: string;
   jrotc_program?: string;
+  competition_module?: boolean;
 }
 
 interface Profile {
@@ -79,7 +80,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             zip_code,
             phone,
             email,
-            jrotc_program
+            jrotc_program,
+            competition_module
           )
         `)
         .eq('id', userId)
