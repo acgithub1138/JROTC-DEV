@@ -14,6 +14,14 @@ export const EmailRulesTab: React.FC = () => {
   const taskTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
   const activeRulesWithoutTemplates = rules.filter(r => r.is_active && !r.template_id);
 
+  // Sort rules in desired order: Task Created, Task Information Needed, Task Completed, Task Canceled
+  const ruleOrder = ['task_created', 'task_information_needed', 'task_completed', 'task_canceled'];
+  const sortedRules = [...rules].sort((a, b) => {
+    const aIndex = ruleOrder.indexOf(a.rule_type);
+    const bIndex = ruleOrder.indexOf(b.rule_type);
+    return aIndex - bIndex;
+  });
+
   const handleToggleRule = (ruleId: string, isActive: boolean) => {
     updateRule({ id: ruleId, is_active: isActive });
   };
@@ -75,7 +83,7 @@ export const EmailRulesTab: React.FC = () => {
         </CardHeader>
         <CardContent>
           <div className="grid gap-6 md:grid-cols-2">
-            {rules.map((rule) => (
+            {sortedRules.map((rule) => (
               <RuleCard
                 key={rule.id}
                 rule={rule}
