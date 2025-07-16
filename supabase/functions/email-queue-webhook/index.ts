@@ -410,6 +410,14 @@ serve(async (req) => {
   console.log('🔍 Method:', req.method);
   console.log('🌐 URL:', req.url);
 
+  // Test endpoint
+  if (req.url.includes('test')) {
+    return new Response(JSON.stringify({ success: true, message: 'Edge function is working' }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json', ...corsHeaders }
+    });
+  }
+
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('✅ Handling CORS preflight request');
