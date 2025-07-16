@@ -57,6 +57,19 @@ export const useJobBoard = () => {
         .single();
 
       if (error) throw error;
+
+      // If cadet is assigned and job has email, set their job_role_email
+      if (data.cadet_id && data.email_address) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ job_role_email: data.email_address })
+          .eq('id', data.cadet_id);
+
+        if (profileError) {
+          console.warn('Failed to update profile job_role_email:', profileError);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -78,6 +91,14 @@ export const useJobBoard = () => {
 
   const updateJob = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<NewJobBoard> }) => {
+      // Get the current job data before updating
+      const { data: currentJob } = await supabase
+        .from('job_board')
+        .select('cadet_id, email_address')
+        .eq('id', id)
+        .single();
+
+      // Update the job board entry
       const { data, error } = await supabase
         .from('job_board')
         .update(updates)
@@ -94,6 +115,36 @@ export const useJobBoard = () => {
         .single();
 
       if (error) throw error;
+
+      // Handle job role email synchronization
+      const oldCadetId = currentJob?.cadet_id;
+      const newCadetId = data.cadet_id;
+      const jobEmail = data.email_address;
+
+      // If cadet assignment changed, clear old cadet's job_role_email
+      if (oldCadetId && oldCadetId !== newCadetId) {
+        const { error: clearError } = await supabase
+          .from('profiles')
+          .update({ job_role_email: null })
+          .eq('id', oldCadetId);
+
+        if (clearError) {
+          console.warn('Failed to clear previous cadet job_role_email:', clearError);
+        }
+      }
+
+      // If new cadet is assigned and job has email, set their job_role_email
+      if (newCadetId && jobEmail) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ job_role_email: jobEmail })
+          .eq('id', newCadetId);
+
+        if (profileError) {
+          console.warn('Failed to update profile job_role_email:', profileError);
+        }
+      }
+
       return data;
     },
     onSuccess: () => {
@@ -115,12 +166,31 @@ export const useJobBoard = () => {
 
   const deleteJob = useMutation({
     mutationFn: async (id: string) => {
+      // Get the job data before deleting to clear cadet's job_role_email
+      const { data: jobToDelete } = await supabase
+        .from('job_board')
+        .select('cadet_id')
+        .eq('id', id)
+        .single();
+
       const { error } = await supabase
         .from('job_board')
         .delete()
         .eq('id', id);
 
       if (error) throw error;
+
+      // Clear the assigned cadet's job_role_email
+      if (jobToDelete?.cadet_id) {
+        const { error: profileError } = await supabase
+          .from('profiles')
+          .update({ job_role_email: null })
+          .eq('id', jobToDelete.cadet_id);
+
+        if (profileError) {
+          console.warn('Failed to clear cadet job_role_email on job deletion:', profileError);
+        }
+      }
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['job-board'] });
