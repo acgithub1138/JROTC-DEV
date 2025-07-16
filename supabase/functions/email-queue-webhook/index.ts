@@ -174,12 +174,11 @@ class EmailProcessor {
         throw new Error(error);
       }
 
-      // Start database transaction for status updates
-      console.log(`🔄 Updating email ${emailId} status to 'processing'...`);
+      // Mark as being processed (keep status as pending, use last_attempt_at for locking)
+      console.log(`🔄 Marking email ${emailId} as being processed...`);
       const processingUpdateResult = await this.supabase
         .from('email_queue')
         .update({
-          status: 'processing',
           last_attempt_at: new Date().toISOString(),
           retry_count: (email.retry_count || 0),
           updated_at: new Date().toISOString()
@@ -188,11 +187,11 @@ class EmailProcessor {
         .eq('status', 'pending'); // Ensure it's still pending
 
       if (processingUpdateResult.error) {
-        console.error(`❌ Failed to update email to processing status:`, processingUpdateResult.error);
+        console.error(`❌ Failed to mark email as processing:`, processingUpdateResult.error);
         throw new Error(`Failed to lock email for processing: ${processingUpdateResult.error.message}`);
       }
 
-      console.log(`✅ Email ${emailId} status updated to 'processing'`);
+      console.log(`✅ Email ${emailId} marked as being processed`);
 
       // Send email via Resend with timeout and detailed error handling
       console.log(`📤 Sending email via Resend...`);
