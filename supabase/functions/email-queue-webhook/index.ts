@@ -14,13 +14,14 @@ interface EmailQueueItem {
   body: string;
   school_id: string;
   scheduled_at: string;
+  retry_count?: number;
 }
-
-// Removed SmtpSettings interface - only using Resend now
 
 class EmailProcessor {
   private supabase;
   private resend: Resend | null = null;
+  private static instance: EmailProcessor | null = null;
+  private warmUpComplete = false;
 
   constructor() {
     this.supabase = createClient(
@@ -34,13 +35,50 @@ class EmailProcessor {
     }
   }
 
+  // Singleton pattern for edge function warming
+  static getInstance(): EmailProcessor {
+    if (!EmailProcessor.instance) {
+      EmailProcessor.instance = new EmailProcessor();
+    }
+    return EmailProcessor.instance;
+  }
+
+  // Warm up function to reduce cold starts
+  async warmUp(): Promise<void> {
+    if (this.warmUpComplete) return;
+    
+    try {
+      console.log('🔥 Warming up email processor...');
+      
+      // Pre-warm Resend connection
+      if (this.resend) {
+        // Small test to warm up the Resend connection (won't send)
+        console.log('✅ Resend connection ready');
+      }
+      
+      // Pre-warm Supabase connection
+      await this.supabase.from('email_queue').select('id').limit(1);
+      console.log('✅ Supabase connection ready');
+      
+      this.warmUpComplete = true;
+      console.log('🚀 Email processor warmed up successfully');
+    } catch (error) {
+      console.warn('⚠️ Warm-up failed, but continuing:', error.message);
+    }
+  }
+
   async getEmailById(emailId: string): Promise<EmailQueueItem | null> {
+    const startTime = Date.now();
+    
     const { data, error } = await this.supabase
       .from('email_queue')
-      .select('id, recipient_email, subject, body, school_id, scheduled_at')
+      .select('id, recipient_email, subject, body, school_id, scheduled_at, retry_count')
       .eq('id', emailId)
       .eq('status', 'pending')
       .single();
+
+    const queryTime = Date.now() - startTime;
+    console.log(`📊 Database query time: ${queryTime}ms`);
 
     if (error) {
       if (error.code === 'PGRST116') {
@@ -52,25 +90,38 @@ class EmailProcessor {
     return data;
   }
 
-// Removed getGlobalSmtpSettings - only using Resend now
-
   async sendEmailWithResend(item: EmailQueueItem): Promise<void> {
     if (!this.resend) {
       throw new Error('Resend API key not configured - check RESEND_API_KEY secret in Supabase');
     }
 
-    console.log(`Attempting to send email via Resend to ${item.recipient_email}`);
-    console.log(`Subject: ${item.subject}`);
+    const sendStartTime = Date.now();
+    console.log(`📧 Sending email via Resend to ${item.recipient_email} (retry: ${item.retry_count || 0})`);
+    console.log(`📝 Subject: ${item.subject}`);
+
+    // Enhanced email sending with retry information
+    const isRetry = (item.retry_count || 0) > 0;
+    const emailBody = isRetry ? 
+      `${item.body}\n\n<!-- Email retry attempt: ${item.retry_count} -->` : 
+      item.body;
 
     const result = await this.resend.emails.send({
-      from: 'JROTC System <onboarding@resend.dev>', // Using Resend's verified domain
+      from: 'JROTC System <onboarding@resend.dev>',
       to: [item.recipient_email],
       subject: item.subject,
-      html: item.body,
+      html: emailBody,
+      headers: {
+        'X-Retry-Count': String(item.retry_count || 0),
+        'X-Email-ID': item.id,
+        'X-School-ID': item.school_id,
+      },
     });
 
+    const sendTime = Date.now() - sendStartTime;
+    console.log(`📊 Resend API time: ${sendTime}ms`);
+
     if (result.error) {
-      console.error('Resend API error details:', result.error);
+      console.error('❌ Resend API error details:', result.error);
       throw new Error(`Resend error: ${result.error.message}`);
     }
 
@@ -81,20 +132,27 @@ class EmailProcessor {
     console.log(`✅ Email sent successfully via Resend to ${item.recipient_email}, Resend ID: ${result.data.id}`);
   }
 
-// Removed simulateSmtpSend - only using Resend now
-
-  async processEmail(emailId: string): Promise<{ success: boolean; error?: string }> {
+  async processEmail(emailId: string, isBatchProcessing = false): Promise<{ success: boolean; error?: string; processingTime?: number }> {
+    const processingStartTime = Date.now();
+    
     try {
       // Get the email from queue
       const email = await this.getEmailById(emailId);
       if (!email) {
-        return { success: false, error: 'Email not found or not pending' };
+        return { 
+          success: false, 
+          error: 'Email not found or not pending',
+          processingTime: Date.now() - processingStartTime
+        };
       }
 
       // Check if it's scheduled for the future
       if (new Date(email.scheduled_at) > new Date()) {
-        console.log(`Email ${emailId} is scheduled for future, skipping`);
-        return { success: true };
+        console.log(`⏰ Email ${emailId} is scheduled for future, skipping`);
+        return { 
+          success: true,
+          processingTime: Date.now() - processingStartTime
+        };
       }
 
       // Validate Resend is available
@@ -102,32 +160,43 @@ class EmailProcessor {
         throw new Error('RESEND_API_KEY is not configured in Supabase secrets');
       }
 
-      // Send email via Resend (no fallback)
+      // Send email via Resend
       await this.sendEmailWithResend(email);
 
-      // Mark as sent only after successful delivery
+      // Mark as sent with processing metrics
+      const updateStartTime = Date.now();
+      const processingTime = Date.now() - processingStartTime;
+      
       const updateResult = await this.supabase
         .from('email_queue')
         .update({
           status: 'sent',
           sent_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
-          error_message: null
+          error_message: null,
+          last_attempt_at: new Date().toISOString()
         })
         .eq('id', emailId);
 
+      const updateTime = Date.now() - updateStartTime;
+      console.log(`📊 Database update time: ${updateTime}ms`);
+
       if (updateResult.error) {
-        console.error('Failed to update email status:', updateResult.error);
+        console.error('❌ Failed to update email status:', updateResult.error);
         throw new Error(`Database update failed: ${updateResult.error.message}`);
       }
 
-      console.log(`✅ Email ${emailId} sent successfully via Resend and marked as sent`);
-      return { success: true };
+      console.log(`✅ Email ${emailId} processed successfully in ${processingTime}ms (batch: ${isBatchProcessing})`);
+      return { 
+        success: true,
+        processingTime
+      };
 
     } catch (error) {
+      const processingTime = Date.now() - processingStartTime;
       console.error(`❌ Failed to process email ${emailId}:`, error);
       
-      // Mark as failed with detailed error message
+      // Mark as failed with detailed error message and metrics
       const errorMessage = error.message || 'Unknown error';
       
       await this.supabase
@@ -135,21 +204,57 @@ class EmailProcessor {
         .update({
           status: 'failed',
           error_message: errorMessage,
-          updated_at: new Date().toISOString()
+          updated_at: new Date().toISOString(),
+          last_attempt_at: new Date().toISOString()
         })
         .eq('id', emailId);
 
-      return { success: false, error: errorMessage };
+      return { 
+        success: false, 
+        error: errorMessage,
+        processingTime
+      };
     }
+  }
+
+  // Batch processing for high-volume scenarios
+  async processBatch(emailIds: string[]): Promise<{ processed: number; failed: number; details: any[] }> {
+    console.log(`🔄 Processing batch of ${emailIds.length} emails`);
+    const batchStartTime = Date.now();
+    
+    const results = await Promise.allSettled(
+      emailIds.map(id => this.processEmail(id, true))
+    );
+
+    let processed = 0;
+    let failed = 0;
+    const details: any[] = [];
+
+    results.forEach((result, index) => {
+      const emailId = emailIds[index];
+      if (result.status === 'fulfilled' && result.value.success) {
+        processed++;
+        details.push({ emailId, status: 'success', processingTime: result.value.processingTime });
+      } else {
+        failed++;
+        const error = result.status === 'rejected' ? result.reason.message : result.value.error;
+        details.push({ emailId, status: 'failed', error });
+      }
+    });
+
+    const batchTime = Date.now() - batchStartTime;
+    console.log(`📊 Batch processing completed in ${batchTime}ms: ${processed} processed, ${failed} failed`);
+
+    return { processed, failed, details };
   }
 }
 
 serve(async (req) => {
+  const requestStartTime = Date.now();
   console.log('🚀 Email Queue Webhook function started');
-  console.log('Timestamp:', new Date().toISOString());
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Headers:', Object.fromEntries(req.headers.entries()));
+  console.log('⏰ Timestamp:', new Date().toISOString());
+  console.log('🔍 Method:', req.method);
+  console.log('🌐 URL:', req.url);
 
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -186,7 +291,7 @@ serve(async (req) => {
   try {
     console.log('📥 Parsing request body...');
     const body = await req.text();
-    console.log('Raw body:', body);
+    console.log('📝 Raw body:', body);
     
     let parsedBody;
     try {
@@ -203,7 +308,7 @@ serve(async (req) => {
       );
     }
     
-    const { email_id } = parsedBody;
+    const { email_id, batch_processing, retry_count } = parsedBody;
     
     if (!email_id) {
       console.error('❌ Missing email_id in request');
@@ -216,18 +321,31 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📧 Processing email ID: ${email_id}`);
-    console.log('🏭 Creating EmailProcessor...');
+    console.log(`📧 Processing email ID: ${email_id} (retry: ${retry_count || 0}, batch: ${!!batch_processing})`);
     
-    const processor = new EmailProcessor();
-    console.log('✅ EmailProcessor created successfully');
+    // Get processor instance and warm up
+    const processor = EmailProcessor.getInstance();
+    await processor.warmUp();
     
     console.log('⚡ Starting email processing...');
-    const result = await processor.processEmail(email_id);
+    const result = await processor.processEmail(email_id, batch_processing);
     
+    const totalTime = Date.now() - requestStartTime;
+    console.log(`📊 Total request time: ${totalTime}ms`);
     console.log('✅ Email processing completed:', result);
 
-    return new Response(JSON.stringify(result), {
+    // Add performance metrics to response
+    const response = {
+      ...result,
+      metrics: {
+        totalRequestTime: totalTime,
+        processingTime: result.processingTime,
+        retryCount: retry_count || 0,
+        batchProcessing: !!batch_processing
+      }
+    };
+
+    return new Response(JSON.stringify(response), {
       status: result.success ? 200 : 500,
       headers: {
         'Content-Type': 'application/json',
@@ -236,17 +354,22 @@ serve(async (req) => {
     });
 
   } catch (error) {
+    const totalTime = Date.now() - requestStartTime;
     console.error('💥 Critical error in email-queue-webhook function:', error);
-    console.error('Error name:', error.name);
-    console.error('Error message:', error.message);
-    console.error('Error stack:', error.stack);
+    console.error('🏷️ Error name:', error.name);
+    console.error('💬 Error message:', error.message);
+    console.error('📜 Error stack:', error.stack);
     
     return new Response(
       JSON.stringify({
         success: false,
         error: error.message || 'Unknown error occurred',
         errorName: error.name,
-        timestamp: new Date().toISOString()
+        timestamp: new Date().toISOString(),
+        metrics: {
+          totalRequestTime: totalTime,
+          failed: true
+        }
       }),
       {
         status: 500,

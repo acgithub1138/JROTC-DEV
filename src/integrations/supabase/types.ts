@@ -593,8 +593,12 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
+          last_attempt_at: string | null
+          max_retries: number | null
+          next_retry_at: string | null
           recipient_email: string
           record_id: string | null
+          retry_count: number | null
           rule_id: string | null
           scheduled_at: string
           school_id: string
@@ -610,8 +614,12 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          last_attempt_at?: string | null
+          max_retries?: number | null
+          next_retry_at?: string | null
           recipient_email: string
           record_id?: string | null
+          retry_count?: number | null
           rule_id?: string | null
           scheduled_at?: string
           school_id: string
@@ -627,8 +635,12 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
+          last_attempt_at?: string | null
+          max_retries?: number | null
+          next_retry_at?: string | null
           recipient_email?: string
           record_id?: string | null
+          retry_count?: number | null
           rule_id?: string | null
           scheduled_at?: string
           school_id?: string
@@ -652,6 +664,50 @@ export type Database = {
             columns: ["template_id"]
             isOneToOne: false
             referencedRelation: "email_templates"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      email_queue_health: {
+        Row: {
+          check_timestamp: string | null
+          created_at: string | null
+          failed_count: number
+          health_status: string
+          id: string
+          pending_count: number
+          processing_time_avg_ms: number | null
+          school_id: string
+          stuck_count: number
+        }
+        Insert: {
+          check_timestamp?: string | null
+          created_at?: string | null
+          failed_count?: number
+          health_status?: string
+          id?: string
+          pending_count?: number
+          processing_time_avg_ms?: number | null
+          school_id: string
+          stuck_count?: number
+        }
+        Update: {
+          check_timestamp?: string | null
+          created_at?: string | null
+          failed_count?: number
+          health_status?: string
+          id?: string
+          pending_count?: number
+          processing_time_avg_ms?: number | null
+          school_id?: string
+          stuck_count?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_health_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
@@ -2439,6 +2495,16 @@ export type Database = {
         }
         Returns: undefined
       }
+      check_email_queue_health: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          school_id: string
+          health_status: string
+          pending_count: number
+          stuck_count: number
+          failed_count: number
+        }[]
+      }
       check_user_permission: {
         Args: { user_id: string; module_name: string; action_name: string }
         Returns: boolean
@@ -2537,6 +2603,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      process_email_batch: {
+        Args: { batch_size?: number }
+        Returns: {
+          processed_count: number
+          failed_count: number
+          details: Json
+        }[]
+      }
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
@@ -2556,6 +2630,14 @@ export type Database = {
         Returns: {
           email: string
           source: string
+        }[]
+      }
+      retry_stuck_emails: {
+        Args: { max_age_minutes?: number }
+        Returns: {
+          email_id: string
+          school_id: string
+          retry_count: number
         }[]
       }
       setup_role_permissions: {

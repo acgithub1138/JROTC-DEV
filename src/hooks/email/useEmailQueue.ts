@@ -19,6 +19,10 @@ export interface EmailQueueItem {
   school_id: string;
   created_at: string;
   updated_at: string;
+  retry_count?: number;
+  max_retries?: number;
+  next_retry_at?: string | null;
+  last_attempt_at?: string | null;
   email_templates?: { name: string; subject: string } | null;
 }
 
@@ -38,11 +42,13 @@ export const useEmailQueue = () => {
             subject
           )
         `)
-        .order('created_at', { ascending: false });
+        .order('created_at', { ascending: false })
+        .limit(100);
 
       if (error) throw error;
       return data as EmailQueueItem[];
     },
+    refetchInterval: 30000, // Auto-refresh every 30 seconds
   });
 
   const retryEmail = useMutation({
