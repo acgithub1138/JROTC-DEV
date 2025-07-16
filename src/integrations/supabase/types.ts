@@ -656,6 +656,63 @@ export type Database = {
           },
         ]
       }
+      email_rule_usage_log: {
+        Row: {
+          error_message: string | null
+          id: string
+          processing_time_ms: number | null
+          recipient_email: string
+          record_id: string
+          rule_id: string
+          school_id: string
+          success: boolean
+          trigger_operation: string
+          trigger_table: string
+          triggered_at: string
+        }
+        Insert: {
+          error_message?: string | null
+          id?: string
+          processing_time_ms?: number | null
+          recipient_email: string
+          record_id: string
+          rule_id: string
+          school_id: string
+          success?: boolean
+          trigger_operation: string
+          trigger_table: string
+          triggered_at?: string
+        }
+        Update: {
+          error_message?: string | null
+          id?: string
+          processing_time_ms?: number | null
+          recipient_email?: string
+          record_id?: string
+          rule_id?: string
+          school_id?: string
+          success?: boolean
+          trigger_operation?: string
+          trigger_table?: string
+          triggered_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_rule_usage_log_rule_id_fkey"
+            columns: ["rule_id"]
+            isOneToOne: false
+            referencedRelation: "email_rules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "email_rule_usage_log_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       email_rules: {
         Row: {
           created_at: string
@@ -2459,6 +2516,20 @@ export type Database = {
       is_current_user_admin: {
         Args: Record<PropertyKey, never>
         Returns: boolean
+      }
+      log_email_rule_usage: {
+        Args: {
+          p_rule_id: string
+          p_trigger_table: string
+          p_trigger_operation: string
+          p_record_id: string
+          p_recipient_email: string
+          p_success?: boolean
+          p_error_message?: string
+          p_processing_time_ms?: number
+          p_school_id?: string
+        }
+        Returns: undefined
       }
       process_email_template: {
         Args: { template_content: string; record_data: Json }
