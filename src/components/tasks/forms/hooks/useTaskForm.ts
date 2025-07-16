@@ -73,26 +73,24 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     }
   }, [validStatuses, validPriorities, canAssignTasks, currentUserId, form]);
 
-  const sendNotificationEmail = async (assignedUserId: string, taskTitle: string) => {
-    if (!sendNotification || !selectedTemplate || !assignedUserId) {
+  const sendNotificationEmail = async (createdTask: any, assignedUserId: string) => {
+    if (!sendNotification || !selectedTemplate || !assignedUserId || !createdTask) {
       return;
     }
 
     try {
-      const assignedUserEmail = await resolveUserEmail(assignedUserId, '');
-      if (!assignedUserEmail) {
+      const emailResult = await resolveUserEmail(assignedUserId, '');
+      if (!emailResult.email) {
         throw new Error('Could not resolve assignee email address');
       }
 
-      const { error } = await supabase.functions.invoke('send-task-notification', {
-        body: {
-          to: assignedUserEmail,
-          template_id: selectedTemplate,
-          task_data: {
-            title: taskTitle,
-            assignee_name: assignedUserEmail,
-          }
-        }
+      // Use the queue_email RPC function
+      const { data: queueId, error } = await supabase.rpc('queue_email', {
+        template_id_param: selectedTemplate,
+        recipient_email_param: emailResult.email,
+        source_table_param: 'tasks',
+        record_id_param: createdTask.id,
+        school_id_param: createdTask.school_id
       });
 
       if (error) {
@@ -147,17 +145,20 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     console.log('Prepared task data for submission:', taskData);
 
     try {
+      let createdTask = null;
+      
       if (mode === 'create') {
         console.log('Calling createTask...');
-        await createTask(taskData);
+        createdTask = await createTask(taskData);
       } else if (task) {
         console.log('Calling updateTask...');
         await updateTask({ id: task.id, ...taskData });
+        createdTask = { id: task.id, school_id: task.school_id };
       }
       
-      // Send notification email if requested
-      if (sendNotification) {
-        await sendNotificationEmail(finalAssignedTo, data.title);
+      // Send notification email if requested and we have task data
+      if (sendNotification && createdTask) {
+        await sendNotificationEmail(createdTask, finalAssignedTo);
       }
       
       // Only close and reset if successful
