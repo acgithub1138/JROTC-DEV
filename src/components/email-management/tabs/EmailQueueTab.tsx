@@ -69,12 +69,12 @@ export const EmailQueueTab: React.FC = () => {
           console.log(`📤 Processing email ID: ${email.id}`);
           
           const { data, error } = await supabase.functions.invoke('email-queue-webhook', {
-            body: { email_id: email.id }
+            body: { email_id: email.id, manual_trigger: true }
           });
 
           if (error) {
             console.error(`❌ Function error for email ${email.id}:`, error);
-            errors.push({ emailId: email.id, error });
+            errors.push({ emailId: email.id, error: error.message || 'Unknown error' });
             failed++;
           } else {
             console.log(`✅ Successfully processed email ${email.id}:`, data);
@@ -83,9 +83,9 @@ export const EmailQueueTab: React.FC = () => {
         } catch (networkError) {
           console.error(`🌐 Network error for email ${email.id}:`, networkError);
           console.error('Network error details:', {
-            name: networkError.name,
-            message: networkError.message,
-            stack: networkError.stack
+            name: (networkError as Error).name,
+            message: (networkError as Error).message,
+            stack: (networkError as Error).stack
           });
           errors.push({ emailId: email.id, error: networkError });
           failed++;
@@ -119,9 +119,9 @@ export const EmailQueueTab: React.FC = () => {
     } catch (error) {
       console.error('💥 Critical error in manual processing:', error);
       console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
+        name: (error as Error).name,
+        message: (error as Error).message,
+        stack: (error as Error).stack
       });
     } finally {
       setIsProcessing(false);
