@@ -4,7 +4,8 @@ import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
-import { AlertCircle } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { AlertCircle, Eye } from 'lucide-react';
 import { EmailRule, RULE_LABELS, RULE_DESCRIPTIONS } from '@/hooks/email/useEmailRules';
 import { EmailTemplate } from '@/hooks/email/useEmailTemplates';
 
@@ -13,6 +14,7 @@ interface RuleCardProps {
   templates: EmailTemplate[];
   onToggle: (ruleId: string, isActive: boolean) => void;
   onTemplateSelect: (ruleId: string, templateId: string | null) => void;
+  onPreview: (templateId: string) => void;
   isUpdating: boolean;
 }
 
@@ -21,6 +23,7 @@ export const RuleCard: React.FC<RuleCardProps> = ({
   templates,
   onToggle,
   onTemplateSelect,
+  onPreview,
   isUpdating,
 }) => {
   const sourceTableTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
@@ -102,10 +105,20 @@ export const RuleCard: React.FC<RuleCardProps> = ({
             )}
             
             {selectedTemplate && !hasTemplateError && (
-              <div className="p-3 bg-muted/50 rounded-md">
-                <p className="text-xs text-muted-foreground mb-1">Selected template:</p>
-                <p className="text-sm font-medium">{selectedTemplate.name}</p>
-                <p className="text-xs text-muted-foreground">{selectedTemplate.subject}</p>
+              <div className="flex items-center justify-between">
+                <div>
+                  <p className="text-sm font-medium">{selectedTemplate.name}</p>
+                  <p className="text-xs text-muted-foreground">{selectedTemplate.subject}</p>
+                </div>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => onPreview(selectedTemplate.id)}
+                  className="ml-2"
+                >
+                  <Eye className="w-4 h-4 mr-1" />
+                  Preview
+                </Button>
               </div>
             )}
           </div>

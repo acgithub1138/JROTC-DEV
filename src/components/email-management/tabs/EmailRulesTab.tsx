@@ -1,14 +1,17 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Loader2, Settings } from 'lucide-react';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { RuleCard } from '../components/RuleCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
+import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 
 export const EmailRulesTab: React.FC = () => {
   const { rules, isLoading: rulesLoading, updateRule, isUpdating } = useEmailRules();
   const { templates, isLoading: templatesLoading } = useEmailTemplates();
+  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
+  const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState<string | null>(null);
 
   const isLoading = rulesLoading || templatesLoading;
   const taskTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
@@ -28,6 +31,11 @@ export const EmailRulesTab: React.FC = () => {
 
   const handleTemplateSelect = (ruleId: string, templateId: string | null) => {
     updateRule({ id: ruleId, template_id: templateId });
+  };
+
+  const handlePreview = (templateId: string) => {
+    setSelectedTemplateForPreview(templateId);
+    setPreviewDialogOpen(true);
   };
 
   if (isLoading) {
@@ -90,6 +98,7 @@ export const EmailRulesTab: React.FC = () => {
                 templates={templates}
                 onToggle={handleToggleRule}
                 onTemplateSelect={handleTemplateSelect}
+                onPreview={handlePreview}
                 isUpdating={isUpdating}
               />
             ))}
@@ -108,6 +117,17 @@ export const EmailRulesTab: React.FC = () => {
           )}
         </CardContent>
       </Card>
+
+      {selectedTemplateForPreview && (
+        <EmailPreviewDialog
+          open={previewDialogOpen}
+          onOpenChange={setPreviewDialogOpen}
+          subject={templates.find(t => t.id === selectedTemplateForPreview)?.subject || ''}
+          body={templates.find(t => t.id === selectedTemplateForPreview)?.body || ''}
+          sourceTable={templates.find(t => t.id === selectedTemplateForPreview)?.source_table || ''}
+          templateId={selectedTemplateForPreview}
+        />
+      )}
     </div>
   );
 };
