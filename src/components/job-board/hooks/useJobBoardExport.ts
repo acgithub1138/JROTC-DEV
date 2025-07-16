@@ -1,5 +1,5 @@
 import { useCallback, useState } from 'react';
-import { useReactFlow } from '@xyflow/react';
+import { useReactFlow, getNodesBounds, getViewportForBounds } from '@xyflow/react';
 import { toPng, toJpeg, toSvg } from 'html-to-image';
 import { toast } from '@/hooks/use-toast';
 
@@ -12,27 +12,51 @@ export interface ExportOptions {
 
 export const useJobBoardExport = () => {
   const [isExporting, setIsExporting] = useState(false);
-  const { fitView, getViewport, setViewport, getNodes } = useReactFlow();
+  const { fitView, getViewport, setViewport, getNodes, getEdges } = useReactFlow();
 
   const exportChart = useCallback(async (options: ExportOptions) => {
     setIsExporting(true);
     
     try {
-      const chartElement = document.querySelector('.react-flow') as HTMLElement;
-      if (!chartElement) {
-        throw new Error('Chart element not found');
+      // Find the React Flow wrapper element (contains both nodes and edges)
+      const reactFlowElement = document.querySelector('.react-flow__renderer') as HTMLElement;
+      if (!reactFlowElement) {
+        throw new Error('React Flow renderer not found');
       }
 
       // Store current viewport
       const currentViewport = getViewport();
       
-      // If exporting full chart, fit view temporarily
+      // If exporting full chart, calculate bounds and fit view
       if (options.area === 'full') {
         const nodes = getNodes();
+        const edges = getEdges();
+        
         if (nodes.length > 0) {
-          fitView({ padding: 0.1, duration: 0 });
-          // Wait for view to update
-          await new Promise(resolve => setTimeout(resolve, 100));
+          // Calculate bounds that include all nodes
+          const nodesBounds = getNodesBounds(nodes);
+          
+          // Add padding to the bounds
+          const padding = 50;
+          const viewport = getViewportForBounds(
+            {
+              x: nodesBounds.x - padding,
+              y: nodesBounds.y - padding,
+              width: nodesBounds.width + padding * 2,
+              height: nodesBounds.height + padding * 2,
+            },
+            reactFlowElement.clientWidth,
+            reactFlowElement.clientHeight,
+            0.1, // min zoom
+            2,   // max zoom
+            0.1  // default zoom
+          );
+          
+          // Apply the calculated viewport
+          setViewport(viewport);
+          
+          // Wait for viewport to update and elements to render
+          await new Promise(resolve => setTimeout(resolve, 500));
         }
       }
 
@@ -44,6 +68,15 @@ export const useJobBoardExport = () => {
           transform: 'scale(1)',
           transformOrigin: 'top left',
         },
+        // Include specific styles for React Flow elements
+        filter: (node: Element) => {
+          // Include all React Flow related elements
+          if (node.classList) {
+            return !node.classList.contains('react-flow__controls') && 
+                   !node.classList.contains('react-flow__minimap');
+          }
+          return true;
+        },
       };
 
       let dataUrl: string;
@@ -51,15 +84,15 @@ export const useJobBoardExport = () => {
       
       switch (options.format) {
         case 'png':
-          dataUrl = await toPng(chartElement, exportOptions);
+          dataUrl = await toPng(reactFlowElement, exportOptions);
           fileExtension = 'png';
           break;
         case 'jpeg':
-          dataUrl = await toJpeg(chartElement, { ...exportOptions, backgroundColor: '#ffffff' });
+          dataUrl = await toJpeg(reactFlowElement, { ...exportOptions, backgroundColor: '#ffffff' });
           fileExtension = 'jpg';
           break;
         case 'svg':
-          dataUrl = await toSvg(chartElement, exportOptions);
+          dataUrl = await toSvg(reactFlowElement, exportOptions);
           fileExtension = 'svg';
           break;
         default:
@@ -79,7 +112,7 @@ export const useJobBoardExport = () => {
 
       toast({
         title: 'Export Successful',
-        description: `Job board chart exported as ${options.format.toUpperCase()}`,
+        description: `Job board chart exported as ${options.format.toUpperCase()} with connections`,
       });
     } catch (error) {
       console.error('Export failed:', error);
@@ -91,7 +124,7 @@ export const useJobBoardExport = () => {
     } finally {
       setIsExporting(false);
     }
-  }, [fitView, getViewport, setViewport, getNodes]);
+  }, [fitView, getViewport, setViewport, getNodes, getEdges]);
 
   return {
     exportChart,
