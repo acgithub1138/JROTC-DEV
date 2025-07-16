@@ -8,6 +8,8 @@ import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
 import { JobBoardToolbar } from './JobBoardToolbar';
 import { ConnectionEditModal } from './ConnectionEditModal';
+import { ExportModal } from './ExportModal';
+import { useJobBoardExport } from '../hooks/useJobBoardExport';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
@@ -27,6 +29,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
+  const [showExportModal, setShowExportModal] = useState(false);
+  const { exportChart, isExporting } = useJobBoardExport();
   const [connectionEditModal, setConnectionEditModal] = useState<{
     isOpen: boolean;
     sourceJob: JobBoardWithCadet | null;
@@ -81,6 +85,10 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const handleToggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+  };
+
+  const handleExport = () => {
+    setShowExportModal(true);
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -161,6 +169,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onRefresh={onRefresh}
         onResetLayout={resetLayout}
         onToggleFullscreen={handleToggleFullscreen}
+        onExport={handleExport}
         isResetting={isResetting}
         isFullscreen={isFullscreen}
         snapToGrid={snapToGrid}
@@ -217,6 +226,13 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
           onSave={handleConnectionSave}
         />
       )}
+      
+      <ExportModal
+        isOpen={showExportModal}
+        onClose={() => setShowExportModal(false)}
+        onExport={exportChart}
+        isExporting={isExporting}
+      />
     </div>
   );
 

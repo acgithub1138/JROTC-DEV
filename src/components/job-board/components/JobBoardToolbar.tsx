@@ -1,11 +1,12 @@
 import React from 'react';
-import { RefreshCcw, RotateCcw, Expand, Minimize, Grid3X3 } from 'lucide-react';
+import { RefreshCcw, RotateCcw, Expand, Minimize, Grid3X3, Download } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 
 interface JobBoardToolbarProps {
   onRefresh?: () => void;
   onResetLayout: () => void;
   onToggleFullscreen: () => void;
+  onExport?: () => void;
   isResetting: boolean;
   isFullscreen: boolean;
   snapToGrid?: boolean;
@@ -15,7 +16,8 @@ interface JobBoardToolbarProps {
 export const JobBoardToolbar = ({ 
   onRefresh, 
   onResetLayout, 
-  onToggleFullscreen, 
+  onToggleFullscreen,
+  onExport,
   isResetting,
   isFullscreen,
   snapToGrid = true,
@@ -53,6 +55,17 @@ export const JobBoardToolbar = ({
           title={snapToGrid ? "Disable snap to grid" : "Enable snap to grid"}
         >
           <Grid3X3 className="w-4 h-4" />
+        </Button>
+      )}
+      {onExport && (
+        <Button
+          variant="outline"
+          size="icon"
+          onClick={onExport}
+          className="bg-white/90 backdrop-blur-sm"
+          title="Export chart"
+        >
+          <Download className="w-4 h-4" />
         </Button>
       )}
       <Button
