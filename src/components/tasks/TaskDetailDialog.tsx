@@ -456,28 +456,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
               </CardHeader>
               <CardContent className="space-y-3">
                  <div className="flex items-center gap-2">
-                   <Flag className="w-4 h-4 text-gray-500" />
-                   <span className="text-sm text-gray-600">Priority:</span>
-                    {isEditing && canEdit ? (
-                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
-                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
-                         <SelectValue />
-                       </SelectTrigger>
-                       <SelectContent>
-                         {priorityOptions.filter(p => p.is_active).map((option) => (
-                           <SelectItem key={option.value} value={option.value}>
-                             {option.label}
-                           </SelectItem>
-                         ))}
-                       </SelectContent>
-                     </Select>
-                   ) : (
-                     <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
-                       {currentPriorityOption?.label || currentTask.priority}
-                     </Badge>
-                   )}
-                 </div>
-                 <div className="flex items-center gap-2">
                    <MessageSquare className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Status:</span>
                     {isEditing && canEdit ? (
@@ -496,6 +474,28 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                    ) : (
                      <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
                        {currentStatusOption?.label || currentTask.status.replace('_', ' ')}
+                     </Badge>
+                   )}
+                 </div>                
+                 <div className="flex items-center gap-2">
+                   <Flag className="w-4 h-4 text-gray-500" />
+                   <span className="text-sm text-gray-600">Priority:</span>
+                    {isEditing && canEdit ? (
+                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
+                         <SelectValue />
+                       </SelectTrigger>
+                       <SelectContent>
+                         {priorityOptions.filter(p => p.is_active).map((option) => (
+                           <SelectItem key={option.value} value={option.value}>
+                             {option.label}
+                           </SelectItem>
+                         ))}
+                       </SelectContent>
+                     </Select>
+                   ) : (
+                     <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                       {currentPriorityOption?.label || currentTask.priority}
                      </Badge>
                    )}
                  </div>
