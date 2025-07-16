@@ -2545,6 +2545,13 @@ export type Database = {
         }
         Returns: string
       }
+      resolve_user_email_with_job_priority: {
+        Args: { user_id_param: string; school_id_param: string }
+        Returns: {
+          email: string
+          source: string
+        }[]
+      }
       setup_role_permissions: {
         Args: { role_name: string }
         Returns: undefined
