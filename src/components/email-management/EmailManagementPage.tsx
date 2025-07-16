@@ -2,9 +2,10 @@
 import React, { useState } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Clock } from 'lucide-react';
+import { Mail, Clock, Settings } from 'lucide-react';
 import { EmailTemplatesTab } from './tabs/EmailTemplatesTab';
 import { EmailQueueTab } from './tabs/EmailQueueTab';
+import { EmailRulesTab } from './tabs/EmailRulesTab';
 
 const EmailManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState('templates');
@@ -17,10 +18,14 @@ const EmailManagementPage: React.FC = () => {
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="grid w-full grid-cols-2">
+        <TabsList className="grid w-full grid-cols-3">
           <TabsTrigger value="templates" className="flex items-center gap-2">
             <Mail className="w-4 h-4" />
             Templates
+          </TabsTrigger>
+          <TabsTrigger value="rules" className="flex items-center gap-2">
+            <Settings className="w-4 h-4" />
+            Rules
           </TabsTrigger>
           <TabsTrigger value="queue" className="flex items-center gap-2">
             <Clock className="w-4 h-4" />
@@ -30,6 +35,10 @@ const EmailManagementPage: React.FC = () => {
 
         <TabsContent value="templates" className="space-y-4">
           <EmailTemplatesTab />
+        </TabsContent>
+
+        <TabsContent value="rules" className="space-y-4">
+          <EmailRulesTab />
         </TabsContent>
 
         <TabsContent value="queue" className="space-y-4">
