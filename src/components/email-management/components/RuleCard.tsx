@@ -79,10 +79,8 @@ export const RuleCard: React.FC<RuleCardProps> = ({
                 Please select an email template to activate this rule.
               </p>}
             
-            {selectedTemplate && !hasTemplateError && <div className="flex items-center justify-between">
+            {selectedTemplate && !hasTemplateError && <div className="flex items-center justify-center gap-2">
                 <div>
-                  <p className="text-sm font-medium">{selectedTemplate.name}</p>
-                  
                 </div>
                 <Button variant="outline" size="sm" onClick={() => onPreview(selectedTemplate.id)} className="ml-2">
                   <Eye className="w-4 h-4 mr-1" />
