@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Trash2, Clock, User, Calendar } from 'lucide-react';
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { getStatusColorClass, getPriorityColorClass, getStatusLabel } from '@/utils/taskStatusUtils';
 
 interface TaskCardsProps {
   tasks: (Task | Subtask)[];
@@ -19,23 +21,8 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
   onEdit, 
   onDelete 
 }) => {
-  const getPriorityColor = (priority: string) => {
-    switch (priority?.toLowerCase()) {
-      case 'high': return 'bg-red-100 text-red-800';
-      case 'medium': return 'bg-yellow-100 text-yellow-800';
-      case 'low': return 'bg-green-100 text-green-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
-
-  const getStatusColor = (status: string) => {
-    switch (status?.toLowerCase()) {
-      case 'completed': return 'bg-green-100 text-green-800';
-      case 'in_progress': return 'bg-blue-100 text-blue-800';
-      case 'pending': return 'bg-yellow-100 text-yellow-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
-  };
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
 
   const formatDate = (dateString?: string) => {
     if (!dateString) return 'No date set';
@@ -64,11 +51,11 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
                 <p className="text-sm text-muted-foreground">{task.task_number}</p>
               </div>
               <div className="flex space-x-1">
-                <Badge className={getPriorityColor(task.priority)}>
+                <Badge className={getPriorityColorClass(task.priority, priorityOptions)}>
                   {task.priority}
                 </Badge>
-                <Badge className={getStatusColor(task.status)}>
-                  {task.status?.replace('_', ' ')}
+                <Badge className={getStatusColorClass(task.status, statusOptions)}>
+                  {getStatusLabel(task.status, statusOptions)}
                 </Badge>
               </div>
             </div>

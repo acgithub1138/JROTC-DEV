@@ -23,6 +23,7 @@ import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
+import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 
 interface SubtaskDetailDialogProps {
@@ -249,7 +250,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const handleCompleteSubtask = async () => {
     await updateSubtask({ 
       id: currentSubtask.id, 
-      status: 'done',
+      status: getDefaultCompletionStatus(statusOptions),
       completed_at: new Date().toISOString()
     });
     
@@ -283,7 +284,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
             </DialogTitle>
             {canEdit && (
               <div className="flex items-center gap-2">
-                {currentSubtask.status !== 'done' && (
+                {!isTaskDone(currentSubtask.status, statusOptions) && (
                   <Button
                     type="button"
                     onClick={handleCompleteSubtask}

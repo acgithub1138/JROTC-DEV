@@ -3,10 +3,14 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CheckSquare, Clock, AlertTriangle } from 'lucide-react';
 import { useMyTasks } from '@/hooks/useMyTasks';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { getStatusColorClass, getPriorityColorClass, getStatusLabel } from '@/utils/taskStatusUtils';
 
 export const MyTasksWidget = () => {
   const { userProfile } = useAuth();
   const { tasks, isLoading, taskCounts } = useMyTasks();
+  const { statusOptions } = useTaskStatusOptions();
+  const { priorityOptions } = useTaskPriorityOptions();
 
   if (isLoading) {
     return (
@@ -58,11 +62,7 @@ export const MyTasksWidget = () => {
           {tasks.length > 0 ? (
             tasks.map((task) => (
               <div key={task.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors rounded-lg">
-                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
-                  task.status === 'completed' ? 'bg-green-500' :
-                  task.status === 'in_progress' ? 'bg-blue-500' :
-                  'bg-gray-400'
-                }`}></div>
+                <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${getStatusColorClass(task.status, statusOptions).includes('bg-green') ? 'bg-green-500' : getStatusColorClass(task.status, statusOptions).includes('bg-blue') ? 'bg-blue-500' : 'bg-gray-400'}`}></div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center justify-between">
                     <p className="font-medium text-foreground text-sm truncate">
@@ -76,19 +76,11 @@ export const MyTasksWidget = () => {
                     )}
                   </div>
                   <div className="flex items-center space-x-2 mt-1">
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      task.priority === 'high' ? 'bg-red-100 text-red-800' :
-                      task.priority === 'medium' ? 'bg-yellow-100 text-yellow-800' :
-                      'bg-green-100 text-green-800'
-                    }`}>
+                    <span className={`text-xs px-2 py-1 rounded-full ${getPriorityColorClass(task.priority, priorityOptions)}`}>
                       {task.priority}
                     </span>
-                    <span className={`text-xs px-2 py-1 rounded-full ${
-                      task.status === 'completed' ? 'bg-green-100 text-green-800' :
-                      task.status === 'in_progress' ? 'bg-blue-100 text-blue-800' :
-                      'bg-gray-100 text-gray-800'
-                    }`}>
-                      {task.status.replace('_', ' ')}
+                    <span className={`text-xs px-2 py-1 rounded-full ${getStatusColorClass(task.status, statusOptions)}`}>
+                      {getStatusLabel(task.status, statusOptions)}
                     </span>
                   </div>
                 </div>

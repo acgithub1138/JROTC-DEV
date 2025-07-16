@@ -1,6 +1,8 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
+import { useTaskStatusOptions } from '@/hooks/useTaskOptions';
+import { isTaskDone } from '@/utils/taskStatusUtils';
 
 export interface MyTask {
   id: string;
@@ -14,6 +16,7 @@ export interface MyTask {
 
 export const useMyTasks = () => {
   const { userProfile } = useAuth();
+  const { statusOptions } = useTaskStatusOptions();
   const [tasks, setTasks] = useState<MyTask[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -31,7 +34,7 @@ export const useMyTasks = () => {
           .select('id, title, task_number, status, priority, due_date, created_at')
           .eq('assigned_to', userProfile.id)
           .eq('school_id', userProfile.school_id)
-          .not('status', 'in', '(done,completed,canceled)')
+          .is('completed_at', null)
           .order('created_at', { ascending: false })
           .limit(10);
 
@@ -56,7 +59,7 @@ export const useMyTasks = () => {
       const dueDate = new Date(task.due_date);
       const today = new Date();
       today.setHours(0, 0, 0, 0);
-      return dueDate < today && task.status !== 'completed';
+      return dueDate < today && !isTaskDone(task.status, statusOptions);
     }).length;
 
     return { total, overdue };

@@ -6,6 +6,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useToast } from '@/hooks/use-toast';
+import { getDefaultCancelStatus } from '@/utils/taskStatusUtils';
 
 interface BulkTaskActionsProps {
   selectedTasks: string[];
@@ -78,7 +79,7 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
         selectedTasks.map(taskId => 
           updateTask({ 
             id: taskId, 
-            status: 'canceled',
+            status: getDefaultCancelStatus(statusOptions),
             completed_at: now
           })
         )

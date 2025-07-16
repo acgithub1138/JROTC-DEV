@@ -28,6 +28,7 @@ import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
+import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
   const { userProfile } = useAuth();
@@ -301,7 +302,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
   const handleCompleteTask = async () => {
     // Check if there are incomplete subtasks
-    const incompleteSubtasks = subtasks?.filter(subtask => subtask.status !== 'done') || [];
+    const incompleteSubtasks = subtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
     
     if (incompleteSubtasks.length > 0) {
       // Show confirmation dialog
@@ -318,24 +319,24 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       // Update the main task
       await updateTask({ 
         id: currentTask.id, 
-        status: 'done',
+        status: getDefaultCompletionStatus(statusOptions),
         completed_at: new Date().toISOString()
       });
       
       // Update subtasks if requested
       if (includeSubtasks && subtasks) {
-        const incompleteSubtasks = subtasks.filter(subtask => subtask.status !== 'done');
+        const incompleteSubtasks = subtasks.filter(subtask => !isTaskDone(subtask.status, statusOptions));
         for (const subtask of incompleteSubtasks) {
           await updateSubtask({
             id: subtask.id,
-            status: 'done',
+            status: getDefaultCompletionStatus(statusOptions),
             completed_at: new Date().toISOString()
           });
         }
       }
       
       // Add system comment
-      const commentText = includeSubtasks && subtasks?.some(s => s.status !== 'done') 
+      const commentText = includeSubtasks && subtasks?.some(s => !isTaskDone(s.status, statusOptions)) 
         ? 'Task and all subtasks completed' 
         : 'Task completed';
       addSystemComment(commentText);
@@ -406,7 +407,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
               )}
             </DialogTitle>
             <div className="flex items-center gap-2">
-              {canEdit && currentTask.status !== 'done' && (
+              {canEdit && !isTaskDone(currentTask.status, statusOptions) && (
                 <Button
                   type="button"
                   onClick={handleCompleteTask}
