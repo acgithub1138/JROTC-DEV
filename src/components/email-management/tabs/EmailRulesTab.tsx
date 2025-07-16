@@ -1,12 +1,9 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { AlertCircle, Loader2, Settings, BarChart3 } from 'lucide-react';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AlertCircle, Loader2, Settings } from 'lucide-react';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { RuleCard } from '../components/RuleCard';
-import { BulkRuleActions } from '../components/BulkRuleActions';
-import { RuleAnalytics } from '../components/RuleAnalytics';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 
 export const EmailRulesTab: React.FC = () => {
@@ -68,63 +65,41 @@ export const EmailRulesTab: React.FC = () => {
         </Alert>
       )}
 
-      <Tabs defaultValue="rules" className="space-y-4">
-        <TabsList>
-          <TabsTrigger value="rules" className="flex items-center gap-2">
-            <Settings className="h-4 w-4" />
-            Rules Management
-          </TabsTrigger>
-          <TabsTrigger value="analytics" className="flex items-center gap-2">
-            <BarChart3 className="h-4 w-4" />
-            Analytics
-          </TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="rules" className="space-y-6">
-          {/* Bulk Actions */}
-          {rules.length > 0 && <BulkRuleActions rules={rules} />}
-
-          <Card>
-            <CardHeader>
-              <CardTitle>Available Rules</CardTitle>
-              <CardDescription>
-                Enable rules to automatically send emails when specific task events occur. 
-                Each enabled rule requires an associated email template.
-              </CardDescription>
-            </CardHeader>
-            <CardContent>
-              <div className="grid gap-6 md:grid-cols-2">
-                {rules.map((rule) => (
-                  <RuleCard
-                    key={rule.id}
-                    rule={rule}
-                    templates={templates}
-                    onToggle={handleToggleRule}
-                    onTemplateSelect={handleTemplateSelect}
-                    isUpdating={isUpdating}
-                  />
-                ))}
-              </div>
-              
-              {rules.length === 0 && (
-                <div className="text-center py-8">
-                  <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                    No rules configured
-                  </h3>
-                  <p className="text-sm text-muted-foreground">
-                    Email rules will be automatically created for your school.
-                  </p>
-                </div>
-              )}
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="analytics">
-          <RuleAnalytics />
-        </TabsContent>
-      </Tabs>
+      <Card>
+        <CardHeader>
+          <CardTitle>Available Rules</CardTitle>
+          <CardDescription>
+            Enable rules to automatically send emails when specific task events occur. 
+            Each enabled rule requires an associated email template.
+          </CardDescription>
+        </CardHeader>
+        <CardContent>
+          <div className="grid gap-6 md:grid-cols-2">
+            {rules.map((rule) => (
+              <RuleCard
+                key={rule.id}
+                rule={rule}
+                templates={templates}
+                onToggle={handleToggleRule}
+                onTemplateSelect={handleTemplateSelect}
+                isUpdating={isUpdating}
+              />
+            ))}
+          </div>
+          
+          {rules.length === 0 && (
+            <div className="text-center py-8">
+              <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-muted-foreground mb-2">
+                No rules configured
+              </h3>
+              <p className="text-sm text-muted-foreground">
+                Email rules will be automatically created for your school.
+              </p>
+            </div>
+          )}
+        </CardContent>
+      </Card>
     </div>
   );
 };
