@@ -22,6 +22,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
+import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
@@ -40,6 +41,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const { priorityOptions } = useTaskPriorityOptions();
   const { canView, canUpdate, canUpdateAssigned, canAssign, canCreate } = useTaskPermissions();
   const { templates } = useEmailTemplates();
+  const { rules } = useEmailRules();
   const { toast } = useToast();
   const [currentTask, setCurrentTask] = useState(task);
   const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
@@ -62,6 +64,29 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const taskTemplates = templates.filter(template => 
     template.is_active && template.source_table === 'tasks'
   );
+
+  // Check if email rules are enabled for status changes that should hide the Send Notification checkbox
+  const shouldHideNotificationCheckbox = () => {
+    const originalStatus = currentTask.status;
+    const newStatus = editData.status;
+    
+    // Only hide if status is actually changing
+    if (originalStatus === newStatus) return false;
+    
+    // Check if changing to "need_information" and the rule is enabled
+    if (newStatus === 'need_information') {
+      const infoNeededRule = rules.find(rule => rule.rule_type === 'task_information_needed');
+      if (infoNeededRule?.is_active) return true;
+    }
+    
+    // Check if changing to "completed" and the rule is enabled
+    if (newStatus === 'completed') {
+      const completedRule = rules.find(rule => rule.rule_type === 'task_completed');
+      if (completedRule?.is_active) return true;
+    }
+    
+    return false;
+  };
 
   // Track changes for unsaved warning
   useEffect(() => {
@@ -587,8 +612,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                    </span>
                  </div>
                  
-                 {/* Send Notification Section */}
-                 {isEditing && canEdit && taskTemplates.length > 0 && (
+                  {/* Send Notification Section */}
+                  {isEditing && canEdit && taskTemplates.length > 0 && !shouldHideNotificationCheckbox() && (
                    <div className="pt-3 border-t space-y-3">
                      <div className="flex items-center gap-2">
                        <Checkbox
