@@ -1704,6 +1704,7 @@ export type Database = {
           flight: string | null
           grade: string | null
           id: string
+          job_role_email: string | null
           last_name: string
           password_change_required: boolean
           phone: string | null
@@ -1720,6 +1721,7 @@ export type Database = {
           flight?: string | null
           grade?: string | null
           id: string
+          job_role_email?: string | null
           last_name: string
           password_change_required?: boolean
           phone?: string | null
@@ -1736,6 +1738,7 @@ export type Database = {
           flight?: string | null
           grade?: string | null
           id?: string
+          job_role_email?: string | null
           last_name?: string
           password_change_required?: boolean
           phone?: string | null

@@ -158,11 +158,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         });
         throw error;
       } else {
-        const emailSource = emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)';
+        const emailSource = emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)';
         addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_board' ? ' (job role email)' : ' (profile email)'}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`,
         });
       }
     } catch (emailError) {
