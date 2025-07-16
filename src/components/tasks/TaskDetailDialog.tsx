@@ -117,20 +117,21 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   }, [task, tasks]);
 
   const sendNotificationEmail = async () => {
-    if (!sendNotification || !selectedTemplate || !currentTask.assigned_to) {
+    const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
+    if (!sendNotification || !selectedTemplate || !newAssignedTo) {
       return;
     }
 
     try {
       // Find the assigned user for name information
-      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === currentTask.assigned_to);
+      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === newAssignedTo);
       
       // If user not found in school users, fetch directly
       if (!assignedUser) {
         const { data: userData, error: userError } = await supabase
           .from('profiles')
           .select('id, first_name, last_name')
-          .eq('id', currentTask.assigned_to)
+          .eq('id', newAssignedTo)
           .single();
           
         if (userError || !userData) {
@@ -147,7 +148,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       }
       
       // Resolve email with job board priority
-      const emailResult = await resolveUserEmail(currentTask.assigned_to, currentTask.school_id);
+      const emailResult = await resolveUserEmail(newAssignedTo, currentTask.school_id);
       
       if (!emailResult?.email) {
         toast({
