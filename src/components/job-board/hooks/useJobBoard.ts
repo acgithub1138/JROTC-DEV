@@ -58,15 +58,41 @@ export const useJobBoard = () => {
 
       if (error) throw error;
 
-      // If cadet is assigned and job has email, set their job_role_email
+      // If cadet is assigned and job has email, handle job_role_email
       if (data.cadet_id && data.email_address) {
-        const { error: profileError } = await supabase
+        // Check if user already has a job_role_email
+        const { data: profile } = await supabase
           .from('profiles')
-          .update({ job_role_email: data.email_address })
-          .eq('id', data.cadet_id);
+          .select('job_role_email')
+          .eq('id', data.cadet_id)
+          .single();
 
-        if (profileError) {
-          console.warn('Failed to update profile job_role_email:', profileError);
+        if (profile?.job_role_email && profile.job_role_email !== data.email_address) {
+          // Ask user if they want to replace existing email
+          const shouldReplace = window.confirm(
+            `This cadet already has a job role email (${profile.job_role_email}). Replace it with ${data.email_address}?`
+          );
+          
+          if (shouldReplace) {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .update({ job_role_email: data.email_address })
+              .eq('id', data.cadet_id);
+
+            if (profileError) {
+              console.warn('Failed to update profile job_role_email:', profileError);
+            }
+          }
+        } else if (!profile?.job_role_email) {
+          // Set job_role_email if user doesn't have one
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: data.email_address })
+            .eq('id', data.cadet_id);
+
+          if (profileError) {
+            console.warn('Failed to update profile job_role_email:', profileError);
+          }
         }
       }
 
@@ -121,27 +147,75 @@ export const useJobBoard = () => {
       const newCadetId = data.cadet_id;
       const jobEmail = data.email_address;
 
-      // If cadet assignment changed, clear old cadet's job_role_email
+      // Handle cadet assignment changes
       if (oldCadetId && oldCadetId !== newCadetId) {
-        const { error: clearError } = await supabase
-          .from('profiles')
-          .update({ job_role_email: null })
-          .eq('id', oldCadetId);
+        // Check if old cadet has other job roles before clearing email
+        const { data: otherJobs } = await supabase
+          .from('job_board')
+          .select('email_address')
+          .eq('cadet_id', oldCadetId)
+          .eq('school_id', userProfile?.school_id)
+          .neq('id', id);
 
-        if (clearError) {
-          console.warn('Failed to clear previous cadet job_role_email:', clearError);
+        if (otherJobs && otherJobs.length > 0) {
+          // Update to the first available job role email
+          const nextEmail = otherJobs.find(job => job.email_address)?.email_address;
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: nextEmail || null })
+            .eq('id', oldCadetId);
+
+          if (updateError) {
+            console.warn('Failed to update old cadet job_role_email:', updateError);
+          }
+        } else {
+          // Clear job_role_email if no other jobs
+          const { error: clearError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: null })
+            .eq('id', oldCadetId);
+
+          if (clearError) {
+            console.warn('Failed to clear previous cadet job_role_email:', clearError);
+          }
         }
       }
 
-      // If new cadet is assigned and job has email, set their job_role_email
+      // Handle new cadet assignment
       if (newCadetId && jobEmail) {
-        const { error: profileError } = await supabase
+        // Check if user already has a job_role_email
+        const { data: profile } = await supabase
           .from('profiles')
-          .update({ job_role_email: jobEmail })
-          .eq('id', newCadetId);
+          .select('job_role_email')
+          .eq('id', newCadetId)
+          .single();
 
-        if (profileError) {
-          console.warn('Failed to update profile job_role_email:', profileError);
+        if (profile?.job_role_email && profile.job_role_email !== jobEmail) {
+          // Ask user if they want to replace existing email
+          const shouldReplace = window.confirm(
+            `This cadet already has a job role email (${profile.job_role_email}). Replace it with ${jobEmail}?`
+          );
+          
+          if (shouldReplace) {
+            const { error: profileError } = await supabase
+              .from('profiles')
+              .update({ job_role_email: jobEmail })
+              .eq('id', newCadetId);
+
+            if (profileError) {
+              console.warn('Failed to update profile job_role_email:', profileError);
+            }
+          }
+        } else if (!profile?.job_role_email) {
+          // Set job_role_email if user doesn't have one
+          const { error: profileError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: jobEmail })
+            .eq('id', newCadetId);
+
+          if (profileError) {
+            console.warn('Failed to update profile job_role_email:', profileError);
+          }
         }
       }
 
@@ -180,15 +254,36 @@ export const useJobBoard = () => {
 
       if (error) throw error;
 
-      // Clear the assigned cadet's job_role_email
+      // Handle cadet job_role_email when deleting job
       if (jobToDelete?.cadet_id) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .update({ job_role_email: null })
-          .eq('id', jobToDelete.cadet_id);
+        // Check if cadet has other job roles
+        const { data: otherJobs } = await supabase
+          .from('job_board')
+          .select('email_address')
+          .eq('cadet_id', jobToDelete.cadet_id)
+          .eq('school_id', userProfile?.school_id);
 
-        if (profileError) {
-          console.warn('Failed to clear cadet job_role_email on job deletion:', profileError);
+        if (otherJobs && otherJobs.length > 0) {
+          // Update to the first available job role email
+          const nextEmail = otherJobs.find(job => job.email_address)?.email_address;
+          const { error: updateError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: nextEmail || null })
+            .eq('id', jobToDelete.cadet_id);
+
+          if (updateError) {
+            console.warn('Failed to update cadet job_role_email:', updateError);
+          }
+        } else {
+          // Clear job_role_email if no other jobs
+          const { error: clearError } = await supabase
+            .from('profiles')
+            .update({ job_role_email: null })
+            .eq('id', jobToDelete.cadet_id);
+
+          if (clearError) {
+            console.warn('Failed to clear cadet job_role_email on job deletion:', clearError);
+          }
         }
       }
     },
