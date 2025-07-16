@@ -18,10 +18,10 @@ export const useJobBoardExport = () => {
     setIsExporting(true);
     
     try {
-      // Find the React Flow wrapper element (contains both nodes and edges)
-      const reactFlowElement = document.querySelector('.react-flow__renderer') as HTMLElement;
+      // Find the main React Flow container (contains both nodes and edges)
+      const reactFlowElement = document.querySelector('.react-flow') as HTMLElement;
       if (!reactFlowElement) {
-        throw new Error('React Flow renderer not found');
+        throw new Error('React Flow container not found');
       }
 
       // Store current viewport
