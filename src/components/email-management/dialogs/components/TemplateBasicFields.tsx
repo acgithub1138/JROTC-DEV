@@ -20,34 +20,9 @@ export const TemplateBasicFields: React.FC<TemplateBasicFieldsProps> = ({
   onFormChange,
   availableTables,
 }) => {
-  // Get available recipient fields based on selected source table
-  const getRecipientOptions = () => {
-    if (!formData.source_table) return [];
-    
-    switch (formData.source_table) {
-      case 'tasks':
-      case 'subtasks':
-        return [
-          { value: 'assigned_to', label: 'Assigned To' },
-          { value: 'assigned_by', label: 'Assigned By' },
-          { value: 'created_by', label: 'Created By' },
-        ];
-      case 'incidents':
-        return [
-          { value: 'assigned_to_admin', label: 'Assigned Admin' },
-          { value: 'created_by', label: 'Created By' },
-        ];
-      default:
-        return [
-          { value: 'created_by', label: 'Created By' },
-        ];
-    }
-  };
-
-  const recipientOptions = getRecipientOptions();
 
   return (
-    <div className="grid grid-cols-4 gap-4">
+    <div className="grid grid-cols-3 gap-4">
       <div className="space-y-2">
         <Label htmlFor="name">Template Name</Label>
         <Input
@@ -75,26 +50,6 @@ export const TemplateBasicFields: React.FC<TemplateBasicFieldsProps> = ({
             {availableTables.map((table) => (
               <SelectItem key={table.name} value={table.name}>
                 {table.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      <div className="space-y-2">
-        <Label>Email Recipient</Label>
-        <Select
-          value={formData.recipient_field}
-          onValueChange={(value) => onFormChange({ recipient_field: value })}
-          disabled={!formData.source_table}
-        >
-          <SelectTrigger>
-            <SelectValue placeholder="Select recipient" />
-          </SelectTrigger>
-          <SelectContent>
-            {recipientOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
               </SelectItem>
             ))}
           </SelectContent>

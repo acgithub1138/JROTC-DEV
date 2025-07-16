@@ -8,6 +8,8 @@ import {
   DialogTitle,
 } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
+import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useAvailableTables, useTableColumns, useEnhancedVariables, useGroupedReferenceFields } from '@/hooks/email/useTableColumns';
 import { TemplateBasicFields } from './components/TemplateBasicFields';
@@ -150,6 +152,24 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
               onFormChange={handleFormChange}
               availableTables={availableTables}
             />
+
+            {/* Email Recipient Field */}
+            <div className="space-y-2">
+              <Label>Email Recipient</Label>
+              <Select
+                value={formData.recipient_field}
+                onValueChange={(value) => handleFormChange({ recipient_field: value })}
+                disabled={!formData.source_table}
+              >
+                <SelectTrigger className="w-1/3">
+                  <SelectValue placeholder="Select recipient" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="assigned_to">Assigned To</SelectItem>
+                  <SelectItem value="assigned_by">Created By</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
             <div className="grid grid-cols-4 gap-6">
               <div className="col-span-3 space-y-4">
