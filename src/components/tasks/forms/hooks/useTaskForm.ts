@@ -5,10 +5,6 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { createTaskSchema, TaskFormData } from '../schemas/taskFormSchema';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { resolveUserEmail } from '@/hooks/useEmailResolution';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -22,17 +18,6 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
-  const { templates } = useEmailTemplates();
-  const { toast } = useToast();
-  
-  // Notification state
-  const [sendNotification, setSendNotification] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  
-  // Filter templates for tasks
-  const taskTemplates = templates.filter(template => 
-    template.is_active && template.source_table === 'tasks'
-  );
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -73,56 +58,8 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     }
   }, [validStatuses, validPriorities, canAssignTasks, currentUserId, form]);
 
-  const sendNotificationEmail = async (createdTask: any, assignedUserId: string) => {
-    if (!sendNotification || !selectedTemplate || !assignedUserId || !createdTask) {
-      return;
-    }
-
-    try {
-      const emailResult = await resolveUserEmail(assignedUserId, '');
-      if (!emailResult.email) {
-        throw new Error('Could not resolve assignee email address');
-      }
-
-      // Use the queue_email RPC function
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
-        template_id_param: selectedTemplate,
-        recipient_email_param: emailResult.email,
-        source_table_param: 'tasks',
-        record_id_param: createdTask.id,
-        school_id_param: createdTask.school_id
-      });
-
-      if (error) {
-        throw error;
-      }
-
-      toast({
-        title: "Notification Sent",
-        description: "Task notification email has been sent successfully.",
-      });
-    } catch (error) {
-      console.error('Error sending notification:', error);
-      toast({
-        title: "Error",
-        description: "Failed to send notification email.",
-        variant: "destructive",
-      });
-    }
-  };
-
   const onSubmit = async (data: TaskFormData) => {
     console.log('Form submitted with data:', data);
-
-    // Validate notification requirements
-    if (sendNotification && !selectedTemplate) {
-      toast({
-        title: "Template Required",
-        description: "Please select an email template to send notification.",
-        variant: "destructive",
-      });
-      return;
-    }
 
     // Ensure assigned_to is set for users without assign permission
     const finalAssignedTo = data.assigned_to || (canAssignTasks ? '' : currentUserId);
@@ -145,27 +82,17 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     console.log('Prepared task data for submission:', taskData);
 
     try {
-      let createdTask = null;
-      
       if (mode === 'create') {
         console.log('Calling createTask...');
-        createdTask = await createTask(taskData);
+        await createTask(taskData);
       } else if (task) {
         console.log('Calling updateTask...');
         await updateTask({ id: task.id, ...taskData });
-        createdTask = { id: task.id, school_id: task.school_id };
-      }
-      
-      // Send notification email if requested and we have task data
-      if (sendNotification && createdTask) {
-        await sendNotificationEmail(createdTask, finalAssignedTo);
       }
       
       // Only close and reset if successful
       onOpenChange(false);
       form.reset();
-      setSendNotification(false);
-      setSelectedTemplate('');
     } catch (error) {
       console.error('Task submission failed:', error);
       // Keep form open so user can try again
@@ -184,10 +111,5 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     isLoading: statusLoading || priorityLoading,
     statusOptions,
     priorityOptions,
-    taskTemplates,
-    sendNotification,
-    setSendNotification,
-    selectedTemplate,
-    setSelectedTemplate,
   };
 };

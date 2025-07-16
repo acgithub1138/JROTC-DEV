@@ -3,8 +3,6 @@ import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Form } from '@/components/ui/form';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/hooks/useTasks';
 import { useTaskForm } from './forms/hooks/useTaskForm';
@@ -36,12 +34,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     isSubmitting, 
     isLoading, 
     statusOptions, 
-    priorityOptions,
-    taskTemplates,
-    sendNotification,
-    setSendNotification,
-    selectedTemplate,
-    setSelectedTemplate
+    priorityOptions 
   } = useTaskForm({
     mode,
     task,
@@ -106,41 +99,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
             />
             
             <TaskDueDateField form={form} />
-
-            {/* Send Notification Section */}
-            {taskTemplates.length > 0 && (
-              <div className="pt-3 border-t space-y-3">
-                <div className="flex items-center gap-2">
-                  <Checkbox
-                    id="send-notification"
-                    checked={sendNotification}
-                    onCheckedChange={(checked) => {
-                      setSendNotification(checked as boolean);
-                      if (!checked) setSelectedTemplate('');
-                    }}
-                  />
-                  <label htmlFor="send-notification" className="text-sm font-medium">
-                    Send Notification
-                  </label>
-                </div>
-                {sendNotification && (
-                  <div className="ml-6">
-                    <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                      <SelectTrigger className="w-full">
-                        <SelectValue placeholder="Select template" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {taskTemplates.map((template) => (
-                          <SelectItem key={template.id} value={template.id}>
-                            {template.name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
-                )}
-              </div>
-            )}
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={isSubmitting}>
