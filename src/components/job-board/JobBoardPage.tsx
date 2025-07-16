@@ -9,6 +9,7 @@ import { JobBoardChart } from './components/JobBoardChart';
 import { AddJobDialog } from './components/AddJobDialog';
 import { EditJobDialog } from './components/EditJobDialog';
 import { DeleteJobDialog } from './components/DeleteJobDialog';
+import { JobRoleEmailConfirmModal } from './components/JobRoleEmailConfirmModal';
 import { useJobBoard } from './hooks/useJobBoard';
 import { getFilteredJobs } from './utils/jobBoardFilters';
 import { JobBoardWithCadet } from './types';
@@ -31,7 +32,9 @@ const JobBoardPage = () => {
     createJob,
     updateJob,
     deleteJob,
-    refetch
+    refetch,
+    emailConfirmModal,
+    setEmailConfirmModal
   } = useJobBoard();
   const filteredJobs = getFilteredJobs(jobs, searchTerm);
   const handleAddJob = (newJob: any) => {
@@ -116,6 +119,16 @@ const JobBoardPage = () => {
         {canUpdate && <EditJobDialog open={!!editingJob} onOpenChange={open => !open && setEditingJob(null)} job={editingJob} onSubmit={handleEditJob} loading={updateJob.isPending} jobs={jobs} />}
 
         {canDelete && <DeleteJobDialog open={!!deletingJob} onOpenChange={open => !open && setDeletingJob(null)} job={deletingJob} onConfirm={handleDeleteJob} loading={deleteJob.isPending} />}
+
+        <JobRoleEmailConfirmModal
+          open={emailConfirmModal.open}
+          onOpenChange={(open) => setEmailConfirmModal(prev => ({ ...prev, open }))}
+          currentEmail={emailConfirmModal.currentEmail}
+          newEmail={emailConfirmModal.newEmail}
+          cadetName={emailConfirmModal.cadetName}
+          onReplace={emailConfirmModal.onReplace}
+          onKeep={emailConfirmModal.onKeep}
+        />
 
       </div>
     </div>;

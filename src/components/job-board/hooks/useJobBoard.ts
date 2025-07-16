@@ -4,11 +4,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { JobBoard, JobBoardWithCadet, NewJobBoard } from '../types';
 import { useToast } from '@/hooks/use-toast';
+import { useState } from 'react';
 
 export const useJobBoard = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  
+  // State for email confirmation modal
+  const [emailConfirmModal, setEmailConfirmModal] = useState<{
+    open: boolean;
+    currentEmail: string;
+    newEmail: string;
+    cadetName: string;
+    onReplace: () => void;
+    onKeep: () => void;
+  }>({
+    open: false,
+    currentEmail: '',
+    newEmail: '',
+    cadetName: '',
+    onReplace: () => {},
+    onKeep: () => {},
+  });
 
   const { data: jobs = [], isLoading, error, refetch } = useQuery({
     queryKey: ['job-board', userProfile?.school_id],
@@ -68,21 +86,38 @@ export const useJobBoard = () => {
           .single();
 
         if (profile?.job_role_email && profile.job_role_email !== data.email_address) {
-          // Ask user if they want to replace existing email
-          const shouldReplace = window.confirm(
-            `This cadet already has a job role email (${profile.job_role_email}). Replace it with ${data.email_address}?`
-          );
+          // Get cadet name for the modal
+          const { data: cadetProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', data.cadet_id)
+            .single();
           
-          if (shouldReplace) {
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .update({ job_role_email: data.email_address })
-              .eq('id', data.cadet_id);
+          const cadetName = cadetProfile ? `${cadetProfile.first_name} ${cadetProfile.last_name}` : 'This cadet';
+          
+          // Show modal to ask user if they want to replace existing email
+          return new Promise((resolve, reject) => {
+            setEmailConfirmModal({
+              open: true,
+              currentEmail: profile.job_role_email!,
+              newEmail: data.email_address,
+              cadetName,
+              onReplace: async () => {
+                const { error: profileError } = await supabase
+                  .from('profiles')
+                  .update({ job_role_email: data.email_address })
+                  .eq('id', data.cadet_id);
 
-            if (profileError) {
-              console.warn('Failed to update profile job_role_email:', profileError);
-            }
-          }
+                if (profileError) {
+                  console.warn('Failed to update profile job_role_email:', profileError);
+                }
+                resolve(data);
+              },
+              onKeep: () => {
+                resolve(data);
+              },
+            });
+          });
         } else if (!profile?.job_role_email) {
           // Set job_role_email if user doesn't have one
           const { error: profileError } = await supabase
@@ -191,21 +226,38 @@ export const useJobBoard = () => {
           .single();
 
         if (profile?.job_role_email && profile.job_role_email !== jobEmail) {
-          // Ask user if they want to replace existing email
-          const shouldReplace = window.confirm(
-            `This cadet already has a job role email (${profile.job_role_email}). Replace it with ${jobEmail}?`
-          );
+          // Get cadet name for the modal
+          const { data: cadetProfile } = await supabase
+            .from('profiles')
+            .select('first_name, last_name')
+            .eq('id', newCadetId)
+            .single();
           
-          if (shouldReplace) {
-            const { error: profileError } = await supabase
-              .from('profiles')
-              .update({ job_role_email: jobEmail })
-              .eq('id', newCadetId);
+          const cadetName = cadetProfile ? `${cadetProfile.first_name} ${cadetProfile.last_name}` : 'This cadet';
+          
+          // Show modal to ask user if they want to replace existing email
+          return new Promise((resolve, reject) => {
+            setEmailConfirmModal({
+              open: true,
+              currentEmail: profile.job_role_email!,
+              newEmail: jobEmail,
+              cadetName,
+              onReplace: async () => {
+                const { error: profileError } = await supabase
+                  .from('profiles')
+                  .update({ job_role_email: jobEmail })
+                  .eq('id', newCadetId);
 
-            if (profileError) {
-              console.warn('Failed to update profile job_role_email:', profileError);
-            }
-          }
+                if (profileError) {
+                  console.warn('Failed to update profile job_role_email:', profileError);
+                }
+                resolve(data);
+              },
+              onKeep: () => {
+                resolve(data);
+              },
+            });
+          });
         } else if (!profile?.job_role_email) {
           // Set job_role_email if user doesn't have one
           const { error: profileError } = await supabase
@@ -312,5 +364,7 @@ export const useJobBoard = () => {
     createJob,
     updateJob,
     deleteJob,
+    emailConfirmModal,
+    setEmailConfirmModal,
   };
 };
