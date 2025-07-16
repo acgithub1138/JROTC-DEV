@@ -769,6 +769,7 @@ export type Database = {
           id: string
           is_active: boolean
           name: string
+          recipient_field: string | null
           school_id: string
           source_table: string
           subject: string
@@ -782,6 +783,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name: string
+          recipient_field?: string | null
           school_id: string
           source_table: string
           subject: string
@@ -795,6 +797,7 @@ export type Database = {
           id?: string
           is_active?: boolean
           name?: string
+          recipient_field?: string | null
           school_id?: string
           source_table?: string
           subject?: string

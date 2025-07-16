@@ -38,6 +38,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     subject: '',
     body: '',
     source_table: '',
+    recipient_field: '',
     is_active: true,
   });
 
@@ -56,6 +57,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         subject: template.subject,
         body: template.body,
         source_table: template.source_table,
+        recipient_field: template.recipient_field || '',
         is_active: template.is_active,
       });
     } else {
@@ -64,6 +66,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         subject: '',
         body: '',
         source_table: '',
+        recipient_field: '',
         is_active: true,
       });
     }

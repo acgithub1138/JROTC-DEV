@@ -10,6 +10,7 @@ export interface EmailTemplate {
   subject: string;
   body: string;
   source_table: string;
+  recipient_field: string;
   variables_used: string[];
   is_active: boolean;
   created_by: string | null;
