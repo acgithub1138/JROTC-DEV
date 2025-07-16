@@ -20,6 +20,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
+import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
@@ -47,6 +48,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const { priorityOptions } = useTaskPriorityOptions();
   const { canEdit: canUpdate, canDelete } = useTablePermissions('tasks');
   const { templates } = useEmailTemplates();
+  const { rules } = useEmailRules();
   const { toast } = useToast();
   const canAssign = canUpdate; // For now, use update permission for assign
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
@@ -263,6 +265,23 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
+  // Determine if Send Notification checkbox should be shown
+  const shouldShowNotificationCheckbox = () => {
+    // If status is changing to "Need Information" and Task Information Needed rule is enabled, hide checkbox
+    const informationNeededRule = rules.find(rule => rule.rule_type === 'task_information_needed');
+    if (informationNeededRule?.is_active && editData.status === 'need_information') {
+      return false;
+    }
+
+    // If status is changing to "Completed" and Task Completed rule is enabled, hide checkbox
+    const taskCompletedRule = rules.find(rule => rule.rule_type === 'task_completed');
+    if (taskCompletedRule?.is_active && editData.status === 'completed') {
+      return false;
+    }
+
+    return true;
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleCancel : onOpenChange}>
@@ -445,8 +464,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                    </span>
                  </div>
                  
-                 {/* Send Notification Section */}
-                 {canEdit && subtaskTemplates.length > 0 && (
+                  {/* Send Notification Section */}
+                  {canEdit && subtaskTemplates.length > 0 && shouldShowNotificationCheckbox() && (
                    <div className="pt-3 border-t space-y-3">
                      <div className="flex items-center gap-2">
                        <Checkbox
