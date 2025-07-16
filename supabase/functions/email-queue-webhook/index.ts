@@ -132,13 +132,20 @@ class EmailProcessor {
     console.log(`✅ Email sent successfully via Resend to ${item.recipient_email}, Resend ID: ${result.data.id}`);
   }
 
-  async processEmail(emailId: string, isBatchProcessing = false): Promise<{ success: boolean; error?: string; processingTime?: number }> {
+  async processEmail(emailId: string, isBatchProcessing = false, manualTrigger = false): Promise<{ success: boolean; error?: string; processingTime?: number; emailDetails?: any }> {
     const processingStartTime = Date.now();
+    let email: EmailQueueItem | null = null;
+    let resendResult: any = null;
     
     try {
-      // Get the email from queue
-      const email = await this.getEmailById(emailId);
+      console.log(`🔍 Starting email processing - ID: ${emailId}, Manual: ${manualTrigger}, Batch: ${isBatchProcessing}`);
+      
+      // Get the email from queue with enhanced logging
+      console.log(`📊 Fetching email ${emailId} from database...`);
+      email = await this.getEmailById(emailId);
+      
       if (!email) {
+        console.log(`⚠️ Email ${emailId} not found or not in pending status`);
         return { 
           success: false, 
           error: 'Email not found or not pending',
@@ -146,27 +153,108 @@ class EmailProcessor {
         };
       }
 
-      // Check if it's scheduled for the future
-      if (new Date(email.scheduled_at) > new Date()) {
-        console.log(`⏰ Email ${emailId} is scheduled for future, skipping`);
+      console.log(`📧 Email details - To: ${email.recipient_email}, Subject: ${email.subject}, Retry: ${email.retry_count || 0}`);
+
+      // Check if it's scheduled for the future (unless manual trigger)
+      const scheduledTime = new Date(email.scheduled_at);
+      const now = new Date();
+      if (scheduledTime > now && !manualTrigger) {
+        console.log(`⏰ Email ${emailId} scheduled for ${scheduledTime.toISOString()}, current time: ${now.toISOString()}, skipping`);
         return { 
           success: true,
-          processingTime: Date.now() - processingStartTime
+          processingTime: Date.now() - processingStartTime,
+          emailDetails: { scheduledFor: email.scheduled_at, currentTime: now.toISOString() }
         };
       }
 
       // Validate Resend is available
       if (!this.resend) {
-        throw new Error('RESEND_API_KEY is not configured in Supabase secrets');
+        const error = 'RESEND_API_KEY is not configured in Supabase secrets';
+        console.error(`❌ Configuration error: ${error}`);
+        throw new Error(error);
       }
 
-      // Send email via Resend
-      await this.sendEmailWithResend(email);
+      // Start database transaction for status updates
+      console.log(`🔄 Updating email ${emailId} status to 'processing'...`);
+      const processingUpdateResult = await this.supabase
+        .from('email_queue')
+        .update({
+          status: 'processing',
+          last_attempt_at: new Date().toISOString(),
+          retry_count: (email.retry_count || 0),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', emailId)
+        .eq('status', 'pending'); // Ensure it's still pending
 
-      // Mark as sent with processing metrics
+      if (processingUpdateResult.error) {
+        console.error(`❌ Failed to update email to processing status:`, processingUpdateResult.error);
+        throw new Error(`Failed to lock email for processing: ${processingUpdateResult.error.message}`);
+      }
+
+      console.log(`✅ Email ${emailId} status updated to 'processing'`);
+
+      // Send email via Resend with timeout and detailed error handling
+      console.log(`📤 Sending email via Resend...`);
+      try {
+        await this.sendEmailWithResend(email);
+        console.log(`✅ Email successfully sent via Resend`);
+      } catch (resendError) {
+        console.error(`❌ Resend API error:`, {
+          error: resendError.message,
+          emailId: emailId,
+          recipient: email.recipient_email,
+          retryCount: email.retry_count || 0
+        });
+        
+        // Determine if this is a retryable error
+        const isRetryable = this.isRetryableError(resendError);
+        const currentRetryCount = (email.retry_count || 0);
+        const maxRetries = 3;
+        
+        if (isRetryable && currentRetryCount < maxRetries) {
+          // Calculate next retry time with exponential backoff
+          const nextRetryDelay = Math.pow(2, currentRetryCount) * 2; // 2, 4, 8 minutes
+          const nextRetryAt = new Date(Date.now() + nextRetryDelay * 60 * 1000);
+          
+          console.log(`🔄 Scheduling retry ${currentRetryCount + 1}/${maxRetries} for ${nextRetryAt.toISOString()}`);
+          
+          const retryUpdateResult = await this.supabase
+            .from('email_queue')
+            .update({
+              status: 'pending',
+              retry_count: currentRetryCount + 1,
+              next_retry_at: nextRetryAt.toISOString(),
+              error_message: `Retry ${currentRetryCount + 1}/${maxRetries}: ${resendError.message}`,
+              updated_at: new Date().toISOString()
+            })
+            .eq('id', emailId);
+
+          if (retryUpdateResult.error) {
+            console.error(`❌ Failed to schedule retry:`, retryUpdateResult.error);
+          }
+
+          return {
+            success: false,
+            error: `Retryable error (attempt ${currentRetryCount + 1}/${maxRetries}): ${resendError.message}`,
+            processingTime: Date.now() - processingStartTime,
+            emailDetails: {
+              retryScheduled: true,
+              nextRetryAt: nextRetryAt.toISOString(),
+              retryCount: currentRetryCount + 1
+            }
+          };
+        } else {
+          // Max retries reached or non-retryable error
+          throw resendError;
+        }
+      }
+
+      // Mark as sent with detailed success logging
       const updateStartTime = Date.now();
       const processingTime = Date.now() - processingStartTime;
       
+      console.log(`💾 Updating email ${emailId} status to 'sent'...`);
       const updateResult = await this.supabase
         .from('email_queue')
         .update({
@@ -174,7 +262,8 @@ class EmailProcessor {
           sent_at: new Date().toISOString(),
           updated_at: new Date().toISOString(),
           error_message: null,
-          last_attempt_at: new Date().toISOString()
+          last_attempt_at: new Date().toISOString(),
+          next_retry_at: null // Clear any retry schedule
         })
         .eq('id', emailId);
 
@@ -182,39 +271,104 @@ class EmailProcessor {
       console.log(`📊 Database update time: ${updateTime}ms`);
 
       if (updateResult.error) {
-        console.error('❌ Failed to update email status:', updateResult.error);
-        throw new Error(`Database update failed: ${updateResult.error.message}`);
+        console.error('❌ Failed to update email status to sent:', updateResult.error);
+        // This is critical - the email was sent but status wasn't updated
+        console.error('🚨 CRITICAL: Email was sent but database update failed!');
+        throw new Error(`Database update failed after successful send: ${updateResult.error.message}`);
       }
 
-      console.log(`✅ Email ${emailId} processed successfully in ${processingTime}ms (batch: ${isBatchProcessing})`);
+      console.log(`✅ Email ${emailId} fully processed successfully in ${processingTime}ms (batch: ${isBatchProcessing})`);
       return { 
         success: true,
-        processingTime
+        processingTime,
+        emailDetails: {
+          recipient: email.recipient_email,
+          subject: email.subject,
+          sentAt: new Date().toISOString(),
+          finalRetryCount: email.retry_count || 0
+        }
       };
 
     } catch (error) {
       const processingTime = Date.now() - processingStartTime;
-      console.error(`❌ Failed to process email ${emailId}:`, error);
+      console.error(`❌ Failed to process email ${emailId}:`, {
+        error: error.message,
+        errorName: error.name,
+        stack: error.stack,
+        processingTime: processingTime,
+        emailDetails: email ? {
+          recipient: email.recipient_email,
+          subject: email.subject,
+          retryCount: email.retry_count || 0
+        } : null
+      });
       
-      // Mark as failed with detailed error message and metrics
+      // Enhanced error handling with detailed failure tracking
       const errorMessage = error.message || 'Unknown error';
+      const currentRetryCount = email?.retry_count || 0;
+      const maxRetries = 3;
       
-      await this.supabase
-        .from('email_queue')
-        .update({
-          status: 'failed',
-          error_message: errorMessage,
-          updated_at: new Date().toISOString(),
-          last_attempt_at: new Date().toISOString()
-        })
-        .eq('id', emailId);
+      // Determine final status
+      const finalStatus = currentRetryCount >= maxRetries ? 'failed' : 'pending';
+      const nextRetryAt = finalStatus === 'pending' ? 
+        new Date(Date.now() + Math.pow(2, currentRetryCount) * 2 * 60 * 1000) : null;
+      
+      console.log(`💾 Updating email ${emailId} status to '${finalStatus}' with error details...`);
+      
+      try {
+        const errorUpdateResult = await this.supabase
+          .from('email_queue')
+          .update({
+            status: finalStatus,
+            error_message: `Processing failed: ${errorMessage}`,
+            updated_at: new Date().toISOString(),
+            last_attempt_at: new Date().toISOString(),
+            retry_count: currentRetryCount,
+            next_retry_at: nextRetryAt?.toISOString() || null
+          })
+          .eq('id', emailId);
+
+        if (errorUpdateResult.error) {
+          console.error('❌ Failed to update error status:', errorUpdateResult.error);
+        } else {
+          console.log(`✅ Error status updated for email ${emailId}`);
+        }
+      } catch (updateError) {
+        console.error('❌ Critical: Failed to update error status:', updateError);
+      }
 
       return { 
         success: false, 
         error: errorMessage,
-        processingTime
+        processingTime,
+        emailDetails: email ? {
+          recipient: email.recipient_email,
+          subject: email.subject,
+          retryCount: currentRetryCount,
+          finalStatus: finalStatus,
+          nextRetryAt: nextRetryAt?.toISOString()
+        } : null
       };
     }
+  }
+
+  // Helper method to determine if an error is retryable
+  private isRetryableError(error: any): boolean {
+    const retryableErrors = [
+      'timeout',
+      'network',
+      'rate_limit',
+      'server_error',
+      'connection_error',
+      'socket_timeout'
+    ];
+    
+    const errorMessage = error.message?.toLowerCase() || '';
+    const errorName = error.name?.toLowerCase() || '';
+    
+    return retryableErrors.some(retryableError => 
+      errorMessage.includes(retryableError) || errorName.includes(retryableError)
+    ) || (error.status >= 500 && error.status < 600); // Server errors are retryable
   }
 
   // Batch processing for high-volume scenarios
@@ -308,7 +462,7 @@ serve(async (req) => {
       );
     }
     
-    const { email_id, batch_processing, retry_count } = parsedBody;
+    const { email_id, batch_processing, retry_count, manual_trigger } = parsedBody;
     
     if (!email_id) {
       console.error('❌ Missing email_id in request');
@@ -321,14 +475,14 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📧 Processing email ID: ${email_id} (retry: ${retry_count || 0}, batch: ${!!batch_processing})`);
+    console.log(`📧 Processing email ID: ${email_id} (retry: ${retry_count || 0}, batch: ${!!batch_processing}, manual: ${!!manual_trigger})`);
     
     // Get processor instance and warm up
     const processor = EmailProcessor.getInstance();
     await processor.warmUp();
     
     console.log('⚡ Starting email processing...');
-    const result = await processor.processEmail(email_id, batch_processing);
+    const result = await processor.processEmail(email_id, batch_processing, manual_trigger);
     
     const totalTime = Date.now() - requestStartTime;
     console.log(`📊 Total request time: ${totalTime}ms`);

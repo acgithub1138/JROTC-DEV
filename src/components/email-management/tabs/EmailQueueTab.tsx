@@ -4,7 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, Mail, AlertCircle, RefreshCw, Play } from 'lucide-react';
+import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -29,20 +29,45 @@ export const EmailQueueTab: React.FC = () => {
   const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = React.useState(false);
+  const [isMonitoring, setIsMonitoring] = React.useState(false);
 
   const handleRefresh = () => {
     queryClient.invalidateQueries({ queryKey: ['email-queue'] });
   };
 
+  const handleMonitor = async () => {
+    setIsMonitoring(true);
+    try {
+      console.log('🔍 Running email queue health monitor...');
+      
+      const { data, error } = await supabase.functions.invoke('email-monitor');
+      
+      if (error) {
+        console.error('❌ Monitor error:', error);
+        throw error;
+      }
+      
+      console.log('📊 Monitor report:', data);
+      
+      // Refresh queue after monitoring
+      queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+      
+    } catch (error) {
+      console.error('💥 Monitor failed:', error);
+    } finally {
+      setIsMonitoring(false);
+    }
+  };
+
   const handleManualProcess = async () => {
     setIsProcessing(true);
     try {
-      console.log('🔄 Manually triggering webhook-based email processing...');
+      console.log('🔄 Manually triggering enhanced email processing...');
       
-      // Get pending emails and trigger webhook for each
+      // Get pending emails with full details for better feedback
       const { data: pendingEmails, error: fetchError } = await supabase
         .from('email_queue')
-        .select('id')
+        .select('id, recipient_email, subject, retry_count, error_message')
         .eq('status', 'pending')
         .lte('scheduled_at', new Date().toISOString());
 
@@ -59,14 +84,16 @@ export const EmailQueueTab: React.FC = () => {
 
       console.log(`📧 Found ${pendingEmails.length} pending emails to process`);
 
-      // Process each email individually with better error tracking
+      // Enhanced processing with detailed feedback
       let processed = 0;
       let failed = 0;
-      const errors: Array<{ emailId: string; error: any }> = [];
+      let retryScheduled = 0;
+      const errors: Array<{ emailId: string; recipient: string; error: any }> = [];
+      const details: Array<{ emailId: string; recipient: string; status: string; [key: string]: any }> = [];
 
       for (const email of pendingEmails) {
         try {
-          console.log(`📤 Processing email ID: ${email.id}`);
+          console.log(`📤 Processing email ID: ${email.id} (To: ${email.recipient_email}, Retry: ${email.retry_count || 0})`);
           
           const { data, error } = await supabase.functions.invoke('email-queue-webhook', {
             body: { email_id: email.id, manual_trigger: true }
@@ -74,11 +101,44 @@ export const EmailQueueTab: React.FC = () => {
 
           if (error) {
             console.error(`❌ Function error for email ${email.id}:`, error);
-            errors.push({ emailId: email.id, error: error.message || 'Unknown error' });
+            errors.push({ 
+              emailId: email.id, 
+              recipient: email.recipient_email,
+              error: error.message || 'Unknown error' 
+            });
             failed++;
-          } else {
+          } else if (data?.success) {
             console.log(`✅ Successfully processed email ${email.id}:`, data);
             processed++;
+            details.push({
+              emailId: email.id,
+              recipient: email.recipient_email,
+              status: 'sent',
+              processingTime: data.processingTime,
+              emailDetails: data.emailDetails
+            });
+          } else {
+            // Handle retry scenarios or other non-success responses
+            const isRetryScheduled = data?.emailDetails?.retryScheduled;
+            if (isRetryScheduled) {
+              console.log(`🔄 Email ${email.id} scheduled for retry:`, data);
+              retryScheduled++;
+              details.push({
+                emailId: email.id,
+                recipient: email.recipient_email,
+                status: 'retry_scheduled',
+                nextRetryAt: data.emailDetails?.nextRetryAt,
+                retryCount: data.emailDetails?.retryCount
+              });
+            } else {
+              console.warn(`⚠️ Email ${email.id} processing returned non-success:`, data);
+              errors.push({ 
+                emailId: email.id, 
+                recipient: email.recipient_email,
+                error: data?.error || 'Processing failed' 
+              });
+              failed++;
+            }
           }
         } catch (networkError) {
           console.error(`🌐 Network error for email ${email.id}:`, networkError);
@@ -87,34 +147,53 @@ export const EmailQueueTab: React.FC = () => {
             message: (networkError as Error).message,
             stack: (networkError as Error).stack
           });
-          errors.push({ emailId: email.id, error: networkError });
+          errors.push({ 
+            emailId: email.id, 
+            recipient: email.recipient_email,
+            error: `Network error: ${(networkError as Error).message}` 
+          });
           failed++;
         }
 
-        // Small delay between requests
+        // Small delay between requests to prevent rate limiting
         await new Promise(resolve => setTimeout(resolve, 200));
       }
 
-      // Log detailed results
-      console.log(`📊 Manual processing complete: ${processed} processed, ${failed} failed`);
+      // Enhanced results logging
+      console.group('📊 Enhanced Processing Results:');
+      console.log(`📧 Total emails processed: ${pendingEmails.length}`);
+      console.log(`✅ Successfully sent: ${processed}`);
+      console.log(`🔄 Retries scheduled: ${retryScheduled}`);
+      console.log(`❌ Failed: ${failed}`);
+      
+      if (details.length > 0) {
+        console.log('📋 Success details:', details);
+      }
       
       if (errors.length > 0) {
-        console.error('❌ Detailed error summary:');
-        errors.forEach(({ emailId, error }) => {
-          console.error(`  - Email ${emailId}:`, error);
+        console.log('❌ Error details:');
+        errors.forEach(({ emailId, recipient, error }) => {
+          console.error(`  - ${emailId} (${recipient}):`, error);
         });
       }
+      console.groupEnd();
       
       // Refresh the queue after processing
       queryClient.invalidateQueries({ queryKey: ['email-queue'] });
 
-      // Show user-friendly result
+      // Enhanced user feedback
+      let resultMessage = '';
       if (processed > 0) {
-        console.log(`✅ Success: ${processed} emails processed`);
+        resultMessage += `✅ ${processed} emails sent`;
+      }
+      if (retryScheduled > 0) {
+        resultMessage += `${resultMessage ? ', ' : ''}🔄 ${retryScheduled} retries scheduled`;
       }
       if (failed > 0) {
-        console.error(`❌ Failed: ${failed} emails failed to process`);
+        resultMessage += `${resultMessage ? ', ' : ''}❌ ${failed} failed`;
       }
+
+      console.log(`📋 Final result: ${resultMessage || 'No emails processed'}`);
 
     } catch (error) {
       console.error('💥 Critical error in manual processing:', error);
@@ -168,6 +247,16 @@ export const EmailQueueTab: React.FC = () => {
               </div>
             </div>
             <div className="flex items-center gap-2">
+              <Button
+                onClick={handleMonitor}
+                disabled={isMonitoring}
+                variant="outline"
+                size="sm"
+                className="flex items-center gap-2"
+              >
+                <Activity className="w-4 h-4" />
+                {isMonitoring ? 'Monitoring...' : 'Health Check'}
+              </Button>
               {pendingCount > 0 && (
                 <Button
                   onClick={handleManualProcess}
