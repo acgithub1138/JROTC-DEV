@@ -5,6 +5,10 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { createTaskSchema, TaskFormData } from '../schemas/taskFormSchema';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
+import { useToast } from '@/hooks/use-toast';
+import { supabase } from '@/integrations/supabase/client';
+import { resolveUserEmail } from '@/hooks/useEmailResolution';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -18,6 +22,17 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
+  const { templates } = useEmailTemplates();
+  const { toast } = useToast();
+  
+  // Notification state
+  const [sendNotification, setSendNotification] = useState(false);
+  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
+  
+  // Filter templates for tasks
+  const taskTemplates = templates.filter(template => 
+    template.is_active && template.source_table === 'tasks'
+  );
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -58,8 +73,58 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     }
   }, [validStatuses, validPriorities, canAssignTasks, currentUserId, form]);
 
+  const sendNotificationEmail = async (assignedUserId: string, taskTitle: string) => {
+    if (!sendNotification || !selectedTemplate || !assignedUserId) {
+      return;
+    }
+
+    try {
+      const assignedUserEmail = await resolveUserEmail(assignedUserId, '');
+      if (!assignedUserEmail) {
+        throw new Error('Could not resolve assignee email address');
+      }
+
+      const { error } = await supabase.functions.invoke('send-task-notification', {
+        body: {
+          to: assignedUserEmail,
+          template_id: selectedTemplate,
+          task_data: {
+            title: taskTitle,
+            assignee_name: assignedUserEmail,
+          }
+        }
+      });
+
+      if (error) {
+        throw error;
+      }
+
+      toast({
+        title: "Notification Sent",
+        description: "Task notification email has been sent successfully.",
+      });
+    } catch (error) {
+      console.error('Error sending notification:', error);
+      toast({
+        title: "Error",
+        description: "Failed to send notification email.",
+        variant: "destructive",
+      });
+    }
+  };
+
   const onSubmit = async (data: TaskFormData) => {
     console.log('Form submitted with data:', data);
+
+    // Validate notification requirements
+    if (sendNotification && !selectedTemplate) {
+      toast({
+        title: "Template Required",
+        description: "Please select an email template to send notification.",
+        variant: "destructive",
+      });
+      return;
+    }
 
     // Ensure assigned_to is set for users without assign permission
     const finalAssignedTo = data.assigned_to || (canAssignTasks ? '' : currentUserId);
@@ -90,9 +155,16 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
         await updateTask({ id: task.id, ...taskData });
       }
       
+      // Send notification email if requested
+      if (sendNotification) {
+        await sendNotificationEmail(finalAssignedTo, data.title);
+      }
+      
       // Only close and reset if successful
       onOpenChange(false);
       form.reset();
+      setSendNotification(false);
+      setSelectedTemplate('');
     } catch (error) {
       console.error('Task submission failed:', error);
       // Keep form open so user can try again
@@ -111,5 +183,10 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     isLoading: statusLoading || priorityLoading,
     statusOptions,
     priorityOptions,
+    taskTemplates,
+    sendNotification,
+    setSendNotification,
+    selectedTemplate,
+    setSelectedTemplate,
   };
 };
