@@ -94,9 +94,7 @@ export const PTTestsTab = ({
   // Apply immediate client-side filtering for smooth UX
   const filteredPTTests = React.useMemo(() => {
     if (!searchTerm) return ptTests;
-    return ptTests.filter((test: PTTest) => 
-      `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    return ptTests.filter((test: PTTest) => `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()));
   }, [ptTests, searchTerm]);
   const formatTime = (seconds: number | null) => {
     if (!seconds) return '-';
@@ -240,7 +238,7 @@ export const PTTestsTab = ({
               </TableHeader>
               <TableBody>
                 {sortedData.map(test => <TableRow key={test.id}>
-                    <TableCell className="font-medium py-[4px]">
+                    <TableCell className="font-medium py-[6px]">
                       {test.profiles.last_name}, {test.profiles.first_name}
                     </TableCell>
                     <TableCell>
