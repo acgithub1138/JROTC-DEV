@@ -12,14 +12,22 @@ interface TaskCommentsSectionProps {
   comments: any[];
   isAddingComment: boolean;
   onAddComment: (comment: string) => void;
+  newComment?: string;
+  onNewCommentChange?: (comment: string) => void;
 }
 
 export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   comments,
   isAddingComment,
-  onAddComment
+  onAddComment,
+  newComment: externalNewComment,
+  onNewCommentChange
 }) => {
-  const [newComment, setNewComment] = useState('');
+  const [internalNewComment, setInternalNewComment] = useState('');
+  
+  // Use external comment state if provided, otherwise use internal state
+  const newComment = externalNewComment !== undefined ? externalNewComment : internalNewComment;
+  const setNewComment = onNewCommentChange || setInternalNewComment;
   const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [showEmailPreview, setShowEmailPreview] = useState(false);

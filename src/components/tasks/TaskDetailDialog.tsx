@@ -27,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
+import { UnsavedCommentModal } from './components/UnsavedCommentModal';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
@@ -51,6 +52,9 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showCompleteConfirmDialog, setShowCompleteConfirmDialog] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [showUnsavedCommentModal, setShowUnsavedCommentModal] = useState(false);
+  const [pendingSaveAction, setPendingSaveAction] = useState<(() => Promise<void>) | null>(null);
   const [editData, setEditData] = useState({
     title: task.title,
     description: task.description || '',
@@ -196,6 +200,17 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleSave = async () => {
+    // Check for unsaved comment before saving
+    if (newComment.trim()) {
+      setPendingSaveAction(() => () => performSave());
+      setShowUnsavedCommentModal(true);
+      return;
+    }
+    
+    await performSave();
+  };
+
+  const performSave = async () => {
     // Validate notification requirements
     if (sendNotification && !selectedTemplate) {
       toast({
@@ -309,6 +324,32 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   const saveAndClose = async () => {
     setShowConfirmDialog(false);
     await handleSave();
+  };
+
+  const handleAddCommentAndSave = async () => {
+    if (newComment.trim()) {
+      await addComment(newComment.trim());
+      setNewComment('');
+    }
+    setShowUnsavedCommentModal(false);
+    if (pendingSaveAction) {
+      await pendingSaveAction();
+      setPendingSaveAction(null);
+    }
+  };
+
+  const handleDiscardCommentAndSave = async () => {
+    setNewComment('');
+    setShowUnsavedCommentModal(false);
+    if (pendingSaveAction) {
+      await pendingSaveAction();
+      setPendingSaveAction(null);
+    }
+  };
+
+  const handleCancelCommentModal = () => {
+    setShowUnsavedCommentModal(false);
+    setPendingSaveAction(null);
   };
 
   const stayOnForm = () => {
@@ -674,6 +715,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
             comments={comments}
             isAddingComment={isAddingComment}
             onAddComment={addComment}
+            newComment={newComment}
+            onNewCommentChange={setNewComment}
           />
         </div>
       </DialogContent>
@@ -715,8 +758,15 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
             Yes, Complete All
           </AlertDialogAction>
         </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
-  </>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      <UnsavedCommentModal
+        open={showUnsavedCommentModal}
+        onAddComment={handleAddCommentAndSave}
+        onDiscard={handleDiscardCommentAndSave}
+        onCancel={handleCancelCommentModal}
+      />
+    </>
   );
 };
