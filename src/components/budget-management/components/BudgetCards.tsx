@@ -61,7 +61,16 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
-                <CardTitle className="text-lg">{transaction.item}</CardTitle>
+                {canViewDetails ? (
+                  <CardTitle 
+                    className="text-lg text-primary hover:text-primary/80 cursor-pointer underline-offset-4 hover:underline"
+                    onClick={() => onEdit(transaction)}
+                  >
+                    {transaction.item}
+                  </CardTitle>
+                ) : (
+                  <CardTitle className="text-lg">{transaction.item}</CardTitle>
+                )}
                 <p className="text-sm text-muted-foreground capitalize">
                   {transaction.type.replace('_', ' ')}
                 </p>

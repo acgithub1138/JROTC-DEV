@@ -149,7 +149,18 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                 onCheckedChange={(checked) => handleSelectTransaction(transaction.id, !!checked)}
               />
             </TableCell>
-            <TableCell className={`font-medium ${getPaddingClass()}`}>{transaction.item}</TableCell>
+            <TableCell className={`font-medium ${getPaddingClass()}`}>
+              {canViewDetails ? (
+                <button
+                  onClick={() => onEdit(transaction)}
+                  className="text-primary hover:text-primary/80 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                >
+                  {transaction.item}
+                </button>
+              ) : (
+                transaction.item
+              )}
+            </TableCell>
             <TableCell className={getPaddingClass()}>{getCategoryBadge(transaction.category)}</TableCell>
             <TableCell className={`capitalize ${getPaddingClass()}`}>{transaction.type}</TableCell>
             <TableCell className={getPaddingClass()}>{formatDate(transaction.date)}</TableCell>
