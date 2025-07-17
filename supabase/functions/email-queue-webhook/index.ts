@@ -307,22 +307,25 @@ class EmailProcessor {
       const currentRetryCount = email?.retry_count || 0;
       const maxRetries = 3;
       
-      // Determine final status
-      const finalStatus = currentRetryCount >= maxRetries ? 'failed' : 'pending';
-      const nextRetryAt = finalStatus === 'pending' ? 
-        new Date(Date.now() + Math.pow(2, currentRetryCount) * 2 * 60 * 1000) : null;
+      // Increment retry count for failed attempts
+      const newRetryCount = currentRetryCount + 1;
       
-      console.log(`💾 Updating email ${emailId} status to '${finalStatus}' with error details...`);
+      // Determine final status based on new retry count
+      const finalStatus = newRetryCount >= maxRetries ? 'failed' : 'pending';
+      const nextRetryAt = finalStatus === 'pending' ? 
+        new Date(Date.now() + Math.pow(2, newRetryCount) * 2 * 60 * 1000) : null;
+      
+      console.log(`💾 Updating email ${emailId} status to '${finalStatus}' with retry count ${newRetryCount}/${maxRetries}...`);
       
       try {
         const errorUpdateResult = await this.supabase
           .from('email_queue')
           .update({
             status: finalStatus,
-            error_message: `Processing failed: ${errorMessage}`,
+            error_message: `Processing failed (attempt ${newRetryCount}/${maxRetries}): ${errorMessage}`,
             updated_at: new Date().toISOString(),
             last_attempt_at: new Date().toISOString(),
-            retry_count: currentRetryCount,
+            retry_count: newRetryCount,
             next_retry_at: nextRetryAt?.toISOString() || null
           })
           .eq('id', emailId);
