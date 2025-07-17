@@ -20,3 +20,6 @@ verify_jwt = false
 
 [functions.manual-process-emails]
 verify_jwt = false
+
+[functions.update-task-status-after-email]
+verify_jwt = false

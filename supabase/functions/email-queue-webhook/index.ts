@@ -21,6 +21,8 @@ interface EmailQueueItem {
   next_retry_at?: string;
   last_attempt_at?: string;
   error_message?: string;
+  source_table?: string;
+  record_id?: string;
 }
 
 class UnifiedEmailProcessor {
@@ -194,6 +196,35 @@ class UnifiedEmailProcessor {
       updateData.status = 'sent';
       updateData.sent_at = new Date().toISOString();
       console.log(`✅ Email ${email.id} marked as sent with Resend ID: ${result.resendId}`);
+      
+      // Check if this was a task_information_needed email and update status accordingly
+      if (email.source_table && email.record_id) {
+        try {
+          // Get the email rule type to determine if we need to update task status
+          const { data: emailRule } = await this.supabase
+            .from('email_queue')
+            .select('rule_id, email_rules!rule_id(rule_type)')
+            .eq('id', email.id)
+            .single();
+
+          const ruleType = emailRule?.email_rules?.rule_type;
+          
+          if (ruleType === 'task_information_needed') {
+            // Call the status update function
+            await this.supabase.functions.invoke('update-task-status-after-email', {
+              body: {
+                taskId: email.record_id,
+                sourceTable: email.source_table,
+                emailRuleType: ruleType
+              }
+            });
+            console.log(`📧 Triggered status update for ${email.source_table} ${email.record_id}`);
+          }
+        } catch (statusUpdateError) {
+          console.error('Error updating task status after email:', statusUpdateError);
+          // Don't fail the email processing if status update fails
+        }
+      }
     } else if (result.isRateLimited) {
       // Handle rate limiting specifically - mark as rate_limited for better tracking
       updateData.status = 'rate_limited';
