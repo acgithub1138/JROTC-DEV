@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, GraduationCap, Award, Plane, Shield, UserX, Users } from 'lucide-react';
+import { ChevronDown, GraduationCap, Award, Plane, Shield, UserX, Users, Calendar } from 'lucide-react';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -56,6 +56,14 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     { value: '', label: 'Clear Flight' }
   ];
 
+  // Year options - from cadet_year enum
+  const yearOptions = [
+    { value: '1st', label: '1st Year' },
+    { value: '2nd', label: '2nd Year' },
+    { value: '3rd', label: '3rd Year' },
+    { value: '4th', label: '4th Year' },
+    { value: '', label: 'Clear Year' }
+  ];
 
   const handleBulkUpdate = async (field: string, value: any) => {
     if (selectedCadets.length === 0) return;
@@ -204,6 +212,24 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
                   onClick={() => handleBulkUpdate('flight', flight.value)}
                 >
                   {flight.label}
+                </DropdownMenuItem>
+              ))}
+            </DropdownMenuSubContent>
+          </DropdownMenuSub>
+
+          {/* Year Updates */}
+          <DropdownMenuSub>
+            <DropdownMenuSubTrigger>
+              <Calendar className="w-4 h-4 mr-2" />
+              Update Year
+            </DropdownMenuSubTrigger>
+            <DropdownMenuSubContent className="bg-white">
+              {yearOptions.map((year) => (
+                <DropdownMenuItem 
+                  key={year.value}
+                  onClick={() => handleBulkUpdate('cadet_year', year.value)}
+                >
+                  {year.label}
                 </DropdownMenuItem>
               ))}
             </DropdownMenuSubContent>
