@@ -97,7 +97,7 @@ onSelectAll
               {canView ? (
                 <Button
                   variant="ghost"
-                  className="h-auto p-0 font-medium text-left justify-start hover:text-primary"
+                  className="h-auto p-0 font-medium text-left justify-start text-blue-600 hover:text-blue-800"
                   onClick={() => onViewProfile(profile)}
                 >
                   {profile.last_name}, {profile.first_name}
