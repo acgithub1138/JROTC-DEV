@@ -145,16 +145,15 @@ class EmailProcessor {
         console.log(`⏱️ Checking global rate limit...`);
         
         // Check when the last email was sent globally
-        const { data: lastEmail } = await supabase
+        const { data: lastEmails } = await supabase
           .from('email_queue')
           .select('sent_at')
           .eq('status', 'sent')
           .order('sent_at', { ascending: false })
-          .limit(1)
-          .single();
+          .limit(1);
         
-        if (lastEmail?.sent_at) {
-          const lastSentTime = new Date(lastEmail.sent_at).getTime();
+        if (lastEmails && lastEmails.length > 0) {
+          const lastSentTime = new Date(lastEmails[0].sent_at).getTime();
           const now = Date.now();
           const timeSinceLastEmail = now - lastSentTime;
           const requiredWait = 2000; // 2 seconds
@@ -164,6 +163,8 @@ class EmailProcessor {
             console.log(`⏱️ Global rate limit: waiting ${waitTime}ms since last email was ${timeSinceLastEmail}ms ago`);
             await new Promise(resolve => setTimeout(resolve, waitTime));
           }
+        } else {
+          console.log(`⏱️ No previous emails found, proceeding without delay`);
         }
       }
       
