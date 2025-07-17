@@ -16,7 +16,7 @@ export const UnsavedCommentModal: React.FC<UnsavedCommentModalProps> = ({
           <AlertDialogTitle className="text-center">Unsaved Comment</AlertDialogTitle>
           <AlertDialogDescription className="text-center">You have unsaved text in the comment box. Please click Add or Discard Comment, then click Save again.</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="flex items-center gap-2 w-full">
+        <AlertDialogFooter className="flex justify-center gap-2 w-full">
           <AlertDialogCancel onClick={onDiscard}>
             Discard Comment
           </AlertDialogCancel>
