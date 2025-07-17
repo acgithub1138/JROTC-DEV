@@ -5,6 +5,8 @@ export const gradeOptions = ['Freshman', 'Sophomore', 'Junior', 'Senior', 'Gradu
 
 export const flightOptions = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
 
+export const cadetYearOptions = ['1st', '2nd', '3rd', '4th'];
+
 // Legacy roleOptions - replaced by useCadetRoles hook for dynamic roles
 export const roleOptions = [
   { value: 'cadet', label: 'Cadet' },

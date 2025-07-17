@@ -72,6 +72,9 @@ onSelectAll
           <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={handleSort}>
             Flight
           </SortableTableHead>
+          <SortableTableHead sortKey="cadet_year" currentSort={sortConfig} onSort={handleSort}>
+            Year
+          </SortableTableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </TableHeader>
@@ -108,6 +111,15 @@ onSelectAll
               {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
             </TableCell>
             <TableCell className="py-2">{profile.flight || '-'}</TableCell>
+            <TableCell className="py-2">
+              {profile.cadet_year ? (
+                <Badge variant="outline" className="text-xs">
+                  {profile.cadet_year}
+                </Badge>
+              ) : (
+                '-'
+              )}
+            </TableCell>
             <TableCell className="text-right py-2">
               {activeTab === 'active' ? (
                 <TableActionButtons

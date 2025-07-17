@@ -8,7 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useAuth } from '@/contexts/AuthContext';
 import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { NewCadet } from '../types';
-import { gradeOptions, flightOptions } from '../constants';
+import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface AddCadetDialogProps {
@@ -85,7 +85,7 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
             </Select>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="grade">Grade</Label>
               <Select
@@ -117,6 +117,24 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
                   {flightOptions.map((flight) => (
                     <SelectItem key={flight} value={flight}>
                       {flight}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cadet_year">Cadet Year</Label>
+              <Select
+                value={newCadet.cadet_year || ""}
+                onValueChange={(value) => setNewCadet({ ...newCadet, cadet_year: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cadetYearOptions.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
                     </SelectItem>
                   ))}
                 </SelectContent>

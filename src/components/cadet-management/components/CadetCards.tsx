@@ -66,7 +66,7 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
           
           <CardContent className="space-y-3">
             <div className="space-y-2">
-              <div className="grid grid-cols-2 gap-2 text-sm">
+              <div className="grid grid-cols-3 gap-2 text-sm">
                 <div>
                   <span className="text-gray-500">Rank:</span>
                   <p className="font-medium">
@@ -76,6 +76,10 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
                 <div>
                   <span className="text-gray-500">Flight:</span>
                   <p className="font-medium">{profile.flight || '-'}</p>
+                </div>
+                <div>
+                  <span className="text-gray-500">Year:</span>
+                  <p className="font-medium">{profile.cadet_year || '-'}</p>
                 </div>
               </div>
             </div>

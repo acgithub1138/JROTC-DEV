@@ -13,7 +13,7 @@ import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Profile } from '../types';
-import { gradeOptions, flightOptions } from '../constants';
+import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 
 interface EditCadetDialogProps {
@@ -119,7 +119,7 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             </div>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="grade">Grade</Label>
               <Select
@@ -153,6 +153,25 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
                   {flightOptions.map((flight) => (
                     <SelectItem key={flight} value={flight}>
                       {flight}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="cadet_year">Cadet Year</Label>
+              <Select
+                value={editingProfile.cadet_year || ""}
+                onValueChange={(value) => setEditingProfile({ ...editingProfile, cadet_year: value })}
+                disabled={!canUpdate}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {cadetYearOptions.map((year) => (
+                    <SelectItem key={year} value={year}>
+                      {year}
                     </SelectItem>
                   ))}
                 </SelectContent>

@@ -1787,6 +1787,7 @@ export type Database = {
       profiles: {
         Row: {
           active: boolean
+          cadet_year: Database["public"]["Enums"]["cadet_year"] | null
           created_at: string
           email: string
           first_name: string
@@ -1804,6 +1805,7 @@ export type Database = {
         }
         Insert: {
           active?: boolean
+          cadet_year?: Database["public"]["Enums"]["cadet_year"] | null
           created_at?: string
           email: string
           first_name: string
@@ -1821,6 +1823,7 @@ export type Database = {
         }
         Update: {
           active?: boolean
+          cadet_year?: Database["public"]["Enums"]["cadet_year"] | null
           created_at?: string
           email?: string
           first_name?: string
@@ -2712,6 +2715,7 @@ export type Database = {
         | "administrative"
         | "other"
       budget_transaction_category: "expense" | "income"
+      cadet_year: "1st" | "2nd" | "3rd" | "4th"
       comp_event_type:
         | "Armed Inspection"
         | "Armed Color Guard"
@@ -2951,6 +2955,7 @@ export const Constants = {
         "other",
       ],
       budget_transaction_category: ["expense", "income"],
+      cadet_year: ["1st", "2nd", "3rd", "4th"],
       comp_event_type: [
         "Armed Inspection",
         "Armed Color Guard",

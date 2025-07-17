@@ -72,6 +72,16 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
                   <p className="text-sm">{profile.flight || '-'}</p>
                 </div>
                 <div>
+                  <p className="text-sm font-medium text-muted-foreground">Cadet Year</p>
+                  {profile.cadet_year ? (
+                    <Badge variant="outline" className="text-xs">
+                      {profile.cadet_year}
+                    </Badge>
+                  ) : (
+                    <p className="text-sm text-muted-foreground">-</p>
+                  )}
+                </div>
+                <div>
                   <p className="text-sm font-medium text-muted-foreground">Job Title</p>
                   <p className="text-sm">{jobRole || '-'}</p>
                 </div>
