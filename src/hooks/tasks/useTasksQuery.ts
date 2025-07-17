@@ -35,7 +35,7 @@ export const useTasksQuery = () => {
     if (!userProfile?.school_id) return;
 
     const channel = supabase
-      .channel('tasks-changes')
+      .channel(`tasks-changes-${userProfile.school_id}`)
       .on(
         'postgres_changes',
         {
