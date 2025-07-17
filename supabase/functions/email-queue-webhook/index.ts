@@ -145,7 +145,7 @@ class EmailProcessor {
         console.log(`⏱️ Checking global rate limit...`);
         
         // Check when the last email was sent globally
-        const { data: lastEmails } = await supabase
+        const { data: lastEmails } = await this.supabase
           .from('email_queue')
           .select('sent_at')
           .eq('status', 'sent')
