@@ -94,40 +94,30 @@ export const PTTestsTab = ({
   };
 
   // Use sortable table hook
-  const { sortedData, sortConfig, handleSort } = useSortableTable({
+  const {
+    sortedData,
+    sortConfig,
+    handleSort
+  } = useSortableTable({
     data: ptTests,
-    defaultSort: { key: 'date', direction: 'desc' },
+    defaultSort: {
+      key: 'date',
+      direction: 'desc'
+    },
     customSortFn: (a, b, sortConfig) => {
-      const aValue = sortConfig.key === 'cadet_name' 
-        ? `${a.profiles.last_name}, ${a.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade'
-        ? a.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? a.profiles.rank || ''
-        : a[sortConfig.key as keyof PTTest];
-      
-      const bValue = sortConfig.key === 'cadet_name' 
-        ? `${b.profiles.last_name}, ${b.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade'
-        ? b.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? b.profiles.rank || ''
-        : b[sortConfig.key as keyof PTTest];
-
+      const aValue = sortConfig.key === 'cadet_name' ? `${a.profiles.last_name}, ${a.profiles.first_name}` : sortConfig.key === 'profiles.grade' ? a.profiles.grade || '' : sortConfig.key === 'profiles.rank' ? a.profiles.rank || '' : a[sortConfig.key as keyof PTTest];
+      const bValue = sortConfig.key === 'cadet_name' ? `${b.profiles.last_name}, ${b.profiles.first_name}` : sortConfig.key === 'profiles.grade' ? b.profiles.grade || '' : sortConfig.key === 'profiles.rank' ? b.profiles.rank || '' : b[sortConfig.key as keyof PTTest];
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
-
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const comparison = aValue.localeCompare(bValue);
         return sortConfig.direction === 'asc' ? comparison : -comparison;
       }
-
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     }
   });
-
   const getSortIcon = (columnKey: string) => {
     if (sortConfig?.key !== columnKey) {
       return <ArrowUpDown className="w-4 h-4 opacity-50" />;
@@ -189,84 +179,53 @@ export const PTTestsTab = ({
       </div>
 
       {/* PT Tests Display */}
-      {sortedData.length === 0 ? (
-        <Card>
+      {sortedData.length === 0 ? <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No PT tests found</p>
           </CardContent>
-        </Card>
-      ) : (
-        <Card>
+        </Card> : <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('cadet_name')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('cadet_name')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Cadet
                       {getSortIcon('cadet_name')}
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('profiles.grade')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('profiles.grade')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Grade
                       {getSortIcon('profiles.grade')}
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('date')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('date')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Date
                       {getSortIcon('date')}
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('push_ups')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('push_ups')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Push-Ups
                       {getSortIcon('push_ups')}
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('sit_ups')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('sit_ups')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Sit-Ups
                       {getSortIcon('sit_ups')}
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('plank_time')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('plank_time')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Plank Time
                       {getSortIcon('plank_time')}
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('mile_time')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('mile_time')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Mile Time
                       {getSortIcon('mile_time')}
                     </Button>
@@ -274,19 +233,14 @@ export const PTTestsTab = ({
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedData.map((test) => (
-                  <TableRow key={test.id}>
-                    <TableCell className="font-medium">
+                {sortedData.map(test => <TableRow key={test.id}>
+                    <TableCell className="font-medium py-[4px]">
                       {test.profiles.last_name}, {test.profiles.first_name}
                     </TableCell>
                     <TableCell>
-                      {test.profiles.grade ? (
-                        <Badge variant="outline" className="text-xs">
+                      {test.profiles.grade ? <Badge variant="outline" className="text-xs">
                           {test.profiles.grade}
-                        </Badge>
-                      ) : (
-                        '-'
-                      )}
+                        </Badge> : '-'}
                     </TableCell>
                     <TableCell>
                       {format(new Date(test.date), 'MMM d, yyyy')}
@@ -303,12 +257,10 @@ export const PTTestsTab = ({
                     <TableCell className="text-center">
                       {formatTime(test.mile_time)}
                     </TableCell>
-                  </TableRow>
-                ))}
+                  </TableRow>)}
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
     </div>;
 };
