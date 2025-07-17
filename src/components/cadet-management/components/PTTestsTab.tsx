@@ -170,12 +170,20 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
         </div>
 
         {/* Bulk Entry Button */}
-        {canCreate && (
-          <Button onClick={onOpenBulkDialog}>
-            <Plus className="w-4 h-4 mr-2" />
-            Bulk PT Test
-          </Button>
-        )}
+        <div className="flex gap-2">
+          {canCreate && (
+            <>
+              <Button onClick={onOpenBulkDialog}>
+                <Plus className="w-4 h-4 mr-2" />
+                Bulk PT Test
+              </Button>
+              <Button variant="outline" onClick={onOpenBulkDialog}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add PT Tests
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       {/* PT Tests Display */}
@@ -184,10 +192,16 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No PT tests found</p>
             {canCreate && (
-              <Button className="mt-4" onClick={onOpenBulkDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Add Single PT Tests
-              </Button>
+              <div className="flex gap-2 justify-center mt-4">
+                <Button onClick={onOpenBulkDialog}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Bulk PT Test
+                </Button>
+                <Button variant="outline" onClick={onOpenBulkDialog}>
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add PT Tests
+                </Button>
+              </div>
             )}
           </CardContent>
         </Card>
