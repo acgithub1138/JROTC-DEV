@@ -29,7 +29,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
     loading: saving,
     updateCadetScore,
     getCadetScores,
-    cadetDataWithAnyScores,
+    cadetDataWithPushUps,
     savePTTests,
     resetData,
   } = usePTTestBulk();
@@ -48,7 +48,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
       return;
     }
 
-    const success = await savePTTests(date, cadetDataWithAnyScores);
+    const success = await savePTTests(date, cadetDataWithPushUps);
     if (success) {
       onOpenChange(false);
       onSuccess?.();
@@ -67,7 +67,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  const isFormValid = date && selectedFlight && cadetDataWithAnyScores.length > 0;
+  const isFormValid = date && selectedFlight;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -214,10 +214,10 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           )}
 
           {/* Summary */}
-          {cadetDataWithAnyScores.length > 0 && (
+          {cadetDataWithPushUps.length > 0 && (
             <div className="bg-muted/50 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">
-                Ready to save PT test results for {cadetDataWithAnyScores.length} cadet{cadetDataWithAnyScores.length !== 1 ? 's' : ''}
+                Ready to save PT test results for {cadetDataWithPushUps.length} cadet{cadetDataWithPushUps.length !== 1 ? 's' : ''} with Push-Ups data
               </p>
             </div>
           )}

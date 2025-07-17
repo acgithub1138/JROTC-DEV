@@ -33,11 +33,8 @@ export const usePTTestBulk = () => {
     return cadetData.get(cadetId) || { pushUps: '', sitUps: '', plankTime: '', mileTime: '' };
   };
 
-  const hasAnyData = (scores: PTTestScores): boolean => {
-    return scores.pushUps.trim() !== '' || 
-           scores.sitUps.trim() !== '' || 
-           scores.plankTime.trim() !== '' || 
-           scores.mileTime.trim() !== '';
+  const hasPushUpsData = (scores: PTTestScores): boolean => {
+    return scores.pushUps.trim() !== '';
   };
 
   const parseTimeToSeconds = (timeStr: string): number | null => {
@@ -61,10 +58,10 @@ export const usePTTestBulk = () => {
     return isNaN(parsed) ? null : parsed;
   };
 
-  const cadetDataWithAnyScores = useMemo(() => {
+  const cadetDataWithPushUps = useMemo(() => {
     const results: CadetPTData[] = [];
     cadetData.forEach((scores, cadetId) => {
-      if (hasAnyData(scores)) {
+      if (hasPushUpsData(scores)) {
         results.push({ cadetId, scores });
       }
     });
@@ -84,7 +81,7 @@ export const usePTTestBulk = () => {
     if (cadets.length === 0) {
       toast({
         title: "No Data",
-        description: "Please enter scores for at least one cadet",
+        description: "Please enter Push-Ups scores for at least one cadet",
         variant: "destructive",
       });
       return false;
@@ -146,7 +143,7 @@ export const usePTTestBulk = () => {
     cadetData,
     updateCadetScore,
     getCadetScores,
-    cadetDataWithAnyScores,
+    cadetDataWithPushUps,
     savePTTests,
     resetData,
   };
