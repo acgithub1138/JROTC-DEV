@@ -7,6 +7,11 @@ export const getFilteredProfiles = (
   activeTab: string, 
   searchTerm: string
 ): Profile[] => {
+  // If we're on the PT Tests tab, return empty array since PT Tests handles its own data
+  if (activeTab === 'pt-tests') {
+    return [];
+  }
+  
   const isActive = activeTab === 'active';
   return profiles.filter(profile => {
     const matchesActiveStatus = profile.active === isActive;
