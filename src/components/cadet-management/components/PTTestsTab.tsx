@@ -14,6 +14,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
+import { useDebounce } from 'use-debounce';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
@@ -44,13 +45,14 @@ export const PTTestsTab = ({
     canCreate
   } = useCadetPermissions();
   const searchTerm = externalSearchTerm;
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const {
     data: ptTests = [],
     isLoading,
     refetch
   } = useQuery({
-    queryKey: ['pt-tests', userProfile?.school_id, selectedDate, searchTerm],
+    queryKey: ['pt-tests', userProfile?.school_id, selectedDate, debouncedSearchTerm],
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
       let query = supabase.from('pt_tests').select(`
@@ -81,13 +83,21 @@ export const PTTestsTab = ({
       if (error) throw error;
 
       // Filter by search term if provided
-      if (searchTerm) {
-        return data.filter((test: PTTest) => `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()));
+      if (debouncedSearchTerm) {
+        return data.filter((test: PTTest) => `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
       }
       return data;
     },
     enabled: !!userProfile?.school_id
   });
+
+  // Apply immediate client-side filtering for smooth UX
+  const filteredPTTests = React.useMemo(() => {
+    if (!searchTerm) return ptTests;
+    return ptTests.filter((test: PTTest) => 
+      `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+  }, [ptTests, searchTerm]);
   const formatTime = (seconds: number | null) => {
     if (!seconds) return '-';
     const mins = Math.floor(seconds / 60);
@@ -95,13 +105,13 @@ export const PTTestsTab = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
-  // Use sortable table hook
+  // Use sortable table hook with filtered data
   const {
     sortedData,
     sortConfig,
     handleSort
   } = useSortableTable({
-    data: ptTests,
+    data: filteredPTTests,
     defaultSort: {
       key: 'date',
       direction: 'desc'
