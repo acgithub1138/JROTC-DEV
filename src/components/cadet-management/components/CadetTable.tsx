@@ -66,14 +66,14 @@ onSelectAll
           <SortableTableHead sortKey="grade" currentSort={sortConfig} onSort={handleSort}>
             Grade
           </SortableTableHead>
+          <SortableTableHead sortKey="cadet_year" currentSort={sortConfig} onSort={handleSort}>
+            Year
+          </SortableTableHead>
           <SortableTableHead sortKey="rank" currentSort={sortConfig} onSort={handleSort}>
             Rank
           </SortableTableHead>
           <SortableTableHead sortKey="flight" currentSort={sortConfig} onSort={handleSort}>
             Flight
-          </SortableTableHead>
-          <SortableTableHead sortKey="cadet_year" currentSort={sortConfig} onSort={handleSort}>
-            Year
           </SortableTableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
@@ -118,10 +118,6 @@ onSelectAll
               )}
             </TableCell>
             <TableCell className="py-2">
-              {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
-            </TableCell>
-            <TableCell className="py-2">{profile.flight || '-'}</TableCell>
-            <TableCell className="py-2">
               {profile.cadet_year ? (
                 <Badge variant="outline" className="text-xs">
                   {profile.cadet_year}
@@ -130,6 +126,10 @@ onSelectAll
                 '-'
               )}
             </TableCell>
+            <TableCell className="py-2">
+              {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
+            </TableCell>
+            <TableCell className="py-2">{profile.flight || '-'}</TableCell>
             <TableCell className="text-right py-2">
               {activeTab === 'active' ? (
                 <TableActionButtons

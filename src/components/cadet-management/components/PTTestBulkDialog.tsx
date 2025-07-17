@@ -41,7 +41,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
       setSelectedFlight('');
       resetData();
     }
-  }, [open, resetData]);
+  }, [open]); // Remove resetData from dependencies to prevent infinite loop
 
   const handleSave = async () => {
     if (!date) {
