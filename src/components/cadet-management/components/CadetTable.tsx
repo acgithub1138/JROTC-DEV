@@ -94,7 +94,17 @@ onSelectAll
               />
             </TableCell>
             <TableCell className="font-medium py-2">
-              {profile.last_name}, {profile.first_name}
+              {canView ? (
+                <Button
+                  variant="ghost"
+                  className="h-auto p-0 font-medium text-left justify-start hover:text-primary"
+                  onClick={() => onViewProfile(profile)}
+                >
+                  {profile.last_name}, {profile.first_name}
+                </Button>
+              ) : (
+                <span>{profile.last_name}, {profile.first_name}</span>
+              )}
             </TableCell>
             
             <TableCell className="capitalize py-2">{profile.role.replace('_', ' ')}</TableCell>
