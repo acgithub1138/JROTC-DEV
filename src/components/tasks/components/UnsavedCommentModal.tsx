@@ -1,36 +1,22 @@
 import React from 'react';
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from '@/components/ui/alert-dialog';
-
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 interface UnsavedCommentModalProps {
   open: boolean;
   onAddComment: () => void;
   onDiscard: () => void;
 }
-
 export const UnsavedCommentModal: React.FC<UnsavedCommentModalProps> = ({
   open,
   onAddComment,
-  onDiscard,
+  onDiscard
 }) => {
-  return (
-    <AlertDialog open={open}>
+  return <AlertDialog open={open}>
       <AlertDialogContent>
         <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Comment</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved text in the comment box. Would you like to add this comment?
-          </AlertDialogDescription>
+          <AlertDialogTitle className="text-center">Unsaved Comment</AlertDialogTitle>
+          <AlertDialogDescription className="text-center">You have unsaved text in the comment box. Please Add or Discard Comment and click Save again.</AlertDialogDescription>
         </AlertDialogHeader>
-        <AlertDialogFooter className="gap-2">
+        <AlertDialogFooter className="flex items-center justify-center gap-2">
           <AlertDialogCancel onClick={onDiscard}>
             Discard Comment
           </AlertDialogCancel>
@@ -39,6 +25,5 @@ export const UnsavedCommentModal: React.FC<UnsavedCommentModalProps> = ({
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
-    </AlertDialog>
-  );
+    </AlertDialog>;
 };
