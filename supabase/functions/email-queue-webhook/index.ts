@@ -104,7 +104,7 @@ class UnifiedEmailProcessor {
     const { data, error } = await this.supabase
       .from('email_queue')
       .select('*')
-      .eq('status', 'pending')
+      .in('status', ['pending', 'rate_limited'])
       .or(`next_retry_at.is.null,next_retry_at.lte.${new Date().toISOString()}`)
       .lte('scheduled_at', new Date().toISOString())
       .order('created_at', { ascending: true })
@@ -148,7 +148,7 @@ class UnifiedEmailProcessor {
       .eq('id', emailId);
   }
 
-  private async sendEmailViaResend(email: EmailQueueItem): Promise<boolean> {
+  private async sendEmailViaResend(email: EmailQueueItem): Promise<{ success: boolean; resendId?: string; isRateLimited?: boolean; errorMessage?: string }> {
     try {
       console.log(`📧 Sending email to ${email.recipient_email} (retry: ${email.retry_count || 0})`);
       
@@ -159,31 +159,64 @@ class UnifiedEmailProcessor {
         html: email.body,
       });
 
-      console.log(`✅ Email sent successfully via Resend to ${email.recipient_email}, Resend ID: ${result.data?.id}`);
-      return true;
+      // Only consider successful if we have a valid Resend ID
+      if (result.data?.id) {
+        console.log(`✅ Email sent successfully via Resend to ${email.recipient_email}, Resend ID: ${result.data.id}`);
+        return { success: true, resendId: result.data.id };
+      } else {
+        console.log(`⚠️ Resend API returned success but no ID for ${email.recipient_email}:`, result);
+        return { success: false, errorMessage: 'No Resend ID returned' };
+      }
     } catch (error: any) {
       console.error(`❌ Resend error for ${email.recipient_email}:`, error);
-      return false;
+      
+      // Check if this is a rate limiting error
+      const isRateLimited = error.message?.includes('rate') || 
+                           error.message?.includes('limit') ||
+                           error.status === 429;
+      
+      if (isRateLimited) {
+        console.log(`🚦 Rate limited by Resend for ${email.recipient_email}`);
+        return { success: false, isRateLimited: true, errorMessage: error.message };
+      }
+      
+      return { success: false, errorMessage: error.message };
     }
   }
 
-  private async updateEmailStatus(email: EmailQueueItem, success: boolean, errorMessage?: string): Promise<void> {
+  private async updateEmailStatus(email: EmailQueueItem, result: { success: boolean; resendId?: string; isRateLimited?: boolean; errorMessage?: string }): Promise<void> {
     const updateData: any = {
-      status: success ? 'sent' : 'failed',
       updated_at: new Date().toISOString(),
     };
 
-    if (success) {
+    if (result.success && result.resendId) {
+      // Only mark as sent if we have a valid Resend ID
+      updateData.status = 'sent';
       updateData.sent_at = new Date().toISOString();
-    } else {
+      console.log(`✅ Email ${email.id} marked as sent with Resend ID: ${result.resendId}`);
+    } else if (result.isRateLimited) {
+      // Handle rate limiting specifically - mark as rate_limited for better tracking
+      updateData.status = 'rate_limited';
       updateData.retry_count = (email.retry_count || 0) + 1;
-      updateData.error_message = errorMessage;
+      updateData.error_message = result.errorMessage;
+      
+      // Shorter retry for rate limiting (1 minute)
+      updateData.next_retry_at = new Date(Date.now() + 60000).toISOString();
+      console.log(`🚦 Email ${email.id} rate limited, will retry in 1 minute`);
+    } else {
+      // Regular failure
+      updateData.retry_count = (email.retry_count || 0) + 1;
+      updateData.error_message = result.errorMessage;
       
       // Set next retry time with exponential backoff if retries remaining
       if (updateData.retry_count < (email.max_retries || 3)) {
         const retryDelayMinutes = Math.pow(2, updateData.retry_count) * 5; // 5, 10, 20 minutes
         updateData.next_retry_at = new Date(Date.now() + retryDelayMinutes * 60000).toISOString();
         updateData.status = 'pending'; // Keep as pending for retry
+        console.log(`🔄 Email ${email.id} failed, will retry in ${retryDelayMinutes} minutes (attempt ${updateData.retry_count})`);
+      } else {
+        updateData.status = 'failed';
+        console.log(`❌ Email ${email.id} failed permanently after ${updateData.retry_count} attempts`);
       }
     }
 
@@ -205,17 +238,17 @@ class UnifiedEmailProcessor {
         return { success: false, error: 'Email not found' };
       }
 
-      if (email.status !== 'pending') {
-        return { success: false, error: 'Email is not pending' };
+      if (!['pending', 'rate_limited'].includes(email.status)) {
+        return { success: false, error: 'Email is not pending or rate limited' };
       }
 
       await this.markEmailAsProcessing(emailId);
       await this.enforceRateLimit();
       
-      const success = await this.sendEmailViaResend(email);
-      await this.updateEmailStatus(email, success, success ? undefined : 'Failed to send via Resend');
+      const result = await this.sendEmailViaResend(email);
+      await this.updateEmailStatus(email, result);
 
-      return { success };
+      return { success: result.success };
     } catch (error: any) {
       console.error(`💥 Error processing email ${emailId}:`, error);
       return { success: false, error: error.message };
@@ -270,10 +303,10 @@ class UnifiedEmailProcessor {
         await this.markEmailAsProcessing(email.id);
         await this.enforceRateLimit();
         
-        const success = await this.sendEmailViaResend(email);
-        await this.updateEmailStatus(email, success, success ? undefined : 'Failed to send via Resend');
+        const result = await this.sendEmailViaResend(email);
+        await this.updateEmailStatus(email, result);
         
-        if (success) {
+        if (result.success) {
           succeeded++;
         } else {
           failed++;

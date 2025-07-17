@@ -564,23 +564,29 @@ export type Database = {
         Row: {
           id: number
           is_locked: boolean
+          last_error: string | null
           last_processed_at: string | null
           locked_at: string | null
           locked_by: string | null
+          processor_version: string | null
         }
         Insert: {
           id?: number
           is_locked?: boolean
+          last_error?: string | null
           last_processed_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
+          processor_version?: string | null
         }
         Update: {
           id?: number
           is_locked?: boolean
+          last_error?: string | null
           last_processed_at?: string | null
           locked_at?: string | null
           locked_by?: string | null
+          processor_version?: string | null
         }
         Relationships: []
       }
@@ -2732,7 +2738,12 @@ export type Database = {
       contact_status: "active" | "semi_active" | "not_active"
       contact_type: "parent" | "relative" | "friend"
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
-      email_queue_status: "pending" | "sent" | "failed" | "cancelled"
+      email_queue_status:
+        | "pending"
+        | "sent"
+        | "failed"
+        | "cancelled"
+        | "rate_limited"
       email_trigger_event: "INSERT" | "UPDATE" | "DELETE"
       event_type:
         | "training"
@@ -2968,7 +2979,13 @@ export const Constants = {
       contact_status: ["active", "semi_active", "not_active"],
       contact_type: ["parent", "relative", "friend"],
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
-      email_queue_status: ["pending", "sent", "failed", "cancelled"],
+      email_queue_status: [
+        "pending",
+        "sent",
+        "failed",
+        "cancelled",
+        "rate_limited",
+      ],
       email_trigger_event: ["INSERT", "UPDATE", "DELETE"],
       event_type: [
         "training",
