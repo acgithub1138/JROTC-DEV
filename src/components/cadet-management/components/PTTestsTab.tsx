@@ -224,16 +224,6 @@ export const PTTestsTab = ({
                   <TableHead>
                     <Button
                       variant="ghost"
-                      onClick={() => handleSort('profiles.rank')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
-                      Rank
-                      {getSortIcon('profiles.rank')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
                       onClick={() => handleSort('date')}
                       className="h-auto p-0 font-medium hover:bg-transparent"
                     >
@@ -298,7 +288,6 @@ export const PTTestsTab = ({
                         '-'
                       )}
                     </TableCell>
-                    <TableCell>{test.profiles.rank || '-'}</TableCell>
                     <TableCell>
                       {format(new Date(test.date), 'MMM d, yyyy')}
                     </TableCell>
