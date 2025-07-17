@@ -11,9 +11,12 @@ import { useTaskManagement } from './hooks/useTaskManagement';
 import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTasksRealtime } from '@/hooks/tasks/useTasksRealtime';
+import { useAuth } from '@/contexts/AuthContext';
 import { AccessDeniedDialog } from '../incident-management/AccessDeniedDialog';
 
 const TaskManagementPage: React.FC = () => {
+  const { userProfile } = useAuth();
   const { canCreate, canView } = useTaskPermissions();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -42,6 +45,9 @@ const TaskManagementPage: React.FC = () => {
     allSchoolTasksCount,
     completedTasksCount
   } = useTaskManagement();
+
+  // Set up real-time subscription for tasks
+  useTasksRealtime(userProfile?.school_id);
 
   const handleTaskSelect = (task: Task | Subtask) => {
     // Check if user has view permissions
