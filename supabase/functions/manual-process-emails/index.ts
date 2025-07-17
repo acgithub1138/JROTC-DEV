@@ -59,7 +59,7 @@ serve(async (req) => {
         
         // Send email via Resend
         const result = await resend.emails.send({
-          from: 'JROTC System <onboarding@resend.dev>',
+          from: 'JROTC CCC <jrotc@careyunlimited.com>',
           to: [email.recipient_email],
           subject: email.subject,
           html: email.body,
