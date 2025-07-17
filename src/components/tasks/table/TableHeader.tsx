@@ -1,5 +1,7 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
+import { Button } from '@/components/ui/button';
+import { RefreshCw } from 'lucide-react';
 import { BulkTaskActions } from './BulkTaskActions';
 interface TableHeaderProps {
   selectedTasks: string[];
@@ -11,6 +13,7 @@ interface TableHeaderProps {
   showOverdueFilter?: boolean;
   overdueFilterChecked?: boolean;
   onOverdueFilterChange?: (checked: boolean) => void;
+  onRefresh?: () => void;
 }
 export const TableHeader: React.FC<TableHeaderProps> = ({
   selectedTasks,
@@ -21,7 +24,8 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
   canDelete,
   showOverdueFilter = false,
   overdueFilterChecked = false,
-  onOverdueFilterChange
+  onOverdueFilterChange,
+  onRefresh
 }) => {
   return <div className="flex items-center justify-between p-4 border-b">
       <div className="flex items-center gap-2">
@@ -35,6 +39,17 @@ export const TableHeader: React.FC<TableHeaderProps> = ({
             <Checkbox checked={overdueFilterChecked} onCheckedChange={onOverdueFilterChange} />
             <span className="text-sm text-gray-600">Overdue Tasks</span>
           </div>}
+        {onRefresh && (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={onRefresh}
+            className="flex items-center gap-2"
+          >
+            <RefreshCw className="h-4 w-4" />
+            Refresh
+          </Button>
+        )}
         <BulkTaskActions
           selectedTasks={selectedTasks}
           onSelectionClear={onSelectionClear}

@@ -25,6 +25,7 @@ interface TaskTabsProps {
   onPageChangeCompleted: (page: number) => void;
   overdueFilter: boolean;
   onOverdueFilterChange: (checked: boolean) => void;
+  onRefresh?: () => void;
 }
 
 export const TaskTabs: React.FC<TaskTabsProps> = ({
@@ -43,7 +44,8 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onPageChangeAllTasks,
   onPageChangeCompleted,
   overdueFilter,
-  onOverdueFilterChange
+  onOverdueFilterChange,
+  onRefresh
 }) => {
   const isMobile = useIsMobile();
 
@@ -66,6 +68,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
         showOverdueFilter={isAllTasksTab}
         overdueFilterChecked={overdueFilter}
         onOverdueFilterChange={onOverdueFilterChange}
+        onRefresh={onRefresh}
       />
     );
   };

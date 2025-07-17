@@ -7,11 +7,13 @@ import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
 import { Subtask } from '@/hooks/tasks/types';
+import { useQueryClient } from '@tanstack/react-query';
 
 export const useTaskManagement = () => {
-  const { tasks } = useTasks();
-  const { data: mySubtasks = [] } = useMySubtasksQuery();
+  const { tasks, refetch: refetchTasks } = useTasks();
+  const { data: mySubtasks = [], refetch: refetchSubtasks } = useMySubtasksQuery();
   const { userProfile } = useAuth();
+  const queryClient = useQueryClient();
   const [searchTerm, setSearchTerm] = useState('');
   const [overdueFilter, setOverdueFilter] = useState(false);
   const [currentPageMyTasks, setCurrentPageMyTasks] = useState(1);
@@ -55,6 +57,15 @@ export const useTaskManagement = () => {
     setCurrentPageCompleted(1);
   }, [searchTerm, overdueFilter]);
 
+  const handleRefresh = async () => {
+    await Promise.all([
+      refetchTasks(),
+      refetchSubtasks(),
+      queryClient.invalidateQueries({ queryKey: ['tasks'] }),
+      queryClient.invalidateQueries({ queryKey: ['subtasks'] })
+    ]);
+  };
+
   return {
     searchTerm,
     setSearchTerm,
@@ -75,6 +86,7 @@ export const useTaskManagement = () => {
     // Original filtered counts for pagination
     myActiveTasksCount: myActiveTasks.length,
     allSchoolTasksCount: allSchoolTasks.length,
-    completedTasksCount: completedTasks.length
+    completedTasksCount: completedTasks.length,
+    handleRefresh
   };
 };

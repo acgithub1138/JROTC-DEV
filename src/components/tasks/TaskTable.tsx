@@ -20,6 +20,7 @@ interface TaskTableProps {
   showOverdueFilter?: boolean;
   overdueFilterChecked?: boolean;
   onOverdueFilterChange?: (checked: boolean) => void;
+  onRefresh?: () => void;
 }
 
 export const TaskTable: React.FC<TaskTableProps> = ({ 
@@ -27,7 +28,8 @@ export const TaskTable: React.FC<TaskTableProps> = ({
   onTaskSelect,
   showOverdueFilter = false,
   overdueFilterChecked = false,
-  onOverdueFilterChange 
+  onOverdueFilterChange,
+  onRefresh 
 }) => {
   const [expandedTasks, setExpandedTasks] = React.useState<Set<string>>(new Set());
   const [selectedTasks, setSelectedTasks] = React.useState<string[]>([]);
@@ -84,6 +86,7 @@ export const TaskTable: React.FC<TaskTableProps> = ({
         showOverdueFilter={showOverdueFilter}
         overdueFilterChecked={overdueFilterChecked}
         onOverdueFilterChange={onOverdueFilterChange}
+        onRefresh={onRefresh}
       />
       <Table>
         <TableHeader>

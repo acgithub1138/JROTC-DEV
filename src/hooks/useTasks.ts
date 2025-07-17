@@ -3,12 +3,13 @@ import { useTasksQuery } from './tasks/useTasksQuery';
 import { useTaskMutations } from './tasks/useTaskMutations';
 
 export const useTasks = () => {
-  const { data: tasks = [], isLoading } = useTasksQuery();
+  const { data: tasks = [], isLoading, refetch } = useTasksQuery();
   const mutations = useTaskMutations();
 
   return {
     tasks,
     isLoading,
+    refetch,
     ...mutations,
   };
 };
