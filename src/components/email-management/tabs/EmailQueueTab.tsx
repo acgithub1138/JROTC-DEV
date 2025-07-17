@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -9,7 +8,6 @@ import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
-
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending':
@@ -24,87 +22,103 @@ const getStatusColor = (status: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 export const EmailQueueTab: React.FC = () => {
-  const { queueItems, isLoading, retryEmail, cancelEmail, isRetrying, isCancelling } = useEmailQueue();
+  const {
+    queueItems,
+    isLoading,
+    retryEmail,
+    cancelEmail,
+    isRetrying,
+    isCancelling
+  } = useEmailQueue();
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isMonitoring, setIsMonitoring] = React.useState(false);
-
   const handleRefresh = () => {
-    queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+    queryClient.invalidateQueries({
+      queryKey: ['email-queue']
+    });
   };
-
   const handleMonitor = async () => {
     setIsMonitoring(true);
     try {
       console.log('🔍 Running email queue health monitor...');
-      
-      const { data, error } = await supabase.functions.invoke('email-monitor');
-      
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('email-monitor');
       if (error) {
         console.error('❌ Monitor error:', error);
         throw error;
       }
-      
       console.log('📊 Monitor report:', data);
-      
+
       // Refresh queue after monitoring
-      queryClient.invalidateQueries({ queryKey: ['email-queue'] });
-      
+      queryClient.invalidateQueries({
+        queryKey: ['email-queue']
+      });
     } catch (error) {
       console.error('💥 Monitor failed:', error);
     } finally {
       setIsMonitoring(false);
     }
   };
-
   const handleManualProcess = async () => {
     setIsProcessing(true);
     try {
       console.log('🔄 Manually triggering enhanced email processing...');
-      
-      // Get pending emails with full details for better feedback
-      const { data: pendingEmails, error: fetchError } = await supabase
-        .from('email_queue')
-        .select('id, recipient_email, subject, retry_count, error_message')
-        .eq('status', 'pending')
-        .lte('scheduled_at', new Date().toISOString());
 
+      // Get pending emails with full details for better feedback
+      const {
+        data: pendingEmails,
+        error: fetchError
+      } = await supabase.from('email_queue').select('id, recipient_email, subject, retry_count, error_message').eq('status', 'pending').lte('scheduled_at', new Date().toISOString());
       if (fetchError) {
         console.error('❌ Error fetching pending emails:', fetchError);
         throw fetchError;
       }
-
       if (!pendingEmails || pendingEmails.length === 0) {
         console.log('ℹ️ No pending emails to process');
-        queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+        queryClient.invalidateQueries({
+          queryKey: ['email-queue']
+        });
         return;
       }
-
       console.log(`📧 Found ${pendingEmails.length} pending emails to process`);
 
       // Enhanced processing with detailed feedback
       let processed = 0;
       let failed = 0;
       let retryScheduled = 0;
-      const errors: Array<{ emailId: string; recipient: string; error: any }> = [];
-      const details: Array<{ emailId: string; recipient: string; status: string; [key: string]: any }> = [];
-
+      const errors: Array<{
+        emailId: string;
+        recipient: string;
+        error: any;
+      }> = [];
+      const details: Array<{
+        emailId: string;
+        recipient: string;
+        status: string;
+        [key: string]: any;
+      }> = [];
       for (const email of pendingEmails) {
         try {
           console.log(`📤 Processing email ID: ${email.id} (To: ${email.recipient_email}, Retry: ${email.retry_count || 0})`);
-          
-          const { data, error } = await supabase.functions.invoke('email-queue-webhook', {
-            body: { email_id: email.id, manual_trigger: true }
+          const {
+            data,
+            error
+          } = await supabase.functions.invoke('email-queue-webhook', {
+            body: {
+              email_id: email.id,
+              manual_trigger: true
+            }
           });
-
           if (error) {
             console.error(`❌ Function error for email ${email.id}:`, error);
-            errors.push({ 
-              emailId: email.id, 
+            errors.push({
+              emailId: email.id,
               recipient: email.recipient_email,
-              error: error.message || 'Unknown error' 
+              error: error.message || 'Unknown error'
             });
             failed++;
           } else if (data?.success) {
@@ -132,10 +146,10 @@ export const EmailQueueTab: React.FC = () => {
               });
             } else {
               console.warn(`⚠️ Email ${email.id} processing returned non-success:`, data);
-              errors.push({ 
-                emailId: email.id, 
+              errors.push({
+                emailId: email.id,
                 recipient: email.recipient_email,
-                error: data?.error || 'Processing failed' 
+                error: data?.error || 'Processing failed'
               });
               failed++;
             }
@@ -147,10 +161,10 @@ export const EmailQueueTab: React.FC = () => {
             message: (networkError as Error).message,
             stack: (networkError as Error).stack
           });
-          errors.push({ 
-            emailId: email.id, 
+          errors.push({
+            emailId: email.id,
             recipient: email.recipient_email,
-            error: `Network error: ${(networkError as Error).message}` 
+            error: `Network error: ${(networkError as Error).message}`
           });
           failed++;
         }
@@ -165,21 +179,25 @@ export const EmailQueueTab: React.FC = () => {
       console.log(`✅ Successfully sent: ${processed}`);
       console.log(`🔄 Retries scheduled: ${retryScheduled}`);
       console.log(`❌ Failed: ${failed}`);
-      
       if (details.length > 0) {
         console.log('📋 Success details:', details);
       }
-      
       if (errors.length > 0) {
         console.log('❌ Error details:');
-        errors.forEach(({ emailId, recipient, error }) => {
+        errors.forEach(({
+          emailId,
+          recipient,
+          error
+        }) => {
           console.error(`  - ${emailId} (${recipient}):`, error);
         });
       }
       console.groupEnd();
-      
+
       // Refresh the queue after processing
-      queryClient.invalidateQueries({ queryKey: ['email-queue'] });
+      queryClient.invalidateQueries({
+        queryKey: ['email-queue']
+      });
 
       // Enhanced user feedback
       let resultMessage = '';
@@ -192,9 +210,7 @@ export const EmailQueueTab: React.FC = () => {
       if (failed > 0) {
         resultMessage += `${resultMessage ? ', ' : ''}❌ ${failed} failed`;
       }
-
       console.log(`📋 Final result: ${resultMessage || 'No emails processed'}`);
-
     } catch (error) {
       console.error('💥 Critical error in manual processing:', error);
       console.error('Error details:', {
@@ -206,10 +222,8 @@ export const EmailQueueTab: React.FC = () => {
       setIsProcessing(false);
     }
   };
-
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Clock className="w-5 h-5" />
@@ -221,14 +235,10 @@ export const EmailQueueTab: React.FC = () => {
             <div className="text-muted-foreground">Loading email queue...</div>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   const pendingCount = queueItems.filter(item => item.status === 'pending').length;
-
-  return (
-    <>
+  return <>
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
@@ -239,41 +249,18 @@ export const EmailQueueTab: React.FC = () => {
                 <Badge variant="secondary" className="ml-2">
                   {queueItems.length} items
                 </Badge>
-                {pendingCount > 0 && (
-                  <Badge variant="outline" className="bg-yellow-50 text-yellow-800">
+                {pendingCount > 0 && <Badge variant="outline" className="bg-yellow-50 text-yellow-800">
                     {pendingCount} pending
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
             </div>
             <div className="flex items-center gap-2">
-              <Button
-                onClick={handleMonitor}
-                disabled={isMonitoring}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
-                <Activity className="w-4 h-4" />
-                {isMonitoring ? 'Monitoring...' : 'Health Check'}
-              </Button>
-              {pendingCount > 0 && (
-                <Button
-                  onClick={handleManualProcess}
-                  disabled={isProcessing}
-                  size="sm"
-                  className="flex items-center gap-2"
-                >
+              
+              {pendingCount > 0 && <Button onClick={handleManualProcess} disabled={isProcessing} size="sm" className="flex items-center gap-2">
                   <Play className="w-4 h-4" />
                   {isProcessing ? 'Processing...' : 'Process Now'}
-                </Button>
-              )}
-              <Button
-                onClick={handleRefresh}
-                variant="outline"
-                size="sm"
-                className="flex items-center gap-2"
-              >
+                </Button>}
+              <Button onClick={handleRefresh} variant="outline" size="sm" className="flex items-center gap-2">
                 <RefreshCw className="w-4 h-4" />
                 Refresh
               </Button>
@@ -281,16 +268,13 @@ export const EmailQueueTab: React.FC = () => {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          {queueItems.length === 0 ? (
-            <div className="flex flex-col items-center justify-center py-8 text-center">
+          {queueItems.length === 0 ? <div className="flex flex-col items-center justify-center py-8 text-center">
               <Mail className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-semibold mb-2">No emails in queue</h3>
               <p className="text-muted-foreground">
                 Email queue is empty. Manually sent emails will appear here.
               </p>
-            </div>
-          ) : (
-            <div className="overflow-x-auto">
+            </div> : <div className="overflow-x-auto">
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -302,8 +286,7 @@ export const EmailQueueTab: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {queueItems.map((item) => (
-                    <TableRow key={item.id}>
+                  {queueItems.map(item => <TableRow key={item.id}>
                       <TableCell className="font-medium py-2">
                         {item.recipient_email}
                       </TableCell>
@@ -314,32 +297,25 @@ export const EmailQueueTab: React.FC = () => {
                         <Badge className={getStatusColor(item.status)}>
                           {item.status}
                         </Badge>
-                        {item.error_message && (
-                          <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                        {item.error_message && <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
                             <AlertCircle className="w-3 h-3" />
                             <span className="truncate max-w-xs">{item.error_message}</span>
-                          </div>
-                        )}
+                          </div>}
                       </TableCell>
                       <TableCell className="text-sm text-muted-foreground py-2">
                         {format(new Date(item.scheduled_at), 'MMM dd, yyyy HH:mm')}
-                        {item.sent_at && (
-                          <div className="text-green-600">
+                        {item.sent_at && <div className="text-green-600">
                             Sent: {format(new Date(item.sent_at), 'MMM dd, yyyy HH:mm')}
-                          </div>
-                        )}
+                          </div>}
                       </TableCell>
                       <TableCell className="text-sm py-2">
                         {item.email_templates?.name || 'Manual'}
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
-            </div>
-          )}
+            </div>}
         </CardContent>
       </Card>
-    </>
-  );
+    </>;
 };
