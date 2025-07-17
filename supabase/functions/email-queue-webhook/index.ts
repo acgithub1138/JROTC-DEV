@@ -106,7 +106,7 @@ class EmailProcessor {
       item.body;
 
     const result = await this.resend.emails.send({
-      from: 'JROTC System <onboarding@resend.dev>',
+      from: 'JROTC CCC <jrotc@careyunlimited.com>',
       to: [item.recipient_email],
       subject: item.subject,
       html: emailBody,
