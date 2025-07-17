@@ -56,6 +56,9 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [showUnsavedCommentModal, setShowUnsavedCommentModal] = useState(false);
+  const [pendingSaveAction, setPendingSaveAction] = useState<(() => Promise<void>) | null>(null);
   const [editData, setEditData] = useState({
     title: subtask.title,
     description: subtask.description || '',
@@ -179,7 +182,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     }
   };
 
-  const handleSave = async () => {
+  const performSave = async () => {
     // Validate notification requirements
     if (sendNotification && !selectedTemplate) {
       toast({
@@ -218,6 +221,24 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     }
   };
 
+  const handleSave = async () => {
+    // Debug logging to track comment state
+    console.log('🔍 handleSave called with newComment:', newComment);
+    console.log('🔍 newComment trimmed:', newComment.trim());
+    console.log('🔍 newComment length:', newComment.length);
+    
+    // Check for unsaved comment before saving
+    if (newComment.trim()) {
+      console.log('🔍 Found unsaved comment, showing modal');
+      setPendingSaveAction(() => () => performSave());
+      setShowUnsavedCommentModal(true);
+      return;
+    }
+    
+    console.log('🔍 No unsaved comment, proceeding with save');
+    await performSave();
+  };
+
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
@@ -238,6 +259,37 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
 
   const stayOnForm = () => {
     setShowConfirmDialog(false);
+  };
+
+  const handleAddCommentAndSave = async () => {
+    console.log('🔍 handleAddCommentAndSave called with newComment:', newComment);
+    console.log('🔍 newComment trimmed:', newComment.trim());
+    
+    if (newComment.trim()) {
+      console.log('🔍 Adding comment:', newComment.trim());
+      await addComment(newComment.trim());
+      setNewComment('');
+    }
+    setShowUnsavedCommentModal(false);
+    if (pendingSaveAction) {
+      console.log('🔍 Executing pending save action');
+      await pendingSaveAction();
+      setPendingSaveAction(null);
+    }
+  };
+
+  const handleDiscardCommentAndSave = async () => {
+    setNewComment('');
+    setShowUnsavedCommentModal(false);
+    if (pendingSaveAction) {
+      await pendingSaveAction();
+      setPendingSaveAction(null);
+    }
+  };
+
+  const handleCancelCommentAction = () => {
+    setShowUnsavedCommentModal(false);
+    setPendingSaveAction(null);
   };
 
   const assigneeOptions = [
@@ -526,6 +578,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
             comments={comments}
             isAddingComment={isAddingComment}
             onAddComment={addComment}
+            newComment={newComment}
+            onNewCommentChange={setNewComment}
           />
         </div>
       </DialogContent>
@@ -547,6 +601,27 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
           </Button>
           <AlertDialogAction onClick={saveAndClose}>
             Save Changes
+          </AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    {/* Unsaved Comment Modal */}
+    <AlertDialog open={showUnsavedCommentModal} onOpenChange={setShowUnsavedCommentModal}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Comment</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have an unsaved comment. Would you like to save it before proceeding?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={handleCancelCommentAction}>Cancel</AlertDialogCancel>
+          <Button onClick={handleDiscardCommentAndSave} variant="outline">
+            Discard Comment
+          </Button>
+          <AlertDialogAction onClick={handleAddCommentAndSave}>
+            Save Comment
           </AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
