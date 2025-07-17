@@ -17,6 +17,7 @@ interface BasicCompetitionTableProps {
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   visibleColumns?: string[];
+  canViewDetails?: boolean;
 }
 const getPlacementColor = (placement: string | null) => {
   if (!placement || placement === '-') return '';
@@ -80,7 +81,8 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onDelete,
   onAddEvent,
   onViewScoreSheets,
-  visibleColumns = []
+  visibleColumns = [],
+  canViewDetails = false
 }) => {
   const isMobile = useIsMobile();
 
@@ -94,7 +96,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
-    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} />;
+    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} canViewDetails={canViewDetails} />;
   }
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
@@ -126,7 +128,20 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
           </TableHeader>
           <TableBody>
             {competitions.map(competition => <TableRow key={competition.id}>
-                {isColumnVisible('name') && <TableCell className="font-medium py-[8px]">{competition.name}</TableCell>}
+                {isColumnVisible('name') && (
+                  <TableCell className="font-medium py-[8px]">
+                    {canViewDetails ? (
+                      <button
+                        onClick={() => onEdit(competition)}
+                        className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                      >
+                        {competition.name}
+                      </button>
+                    ) : (
+                      competition.name
+                    )}
+                  </TableCell>
+                )}
                 {isColumnVisible('date') && <TableCell>
                     {formatCompetitionDateFull(competition.competition_date)}
                   </TableCell>}

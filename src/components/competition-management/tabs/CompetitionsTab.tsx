@@ -154,6 +154,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
         onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         visibleColumns={visibleColumns}
+        canViewDetails={canViewDetails}
       />
 
       {!readOnly && canCreate && (

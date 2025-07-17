@@ -14,6 +14,7 @@ interface CompetitionCardsProps {
   onDelete: (id: string) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
+  canViewDetails?: boolean;
 }
 
 const getPlacementColor = (placement: string | null) => {
@@ -65,7 +66,8 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
   onEdit,
   onDelete,
   onAddEvent,
-  onViewScoreSheets
+  onViewScoreSheets,
+  canViewDetails = false
 }) => {
   if (isLoading) {
     return (
@@ -104,9 +106,18 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  <CardTitle className="text-lg font-semibold line-clamp-2">
-                    {competition.name}
-                  </CardTitle>
+                  {canViewDetails ? (
+                    <CardTitle 
+                      className="text-lg font-semibold line-clamp-2 text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline"
+                      onClick={() => onEdit(competition)}
+                    >
+                      {competition.name}
+                    </CardTitle>
+                  ) : (
+                    <CardTitle className="text-lg font-semibold line-clamp-2">
+                      {competition.name}
+                    </CardTitle>
+                  )}
                   <div className="flex items-center gap-1 mt-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
                     {formatCompetitionDateFull(competition.competition_date)}
