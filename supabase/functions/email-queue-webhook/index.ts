@@ -140,10 +140,31 @@ class EmailProcessor {
     try {
       console.log(`🔍 Starting email processing - ID: ${emailId}, Manual: ${manualTrigger}, Batch: ${isBatchProcessing}`);
       
-      // Rate limiting: Fixed 2 second delay to respect Resend's limit (1 email every 2 seconds)
+      // Global rate limiting: Ensure only 1 email every 2 seconds across all instances
       if (!manualTrigger && !isBatchProcessing) {
-        console.log(`⏱️ Rate limiting: waiting 2000ms to respect Resend's 2 emails per second limit`);
-        await new Promise(resolve => setTimeout(resolve, 2000));
+        console.log(`⏱️ Checking global rate limit...`);
+        
+        // Check when the last email was sent globally
+        const { data: lastEmail } = await supabase
+          .from('email_queue')
+          .select('sent_at')
+          .eq('status', 'sent')
+          .order('sent_at', { ascending: false })
+          .limit(1)
+          .single();
+        
+        if (lastEmail?.sent_at) {
+          const lastSentTime = new Date(lastEmail.sent_at).getTime();
+          const now = Date.now();
+          const timeSinceLastEmail = now - lastSentTime;
+          const requiredWait = 2000; // 2 seconds
+          
+          if (timeSinceLastEmail < requiredWait) {
+            const waitTime = requiredWait - timeSinceLastEmail;
+            console.log(`⏱️ Global rate limit: waiting ${waitTime}ms since last email was ${timeSinceLastEmail}ms ago`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
       }
       
       // Get the email from queue with enhanced logging
