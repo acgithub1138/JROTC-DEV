@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarIcon, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -23,6 +24,8 @@ const FLIGHTS = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
 export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDialogProps) => {
   const [date, setDate] = useState<Date>();
   const [selectedFlight, setSelectedFlight] = useState<string>('');
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   
   const { cadets, isLoading: cadetsLoading } = useCadetsByFlight(selectedFlight);
   const {
@@ -34,11 +37,18 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
     resetData,
   } = usePTTestBulk();
 
+  // Check for unsaved changes
+  useEffect(() => {
+    setHasUnsavedChanges(cadetDataWithPushUps.length > 0);
+  }, [cadetDataWithPushUps]);
+
   // Reset form when dialog opens/closes
   useEffect(() => {
     if (!open) {
       setDate(undefined);
       setSelectedFlight('');
+      setHasUnsavedChanges(false);
+      setShowConfirmDialog(false);
       resetData();
     }
   }, [open]); // Remove resetData from dependencies to prevent infinite loop
@@ -50,9 +60,33 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
 
     const success = await savePTTests(date, cadetDataWithPushUps);
     if (success) {
+      setHasUnsavedChanges(false);
       onOpenChange(false);
       onSuccess?.();
     }
+  };
+
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const confirmClose = () => {
+    setShowConfirmDialog(false);
+    setHasUnsavedChanges(false);
+    onOpenChange(false);
+  };
+
+  const saveAndClose = async () => {
+    setShowConfirmDialog(false);
+    await handleSave();
+  };
+
+  const stayOnForm = () => {
+    setShowConfirmDialog(false);
   };
 
   const formatTimeDisplay = (seconds: string) => {
@@ -70,7 +104,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
   const isFormValid = date && selectedFlight;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk PT Test Entry</DialogTitle>
@@ -225,7 +259,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
 
         {/* Footer */}
         <div className="flex justify-end space-x-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)} disabled={saving}>
+          <Button variant="outline" onClick={handleClose} disabled={saving}>
             Cancel
           </Button>
           <Button 
@@ -237,6 +271,28 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           </Button>
         </div>
       </DialogContent>
+
+      {/* Confirmation Dialog for Unsaved Changes */}
+      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+            <AlertDialogDescription>
+              You have unsaved PT test data. What would you like to do?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={stayOnForm}>Stay on Form</AlertDialogCancel>
+            <Button onClick={confirmClose} variant="outline">
+              Close Without Saving
+            </Button>
+            <AlertDialogAction onClick={saveAndClose} disabled={!isFormValid || saving}>
+              {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+              Save Changes
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Dialog>
   );
 };
