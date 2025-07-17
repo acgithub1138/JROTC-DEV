@@ -21,6 +21,7 @@ interface CadetTabsContentProps {
   onSelectAll: (checked: boolean) => void;
   onRefresh: () => void;
   onOpenPTTestDialog: () => void;
+  searchTerm?: string;
 }
 export const CadetTabsContent = ({
   activeTab,
@@ -35,7 +36,8 @@ export const CadetTabsContent = ({
   onSelectCadet,
   onSelectAll,
   onRefresh,
-  onOpenPTTestDialog
+  onOpenPTTestDialog,
+  searchTerm
 }: CadetTabsContentProps) => {
   const isMobile = useIsMobile();
   const {
@@ -76,7 +78,7 @@ export const CadetTabsContent = ({
       </TabsContent>
 
       <TabsContent value="pt-tests" className="mt-4">
-        <PTTestsTab onOpenBulkDialog={onOpenPTTestDialog} />
+        <PTTestsTab onOpenBulkDialog={onOpenPTTestDialog} searchTerm={searchTerm} />
       </TabsContent>
     </Tabs>;
 };

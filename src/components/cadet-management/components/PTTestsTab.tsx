@@ -16,6 +16,7 @@ import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
+  searchTerm?: string;
 }
 interface PTTest {
   id: string;
@@ -33,7 +34,8 @@ interface PTTest {
   };
 }
 export const PTTestsTab = ({
-  onOpenBulkDialog
+  onOpenBulkDialog,
+  searchTerm: externalSearchTerm = ''
 }: PTTestsTabProps) => {
   const {
     userProfile
@@ -41,7 +43,7 @@ export const PTTestsTab = ({
   const {
     canCreate
   } = useCadetPermissions();
-  const [searchTerm, setSearchTerm] = useState('');
+  const searchTerm = externalSearchTerm;
   const [selectedDate, setSelectedDate] = useState<Date>();
   const {
     data: ptTests = [],
@@ -138,12 +140,6 @@ export const PTTestsTab = ({
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-4">
-          {/* Search */}
-          <div className="relative">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input placeholder="Search cadets..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 w-64" />
-          </div>
-
           {/* Date Filter */}
           <Popover>
             <PopoverTrigger asChild>
