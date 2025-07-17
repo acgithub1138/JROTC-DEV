@@ -34,6 +34,9 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
   const { queueItems } = useEmailQueue();
 
   const handleAddComment = () => {
+    console.log('🔍 TaskCommentsSection handleAddComment called with newComment:', newComment);
+    console.log('🔍 newComment trimmed:', newComment.trim());
+    
     if (newComment.trim()) {
       onAddComment(newComment.trim());
       setNewComment('');
@@ -110,7 +113,10 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
         <Textarea
           placeholder="Add a comment..."
           value={newComment}
-          onChange={(e) => setNewComment(e.target.value)}
+          onChange={(e) => {
+            console.log('🔍 Comment textarea onChange:', e.target.value);
+            setNewComment(e.target.value);
+          }}
           rows={3}
         />
         <div className="flex justify-end mt-2">

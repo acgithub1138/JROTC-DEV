@@ -200,13 +200,20 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleSave = async () => {
+    // Debug logging to track comment state
+    console.log('🔍 handleSave called with newComment:', newComment);
+    console.log('🔍 newComment trimmed:', newComment.trim());
+    console.log('🔍 newComment length:', newComment.length);
+    
     // Check for unsaved comment before saving
     if (newComment.trim()) {
+      console.log('🔍 Found unsaved comment, showing modal');
       setPendingSaveAction(() => () => performSave());
       setShowUnsavedCommentModal(true);
       return;
     }
     
+    console.log('🔍 No unsaved comment, proceeding with save');
     await performSave();
   };
 
@@ -327,12 +334,17 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
   };
 
   const handleAddCommentAndSave = async () => {
+    console.log('🔍 handleAddCommentAndSave called with newComment:', newComment);
+    console.log('🔍 newComment trimmed:', newComment.trim());
+    
     if (newComment.trim()) {
+      console.log('🔍 Adding comment:', newComment.trim());
       await addComment(newComment.trim());
       setNewComment('');
     }
     setShowUnsavedCommentModal(false);
     if (pendingSaveAction) {
+      console.log('🔍 Executing pending save action');
       await pendingSaveAction();
       setPendingSaveAction(null);
     }
