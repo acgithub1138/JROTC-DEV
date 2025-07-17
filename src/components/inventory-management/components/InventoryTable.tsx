@@ -231,9 +231,20 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
               />
               </TableCell>
-               {isColumnVisible('item_id') && (
-                 <TableCell className={`font-medium ${getPaddingClass()}`}>{item.item_id}</TableCell>
-               )}
+                {isColumnVisible('item_id') && (
+                  <TableCell className={`font-medium ${getPaddingClass()}`}>
+                    {canViewDetails ? (
+                      <button
+                        onClick={() => handleView(item)}
+                        className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                      >
+                        {item.item_id}
+                      </button>
+                    ) : (
+                      item.item_id
+                    )}
+                  </TableCell>
+                )}
                {isColumnVisible('item') && (
                  <TableCell className={getPaddingClass()}>{item.item}</TableCell>
                )}
