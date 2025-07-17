@@ -186,7 +186,7 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
             {canCreate && (
               <Button className="mt-4" onClick={onOpenBulkDialog}>
                 <Plus className="w-4 h-4 mr-2" />
-                Add PT Tests
+                Add Single PT Tests
               </Button>
             )}
           </CardContent>
