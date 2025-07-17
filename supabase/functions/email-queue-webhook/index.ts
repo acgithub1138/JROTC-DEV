@@ -140,11 +140,10 @@ class EmailProcessor {
     try {
       console.log(`🔍 Starting email processing - ID: ${emailId}, Manual: ${manualTrigger}, Batch: ${isBatchProcessing}`);
       
-      // Rate limiting: Longer delay to respect Resend's 2 emails per second limit
+      // Rate limiting: Fixed 2 second delay to respect Resend's limit (1 email every 2 seconds)
       if (!manualTrigger && !isBatchProcessing) {
-        const delay = Math.floor(Math.random() * 2000) + 2000; // Random delay 2-4 seconds
-        console.log(`⏱️ Rate limiting: waiting ${delay}ms to avoid Resend limits`);
-        await new Promise(resolve => setTimeout(resolve, delay));
+        console.log(`⏱️ Rate limiting: waiting 2000ms to respect Resend's 2 emails per second limit`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
       }
       
       // Get the email from queue with enhanced logging
