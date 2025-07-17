@@ -23,6 +23,7 @@ interface EmailQueueItem {
   error_message?: string;
   source_table?: string;
   record_id?: string;
+  rule_id?: string;
 }
 
 class UnifiedEmailProcessor {
@@ -197,14 +198,29 @@ class UnifiedEmailProcessor {
       // Check if this was a task_information_needed email and update status accordingly
       if (email.source_table && email.record_id) {
         try {
-          // Get the email rule type to determine if we need to update task status
-          const { data: emailRule } = await this.supabase
-            .from('email_queue')
-            .select('rule_id, email_rules!rule_id(rule_type)')
-            .eq('id', email.id)
-            .single();
-
-          const ruleType = emailRule?.email_rules?.rule_type;
+          // Get the rule type to determine if we need to update task status
+          let ruleType = null;
+          
+          // First get the rule_id from the current email if not already available
+          const ruleId = email.rule_id;
+          
+          if (ruleId) {
+            // Get the rule type from email_rules table
+            const { data: ruleData, error: ruleError } = await this.supabase
+              .from('email_rules')
+              .select('rule_type')
+              .eq('id', ruleId)
+              .single();
+            
+            if (ruleError) {
+              console.error('Error fetching rule type:', ruleError);
+            } else {
+              ruleType = ruleData?.rule_type;
+              console.log(`📋 Rule type for email ${email.id}: ${ruleType}`);
+            }
+          } else {
+            console.log(`⚠️ No rule_id found for email ${email.id}`);
+          }
           
           if (ruleType === 'task_information_needed') {
             // Call the status update function
