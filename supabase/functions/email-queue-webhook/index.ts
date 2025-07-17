@@ -150,25 +150,30 @@ class UnifiedEmailProcessor {
 
   private async sendEmailViaResend(email: EmailQueueItem): Promise<{ success: boolean; resendId?: string; isRateLimited?: boolean; errorMessage?: string }> {
     try {
-      console.log(`📧 Sending email to ${email.recipient_email} (retry: ${email.retry_count || 0})`);
+      // Check if recipient_email contains multiple recipients (comma-separated)
+      const recipients = email.recipient_email.split(',').map(email => email.trim()).filter(email => email);
+      const recipientCount = recipients.length;
+      
+      console.log(`📧 Sending email to ${recipientCount} recipient(s): ${email.recipient_email} (retry: ${email.retry_count || 0})`);
       
       const result = await this.resend.emails.send({
         from: 'JROTC CCC <jrotc@careyunlimited.com>',
-        to: [email.recipient_email],
+        to: recipients,
         subject: email.subject,
         html: email.body,
       });
 
       // Only consider successful if we have a valid Resend ID
       if (result.data?.id) {
-        console.log(`✅ Email sent successfully via Resend to ${email.recipient_email}, Resend ID: ${result.data.id}`);
+        console.log(`✅ Email sent successfully via Resend to ${recipientCount} recipient(s), Resend ID: ${result.data.id}`);
         return { success: true, resendId: result.data.id };
       } else {
-        console.log(`⚠️ Resend API returned success but no ID for ${email.recipient_email}:`, result);
+        console.log(`⚠️ Resend API returned success but no ID for ${recipientCount} recipient(s):`, result);
         return { success: false, errorMessage: 'No Resend ID returned' };
       }
     } catch (error: any) {
-      console.error(`❌ Resend error for ${email.recipient_email}:`, error);
+      const recipients = email.recipient_email.split(',').map(email => email.trim()).filter(email => email);
+      console.error(`❌ Resend error for ${recipients.length} recipient(s):`, error);
       
       // Check if this is a rate limiting error
       const isRateLimited = error.message?.includes('rate') || 
@@ -176,7 +181,7 @@ class UnifiedEmailProcessor {
                            error.status === 429;
       
       if (isRateLimited) {
-        console.log(`🚦 Rate limited by Resend for ${email.recipient_email}`);
+        console.log(`🚦 Rate limited by Resend for ${recipients.length} recipient(s)`);
         return { success: false, isRateLimited: true, errorMessage: error.message };
       }
       

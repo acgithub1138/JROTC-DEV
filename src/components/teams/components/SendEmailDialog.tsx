@@ -63,27 +63,23 @@ export const SendEmailDialog = ({ open, onOpenChange, team }: SendEmailDialogPro
         return;
       }
 
-      // Send email to each recipient using the existing email queue system
-      const emailPromises = recipients.map(async (email) => {
-        const { error } = await supabase
-          .from('email_queue')
-          .insert({
-            recipient_email: email,
-            subject: subject,
-            body: body,
-            school_id: userProfile.school_id,
-            scheduled_at: new Date().toISOString(),
-            status: 'pending'
-          });
-        
-        if (error) throw error;
-      });
-
-      await Promise.all(emailPromises);
+      // Send one email to all recipients (comma-separated in TO field)
+      const { error } = await supabase
+        .from('email_queue')
+        .insert({
+          recipient_email: recipients.join(', '),
+          subject: subject,
+          body: body,
+          school_id: userProfile.school_id,
+          scheduled_at: new Date().toISOString(),
+          status: 'pending'
+        });
+      
+      if (error) throw error;
 
       toast({
         title: "Success",
-        description: `Email queued for ${recipients.length} recipient(s). Team: ${team.name}`,
+        description: `Email queued for ${recipients.length} recipient(s) in Team: ${team.name}`,
         duration: 5000
       });
 
