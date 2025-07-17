@@ -1,6 +1,6 @@
 
 import { useQuery, useQueryClient } from '@tanstack/react-query';
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from './types';
@@ -8,6 +8,7 @@ import { Task } from './types';
 export const useTasksQuery = () => {
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
+  const subscriptionRef = useRef<any>(null);
 
   const query = useQuery({
     queryKey: ['tasks', userProfile?.school_id],
@@ -34,8 +35,14 @@ export const useTasksQuery = () => {
   useEffect(() => {
     if (!userProfile?.school_id) return;
 
+    // Clean up any existing subscription first
+    if (subscriptionRef.current) {
+      supabase.removeChannel(subscriptionRef.current);
+      subscriptionRef.current = null;
+    }
+
     const channel = supabase
-      .channel(`tasks-changes-${userProfile.school_id}`)
+      .channel(`tasks-changes-${userProfile.school_id}-${Date.now()}`)
       .on(
         'postgres_changes',
         {
@@ -52,10 +59,15 @@ export const useTasksQuery = () => {
       )
       .subscribe();
 
+    subscriptionRef.current = channel;
+
     return () => {
-      supabase.removeChannel(channel);
+      if (subscriptionRef.current) {
+        supabase.removeChannel(subscriptionRef.current);
+        subscriptionRef.current = null;
+      }
     };
-  }, [userProfile?.school_id, queryClient]);
+  }, [userProfile?.school_id]); // Removed queryClient from dependencies
 
   return query;
 };
