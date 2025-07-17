@@ -123,14 +123,11 @@ class UnifiedEmailProcessor {
   private async getStuckEmails(): Promise<EmailQueueItem[]> {
     const thirtySecondsAgo = new Date(Date.now() - 30000).toISOString();
     
+    // Get stuck emails with a raw query since we need to compare columns
     const { data, error } = await this.supabase
-      .from('email_queue')
-      .select('*')
-      .eq('status', 'pending')
-      .lt('created_at', thirtySecondsAgo)
-      .or(`retry_count.is.null,retry_count.lt.max_retries`)
-      .order('created_at', { ascending: true })
-      .limit(5);
+      .rpc('get_stuck_emails', {
+        threshold_time: thirtySecondsAgo
+      });
 
     if (error) {
       console.error('🔄 Error fetching stuck emails:', error);
