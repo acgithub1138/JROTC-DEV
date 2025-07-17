@@ -1,19 +1,19 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Search } from 'lucide-react';
+import { CalendarIcon, Plus, Search, ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useSortableTable } from '@/hooks/useSortableTable';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
 }
@@ -92,12 +92,48 @@ export const PTTestsTab = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-  const groupedByDate = ptTests.reduce((acc: Record<string, PTTest[]>, test) => {
-    const date = test.date;
-    if (!acc[date]) acc[date] = [];
-    acc[date].push(test);
-    return acc;
-  }, {});
+
+  // Use sortable table hook
+  const { sortedData, sortConfig, handleSort } = useSortableTable({
+    data: ptTests,
+    defaultSort: { key: 'date', direction: 'desc' },
+    customSortFn: (a, b, sortConfig) => {
+      const aValue = sortConfig.key === 'cadet_name' 
+        ? `${a.profiles.last_name}, ${a.profiles.first_name}`
+        : sortConfig.key === 'profiles.grade'
+        ? a.profiles.grade || ''
+        : sortConfig.key === 'profiles.rank'
+        ? a.profiles.rank || ''
+        : a[sortConfig.key as keyof PTTest];
+      
+      const bValue = sortConfig.key === 'cadet_name' 
+        ? `${b.profiles.last_name}, ${b.profiles.first_name}`
+        : sortConfig.key === 'profiles.grade'
+        ? b.profiles.grade || ''
+        : sortConfig.key === 'profiles.rank'
+        ? b.profiles.rank || ''
+        : b[sortConfig.key as keyof PTTest];
+
+      if (aValue === null || aValue === undefined) return 1;
+      if (bValue === null || bValue === undefined) return -1;
+
+      if (typeof aValue === 'string' && typeof bValue === 'string') {
+        const comparison = aValue.localeCompare(bValue);
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+
+      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
+      return 0;
+    }
+  });
+
+  const getSortIcon = (columnKey: string) => {
+    if (sortConfig?.key !== columnKey) {
+      return <ArrowUpDown className="w-4 h-4 opacity-50" />;
+    }
+    return <ArrowUpDown className={cn("w-4 h-4", sortConfig.direction === 'asc' ? 'rotate-180' : '')} />;
+  };
   if (isLoading) {
     return <div className="space-y-4">
         <div className="animate-pulse">
@@ -153,65 +189,137 @@ export const PTTestsTab = ({
       </div>
 
       {/* PT Tests Display */}
-      {Object.keys(groupedByDate).length === 0 ? <Card>
+      {sortedData.length === 0 ? (
+        <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No PT tests found</p>
-            {canCreate && <div className="flex gap-2 justify-center mt-4">
-                
-                
-              </div>}
           </CardContent>
-        </Card> : <div className="space-y-6">
-          {Object.entries(groupedByDate).sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime()).map(([date, tests]) => <Card key={date}>
-                <CardHeader>
-                  <CardTitle className="text-lg">
-                    {format(new Date(date), 'MMMM d, yyyy')}
-                    <Badge variant="secondary" className="ml-2">
-                      {tests.length} test{tests.length !== 1 ? 's' : ''}
-                    </Badge>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Table>
-                    <TableHeader>
-                      <TableRow>
-                        <TableHead>Cadet</TableHead>
-                        <TableHead>Grade</TableHead>
-                        <TableHead>Rank</TableHead>
-                        <TableHead className="text-center">Push-Ups</TableHead>
-                        <TableHead className="text-center">Sit-Ups</TableHead>
-                        <TableHead className="text-center">Plank Time</TableHead>
-                        <TableHead className="text-center">Mile Time</TableHead>
-                      </TableRow>
-                    </TableHeader>
-                    <TableBody>
-                      {tests.map(test => <TableRow key={test.id}>
-                          <TableCell className="font-medium">
-                            {test.profiles.last_name}, {test.profiles.first_name}
-                          </TableCell>
-                          <TableCell>
-                            {test.profiles.grade ? <Badge variant="outline" className="text-xs">
-                                {test.profiles.grade}
-                              </Badge> : '-'}
-                          </TableCell>
-                          <TableCell>{test.profiles.rank || '-'}</TableCell>
-                          <TableCell className="text-center">
-                            {test.push_ups || '-'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {test.sit_ups || '-'}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {formatTime(test.plank_time)}
-                          </TableCell>
-                          <TableCell className="text-center">
-                            {formatTime(test.mile_time)}
-                          </TableCell>
-                        </TableRow>)}
-                    </TableBody>
-                  </Table>
-                </CardContent>
-              </Card>)}
-        </div>}
+        </Card>
+      ) : (
+        <Card>
+          <CardContent className="p-0">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('cadet_name')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Cadet
+                      {getSortIcon('cadet_name')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('profiles.grade')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Grade
+                      {getSortIcon('profiles.grade')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('profiles.rank')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Rank
+                      {getSortIcon('profiles.rank')}
+                    </Button>
+                  </TableHead>
+                  <TableHead>
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('date')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Date
+                      {getSortIcon('date')}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('push_ups')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Push-Ups
+                      {getSortIcon('push_ups')}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('sit_ups')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Sit-Ups
+                      {getSortIcon('sit_ups')}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('plank_time')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Plank Time
+                      {getSortIcon('plank_time')}
+                    </Button>
+                  </TableHead>
+                  <TableHead className="text-center">
+                    <Button
+                      variant="ghost"
+                      onClick={() => handleSort('mile_time')}
+                      className="h-auto p-0 font-medium hover:bg-transparent"
+                    >
+                      Mile Time
+                      {getSortIcon('mile_time')}
+                    </Button>
+                  </TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {sortedData.map((test) => (
+                  <TableRow key={test.id}>
+                    <TableCell className="font-medium">
+                      {test.profiles.last_name}, {test.profiles.first_name}
+                    </TableCell>
+                    <TableCell>
+                      {test.profiles.grade ? (
+                        <Badge variant="outline" className="text-xs">
+                          {test.profiles.grade}
+                        </Badge>
+                      ) : (
+                        '-'
+                      )}
+                    </TableCell>
+                    <TableCell>{test.profiles.rank || '-'}</TableCell>
+                    <TableCell>
+                      {format(new Date(test.date), 'MMM d, yyyy')}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {test.push_ups || '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {test.sit_ups || '-'}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {formatTime(test.plank_time)}
+                    </TableCell>
+                    <TableCell className="text-center">
+                      {formatTime(test.mile_time)}
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </CardContent>
+        </Card>
+      )}
     </div>;
 };
