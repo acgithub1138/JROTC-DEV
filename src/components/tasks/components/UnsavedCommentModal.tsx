@@ -18,13 +18,13 @@ export const UnsavedCommentModal: React.FC<UnsavedCommentModalProps> = ({
         </AlertDialogHeader>
         <AlertDialogFooter>
           <div className="flex justify-center items-center gap-2">
-          <AlertDialogCancel onClick={onDiscard} className="flex-shrink-0">
-            Discard Comment
-          </AlertDialogCancel>
-          <AlertDialogAction onClick={onAddComment} className="flex-shrink-0">
-            Add Comment
-          </AlertDialogAction>
-            <div/>
+            <AlertDialogCancel onClick={onDiscard} className="flex-shrink-0">
+              Discard Comment
+            </AlertDialogCancel>
+            <AlertDialogAction onClick={onAddComment} className="flex-shrink-0">
+              Add Comment
+            </AlertDialogAction>
+          </div>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>;
