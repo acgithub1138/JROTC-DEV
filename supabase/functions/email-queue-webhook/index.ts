@@ -407,10 +407,14 @@ class EmailProcessor {
 
 serve(async (req) => {
   const requestStartTime = Date.now();
-  console.log('🚀 Email Queue Webhook function started');
-  console.log('⏰ Timestamp:', new Date().toISOString());
-  console.log('🔍 Method:', req.method);
-  console.log('🌐 URL:', req.url);
+  const requestId = crypto.randomUUID();
+  
+  console.log(`🚀 [${requestId}] Email Queue Webhook function started`);
+  console.log(`⏰ [${requestId}] Timestamp:`, new Date().toISOString());
+  console.log(`🔍 [${requestId}] Method:`, req.method);
+  console.log(`🌐 [${requestId}] URL:`, req.url);
+  console.log(`📊 [${requestId}] User-Agent:`, req.headers.get('user-agent') || 'not provided');
+  console.log(`🔐 [${requestId}] Authorization header present:`, !!req.headers.get('authorization'));
 
   // Test endpoint
   if (req.url.includes('test')) {
@@ -485,22 +489,28 @@ serve(async (req) => {
       );
     }
 
-    console.log(`📧 Processing email ID: ${email_id} (retry: ${retry_count || 0}, batch: ${!!batch_processing}, manual: ${!!manual_trigger})`);
+    console.log(`📧 [${requestId}] Processing email ID: ${email_id} (retry: ${retry_count || 0}, batch: ${!!batch_processing}, manual: ${!!manual_trigger})`);
     
     // Get processor instance and warm up
+    console.log(`🏭 [${requestId}] Getting EmailProcessor instance...`);
     const processor = EmailProcessor.getInstance();
-    await processor.warmUp();
     
-    console.log('⚡ Starting email processing...');
+    console.log(`🔥 [${requestId}] Starting processor warm-up...`);
+    await processor.warmUp();
+    console.log(`✅ [${requestId}] Processor warm-up completed`);
+    
+    console.log(`⚡ [${requestId}] Starting email processing...`);
     const result = await processor.processEmail(email_id, batch_processing, manual_trigger);
+    console.log(`🎯 [${requestId}] Email processing result:`, JSON.stringify(result, null, 2));
     
     const totalTime = Date.now() - requestStartTime;
-    console.log(`📊 Total request time: ${totalTime}ms`);
-    console.log('✅ Email processing completed:', result);
+    console.log(`📊 [${requestId}] Total request time: ${totalTime}ms`);
+    console.log(`✅ [${requestId}] Email processing completed:`, result);
 
     // Add performance metrics to response
     const response = {
       ...result,
+      requestId,
       metrics: {
         totalRequestTime: totalTime,
         processingTime: result.processingTime,
@@ -509,7 +519,10 @@ serve(async (req) => {
       }
     };
 
-    return new Response(JSON.stringify(response), {
+    console.log(`📤 [${requestId}] Preparing response with status:`, result.success ? 200 : 500);
+    console.log(`📋 [${requestId}] Full response object:`, JSON.stringify(response, null, 2));
+
+    const finalResponse = new Response(JSON.stringify(response), {
       status: result.success ? 200 : 500,
       headers: {
         'Content-Type': 'application/json',
@@ -517,24 +530,51 @@ serve(async (req) => {
       },
     });
 
+    console.log(`🚀 [${requestId}] Returning response to caller`);
+    return finalResponse;
+
   } catch (error) {
     const totalTime = Date.now() - requestStartTime;
-    console.error('💥 Critical error in email-queue-webhook function:', error);
-    console.error('🏷️ Error name:', error.name);
-    console.error('💬 Error message:', error.message);
-    console.error('📜 Error stack:', error.stack);
+    console.error(`💥 [${requestId}] CRITICAL ERROR in email-queue-webhook function:`, error);
+    console.error(`🏷️ [${requestId}] Error name:`, error.name);
+    console.error(`💬 [${requestId}] Error message:`, error.message);
+    console.error(`📜 [${requestId}] Error stack:`, error.stack);
+    console.error(`⏱️ [${requestId}] Time until error: ${totalTime}ms`);
+    console.error(`🔍 [${requestId}] Error occurred during main request processing`);
+    
+    // Additional debugging information
+    console.error(`🧪 [${requestId}] Error details:`, {
+      name: error.name,
+      message: error.message,
+      cause: error.cause,
+      code: error.code,
+      status: error.status,
+      stack: error.stack?.substring(0, 500) + '...' // Truncate stack
+    });
+    
+    const errorResponse = {
+      success: false,
+      error: error.message || 'Unknown error occurred',
+      errorName: error.name,
+      requestId,
+      timestamp: new Date().toISOString(),
+      debug: {
+        errorOccurredIn: 'main_catch_block',
+        totalTimeMs: totalTime,
+        hasStack: !!error.stack,
+        errorType: typeof error,
+        errorKeys: Object.keys(error)
+      },
+      metrics: {
+        totalRequestTime: totalTime,
+        failed: true
+      }
+    };
+    
+    console.error(`📤 [${requestId}] Returning error response:`, JSON.stringify(errorResponse, null, 2));
     
     return new Response(
-      JSON.stringify({
-        success: false,
-        error: error.message || 'Unknown error occurred',
-        errorName: error.name,
-        timestamp: new Date().toISOString(),
-        metrics: {
-          totalRequestTime: totalTime,
-          failed: true
-        }
-      }),
+      JSON.stringify(errorResponse),
       {
         status: 500,
         headers: {
