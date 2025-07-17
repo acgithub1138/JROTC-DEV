@@ -560,6 +560,30 @@ export type Database = {
           },
         ]
       }
+      email_processing_lock: {
+        Row: {
+          id: number
+          is_locked: boolean
+          last_processed_at: string | null
+          locked_at: string | null
+          locked_by: string | null
+        }
+        Insert: {
+          id?: number
+          is_locked?: boolean
+          last_processed_at?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Update: {
+          id?: number
+          is_locked?: boolean
+          last_processed_at?: string | null
+          locked_at?: string | null
+          locked_by?: string | null
+        }
+        Relationships: []
+      }
       email_processing_log: {
         Row: {
           failed_count: number | null
