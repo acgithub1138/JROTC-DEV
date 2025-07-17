@@ -2551,14 +2551,6 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      generate_subtask_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      generate_task_number: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
       get_all_roles: {
         Args: Record<PropertyKey, never>
         Returns: {

@@ -12,13 +12,7 @@ verify_jwt = true
 [functions.process-email-queue]
 verify_jwt = false
 
-[functions.test-smtp-connection]
-verify_jwt = false
-
 [functions.email-queue-webhook]
-verify_jwt = false
-
-[functions.manual-process-emails]
 verify_jwt = false
 
 [functions.update-task-status-after-email]
