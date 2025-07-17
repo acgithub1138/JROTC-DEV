@@ -14,11 +14,9 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
 }
-
 interface PTTest {
   id: string;
   cadet_id: string;
@@ -34,21 +32,26 @@ interface PTTest {
     rank: string | null;
   };
 }
-
-export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
-  const { userProfile } = useAuth();
-  const { canCreate } = useCadetPermissions();
+export const PTTestsTab = ({
+  onOpenBulkDialog
+}: PTTestsTabProps) => {
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canCreate
+  } = useCadetPermissions();
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedDate, setSelectedDate] = useState<Date>();
-
-  const { data: ptTests = [], isLoading, refetch } = useQuery({
+  const {
+    data: ptTests = [],
+    isLoading,
+    refetch
+  } = useQuery({
     queryKey: ['pt-tests', userProfile?.school_id, selectedDate, searchTerm],
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
-
-      let query = supabase
-        .from('pt_tests')
-        .select(`
+      let query = supabase.from('pt_tests').select(`
           id,
           cadet_id,
           date,
@@ -62,106 +65,71 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
             grade,
             rank
           )
-        `)
-        .eq('school_id', userProfile.school_id)
-        .order('date', { ascending: false });
-
+        `).eq('school_id', userProfile.school_id).order('date', {
+        ascending: false
+      });
       if (selectedDate) {
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         query = query.eq('date', dateStr);
       }
-
-      const { data, error } = await query;
+      const {
+        data,
+        error
+      } = await query;
       if (error) throw error;
 
       // Filter by search term if provided
       if (searchTerm) {
-        return data.filter((test: PTTest) => 
-          `${test.profiles.first_name} ${test.profiles.last_name}`
-            .toLowerCase()
-            .includes(searchTerm.toLowerCase())
-        );
+        return data.filter((test: PTTest) => `${test.profiles.first_name} ${test.profiles.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()));
       }
-
       return data;
     },
-    enabled: !!userProfile?.school_id,
+    enabled: !!userProfile?.school_id
   });
-
   const formatTime = (seconds: number | null) => {
     if (!seconds) return '-';
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   const groupedByDate = ptTests.reduce((acc: Record<string, PTTest[]>, test) => {
     const date = test.date;
     if (!acc[date]) acc[date] = [];
     acc[date].push(test);
     return acc;
   }, {});
-
   if (isLoading) {
-    return (
-      <div className="space-y-4">
+    return <div className="space-y-4">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-200 rounded"></div>)}
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Search */}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
-            <Input
-              placeholder="Search cadets..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-10 w-64"
-            />
+            <Input placeholder="Search cadets..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10 w-64" />
           </div>
 
           {/* Date Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !selectedDate && "text-muted-foreground"
-                )}
-              >
+              <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedDate ? format(selectedDate, "PPP") : <span>Filter by date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
+              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus className="p-3 pointer-events-auto" />
               <div className="p-3 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedDate(undefined)}
-                  className="w-full"
-                >
+                <Button variant="outline" size="sm" onClick={() => setSelectedDate(undefined)} className="w-full">
                   Clear Filter
                 </Button>
               </div>
@@ -171,8 +139,7 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
 
         {/* Bulk Entry Button */}
         <div className="flex gap-2">
-          {canCreate && (
-            <>
+          {canCreate && <>
               <Button onClick={onOpenBulkDialog}>
                 <Plus className="w-4 h-4 mr-2" />
                 Bulk PT Test
@@ -181,36 +148,21 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
                 <Plus className="w-4 h-4 mr-2" />
                 Add PT Tests
               </Button>
-            </>
-          )}
+            </>}
         </div>
       </div>
 
       {/* PT Tests Display */}
-      {Object.keys(groupedByDate).length === 0 ? (
-        <Card>
+      {Object.keys(groupedByDate).length === 0 ? <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No PT tests found</p>
-            {canCreate && (
-              <div className="flex gap-2 justify-center mt-4">
-                <Button onClick={onOpenBulkDialog}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Bulk PT Test
-                </Button>
-                <Button variant="outline" onClick={onOpenBulkDialog}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add PT Tests
-                </Button>
-              </div>
-            )}
+            {canCreate && <div className="flex gap-2 justify-center mt-4">
+                
+                
+              </div>}
           </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-6">
-          {Object.entries(groupedByDate)
-            .sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime())
-            .map(([date, tests]) => (
-              <Card key={date}>
+        </Card> : <div className="space-y-6">
+          {Object.entries(groupedByDate).sort(([a], [b]) => new Date(b).getTime() - new Date(a).getTime()).map(([date, tests]) => <Card key={date}>
                 <CardHeader>
                   <CardTitle className="text-lg">
                     {format(new Date(date), 'MMMM d, yyyy')}
@@ -233,19 +185,14 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {tests.map((test) => (
-                        <TableRow key={test.id}>
+                      {tests.map(test => <TableRow key={test.id}>
                           <TableCell className="font-medium">
                             {test.profiles.last_name}, {test.profiles.first_name}
                           </TableCell>
                           <TableCell>
-                            {test.profiles.grade ? (
-                              <Badge variant="outline" className="text-xs">
+                            {test.profiles.grade ? <Badge variant="outline" className="text-xs">
                                 {test.profiles.grade}
-                              </Badge>
-                            ) : (
-                              '-'
-                            )}
+                              </Badge> : '-'}
                           </TableCell>
                           <TableCell>{test.profiles.rank || '-'}</TableCell>
                           <TableCell className="text-center">
@@ -260,15 +207,11 @@ export const PTTestsTab = ({ onOpenBulkDialog }: PTTestsTabProps) => {
                           <TableCell className="text-center">
                             {formatTime(test.mile_time)}
                           </TableCell>
-                        </TableRow>
-                      ))}
+                        </TableRow>)}
                     </TableBody>
                   </Table>
                 </CardContent>
-              </Card>
-            ))}
-        </div>
-      )}
-    </div>
-  );
+              </Card>)}
+        </div>}
+    </div>;
 };
