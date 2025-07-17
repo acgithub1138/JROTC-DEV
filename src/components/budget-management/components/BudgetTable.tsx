@@ -153,7 +153,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
               {canViewDetails ? (
                 <button
                   onClick={() => onEdit(transaction)}
-                  className="text-primary hover:text-primary/80 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                  className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
                 >
                   {transaction.item}
                 </button>

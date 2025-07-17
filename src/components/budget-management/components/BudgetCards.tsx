@@ -63,7 +63,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
               <div>
                 {canViewDetails ? (
                   <CardTitle 
-                    className="text-lg text-primary hover:text-primary/80 cursor-pointer underline-offset-4 hover:underline"
+                    className="text-lg text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline"
                     onClick={() => onEdit(transaction)}
                   >
                     {transaction.item}
