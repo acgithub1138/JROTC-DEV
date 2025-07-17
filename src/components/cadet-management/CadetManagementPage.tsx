@@ -10,7 +10,7 @@ import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
-import { PTTestDialog } from './components/PTTestDialog';
+import { PTTestBulkDialog } from './components/PTTestBulkDialog';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
@@ -179,7 +179,7 @@ const CadetManagementPage = () => {
       
       <ViewCadetDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} profile={viewingProfile} />
       
-      <PTTestDialog open={ptTestDialogOpen} onOpenChange={setPTTestDialogOpen} onSuccess={() => {
+      <PTTestBulkDialog open={ptTestDialogOpen} onOpenChange={setPTTestDialogOpen} onSuccess={() => {
       // Refresh any PT test related data if needed
       fetchProfiles();
     }} />
