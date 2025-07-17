@@ -183,7 +183,17 @@ class BackupEmailProcessor {
     let failed = 0;
     const details = [];
 
-    for (const email of stuckEmails) {
+    for (let i = 0; i < stuckEmails.length; i++) {
+      const email = stuckEmails[i];
+      
+      // Add delay between emails (except for the first one) to respect global rate limiting
+      if (i > 0) {
+        console.log(`⏱️ Waiting 2 seconds before processing next email...`);
+        await new Promise(resolve => setTimeout(resolve, 2000));
+      }
+      
+      console.log(`🔄 Processing stuck email ${i + 1}/${stuckEmails.length}: ${email.id}`);
+      
       const result = await this.processStuckEmail(email);
       await this.updateEmailStatus(email, result.success, result.method);
       

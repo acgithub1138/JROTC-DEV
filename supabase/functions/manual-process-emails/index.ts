@@ -52,10 +52,39 @@ serve(async (req) => {
     let processed = 0;
     let failed = 0;
 
-    // Process each email using Resend
-    for (const email of pendingEmails) {
+    // Process each email with 2-second delay to respect global rate limiting
+    for (let i = 0; i < pendingEmails.length; i++) {
+      const email = pendingEmails[i];
+      
       try {
-        console.log(`Sending email ${email.id} to ${email.recipient_email}`);
+        // Add delay between emails (except for the first one)
+        if (i > 0) {
+          console.log(`⏱️ Waiting 2 seconds before processing next email...`);
+          await new Promise(resolve => setTimeout(resolve, 2000));
+        }
+        
+        console.log(`📤 Processing email ${i + 1}/${pendingEmails.length}: ${email.id} to ${email.recipient_email}`);
+        
+        // Check global rate limit by looking at the last sent email
+        const { data: lastEmails } = await supabase
+          .from('email_queue')
+          .select('sent_at')
+          .eq('status', 'sent')
+          .order('sent_at', { ascending: false })
+          .limit(1);
+        
+        if (lastEmails && lastEmails.length > 0) {
+          const lastSentTime = new Date(lastEmails[0].sent_at).getTime();
+          const now = Date.now();
+          const timeSinceLastEmail = now - lastSentTime;
+          const requiredWait = 2000; // 2 seconds
+          
+          if (timeSinceLastEmail < requiredWait) {
+            const waitTime = requiredWait - timeSinceLastEmail;
+            console.log(`⏱️ Global rate limit: waiting additional ${waitTime}ms since last email was ${timeSinceLastEmail}ms ago`);
+            await new Promise(resolve => setTimeout(resolve, waitTime));
+          }
+        }
         
         // Send email via Resend
         const result = await resend.emails.send({
@@ -66,7 +95,7 @@ serve(async (req) => {
         });
 
         if (result.error) {
-          console.error(`Resend error for ${email.id}:`, result.error);
+          console.error(`❌ Resend error for ${email.id}:`, result.error);
           
           // Mark as failed
           await supabase
@@ -80,7 +109,7 @@ serve(async (req) => {
           
           failed++;
         } else {
-          console.log(`Email ${email.id} sent successfully. Resend ID: ${result.data?.id}`);
+          console.log(`✅ Email ${email.id} sent successfully. Resend ID: ${result.data?.id}`);
           
           // Mark as sent
           const { error: updateError } = await supabase
@@ -94,13 +123,13 @@ serve(async (req) => {
             .eq('id', email.id);
 
           if (updateError) {
-            console.error(`Failed to update email ${email.id}:`, updateError);
+            console.error(`❌ Failed to update email ${email.id}:`, updateError);
           } else {
             processed++;
           }
         }
       } catch (error) {
-        console.error(`Error processing email ${email.id}:`, error);
+        console.error(`❌ Error processing email ${email.id}:`, error);
         
         // Mark as failed
         await supabase

@@ -141,31 +141,29 @@ class EmailProcessor {
       console.log(`🔍 Starting email processing - ID: ${emailId}, Manual: ${manualTrigger}, Batch: ${isBatchProcessing}`);
       
       // Global rate limiting: Ensure only 1 email every 2 seconds across all instances
-      if (!manualTrigger && !isBatchProcessing) {
-        console.log(`⏱️ Checking global rate limit...`);
+      console.log(`⏱️ Checking global rate limit...`);
+      
+      // Check when the last email was sent globally
+      const { data: lastEmails } = await this.supabase
+        .from('email_queue')
+        .select('sent_at')
+        .eq('status', 'sent')
+        .order('sent_at', { ascending: false })
+        .limit(1);
+      
+      if (lastEmails && lastEmails.length > 0) {
+        const lastSentTime = new Date(lastEmails[0].sent_at).getTime();
+        const now = Date.now();
+        const timeSinceLastEmail = now - lastSentTime;
+        const requiredWait = 2000; // 2 seconds
         
-        // Check when the last email was sent globally
-        const { data: lastEmails } = await this.supabase
-          .from('email_queue')
-          .select('sent_at')
-          .eq('status', 'sent')
-          .order('sent_at', { ascending: false })
-          .limit(1);
-        
-        if (lastEmails && lastEmails.length > 0) {
-          const lastSentTime = new Date(lastEmails[0].sent_at).getTime();
-          const now = Date.now();
-          const timeSinceLastEmail = now - lastSentTime;
-          const requiredWait = 2000; // 2 seconds
-          
-          if (timeSinceLastEmail < requiredWait) {
-            const waitTime = requiredWait - timeSinceLastEmail;
-            console.log(`⏱️ Global rate limit: waiting ${waitTime}ms since last email was ${timeSinceLastEmail}ms ago`);
-            await new Promise(resolve => setTimeout(resolve, waitTime));
-          }
-        } else {
-          console.log(`⏱️ No previous emails found, proceeding without delay`);
+        if (timeSinceLastEmail < requiredWait) {
+          const waitTime = requiredWait - timeSinceLastEmail;
+          console.log(`⏱️ Global rate limit: waiting ${waitTime}ms since last email was ${timeSinceLastEmail}ms ago`);
+          await new Promise(resolve => setTimeout(resolve, waitTime));
         }
+      } else {
+        console.log(`⏱️ No previous emails found, proceeding without delay`);
       }
       
       // Get the email from queue with enhanced logging
