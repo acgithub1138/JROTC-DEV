@@ -26,6 +26,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
+import { UnsavedCommentModal } from './components/UnsavedCommentModal';
 
 interface SubtaskDetailDialogProps {
   subtask: Subtask;
@@ -261,8 +262,8 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     setShowConfirmDialog(false);
   };
 
-  const handleAddCommentAndSave = async () => {
-    console.log('🔍 handleAddCommentAndSave called with newComment:', newComment);
+  const handleAddComment = async () => {
+    console.log('🔍 handleAddComment called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
     
     if (newComment.trim()) {
@@ -271,23 +272,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       setNewComment('');
     }
     setShowUnsavedCommentModal(false);
-    if (pendingSaveAction) {
-      console.log('🔍 Executing pending save action');
-      await pendingSaveAction();
-      setPendingSaveAction(null);
-    }
+    setPendingSaveAction(null);
   };
 
-  const handleDiscardCommentAndSave = async () => {
+  const handleDiscardComment = () => {
     setNewComment('');
-    setShowUnsavedCommentModal(false);
-    if (pendingSaveAction) {
-      await pendingSaveAction();
-      setPendingSaveAction(null);
-    }
-  };
-
-  const handleCancelCommentAction = () => {
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
@@ -606,26 +595,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>
 
-    {/* Unsaved Comment Modal */}
-    <AlertDialog open={showUnsavedCommentModal} onOpenChange={setShowUnsavedCommentModal}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Comment</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have an unsaved comment. Would you like to save it before proceeding?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={handleCancelCommentAction}>Cancel</AlertDialogCancel>
-          <Button onClick={handleDiscardCommentAndSave} variant="outline">
-            Discard Comment
-          </Button>
-          <AlertDialogAction onClick={handleAddCommentAndSave}>
-            Save Comment
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <UnsavedCommentModal
+      open={showUnsavedCommentModal}
+      onAddComment={handleAddComment}
+      onDiscard={handleDiscardComment}
+    />
   </>
   );
 };

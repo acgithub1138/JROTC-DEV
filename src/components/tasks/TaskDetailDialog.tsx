@@ -333,8 +333,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     await handleSave();
   };
 
-  const handleAddCommentAndSave = async () => {
-    console.log('🔍 handleAddCommentAndSave called with newComment:', newComment);
+  const handleAddComment = async () => {
+    console.log('🔍 handleAddComment called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
     
     if (newComment.trim()) {
@@ -343,23 +343,11 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       setNewComment('');
     }
     setShowUnsavedCommentModal(false);
-    if (pendingSaveAction) {
-      console.log('🔍 Executing pending save action');
-      await pendingSaveAction();
-      setPendingSaveAction(null);
-    }
+    setPendingSaveAction(null);
   };
 
-  const handleDiscardCommentAndSave = async () => {
+  const handleDiscardComment = () => {
     setNewComment('');
-    setShowUnsavedCommentModal(false);
-    if (pendingSaveAction) {
-      await pendingSaveAction();
-      setPendingSaveAction(null);
-    }
-  };
-
-  const handleCancelCommentModal = () => {
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
@@ -775,9 +763,8 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
 
       <UnsavedCommentModal
         open={showUnsavedCommentModal}
-        onAddComment={handleAddCommentAndSave}
-        onDiscard={handleDiscardCommentAndSave}
-        onCancel={handleCancelCommentModal}
+        onAddComment={handleAddComment}
+        onDiscard={handleDiscardComment}
       />
     </>
   );
