@@ -264,7 +264,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           </Button>
           <Button 
             onClick={handleSave} 
-            disabled={saving}
+            disabled={!isFormValid || saving}
           >
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save PT Tests
