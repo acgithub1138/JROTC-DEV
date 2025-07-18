@@ -101,32 +101,34 @@ export const EmailRulesTab: React.FC = () => {
                 </tr>
               </thead>
               <tbody>
-                {sortedRules.map((rule) => (
-                  <RuleCard
-                    key={rule.id}
-                    rule={rule}
-                    templates={templates}
-                    onToggle={handleToggleRule}
-                    onTemplateSelect={handleTemplateSelect}
-                    onPreview={handlePreview}
-                    isUpdating={isUpdating}
-                  />
-                ))}
+                {sortedRules.length === 0 ? (
+                  <tr>
+                    <td colSpan={4} className="text-center py-8">
+                      <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
+                      <div className="text-lg font-medium text-muted-foreground mb-2">
+                        No rules configured
+                      </div>
+                      <div className="text-sm text-muted-foreground">
+                        Email rules will be automatically created for your school.
+                      </div>
+                    </td>
+                  </tr>
+                ) : (
+                  sortedRules.map((rule) => (
+                    <RuleCard
+                      key={rule.id}
+                      rule={rule}
+                      templates={templates}
+                      onToggle={handleToggleRule}
+                      onTemplateSelect={handleTemplateSelect}
+                      onPreview={handlePreview}
+                      isUpdating={isUpdating}
+                    />
+                  ))
+                )}
               </tbody>
             </table>
           </div>
-          
-          {rules.length === 0 && (
-            <div className="text-center py-8">
-              <Settings className="w-12 h-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="text-lg font-medium text-muted-foreground mb-2">
-                No rules configured
-              </h3>
-              <p className="text-sm text-muted-foreground">
-                Email rules will be automatically created for your school.
-              </p>
-            </div>
-          )}
         </CardContent>
       </Card>
 
