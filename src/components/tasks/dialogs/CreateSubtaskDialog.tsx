@@ -5,11 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { format } from 'date-fns';
-import { CalendarIcon } from 'lucide-react';
-import { cn } from '@/lib/utils';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -40,7 +36,6 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
     assigned_to: '',
     due_date: null as Date | null,
   });
-  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -162,37 +157,18 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
 
             <div>
               <Label>Due Date</Label>
-              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
-                <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className={cn(
-                      'w-full justify-start text-left font-normal touch-manipulation select-none',
-                      !formData.due_date && 'text-muted-foreground'
-                    )}
-                    onClick={(e) => {
-                      e.preventDefault();
-                      e.stopPropagation();
-                      setIsDatePickerOpen(!isDatePickerOpen);
-                    }}
-                    onTouchStart={(e) => e.stopPropagation()}
-                  >
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {formData.due_date ? format(formData.due_date, 'PPP') : 'Pick a date'}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={formData.due_date}
-                    onSelect={(date) => {
-                      setFormData({ ...formData, due_date: date || null });
-                      setIsDatePickerOpen(false);
-                    }}
-                    className="pointer-events-auto"
-                  />
-                </PopoverContent>
-              </Popover>
+              <Input
+                type="date"
+                value={formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const dateValue = e.target.value;
+                  setFormData({ 
+                    ...formData, 
+                    due_date: dateValue ? new Date(dateValue) : null 
+                  });
+                }}
+                className="w-full"
+              />
             </div>
           </div>
 
