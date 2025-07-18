@@ -101,9 +101,10 @@ export const useAvailableTables = () => {
         'incidents': 'Incidents'
       };
       
-      // Only include tasks and incidents tables
+      // Only include tasks, subtasks and incidents tables
       let availableTables = [
         { name: 'tasks', label: 'Tasks' },
+        { name: 'subtasks', label: 'Subtasks' },
         { name: 'incidents', label: 'Incidents' }
       ];
       
