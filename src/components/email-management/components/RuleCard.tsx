@@ -45,6 +45,11 @@ export const RuleCard: React.FC<RuleCardProps> = ({
           </div>
           <p className="text-sm text-muted-foreground">
             {RULE_DESCRIPTIONS[rule.rule_type] || `Triggered for ${rule.rule_type}`}
+            {rule.rule_type === 'task_overdue_reminder' && (
+              <span className="block text-xs mt-1 text-amber-600">
+                Automated daily at 10:00 AM UTC
+              </span>
+            )}
           </p>
         </div>
       </td>
