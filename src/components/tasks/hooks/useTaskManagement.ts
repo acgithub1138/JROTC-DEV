@@ -20,10 +20,7 @@ export const useTaskManagement = () => {
   const [currentPageAllTasks, setCurrentPageAllTasks] = useState(1);
   const [currentPageCompleted, setCurrentPageCompleted] = useState(1);
 
-  useEffect(() => {
-    // Automatically sync task options when the page loads
-    syncTaskOptions().catch(console.error);
-  }, []);
+  // Removed automatic sync to allow dynamic status/priority management from database
 
   // Helper function to filter overdue tasks
   const filterOverdueTasks = (taskList: Task[]) => {
