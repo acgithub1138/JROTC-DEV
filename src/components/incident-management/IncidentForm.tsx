@@ -2,6 +2,8 @@ import React from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -18,6 +20,12 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -26,6 +34,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Button } from "@/components/ui/button";
+import { cn } from '@/lib/utils';
 import { useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useIncidentMutations } from "@/hooks/incidents/useIncidentMutations";
 import { useAuth } from "@/contexts/AuthContext";
@@ -35,12 +44,11 @@ const formSchema = z.object({
   description: z.string().optional(),
   priority: z.string().min(1, "Priority is required"),
   category: z.string().min(1, "Category is required"),
-  due_date: z.string().optional().refine((date) => {
+  due_date: z.date().optional().refine((date) => {
     if (!date) return true; // Optional field, so empty is valid
-    const selectedDate = new Date(date);
     const today = new Date();
     today.setHours(0, 0, 0, 0); // Reset time to start of day
-    return selectedDate >= today;
+    return date >= today;
   }, "Due date must be today or in the future"),
 });
 
@@ -67,7 +75,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       description: "",
       priority: "medium",
       category: "issue",
-      due_date: "",
+      due_date: undefined,
     },
   });
 
@@ -79,7 +87,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
       category: data.category,
       school_id: userProfile?.school_id || "",
       created_by: userProfile?.id,
-      due_date: data.due_date ? new Date(data.due_date).toISOString() : null,
+      due_date: data.due_date ? data.due_date.toISOString() : null,
     }, {
       onSuccess: () => {
         form.reset();
@@ -192,11 +200,40 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                 control={form.control}
                 name="due_date"
                 render={({ field }) => (
-                  <FormItem>
+                  <FormItem className="flex flex-col">
                     <FormLabel>Due Date</FormLabel>
-                    <FormControl>
-                      <Input type="date" {...field} />
-                    </FormControl>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "PPP")
+                            ) : (
+                              <span>Pick a date</span>
+                            )}
+                            <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) =>
+                            date < new Date()
+                          }
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

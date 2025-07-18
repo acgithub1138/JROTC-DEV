@@ -2,6 +2,8 @@ import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -20,6 +22,12 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -27,13 +35,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 const editSchema = z.object({
   item: z.string().min(1, 'Item is required'),
   type: z.string().min(1, 'Type is required'),
   description: z.string().optional(),
-  date: z.string().min(1, 'Date is required'),
+  date: z.date({
+    required_error: 'Date is required',
+  }),
   amount: z.number().min(0.01, 'Amount must be greater than 0'),
   payment_method: z.string().optional(),
   status: z.string().optional(),
@@ -68,7 +79,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
         item: item.item,
         type: item.type,
         description: item.description || '',
-        date: item.date,
+        date: new Date(item.date),
         amount: Number(item.amount),
         payment_method: item.payment_method || '',
         status: item.status || '',
@@ -81,7 +92,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
       item: data.item,
       type: data.type,
       description: data.description,
-      date: data.date,
+      date: format(data.date, 'yyyy-MM-dd'),
       amount: data.amount,
     };
 
@@ -163,11 +174,41 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Date</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} disabled={isReadOnly} />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                          disabled={isReadOnly}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          isReadOnly || date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}

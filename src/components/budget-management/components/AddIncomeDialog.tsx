@@ -2,6 +2,8 @@ import React from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { CalendarIcon } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -19,6 +21,12 @@ import {
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '@/components/ui/popover';
 import {
   Select,
   SelectContent,
@@ -26,13 +34,16 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { cn } from '@/lib/utils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
   type: z.enum(['fundraiser', 'donation', 'other']),
   description: z.string().optional(),
-  date: z.string().min(1, 'Date is required'),
+  date: z.date({
+    required_error: 'Date is required',
+  }),
   amount: z.number().min(0.01, 'Amount must be greater than 0'),
 });
 
@@ -55,7 +66,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
       item: '',
       type: 'other',
       description: '',
-      date: new Date().toISOString().split('T')[0],
+      date: new Date(),
       amount: 0,
     },
   });
@@ -66,7 +77,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
       category: 'income',
       type: data.type,
       description: data.description,
-      date: data.date,
+      date: format(data.date, 'yyyy-MM-dd'),
       amount: data.amount,
       archive: false,
     });
@@ -123,11 +134,40 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
               control={form.control}
               name="date"
               render={({ field }) => (
-                <FormItem>
+                <FormItem className="flex flex-col">
                   <FormLabel>Date *</FormLabel>
-                  <FormControl>
-                    <Input type="date" {...field} />
-                  </FormControl>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "w-full pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(new Date(field.value), "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value ? new Date(field.value) : undefined}
+                        onSelect={field.onChange}
+                        disabled={(date) =>
+                          date > new Date() || date < new Date("1900-01-01")
+                        }
+                        initialFocus
+                        className="p-3 pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
                   <FormMessage />
                 </FormItem>
               )}
