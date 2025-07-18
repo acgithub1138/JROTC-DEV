@@ -569,35 +569,25 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Due Date:</span>
-                   {isEditing && canEdit ? (
-                     <Popover>
-                       <PopoverTrigger asChild>
-                         <Button variant="outline" className="h-8 text-left">
-                           <CalendarIcon className="mr-2 h-4 w-4" />
-                           {editData.due_date ? format(editData.due_date, 'PPP') : 'Set date'}
-                         </Button>
-                       </PopoverTrigger>
-                       <PopoverContent className="w-auto p-0">
-                         <Calendar
-                           mode="single"
-                           selected={editData.due_date}
-                           onSelect={(date) => setEditData({...editData, due_date: date})}
-                           disabled={(date) => {
-                             const tomorrow = new Date();
-                             tomorrow.setDate(tomorrow.getDate() + 1);
-                             tomorrow.setHours(0, 0, 0, 0);
-                             return date < tomorrow;
-                           }}
-                           initialFocus
-                           className="pointer-events-auto"
-                         />
-                       </PopoverContent>
-                     </Popover>
-                   ) : (
-                     <span className="text-sm font-medium">
-                       {currentTask.due_date ? format(new Date(currentTask.due_date), 'PPP') : 'No due date'}
-                     </span>
-                   )}
+                    {isEditing && canEdit ? (
+                      <Input
+                        type="date"
+                        value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''}
+                        onChange={(e) => {
+                          const dateValue = e.target.value;
+                          if (dateValue) {
+                            setEditData({...editData, due_date: new Date(dateValue + 'T00:00:00')});
+                          } else {
+                            setEditData({...editData, due_date: null});
+                          }
+                        }}
+                        className="h-8 w-auto min-w-[150px]"
+                      />
+                    ) : (
+                      <span className="text-sm font-medium">
+                        {currentTask.due_date ? format(new Date(currentTask.due_date), 'PPP') : 'No due date'}
+                      </span>
+                    )}
                  </div>
               </CardContent>
             </Card>
