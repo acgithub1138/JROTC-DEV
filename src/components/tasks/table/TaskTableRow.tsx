@@ -150,7 +150,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
               </Button>
             )}
             {isSubtask && (
-              <div className="w-6 h-6 flex items-center justify-center">
+              <div className="w-4 h-4 flex items-center justify-center">
                 {/* Placeholder for alignment - no dot */}
               </div>
             )}
