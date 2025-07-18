@@ -170,7 +170,8 @@ export const resolveCollisions = (
   if (iteration >= maxIterations) {
     console.warn(`⚠️ Collision resolution reached maximum iterations (${maxIterations}), checking final result`);
     const finalCollisionResult = detectCollisions(currentNodes);
-    if (finalCollisionResult.hasCollision && finalCollisionResult.collidingNodes.length > collidingNodes.size) {
+    const originalCollisionResult = detectCollisions(originalNodes);
+    if (finalCollisionResult.hasCollision && finalCollisionResult.collidingNodes.length > originalCollisionResult.collidingNodes.length) {
       console.warn(`🔄 Final result has more collisions, reverting to original positions`);
       return originalNodes;
     }
