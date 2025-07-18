@@ -9,6 +9,7 @@ interface EditInventoryItemDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSubmit: (item: any) => Promise<void>;
+  viewOnly?: boolean;
 }
 
 export const EditInventoryItemDialog: React.FC<EditInventoryItemDialogProps> = ({
@@ -16,9 +17,10 @@ export const EditInventoryItemDialog: React.FC<EditInventoryItemDialogProps> = (
   open,
   onOpenChange,
   onSubmit,
+  viewOnly = false,
 }) => {
   const { canEdit: canUpdate } = useTablePermissions('inventory');
-  const isReadOnly = !canUpdate;
+  const isReadOnly = viewOnly || !canUpdate;
 
   const handleSubmit = async (data: any) => {
     if (!isReadOnly) {
@@ -32,7 +34,7 @@ export const EditInventoryItemDialog: React.FC<EditInventoryItemDialogProps> = (
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isReadOnly ? 'View Inventory Item' : 'Edit Inventory Item'}
+            {viewOnly ? 'View Inventory Item' : (isReadOnly ? 'View Inventory Item' : 'Edit Inventory Item')}
           </DialogTitle>
         </DialogHeader>
         <InventoryItemForm 

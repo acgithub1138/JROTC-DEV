@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
+import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { InventoryActions } from './components/InventoryActions';
 import { InventoryFilters } from './components/InventoryFilters';
@@ -17,6 +18,7 @@ const InventoryManagementPage = () => {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
+  const [viewingItem, setViewingItem] = useState<any>(null);
   const { toast } = useToast();
 
   // Define available columns for the inventory table
@@ -83,6 +85,10 @@ const InventoryManagementPage = () => {
         variant: "destructive"
       });
     }
+  };
+
+  const handleViewItem = (item: any) => {
+    setViewingItem(item);
   };
   const handleDeleteItem = async (id: string) => {
     if (!confirm('Are you sure you want to delete this inventory item?')) {
@@ -171,7 +177,7 @@ const InventoryManagementPage = () => {
           />
         }
       >
-        <InventoryTable items={paginatedItems as any} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onDelete={handleDeleteItem} />
+        <InventoryTable items={paginatedItems as any} isLoading={isLoading} selectedItems={selectedItems} visibleColumns={enabledColumns.map(col => col.key)} onSelectionChange={setSelectedItems} onEdit={handleUpdateItem} onView={handleViewItem} onDelete={handleDeleteItem} />
       </StandardTableWrapper>
 
       <TablePagination currentPage={currentPage} totalPages={totalPages} totalItems={filteredItems.length} onPageChange={handlePageChange} />
@@ -179,6 +185,16 @@ const InventoryManagementPage = () => {
       <AddInventoryItemDialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen} onSubmit={handleCreateItem} />
 
       <BulkOperationsDialog open={isBulkDialogOpen} onOpenChange={setIsBulkDialogOpen} onImport={handleBulkImport} />
+      
+      {viewingItem && (
+        <EditInventoryItemDialog
+          item={viewingItem}
+          open={!!viewingItem}
+          onOpenChange={(open) => !open && setViewingItem(null)}
+          onSubmit={async () => {}}
+          viewOnly={true}
+        />
+      )}
     </div>;
 };
 export default InventoryManagementPage;

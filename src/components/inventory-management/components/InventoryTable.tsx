@@ -25,6 +25,7 @@ interface InventoryTableProps {
   visibleColumns: string[];
   onSelectionChange: (selectedIds: string[]) => void;
   onEdit: (item: any) => Promise<void>;
+  onView: (item: any) => void;
   onDelete: (id: string) => Promise<void>;
 }
 
@@ -35,6 +36,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   visibleColumns,
   onSelectionChange,
   onEdit,
+  onView,
   onDelete,
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
@@ -54,7 +56,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   };
 
   const handleView = (item: InventoryItem) => {
-    setEditingItem(item);
+    onView(item);
   };
 
   const handleEditSubmit = async (updatedItem: any) => {
