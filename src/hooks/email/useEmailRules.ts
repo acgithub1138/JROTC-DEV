@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface EmailRule {
   id: string;
   school_id: string;
-  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'task_overdue_reminder' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled';
+  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'task_overdue_reminder' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled' | 'subtask_overdue_reminder';
   template_id: string | null;
   is_active: boolean;
   trigger_event: 'INSERT' | 'UPDATE';
@@ -27,6 +27,7 @@ export const RULE_LABELS: Record<RuleType, string> = {
   subtask_information_needed: 'Subtask Information Needed',
   subtask_completed: 'Subtask Completed',
   subtask_canceled: 'Subtask Canceled',
+  subtask_overdue_reminder: 'Subtask Overdue Reminder',
 };
 
 export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
@@ -39,6 +40,7 @@ export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
   subtask_information_needed: 'Triggered when a subtask status is set to Need Information',
   subtask_completed: 'Triggered when a subtask status is set to Completed',
   subtask_canceled: 'Triggered when a subtask status is set to Canceled',
+  subtask_overdue_reminder: 'Send reminder emails 3, 2, 1 days before and on due date at 10am',
 };
 
 export const useEmailRules = () => {
