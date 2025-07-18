@@ -1,6 +1,7 @@
-
 import { LayoutNode, PositionedNode, LayoutConfig, groupBySquadron } from './intelligentLayout';
+import { JobBoardWithCadet } from '../types';
 import { resolveCollisions } from './collisionDetection';
+import { calculateEnhancedHierarchicalLayout } from './enhancedHierarchicalLayout';
 
 export interface TreeLayoutResult {
   positionedNodes: PositionedNode[];
@@ -203,7 +204,7 @@ const positionAssistants = (
   return result;
 };
 
-// Main hierarchical tree layout function
+// Main hierarchical tree layout function - now enhanced
 export const calculateHierarchicalTreeLayout = (
   nodes: Map<string, LayoutNode>,
   config: LayoutConfig = {
@@ -216,78 +217,18 @@ export const calculateHierarchicalTreeLayout = (
     squadronPadding: 100,
   }
 ): TreeLayoutResult => {
-  // Group nodes by squadron for more vertical organization
-  const squadronGroups = groupBySquadron(nodes);
+  // Extract jobs from layout nodes for enhanced algorithm
+  const jobs: JobBoardWithCadet[] = Array.from(nodes.values()).map(node => node.job);
   
-  if (squadronGroups.size === 0) {
-    return { positionedNodes: [], totalWidth: 0, totalHeight: 0 };
-  }
-
-  let allPositionedNodes: PositionedNode[] = [];
-  let currentY = 0;
-  let maxWidth = 0;
-
-  // Position each squadron group vertically
-  squadronGroups.forEach((squadronNodes, squadronName) => {
-    const rootNodes = squadronNodes.filter(node => !node.parent && !node.isAssistant);
-    
-    if (rootNodes.length === 0) return;
-
-    // Calculate subtree widths for this squadron
-    const subtreeWidths = new Map<string, number>();
-    squadronNodes.forEach(node => {
-      calculateSubtreeWidth(node.id, nodes, config, subtreeWidths);
-    });
-
-    let squadronMaxHeight = 0;
-    let currentX = 0;
-
-    // Position each root tree horizontally within the squadron
-    rootNodes.forEach((rootNode, index) => {
-      const subtreeWidth = subtreeWidths.get(rootNode.id) || config.nodeWidth;
-      
-      // Position this root tree, but offset by currentY for vertical grouping
-      const treeNodes = positionSubtree(rootNode.id, nodes, config, currentX, 0, subtreeWidths);
-      
-      // Offset all nodes in this tree by currentY to create vertical grouping
-      const offsetTreeNodes = treeNodes.map(node => ({
-        ...node,
-        y: node.y + currentY,
-        finalPosition: { x: node.finalPosition.x, y: node.finalPosition.y + currentY }
-      }));
-      
-      allPositionedNodes.push(...offsetTreeNodes);
-      
-      // Calculate the height of this tree
-      const treeHeight = Math.max(...offsetTreeNodes.map(n => n.finalPosition.y + config.nodeHeight)) - currentY;
-      squadronMaxHeight = Math.max(squadronMaxHeight, treeHeight);
-      
-      // Move to next root tree position horizontally
-      currentX += subtreeWidth;
-      if (index < rootNodes.length - 1) {
-        currentX += config.minNodeSpacing;
-      }
-    });
-
-    // Update maxWidth and move to next squadron vertically
-    maxWidth = Math.max(maxWidth, currentX);
-    currentY += squadronMaxHeight + config.squadronPadding;
-  });
-
-  // Position assistants
-  allPositionedNodes = positionAssistants(allPositionedNodes, nodes, config);
-
-  // Resolve collisions
-  allPositionedNodes = resolveCollisions(allPositionedNodes, config);
-
-  // Calculate total dimensions
-  const totalWidth = maxWidth;
-  const totalHeight = currentY;
-
+  // Use the enhanced hierarchical layout algorithm
+  const enhancedResult = calculateEnhancedHierarchicalLayout(jobs, config);
+  
+  console.log('🚀 Using enhanced hierarchical layout algorithm');
+  
   return {
-    positionedNodes: allPositionedNodes,
-    totalWidth,
-    totalHeight,
+    positionedNodes: enhancedResult.positionedNodes,
+    totalWidth: enhancedResult.totalWidth,
+    totalHeight: enhancedResult.totalHeight,
   };
 };
 
