@@ -67,15 +67,8 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
   // Handle task cancellation
   const handleCancel = async () => {
-    const now = new Date().toISOString();
-    await updateTask({
-      id: task.id,
-      status: 'canceled',
-      completed_at: now
-    });
-    
-    // Add system comment for cancellation
-    await handleSystemComment(task.id, 'Task was canceled');
+    setPendingStatusChange('canceled');
+    setIsStatusCommentModalOpen(true);
   };
 
   // Check if task can be canceled (not already done or canceled)
@@ -83,7 +76,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
   // Handle status change with comment modal for specific statuses
   const handleStatusChange = async (newStatus: string) => {
-    if (newStatus === 'need_information' || newStatus === 'completed') {
+    if (newStatus === 'need_information' || newStatus === 'completed' || newStatus === 'canceled') {
       setPendingStatusChange(newStatus);
       setIsStatusCommentModalOpen(true);
     } else {
@@ -99,8 +92,18 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         await handleSystemComment(task.id, comment);
       }
       
-      // Then save the status change (which will trigger email with the fresh comment)
-      await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
+      // For canceled status, also set completed_at
+      if (pendingStatusChange === 'canceled') {
+        const now = new Date().toISOString();
+        await updateTask({
+          id: task.id,
+          status: pendingStatusChange,
+          completed_at: now
+        });
+      } else {
+        // Then save the status change (which will trigger email with the fresh comment)
+        await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
+      }
       
       // Reset modal state
       setIsStatusCommentModalOpen(false);
