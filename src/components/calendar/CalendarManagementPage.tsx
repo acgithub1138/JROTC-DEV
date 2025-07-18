@@ -124,17 +124,19 @@ const CalendarManagementPage = () => {
     }
   };
 
-  const handleDeleteThisEvent = () => {
+  const handleDeleteThisEvent = async () => {
     if (deletingEvent) {
-      deleteEvent(deletingEvent.id);
+      await deleteEvent(deletingEvent.id);
+      handleCloseDialog();
     }
   };
 
-  const handleDeleteSeries = () => {
+  const handleDeleteSeries = async () => {
     if (deletingEvent) {
       // If it's an instance, get the parent ID, otherwise use the event ID
       const parentId = deletingEvent.parent_event_id || deletingEvent.id;
-      deleteRecurringSeries(parentId);
+      await deleteRecurringSeries(parentId);
+      handleCloseDialog();
     }
   };
   return <div className="p-6 space-y-6">
