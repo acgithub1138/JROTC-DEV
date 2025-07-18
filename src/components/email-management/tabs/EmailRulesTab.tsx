@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertCircle, Loader2, Settings } from 'lucide-react';
@@ -15,10 +16,20 @@ export const EmailRulesTab: React.FC = () => {
 
   const isLoading = rulesLoading || templatesLoading;
   const taskTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
+  const subtaskTemplates = templates.filter(t => t.source_table === 'subtasks' && t.is_active);
   const activeRulesWithoutTemplates = rules.filter(r => r.is_active && !r.template_id);
 
-  // Sort rules in desired order: Task Created, Task Information Needed, Task Completed, Task Canceled
-  const ruleOrder = ['task_created', 'task_information_needed', 'task_completed', 'task_canceled'];
+  // Sort rules in desired order: Task rules first, then Subtask rules
+  const ruleOrder = [
+    'task_created', 
+    'task_information_needed', 
+    'task_completed', 
+    'task_canceled',
+    'subtask_created', 
+    'subtask_information_needed', 
+    'subtask_completed', 
+    'subtask_canceled'
+  ];
   const sortedRules = [...rules].sort((a, b) => {
     const aIndex = ruleOrder.indexOf(a.rule_type);
     const bIndex = ruleOrder.indexOf(b.rule_type);
@@ -56,17 +67,22 @@ export const EmailRulesTab: React.FC = () => {
         <div>
           <h2 className="text-lg font-semibold">Email Rules</h2>
           <p className="text-sm text-muted-foreground">
-            Configure automated email notifications for task events
+            Configure automated email notifications for task and subtask events
           </p>
         </div>
       </div>
 
-      {taskTemplates.length === 0 && (
+      {(taskTemplates.length === 0 || subtaskTemplates.length === 0) && (
         <Alert>
           <AlertCircle className="w-4 h-4" />
           <AlertDescription>
-            No task email templates found. You need to create task email templates before you can activate rules.
-            Go to the Templates tab to create templates for the "tasks" source table.
+            {taskTemplates.length === 0 && subtaskTemplates.length === 0 
+              ? "No task or subtask email templates found. You need to create email templates before you can activate rules."
+              : taskTemplates.length === 0 
+                ? "No task email templates found. Create task templates for task rules to work."
+                : "No subtask email templates found. Create subtask templates for subtask rules to work."
+            }
+            Go to the Templates tab to create templates for the relevant source tables.
           </AlertDescription>
         </Alert>
       )}
@@ -85,7 +101,7 @@ export const EmailRulesTab: React.FC = () => {
         <CardHeader>
           <CardTitle>Available Rules</CardTitle>
           <CardDescription>
-            Enable rules to automatically send emails when specific task events occur. 
+            Enable rules to automatically send emails when specific task or subtask events occur. 
             Each enabled rule requires an associated email template.
           </CardDescription>
         </CardHeader>

@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -24,7 +25,12 @@ export const RuleCard: React.FC<RuleCardProps> = ({
   onPreview,
   isUpdating
 }) => {
-  const sourceTableTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
+  // Determine source table based on rule type
+  const sourceTable = rule.rule_type.startsWith('subtask_') ? 'subtasks' : 'tasks';
+  
+  // Filter templates based on the rule's source table
+  const relevantTemplates = templates.filter(t => t.source_table === sourceTable && t.is_active);
+  
   const selectedTemplate = templates.find(t => t.id === rule.template_id);
   const hasTemplateError = rule.is_active && !rule.template_id;
 
@@ -34,11 +40,11 @@ export const RuleCard: React.FC<RuleCardProps> = ({
       <td className="py-4 px-4">
         <div className="space-y-1">
           <div className="flex items-center gap-2">
-            <span className="font-medium">{RULE_LABELS[rule.rule_type]}</span>
+            <span className="font-medium">{RULE_LABELS[rule.rule_type] || rule.rule_type}</span>
             {hasTemplateError && <AlertCircle className="w-4 h-4 text-destructive" />}
           </div>
           <p className="text-sm text-muted-foreground">
-            {RULE_DESCRIPTIONS[rule.rule_type]}
+            {RULE_DESCRIPTIONS[rule.rule_type] || `Triggered for ${rule.rule_type}`}
           </p>
         </div>
       </td>
@@ -70,12 +76,12 @@ export const RuleCard: React.FC<RuleCardProps> = ({
                 <SelectValue placeholder="Select template..." />
               </SelectTrigger>
               <SelectContent>
-                {sourceTableTemplates.length === 0 ? (
+                {relevantTemplates.length === 0 ? (
                   <div className="p-2 text-sm text-muted-foreground">
-                    No task templates available
+                    No {sourceTable} templates available
                   </div>
                 ) : (
-                  sourceTableTemplates.map(template => (
+                  relevantTemplates.map(template => (
                     <SelectItem key={template.id} value={template.id}>
                       <div className="flex flex-col items-start">
                         <span className="font-medium">{template.name}</span>
