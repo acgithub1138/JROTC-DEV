@@ -46,6 +46,7 @@ interface EditBudgetItemDialogProps {
   onOpenChange: (open: boolean) => void;
   item: BudgetTransaction;
   onSubmit: (id: string, updates: Partial<BudgetTransaction>) => void;
+  viewOnly?: boolean;
 }
 
 export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
@@ -53,8 +54,10 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
   onOpenChange,
   item,
   onSubmit,
+  viewOnly = false,
 }) => {
   const { canEdit: canUpdate } = useTablePermissions('budget');
+  const isReadOnly = viewOnly || !canUpdate;
   const form = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
   });
@@ -113,7 +116,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Edit {item.category === 'income' ? 'Income' : 'Expense'}</DialogTitle>
+          <DialogTitle>{viewOnly ? 'View' : 'Edit'} {item.category === 'income' ? 'Income' : 'Expense'}</DialogTitle>
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
@@ -124,7 +127,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                 <FormItem>
                   <FormLabel>Item</FormLabel>
                   <FormControl>
-                    <Input placeholder="Enter item name" {...field} disabled={!canUpdate} />
+                    <Input placeholder="Enter item name" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -137,9 +140,9 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
               render={({ field }) => (
                 <FormItem>
                   <FormLabel>Type</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={isReadOnly}>
                      <FormControl>
-                        <SelectTrigger disabled={!canUpdate}>
+                        <SelectTrigger disabled={isReadOnly}>
                          <SelectValue placeholder="Select type" />
                        </SelectTrigger>
                     </FormControl>
@@ -163,7 +166,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                 <FormItem>
                   <FormLabel>Date</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} disabled={!canUpdate} />
+                    <Input type="date" {...field} disabled={isReadOnly} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
@@ -183,7 +186,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                       placeholder="0.00"
                       {...field}
                       onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                       disabled={!canUpdate}
+                       disabled={isReadOnly}
                     />
                   </FormControl>
                   <FormMessage />
@@ -199,9 +202,9 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Payment Method</FormLabel>
-                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                       <Select onValueChange={field.onChange} value={field.value} disabled={isReadOnly}>
                         <FormControl>
-                           <SelectTrigger disabled={!canUpdate}>
+                           <SelectTrigger disabled={isReadOnly}>
                             <SelectValue placeholder="Select payment method" />
                           </SelectTrigger>
                         </FormControl>
@@ -224,9 +227,9 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={isReadOnly}>
                         <FormControl>
-                          <SelectTrigger disabled={!canUpdate}>
+                          <SelectTrigger disabled={isReadOnly}>
                             <SelectValue placeholder="Select status" />
                           </SelectTrigger>
                         </FormControl>
@@ -254,7 +257,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
                       placeholder="Optional description"
                       className="resize-none"
                       {...field}
-                       disabled={!canUpdate}
+                       disabled={isReadOnly}
                     />
                   </FormControl>
                   <FormMessage />
@@ -264,9 +267,11 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
 
             <div className="flex justify-end space-x-2">
               <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
+                {viewOnly ? 'Close' : 'Cancel'}
               </Button>
-              <Button type="submit" disabled={!canUpdate}>Update</Button>
+              {!viewOnly && (
+                <Button type="submit" disabled={!canUpdate}>Update</Button>
+              )}
             </div>
           </form>
         </Form>

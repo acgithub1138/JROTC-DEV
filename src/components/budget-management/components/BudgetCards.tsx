@@ -10,12 +10,14 @@ import { BudgetTransaction } from '../BudgetManagementPage';
 interface BudgetCardsProps {
   transactions: BudgetTransaction[];
   onEdit: (transaction: BudgetTransaction) => void;
+  onView: (transaction: BudgetTransaction) => void;
   onDelete: (id: string) => void;
 }
 
 export const BudgetCards: React.FC<BudgetCardsProps> = ({
   transactions,
   onEdit,
+  onView,
   onDelete,
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
@@ -61,16 +63,16 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
           <CardHeader className="pb-3">
             <div className="flex items-start justify-between">
               <div>
-                {canViewDetails ? (
-                  <CardTitle 
-                    className="text-lg text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline"
-                    onClick={() => onEdit(transaction)}
-                  >
-                    {transaction.item}
-                  </CardTitle>
-                ) : (
-                  <CardTitle className="text-lg">{transaction.item}</CardTitle>
-                )}
+                 {canViewDetails ? (
+                   <CardTitle 
+                     className="text-lg text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline"
+                     onClick={() => onView(transaction)}
+                   >
+                     {transaction.item}
+                   </CardTitle>
+                 ) : (
+                   <CardTitle className="text-lg">{transaction.item}</CardTitle>
+                 )}
                 <p className="text-sm text-muted-foreground capitalize">
                   {transaction.type.replace('_', ' ')}
                 </p>
@@ -121,22 +123,22 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 pt-2">
-              {canViewDetails && (
-                <Tooltip>
-                  <TooltipTrigger asChild>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={() => onEdit(transaction)}
-                    >
-                      <Eye className="w-4 h-4" />
-                    </Button>
-                  </TooltipTrigger>
-                  <TooltipContent>
-                    <p>View transaction</p>
-                  </TooltipContent>
-                </Tooltip>
-              )}
+               {canViewDetails && (
+                 <Tooltip>
+                   <TooltipTrigger asChild>
+                     <Button
+                       variant="outline"
+                       size="sm"
+                       onClick={() => onView(transaction)}
+                     >
+                       <Eye className="w-4 h-4" />
+                     </Button>
+                   </TooltipTrigger>
+                   <TooltipContent>
+                     <p>View transaction</p>
+                   </TooltipContent>
+                 </Tooltip>
+               )}
               {canUpdate && (
                 <Tooltip>
                   <TooltipTrigger asChild>

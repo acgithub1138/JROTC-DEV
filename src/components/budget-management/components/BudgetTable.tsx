@@ -16,6 +16,7 @@ interface BudgetTableProps {
   transactions: BudgetTransaction[];
   isLoading: boolean;
   onEdit: (transaction: BudgetTransaction) => void;
+  onView: (transaction: BudgetTransaction) => void;
   onDelete: (id: string) => void;
 }
 
@@ -23,6 +24,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   transactions,
   isLoading,
   onEdit,
+  onView,
   onDelete,
 }) => {
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
@@ -150,16 +152,16 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
               />
             </TableCell>
             <TableCell className={`font-medium ${getPaddingClass()}`}>
-              {canViewDetails ? (
-                <button
-                  onClick={() => onEdit(transaction)}
-                  className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
-                >
-                  {transaction.item}
-                </button>
-              ) : (
-                transaction.item
-              )}
+                      {canViewDetails ? (
+                        <button
+                          onClick={() => onView(transaction)}
+                          className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                        >
+                          {transaction.item}
+                        </button>
+                      ) : (
+                        transaction.item
+                      )}
             </TableCell>
             <TableCell className={getPaddingClass()}>{getCategoryBadge(transaction.category)}</TableCell>
             <TableCell className={`capitalize ${getPaddingClass()}`}>{transaction.type}</TableCell>
@@ -181,7 +183,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                 canView={canViewDetails}
                 canEdit={canUpdate}
                 canDelete={canDelete}
-                onView={() => onEdit(transaction)}
+                onView={() => onView(transaction)}
                 onEdit={() => onEdit(transaction)}
                 onDelete={() => onDelete(transaction.id)}
               />

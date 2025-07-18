@@ -44,6 +44,7 @@ const BudgetManagementPage = () => {
   const [showAddIncome, setShowAddIncome] = useState(false);
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
+  const [viewingItem, setViewingItem] = useState<BudgetTransaction | null>(null);
   const [filters, setFilters] = useState<BudgetFilters>({
     search: '',
     category: '',
@@ -99,9 +100,9 @@ const BudgetManagementPage = () => {
 
       <div className="rounded-lg border bg-card">
         {isMobile ? (
-          <BudgetCards transactions={transactions} onEdit={setEditingItem} onDelete={deleteTransaction} />
+          <BudgetCards transactions={transactions} onEdit={setEditingItem} onView={setViewingItem} onDelete={deleteTransaction} />
         ) : (
-          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onDelete={deleteTransaction} />
+          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onView={setViewingItem} onDelete={deleteTransaction} />
         )}
       </div>
 
@@ -110,6 +111,8 @@ const BudgetManagementPage = () => {
       <AddExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} onSubmit={createTransaction} />
 
       {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
+      
+      {viewingItem && <EditBudgetItemDialog open={!!viewingItem} onOpenChange={() => setViewingItem(null)} item={viewingItem} onSubmit={updateTransaction} viewOnly />}
     </div>;
 };
 export default BudgetManagementPage;
