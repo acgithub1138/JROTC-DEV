@@ -17,6 +17,7 @@ import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
+import { useTaskComments } from '@/hooks/useTaskComments';
 import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
 import { EditableCell } from './EditableCell';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
@@ -49,6 +50,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const { canCreate, canUpdate } = useTaskPermissions();
   const { updateTask } = useTasks();
   const { handleSystemComment } = useTaskSystemComments();
+  const { addComment } = useTaskComments(task.id);
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
   const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
@@ -89,7 +91,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
     if (pendingStatusChange) {
       // First add the user comment BEFORE status change
       if (comment.trim()) {
-        await handleSystemComment(task.id, comment);
+        addComment(comment);
       }
       
       // For canceled status, also set completed_at

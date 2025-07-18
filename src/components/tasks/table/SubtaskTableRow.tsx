@@ -12,6 +12,7 @@ import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+import { useSubtaskComments } from '@/hooks/useSubtaskComments';
 import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
 import { EditableCell } from './EditableCell';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
@@ -38,6 +39,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
   const { canUpdate } = useTaskPermissions();
   const { updateSubtask } = useSubtasks();
   const { handleSystemComment } = useSubtaskSystemComments();
+  const { addComment } = useSubtaskComments(subtask.id);
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
@@ -78,7 +80,7 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
       try {
         // First add the user comment BEFORE status change
         if (comment.trim()) {
-          await handleSystemComment(subtask.id, comment);
+          addComment(comment);
         }
         
         // For canceled status, also set completed_at
