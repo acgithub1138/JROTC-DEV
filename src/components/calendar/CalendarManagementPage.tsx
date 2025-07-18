@@ -5,6 +5,7 @@ import { CalendarView } from './components/CalendarView';
 import { EventDialog } from './components/EventDialog';
 import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
+import { RecurringDeleteDialog } from './components/RecurringDeleteDialog';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCalendarPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -29,8 +30,10 @@ export interface Event {
 const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
+  const [showRecurringDeleteDialog, setShowRecurringDeleteDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
+  const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [filters, setFilters] = useState({
     eventType: '',
@@ -48,7 +51,8 @@ const CalendarManagementPage = () => {
     isLoading,
     createEvent,
     updateEvent,
-    deleteEvent
+    deleteEvent,
+    deleteRecurringSeries
   } = useEvents(filters);
   const handleCreateEvent = () => {
     setEditingEvent(null);
@@ -78,8 +82,10 @@ const CalendarManagementPage = () => {
   const handleCloseDialog = () => {
     setShowEventDialog(false);
     setShowEventDetailsDialog(false);
+    setShowRecurringDeleteDialog(false);
     setEditingEvent(null);
     setViewingEvent(null);
+    setDeletingEvent(null);
     setSelectedDate(null);
   };
   const handleEventSubmit = async (eventData: any) => {
@@ -95,6 +101,42 @@ const CalendarManagementPage = () => {
     setEditingEvent(null);
     setShowEventDialog(true);
   };
+
+  const handleDeleteEvent = (event: Event) => {
+    // Check if this is a recurring event
+    if (event.is_recurring || event.parent_event_id) {
+      setDeletingEvent(event);
+      setShowRecurringDeleteDialog(true);
+    } else {
+      // Regular single event - delete directly
+      deleteEvent(event.id);
+    }
+  };
+
+  const handleDeleteEventById = async (id: string) => {
+    // Find the event by ID first
+    const event = events.find(e => e.id === id);
+    if (event) {
+      handleDeleteEvent(event);
+    } else {
+      // Fallback to direct deletion if event not found
+      await deleteEvent(id);
+    }
+  };
+
+  const handleDeleteThisEvent = () => {
+    if (deletingEvent) {
+      deleteEvent(deletingEvent.id);
+    }
+  };
+
+  const handleDeleteSeries = () => {
+    if (deletingEvent) {
+      // If it's an instance, get the parent ID, otherwise use the event ID
+      const parentId = deletingEvent.parent_event_id || deletingEvent.id;
+      deleteRecurringSeries(parentId);
+    }
+  };
   return <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <h1 className="text-3xl font-bold">Calendar</h1>
@@ -106,7 +148,7 @@ const CalendarManagementPage = () => {
         isLoading={isLoading} 
         onEventEdit={canViewDetails ? handleEditEvent : undefined} 
         onEventView={canViewDetails ? handleViewEvent : undefined} 
-        onEventDelete={canCreateEvents ? deleteEvent : undefined} 
+        onEventDelete={canCreateEvents ? handleDeleteEventById : undefined} 
         onDateSelect={handleDateSelect} 
         onDateDoubleClick={handleDateDoubleClick} 
         onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} 
@@ -122,11 +164,20 @@ const CalendarManagementPage = () => {
           event={editingEvent} 
           selectedDate={selectedDate} 
           onSubmit={handleEventSubmit} 
-          onDelete={canDeleteEvents ? deleteEvent : undefined} 
+          onDelete={canDeleteEvents ? handleDeleteEventById : undefined} 
         />
       )}
 
       <EventDetailsDialog open={showEventDetailsDialog} onOpenChange={handleCloseDialog} event={viewingEvent} />
+
+      <RecurringDeleteDialog
+        open={showRecurringDeleteDialog}
+        onOpenChange={setShowRecurringDeleteDialog}
+        eventTitle={deletingEvent?.title || ''}
+        isRecurringParent={deletingEvent?.is_recurring || false}
+        onDeleteThis={handleDeleteThisEvent}
+        onDeleteSeries={handleDeleteSeries}
+      />
     </div>;
 };
 export default CalendarManagementPage;

@@ -198,12 +198,42 @@ export const useEvents = (filters: EventFilters) => {
     }
   };
 
+  const deleteRecurringSeries = async (parentId: string) => {
+    try {
+      // Delete all instances of the recurring series
+      const { error } = await supabase
+        .from('events')
+        .delete()
+        .or(`id.eq.${parentId},parent_event_id.eq.${parentId}`);
+
+      if (error) throw error;
+
+      // Remove from local state
+      setEvents(prev => prev.filter(event => 
+        event.id !== parentId && event.parent_event_id !== parentId
+      ));
+      
+      toast({
+        title: 'Success',
+        description: 'Recurring series deleted successfully',
+      });
+    } catch (error) {
+      console.error('Error deleting recurring series:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to delete recurring series',
+        variant: 'destructive',
+      });
+    }
+  };
+
   return {
     events,
     isLoading,
     createEvent,
     updateEvent,
     deleteEvent,
+    deleteRecurringSeries,
     refetch: fetchEvents,
   };
 };
