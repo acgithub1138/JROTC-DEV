@@ -104,7 +104,7 @@ interface PositionGrid {
   markArea: (x: number, y: number, width: number, height: number) => void;
 }
 
-const createPositionGrid = (cellSize: number = 50): PositionGrid => {
+const createPositionGrid = (cellSize: number = 20): PositionGrid => {
   const occupiedAreas = new Set<string>();
   
   const getGridKey = (x: number, y: number) => `${Math.floor(x / cellSize)},${Math.floor(y / cellSize)}`;
@@ -188,8 +188,10 @@ const positionSquadronMembers = (
   startY: number
 ): { positions: Map<string, { x: number; y: number }>, maxY: number } => {
   const positions = new Map<string, { x: number; y: number }>();
-  const grid = createPositionGrid(40); // 40px grid cells for positioning
+  const grid = createPositionGrid(20); // Smaller grid cells for better collision detection
   let globalMaxY = startY;
+  
+  console.log(`📍 Positioning squadron members starting at Y: ${startY}`);
 
   // Enhanced spacing configuration
   const nodeBuffer = 60; // Extra space around each node
@@ -262,7 +264,9 @@ const positionAssistants = (
   config: LayoutConfig
 ): PositionedNode[] => {
   const result = [...nodes];
-  const grid = createPositionGrid(40);
+  const grid = createPositionGrid(20); // Use consistent smaller grid cells
+  
+  console.log(`👥 Positioning assistants for ${jobs.filter(j => j.assistant && j.assistant !== 'NA').length} assistant roles`);
   
   // Mark existing nodes in grid
   result.forEach(node => {
@@ -337,9 +341,9 @@ const positionAssistants = (
 export const calculateEnhancedHierarchicalLayout = (
   jobs: JobBoardWithCadet[],
   config: LayoutConfig = {
-    nodeWidth: 300,
-    nodeHeight: 120,
-    levelHeight: 300, // Increased for more vertical space
+    nodeWidth: 280,     // Updated to match JobRoleNode component
+    nodeHeight: 140,    // Updated to match actual rendered height
+    levelHeight: 300,   // Increased for more vertical space
     minNodeSpacing: 200, // Increased horizontal spacing
     maxNodeSpacing: 350,
     assistantOffset: 120, // More space for assistants
