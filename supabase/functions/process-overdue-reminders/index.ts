@@ -19,7 +19,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
-  console.log('🚀 Processing overdue task reminders at:', new Date().toISOString());
+  console.log('🚀 Processing overdue task & subtask reminders at:', new Date().toISOString());
 
   try {
     // Initialize Supabase client with service role key for full access
@@ -43,7 +43,7 @@ const handler = async (req: Request): Promise<Response> => {
     const totalProcessed = processingResults.reduce((sum, result) => sum + result.processed_count, 0);
     const uniqueSchools = new Set(processingResults.map(r => r.school_id).filter(Boolean));
     
-    console.log(`✅ Processed ${totalProcessed} overdue task reminders across ${uniqueSchools.size} schools`);
+    console.log(`✅ Processed ${totalProcessed} overdue reminders across ${uniqueSchools.size} schools`);
     
     // Group results by reminder type for logging
     const resultsByType = processingResults.reduce((acc, result) => {
@@ -65,8 +65,8 @@ const handler = async (req: Request): Promise<Response> => {
       resultsByType,
       timestamp: new Date().toISOString(),
       message: totalProcessed > 0 
-        ? `Successfully processed ${totalProcessed} overdue task reminders`
-        : 'No overdue task reminders to process at this time'
+        ? `Successfully processed ${totalProcessed} overdue reminders (tasks & subtasks)`
+        : 'No overdue task or subtask reminders to process at this time'
     };
 
     return new Response(JSON.stringify(response), {

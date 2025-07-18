@@ -2111,6 +2111,36 @@ export type Database = {
           },
         ]
       }
+      subtask_overdue_reminders: {
+        Row: {
+          created_at: string
+          email_queue_id: string | null
+          id: string
+          reminder_type: string
+          school_id: string
+          sent_at: string
+          subtask_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_queue_id?: string | null
+          id?: string
+          reminder_type: string
+          school_id: string
+          sent_at?: string
+          subtask_id: string
+        }
+        Update: {
+          created_at?: string
+          email_queue_id?: string | null
+          id?: string
+          reminder_type?: string
+          school_id?: string
+          sent_at?: string
+          subtask_id?: string
+        }
+        Relationships: []
+      }
       subtasks: {
         Row: {
           assigned_by: string | null
