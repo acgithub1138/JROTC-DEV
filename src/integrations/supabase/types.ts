@@ -992,7 +992,11 @@ export type Database = {
           event_type: Database["public"]["Enums"]["event_type"]
           id: string
           is_all_day: boolean
+          is_recurring: boolean | null
           location: string | null
+          parent_event_id: string | null
+          recurrence_end_date: string | null
+          recurrence_rule: Json | null
           school_id: string
           start_date: string
           title: string
@@ -1006,7 +1010,11 @@ export type Database = {
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
           is_all_day?: boolean
+          is_recurring?: boolean | null
           location?: string | null
+          parent_event_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_rule?: Json | null
           school_id: string
           start_date: string
           title: string
@@ -1020,7 +1028,11 @@ export type Database = {
           event_type?: Database["public"]["Enums"]["event_type"]
           id?: string
           is_all_day?: boolean
+          is_recurring?: boolean | null
           location?: string | null
+          parent_event_id?: string | null
+          recurrence_end_date?: string | null
+          recurrence_rule?: Json | null
           school_id?: string
           start_date?: string
           title?: string
@@ -1032,6 +1044,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_parent_event_id_fkey"
+            columns: ["parent_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
             referencedColumns: ["id"]
           },
           {

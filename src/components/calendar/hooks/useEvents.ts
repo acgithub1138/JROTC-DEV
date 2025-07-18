@@ -3,6 +3,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Event } from '../CalendarManagementPage';
+import { generateRecurringEvents, validateRecurrenceRule } from '@/utils/recurrence';
 
 interface EventFilters {
   eventType: string;
@@ -64,6 +65,19 @@ export const useEvents = (filters: EventFilters) => {
     if (!userProfile?.school_id) return;
 
     try {
+      // Validate recurrence rule if recurring
+      if (eventData.is_recurring && eventData.recurrence_rule) {
+        const validation = validateRecurrenceRule(eventData.recurrence_rule);
+        if (!validation.isValid) {
+          toast({
+            title: 'Error',
+            description: validation.error || 'Invalid recurrence rule',
+            variant: 'destructive',
+          });
+          return;
+        }
+      }
+
       const { data, error } = await supabase
         .from('events')
         .insert({
@@ -76,10 +90,49 @@ export const useEvents = (filters: EventFilters) => {
 
       if (error) throw error;
 
-      setEvents(prev => [...prev, data]);
+      // Generate recurring instances if this is a recurring event
+      if (data.is_recurring && data.recurrence_rule) {
+        try {
+          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any);
+          
+          if (recurringInstances.length > 0) {
+            // Convert instances to match database schema
+            const eventsToInsert = recurringInstances.map(instance => ({
+              ...instance,
+              event_type: instance.event_type as 'training' | 'competition' | 'ceremony' | 'meeting' | 'drill' | 'other'
+            }));
+
+            const { error: instancesError } = await supabase
+              .from('events')
+              .insert(eventsToInsert);
+
+            if (instancesError) {
+              console.error('Error creating recurring instances:', instancesError);
+              toast({
+                title: 'Warning',
+                description: 'Event created but failed to create recurring instances',
+                variant: 'destructive',
+              });
+            }
+          }
+        } catch (recurringError) {
+          console.error('Error generating recurring instances:', recurringError);
+          toast({
+            title: 'Warning',
+            description: 'Event created but failed to generate recurring instances',
+            variant: 'destructive',
+          });
+        }
+      }
+
+      // Refresh events to show all instances
+      await fetchEvents();
+      
       toast({
         title: 'Success',
-        description: 'Event created successfully',
+        description: data.is_recurring 
+          ? 'Recurring event created successfully' 
+          : 'Event created successfully',
       });
     } catch (error) {
       console.error('Error creating event:', error);

@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
+import { RotateCcw } from 'lucide-react';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -81,21 +82,26 @@ export const MonthView: React.FC<MonthViewProps> = ({
               
               <div className="space-y-1">
                 {dayEvents.slice(0, 3).map(event => (
-                  <div
-                    key={event.id}
-                    className={cn(
-                      "text-xs px-2 py-1 rounded text-white truncate",
-                      getEventTypeColor(event.event_type),
-                      onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
-                    )}
-                    onClick={onEventClick ? (e) => {
-                      e.stopPropagation();
-                      onEventClick(event);
-                    } : undefined}
-                    title={event.title}
-                  >
-                    {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'HH:mm')} ${event.title}`}
-                  </div>
+                   <div
+                     key={event.id}
+                     className={cn(
+                       "text-xs px-2 py-1 rounded text-white truncate flex items-center gap-1",
+                       getEventTypeColor(event.event_type),
+                       onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
+                     )}
+                     onClick={onEventClick ? (e) => {
+                       e.stopPropagation();
+                       onEventClick(event);
+                     } : undefined}
+                     title={event.title}
+                   >
+                     {event.is_recurring && (
+                       <RotateCcw className="w-3 h-3 flex-shrink-0" />
+                     )}
+                     <span className="truncate">
+                       {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'HH:mm')} ${event.title}`}
+                     </span>
+                   </div>
                 ))}
                 
                 {dayEvents.length > 3 && (

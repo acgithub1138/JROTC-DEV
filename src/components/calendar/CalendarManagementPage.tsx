@@ -21,6 +21,10 @@ export interface Event {
   created_by?: string;
   created_at: string;
   updated_at: string;
+  is_recurring?: boolean;
+  recurrence_rule?: any;
+  recurrence_end_date?: string;
+  parent_event_id?: string;
 }
 const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);

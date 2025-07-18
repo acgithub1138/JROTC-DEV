@@ -13,6 +13,8 @@ import { EventAssignmentSection } from './EventAssignmentSection';
 import { useEventTypes } from '../hooks/useEventTypes';
 import { useCalendarPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AddressLookupField } from './AddressLookupField';
+import { RecurrenceSettings } from './RecurrenceSettings';
+import { RecurrenceRule } from '@/utils/recurrence';
 
 interface EventFormProps {
   event?: Event | null;
@@ -43,6 +45,12 @@ export const EventForm: React.FC<EventFormProps> = ({
     event_type: 'other',
     is_all_day: false,
   });
+  const [isRecurring, setIsRecurring] = useState(false);
+  const [recurrenceRule, setRecurrenceRule] = useState<RecurrenceRule>({
+    frequency: 'daily',
+    interval: 1,
+    endType: 'never',
+  });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showAddEventTypeDialog, setShowAddEventTypeDialog] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
@@ -69,6 +77,12 @@ export const EventForm: React.FC<EventFormProps> = ({
         event_type: event.event_type,
         is_all_day: event.is_all_day,
       });
+
+      // Set recurrence data for existing events
+      setIsRecurring(event.is_recurring || false);
+      if (event.recurrence_rule) {
+        setRecurrenceRule(event.recurrence_rule);
+      }
     } else if (selectedDate) {
       const dateStr = format(selectedDate, 'yyyy-MM-dd');
       setFormData(prev => ({
@@ -122,6 +136,11 @@ export const EventForm: React.FC<EventFormProps> = ({
         is_all_day: formData.is_all_day,
         start_date: new Date(startDateTime).toISOString(),
         end_date: endDateTime ? new Date(endDateTime).toISOString() : null,
+        is_recurring: isRecurring,
+        recurrence_rule: isRecurring ? recurrenceRule : null,
+        recurrence_end_date: isRecurring && recurrenceRule.endType === 'date' && recurrenceRule.endDate 
+          ? new Date(recurrenceRule.endDate).toISOString() 
+          : null,
       };
       
       await onSubmit(eventData);
@@ -398,6 +417,13 @@ export const EventForm: React.FC<EventFormProps> = ({
           />
         </div>
       )}
+
+      <RecurrenceSettings
+        isRecurring={isRecurring}
+        onRecurringChange={setIsRecurring}
+        recurrenceRule={recurrenceRule}
+        onRecurrenceRuleChange={setRecurrenceRule}
+      />
 
       {/* Show Event Assignments for existing events or when editing */}
       {event && (
