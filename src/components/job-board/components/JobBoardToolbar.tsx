@@ -39,7 +39,7 @@ export const JobBoardToolbar = ({
   onLayoutAlgorithmChange,
 }: JobBoardToolbarProps) => {
   return (
-    <div className="absolute top-2 left-2 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
+    <div className="absolute top-2 right-2 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
       {/* Layout Algorithm Selection */}
       <Select value={layoutAlgorithm} onValueChange={onLayoutAlgorithmChange}>
         <SelectTrigger className="w-36">
