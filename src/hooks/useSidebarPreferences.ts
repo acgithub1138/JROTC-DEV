@@ -39,7 +39,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     { id: 'cadets', label: 'Cadets', icon: 'User' },
     { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
     { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
-    { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+    { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
     { id: 'teams', label: 'Teams', icon: 'Users' },
     { id: 'budget', label: 'Budget', icon: 'DollarSign' },
     { id: 'inventory', label: 'Inventory', icon: 'Package' },
@@ -112,7 +112,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       return [
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
-        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'teams', label: 'Teams', icon: 'Users' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
@@ -129,7 +129,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         ...baseItems,
         { id: 'cadets', label: 'Cadets', icon: 'User' },
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
@@ -139,7 +139,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       return [
         ...baseItems,
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'job-board', label: 'Job Board', icon: 'Briefcase' },
+        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
 

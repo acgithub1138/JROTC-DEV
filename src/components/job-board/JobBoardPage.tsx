@@ -79,7 +79,7 @@ const JobBoardPage = () => {
   return <div className="p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
           {canCreate && <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
@@ -93,14 +93,14 @@ const JobBoardPage = () => {
                 <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 w-4 h-4" />
                 <Input placeholder="Search by cadet name or role..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
-              <div className="flex text-right">If the Job board Chart disappears, click the Job board tab then Job Board Chart tab again.</div>
+              <div className="flex text-right">If the Chain of Command Chart disappears, click the Chain of Command tab then Chain of Command Chart tab again.</div>
             </div>
           </CardHeader>
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="table">Job Board</TabsTrigger>
-                <TabsTrigger value="chart">Job Board Chart</TabsTrigger>
+                <TabsTrigger value="table">Chain of Command</TabsTrigger>
+                <TabsTrigger value="chart">Chain of Command Chart</TabsTrigger>
               </TabsList>
               
               <TabsContent value="table" className="mt-4">
