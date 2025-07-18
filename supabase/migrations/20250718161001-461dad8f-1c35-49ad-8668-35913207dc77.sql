@@ -1,0 +1,2 @@
+-- Update the function comment to reflect it now processes both tasks and subtasks
+COMMENT ON FUNCTION public.process_overdue_task_reminders() IS 'Processes overdue reminders for both tasks and subtasks. Sends reminder emails 3, 2, 1 days before and on due date at 10 AM UTC daily.';
