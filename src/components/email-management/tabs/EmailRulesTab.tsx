@@ -90,18 +90,30 @@ export const EmailRulesTab: React.FC = () => {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            {sortedRules.map((rule) => (
-              <RuleCard
-                key={rule.id}
-                rule={rule}
-                templates={templates}
-                onToggle={handleToggleRule}
-                onTemplateSelect={handleTemplateSelect}
-                onPreview={handlePreview}
-                isUpdating={isUpdating}
-              />
-            ))}
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead>
+                <tr className="border-b">
+                  <th className="text-left py-3 px-4 font-medium">Rule</th>
+                  <th className="text-left py-3 px-4 font-medium">Status</th>
+                  <th className="text-left py-3 px-4 font-medium">Template</th>
+                  <th className="text-left py-3 px-4 font-medium">Actions</th>
+                </tr>
+              </thead>
+              <tbody>
+                {sortedRules.map((rule) => (
+                  <RuleCard
+                    key={rule.id}
+                    rule={rule}
+                    templates={templates}
+                    onToggle={handleToggleRule}
+                    onTemplateSelect={handleTemplateSelect}
+                    onPreview={handlePreview}
+                    isUpdating={isUpdating}
+                  />
+                ))}
+              </tbody>
+            </table>
           </div>
           
           {rules.length === 0 && (
