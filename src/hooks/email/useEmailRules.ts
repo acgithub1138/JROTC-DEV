@@ -7,7 +7,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export interface EmailRule {
   id: string;
   school_id: string;
-  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled';
+  rule_type: 'task_created' | 'task_information_needed' | 'task_completed' | 'task_canceled' | 'task_overdue_reminder' | 'subtask_created' | 'subtask_information_needed' | 'subtask_completed' | 'subtask_canceled';
   template_id: string | null;
   is_active: boolean;
   trigger_event: 'INSERT' | 'UPDATE';
@@ -22,6 +22,7 @@ export const RULE_LABELS: Record<RuleType, string> = {
   task_information_needed: 'Task Information Needed',
   task_completed: 'Task Completed',
   task_canceled: 'Task Canceled',
+  task_overdue_reminder: 'Task Overdue Reminder',
   subtask_created: 'Subtask Created',
   subtask_information_needed: 'Subtask Information Needed',
   subtask_completed: 'Subtask Completed',
@@ -33,6 +34,7 @@ export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
   task_information_needed: 'Triggered when a task status is set to Need Information',
   task_completed: 'Triggered when a task status is set to Completed',
   task_canceled: 'Triggered when a task status is set to Canceled',
+  task_overdue_reminder: 'Send reminder emails 3, 2, 1 days before and on due date at 10am',
   subtask_created: 'Triggered when a new subtask is created',
   subtask_information_needed: 'Triggered when a subtask status is set to Need Information',
   subtask_completed: 'Triggered when a subtask status is set to Completed',
