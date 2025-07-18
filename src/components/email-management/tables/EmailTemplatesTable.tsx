@@ -8,6 +8,7 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -15,6 +16,8 @@ import { Edit, Trash2, Eye } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { format } from 'date-fns';
+import { useState, useMemo } from 'react';
+import { SortConfig } from '@/components/ui/sortable-table';
 
 interface EmailTemplatesTableProps {
   templates: EmailTemplate[];
@@ -31,6 +34,33 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
 }) => {
   const { deleteTemplate } = useEmailTemplates();
   const { canUpdate, canDelete, canViewDetails } = useEmailPermissions();
+  const [sortConfig, setSortConfig] = useState<SortConfig | null>({ key: 'name', direction: 'asc' });
+
+  const sortedTemplates = useMemo(() => {
+    if (!sortConfig) return templates;
+
+    return [...templates].sort((a, b) => {
+      const aValue = a[sortConfig.key as keyof EmailTemplate];
+      const bValue = b[sortConfig.key as keyof EmailTemplate];
+
+      if (aValue < bValue) {
+        return sortConfig.direction === 'asc' ? -1 : 1;
+      }
+      if (aValue > bValue) {
+        return sortConfig.direction === 'asc' ? 1 : -1;
+      }
+      return 0;
+    });
+  }, [templates, sortConfig]);
+
+  const handleSort = (key: string) => {
+    setSortConfig(prevConfig => {
+      if (prevConfig?.key === key) {
+        return { key, direction: prevConfig.direction === 'asc' ? 'desc' : 'asc' };
+      }
+      return { key, direction: 'asc' };
+    });
+  };
 
   const handleDelete = (id: string) => {
     if (window.confirm('Are you sure you want to delete this template?')) {
@@ -48,7 +78,13 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Name</TableHead>
+            <SortableTableHead 
+              sortKey="name" 
+              currentSort={sortConfig} 
+              onSort={handleSort}
+            >
+              Name
+            </SortableTableHead>
             <TableHead>Subject</TableHead>
             <TableHead>Source Table</TableHead>
             <TableHead>Status</TableHead>
@@ -57,7 +93,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {templates.map((template) => (
+          {sortedTemplates.map((template) => (
             <TableRow key={template.id}>
               <TableCell className="font-medium py-2">
                 {canViewDetails && onView ? (
