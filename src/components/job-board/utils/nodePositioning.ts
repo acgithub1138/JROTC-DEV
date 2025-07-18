@@ -1,15 +1,6 @@
 
 import { JobBoardWithCadet } from '../types';
 import { HierarchyNode } from './hierarchyBuilder';
-import { 
-  createLayoutNodes, 
-  DEFAULT_INTELLIGENT_CONFIG, 
-  LayoutConfig 
-} from './intelligentLayout';
-import { 
-  calculateHierarchicalTreeLayout, 
-  calculateRadialLayout 
-} from './hierarchicalTreeLayout';
 
 export interface NodePositionConfig {
   nodeWidth: number;
@@ -25,9 +16,7 @@ export const DEFAULT_POSITION_CONFIG: NodePositionConfig = {
   nodeSpacing: 50,
 };
 
-export type LayoutAlgorithm = 'hierarchical' | 'radial' | 'legacy';
-
-// Legacy positioning for backward compatibility
+// Legacy positioning for reliable, simple layout
 const calculateLegacyPositions = (
   jobs: JobBoardWithCadet[],
   hierarchyNodes: Map<string, HierarchyNode>,
@@ -85,50 +74,10 @@ export const calculateNodePositions = (
   jobs: JobBoardWithCadet[],
   hierarchyNodes: Map<string, HierarchyNode>,
   config: NodePositionConfig = DEFAULT_POSITION_CONFIG,
-  savedPositions?: Map<string, { x: number; y: number }>,
-  algorithm: LayoutAlgorithm = 'hierarchical'
+  savedPositions?: Map<string, { x: number; y: number }>
 ): Map<string, { x: number; y: number }> => {
   
-  // If user has saved positions, prioritize those and use legacy algorithm
-  if (savedPositions && savedPositions.size > 0) {
-    return calculateLegacyPositions(jobs, hierarchyNodes, config, savedPositions);
-  }
+  console.log(`📍 Using legacy layout algorithm for ${jobs.length} jobs`);
   
-  // Use intelligent algorithms for new layouts
-  if (algorithm === 'legacy') {
-    return calculateLegacyPositions(jobs, hierarchyNodes, config, savedPositions);
-  }
-  
-  // Convert to intelligent layout config
-  const intelligentConfig: LayoutConfig = {
-    nodeWidth: config.nodeWidth,
-    nodeHeight: config.nodeHeight,
-    levelHeight: config.levelHeight,
-    minNodeSpacing: config.nodeSpacing,
-    maxNodeSpacing: config.nodeSpacing * 2,
-    assistantOffset: 50,
-    squadronPadding: 100,
-  };
-  
-  // Create enhanced layout nodes
-  const layoutNodes = createLayoutNodes(jobs, hierarchyNodes, intelligentConfig);
-  
-  // Calculate positions using the selected algorithm
-  let layoutResult;
-  if (algorithm === 'radial') {
-    layoutResult = calculateRadialLayout(layoutNodes, intelligentConfig);
-  } else {
-    layoutResult = calculateHierarchicalTreeLayout(layoutNodes, intelligentConfig);
-  }
-  
-  // Convert positioned nodes back to position map
-  const positions = new Map<string, { x: number; y: number }>();
-  layoutResult.positionedNodes.forEach(node => {
-    positions.set(node.id, node.finalPosition);
-  });
-  
-  console.log(`✨ Intelligent ${algorithm} layout calculated for ${positions.size} nodes`);
-  console.log(`📐 Total dimensions: ${layoutResult.totalWidth}x${layoutResult.totalHeight}`);
-  
-  return positions;
+  return calculateLegacyPositions(jobs, hierarchyNodes, config, savedPositions);
 };

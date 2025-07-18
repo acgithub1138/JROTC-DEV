@@ -1,6 +1,6 @@
+
 import React from 'react';
 import { Button } from '@/components/ui/button';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { 
   RefreshCw, 
@@ -8,10 +8,7 @@ import {
   Maximize, 
   Minimize, 
   Download, 
-  Grid3X3, 
-  GitBranch,
-  Radar,
-  List
+  Grid3X3
 } from 'lucide-react';
 
 interface JobBoardToolbarProps {
@@ -23,8 +20,6 @@ interface JobBoardToolbarProps {
   isFullscreen: boolean;
   snapToGrid: boolean;
   onToggleSnapToGrid: () => void;
-  layoutAlgorithm?: 'hierarchical' | 'radial' | 'legacy';
-  onLayoutAlgorithmChange?: (algorithm: 'hierarchical' | 'radial' | 'legacy') => void;
 }
 
 export const JobBoardToolbar = ({
@@ -36,49 +31,10 @@ export const JobBoardToolbar = ({
   isFullscreen,
   snapToGrid,
   onToggleSnapToGrid,
-  layoutAlgorithm = 'hierarchical',
-  onLayoutAlgorithmChange,
 }: JobBoardToolbarProps) => {
   return (
     <TooltipProvider>
       <div className="absolute top-2 right-2 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
-        {/* Layout Algorithm Selection */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <Select value={layoutAlgorithm} onValueChange={onLayoutAlgorithmChange}>
-                <SelectTrigger className="w-36">
-                  <SelectValue placeholder="Layout" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="hierarchical">
-                    <div className="flex items-center gap-2">
-                      <GitBranch className="w-4 h-4" />
-                      Hierarchical
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="radial">
-                    <div className="flex items-center gap-2">
-                      <Radar className="w-4 h-4" />
-                      Radial
-                    </div>
-                  </SelectItem>
-                  <SelectItem value="legacy">
-                    <div className="flex items-center gap-2">
-                      <List className="w-4 h-4" />
-                      Legacy
-                    </div>
-                  </SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Choose layout algorithm</p>
-          </TooltipContent>
-        </Tooltip>
-
-        {/* Existing toolbar buttons */}
         {onRefresh && (
           <Tooltip>
             <TooltipTrigger asChild>
