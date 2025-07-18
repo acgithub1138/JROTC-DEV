@@ -9,7 +9,7 @@ interface EventDialogProps {
   event?: Event | null;
   selectedDate?: Date | null;
   onSubmit: (eventData: any) => Promise<void>;
-  onDelete?: (id: string) => Promise<void>;
+  onDelete?: (event: Event) => void;
 }
 
 export const EventDialog: React.FC<EventDialogProps> = ({
@@ -27,8 +27,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
 
   const handleDelete = async () => {
     if (event && onDelete) {
-      await onDelete(event.id);
-      onOpenChange(false);
+      await onDelete(event);
     }
   };
 
