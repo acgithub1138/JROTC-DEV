@@ -14,13 +14,13 @@ export interface CollisionResult {
   suggestedPositions: Map<string, { x: number; y: number }>;
 }
 
-// Check if two rectangles overlap
-export const rectanglesOverlap = (rect1: Rectangle, rect2: Rectangle): boolean => {
+// Check if two rectangles overlap with minimum spacing
+export const rectanglesOverlap = (rect1: Rectangle, rect2: Rectangle, minSpacing: number = 20): boolean => {
   return !(
-    rect1.x + rect1.width < rect2.x ||
-    rect2.x + rect2.width < rect1.x ||
-    rect1.y + rect1.height < rect2.y ||
-    rect2.y + rect2.height < rect1.y
+    rect1.x + rect1.width + minSpacing <= rect2.x ||
+    rect2.x + rect2.width + minSpacing <= rect1.x ||
+    rect1.y + rect1.height + minSpacing <= rect2.y ||
+    rect2.y + rect2.height + minSpacing <= rect1.y
   );
 };
 
@@ -57,19 +57,42 @@ export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
   
   // Generate suggested positions for colliding nodes
   collisionPairs.forEach(([node1, node2]) => {
-    // Simple resolution: move horizontally apart
-    const distance = (node1.width + node2.width) / 2 + 50; // 50px padding
-    const midX = (node1.finalPosition.x + node2.finalPosition.x) / 2;
+    const rect1 = nodeToRectangle(node1);
+    const rect2 = nodeToRectangle(node2);
     
-    suggestedPositions.set(node1.id, {
-      x: midX - distance / 2,
-      y: node1.finalPosition.y,
-    });
+    // Determine if we should separate horizontally or vertically
+    const overlapX = Math.min(rect1.x + rect1.width, rect2.x + rect2.width) - Math.max(rect1.x, rect2.x);
+    const overlapY = Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - Math.max(rect1.y, rect2.y);
     
-    suggestedPositions.set(node2.id, {
-      x: midX + distance / 2,
-      y: node2.finalPosition.y,
-    });
+    if (overlapX < overlapY) {
+      // Separate horizontally
+      const distance = Math.max(node1.width, node2.width) + 60; // 60px padding
+      const midX = (node1.finalPosition.x + node2.finalPosition.x) / 2;
+      
+      suggestedPositions.set(node1.id, {
+        x: midX - distance / 2,
+        y: node1.finalPosition.y,
+      });
+      
+      suggestedPositions.set(node2.id, {
+        x: midX + distance / 2,
+        y: node2.finalPosition.y,
+      });
+    } else {
+      // Separate vertically
+      const distance = Math.max(node1.height, node2.height) + 40; // 40px padding
+      const midY = (node1.finalPosition.y + node2.finalPosition.y) / 2;
+      
+      suggestedPositions.set(node1.id, {
+        x: node1.finalPosition.x,
+        y: midY - distance / 2,
+      });
+      
+      suggestedPositions.set(node2.id, {
+        x: node2.finalPosition.x,
+        y: midY + distance / 2,
+      });
+    }
   });
   
   return {

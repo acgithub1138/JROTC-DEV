@@ -8,7 +8,7 @@ export interface TreeLayoutResult {
   totalHeight: number;
 }
 
-// Calculate the width needed for a subtree
+// Calculate the width needed for a subtree with vertical stacking support
 const calculateSubtreeWidth = (
   nodeId: string,
   nodes: Map<string, LayoutNode>,
@@ -23,23 +23,52 @@ const calculateSubtreeWidth = (
     return config.nodeWidth;
   }
   
-  // Calculate total width of all children
-  let childrenWidth = 0;
-  node.children.forEach((childId, index) => {
-    const childWidth = calculateSubtreeWidth(childId, nodes, config, memo);
-    childrenWidth += childWidth;
-    if (index < node.children.length - 1) {
-      childrenWidth += config.minNodeSpacing;
-    }
-  });
+  const maxHorizontalChildren = 4;
   
-  // The subtree width is the maximum of node width and children width
-  const subtreeWidth = Math.max(config.nodeWidth, childrenWidth);
-  memo.set(nodeId, subtreeWidth);
-  return subtreeWidth;
+  if (node.children.length <= maxHorizontalChildren) {
+    // Calculate total width of all children horizontally
+    let childrenWidth = 0;
+    node.children.forEach((childId, index) => {
+      const childWidth = calculateSubtreeWidth(childId, nodes, config, memo);
+      childrenWidth += childWidth;
+      if (index < node.children.length - 1) {
+        childrenWidth += config.minNodeSpacing;
+      }
+    });
+    
+    // The subtree width is the maximum of node width and children width
+    const subtreeWidth = Math.max(config.nodeWidth, childrenWidth);
+    memo.set(nodeId, subtreeWidth);
+    return subtreeWidth;
+  } else {
+    // For vertical stacking, calculate the maximum width of any row
+    const childrenPerRow = maxHorizontalChildren;
+    const rows = Math.ceil(node.children.length / childrenPerRow);
+    let maxRowWidth = config.nodeWidth; // At least as wide as the parent
+    
+    for (let row = 0; row < rows; row++) {
+      const rowStartIndex = row * childrenPerRow;
+      const rowEndIndex = Math.min(rowStartIndex + childrenPerRow, node.children.length);
+      const rowChildren = node.children.slice(rowStartIndex, rowEndIndex);
+      
+      let rowWidth = 0;
+      rowChildren.forEach((childId, index) => {
+        const childWidth = calculateSubtreeWidth(childId, nodes, config, memo);
+        rowWidth += childWidth;
+        if (index < rowChildren.length - 1) {
+          rowWidth += config.minNodeSpacing;
+        }
+      });
+      
+      maxRowWidth = Math.max(maxRowWidth, rowWidth);
+    }
+    
+    memo.set(nodeId, maxRowWidth);
+    return maxRowWidth;
+  }
 };
 
-// Position nodes in a hierarchical tree layout
+// Position nodes in a hierarchical tree layout with vertical stacking for many children
 const positionSubtree = (
   nodeId: string,
   nodes: Map<string, LayoutNode>,
@@ -66,22 +95,66 @@ const positionSubtree = (
   
   // Position children
   if (node.children.length > 0) {
-    let childX = startX;
+    const maxHorizontalChildren = 4; // Maximum children in horizontal row
     
-    node.children.forEach(childId => {
-      const childSubtreeWidth = subtreeWidths.get(childId) || config.nodeWidth;
-      const childPositions = positionSubtree(
-        childId,
-        nodes,
-        config,
-        childX,
-        level + 1,
-        subtreeWidths
-      );
+    if (node.children.length <= maxHorizontalChildren) {
+      // Position children horizontally
+      let childX = startX;
       
-      result.push(...childPositions);
-      childX += childSubtreeWidth + config.minNodeSpacing;
-    });
+      node.children.forEach(childId => {
+        const childSubtreeWidth = subtreeWidths.get(childId) || config.nodeWidth;
+        const childPositions = positionSubtree(
+          childId,
+          nodes,
+          config,
+          childX,
+          level + 1,
+          subtreeWidths
+        );
+        
+        result.push(...childPositions);
+        childX += childSubtreeWidth + config.minNodeSpacing;
+      });
+    } else {
+      // Position children vertically in groups
+      const childrenPerRow = maxHorizontalChildren;
+      const rows = Math.ceil(node.children.length / childrenPerRow);
+      
+      for (let row = 0; row < rows; row++) {
+        const rowStartIndex = row * childrenPerRow;
+        const rowEndIndex = Math.min(rowStartIndex + childrenPerRow, node.children.length);
+        const rowChildren = node.children.slice(rowStartIndex, rowEndIndex);
+        
+        // Calculate total width needed for this row
+        let rowWidth = 0;
+        rowChildren.forEach((childId, index) => {
+          const childSubtreeWidth = subtreeWidths.get(childId) || config.nodeWidth;
+          rowWidth += childSubtreeWidth;
+          if (index < rowChildren.length - 1) {
+            rowWidth += config.minNodeSpacing;
+          }
+        });
+        
+        // Center the row under the parent
+        const rowStartX = nodeX + (config.nodeWidth - rowWidth) / 2;
+        let childX = rowStartX;
+        
+        rowChildren.forEach(childId => {
+          const childSubtreeWidth = subtreeWidths.get(childId) || config.nodeWidth;
+          const childPositions = positionSubtree(
+            childId,
+            nodes,
+            config,
+            childX,
+            level + 1 + row, // Each row gets its own level
+            subtreeWidths
+          );
+          
+          result.push(...childPositions);
+          childX += childSubtreeWidth + config.minNodeSpacing;
+        });
+      }
+    }
   }
   
   return result;
