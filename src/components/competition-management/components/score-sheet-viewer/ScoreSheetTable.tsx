@@ -9,6 +9,7 @@ import { EditScoreSheetDialog } from './EditScoreSheetDialog';
 import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionTemplates } from '../../hooks/useCompetitionTemplates';
 import { toast } from 'sonner';
 
 interface ScoreSheetTableProps {
@@ -28,7 +29,42 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const { canViewDetails, canUpdate, canDelete } = useCompetitionPermissions();
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
+  const { templates } = useCompetitionTemplates();
   const fieldNames = getFieldNames(events);
+
+  // Function to get field name with max value if available
+  const getFieldNameWithMax = (fieldName: string): string => {
+    const cleanName = getCleanFieldName(fieldName);
+    
+    // Get template from the first event (assuming all events use the same template)
+    const firstEvent = events[0];
+    if (!firstEvent?.score_sheet?.template_id) return cleanName;
+    
+    const template = templates.find(t => t.id === firstEvent.score_sheet.template_id);
+    if (!template?.scores) return cleanName;
+    
+    // Parse the scores JSON data safely
+    let scoresData: any;
+    try {
+      scoresData = typeof template.scores === 'string' ? JSON.parse(template.scores) : template.scores;
+    } catch {
+      return cleanName;
+    }
+    
+    if (!scoresData?.criteria || !Array.isArray(scoresData.criteria)) return cleanName;
+    
+    // Find the matching field in template criteria
+    const templateField = scoresData.criteria.find((field: any) => {
+      const templateFieldId = field.id || `field_${field.name}`;
+      return fieldName.includes(templateFieldId) || fieldName.includes(field.name?.replace(/\s+/g, '_').toLowerCase());
+    });
+    
+    if (templateField?.maxValue) {
+      return `${cleanName} (${templateField.maxValue})`;
+    }
+    
+    return cleanName;
+  };
 
   // Function to get judge column color classes
   const getJudgeColorClasses = (index: number) => {
@@ -144,7 +180,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
             return (
               <TableRow key={fieldName}>
                 <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
-                  {getCleanFieldName(fieldName)}
+                  {getFieldNameWithMax(fieldName)}
                 </TableCell>
                  {events.map((event, eventIndex) => {
                    const value = event.score_sheet?.scores?.[fieldName];
