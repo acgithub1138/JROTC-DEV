@@ -1,4 +1,3 @@
-
 import { PositionedNode, LayoutConfig } from './intelligentLayout';
 
 export interface Rectangle {
@@ -14,8 +13,8 @@ export interface CollisionResult {
   suggestedPositions: Map<string, { x: number; y: number }>;
 }
 
-// Check if two rectangles overlap with minimum spacing (updated for better collision detection)
-export const rectanglesOverlap = (rect1: Rectangle, rect2: Rectangle, minSpacing: number = 200): boolean => {
+// Check if two rectangles overlap with balanced minimum spacing
+export const rectanglesOverlap = (rect1: Rectangle, rect2: Rectangle, minSpacing: number = 100): boolean => {
   const overlaps = !(
     rect1.x + rect1.width + minSpacing <= rect2.x ||
     rect2.x + rect2.width + minSpacing <= rect1.x ||
@@ -28,7 +27,11 @@ export const rectanglesOverlap = (rect1: Rectangle, rect2: Rectangle, minSpacing
     console.log(`🔍 Collision detected between nodes:`, {
       rect1: { x: rect1.x, y: rect1.y, w: rect1.width, h: rect1.height },
       rect2: { x: rect2.x, y: rect2.y, w: rect2.width, h: rect2.height },
-      minSpacing
+      minSpacing,
+      separation: {
+        horizontal: Math.min(Math.abs(rect1.x + rect1.width - rect2.x), Math.abs(rect2.x + rect2.width - rect1.x)),
+        vertical: Math.min(Math.abs(rect1.y + rect1.height - rect2.y), Math.abs(rect2.y + rect2.height - rect1.y))
+      }
     });
   }
   
@@ -43,10 +46,12 @@ export const nodeToRectangle = (node: PositionedNode): Rectangle => ({
   height: node.height,
 });
 
-// Detect collisions between all nodes
+// Detect collisions between all nodes with improved logging
 export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
   const collidingNodes = new Set<string>();
   const collisionPairs: Array<[PositionedNode, PositionedNode]> = [];
+  
+  console.log(`🔍 Checking collisions for ${nodes.length} nodes`);
   
   for (let i = 0; i < nodes.length; i++) {
     for (let j = i + 1; j < nodes.length; j++) {
@@ -64,9 +69,11 @@ export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
     }
   }
   
+  console.log(`⚠️ Found ${collisionPairs.length} collision pairs affecting ${collidingNodes.size} nodes`);
+  
   const suggestedPositions = new Map<string, { x: number; y: number }>();
   
-  // Generate suggested positions for colliding nodes
+  // Generate suggested positions for colliding nodes with improved separation
   collisionPairs.forEach(([node1, node2]) => {
     const rect1 = nodeToRectangle(node1);
     const rect2 = nodeToRectangle(node2);
@@ -76,8 +83,8 @@ export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
     const overlapY = Math.min(rect1.y + rect1.height, rect2.y + rect2.height) - Math.max(rect1.y, rect2.y);
     
     if (overlapX < overlapY) {
-      // Separate horizontally with proper spacing
-      const distance = Math.max(node1.width, node2.width) + 200; // Match layout minNodeSpacing
+      // Separate horizontally with balanced spacing
+      const distance = Math.max(node1.width, node2.width) + 120; // Balanced horizontal separation
       const midX = (node1.finalPosition.x + node2.finalPosition.x) / 2;
       
       suggestedPositions.set(node1.id, {
@@ -90,8 +97,8 @@ export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
         y: node2.finalPosition.y,
       });
     } else {
-      // Separate vertically with proper spacing
-      const distance = Math.max(node1.height, node2.height) + 150; // Better vertical spacing
+      // Separate vertically with balanced spacing
+      const distance = Math.max(node1.height, node2.height) + 80; // Balanced vertical separation
       const midY = (node1.finalPosition.y + node2.finalPosition.y) / 2;
       
       suggestedPositions.set(node1.id, {
@@ -113,14 +120,16 @@ export const detectCollisions = (nodes: PositionedNode[]): CollisionResult => {
   };
 };
 
-// Resolve collisions using force-based positioning with enhanced logging
+// Resolve collisions using improved force-based positioning with fallback strategy
 export const resolveCollisions = (
   nodes: PositionedNode[],
   config: LayoutConfig,
-  maxIterations: number = 15  // Increased for complex layouts
+  maxIterations: number = 8  // Reduced iterations to prevent over-correction
 ): PositionedNode[] => {
   let currentNodes = [...nodes];
   let iteration = 0;
+  let previousCollisionCount = Infinity;
+  let originalNodes = [...nodes]; // Keep original positions as fallback
   
   console.log(`🔧 Starting collision resolution for ${nodes.length} nodes`);
   
@@ -132,13 +141,20 @@ export const resolveCollisions = (
       break; // No more collisions
     }
     
-    console.log(`⚠️ Iteration ${iteration + 1}: Found ${collisionResult.collidingNodes.length} colliding nodes`);
+    const currentCollisionCount = collisionResult.collidingNodes.length;
+    console.log(`⚠️ Iteration ${iteration + 1}: Found ${currentCollisionCount} colliding nodes`);
     
-    // Apply suggested positions with better separation
+    // If we're not making progress or making things worse, revert to original positions
+    if (iteration > 2 && currentCollisionCount >= previousCollisionCount) {
+      console.warn(`🔄 Collision resolution not improving, reverting to original positions`);
+      return originalNodes;
+    }
+    
+    // Apply suggested positions with improved separation
     currentNodes = currentNodes.map(node => {
       const suggestedPosition = collisionResult.suggestedPositions.get(node.id);
       if (suggestedPosition) {
-        console.log(`📍 Moving node ${node.id} to position (${suggestedPosition.x}, ${suggestedPosition.y})`);
+        console.log(`📍 Moving node ${node.id} from (${node.finalPosition.x}, ${node.finalPosition.y}) to (${suggestedPosition.x}, ${suggestedPosition.y})`);
         return {
           ...node,
           finalPosition: suggestedPosition,
@@ -147,11 +163,17 @@ export const resolveCollisions = (
       return node;
     });
     
+    previousCollisionCount = currentCollisionCount;
     iteration++;
   }
   
   if (iteration >= maxIterations) {
-    console.warn(`⚠️ Collision resolution reached maximum iterations (${maxIterations})`);
+    console.warn(`⚠️ Collision resolution reached maximum iterations (${maxIterations}), checking final result`);
+    const finalCollisionResult = detectCollisions(currentNodes);
+    if (finalCollisionResult.hasCollision && finalCollisionResult.collidingNodes.length > collidingNodes.size) {
+      console.warn(`🔄 Final result has more collisions, reverting to original positions`);
+      return originalNodes;
+    }
   }
   
   return currentNodes;

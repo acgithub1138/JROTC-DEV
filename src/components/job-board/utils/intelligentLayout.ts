@@ -1,4 +1,3 @@
-
 import { JobBoardWithCadet } from '../types';
 import { HierarchyNode } from './hierarchyBuilder';
 
@@ -30,14 +29,15 @@ export interface LayoutConfig {
   squadronPadding: number;
 }
 
+// Updated to match actual node dimensions and spacing needs
 export const DEFAULT_INTELLIGENT_CONFIG: LayoutConfig = {
-  nodeWidth: 300,
-  nodeHeight: 120,
-  levelHeight: 200,
-  minNodeSpacing: 80,
-  maxNodeSpacing: 150,
-  assistantOffset: 50,
-  squadronPadding: 100,
+  nodeWidth: 280,     // Match enhanced hierarchical layout
+  nodeHeight: 140,    // Match enhanced hierarchical layout
+  levelHeight: 300,   // Keep generous vertical spacing
+  minNodeSpacing: 200, // Match enhanced hierarchical layout
+  maxNodeSpacing: 350, // Match enhanced hierarchical layout
+  assistantOffset: 120, // Match enhanced hierarchical layout
+  squadronPadding: 250, // Match enhanced hierarchical layout
 };
 
 // Extract squadron/department grouping from role names

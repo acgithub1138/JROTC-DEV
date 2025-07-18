@@ -1,4 +1,3 @@
-
 import { LayoutNode, PositionedNode, LayoutConfig } from './intelligentLayout';
 import { JobBoardWithCadet } from '../types';
 import { 
@@ -96,7 +95,7 @@ const positionSquadronCommanders = (
   return { positions, maxY: startY + config.nodeHeight, squadronColumns };
 };
 
-// Grid-based positioning system to prevent overlaps
+// Grid-based positioning system with balanced cell size
 interface PositionGrid {
   occupiedAreas: Set<string>;
   getGridKey: (x: number, y: number) => string;
@@ -104,7 +103,7 @@ interface PositionGrid {
   markArea: (x: number, y: number, width: number, height: number) => void;
 }
 
-const createPositionGrid = (cellSize: number = 20): PositionGrid => {
+const createPositionGrid = (cellSize: number = 40): PositionGrid => {
   const occupiedAreas = new Set<string>();
   
   const getGridKey = (x: number, y: number) => `${Math.floor(x / cellSize)},${Math.floor(y / cellSize)}`;
@@ -147,7 +146,7 @@ const findFreePosition = (
   width: number, 
   height: number, 
   grid: PositionGrid,
-  maxSearchRadius: number = 300
+  maxSearchRadius: number = 200  // Reduced search radius
 ): { x: number; y: number } => {
   // Try preferred position first
   if (grid.isAreaFree(preferredX, preferredY, width, height)) {
@@ -155,7 +154,7 @@ const findFreePosition = (
   }
   
   // Search in expanding spirals with preference for vertical movement
-  for (let radius = 60; radius <= maxSearchRadius; radius += 60) {
+  for (let radius = 80; radius <= maxSearchRadius; radius += 80) {
     // Try vertical offsets first (maintains squadron organization)
     const verticalOffsets = [radius, -radius];
     for (const offsetY of verticalOffsets) {
@@ -179,7 +178,7 @@ const findFreePosition = (
   return { x: preferredX, y: preferredY + maxSearchRadius };
 };
 
-// Position squadron members in collision-free vertical columns
+// Position squadron members in collision-free vertical columns with improved spacing
 const positionSquadronMembers = (
   squadrons: Map<string, SquadronStructure>,
   layoutNodes: Map<string, LayoutNode>,
@@ -188,14 +187,14 @@ const positionSquadronMembers = (
   startY: number
 ): { positions: Map<string, { x: number; y: number }>, maxY: number } => {
   const positions = new Map<string, { x: number; y: number }>();
-  const grid = createPositionGrid(20); // Smaller grid cells for better collision detection
+  const grid = createPositionGrid(40); // Balanced grid cell size
   let globalMaxY = startY;
   
   console.log(`📍 Positioning squadron members starting at Y: ${startY}`);
 
-  // Enhanced spacing configuration
-  const nodeBuffer = 60; // Extra space around each node
-  const levelSpacing = config.levelHeight + 40; // Extra vertical space between levels
+  // Balanced spacing configuration
+  const nodeBuffer = 40; // Reduced buffer space around each node
+  const levelSpacing = config.levelHeight + 20; // Reduced extra vertical space between levels
   const memberSpacing = config.nodeHeight + nodeBuffer; // Space between members
   
   squadrons.forEach((squadron, squadronName) => {
@@ -218,7 +217,7 @@ const positionSquadronMembers = (
       }
     });
     
-    // Position each level group with collision prevention
+    // Position each level group with improved collision prevention
     Array.from(levelGroups.keys()).sort().forEach((level, levelIndex) => {
       const levelMembers = levelGroups.get(level) || [];
       let levelStartY = currentY;
@@ -228,18 +227,19 @@ const positionSquadronMembers = (
         let preferredX = columnX;
         let preferredY = levelStartY;
         
-        // For multiple members at same level, arrange in a single column with proper spacing
+        // For multiple members at same level, arrange in a single column with balanced spacing
         if (levelMembers.length > 1) {
           preferredY = levelStartY + memberIndex * memberSpacing;
         }
         
-        // Find collision-free position
+        // Find collision-free position with reduced search radius
         const finalPosition = findFreePosition(
           preferredX, 
           preferredY, 
           config.nodeWidth, 
           config.nodeHeight, 
-          grid
+          grid,
+          200  // Reduced search radius
         );
         
         positions.set(member.id, finalPosition);
@@ -248,23 +248,23 @@ const positionSquadronMembers = (
         globalMaxY = Math.max(globalMaxY, finalPosition.y + config.nodeHeight);
       });
       
-      // Calculate space needed for this level
+      // Calculate space needed for this level with balanced spacing
       const levelHeight = levelMembers.length * memberSpacing;
-      currentY = Math.max(currentY + levelHeight + levelSpacing, currentY + levelSpacing);
+      currentY = Math.max(currentY + levelHeight + levelSpacing * 0.7, currentY + levelSpacing * 0.7);
     });
   });
   
   return { positions, maxY: globalMaxY };
 };
 
-// Position assistants with collision detection
+// Position assistants with improved collision detection
 const positionAssistants = (
   nodes: PositionedNode[],
   jobs: JobBoardWithCadet[],
   config: LayoutConfig
 ): PositionedNode[] => {
   const result = [...nodes];
-  const grid = createPositionGrid(20); // Use consistent smaller grid cells
+  const grid = createPositionGrid(40); // Consistent balanced grid cell size
   
   console.log(`👥 Positioning assistants for ${jobs.filter(j => j.assistant && j.assistant !== 'NA').length} assistant roles`);
   
@@ -281,16 +281,16 @@ const positionAssistants = (
         const assistantIndex = result.findIndex(n => n.id === job.id);
         
         if (supervisorPosition && assistantIndex >= 0) {
-          // Try multiple positions for assistant
+          // Try multiple positions for assistant with balanced spacing
           const assistantPositions = [
             // Right of supervisor (preferred)
             { 
-              x: supervisorPosition.finalPosition.x + config.nodeWidth + config.assistantOffset, 
+              x: supervisorPosition.finalPosition.x + config.nodeWidth + 80, // Reduced offset 
               y: supervisorPosition.finalPosition.y 
             },
             // Left of supervisor
             { 
-              x: supervisorPosition.finalPosition.x - config.nodeWidth - config.assistantOffset, 
+              x: supervisorPosition.finalPosition.x - config.nodeWidth - 80, // Reduced offset
               y: supervisorPosition.finalPosition.y 
             },
             // Below supervisor
@@ -309,14 +309,15 @@ const positionAssistants = (
             }
           }
           
-          // If none available, use collision-free search
+          // If none available, use collision-free search with reduced radius
           if (!grid.isAreaFree(finalPosition.x, finalPosition.y, config.nodeWidth, config.nodeHeight)) {
             finalPosition = findFreePosition(
               assistantPositions[0].x, 
               assistantPositions[0].y, 
               config.nodeWidth, 
               config.nodeHeight, 
-              grid
+              grid,
+              150  // Reduced search radius
             );
           }
           
