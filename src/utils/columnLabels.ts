@@ -17,6 +17,22 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
       updated_at: 'Updated Date',
       school_id: 'School'
     },
+    subtasks: {
+      id: 'Subtask ID',
+      task_number: 'Subtask Number',
+      title: 'Title',
+      description: 'Description',
+      status: 'Status',
+      priority: 'Priority',
+      assigned_to: 'Assigned To',
+      assigned_by: 'Created By',
+      team_id: 'Team',
+      due_date: 'Due Date',
+      completed_at: 'Completed At',
+      created_at: 'Created Date',
+      updated_at: 'Updated Date',
+      school_id: 'School'
+    },
     cadets: {
       id: 'Cadet ID',
       cadet_id: 'Cadet Number',
@@ -113,6 +129,7 @@ export const getColumnLabel = (columnName: string, tableName: string): string =>
 export const getProfileReferenceFields = (tableName: string): string[] => {
   const profileFields: Record<string, string[]> = {
     tasks: ['assigned_to', 'assigned_by'],
+    subtasks: ['assigned_to', 'assigned_by'],
     cadets: ['profile_id'],
     teams: ['team_lead_id'],
     expenses: ['created_by', 'approved_by'],
@@ -130,9 +147,9 @@ export const getEnhancedVariables = (tableName: string): Array<{ variable: strin
     label: `${getColumnLabel(field, tableName)} Name`
   }));
 
-  // Add comments variable for tasks and incidents
+  // Add comments variable for tasks, subtasks and incidents
   const commentsVariables = [];
-  if (tableName === 'tasks' || tableName === 'incidents') {
+  if (tableName === 'tasks' || tableName === 'subtasks' || tableName === 'incidents') {
     commentsVariables.push({
       variable: 'last_comment',
       label: 'Last User Comment'
