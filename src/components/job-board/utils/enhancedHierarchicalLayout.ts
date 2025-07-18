@@ -80,7 +80,7 @@ const positionSquadronCommanders = (
   
   const squadronArray = Array.from(squadrons.values());
   const totalSquadrons = squadronArray.length;
-  const squadronSpacing = config.nodeWidth * 2; // More space between squadrons
+  const squadronSpacing = config.nodeWidth * 2.5; // Much more space between squadrons
   const totalWidth = totalSquadrons * config.nodeWidth + (totalSquadrons - 1) * squadronSpacing;
   const startX = -totalWidth / 2;
   
@@ -132,23 +132,25 @@ const positionSquadronMembers = (
       const levelMembers = levelGroups.get(level) || [];
       
       levelMembers.forEach((member, index) => {
-        // For more than 3 members at same level, create sub-columns
-        const subColumnOffset = levelMembers.length > 3 ? 
-          (index % 2) * (config.nodeWidth * 0.7) - (config.nodeWidth * 0.35) : 0;
+        // For more than 2 members at same level, create sub-columns with better spacing
+        const subColumnOffset = levelMembers.length > 2 ? 
+          (index % 2) * (config.nodeWidth + config.minNodeSpacing * 0.6) - (config.nodeWidth + config.minNodeSpacing * 0.6) * 0.5 : 0;
         
         positions.set(member.id, { 
           x: columnX + subColumnOffset, 
           y: currentY 
         });
         
-        // Move to next row if we have more than 2 at same level
-        if (levelMembers.length > 2 && (index + 1) % 2 === 0) {
-          currentY += config.levelHeight * 0.7;
+        // Move to next row if we have more than 1 at same level
+        if (levelMembers.length > 1 && (index + 1) % 2 === 0) {
+          currentY += config.levelHeight * 0.8;
         }
       });
       
-      // Move to next level
-      currentY += config.levelHeight;
+      // Move to next level with proper spacing
+      if (levelMembers.length > 0) {
+        currentY += config.levelHeight * 0.9;
+      }
     });
     
     globalMaxY = Math.max(globalMaxY, currentY);
@@ -197,11 +199,11 @@ export const calculateEnhancedHierarchicalLayout = (
   config: LayoutConfig = {
     nodeWidth: 300,
     nodeHeight: 120,
-    levelHeight: 180,
-    minNodeSpacing: 100,
-    maxNodeSpacing: 200,
-    assistantOffset: 60,
-    squadronPadding: 150,
+    levelHeight: 220,
+    minNodeSpacing: 150,
+    maxNodeSpacing: 250,
+    assistantOffset: 80,
+    squadronPadding: 200,
   }
 ): EnhancedLayoutResult => {
   if (jobs.length === 0) {
