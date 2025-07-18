@@ -94,13 +94,13 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
   const handleStatusChangeWithComment = async (comment: string) => {
     if (pendingStatusChange) {
-      // First save the status change
-      await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
-      
-      // Then add the user comment
+      // First add the user comment BEFORE status change
       if (comment.trim()) {
         await handleSystemComment(task.id, comment);
       }
+      
+      // Then save the status change (which will trigger email with the fresh comment)
+      await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
       
       // Reset modal state
       setIsStatusCommentModalOpen(false);

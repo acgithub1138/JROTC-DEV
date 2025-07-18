@@ -76,16 +76,16 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
 
   const handleStatusChangeWithComment = async (comment: string) => {
     if (pendingStatusChange) {
-      // First save the status change
+      // First add the user comment BEFORE status change
+      if (comment.trim()) {
+        await handleSystemComment(subtask.id, comment);
+      }
+      
+      // Then save the status change (which will trigger email with the fresh comment)
       await updateSubtask({
         id: subtask.id,
         status: pendingStatusChange
       });
-      
-      // Then add the user comment
-      if (comment.trim()) {
-        await handleSystemComment(subtask.id, comment);
-      }
       
       // Reset modal state
       setIsStatusCommentModalOpen(false);
