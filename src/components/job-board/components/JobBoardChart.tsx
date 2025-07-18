@@ -1,4 +1,3 @@
-
 import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
@@ -30,6 +29,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [layoutAlgorithm, setLayoutAlgorithm] = useState<'hierarchical' | 'radial' | 'legacy'>('hierarchical');
   const { exportChart, isExporting } = useJobBoardExport();
   const [connectionEditModal, setConnectionEditModal] = useState<{
     isOpen: boolean;
@@ -52,6 +52,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     jobs,
     savedPositionsMap,
     handleNodesChange,
+    layoutAlgorithm,
   });
 
   // Stabilized fitView function 
@@ -89,6 +90,11 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const handleExport = () => {
     setShowExportModal(true);
+  };
+
+  const handleLayoutAlgorithmChange = (algorithm: 'hierarchical' | 'radial' | 'legacy') => {
+    console.log(`🔄 Switching to ${algorithm} layout algorithm`);
+    setLayoutAlgorithm(algorithm);
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -174,6 +180,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         isFullscreen={isFullscreen}
         snapToGrid={snapToGrid}
         onToggleSnapToGrid={() => setSnapToGrid(!snapToGrid)}
+        layoutAlgorithm={layoutAlgorithm}
+        onLayoutAlgorithmChange={handleLayoutAlgorithmChange}
       />
       
       <ReactFlow

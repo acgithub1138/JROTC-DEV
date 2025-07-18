@@ -1,20 +1,23 @@
+
 import { useMemo, useCallback, useEffect, useRef } from 'react';
 import { useNodesState, useEdgesState, NodeChange, Node, Edge } from '@xyflow/react';
 import { JobBoardWithCadet } from '../types';
 import { buildJobHierarchy } from '../utils/hierarchyBuilder';
-import { calculateNodePositions, DEFAULT_POSITION_CONFIG } from '../utils/nodePositioning';
+import { calculateNodePositions, DEFAULT_POSITION_CONFIG, LayoutAlgorithm } from '../utils/nodePositioning';
 import { createFlowNodes, createFlowEdges } from '../utils/flowElementFactory';
 
 interface UseJobBoardNodesProps {
   jobs: JobBoardWithCadet[];
   savedPositionsMap: Map<string, { x: number; y: number }>;
   handleNodesChange: (changes: NodeChange[], nodes: any[]) => void;
+  layoutAlgorithm?: LayoutAlgorithm;
 }
 
 export const useJobBoardNodes = ({
   jobs,
   savedPositionsMap,
   handleNodesChange,
+  layoutAlgorithm = 'hierarchical',
 }: UseJobBoardNodesProps) => {
   // Initialize with empty nodes/edges
   const [nodes, setNodes, onNodesChange] = useNodesState([]);
@@ -23,6 +26,7 @@ export const useJobBoardNodes = ({
   // Refs to track previous state for change detection
   const previousJobsRef = useRef<JobBoardWithCadet[]>([]);
   const previousSavedPositionsRef = useRef<Map<string, { x: number; y: number }>>(new Map());
+  const previousLayoutAlgorithmRef = useRef<LayoutAlgorithm>(layoutAlgorithm);
   const isInitializedRef = useRef(false);
 
   // Handle node changes with position persistence
@@ -86,20 +90,17 @@ export const useJobBoardNodes = ({
       // If we have no nodes or need to add/remove nodes, recreate all
       if (currentNodes.length !== allJobs.length) {
         const flowNodes = createFlowNodes(allJobs, positions);
+        console.log(`🔄 Recreated all ${flowNodes.length} nodes due to count change`);
         return flowNodes;
       }
 
-      // Create a map of current nodes for efficient lookup
-      const currentNodesMap = new Map(currentNodes.map(node => [node.id, node]));
-      
       // Only update changed nodes, preserve others exactly as they are
       return currentNodes.map(node => {
         if (changedJobIds.has(node.id)) {
           const job = allJobs.find(j => j.id === node.id);
           if (job) {
-            // Use saved position if available, otherwise keep current position
-            const savedPosition = positions.get(job.id);
-            const position = savedPosition || { x: node.position.x, y: node.position.y };
+            // Use calculated position (intelligent layout already applied)
+            const position = positions.get(job.id) || { x: node.position.x, y: node.position.y };
             
             // Create new node data but preserve position and other React Flow properties
             const [updatedNode] = createFlowNodes([job], new Map([[job.id, position]]));
@@ -135,28 +136,55 @@ export const useJobBoardNodes = ({
         return !prevPosition || prevPosition.x !== position.x || prevPosition.y !== position.y;
       });
 
-    // Initial load - create everything
-    if (!isInitializedRef.current || (hasPositionChanges && !hasJobChanges)) {
+    // Check for layout algorithm changes
+    const hasLayoutAlgorithmChanged = layoutAlgorithm !== previousLayoutAlgorithmRef.current;
+
+    // Determine if we need to recalculate layout
+    const needsLayoutRecalculation = !isInitializedRef.current || hasJobChanges || hasLayoutAlgorithmChanged || 
+      (hasPositionChanges && savedPositionsMap.size === 0); // Only recalculate if positions were cleared
+
+    if (needsLayoutRecalculation) {
+      console.log(`🎯 Recalculating layout using ${layoutAlgorithm} algorithm`);
+      
       const hierarchyResult = buildJobHierarchy(jobs);
-      const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
-      const flowNodes = createFlowNodes(jobs, positions);
-      const flowEdges = createFlowEdges(hierarchyResult, jobs);
+      const positions = calculateNodePositions(
+        jobs, 
+        hierarchyResult.nodes, 
+        DEFAULT_POSITION_CONFIG, 
+        savedPositionsMap,
+        layoutAlgorithm
+      );
       
-      setNodes(flowNodes);
-      setEdges(flowEdges);
-      isInitializedRef.current = true;
-    }
-    // Job changes - update selectively
-    else if (hasJobChanges) {
-      const hierarchyResult = buildJobHierarchy(jobs);
-      const positions = calculateNodePositions(jobs, hierarchyResult.nodes, DEFAULT_POSITION_CONFIG, savedPositionsMap);
-      
-      // Update specific nodes
-      updateSpecificNodes(changedJobIds, jobs, positions);
-      
-      // Always update edges when jobs change (connections might have changed)
-      const flowEdges = createFlowEdges(hierarchyResult, jobs);
-      setEdges(flowEdges);
+      if (!isInitializedRef.current || hasJobChanges || hasLayoutAlgorithmChanged) {
+        // Full recreation
+        const flowNodes = createFlowNodes(jobs, positions);
+        const flowEdges = createFlowEdges(hierarchyResult, jobs);
+        
+        setNodes(flowNodes);
+        setEdges(flowEdges);
+        console.log(`✨ Created layout with ${flowNodes.length} nodes using ${layoutAlgorithm} algorithm`);
+        
+        isInitializedRef.current = true;
+      } else {
+        // Update specific nodes
+        updateSpecificNodes(changedJobIds, jobs, positions);
+        
+        // Always update edges when jobs change
+        const flowEdges = createFlowEdges(hierarchyResult, jobs);
+        setEdges(flowEdges);
+      }
+    } else if (hasPositionChanges) {
+      // Only position changes, update existing nodes
+      console.log('📍 Updating node positions from saved preferences');
+      setNodes(currentNodes => 
+        currentNodes.map(node => {
+          const savedPosition = savedPositionsMap.get(node.id);
+          if (savedPosition) {
+            return { ...node, position: savedPosition };
+          }
+          return node;
+        })
+      );
     }
 
     // Update refs
@@ -166,7 +194,10 @@ export const useJobBoardNodes = ({
     if (hasPositionChanges) {
       previousSavedPositionsRef.current = new Map(savedPositionsMap);
     }
-  }, [jobs, savedPositionsMap, getChangedJobs, updateSpecificNodes]);
+    if (hasLayoutAlgorithmChanged) {
+      previousLayoutAlgorithmRef.current = layoutAlgorithm;
+    }
+  }, [jobs, savedPositionsMap, layoutAlgorithm, getChangedJobs, updateSpecificNodes]);
 
   return {
     nodes,
