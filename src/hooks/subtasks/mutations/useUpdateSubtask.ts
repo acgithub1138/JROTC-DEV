@@ -24,10 +24,15 @@ export const useUpdateSubtask = () => {
 
       if (error) throw error;
     },
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
+      // Invalidate all subtask queries (both general and specific parent task queries)
       queryClient.invalidateQueries({ queryKey: ['subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['my-subtasks'] });
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
+      
+      // Force refetch to ensure UI updates immediately
+      queryClient.refetchQueries({ queryKey: ['subtasks'] });
+      
       toast({
         title: "Subtask updated",
         description: "The subtask has been updated successfully.",
