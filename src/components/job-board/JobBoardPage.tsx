@@ -79,7 +79,7 @@ const JobBoardPage = () => {
   return <div className="p-6">
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
-          <h1 className="text-3xl font-bold text-gray-900">Job Board</h1>
+          <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
           {canCreate && <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
@@ -99,8 +99,8 @@ const JobBoardPage = () => {
           <CardContent>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
               <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="table">Job Board</TabsTrigger>
-                <TabsTrigger value="chart">Job Board Chart</TabsTrigger>
+                <TabsTrigger value="table">Chain of Command</TabsTrigger>
+                <TabsTrigger value="chart">Chain of Command Chart</TabsTrigger>
               </TabsList>
               
               <TabsContent value="table" className="mt-4">
