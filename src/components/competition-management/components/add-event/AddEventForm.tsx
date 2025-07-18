@@ -51,11 +51,28 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({
               <SelectValue placeholder="Select a program..." />
             </SelectTrigger>
             <SelectContent>
-              {availablePrograms.map(program => (
-                <SelectItem key={program} value={program}>
-                  {program.charAt(0).toUpperCase() + program.slice(1).replace('_', ' ')}
-                </SelectItem>
-              ))}
+              {availablePrograms.map(program => {
+                // Proper capitalization for branch names
+                const formatBranchName = (branch: string) => {
+                  const branchMap: Record<string, string> = {
+                    'air_force': 'Air Force',
+                    'marine_corps': 'Marine Corps',
+                    'army': 'Army',
+                    'navy': 'Navy',
+                    'space_force': 'Space Force',
+                    'coast_guard': 'Coast Guard'
+                  };
+                  return branchMap[branch] || branch.split('_').map(word => 
+                    word.charAt(0).toUpperCase() + word.slice(1)
+                  ).join(' ');
+                };
+                
+                return (
+                  <SelectItem key={program} value={program}>
+                    {formatBranchName(program)}
+                  </SelectItem>
+                );
+              })}
             </SelectContent>
           </Select>
         </div>
