@@ -59,7 +59,18 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
         <TableBody>
           {templates.map((template) => (
             <TableRow key={template.id}>
-              <TableCell className="font-medium py-2">{template.name}</TableCell>
+              <TableCell className="font-medium py-2">
+                {canViewDetails && onView ? (
+                  <button
+                    onClick={() => onView(template)}
+                    className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer bg-transparent border-none p-0 font-medium text-left"
+                  >
+                    {template.name}
+                  </button>
+                ) : (
+                  template.name
+                )}
+              </TableCell>
               <TableCell className="py-2">{template.subject}</TableCell>
               <TableCell className="py-2">
                 <Badge variant="outline">{template.source_table}</Badge>
