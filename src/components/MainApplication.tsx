@@ -122,7 +122,7 @@ const MainApplication = () => {
               </ProtectedRoute>
             } />
             <Route path="/users" element={
-              <ProtectedRoute module="users">
+              <ProtectedRoute requireAdminRole={true}>
                 <UserAdminPage />
               </ProtectedRoute>
             } />

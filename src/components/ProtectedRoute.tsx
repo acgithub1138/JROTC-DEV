@@ -9,12 +9,14 @@ interface ProtectedRouteProps {
   children: React.ReactNode;
   module?: string; // Module name for permission checking
   requirePermission?: 'sidebar' | 'read' | 'view'; // Which permission to check
+  requireAdminRole?: boolean; // Require admin role specifically
 }
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
   module,
-  requirePermission = 'sidebar' 
+  requirePermission = 'sidebar',
+  requireAdminRole = false
 }) => {
   const { user, userProfile, loading } = useAuth();
   const { hasPermission } = usePermissionContext();
@@ -32,15 +34,24 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }
   }, [user, userProfile]);
 
-  // Check module permissions
+  // Check module permissions or admin role requirement
   useEffect(() => {
-    if (user && module) {
-      const hasAccess = hasPermission(module, requirePermission);
-      setShowAccessDenied(!hasAccess);
+    if (user) {
+      if (requireAdminRole) {
+        // Check if user is admin
+        const isAdmin = userProfile?.role === 'admin';
+        setShowAccessDenied(!isAdmin);
+      } else if (module) {
+        // Check module permissions
+        const hasAccess = hasPermission(module, requirePermission);
+        setShowAccessDenied(!hasAccess);
+      } else {
+        setShowAccessDenied(false);
+      }
     } else {
       setShowAccessDenied(false);
     }
-  }, [user, module, requirePermission, hasPermission]);
+  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission]);
 
   if (loading) {
     return (
@@ -73,8 +84,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
 
-  // Show access denied if user doesn't have permission for this module
-  if (showAccessDenied && module) {
+  // Show access denied if user doesn't have permission for this module or admin requirement
+  if (showAccessDenied && (module || requireAdminRole)) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
         <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
