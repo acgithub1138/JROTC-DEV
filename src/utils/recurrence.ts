@@ -37,6 +37,9 @@ export function generateRecurringEvents(
   let currentDate = new Date(startDate);
   let instanceCount = 0;
   
+  // Skip the first occurrence since the original event already exists
+  currentDate = calculateNextOccurrence(currentDate, recurrenceRule);
+  
   while (instanceCount < maxInstances) {
     // Check end conditions
     if (recurrenceRule.endType === 'date' && recurrenceRule.endDate) {
@@ -44,7 +47,8 @@ export function generateRecurringEvents(
     }
     
     if (recurrenceRule.endType === 'count' && recurrenceRule.occurrenceCount) {
-      if (instanceCount >= recurrenceRule.occurrenceCount) break;
+      // For count-based, we want total occurrences including the original
+      if (instanceCount >= (recurrenceRule.occurrenceCount - 1)) break;
     }
     
     // For weekly frequency, check if current day is in daysOfWeek

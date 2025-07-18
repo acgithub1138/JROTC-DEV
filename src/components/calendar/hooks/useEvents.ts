@@ -93,7 +93,9 @@ export const useEvents = (filters: EventFilters) => {
       // Generate recurring instances if this is a recurring event
       if (data.is_recurring && data.recurrence_rule) {
         try {
+          console.log('Generating recurring instances for event:', data.id, 'with rule:', data.recurrence_rule);
           const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any);
+          console.log('Generated instances:', recurringInstances.length, recurringInstances);
           
           if (recurringInstances.length > 0) {
             // Convert instances to match database schema
@@ -113,6 +115,8 @@ export const useEvents = (filters: EventFilters) => {
                 description: 'Event created but failed to create recurring instances',
                 variant: 'destructive',
               });
+            } else {
+              console.log('Successfully created recurring instances');
             }
           }
         } catch (recurringError) {
