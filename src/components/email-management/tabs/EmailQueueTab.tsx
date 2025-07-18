@@ -3,7 +3,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity } from 'lucide-react';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity, Users } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -286,10 +287,47 @@ export const EmailQueueTab: React.FC = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {queueItems.map(item => <TableRow key={item.id}>
-                      <TableCell className="font-medium py-2">
-                        {item.recipient_email}
-                      </TableCell>
+                  {queueItems.map(item => {
+                    const recipients = item.recipient_email.split(',').map(email => email.trim());
+                    const hasMultiple = recipients.length > 1;
+                    
+                    return (
+                      <TableRow key={item.id}>
+                        <TableCell className="font-medium py-2">
+                          {hasMultiple ? (
+                            <div className="flex items-center gap-2">
+                              <Popover>
+                                <PopoverTrigger asChild>
+                                  <Button 
+                                    variant="outline" 
+                                    size="sm" 
+                                    className="h-6 px-2 text-xs"
+                                  >
+                                    <Users className="w-3 h-3 mr-1" />
+                                    Multiple ({recipients.length})
+                                  </Button>
+                                </PopoverTrigger>
+                                <PopoverContent className="w-80">
+                                  <div className="space-y-2">
+                                    <h4 className="font-medium text-sm">Recipients ({recipients.length})</h4>
+                                    <div className="max-h-48 overflow-y-auto space-y-1">
+                                      {recipients.map((email, index) => (
+                                        <div 
+                                          key={index} 
+                                          className="text-xs p-2 bg-muted rounded border"
+                                        >
+                                          {email}
+                                        </div>
+                                      ))}
+                                    </div>
+                                  </div>
+                                </PopoverContent>
+                              </Popover>
+                            </div>
+                          ) : (
+                            item.recipient_email
+                          )}
+                        </TableCell>
                       <TableCell className="max-w-xs truncate py-2">
                         {item.subject}
                       </TableCell>
@@ -311,7 +349,9 @@ export const EmailQueueTab: React.FC = () => {
                       <TableCell className="text-sm py-2">
                         {item.email_templates?.name || 'Manual'}
                       </TableCell>
-                    </TableRow>)}
+                    </TableRow>
+                    );
+                  })}
                 </TableBody>
               </Table>
             </div>}
