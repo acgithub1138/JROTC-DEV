@@ -4,6 +4,7 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import ProtectedRoute from './ProtectedRoute';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
 import IncidentManagementPage from './incident-management/IncidentManagementPage';
@@ -100,25 +101,93 @@ const MainApplication = () => {
         )}
         <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
           <Routes>
-            <Route path="/" element={<DashboardOverview />} />
-            <Route path="/tasks" element={<TaskManagementPage />} />
-            <Route path="/incidents" element={<IncidentManagementPage />} />
-            <Route path="/school" element={<SchoolManagementPage />} />
-            <Route path="/users" element={<UserAdminPage />} />
-            <Route path="/email" element={<EmailManagementPage />} />
+            <Route path="/" element={
+              <ProtectedRoute>
+                <DashboardOverview />
+              </ProtectedRoute>
+            } />
+            <Route path="/tasks" element={
+              <ProtectedRoute module="tasks">
+                <TaskManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/incidents" element={
+              <ProtectedRoute module="incident_management">
+                <IncidentManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/school" element={
+              <ProtectedRoute>
+                <SchoolManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/users" element={
+              <ProtectedRoute module="users">
+                <UserAdminPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/email" element={
+              <ProtectedRoute module="email">
+                <EmailManagementPage />
+              </ProtectedRoute>
+            } />
             
-            <Route path="/settings" element={<SettingsPage />} />
-            <Route path="/cadets" element={<CadetManagementPage />} />
-            <Route path="/job-board" element={<JobBoardPage />} />
-            <Route path="/teams" element={<TeamsManagementPage />} />
-            <Route path="/inventory" element={<InventoryManagementPage />} />
-            <Route path="/budget" element={<BudgetManagementPage />} />
-            <Route path="/contacts" element={<ContactManagementPage />} />
-            <Route path="/calendar" element={<CalendarManagementPage />} />
-            <Route path="/competitions" element={<CompetitionManagementPage />} />
-            <Route path="/competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
+            <Route path="/settings" element={
+              <ProtectedRoute>
+                <SettingsPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/cadets" element={
+              <ProtectedRoute module="cadets">
+                <CadetManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/job-board" element={
+              <ProtectedRoute module="job_board">
+                <JobBoardPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/teams" element={
+              <ProtectedRoute module="teams">
+                <TeamsManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/inventory" element={
+              <ProtectedRoute module="inventory">
+                <InventoryManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/budget" element={
+              <ProtectedRoute module="budget">
+                <BudgetManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/contacts" element={
+              <ProtectedRoute module="contacts">
+                <ContactManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/calendar" element={
+              <ProtectedRoute module="calendar">
+                <CalendarManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/competitions" element={
+              <ProtectedRoute module="competitions">
+                <CompetitionManagementPage />
+              </ProtectedRoute>
+            } />
+            <Route path="/competitions/score-sheets/:competitionId" element={
+              <ProtectedRoute module="competitions">
+                <ScoreSheetPage />
+              </ProtectedRoute>
+            } />
             
-            <Route path="/roles" element={<RoleManagementPage />} />
+            <Route path="/roles" element={
+              <ProtectedRoute>
+                <RoleManagementPage />
+              </ProtectedRoute>
+            } />
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>
