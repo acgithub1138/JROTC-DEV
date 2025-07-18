@@ -143,52 +143,74 @@ export const calculateHierarchicalTreeLayout = (
     squadronPadding: 100,
   }
 ): TreeLayoutResult => {
-  // Find root nodes (no parent)
-  const rootNodes = Array.from(nodes.values()).filter(node => !node.parent && !node.isAssistant);
+  // Group nodes by squadron for more vertical organization
+  const squadronGroups = groupBySquadron(nodes);
   
-  if (rootNodes.length === 0) {
+  if (squadronGroups.size === 0) {
     return { positionedNodes: [], totalWidth: 0, totalHeight: 0 };
   }
-  
-  // Calculate subtree widths for all nodes
-  const subtreeWidths = new Map<string, number>();
-  nodes.forEach((_, nodeId) => {
-    calculateSubtreeWidth(nodeId, nodes, config, subtreeWidths);
-  });
-  
-  // Position each root tree
+
   let allPositionedNodes: PositionedNode[] = [];
-  let currentX = 0;
-  let maxHeight = 0;
-  
-  rootNodes.forEach((rootNode, index) => {
-    const subtreeWidth = subtreeWidths.get(rootNode.id) || config.nodeWidth;
+  let currentY = 0;
+  let maxWidth = 0;
+
+  // Position each squadron group vertically
+  squadronGroups.forEach((squadronNodes, squadronName) => {
+    const rootNodes = squadronNodes.filter(node => !node.parent && !node.isAssistant);
     
-    // Position this root tree
-    const treeNodes = positionSubtree(rootNode.id, nodes, config, currentX, 0, subtreeWidths);
-    allPositionedNodes.push(...treeNodes);
-    
-    // Calculate the height of this tree
-    const treeHeight = Math.max(...treeNodes.map(n => n.finalPosition.y + config.nodeHeight));
-    maxHeight = Math.max(maxHeight, treeHeight);
-    
-    // Move to next root tree position
-    currentX += subtreeWidth;
-    if (index < rootNodes.length - 1) {
-      currentX += config.squadronPadding;
-    }
+    if (rootNodes.length === 0) return;
+
+    // Calculate subtree widths for this squadron
+    const subtreeWidths = new Map<string, number>();
+    squadronNodes.forEach(node => {
+      calculateSubtreeWidth(node.id, nodes, config, subtreeWidths);
+    });
+
+    let squadronMaxHeight = 0;
+    let currentX = 0;
+
+    // Position each root tree horizontally within the squadron
+    rootNodes.forEach((rootNode, index) => {
+      const subtreeWidth = subtreeWidths.get(rootNode.id) || config.nodeWidth;
+      
+      // Position this root tree, but offset by currentY for vertical grouping
+      const treeNodes = positionSubtree(rootNode.id, nodes, config, currentX, 0, subtreeWidths);
+      
+      // Offset all nodes in this tree by currentY to create vertical grouping
+      const offsetTreeNodes = treeNodes.map(node => ({
+        ...node,
+        y: node.y + currentY,
+        finalPosition: { x: node.finalPosition.x, y: node.finalPosition.y + currentY }
+      }));
+      
+      allPositionedNodes.push(...offsetTreeNodes);
+      
+      // Calculate the height of this tree
+      const treeHeight = Math.max(...offsetTreeNodes.map(n => n.finalPosition.y + config.nodeHeight)) - currentY;
+      squadronMaxHeight = Math.max(squadronMaxHeight, treeHeight);
+      
+      // Move to next root tree position horizontally
+      currentX += subtreeWidth;
+      if (index < rootNodes.length - 1) {
+        currentX += config.minNodeSpacing;
+      }
+    });
+
+    // Update maxWidth and move to next squadron vertically
+    maxWidth = Math.max(maxWidth, currentX);
+    currentY += squadronMaxHeight + config.squadronPadding;
   });
-  
+
   // Position assistants
   allPositionedNodes = positionAssistants(allPositionedNodes, nodes, config);
-  
+
   // Resolve collisions
   allPositionedNodes = resolveCollisions(allPositionedNodes, config);
-  
+
   // Calculate total dimensions
-  const totalWidth = Math.max(...allPositionedNodes.map(n => n.finalPosition.x + config.nodeWidth));
-  const totalHeight = maxHeight;
-  
+  const totalWidth = maxWidth;
+  const totalHeight = currentY;
+
   return {
     positionedNodes: allPositionedNodes,
     totalWidth,
