@@ -40,6 +40,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
     assigned_to: '',
     due_date: null as Date | null,
   });
+  const [isDatePickerOpen, setIsDatePickerOpen] = useState(false);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -161,14 +162,20 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
 
             <div>
               <Label>Due Date</Label>
-              <Popover>
+              <Popover open={isDatePickerOpen} onOpenChange={setIsDatePickerOpen}>
                 <PopoverTrigger asChild>
                   <Button
                     variant="outline"
                     className={cn(
-                      'w-full justify-start text-left font-normal',
+                      'w-full justify-start text-left font-normal touch-manipulation select-none',
                       !formData.due_date && 'text-muted-foreground'
                     )}
+                    onClick={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      setIsDatePickerOpen(!isDatePickerOpen);
+                    }}
+                    onTouchStart={(e) => e.stopPropagation()}
                   >
                     <CalendarIcon className="mr-2 h-4 w-4" />
                     {formData.due_date ? format(formData.due_date, 'PPP') : 'Pick a date'}
@@ -178,8 +185,11 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
                   <Calendar
                     mode="single"
                     selected={formData.due_date}
-                    onSelect={(date) => setFormData({ ...formData, due_date: date || null })}
-                    initialFocus
+                    onSelect={(date) => {
+                      setFormData({ ...formData, due_date: date || null });
+                      setIsDatePickerOpen(false);
+                    }}
+                    className="pointer-events-auto"
                   />
                 </PopoverContent>
               </Popover>
