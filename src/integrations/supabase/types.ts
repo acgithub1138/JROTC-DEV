@@ -2236,6 +2236,36 @@ export type Database = {
           },
         ]
       }
+      task_overdue_reminders: {
+        Row: {
+          created_at: string
+          email_queue_id: string | null
+          id: string
+          reminder_type: string
+          school_id: string
+          sent_at: string
+          task_id: string
+        }
+        Insert: {
+          created_at?: string
+          email_queue_id?: string | null
+          id?: string
+          reminder_type: string
+          school_id: string
+          sent_at?: string
+          task_id: string
+        }
+        Update: {
+          created_at?: string
+          email_queue_id?: string | null
+          id?: string
+          reminder_type?: string
+          school_id?: string
+          sent_at?: string
+          task_id?: string
+        }
+        Relationships: []
+      }
       task_priority_options: {
         Row: {
           color_class: string
@@ -2658,6 +2688,15 @@ export type Database = {
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
+      }
+      process_overdue_task_reminders: {
+        Args: Record<PropertyKey, never>
+        Returns: {
+          processed_count: number
+          school_id: string
+          reminder_type: string
+          tasks_found: number
+        }[]
       }
       queue_email: {
         Args:
