@@ -12,6 +12,9 @@ import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
+import { EditableCell } from './EditableCell';
+import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
 
 interface SubtaskTableRowProps {
   subtask: Subtask;
@@ -36,6 +39,10 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
   const { updateSubtask } = useSubtasks();
   const { handleSystemComment } = useSubtaskSystemComments();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
+  const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
+  
+  const { editState, setEditState, cancelEdit, saveEdit, canEditTask } = useTaskTableLogic();
 
   // Handle subtask cancellation
   const handleCancel = async () => {
@@ -52,6 +59,45 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
 
   // Check if subtask can be canceled (not already done or canceled)
   const canCancel = canUpdate && subtask.status !== 'done' && subtask.status !== 'canceled';
+
+  // Handle status change with comment modal for specific statuses
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === 'need_information' || newStatus === 'completed') {
+      setPendingStatusChange(newStatus);
+      setIsStatusCommentModalOpen(true);
+    } else {
+      // Direct status change for other statuses - we need to use updateSubtask instead of saveEdit
+      await updateSubtask({
+        id: subtask.id,
+        status: newStatus
+      });
+    }
+  };
+
+  const handleStatusChangeWithComment = async (comment: string) => {
+    if (pendingStatusChange) {
+      // First save the status change
+      await updateSubtask({
+        id: subtask.id,
+        status: pendingStatusChange
+      });
+      
+      // Then add the user comment
+      if (comment.trim()) {
+        await handleSystemComment(subtask.id, comment);
+      }
+      
+      // Reset modal state
+      setIsStatusCommentModalOpen(false);
+      setPendingStatusChange(null);
+    }
+  };
+
+  const handleCancelStatusChange = () => {
+    setIsStatusCommentModalOpen(false);
+    setPendingStatusChange(null);
+    cancelEdit();
+  };
 
   return (
     <>
@@ -88,9 +134,21 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
           </Button>
         </TableCell>
         <TableCell className="py-2">
-          <Badge className={getStatusColorClass(subtask.status, statusOptions)}>
-            {getStatusLabel(subtask.status, statusOptions)}
-          </Badge>
+          <EditableCell
+            task={subtask as any}
+            field="status"
+            value={subtask.status}
+            displayValue={
+              <Badge className={getStatusColorClass(subtask.status, statusOptions)}>
+                {getStatusLabel(subtask.status, statusOptions)}
+              </Badge>
+            }
+            editState={editState}
+            setEditState={setEditState}
+            onSave={(task, field, newValue) => handleStatusChange(newValue)}
+            onCancel={cancelEdit}
+            canEdit={canUpdate}
+          />
         </TableCell>
         <TableCell className="py-2">
           <Badge className={getPriorityColorClass(subtask.priority, priorityOptions)}>
@@ -125,6 +183,14 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
         onClose={() => setIsDescriptionModalOpen(false)}
         taskTitle={subtask.title}
         taskDescription={subtask.description}
+      />
+
+      <StatusChangeCommentModal
+        isOpen={isStatusCommentModalOpen}
+        onClose={handleCancelStatusChange}
+        onConfirm={handleStatusChangeWithComment}
+        newStatus={pendingStatusChange || ''}
+        taskTitle={subtask.title}
       />
     </>
   );

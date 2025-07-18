@@ -17,6 +17,9 @@ import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
+import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
+import { EditableCell } from './EditableCell';
+import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
 
 interface TaskTableRowProps {
   task: Task | Subtask;
@@ -48,6 +51,10 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const { handleSystemComment } = useTaskSystemComments();
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
+  const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
+  const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
+  
+  const { editState, setEditState, cancelEdit, saveEdit, canEditTask } = useTaskTableLogic();
   
   // Check if this is a subtask (has parent_task_id property)
   const isSubtask = 'parent_task_id' in task;
@@ -73,6 +80,39 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
 
   // Check if task can be canceled (not already done or canceled)
   const canCancel = canUpdate && task.status !== 'done' && task.status !== 'canceled';
+
+  // Handle status change with comment modal for specific statuses
+  const handleStatusChange = async (newStatus: string) => {
+    if (newStatus === 'need_information' || newStatus === 'completed') {
+      setPendingStatusChange(newStatus);
+      setIsStatusCommentModalOpen(true);
+    } else {
+      // Direct status change for other statuses
+      await saveEdit(task, 'status', newStatus, handleSystemComment);
+    }
+  };
+
+  const handleStatusChangeWithComment = async (comment: string) => {
+    if (pendingStatusChange) {
+      // First save the status change
+      await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
+      
+      // Then add the user comment
+      if (comment.trim()) {
+        await handleSystemComment(task.id, comment);
+      }
+      
+      // Reset modal state
+      setIsStatusCommentModalOpen(false);
+      setPendingStatusChange(null);
+    }
+  };
+
+  const handleCancelStatusChange = () => {
+    setIsStatusCommentModalOpen(false);
+    setPendingStatusChange(null);
+    cancelEdit();
+  };
 
   return (
     <>
@@ -135,9 +175,21 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           </Button>
         </TableCell>
         <TableCell className="py-2">
-          <Badge className={getStatusColorClass(task.status, statusOptions)}>
-            {getStatusLabel(task.status, statusOptions)}
-          </Badge>
+          <EditableCell
+            task={task}
+            field="status"
+            value={task.status}
+            displayValue={
+              <Badge className={getStatusColorClass(task.status, statusOptions)}>
+                {getStatusLabel(task.status, statusOptions)}
+              </Badge>
+            }
+            editState={editState}
+            setEditState={setEditState}
+            onSave={(task, field, newValue) => handleStatusChange(newValue)}
+            onCancel={cancelEdit}
+            canEdit={canEditTask(task)}
+          />
         </TableCell>
         <TableCell className="py-2">
           <Badge className={getPriorityColorClass(task.priority, priorityOptions)}>
@@ -198,6 +250,14 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           parentTaskTitle={task.title}
         />
       )}
+
+      <StatusChangeCommentModal
+        isOpen={isStatusCommentModalOpen}
+        onClose={handleCancelStatusChange}
+        onConfirm={handleStatusChangeWithComment}
+        newStatus={pendingStatusChange || ''}
+        taskTitle={task.title}
+      />
     </>
   );
 };
