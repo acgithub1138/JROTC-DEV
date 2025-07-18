@@ -19,21 +19,9 @@ export const EmailRulesTab: React.FC = () => {
   const subtaskTemplates = templates.filter(t => t.source_table === 'subtasks' && t.is_active);
   const activeRulesWithoutTemplates = rules.filter(r => r.is_active && !r.template_id);
 
-  // Sort rules in desired order: Task rules first, then Subtask rules
-  const ruleOrder = [
-    'task_created', 
-    'task_information_needed', 
-    'task_completed', 
-    'task_canceled',
-    'subtask_created', 
-    'subtask_information_needed', 
-    'subtask_completed', 
-    'subtask_canceled'
-  ];
+  // Sort rules alphabetically by rule type (name)
   const sortedRules = [...rules].sort((a, b) => {
-    const aIndex = ruleOrder.indexOf(a.rule_type);
-    const bIndex = ruleOrder.indexOf(b.rule_type);
-    return aIndex - bIndex;
+    return a.rule_type.localeCompare(b.rule_type);
   });
 
   const handleToggleRule = (ruleId: string, isActive: boolean) => {
