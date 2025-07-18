@@ -59,40 +59,55 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
       setPendingStatusChange(newStatus);
       setIsStatusCommentModalOpen(true);
     } else {
-      // Direct status change for other statuses - we need to use updateSubtask instead of saveEdit
-      await updateSubtask({
-        id: subtask.id,
-        status: newStatus
-      });
+      try {
+        // Direct status change for other statuses - we need to use updateSubtask instead of saveEdit
+        await updateSubtask({
+          id: subtask.id,
+          status: newStatus
+        });
+        cancelEdit(); // Close the dropdown after successful update
+      } catch (error) {
+        cancelEdit(); // Also close on error to reset the UI
+        throw error;
+      }
     }
   };
 
   const handleStatusChangeWithComment = async (comment: string) => {
     if (pendingStatusChange) {
-      // First add the user comment BEFORE status change
-      if (comment.trim()) {
-        await handleSystemComment(subtask.id, comment);
+      try {
+        // First add the user comment BEFORE status change
+        if (comment.trim()) {
+          await handleSystemComment(subtask.id, comment);
+        }
+        
+        // For canceled status, also set completed_at
+        if (pendingStatusChange === 'canceled') {
+          const now = new Date().toISOString();
+          await updateSubtask({
+            id: subtask.id,
+            status: pendingStatusChange,
+            completed_at: now
+          });
+        } else {
+          // Then save the status change (which will trigger email with the fresh comment)
+          await updateSubtask({
+            id: subtask.id,
+            status: pendingStatusChange
+          });
+        }
+        
+        // Reset modal state and close dropdown
+        setIsStatusCommentModalOpen(false);
+        setPendingStatusChange(null);
+        cancelEdit(); // Close the dropdown after successful update
+      } catch (error) {
+        // Reset modal state and close dropdown even on error
+        setIsStatusCommentModalOpen(false);
+        setPendingStatusChange(null);
+        cancelEdit();
+        throw error;
       }
-      
-      // For canceled status, also set completed_at
-      if (pendingStatusChange === 'canceled') {
-        const now = new Date().toISOString();
-        await updateSubtask({
-          id: subtask.id,
-          status: pendingStatusChange,
-          completed_at: now
-        });
-      } else {
-        // Then save the status change (which will trigger email with the fresh comment)
-        await updateSubtask({
-          id: subtask.id,
-          status: pendingStatusChange
-        });
-      }
-      
-      // Reset modal state
-      setIsStatusCommentModalOpen(false);
-      setPendingStatusChange(null);
     }
   };
 
