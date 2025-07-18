@@ -96,7 +96,90 @@ const positionSquadronCommanders = (
   return { positions, maxY: startY + config.nodeHeight, squadronColumns };
 };
 
-// Position squadron members in vertical columns
+// Grid-based positioning system to prevent overlaps
+interface PositionGrid {
+  occupiedAreas: Set<string>;
+  getGridKey: (x: number, y: number) => string;
+  isAreaFree: (x: number, y: number, width: number, height: number) => boolean;
+  markArea: (x: number, y: number, width: number, height: number) => void;
+}
+
+const createPositionGrid = (cellSize: number = 50): PositionGrid => {
+  const occupiedAreas = new Set<string>();
+  
+  const getGridKey = (x: number, y: number) => `${Math.floor(x / cellSize)},${Math.floor(y / cellSize)}`;
+  
+  const isAreaFree = (x: number, y: number, width: number, height: number) => {
+    const startGridX = Math.floor(x / cellSize);
+    const endGridX = Math.floor((x + width) / cellSize);
+    const startGridY = Math.floor(y / cellSize);
+    const endGridY = Math.floor((y + height) / cellSize);
+    
+    for (let gx = startGridX; gx <= endGridX; gx++) {
+      for (let gy = startGridY; gy <= endGridY; gy++) {
+        if (occupiedAreas.has(`${gx},${gy}`)) {
+          return false;
+        }
+      }
+    }
+    return true;
+  };
+  
+  const markArea = (x: number, y: number, width: number, height: number) => {
+    const startGridX = Math.floor(x / cellSize);
+    const endGridX = Math.floor((x + width) / cellSize);
+    const startGridY = Math.floor(y / cellSize);
+    const endGridY = Math.floor((y + height) / cellSize);
+    
+    for (let gx = startGridX; gx <= endGridX; gx++) {
+      for (let gy = startGridY; gy <= endGridY; gy++) {
+        occupiedAreas.add(`${gx},${gy}`);
+      }
+    }
+  };
+  
+  return { occupiedAreas, getGridKey, isAreaFree, markArea };
+};
+
+const findFreePosition = (
+  preferredX: number, 
+  preferredY: number, 
+  width: number, 
+  height: number, 
+  grid: PositionGrid,
+  maxSearchRadius: number = 300
+): { x: number; y: number } => {
+  // Try preferred position first
+  if (grid.isAreaFree(preferredX, preferredY, width, height)) {
+    return { x: preferredX, y: preferredY };
+  }
+  
+  // Search in expanding spirals with preference for vertical movement
+  for (let radius = 60; radius <= maxSearchRadius; radius += 60) {
+    // Try vertical offsets first (maintains squadron organization)
+    const verticalOffsets = [radius, -radius];
+    for (const offsetY of verticalOffsets) {
+      const y = preferredY + offsetY;
+      if (grid.isAreaFree(preferredX, y, width, height)) {
+        return { x: preferredX, y };
+      }
+    }
+    
+    // Then try horizontal offsets (within squadron column)
+    const horizontalOffsets = [-radius * 0.5, radius * 0.5];
+    for (const offsetX of horizontalOffsets) {
+      const x = preferredX + offsetX;
+      if (grid.isAreaFree(x, preferredY, width, height)) {
+        return { x, y: preferredY };
+      }
+    }
+  }
+  
+  // Fallback: place below existing content
+  return { x: preferredX, y: preferredY + maxSearchRadius };
+};
+
+// Position squadron members in collision-free vertical columns
 const positionSquadronMembers = (
   squadrons: Map<string, SquadronStructure>,
   layoutNodes: Map<string, LayoutNode>,
@@ -105,7 +188,13 @@ const positionSquadronMembers = (
   startY: number
 ): { positions: Map<string, { x: number; y: number }>, maxY: number } => {
   const positions = new Map<string, { x: number; y: number }>();
+  const grid = createPositionGrid(40); // 40px grid cells for positioning
   let globalMaxY = startY;
+
+  // Enhanced spacing configuration
+  const nodeBuffer = 60; // Extra space around each node
+  const levelSpacing = config.levelHeight + 40; // Extra vertical space between levels
+  const memberSpacing = config.nodeHeight + nodeBuffer; // Space between members
   
   squadrons.forEach((squadron, squadronName) => {
     const columnX = squadronColumns.get(squadronName) || 0;
@@ -127,45 +216,58 @@ const positionSquadronMembers = (
       }
     });
     
-    // Position each level group
-    Array.from(levelGroups.keys()).sort().forEach(level => {
+    // Position each level group with collision prevention
+    Array.from(levelGroups.keys()).sort().forEach((level, levelIndex) => {
       const levelMembers = levelGroups.get(level) || [];
+      let levelStartY = currentY;
       
-      levelMembers.forEach((member, index) => {
-        // For more than 2 members at same level, create sub-columns with better spacing
-        const subColumnOffset = levelMembers.length > 2 ? 
-          (index % 2) * (config.nodeWidth + config.minNodeSpacing * 0.6) - (config.nodeWidth + config.minNodeSpacing * 0.6) * 0.5 : 0;
+      levelMembers.forEach((member, memberIndex) => {
+        // Calculate preferred position
+        let preferredX = columnX;
+        let preferredY = levelStartY;
         
-        positions.set(member.id, { 
-          x: columnX + subColumnOffset, 
-          y: currentY 
-        });
-        
-        // Move to next row if we have more than 1 at same level
-        if (levelMembers.length > 1 && (index + 1) % 2 === 0) {
-          currentY += config.levelHeight * 0.8;
+        // For multiple members at same level, arrange in a single column with proper spacing
+        if (levelMembers.length > 1) {
+          preferredY = levelStartY + memberIndex * memberSpacing;
         }
+        
+        // Find collision-free position
+        const finalPosition = findFreePosition(
+          preferredX, 
+          preferredY, 
+          config.nodeWidth, 
+          config.nodeHeight, 
+          grid
+        );
+        
+        positions.set(member.id, finalPosition);
+        grid.markArea(finalPosition.x, finalPosition.y, config.nodeWidth, config.nodeHeight);
+        
+        globalMaxY = Math.max(globalMaxY, finalPosition.y + config.nodeHeight);
       });
       
-      // Move to next level with proper spacing
-      if (levelMembers.length > 0) {
-        currentY += config.levelHeight * 0.9;
-      }
+      // Calculate space needed for this level
+      const levelHeight = levelMembers.length * memberSpacing;
+      currentY = Math.max(currentY + levelHeight + levelSpacing, currentY + levelSpacing);
     });
-    
-    globalMaxY = Math.max(globalMaxY, currentY);
   });
   
   return { positions, maxY: globalMaxY };
 };
 
-// Position assistants next to their supervisors
+// Position assistants with collision detection
 const positionAssistants = (
   nodes: PositionedNode[],
   jobs: JobBoardWithCadet[],
   config: LayoutConfig
 ): PositionedNode[] => {
   const result = [...nodes];
+  const grid = createPositionGrid(40);
+  
+  // Mark existing nodes in grid
+  result.forEach(node => {
+    grid.markArea(node.finalPosition.x, node.finalPosition.y, config.nodeWidth, config.nodeHeight);
+  });
   
   jobs.forEach(job => {
     if (job.assistant && job.assistant !== 'NA') {
@@ -175,16 +277,54 @@ const positionAssistants = (
         const assistantIndex = result.findIndex(n => n.id === job.id);
         
         if (supervisorPosition && assistantIndex >= 0) {
-          // Position assistant to the right of supervisor
-          const assistantX = supervisorPosition.finalPosition.x + config.nodeWidth + config.assistantOffset;
-          const assistantY = supervisorPosition.finalPosition.y;
+          // Try multiple positions for assistant
+          const assistantPositions = [
+            // Right of supervisor (preferred)
+            { 
+              x: supervisorPosition.finalPosition.x + config.nodeWidth + config.assistantOffset, 
+              y: supervisorPosition.finalPosition.y 
+            },
+            // Left of supervisor
+            { 
+              x: supervisorPosition.finalPosition.x - config.nodeWidth - config.assistantOffset, 
+              y: supervisorPosition.finalPosition.y 
+            },
+            // Below supervisor
+            { 
+              x: supervisorPosition.finalPosition.x, 
+              y: supervisorPosition.finalPosition.y + config.nodeHeight + 60 
+            }
+          ];
+          
+          // Find first available position
+          let finalPosition = assistantPositions[0]; // fallback
+          for (const pos of assistantPositions) {
+            if (grid.isAreaFree(pos.x, pos.y, config.nodeWidth, config.nodeHeight)) {
+              finalPosition = pos;
+              break;
+            }
+          }
+          
+          // If none available, use collision-free search
+          if (!grid.isAreaFree(finalPosition.x, finalPosition.y, config.nodeWidth, config.nodeHeight)) {
+            finalPosition = findFreePosition(
+              assistantPositions[0].x, 
+              assistantPositions[0].y, 
+              config.nodeWidth, 
+              config.nodeHeight, 
+              grid
+            );
+          }
           
           result[assistantIndex] = {
             ...result[assistantIndex],
-            x: assistantX,
-            y: assistantY,
-            finalPosition: { x: assistantX, y: assistantY }
+            x: finalPosition.x,
+            y: finalPosition.y,
+            finalPosition
           };
+          
+          // Mark assistant position in grid
+          grid.markArea(finalPosition.x, finalPosition.y, config.nodeWidth, config.nodeHeight);
         }
       }
     }
@@ -199,11 +339,11 @@ export const calculateEnhancedHierarchicalLayout = (
   config: LayoutConfig = {
     nodeWidth: 300,
     nodeHeight: 120,
-    levelHeight: 220,
-    minNodeSpacing: 150,
-    maxNodeSpacing: 250,
-    assistantOffset: 80,
-    squadronPadding: 200,
+    levelHeight: 300, // Increased for more vertical space
+    minNodeSpacing: 200, // Increased horizontal spacing
+    maxNodeSpacing: 350,
+    assistantOffset: 120, // More space for assistants
+    squadronPadding: 250, // More squadron separation
   }
 ): EnhancedLayoutResult => {
   if (jobs.length === 0) {
