@@ -118,22 +118,24 @@ export const TeamsTable = ({ teams, onEditTeam, onDeleteTeam, onSendEmail, onVie
               </TableCell>
               <TableCell className="py-2">
                 <div className="flex items-center justify-center gap-2">
-                  <TooltipProvider>
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button
-                          variant="outline"
-                          size="icon" className="h-6 w-6"
-                          onClick={() => onSendEmail(team)}
-                        >
-                          <Mail className="w-3 h-3" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Send email to team</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  </TooltipProvider>
+                  {canUpdate && (
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            variant="outline"
+                            size="icon" className="h-6 w-6"
+                            onClick={() => onSendEmail(team)}
+                          >
+                            <Mail className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Send email to team</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  )}
                   {canUpdate && (
                     <TooltipProvider>
                       <Tooltip>
