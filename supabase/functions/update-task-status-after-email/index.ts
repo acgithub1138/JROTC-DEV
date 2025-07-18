@@ -27,8 +27,8 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Processing status update request:', { taskId, sourceTable, emailRuleType });
 
-    // Only process if this is a task_information_needed email for tasks or subtasks
-    if (emailRuleType === 'task_information_needed' && (sourceTable === 'tasks' || sourceTable === 'subtasks')) {
+    // Only process if this is a task_information_needed or subtask_information_needed email for tasks or subtasks
+    if ((emailRuleType === 'task_information_needed' || emailRuleType === 'subtask_information_needed') && (sourceTable === 'tasks' || sourceTable === 'subtasks')) {
       
       // Get the current task/subtask to check its status
       const { data: currentRecord, error: fetchError } = await supabase

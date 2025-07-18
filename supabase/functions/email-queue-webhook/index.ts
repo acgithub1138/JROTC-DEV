@@ -227,7 +227,7 @@ class UnifiedEmailProcessor {
             console.log(`⚠️ No rule_id found for email ${email.id}`);
           }
           
-          if (ruleType === 'task_information_needed') {
+          if (ruleType === 'task_information_needed' || ruleType === 'subtask_information_needed') {
             // Call the status update function
             await this.supabase.functions.invoke('update-task-status-after-email', {
               body: {
