@@ -83,12 +83,7 @@ export const RuleCard: React.FC<RuleCardProps> = ({
                 ) : (
                   relevantTemplates.map(template => (
                     <SelectItem key={template.id} value={template.id}>
-                      <div className="flex flex-col items-start">
-                        <span className="font-medium">{template.name}</span>
-                        <span className="text-xs text-muted-foreground">
-                          {template.subject}
-                        </span>
-                      </div>
+                      {template.name}
                     </SelectItem>
                   ))
                 )}
