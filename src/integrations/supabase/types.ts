@@ -1590,6 +1590,7 @@ export type Database = {
           reports_to_target_handle: string | null
           role: string
           school_id: string
+          tier: number | null
           updated_at: string
         }
         Insert: {
@@ -1605,6 +1606,7 @@ export type Database = {
           reports_to_target_handle?: string | null
           role: string
           school_id: string
+          tier?: number | null
           updated_at?: string
         }
         Update: {
@@ -1620,6 +1622,7 @@ export type Database = {
           reports_to_target_handle?: string | null
           role?: string
           school_id?: string
+          tier?: number | null
           updated_at?: string
         }
         Relationships: [
