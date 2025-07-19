@@ -126,9 +126,10 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
             <Input
               id="tier"
               type="number"
-              min="1"
+              step="0.1"
+              min="0"
               value={formData.tier?.toString() || '1'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tier: parseInt(e.target.value) || 1 }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, tier: parseFloat(e.target.value) || 1 }))}
               placeholder="Enter tier number..."
             />
           </div>
