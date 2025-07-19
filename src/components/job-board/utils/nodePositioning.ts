@@ -38,14 +38,34 @@ const calculateTierBasedPositions = (
   // Sort tiers to process them in order
   const sortedTiers = Array.from(tierGroups.keys()).sort((a, b) => a - b);
   
+  // Calculate Y positions for all tiers first
+  const tierYPositions = new Map<number, number>();
+  let currentY = 0;
+  
+  sortedTiers.forEach((tier) => {
+    const baseTier = Math.floor(tier);
+    const subTier = tier - baseTier;
+    
+    if (subTier === 0) {
+      // Whole number tier - starts where we left off
+      tierYPositions.set(tier, currentY);
+      currentY += config.levelHeight; // Standard spacing for whole numbers
+    } else {
+      // Decimal tier - use card height + 10px spacing from the base tier
+      const baseTierY = tierYPositions.get(baseTier) || 0;
+      const decimalOffset = subTier * (config.nodeHeight + 10); // 120px + 10px = 130px spacing
+      const yPosition = baseTierY + decimalOffset;
+      tierYPositions.set(tier, yPosition);
+      
+      // Update currentY to be after this decimal tier for the next whole number
+      currentY = Math.max(currentY, yPosition + (config.nodeHeight + 10));
+    }
+  });
+  
   // Position nodes within their tiers
   sortedTiers.forEach((tier) => {
     const tierJobs = tierGroups.get(tier)!;
-    
-    // Calculate Y position based on tier (including decimal positions)
-    const baseTier = Math.floor(tier);
-    const subTier = tier - baseTier;
-    const yPosition = baseTier * config.levelHeight + (subTier * (config.levelHeight * 0.6)); // Sub-tiers at 60% spacing
+    const yPosition = tierYPositions.get(tier)!;
     
     // Group by squadron/flight for better horizontal organization
     const squadronGroups = new Map<string, JobBoardWithCadet[]>();
