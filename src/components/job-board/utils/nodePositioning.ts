@@ -42,6 +42,11 @@ const calculateTierBasedPositions = (
   sortedTiers.forEach((tier) => {
     const tierJobs = tierGroups.get(tier)!;
     
+    // Calculate Y position based on tier (including decimal positions)
+    const baseTier = Math.floor(tier);
+    const subTier = tier - baseTier;
+    const yPosition = baseTier * config.levelHeight + (subTier * (config.levelHeight * 0.6)); // Sub-tiers at 60% spacing
+    
     // Group by squadron/flight for better horizontal organization
     const squadronGroups = new Map<string, JobBoardWithCadet[]>();
     tierJobs.forEach(job => {
@@ -56,7 +61,6 @@ const calculateTierBasedPositions = (
     });
     
     const squadronNames = Array.from(squadronGroups.keys()).sort();
-    let currentX = 0;
     
     // Calculate total width needed for this tier
     const totalJobs = tierJobs.length;
@@ -68,16 +72,7 @@ const calculateTierBasedPositions = (
       const squadronJobs = squadronGroups.get(squadron)!;
       
       squadronJobs.forEach((job) => {
-        // Handle decimal tiers for sub-positioning
-        const baseTier = Math.floor(tier);
-        const subTier = tier - baseTier;
-        
         let xPosition = startX + jobIndex * (config.nodeWidth + config.nodeSpacing);
-        
-        // Add slight horizontal offset for decimal tiers
-        if (subTier > 0) {
-          xPosition += subTier * 100; // 100px offset per decimal
-        }
         
         // Special positioning for assistant roles
         if (job.assistant && job.assistant !== 'NA') {
@@ -94,7 +89,7 @@ const calculateTierBasedPositions = (
         const savedPosition = savedPositions?.get(job.id);
         const position = savedPosition || {
           x: xPosition,
-          y: baseTier * config.levelHeight,
+          y: yPosition,
         };
         
         positions.set(job.id, position);
