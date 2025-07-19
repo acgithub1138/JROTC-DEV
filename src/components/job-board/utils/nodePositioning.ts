@@ -42,24 +42,37 @@ const calculateTierBasedPositions = (
   const tierYPositions = new Map<number, number>();
   let currentY = 0;
   
+  // Group tiers by their base number to handle decimals properly
+  const baseTierGroups = new Map<number, number[]>();
   sortedTiers.forEach((tier) => {
     const baseTier = Math.floor(tier);
-    const subTier = tier - baseTier;
-    
-    if (subTier === 0) {
-      // Whole number tier - starts where we left off
-      tierYPositions.set(tier, currentY);
-      currentY += config.levelHeight; // Standard spacing for whole numbers
-    } else {
-      // Decimal tier - use card height + 10px spacing from the base tier
-      const baseTierY = tierYPositions.get(baseTier) || 0;
-      const decimalOffset = subTier * (config.nodeHeight + 10); // 120px + 10px = 130px spacing
-      const yPosition = baseTierY + decimalOffset;
-      tierYPositions.set(tier, yPosition);
-      
-      // Update currentY to be after this decimal tier for the next whole number
-      currentY = Math.max(currentY, yPosition + (config.nodeHeight + 10));
+    if (!baseTierGroups.has(baseTier)) {
+      baseTierGroups.set(baseTier, []);
     }
+    baseTierGroups.get(baseTier)!.push(tier);
+  });
+  
+  // Process each base tier group
+  Array.from(baseTierGroups.keys()).sort((a, b) => a - b).forEach((baseTier) => {
+    const tiersInGroup = baseTierGroups.get(baseTier)!.sort((a, b) => a - b);
+    
+    tiersInGroup.forEach((tier, index) => {
+      if (tier === baseTier) {
+        // Whole number tier - starts where we left off
+        tierYPositions.set(tier, currentY);
+        currentY += config.levelHeight; // Standard spacing for whole numbers
+      } else {
+        // Decimal tier - position sequentially below the base tier
+        const baseTierY = tierYPositions.get(baseTier) || currentY;
+        // Count how many decimal tiers come before this one in the same base tier
+        const decimalIndex = tiersInGroup.filter(t => t > baseTier && t < tier).length + 1;
+        const yPosition = baseTierY + (decimalIndex * (config.nodeHeight + 10));
+        tierYPositions.set(tier, yPosition);
+        
+        // Update currentY to be after this decimal tier for the next base tier
+        currentY = Math.max(currentY, yPosition + (config.nodeHeight + 10));
+      }
+    });
   });
   
   // Position nodes within their tiers
