@@ -1,6 +1,17 @@
 
 import { JobBoardWithCadet } from '../types';
-import { LayoutNode } from './intelligentLayout';
+
+export interface LayoutNode {
+  id: string;
+  job: JobBoardWithCadet;
+  level: number;
+  children: string[];
+  parent?: string;
+  isAssistant: boolean;
+  squadron: string;
+  width: number;
+  height: number;
+}
 
 export interface CommandLevel {
   level: number;
