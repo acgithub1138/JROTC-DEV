@@ -26,6 +26,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
     email_address: '',
     reports_to: '',
     assistant: '',
+    tier: 1,
   });
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
@@ -42,6 +43,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
         email_address: '',
         reports_to: '',
         assistant: '',
+        tier: 1,
       });
       // Invalidate roles query to refetch latest roles
       queryClient.invalidateQueries({ queryKey: ['job-board-roles', userProfile?.school_id] });
@@ -67,6 +69,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
       email_address: '',
       reports_to: '',
       assistant: '',
+      tier: 1,
     });
     onOpenChange(false);
   };
@@ -116,6 +119,25 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
               placeholder="Enter job role..."
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tier">Tier</Label>
+            <Select
+              value={formData.tier?.toString() || '1'}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, tier: parseInt(value) }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select tier..." />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((tier) => (
+                  <SelectItem key={tier} value={tier.toString()}>
+                    Tier {tier}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">

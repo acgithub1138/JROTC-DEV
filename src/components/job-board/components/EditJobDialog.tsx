@@ -25,6 +25,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
     email_address: '',
     reports_to: '',
     assistant: '',
+    tier: 1,
   });
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
@@ -38,6 +39,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
         email_address: job.email_address || '',
         reports_to: job.reports_to || '',
         assistant: job.assistant || '',
+        tier: job.tier || 1,
       });
     }
   }, [job]);
@@ -108,6 +110,25 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
               placeholder="Enter job role..."
               required
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="tier">Tier</Label>
+            <Select
+              value={formData.tier?.toString() || '1'}
+              onValueChange={(value) => setFormData(prev => ({ ...prev, tier: parseInt(value) }))}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select tier..." />
+              </SelectTrigger>
+              <SelectContent>
+                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((tier) => (
+                  <SelectItem key={tier} value={tier.toString()}>
+                    Tier {tier}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="space-y-2">
