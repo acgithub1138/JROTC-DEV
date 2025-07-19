@@ -47,7 +47,7 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
   const { job, role, cadetName, rank, grade, occupiedHandles } = data;
 
   return (
-    <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md min-w-[280px] hover:shadow-lg transition-all relative group">
+    <div className="bg-white border-2 border-gray-300 rounded-lg p-4 shadow-md w-[300px] h-[120px] hover:shadow-lg transition-all relative group flex flex-col justify-between">
       <SimpleHandle
         id="top-target"
         type="target"
@@ -85,26 +85,26 @@ export const JobRoleNode = ({ data }: JobRoleNodeProps) => {
         hasConnection={occupiedHandles.has('right-source')}
       />
       
-      <div className="space-y-2">
+      <div className="flex-1 flex flex-col justify-center space-y-1">
         {/* Role Name */}
-        <div className="font-bold text-lg text-gray-900 text-center border-b pb-2">
+        <div className="font-bold text-sm text-gray-900 text-center border-b pb-1 leading-tight">
           {role}
         </div>
         
         {/* Cadet Name */}
         <div className="text-center">
-          <div className="font-semibold text-gray-800">{cadetName}</div>
+          <div className="font-semibold text-sm text-gray-800 leading-tight">{cadetName}</div>
         </div>
         
         {/* Rank and Grade */}
-        <div className="flex justify-between items-center pt-2">
+        <div className="flex justify-between items-center pt-1">
           {rank && (
-            <Badge variant="outline" className="text-xs">
+            <Badge variant="outline" className="text-xs px-1 py-0">
               {rank}
             </Badge>
           )}
           {grade && (
-            <Badge className={`text-xs ${getGradeColor(grade)}`}>
+            <Badge className={`text-xs px-1 py-0 ${getGradeColor(grade)}`}>
               {grade}
             </Badge>
           )}
