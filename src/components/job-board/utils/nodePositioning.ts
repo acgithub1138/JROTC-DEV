@@ -28,7 +28,7 @@ const calculateTierBasedPositions = (
   // Group nodes by tier (from database tier field)
   const tierGroups = new Map<number, JobBoardWithCadet[]>();
   jobs.forEach((job) => {
-    const tier = job.tier || 1; // Default to tier 1 if not set
+    const tier = parseFloat(job.tier || '1'); // Parse string tier to number, default to 1
     if (!tierGroups.has(tier)) {
       tierGroups.set(tier, []);
     }

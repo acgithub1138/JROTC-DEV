@@ -50,7 +50,7 @@ export const useJobBoard = () => {
         console.error('Error fetching job board:', error);
         throw error;
       }
-      return data as JobBoardWithCadet[];
+      return data as unknown as JobBoardWithCadet[];
     },
     enabled: !!userProfile?.school_id,
   });
@@ -59,11 +59,7 @@ export const useJobBoard = () => {
     mutationFn: async (newJob: NewJobBoard) => {
       const { data, error } = await supabase
         .from('job_board')
-        .insert({
-          ...newJob,
-          tier: typeof newJob.tier === 'string' ? parseFloat(newJob.tier) || 1 : newJob.tier,
-          school_id: userProfile?.school_id
-        })
+        .insert({ ...newJob, school_id: userProfile?.school_id } as any)
         .select(`
           *,
           cadet:profiles!cadet_id (
@@ -161,13 +157,9 @@ export const useJobBoard = () => {
         .single();
 
       // Update the job board entry
-      const updatesWithTier = {
-        ...updates,
-        tier: typeof updates.tier === 'string' ? parseFloat(updates.tier) || 1 : updates.tier,
-      };
       const { data, error } = await supabase
         .from('job_board')
-        .update(updatesWithTier)
+        .update(updates as any)
         .eq('id', id)
         .select(`
           *,

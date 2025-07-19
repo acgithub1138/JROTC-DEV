@@ -25,7 +25,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
     email_address: '',
     reports_to: '',
     assistant: '',
-    tier: 1,
+    tier: '1',
   });
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
@@ -42,7 +42,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
         email_address: '',
         reports_to: '',
         assistant: '',
-        tier: 1,
+        tier: '1',
       });
       // Invalidate roles query to refetch latest roles
       queryClient.invalidateQueries({ queryKey: ['job-board-roles', userProfile?.school_id] });
@@ -58,7 +58,6 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
       cadet_id: formData.cadet_id === 'unassigned' ? undefined : formData.cadet_id,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
-      tier: typeof formData.tier === 'string' ? parseFloat(formData.tier) || 1 : formData.tier,
     });
   };
 
@@ -69,7 +68,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
       email_address: '',
       reports_to: '',
       assistant: '',
-      tier: 1,
+      tier: '1',
     });
     onOpenChange(false);
   };
@@ -126,7 +125,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
             <Input
               id="tier"
               type="text"
-              value={formData.tier?.toString() || '1'}
+              value={formData.tier || '1'}
               onChange={(e) => setFormData(prev => ({ ...prev, tier: e.target.value }))}
               placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
             />

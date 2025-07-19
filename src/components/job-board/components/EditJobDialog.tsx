@@ -24,7 +24,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
     email_address: '',
     reports_to: '',
     assistant: '',
-    tier: 1,
+    tier: '1',
   });
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
@@ -38,7 +38,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
         email_address: job.email_address || '',
         reports_to: job.reports_to || '',
         assistant: job.assistant || '',
-        tier: job.tier || 1,
+        tier: job.tier || '1',
       });
     }
   }, [job]);
@@ -55,7 +55,6 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
       cadet_id: cadetId,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
-      tier: typeof formData.tier === 'string' ? parseFloat(formData.tier) || 1 : formData.tier,
     });
   };
 
@@ -117,7 +116,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             <Input
               id="tier"
               type="text"
-              value={formData.tier?.toString() || '1'}
+              value={formData.tier || '1'}
               onChange={(e) => setFormData(prev => ({ ...prev, tier: e.target.value }))}
               placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
             />
