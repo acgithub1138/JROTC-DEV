@@ -24,7 +24,6 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
     email_address: '',
     reports_to: '',
     assistant: '',
-    tier: '1',
   });
 
   const { users: cadets } = useSchoolUsers(true); // Only active cadets
@@ -38,7 +37,6 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
         email_address: job.email_address || '',
         reports_to: job.reports_to || '',
         assistant: job.assistant || '',
-        tier: job.tier || '1',
       });
     }
   }, [job]);
@@ -111,16 +109,6 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             />
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="tier">Tier</Label>
-            <Input
-              id="tier"
-              type="text"
-              value={formData.tier || '1'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tier: e.target.value }))}
-              placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
-            />
-          </div>
 
           <div className="space-y-2">
             <Label htmlFor="email_address">Email Address</Label>
