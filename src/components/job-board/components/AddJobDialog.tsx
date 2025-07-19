@@ -123,21 +123,14 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
 
           <div className="space-y-2">
             <Label htmlFor="tier">Tier</Label>
-            <Select
+            <Input
+              id="tier"
+              type="number"
+              min="1"
               value={formData.tier?.toString() || '1'}
-              onValueChange={(value) => setFormData(prev => ({ ...prev, tier: parseInt(value) }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select tier..." />
-              </SelectTrigger>
-              <SelectContent>
-                {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((tier) => (
-                  <SelectItem key={tier} value={tier.toString()}>
-                    Tier {tier}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
+              onChange={(e) => setFormData(prev => ({ ...prev, tier: parseInt(e.target.value) || 1 }))}
+              placeholder="Enter tier number..."
+            />
           </div>
 
           <div className="space-y-2">
