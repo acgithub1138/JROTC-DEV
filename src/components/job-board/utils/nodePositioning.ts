@@ -16,8 +16,8 @@ export const DEFAULT_POSITION_CONFIG: NodePositionConfig = {
   nodeSpacing: 50,
 };
 
-// Tier-based positioning using database tier values
-const calculateTierBasedPositions = (
+// Legacy hierarchical positioning based on reports_to relationships
+const calculateHierarchicalPositions = (
   jobs: JobBoardWithCadet[],
   hierarchyNodes: Map<string, HierarchyNode>,
   config: NodePositionConfig,
@@ -25,64 +25,29 @@ const calculateTierBasedPositions = (
 ): Map<string, { x: number; y: number }> => {
   const positions = new Map<string, { x: number; y: number }>();
   
-  // Group nodes by tier (from database tier field)
-  const tierGroups = new Map<number, JobBoardWithCadet[]>();
+  // Group nodes by their hierarchy level
+  const levelGroups = new Map<number, JobBoardWithCadet[]>();
   jobs.forEach((job) => {
-    const tier = parseFloat(job.tier || '1'); // Parse string tier to number, default to 1
-    if (!tierGroups.has(tier)) {
-      tierGroups.set(tier, []);
+    const hierarchyNode = hierarchyNodes.get(job.id);
+    const level = hierarchyNode?.level || 0;
+    
+    if (!levelGroups.has(level)) {
+      levelGroups.set(level, []);
     }
-    tierGroups.get(tier)!.push(job);
+    levelGroups.get(level)!.push(job);
   });
 
-  // Sort tiers to process them in order
-  const sortedTiers = Array.from(tierGroups.keys()).sort((a, b) => a - b);
+  // Sort levels to process them in order
+  const sortedLevels = Array.from(levelGroups.keys()).sort((a, b) => a - b);
   
-  // Calculate Y positions for all tiers first
-  const tierYPositions = new Map<number, number>();
-  let currentY = 0;
-  
-  // Group tiers by their base number to handle decimals properly
-  const baseTierGroups = new Map<number, number[]>();
-  sortedTiers.forEach((tier) => {
-    const baseTier = Math.floor(tier);
-    if (!baseTierGroups.has(baseTier)) {
-      baseTierGroups.set(baseTier, []);
-    }
-    baseTierGroups.get(baseTier)!.push(tier);
-  });
-  
-  // Process each base tier group
-  Array.from(baseTierGroups.keys()).sort((a, b) => a - b).forEach((baseTier) => {
-    const tiersInGroup = baseTierGroups.get(baseTier)!.sort((a, b) => a - b);
-    
-    tiersInGroup.forEach((tier, index) => {
-      if (tier === baseTier) {
-        // Whole number tier - starts where we left off
-        tierYPositions.set(tier, currentY);
-        currentY += config.levelHeight; // Standard spacing for whole numbers
-      } else {
-        // Decimal tier - position sequentially below the base tier
-        const baseTierY = tierYPositions.get(baseTier) || currentY;
-        // Count how many decimal tiers come before this one in the same base tier
-        const decimalIndex = tiersInGroup.filter(t => t > baseTier && t < tier).length + 1;
-        const yPosition = baseTierY + (decimalIndex * (config.nodeHeight + 10));
-        tierYPositions.set(tier, yPosition);
-        
-        // Update currentY to be after this decimal tier for the next base tier
-        currentY = Math.max(currentY, yPosition + (config.nodeHeight + 10));
-      }
-    });
-  });
-  
-  // Position nodes within their tiers
-  sortedTiers.forEach((tier) => {
-    const tierJobs = tierGroups.get(tier)!;
-    const yPosition = tierYPositions.get(tier)!;
+  // Position nodes level by level
+  sortedLevels.forEach((level) => {
+    const levelJobs = levelGroups.get(level)!;
+    const yPosition = level * config.levelHeight;
     
     // Group by squadron/flight for better horizontal organization
     const squadronGroups = new Map<string, JobBoardWithCadet[]>();
-    tierJobs.forEach(job => {
+    levelJobs.forEach(job => {
       // Extract squadron from role (e.g., "Alpha Squadron CC" -> "Alpha")
       const squadronMatch = job.role.match(/(\w+)\s+(Squadron|Flight)/);
       const squadron = squadronMatch ? squadronMatch[1] : 'Staff';
@@ -95,8 +60,8 @@ const calculateTierBasedPositions = (
     
     const squadronNames = Array.from(squadronGroups.keys()).sort();
     
-    // Calculate total width needed for this tier
-    const totalJobs = tierJobs.length;
+    // Calculate total width needed for this level
+    const totalJobs = levelJobs.length;
     const totalWidth = totalJobs * (config.nodeWidth + config.nodeSpacing) - config.nodeSpacing;
     const startX = -totalWidth / 2;
     
@@ -141,7 +106,7 @@ export const calculateNodePositions = (
   savedPositions?: Map<string, { x: number; y: number }>
 ): Map<string, { x: number; y: number }> => {
   
-  console.log(`📍 Using tier-based layout algorithm for ${jobs.length} jobs`);
+  console.log(`📍 Using legacy hierarchical layout algorithm for ${jobs.length} jobs`);
   
-  return calculateTierBasedPositions(jobs, hierarchyNodes, config, savedPositions);
+  return calculateHierarchicalPositions(jobs, hierarchyNodes, config, savedPositions);
 };
