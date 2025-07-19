@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -116,12 +115,10 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
             <Label htmlFor="tier">Tier</Label>
             <Input
               id="tier"
-              type="number"
-              step="0.1"
-              min="0"
+              type="text"
               value={formData.tier?.toString() || '1'}
               onChange={(e) => setFormData(prev => ({ ...prev, tier: parseFloat(e.target.value) || 1 }))}
-              placeholder="Enter tier number..."
+              placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
             />
           </div>
 
