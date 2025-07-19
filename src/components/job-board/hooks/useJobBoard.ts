@@ -61,6 +61,7 @@ export const useJobBoard = () => {
         .from('job_board')
         .insert({
           ...newJob,
+          tier: typeof newJob.tier === 'string' ? parseFloat(newJob.tier) || 1 : newJob.tier,
           school_id: userProfile?.school_id
         })
         .select(`
@@ -160,9 +161,13 @@ export const useJobBoard = () => {
         .single();
 
       // Update the job board entry
+      const updatesWithTier = {
+        ...updates,
+        tier: typeof updates.tier === 'string' ? parseFloat(updates.tier) || 1 : updates.tier,
+      };
       const { data, error } = await supabase
         .from('job_board')
-        .update(updates)
+        .update(updatesWithTier)
         .eq('id', id)
         .select(`
           *,

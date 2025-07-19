@@ -32,7 +32,7 @@ export interface NewJobBoard {
   email_address?: string;
   reports_to?: string;
   assistant?: string;
-  tier?: number;
+  tier?: number | string;
   reports_to_source_handle?: string;
   reports_to_target_handle?: string;
   assistant_source_handle?: string;

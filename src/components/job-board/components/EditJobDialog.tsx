@@ -55,6 +55,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
       cadet_id: cadetId,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
+      tier: typeof formData.tier === 'string' ? parseFloat(formData.tier) || 1 : formData.tier,
     });
   };
 
@@ -117,7 +118,7 @@ export const EditJobDialog = ({ open, onOpenChange, job, onSubmit, loading, jobs
               id="tier"
               type="text"
               value={formData.tier?.toString() || '1'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tier: parseFloat(e.target.value) || 1 }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, tier: e.target.value }))}
               placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
             />
           </div>

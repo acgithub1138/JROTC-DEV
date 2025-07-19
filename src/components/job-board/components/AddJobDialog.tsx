@@ -58,6 +58,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
       cadet_id: formData.cadet_id === 'unassigned' ? undefined : formData.cadet_id,
       reports_to: formData.reports_to || undefined,
       assistant: formData.assistant || undefined,
+      tier: typeof formData.tier === 'string' ? parseFloat(formData.tier) || 1 : formData.tier,
     });
   };
 
@@ -126,7 +127,7 @@ export const AddJobDialog = ({ open, onOpenChange, onSubmit, loading, jobs }: Ad
               id="tier"
               type="text"
               value={formData.tier?.toString() || '1'}
-              onChange={(e) => setFormData(prev => ({ ...prev, tier: parseFloat(e.target.value) || 1 }))}
+              onChange={(e) => setFormData(prev => ({ ...prev, tier: e.target.value }))}
               placeholder="Enter tier (e.g., 1, 2.1, 3.2)..."
             />
           </div>
