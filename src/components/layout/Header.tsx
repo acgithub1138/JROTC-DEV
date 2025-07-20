@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Badge } from '@/components/ui/badge';
@@ -6,11 +7,13 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { User, LogOut, Settings, Menu, Shield } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+
 interface HeaderProps {
   activeModule: string;
   onModuleChange?: (module: string) => void;
   isMobile?: boolean;
 }
+
 export const Header: React.FC<HeaderProps> = ({
   activeModule,
   onModuleChange,
@@ -24,6 +27,7 @@ export const Header: React.FC<HeaderProps> = ({
   const {
     menuItems
   } = useSidebarPreferences();
+
   const getModuleTitle = (module: string) => {
     const titles: {
       [key: string]: string;
@@ -44,6 +48,7 @@ export const Header: React.FC<HeaderProps> = ({
     };
     return titles[module] || module.charAt(0).toUpperCase() + module.slice(1);
   };
+
   const getRoleColor = (role: string) => {
     switch (role) {
       case 'admin':
@@ -60,6 +65,7 @@ export const Header: React.FC<HeaderProps> = ({
         return 'bg-gray-100 text-gray-800';
     }
   };
+
   return <div className="bg-white border-b border-gray-200 px-6 py-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-4">
@@ -88,10 +94,15 @@ export const Header: React.FC<HeaderProps> = ({
                 </div>
               </SheetContent>
             </Sheet>}
-          
-          <div>
-            {userProfile?.schools && <p className="text-sm text-gray-600">{userProfile.schools.name}</p>}
-          </div>
+        </div>
+        
+        {/* Centered School Name */}
+        <div className="absolute left-1/2 transform -translate-x-1/2">
+          {userProfile?.schools && (
+            <h1 className="text-xl font-semibold text-gray-900">
+              {userProfile.schools.name}
+            </h1>
+          )}
         </div>
         
         <div className="flex items-center">
