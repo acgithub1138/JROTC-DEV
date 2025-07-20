@@ -9,9 +9,11 @@ import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
 import IncidentManagementPage from './incident-management/IncidentManagementPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAdminPage from './user-management/UserAdminPage';
 import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import IncidentOptionsManagement from './incident-management/IncidentOptionsManagement';
+import ThemeManagement from './themes/ThemeManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
 
 import NotFound from '@/pages/NotFound';
@@ -196,17 +198,30 @@ const MainApplication = () => {
   );
 };
 
-// Settings Page component with Task and Incident Options Management
+// Settings Page Component
 const SettingsPage = () => {
   return (
-    <div className="p-6">
-      <div className="max-w-4xl mx-auto">
-        <h1 className="text-3xl font-bold text-gray-900 mb-6">Settings</h1>
-        <div className="space-y-6">
-          <TaskOptionsManagement />
-          <IncidentOptionsManagement />
-        </div>
+    <div className="space-y-6">
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
+        <p className="text-gray-600">Manage system settings and options</p>
       </div>
+      <Tabs defaultValue="tasks" className="w-full">
+        <TabsList>
+          <TabsTrigger value="tasks">Task Options</TabsTrigger>
+          <TabsTrigger value="incidents">Incident Options</TabsTrigger>
+          <TabsTrigger value="themes">Themes</TabsTrigger>
+        </TabsList>
+        <TabsContent value="tasks">
+          <TaskOptionsManagement />
+        </TabsContent>
+        <TabsContent value="incidents">
+          <IncidentOptionsManagement />
+        </TabsContent>
+        <TabsContent value="themes">
+          <ThemeManagement />
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

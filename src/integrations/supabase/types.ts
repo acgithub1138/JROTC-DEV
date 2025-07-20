@@ -1590,7 +1590,6 @@ export type Database = {
           reports_to_target_handle: string | null
           role: string
           school_id: string
-          tier: number | null
           updated_at: string
         }
         Insert: {
@@ -1606,7 +1605,6 @@ export type Database = {
           reports_to_target_handle?: string | null
           role: string
           school_id: string
-          tier?: number | null
           updated_at?: string
         }
         Update: {
@@ -1622,7 +1620,6 @@ export type Database = {
           reports_to_target_handle?: string | null
           role?: string
           school_id?: string
-          tier?: number | null
           updated_at?: string
         }
         Relationships: [
@@ -2528,6 +2525,45 @@ export type Database = {
             referencedColumns: ["id"]
           },
         ]
+      }
+      themes: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          id: string
+          is_active: boolean
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          primary_color: string
+          school_id: string
+          secondary_color: string
+          theme_image_url: string | null
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          primary_color?: string
+          school_id: string
+          secondary_color?: string
+          theme_image_url?: string | null
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          is_active?: boolean
+          jrotc_program?: Database["public"]["Enums"]["jrotc_program"]
+          primary_color?: string
+          school_id?: string
+          secondary_color?: string
+          theme_image_url?: string | null
+          updated_at?: string
+        }
+        Relationships: []
       }
       user_sidebar_preferences: {
         Row: {
