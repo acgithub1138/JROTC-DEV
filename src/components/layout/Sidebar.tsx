@@ -65,8 +65,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
   const { themes } = useThemes();
   const [showCustomization, setShowCustomization] = useState(false);
 
-  // Get the active theme for the user's school
-  const activeTheme = themes.find(theme => theme.is_active);
+  // Get the active theme that matches the user's JROTC program
+  const activeTheme = themes.find(theme => 
+    theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program
+  );
 
   const handlePreferencesUpdated = async () => {
     // Refresh the preferences data from the database

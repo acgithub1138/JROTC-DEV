@@ -22,14 +22,11 @@ export const useThemes = () => {
   const { userProfile } = useAuth();
 
   const fetchThemes = async () => {
-    if (!userProfile?.school_id) return;
-
     try {
       setLoading(true);
       const { data, error } = await supabase
         .from('themes')
         .select('*')
-        .eq('school_id', userProfile.school_id)
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
