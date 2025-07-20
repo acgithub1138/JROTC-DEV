@@ -2534,7 +2534,7 @@ export type Database = {
           is_active: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
           primary_color: string
-          school_id: string
+          school_id: string | null
           secondary_color: string
           theme_image_url: string | null
           updated_at: string
@@ -2546,7 +2546,7 @@ export type Database = {
           is_active?: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
           primary_color?: string
-          school_id: string
+          school_id?: string | null
           secondary_color?: string
           theme_image_url?: string | null
           updated_at?: string
@@ -2558,7 +2558,7 @@ export type Database = {
           is_active?: boolean
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"]
           primary_color?: string
-          school_id?: string
+          school_id?: string | null
           secondary_color?: string
           theme_image_url?: string | null
           updated_at?: string
