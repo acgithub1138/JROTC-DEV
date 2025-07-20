@@ -24,6 +24,9 @@ interface ThemeFormData {
   jrotc_program: 'army' | 'navy' | 'air_force' | 'marine_corps' | 'coast_guard' | 'space_force';
   primary_color: string;
   secondary_color: string;
+  link_text: string;
+  link_selected_text: string;
+  link_hover: string;
   theme_image_url?: string;
 }
 
@@ -36,8 +39,11 @@ const ThemeForm: React.FC<{
   const { uploadThemeImage } = useThemes();
   const [formData, setFormData] = useState<ThemeFormData>({
     jrotc_program: theme?.jrotc_program || 'army',
-    primary_color: theme?.primary_color || '#1f2937',
-    secondary_color: theme?.secondary_color || '#6b7280',
+    primary_color: theme?.primary_color || '#111827',
+    secondary_color: theme?.secondary_color || '#2563eb',
+    link_text: (theme as any)?.link_text || '#d1d5db',
+    link_selected_text: (theme as any)?.link_selected_text || '#ffffff',
+    link_hover: (theme as any)?.link_hover || '#1f2937',
     theme_image_url: theme?.theme_image_url || ''
   });
   const [imageFile, setImageFile] = useState<File | null>(null);
@@ -95,7 +101,7 @@ const ThemeForm: React.FC<{
 
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-2">
-          <Label htmlFor="primary_color">Primary Color</Label>
+          <Label htmlFor="primary_color">Primary Color (Sidebar Background)</Label>
           <div className="flex items-center space-x-2">
             <Input
               type="color"
@@ -108,14 +114,14 @@ const ThemeForm: React.FC<{
               type="text"
               value={formData.primary_color}
               onChange={(e) => setFormData(prev => ({ ...prev, primary_color: e.target.value }))}
-              placeholder="#1f2937"
+              placeholder="#111827"
               className="flex-1"
             />
           </div>
         </div>
 
         <div className="space-y-2">
-          <Label htmlFor="secondary_color">Secondary Color</Label>
+          <Label htmlFor="secondary_color">Secondary Color (Selected Link)</Label>
           <div className="flex items-center space-x-2">
             <Input
               type="color"
@@ -128,7 +134,69 @@ const ThemeForm: React.FC<{
               type="text"
               value={formData.secondary_color}
               onChange={(e) => setFormData(prev => ({ ...prev, secondary_color: e.target.value }))}
-              placeholder="#6b7280"
+              placeholder="#2563eb"
+              className="flex-1"
+            />
+          </div>
+        </div>
+      </div>
+
+      <div className="grid grid-cols-3 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="link_text">Link Text Color</Label>
+          <div className="flex items-center space-x-2">
+            <Input
+              type="color"
+              id="link_text"
+              value={formData.link_text}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_text: e.target.value }))}
+              className="w-16 h-10 p-1 rounded"
+            />
+            <Input
+              type="text"
+              value={formData.link_text}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_text: e.target.value }))}
+              placeholder="#d1d5db"
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="link_selected_text">Selected Link Text</Label>
+          <div className="flex items-center space-x-2">
+            <Input
+              type="color"
+              id="link_selected_text"
+              value={formData.link_selected_text}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_selected_text: e.target.value }))}
+              className="w-16 h-10 p-1 rounded"
+            />
+            <Input
+              type="text"
+              value={formData.link_selected_text}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_selected_text: e.target.value }))}
+              placeholder="#ffffff"
+              className="flex-1"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="link_hover">Link Hover Color</Label>
+          <div className="flex items-center space-x-2">
+            <Input
+              type="color"
+              id="link_hover"
+              value={formData.link_hover}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_hover: e.target.value }))}
+              className="w-16 h-10 p-1 rounded"
+            />
+            <Input
+              type="text"
+              value={formData.link_hover}
+              onChange={(e) => setFormData(prev => ({ ...prev, link_hover: e.target.value }))}
+              placeholder="#1f2937"
               className="flex-1"
             />
           </div>

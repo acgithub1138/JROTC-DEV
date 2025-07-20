@@ -36,6 +36,15 @@ interface SidebarProps {
   onModuleChange: (module: string) => void;
 }
 
+// Default theme configuration
+const DEFAULT_THEME = {
+  primary_color: '#111827',    // Sidebar background (gray-900)
+  secondary_color: '#2563eb',  // Selected link background (blue-600)
+  link_text: '#d1d5db',       // Link text (gray-300)
+  link_selected_text: '#ffffff', // Selected link text (white)
+  link_hover: '#1f2937'       // Hover background (gray-800)
+};
+
 // Icon mapping for dynamic icon resolution
 const iconMap = {
   Home,
@@ -65,10 +74,19 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
   const { themes } = useThemes();
   const [showCustomization, setShowCustomization] = useState(false);
 
-  // Get the active theme that matches the user's JROTC program
+  // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => 
     theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program
   );
+  
+  // Use active theme or fallback to default theme
+  const currentTheme = {
+    primary_color: activeTheme?.primary_color || DEFAULT_THEME.primary_color,
+    secondary_color: activeTheme?.secondary_color || DEFAULT_THEME.secondary_color,
+    link_text: (activeTheme as any)?.link_text || DEFAULT_THEME.link_text,
+    link_selected_text: (activeTheme as any)?.link_selected_text || DEFAULT_THEME.link_selected_text,
+    link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover,
+  };
 
   const handlePreferencesUpdated = async () => {
     // Refresh the preferences data from the database
@@ -77,7 +95,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
   if (isLoading) {
     return (
-      <div className={cn('fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col z-40', className)}>
+      <div 
+        className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)}
+        style={{ backgroundColor: currentTheme.primary_color }}
+      >
         <div className="p-6">
           <div className="flex items-center space-x-2">
             {activeTheme?.theme_image_url ? (
@@ -95,7 +116,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <div className="flex-1 p-3">
           <div className="space-y-2">
             {[1, 2, 3, 4].map((i) => (
-              <div key={i} className="h-10 bg-gray-800 rounded animate-pulse" />
+              <div key={i} className="h-10 rounded animate-pulse" style={{ backgroundColor: currentTheme.link_hover }} />
             ))}
           </div>
         </div>
@@ -105,7 +126,10 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
 
   return (
     <>
-      <div className={cn('fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col z-40', className)}>
+      <div 
+        className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)}
+        style={{ backgroundColor: currentTheme.primary_color }}
+      >
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
@@ -136,16 +160,28 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
           <div className="space-y-1">
             {menuItems.map((item) => {
               const Icon = iconMap[item.icon as keyof typeof iconMap] || Home;
+              const isActive = activeModule === item.id;
               return (
                 <Button
                   key={item.id}
-                  variant={activeModule === item.id ? 'secondary' : 'ghost'}
-                  className={cn(
-                    'w-full justify-start text-left font-normal',
-                    activeModule === item.id
-                      ? 'bg-blue-600 text-white hover:bg-blue-700'
-                      : 'text-gray-300 hover:text-white hover:bg-gray-800'
-                  )}
+                  variant="ghost"
+                  className="w-full justify-start text-left font-normal"
+                  style={{
+                    backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
+                    color: isActive ? currentTheme.link_selected_text : currentTheme.link_text,
+                  }}
+                  onMouseEnter={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+                      e.currentTarget.style.color = '#ffffff';
+                    }
+                  }}
+                  onMouseLeave={(e) => {
+                    if (!isActive) {
+                      e.currentTarget.style.backgroundColor = 'transparent';
+                      e.currentTarget.style.color = currentTheme.link_text;
+                    }
+                  }}
                   onClick={() => onModuleChange(item.id)}
                 >
                   <Icon className="w-4 h-4 mr-3" />
