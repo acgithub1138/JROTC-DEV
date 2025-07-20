@@ -5,6 +5,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+import { useThemes } from '@/hooks/useThemes';
 import { SidebarCustomization } from './SidebarCustomization';
 import {
   User,
@@ -61,7 +62,11 @@ const iconMap = {
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
   const { userProfile } = useAuth();
   const { menuItems, isLoading, refreshPreferences } = useSidebarPreferences();
+  const { themes } = useThemes();
   const [showCustomization, setShowCustomization] = useState(false);
+
+  // Get the active theme for the user's school
+  const activeTheme = themes.find(theme => theme.is_active);
 
   const handlePreferencesUpdated = async () => {
     // Refresh the preferences data from the database
@@ -73,7 +78,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
       <div className={cn('fixed left-0 top-0 h-full w-64 bg-gray-900 text-white flex flex-col z-40', className)}>
         <div className="p-6">
           <div className="flex items-center space-x-2">
-            <Shield className="w-8 h-8 text-blue-400" />
+            {activeTheme?.theme_image_url ? (
+              <img 
+                src={activeTheme.theme_image_url} 
+                alt="JROTC Program Logo" 
+                className="w-8 h-8 object-contain"
+              />
+            ) : (
+              <Shield className="w-8 h-8 text-blue-400" />
+            )}
             <h1 className="text-xl font-bold">JROTC CCC</h1>
           </div>
         </div>
@@ -94,7 +107,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <div className="p-6">
           <div className="flex items-center justify-between">
             <div className="flex items-center space-x-2">
-              <Shield className="w-8 h-8 text-blue-400" />
+              {activeTheme?.theme_image_url ? (
+                <img 
+                  src={activeTheme.theme_image_url} 
+                  alt="JROTC Program Logo" 
+                  className="w-8 h-8 object-contain"
+                />
+              ) : (
+                <Shield className="w-8 h-8 text-blue-400" />
+              )}
               <h1 className="text-xl font-bold">JROTC CCC</h1>
             </div>
             <Button
