@@ -67,9 +67,9 @@ export const Header: React.FC<HeaderProps> = ({
   };
 
   return <div className="bg-white border-b border-gray-200 px-6 py-4">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center space-x-4">
-          {/* Mobile Menu Button */}
+      <div className="flex items-center">
+        {/* Left side - Mobile Menu Button */}
+        <div className="flex items-center space-x-4 flex-shrink-0">
           {isMobile && onModuleChange && <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
@@ -96,8 +96,8 @@ export const Header: React.FC<HeaderProps> = ({
             </Sheet>}
         </div>
         
-        {/* Centered School Name */}
-        <div className="absolute left-1/2 transform -translate-x-1/2">
+        {/* Center - School Name */}
+        <div className="flex-1 flex justify-center">
           {userProfile?.schools && (
             <h1 className="text-xl font-semibold text-gray-900">
               {userProfile.schools.name}
@@ -105,8 +105,8 @@ export const Header: React.FC<HeaderProps> = ({
           )}
         </div>
         
-        <div className="flex items-center">
-          {/* User Menu */}
+        {/* Right side - User Menu */}
+        <div className="flex items-center flex-shrink-0">
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" className="flex items-center space-x-2">
