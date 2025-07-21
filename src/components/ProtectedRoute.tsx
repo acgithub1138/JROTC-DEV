@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
@@ -19,11 +20,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdminRole = false
 }) => {
   const { user, userProfile, loading } = useAuth();
-  const { hasPermission } = usePermissionContext();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
 
-  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
+  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'permissionsLoading:', permissionsLoading);
 
   // Check if user needs to change password
   useEffect(() => {
@@ -36,24 +37,28 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check module permissions or admin role requirement
   useEffect(() => {
-    if (user) {
-      if (requireAdminRole) {
-        // Check if user is admin
-        const isAdmin = userProfile?.role === 'admin';
-        setShowAccessDenied(!isAdmin);
-      } else if (module) {
-        // Check module permissions
-        const hasAccess = hasPermission(module, requirePermission);
-        setShowAccessDenied(!hasAccess);
-      } else {
-        setShowAccessDenied(false);
-      }
+    // Don't check permissions while they're still loading
+    if (permissionsLoading || !user) {
+      setShowAccessDenied(false);
+      return;
+    }
+
+    if (requireAdminRole) {
+      // Check if user is admin
+      const isAdmin = userProfile?.role === 'admin';
+      setShowAccessDenied(!isAdmin);
+    } else if (module) {
+      // Check module permissions
+      const hasAccess = hasPermission(module, requirePermission);
+      console.log(`Permission check for ${module}:${requirePermission} = ${hasAccess}`);
+      setShowAccessDenied(!hasAccess);
     } else {
       setShowAccessDenied(false);
     }
-  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission]);
+  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission, permissionsLoading]);
 
-  if (loading) {
+  // Show loading while auth or permissions are loading
+  if (loading || permissionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
