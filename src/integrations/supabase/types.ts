@@ -2574,6 +2574,48 @@ export type Database = {
         }
         Relationships: []
       }
+      user_history: {
+        Row: {
+          change_reason: string | null
+          changed_by: string | null
+          created_at: string
+          field_name: string
+          id: string
+          ip_address: string | null
+          new_value: string | null
+          old_value: string | null
+          school_id: string | null
+          user_agent: string | null
+          user_id: string
+        }
+        Insert: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          field_name: string
+          id?: string
+          ip_address?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          school_id?: string | null
+          user_agent?: string | null
+          user_id: string
+        }
+        Update: {
+          change_reason?: string | null
+          changed_by?: string | null
+          created_at?: string
+          field_name?: string
+          id?: string
+          ip_address?: string | null
+          new_value?: string | null
+          old_value?: string | null
+          school_id?: string | null
+          user_agent?: string | null
+          user_id?: string
+        }
+        Relationships: []
+      }
       user_sidebar_preferences: {
         Row: {
           competitions_columns: string[] | null
@@ -2733,6 +2775,24 @@ export type Database = {
           data_type: string
         }[]
       }
+      get_user_history: {
+        Args: {
+          target_user_id?: string
+          limit_count?: number
+          offset_count?: number
+        }
+        Returns: {
+          id: string
+          user_id: string
+          field_name: string
+          old_value: string
+          new_value: string
+          changed_by: string
+          change_reason: string
+          created_at: string
+          changed_by_name: string
+        }[]
+      }
       get_user_school_id: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2764,7 +2824,7 @@ export type Database = {
         }[]
       }
       process_email_template: {
-        Args: { template_content: string; record_data: Json }
+        Args: { template_text: string; data_json: Json }
         Returns: string
       }
       process_overdue_task_reminders: {
