@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useMemo } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -10,7 +9,6 @@ export type UserRole = Database['public']['Enums']['user_role'];
 interface PermissionContextType {
   hasPermission: (module: string, action: string) => boolean;
   isLoading: boolean;
-  error: any;
 }
 
 const PermissionContext = createContext<PermissionContextType | undefined>(undefined);
@@ -24,26 +22,25 @@ export const usePermissionContext = () => {
 };
 
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const { userProfile, loading: authLoading } = useAuth();
+  const { userProfile } = useAuth();
 
-  // Fetch all permission data using proper JOINs instead of nested queries
-  const { data: permissionData, isLoading, error } = useQuery({
+  // Fetch all permission data in a single query
+  const { data: permissionData, isLoading } = useQuery({
     queryKey: ['all-permissions', userProfile?.role, userProfile?.id],
     queryFn: async () => {
       if (!userProfile?.role) {
-        console.log('Permission query: No user role available, userProfile:', userProfile);
+        console.log('Permission query: No user role available');
         return null;
       }
 
-      console.log('Fetching permissions for role:', userProfile.role, 'user:', userProfile.id);
+      console.log('Fetching permissions for role:', userProfile.role);
       
-      // Use proper JOIN query instead of nested query
       const { data, error } = await supabase
         .from('role_permissions')
         .select(`
           enabled,
-          permission_modules!inner(name),
-          permission_actions!inner(name)
+          module:permission_modules(name),
+          action:permission_actions(name)
         `)
         .eq('role', userProfile.role);
       
@@ -52,32 +49,19 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         throw error;
       }
       
-      console.log('Raw permission data received:', data);
-      
       // Transform into a lookup map for O(1) access
       const permissionMap: Record<string, boolean> = {};
-      
-      if (data && Array.isArray(data)) {
-        data.forEach(permission => {
-          // Handle the JOIN result structure
-          const moduleName = permission.permission_modules?.name;
-          const actionName = permission.permission_actions?.name;
-          
-          if (moduleName && actionName) {
-            const key = `${moduleName}:${actionName}`;
-            permissionMap[key] = permission.enabled;
-            console.log(`Permission: ${key} = ${permission.enabled}`);
-          } else {
-            console.warn('Missing module or action name in permission:', permission);
-          }
-        });
-      }
+      data.forEach(permission => {
+        if (permission.module?.name && permission.action?.name) {
+          const key = `${permission.module.name}:${permission.action.name}`;
+          permissionMap[key] = permission.enabled;
+        }
+      });
       
       console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
-      console.log('Full permission map:', permissionMap);
       return permissionMap;
     },
-    enabled: !!userProfile?.role && !authLoading,
+    enabled: !!userProfile?.role,
     staleTime: 10 * 60 * 1000, // 10 minutes
     gcTime: 15 * 60 * 1000, // 15 minutes
     refetchOnMount: false,
@@ -88,24 +72,16 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Memoized permission checker for optimal performance
   const hasPermission = useMemo(() => {
     return (module: string, action: string): boolean => {
-      if (!permissionData || !userProfile?.role) {
-        console.log(`Permission check failed: no data or role. Module: ${module}, Action: ${action}, Data exists: ${!!permissionData}, Role: ${userProfile?.role}`);
-        return false;
-      }
+      if (!permissionData || !userProfile?.role) return false;
       const key = `${module}:${action}`;
-      const result = permissionData[key] || false;
-      console.log(`Permission check: ${key} = ${result}`);
-      return result;
+      return permissionData[key] || false;
     };
   }, [permissionData, userProfile?.role]);
 
   const value: PermissionContextType = {
     hasPermission,
-    isLoading: isLoading || authLoading,
-    error,
+    isLoading,
   };
-
-  console.log('PermissionContext render - loading:', value.isLoading, 'error:', error, 'permissionData keys:', permissionData ? Object.keys(permissionData).length : 0);
 
   return (
     <PermissionContext.Provider value={value}>

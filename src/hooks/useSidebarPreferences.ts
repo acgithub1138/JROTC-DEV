@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
@@ -29,8 +28,6 @@ const MODULE_MAPPING: Record<string, string> = {
 };
 
 const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
-  console.log('Getting menu items from permissions for role:', role);
-  
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -54,25 +51,19 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
   ];
 
   const allowedItems = potentialItems.filter(item => {
-    console.log(`Checking item: ${item.id}`);
-    
     // Admin-only items
     if (item.adminOnly && role !== 'admin') {
-      console.log(`  Skipped ${item.id}: admin only and user is ${role}`);
       return false;
     }
 
     // Special cases for admin items
     if (item.adminOnly && role === 'admin') {
-      console.log(`  Allowed ${item.id}: admin only and user is admin`);
       return true;
     }
 
     // Settings is only available to admins
     if (item.id === 'settings') {
-      const allowed = role === 'admin';
-      console.log(`  ${allowed ? 'Allowed' : 'Skipped'} ${item.id}: settings check for ${role}`);
-      return allowed;
+      return role === 'admin';
     }
 
     // Special case for competitions - requires both permission and school setting
@@ -80,32 +71,23 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       const moduleKey = MODULE_MAPPING[item.id];
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
       const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-      const allowed = hasModulePermission && hasCompetitionModule;
-      console.log(`  ${allowed ? 'Allowed' : 'Skipped'} ${item.id}: permission=${hasModulePermission}, competition_module=${hasCompetitionModule}`);
-      return allowed;
+      return hasModulePermission && hasCompetitionModule;
     }
 
     // Check permissions for regular items
     const moduleKey = MODULE_MAPPING[item.id];
     if (moduleKey) {
-      const hasAccess = hasPermission(moduleKey, 'sidebar');
-      console.log(`  ${hasAccess ? 'Allowed' : 'Skipped'} ${item.id}: ${moduleKey}:sidebar = ${hasAccess}`);
-      return hasAccess;
+      return hasPermission(moduleKey, 'sidebar');
     }
 
-    console.log(`  Skipped ${item.id}: no module mapping found`);
     return false;
   });
 
-  const finalItems = [...baseItems, ...allowedItems];
-  console.log('Final menu items:', finalItems.map(item => item.id));
-  return finalItems;
+  return [...baseItems, ...allowedItems];
 };
 
 // Fallback function for when permissions aren't loaded yet
 const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[] => {
-  console.log('Using fallback menu items for role:', role);
-  
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -160,6 +142,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
+
       ];
     
     default:
@@ -168,88 +151,76 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
 };
 
 export const useSidebarPreferences = () => {
-  const { userProfile, loading: authLoading } = useAuth();
-  const { hasPermission, isLoading: permissionsLoading, error: permissionsError } = usePermissionContext();
+  const { userProfile } = useAuth();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-  const isLoadingRef = useRef(false);
 
-  // Stable memoized values to prevent unnecessary re-renders
-  const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
+  // Memoize permission state to prevent unnecessary re-renders
+  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
   const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
-  const permissionsLoaded = useMemo(() => !permissionsLoading && !authLoading, [permissionsLoading, authLoading]);
+  const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
 
-  // Stable permission checker that doesn't change on every render
-  const stableHasPermission = useCallback((module: string, action: string) => {
-    return hasPermission(module, action);
-  }, [hasPermission]);
-
-  // Main load function with stable dependencies
+  // Debounced load function to prevent rapid successive calls
   const loadPreferences = useCallback(async () => {
-    if (!userId || isLoadingRef.current) {
-      console.log('Skipping load - no userId or already loading:', { userId, isLoading: isLoadingRef.current });
+    if (!userId) {
+      console.log('No user profile found, skipping sidebar preferences load');
       return;
     }
-
-    // Don't proceed if permissions are still loading
-    if (permissionsLoading || authLoading) {
-      console.log('Skipping load - still loading auth or permissions:', { authLoading, permissionsLoading });
-      return;
-    }
-
-    // Prevent concurrent loads
-    isLoadingRef.current = true;
 
     // Clear any existing timeout
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
     }
 
-    console.log('Loading sidebar preferences for user:', userId, 'role:', userRole, 'permissions loaded:', permissionsLoaded);
-    console.log('Permissions error:', permissionsError);
-    
-    try {
-      const { data, error } = await supabase
-        .from('user_sidebar_preferences')
-        .select('menu_items')
-        .eq('user_id', userId)
-        .single();
-
-      if (error && error.code !== 'PGRST116') {
-        console.error('Error loading sidebar preferences:', error);
-      }
-
-      // Use database permissions if loaded, otherwise fallback to hardcoded
-      const defaultItems = permissionsLoaded && !permissionsError
-        ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
-        : getDefaultMenuItemsForRole(userRole, userProfile);
+    // Debounce the actual loading
+    loadingTimeoutRef.current = setTimeout(async () => {
+      console.log('Loading sidebar preferences for user:', userId, 'role:', userRole);
+      console.log('Permission system loaded:', permissionsLoaded);
+      setIsLoading(true);
       
-      console.log('Generated menu items count:', defaultItems.length, 'using', permissionsLoaded && !permissionsError ? 'database permissions' : 'fallback permissions');
-      
-      if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
-        console.log('Found saved preferences, filtering menu items');
-        // Filter out invalid items and ensure all valid items are included
-        const savedItemIds = data.menu_items;
-        const orderedItems = savedItemIds
-          .map(id => defaultItems.find(item => item.id === id))
-          .filter(Boolean) as MenuItem[];
+      try {
+        const { data, error } = await supabase
+          .from('user_sidebar_preferences')
+          .select('menu_items')
+          .eq('user_id', userId)
+          .single();
+
+        if (error && error.code !== 'PGRST116') {
+          console.error('Error loading sidebar preferences:', error);
+        }
+
+        // Use database permissions if loaded, otherwise fallback to hardcoded
+        const defaultItems = permissionsLoaded 
+          ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
+          : getDefaultMenuItemsForRole(userRole, userProfile);
         
-        setMenuItems(orderedItems);
-      } else {
-        console.log('No saved preferences, using default items');
-        setMenuItems(defaultItems);
+        console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
+        
+        if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
+          console.log('Found saved preferences, filtering menu items');
+          // Filter out invalid items and ensure all valid items are included
+          const savedItemIds = data.menu_items;
+          const orderedItems = savedItemIds
+            .map(id => defaultItems.find(item => item.id === id))
+            .filter(Boolean) as MenuItem[];
+          
+          setMenuItems(orderedItems);
+        } else {
+          console.log('No saved preferences, using default items');
+          setMenuItems(defaultItems);
+        }
+      } catch (error) {
+        console.error('Error loading sidebar preferences:', error);
+        const fallbackItems = getDefaultMenuItemsForRole(userRole);
+        setMenuItems(fallbackItems);
+      } finally {
+        console.log('Sidebar preferences loaded, setting loading to false');
+        setIsLoading(false);
       }
-    } catch (error) {
-      console.error('Error loading sidebar preferences:', error);
-      const fallbackItems = getDefaultMenuItemsForRole(userRole, userProfile);
-      setMenuItems(fallbackItems);
-    } finally {
-      console.log('Sidebar preferences loaded successfully');
-      setIsLoading(false);
-      isLoadingRef.current = false;
-    }
-  }, [userId, userRole, permissionsLoaded, stableHasPermission, userProfile, permissionsLoading, authLoading, permissionsError]);
+    }, 100); // 100ms debounce
+  }, [userId, userRole, permissionsLoaded, hasPermission]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {
@@ -294,8 +265,8 @@ export const useSidebarPreferences = () => {
         .delete()
         .eq('user_id', userId);
 
-      const defaultItems = permissionsLoaded && !permissionsError
-        ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
+      const defaultItems = permissionsLoaded 
+        ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
         : getDefaultMenuItemsForRole(userRole, userProfile);
       setMenuItems(defaultItems);
       return true;
@@ -303,25 +274,21 @@ export const useSidebarPreferences = () => {
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  }, [userId, permissionsLoaded, userRole, stableHasPermission, userProfile, permissionsError]);
+  }, [userId, permissionsLoaded, userRole, hasPermission]);
 
   const refreshPreferences = useCallback(async () => {
     await loadPreferences();
   }, [loadPreferences]);
 
-  // Effect to load preferences when dependencies change
   useEffect(() => {
-    if (userId && !isLoadingRef.current && permissionsLoaded) {
-      console.log('useEffect triggered - loading preferences');
-      loadPreferences();
-    }
-  }, [userId, loadPreferences, permissionsLoaded]);
+    loadPreferences();
+  }, [loadPreferences]);
 
   const getDefaultMenuItems = useCallback(() => {
-    return permissionsLoaded && !permissionsError
-      ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
+    return permissionsLoaded 
+      ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
       : getDefaultMenuItemsForRole(userRole, userProfile);
-  }, [permissionsLoaded, userRole, stableHasPermission, userProfile, permissionsError]);
+  }, [permissionsLoaded, userRole, hasPermission, userProfile]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -329,13 +296,12 @@ export const useSidebarPreferences = () => {
       if (loadingTimeoutRef.current) {
         clearTimeout(loadingTimeoutRef.current);
       }
-      isLoadingRef.current = false;
     };
   }, []);
 
   return {
     menuItems,
-    isLoading: isLoading || permissionsLoading || authLoading,
+    isLoading,
     savePreferences,
     resetToDefault,
     refreshPreferences,

@@ -2764,7 +2764,7 @@ export type Database = {
         }[]
       }
       process_email_template: {
-        Args: { template_text: string; data_json: Json }
+        Args: { template_content: string; record_data: Json }
         Returns: string
       }
       process_overdue_task_reminders: {
