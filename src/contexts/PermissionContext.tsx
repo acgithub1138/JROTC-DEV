@@ -26,7 +26,7 @@ export const usePermissionContext = () => {
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { userProfile, loading: authLoading } = useAuth();
 
-  // Fetch all permission data in a single query
+  // Fetch all permission data using proper JOINs instead of nested queries
   const { data: permissionData, isLoading, error } = useQuery({
     queryKey: ['all-permissions', userProfile?.role, userProfile?.id],
     queryFn: async () => {
@@ -37,12 +37,13 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       console.log('Fetching permissions for role:', userProfile.role, 'user:', userProfile.id);
       
+      // Use proper JOIN query instead of nested query
       const { data, error } = await supabase
         .from('role_permissions')
         .select(`
           enabled,
-          module:permission_modules(name),
-          action:permission_actions(name)
+          permission_modules!inner(name),
+          permission_actions!inner(name)
         `)
         .eq('role', userProfile.role);
       
@@ -55,13 +56,22 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       
       // Transform into a lookup map for O(1) access
       const permissionMap: Record<string, boolean> = {};
-      data.forEach(permission => {
-        if (permission.module?.name && permission.action?.name) {
-          const key = `${permission.module.name}:${permission.action.name}`;
-          permissionMap[key] = permission.enabled;
-          console.log(`Permission: ${key} = ${permission.enabled}`);
-        }
-      });
+      
+      if (data && Array.isArray(data)) {
+        data.forEach(permission => {
+          // Handle the JOIN result structure
+          const moduleName = permission.permission_modules?.name;
+          const actionName = permission.permission_actions?.name;
+          
+          if (moduleName && actionName) {
+            const key = `${moduleName}:${actionName}`;
+            permissionMap[key] = permission.enabled;
+            console.log(`Permission: ${key} = ${permission.enabled}`);
+          } else {
+            console.warn('Missing module or action name in permission:', permission);
+          }
+        });
+      }
       
       console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
       console.log('Full permission map:', permissionMap);
