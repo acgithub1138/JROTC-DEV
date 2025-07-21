@@ -29,6 +29,8 @@ const MODULE_MAPPING: Record<string, string> = {
 };
 
 const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
+  console.log('Getting menu items from permissions for role:', role);
+  
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -52,19 +54,25 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
   ];
 
   const allowedItems = potentialItems.filter(item => {
+    console.log(`Checking item: ${item.id}`);
+    
     // Admin-only items
     if (item.adminOnly && role !== 'admin') {
+      console.log(`  Skipped ${item.id}: admin only and user is ${role}`);
       return false;
     }
 
     // Special cases for admin items
     if (item.adminOnly && role === 'admin') {
+      console.log(`  Allowed ${item.id}: admin only and user is admin`);
       return true;
     }
 
     // Settings is only available to admins
     if (item.id === 'settings') {
-      return role === 'admin';
+      const allowed = role === 'admin';
+      console.log(`  ${allowed ? 'Allowed' : 'Skipped'} ${item.id}: settings check for ${role}`);
+      return allowed;
     }
 
     // Special case for competitions - requires both permission and school setting
@@ -72,23 +80,32 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       const moduleKey = MODULE_MAPPING[item.id];
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
       const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-      return hasModulePermission && hasCompetitionModule;
+      const allowed = hasModulePermission && hasCompetitionModule;
+      console.log(`  ${allowed ? 'Allowed' : 'Skipped'} ${item.id}: permission=${hasModulePermission}, competition_module=${hasCompetitionModule}`);
+      return allowed;
     }
 
     // Check permissions for regular items
     const moduleKey = MODULE_MAPPING[item.id];
     if (moduleKey) {
-      return hasPermission(moduleKey, 'sidebar');
+      const hasAccess = hasPermission(moduleKey, 'sidebar');
+      console.log(`  ${hasAccess ? 'Allowed' : 'Skipped'} ${item.id}: ${moduleKey}:sidebar = ${hasAccess}`);
+      return hasAccess;
     }
 
+    console.log(`  Skipped ${item.id}: no module mapping found`);
     return false;
   });
 
-  return [...baseItems, ...allowedItems];
+  const finalItems = [...baseItems, ...allowedItems];
+  console.log('Final menu items:', finalItems.map(item => item.id));
+  return finalItems;
 };
 
 // Fallback function for when permissions aren't loaded yet
 const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[] => {
+  console.log('Using fallback menu items for role:', role);
+  
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -143,7 +160,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
-
       ];
     
     default:
@@ -152,8 +168,8 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
 };
 
 export const useSidebarPreferences = () => {
-  const { userProfile } = useAuth();
-  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
+  const { userProfile, loading: authLoading } = useAuth();
+  const { hasPermission, isLoading: permissionsLoading, error: permissionsError } = usePermissionContext();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -162,7 +178,7 @@ export const useSidebarPreferences = () => {
   // Stable memoized values to prevent unnecessary re-renders
   const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
   const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
-  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
+  const permissionsLoaded = useMemo(() => !permissionsLoading && !authLoading, [permissionsLoading, authLoading]);
 
   // Stable permission checker that doesn't change on every render
   const stableHasPermission = useCallback((module: string, action: string) => {
@@ -176,6 +192,12 @@ export const useSidebarPreferences = () => {
       return;
     }
 
+    // Don't proceed if permissions are still loading
+    if (permissionsLoading || authLoading) {
+      console.log('Skipping load - still loading auth or permissions:', { authLoading, permissionsLoading });
+      return;
+    }
+
     // Prevent concurrent loads
     isLoadingRef.current = true;
 
@@ -185,6 +207,7 @@ export const useSidebarPreferences = () => {
     }
 
     console.log('Loading sidebar preferences for user:', userId, 'role:', userRole, 'permissions loaded:', permissionsLoaded);
+    console.log('Permissions error:', permissionsError);
     
     try {
       const { data, error } = await supabase
@@ -198,11 +221,11 @@ export const useSidebarPreferences = () => {
       }
 
       // Use database permissions if loaded, otherwise fallback to hardcoded
-      const defaultItems = permissionsLoaded 
+      const defaultItems = permissionsLoaded && !permissionsError
         ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
         : getDefaultMenuItemsForRole(userRole, userProfile);
       
-      console.log('Generated menu items count:', defaultItems.length, 'using', permissionsLoaded ? 'database permissions' : 'fallback permissions');
+      console.log('Generated menu items count:', defaultItems.length, 'using', permissionsLoaded && !permissionsError ? 'database permissions' : 'fallback permissions');
       
       if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
         console.log('Found saved preferences, filtering menu items');
@@ -226,7 +249,7 @@ export const useSidebarPreferences = () => {
       setIsLoading(false);
       isLoadingRef.current = false;
     }
-  }, [userId, userRole, permissionsLoaded, stableHasPermission, userProfile]);
+  }, [userId, userRole, permissionsLoaded, stableHasPermission, userProfile, permissionsLoading, authLoading, permissionsError]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {
@@ -271,7 +294,7 @@ export const useSidebarPreferences = () => {
         .delete()
         .eq('user_id', userId);
 
-      const defaultItems = permissionsLoaded 
+      const defaultItems = permissionsLoaded && !permissionsError
         ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
         : getDefaultMenuItemsForRole(userRole, userProfile);
       setMenuItems(defaultItems);
@@ -280,7 +303,7 @@ export const useSidebarPreferences = () => {
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  }, [userId, permissionsLoaded, userRole, stableHasPermission, userProfile]);
+  }, [userId, permissionsLoaded, userRole, stableHasPermission, userProfile, permissionsError]);
 
   const refreshPreferences = useCallback(async () => {
     await loadPreferences();
@@ -288,17 +311,17 @@ export const useSidebarPreferences = () => {
 
   // Effect to load preferences when dependencies change
   useEffect(() => {
-    if (userId && !isLoadingRef.current) {
+    if (userId && !isLoadingRef.current && permissionsLoaded) {
       console.log('useEffect triggered - loading preferences');
       loadPreferences();
     }
-  }, [userId, loadPreferences]);
+  }, [userId, loadPreferences, permissionsLoaded]);
 
   const getDefaultMenuItems = useCallback(() => {
-    return permissionsLoaded 
+    return permissionsLoaded && !permissionsError
       ? getMenuItemsFromPermissions(userRole, stableHasPermission, userProfile)
       : getDefaultMenuItemsForRole(userRole, userProfile);
-  }, [permissionsLoaded, userRole, stableHasPermission, userProfile]);
+  }, [permissionsLoaded, userRole, stableHasPermission, userProfile, permissionsError]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
@@ -312,7 +335,7 @@ export const useSidebarPreferences = () => {
 
   return {
     menuItems,
-    isLoading,
+    isLoading: isLoading || permissionsLoading || authLoading,
     savePreferences,
     resetToDefault,
     refreshPreferences,

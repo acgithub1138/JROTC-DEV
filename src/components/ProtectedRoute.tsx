@@ -20,11 +20,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdminRole = false
 }) => {
   const { user, userProfile, loading } = useAuth();
-  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
+  const { hasPermission, isLoading: permissionsLoading, error: permissionsError } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
 
-  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'permissionsLoading:', permissionsLoading);
+  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading, 'permissionsLoading:', permissionsLoading, 'permissionsError:', permissionsError);
 
   // Check if user needs to change password
   useEffect(() => {
@@ -37,8 +37,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check module permissions or admin role requirement
   useEffect(() => {
-    // Don't check permissions while they're still loading
-    if (permissionsLoading || !user) {
+    // Don't check permissions while they're still loading or if there's an error
+    if (permissionsLoading || !user || permissionsError) {
       setShowAccessDenied(false);
       return;
     }
@@ -46,6 +46,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (requireAdminRole) {
       // Check if user is admin
       const isAdmin = userProfile?.role === 'admin';
+      console.log(`Admin check: user role = ${userProfile?.role}, isAdmin = ${isAdmin}`);
       setShowAccessDenied(!isAdmin);
     } else if (module) {
       // Check module permissions
@@ -55,7 +56,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     } else {
       setShowAccessDenied(false);
     }
-  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission, permissionsLoading]);
+  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission, permissionsLoading, permissionsError]);
 
   // Show loading while auth or permissions are loading
   if (loading || permissionsLoading) {
@@ -64,6 +65,34 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
         <div className="text-center">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
           <p className="mt-4 text-gray-600">Loading...</p>
+          {permissionsLoading && <p className="mt-2 text-sm text-gray-500">Loading permissions...</p>}
+        </div>
+      </div>
+    );
+  }
+
+  // Show error if permissions failed to load
+  if (permissionsError) {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center p-6">
+        <div className="bg-white rounded-lg shadow-lg p-8 max-w-md w-full text-center">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 bg-red-100 rounded-full">
+              <svg className="h-8 w-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.996-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z" />
+              </svg>
+            </div>
+          </div>
+          <h2 className="text-2xl font-semibold text-gray-900 mb-2">Permission Error</h2>
+          <p className="text-gray-600 mb-6">
+            Failed to load user permissions. Please refresh the page or contact support.
+          </p>
+          <button 
+            onClick={() => window.location.reload()}
+            className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
+          >
+            Refresh Page
+          </button>
         </div>
       </div>
     );
@@ -105,6 +134,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           <p className="text-gray-600 mb-6">
             You do not have permission to access this page. Please contact your administrator if you believe this is an error.
           </p>
+          {module && (
+            <p className="text-sm text-gray-500 mb-4">
+              Required permission: {module}:{requirePermission}
+            </p>
+          )}
           <button 
             onClick={() => window.history.back()}
             className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
