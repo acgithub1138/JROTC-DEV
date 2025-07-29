@@ -46,9 +46,9 @@ const ProductPage = ({ module }: ProductPageProps) => {
       ],
       integrations: ["Task Management", "Team Management", "Email Management"],
       testimonial: {
-//        content: "The cadet management system has revolutionized how we track our 200+ cadets. Everything is organized and accessible.",
-//        author: "MSgt Jennifer Rodriguez",
-//        title: "Senior Army Instructor"
+        content: "The cadet management system has revolutionized how we track our 200+ cadets. Everything is organized and accessible.",
+        author: "MSgt Jennifer Rodriguez",
+        title: "Senior Army Instructor"
       }
     },
     task: {
@@ -75,9 +75,9 @@ const ProductPage = ({ module }: ProductPageProps) => {
       ],
       integrations: ["Cadet Management", "Calendar Management", "Email Management"],
       testimonial: {
-//        content: "Task management has eliminated the chaos of tracking assignments. Our completion rates improved by 40%.",
-//        author: "Colonel Sarah Thompson",
-//        title: "JROTC Program Director"
+        content: "Task management has eliminated the chaos of tracking assignments. Our completion rates improved by 40%.",
+        author: "Colonel Sarah Thompson",
+        title: "JROTC Program Director"
       }
     },
     competition: {
@@ -109,9 +109,9 @@ const ProductPage = ({ module }: ProductPageProps) => {
       ],
       integrations: ["Cadet Management", "Team Management", "Calendar Management"],
       testimonial: {
-//        content: "Our drill meets run smoother than ever. The scoring system eliminated disputes and saves hours of work.",
-//        author: "Major Robert Kim",
-//        title: "Competition Coordinator"
+        content: "Our drill meets run smoother than ever. The scoring system eliminated disputes and saves hours of work.",
+        author: "Major Robert Kim",
+        title: "Competition Coordinator"
       }
     },
     // ... continue for other modules
