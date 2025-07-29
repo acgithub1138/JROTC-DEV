@@ -17,11 +17,9 @@ const PricingPage = () => {
         "Task assignment",
         "Email communications",
         "Budget & inventory tracking",
-        "Analytics dashboard",
+        "Competition Analytics",
         "Standard support",
-        "Mobile app access",
-        "Custom reporting",
-        "Calendar integration"
+        "Events Calendar"
       ],
       notIncluded: [
         "Competition management"
@@ -40,12 +38,10 @@ const PricingPage = () => {
         "Task assignment",
         "Email communications",
         "Budget & inventory tracking",
-        "Analytics dashboard",
+        "Competition Analytics",
         "Competition management",
         "Priority support",
-        "Mobile app access",
-        "Custom reporting",
-        "Calendar integration"
+        "Events Calendar"
       ],
       notIncluded: [],
       popular: true,
