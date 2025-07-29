@@ -127,9 +127,6 @@ const LandingPage = () => {
               <Button size="lg" className="text-lg px-8" asChild>
                 <Link to="/contact">Get Started</Link>
               </Button>
-              <Button variant="outline" size="lg" className="text-lg px-8" asChild>
-                <Link to="/products/cadet-management">View Demo</Link>
-              </Button>
             </div>
             <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
