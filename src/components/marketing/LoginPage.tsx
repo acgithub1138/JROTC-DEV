@@ -134,7 +134,7 @@ const LoginPage = () => {
         {/* Features reminder */}
         <div className="mt-8 text-center">
           <p className="text-sm text-muted-foreground mb-4">
-            JROTC Pro includes:
+            JROTC CCC includes:
           </p>
           <div className="grid grid-cols-2 gap-2 text-xs text-muted-foreground">
             <div>• Cadet Management</div>
