@@ -1,6 +1,7 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { format } from 'date-fns';
 
 interface ProfileHistoryTabProps {
@@ -60,28 +61,30 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
 
   if (isLoading) {
     return (
-      <div className="p-6">
-        <div className="animate-pulse space-y-4">
-          {[...Array(3)].map((_, i) => (
-            <div key={i} className="h-16 bg-muted rounded"></div>
-          ))}
-        </div>
-      </div>
+      <Card>
+        <CardContent className="p-6">
+          <div className="animate-pulse space-y-4">
+            {[...Array(3)].map((_, i) => (
+              <div key={i} className="h-16 bg-muted rounded"></div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     );
   }
 
   return (
-    <div className="h-full flex flex-col p-4 overflow-y-auto">
-      <div className="flex-shrink-0 mb-4">
-        <h3 className="text-lg font-semibold">Profile Change History</h3>
-      </div>
-      <div className="flex-1 overflow-y-auto min-h-0">
+    <Card className="h-[600px] flex flex-col">
+      <CardHeader className="flex-shrink-0">
+        <CardTitle>Profile Change History</CardTitle>
+      </CardHeader>
+      <CardContent className="flex-1 overflow-hidden">
         {history.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No profile changes recorded yet</p>
           </div>
         ) : (
-          <div className="space-y-3">
+          <div className="h-full overflow-y-auto space-y-3">
             {history.map((item) => (
               <div key={item.id} className="border rounded-lg p-3">
                 <div className="flex items-center justify-between">
@@ -109,7 +112,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
             ))}
           </div>
         )}
-      </div>
-    </div>
+      </CardContent>
+    </Card>
   );
 };
