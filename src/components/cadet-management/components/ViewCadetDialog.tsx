@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit } from 'lucide-react';
 import { Profile } from '../types';
 import { getGradeColor } from '@/utils/gradeColors';
 import { ProfileHistoryTab } from './ProfileHistoryTab';
@@ -13,24 +15,38 @@ import { useJobRole } from '../hooks/useJobRole';
 import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
 import { useAuth } from '@/contexts/AuthContext';
 import { JROTCProgram } from '@/utils/jrotcRanks';
+import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface ViewCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile | null;
+  onEditProfile?: (profile: Profile) => void;
 }
 
-export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialogProps) => {
+export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: ViewCadetDialogProps) => {
   const { jobRole } = useJobRole(profile?.id);
   const { userProfile } = useAuth();
+  const { canUpdate } = useCadetPermissions();
 
   if (!profile) return null;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
-        <DialogHeader>
+        <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle>Cadet Profile</DialogTitle>
+          {canUpdate && onEditProfile && (
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={() => onEditProfile(profile)}
+              className="flex items-center gap-2"
+            >
+              <Edit className="h-4 w-4" />
+              Edit
+            </Button>
+          )}
         </DialogHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col">
@@ -95,23 +111,16 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
             </CardContent>
           </Card>
 
-          {/* Tabs Section */}
           <div className="flex-1 overflow-hidden">
-            <Tabs defaultValue="history" className="h-full flex flex-col">
+            <Tabs defaultValue="equipment" className="h-full flex flex-col">
               <TabsList className="grid w-full grid-cols-4">
-                <TabsTrigger value="history">History</TabsTrigger>
                 <TabsTrigger value="equipment">Equipment</TabsTrigger>
                 <TabsTrigger value="competitions">Competitions</TabsTrigger>
                 <TabsTrigger value="pt-tests">PT Tests</TabsTrigger>
+                <TabsTrigger value="history">History</TabsTrigger>
               </TabsList>
               
               <div className="flex-1 overflow-hidden">
-                <TabsContent value="history" className="h-full overflow-auto mt-0 p-0">
-                  <div className="h-full overflow-y-auto">
-                    <ProfileHistoryTab profileId={profile.id} />
-                  </div>
-                </TabsContent>
-                
                 <TabsContent value="equipment" className="h-full overflow-auto mt-0 p-0">
                   <div className="h-full overflow-y-auto">
                     <ProfileEquipmentTab profileId={profile.id} />
@@ -127,6 +136,12 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile }: ViewCadetDialog
                 <TabsContent value="pt-tests" className="h-full overflow-auto mt-0 p-0">
                   <div className="h-full overflow-y-auto">
                     <ProfilePTTestsTab profileId={profile.id} />
+                  </div>
+                </TabsContent>
+
+                <TabsContent value="history" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfileHistoryTab profileId={profile.id} />
                   </div>
                 </TabsContent>
               </div>
