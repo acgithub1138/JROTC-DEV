@@ -7,9 +7,11 @@ import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useContactForm } from "@/hooks/marketing/useContactForm";
-
 const ContactPage = () => {
-  const { submitContactForm, isSubmitting } = useContactForm();
+  const {
+    submitContactForm,
+    isSubmitting
+  } = useContactForm();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,7 +21,6 @@ const ContactPage = () => {
     message: "",
     type: "demo"
   });
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     submitContactForm(formData);
@@ -34,34 +35,29 @@ const ContactPage = () => {
       type: "demo"
     });
   };
-
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
-  const contactInfo = [
-    {
-      icon: Mail,
-      title: "Email Us",
-      content: "jortc_ccc@careyunlimited.com.com",
-      description: "We respond within 24 hours"
-    },
-    {
-      icon: Phone,
-      title: "Call Us",
-      content: "904-803-8292",
-      description: "Mon-Fri, 8AM-5PM CST"
-    },
-    {
-      icon: MapPin,
-      title: "Office",
-      content: "Flower Mound, TX",
-      description: "Home base"
-    }
-  ];
-
-  return (
-    <div className="min-h-screen">
+  const contactInfo = [{
+    icon: Mail,
+    title: "Email Us",
+    content: "jortc_ccc@careyunlimited.com.com",
+    description: "We respond within 24 hours"
+  }, {
+    icon: Phone,
+    title: "Call Us",
+    content: "904-803-8292",
+    description: "Mon-Fri, 8AM-5PM CST"
+  }, {
+    icon: MapPin,
+    title: "Office",
+    content: "Flower Mound, TX",
+    description: "Home base"
+  }];
+  return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
@@ -89,49 +85,29 @@ const ContactPage = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
-                      <Input
-                        id="name"
-                        value={formData.name}
-                        onChange={(e) => handleChange("name", e.target.value)}
-                        required
-                      />
+                      <Input id="name" value={formData.name} onChange={e => handleChange("name", e.target.value)} required />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address *</Label>
-                      <Input
-                        id="email"
-                        type="email"
-                        value={formData.email}
-                        onChange={(e) => handleChange("email", e.target.value)}
-                        required
-                      />
+                      <Input id="email" type="email" value={formData.email} onChange={e => handleChange("email", e.target.value)} required />
                     </div>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input
-                        id="phone"
-                        value={formData.phone}
-                        onChange={(e) => handleChange("phone", e.target.value)}
-                      />
+                      <Input id="phone" value={formData.phone} onChange={e => handleChange("phone", e.target.value)} />
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="school">School/Institution *</Label>
-                      <Input
-                        id="school"
-                        value={formData.school}
-                        onChange={(e) => handleChange("school", e.target.value)}
-                        required
-                      />
+                      <Input id="school" value={formData.school} onChange={e => handleChange("school", e.target.value)} required />
                     </div>
                   </div>
 
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="cadets">Number of Cadets</Label>
-                      <Select value={formData.cadets} onValueChange={(value) => handleChange("cadets", value)}>
+                      <Select value={formData.cadets} onValueChange={value => handleChange("cadets", value)}>
                         <SelectTrigger>
                           <SelectValue placeholder="Select range" />
                         </SelectTrigger>
@@ -146,7 +122,7 @@ const ContactPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="type">I'm Interested In</Label>
-                      <Select value={formData.type} onValueChange={(value) => handleChange("type", value)}>
+                      <Select value={formData.type} onValueChange={value => handleChange("type", value)}>
                         <SelectTrigger>
                           <SelectValue />
                         </SelectTrigger>
@@ -162,13 +138,7 @@ const ContactPage = () => {
 
                   <div className="space-y-2">
                     <Label htmlFor="message">Additional Information</Label>
-                    <Textarea
-                      id="message"
-                      placeholder="Tell us about your current challenges or specific needs..."
-                      value={formData.message}
-                      onChange={(e) => handleChange("message", e.target.value)}
-                      rows={4}
-                    />
+                    <Textarea id="message" placeholder="Tell us about your current challenges or specific needs..." value={formData.message} onChange={e => handleChange("message", e.target.value)} rows={4} />
                   </div>
 
                   <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
@@ -189,8 +159,7 @@ const ContactPage = () => {
               </div>
 
               <div className="grid gap-6">
-                {contactInfo.map((info, index) => (
-                  <Card key={index}>
+                {contactInfo.map((info, index) => <Card key={index}>
                     <CardContent className="pt-6">
                       <div className="flex items-start gap-4">
                         <div className="p-2 rounded-md bg-primary/10 text-primary">
@@ -203,22 +172,10 @@ const ContactPage = () => {
                         </div>
                       </div>
                     </CardContent>
-                  </Card>
-                ))}
+                  </Card>)}
               </div>
 
-              <Card className="bg-primary text-primary-foreground">
-                <CardContent className="pt-6">
-                  <h3 className="text-xl font-semibold mb-2">Quick Setup Available</h3>
-                  <p className="opacity-90 mb-4">
-                    Need to get started immediately? Our team can have your program 
-                    set up and running within 24 hours.
-                  </p>
-                  <Button variant="secondary" size="sm">
-                    Request Setup
-                  </Button>
-                </CardContent>
-              </Card>
+              
             </div>
           </div>
         </div>
@@ -285,8 +242,6 @@ const ContactPage = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default ContactPage;
