@@ -40,7 +40,6 @@ const PricingPage = () => {
         "Budget & inventory tracking",
         "Competition Analytics",
         "Competition management",
-        "Priority support",
         "Events Calendar"
       ],
       notIncluded: [],
