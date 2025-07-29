@@ -6,12 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { useContactForm } from "@/hooks/marketing/useContactForm";
 const ContactPage = () => {
-  const {
-    submitContactForm,
-    isSubmitting
-  } = useContactForm();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -21,25 +16,37 @@ const ContactPage = () => {
     message: "",
     type: "demo"
   });
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    submitContactForm(formData);
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      school: "",
-      cadets: "",
-      message: "",
-      type: "demo"
-    });
-  };
+
   const handleChange = (field: string, value: string) => {
     setFormData(prev => ({
       ...prev,
       [field]: value
     }));
+  };
+
+  const createMailtoLink = () => {
+    const typeLabels: Record<string, string> = {
+      demo: "Schedule Demo",
+      pricing: "Pricing Information", 
+      setup: "Get Started",
+      support: "Technical Support"
+    };
+
+    const subject = `JROTC CCC - IM INTERESTED IN ${typeLabels[formData.type] || formData.type}`;
+    
+    const body = `
+Name: ${formData.name}
+Email: ${formData.email}
+Phone: ${formData.phone}
+School/Institution: ${formData.school}
+Number of Cadets: ${formData.cadets}
+I'm Interested In: ${typeLabels[formData.type] || formData.type}
+
+Additional Information:
+${formData.message}
+    `.trim();
+
+    return `mailto:jrotc_info@careyunlimited.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
   };
   const contactInfo = [{
     icon: Mail,
@@ -76,7 +83,7 @@ const ContactPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
@@ -136,10 +143,10 @@ const ContactPage = () => {
                     <Textarea id="message" placeholder="Tell us about your current challenges or specific needs..." value={formData.message} onChange={e => handleChange("message", e.target.value)} rows={4} />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                  <Button asChild size="lg" className="w-full">
+                    <a href={createMailtoLink()}>Send Message</a>
                   </Button>
-                </form>
+                </div>
               </CardContent>
             </Card>
 
