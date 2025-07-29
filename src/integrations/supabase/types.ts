@@ -2885,9 +2885,7 @@ export type Database = {
         Returns: boolean
       }
       validate_role_transition: {
-        Args:
-          | { user_id: string; old_role: string; new_role: string }
-          | { user_id: string; old_role_id: string; new_role_id: string }
+        Args: { user_id: string; old_role_id: string; new_role_id: string }
         Returns: boolean
       }
       validate_task_priority: {
