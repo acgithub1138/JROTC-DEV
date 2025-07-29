@@ -6,9 +6,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Phone, MapPin } from "lucide-react";
-import { useContactForm } from "@/hooks/marketing/useContactForm";
 const ContactPage = () => {
-  const { submitContactForm, isSubmitting } = useContactForm();
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -19,19 +17,22 @@ const ContactPage = () => {
     type: "demo"
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    submitContactForm(formData);
-    // Reset form
-    setFormData({
-      name: "",
-      email: "",
-      phone: "",
-      school: "",
-      cadets: "",
-      message: "",
-      type: "demo"
-    });
+  const handleEmailClick = () => {
+    const subject = `Contact Form Submission from ${formData.name} - ${formData.school}`;
+    const body = `
+Name: ${formData.name}
+Email: ${formData.email}
+Phone: ${formData.phone}
+School/Institution: ${formData.school}
+Number of Cadets: ${formData.cadets}
+Interest Type: ${formData.type}
+
+Message:
+${formData.message}
+    `.trim();
+    
+    const mailtoUrl = `mailto:jortc_ccc@careyunlimited.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+    window.location.href = mailtoUrl;
   };
 
   const handleChange = (field: string, value: string) => {
@@ -43,7 +44,7 @@ const ContactPage = () => {
   const contactInfo = [{
     icon: Mail,
     title: "Email Us",
-    content: "jortc_ccc@careyunlimited.com.com",
+    content: "jortc_ccc@careyunlimited.com",
     description: "We are here to help!"
   },{
     icon: MapPin,
@@ -75,7 +76,7 @@ const ContactPage = () => {
                 </CardDescription>
               </CardHeader>
               <CardContent>
-                <form onSubmit={handleSubmit} className="space-y-6">
+                <div className="space-y-6">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="name">Full Name *</Label>
@@ -135,10 +136,10 @@ const ContactPage = () => {
                     <Textarea id="message" placeholder="Tell us about your current challenges or specific needs..." value={formData.message} onChange={e => handleChange("message", e.target.value)} rows={4} />
                   </div>
 
-                  <Button type="submit" size="lg" className="w-full" disabled={isSubmitting}>
-                    {isSubmitting ? "Sending..." : "Send Message"}
+                  <Button onClick={handleEmailClick} size="lg" className="w-full">
+                    Send Message
                   </Button>
-                </form>
+                </div>
               </CardContent>
             </Card>
 
