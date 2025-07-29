@@ -17,12 +17,12 @@ const PricingPage = () => {
         "Task assignment",
         "Email communications",
         "Budget & inventory tracking",
-        "Competition Analytics",
-        "Standard support",
-        "Events Calendar"
+        "Events Calendar",
+
       ],
       notIncluded: [
-        "Competition management"
+        "Competition management",
+        "Competition Analytics"
       ],
       popular: false,
       cta: "Get Started"
@@ -38,9 +38,9 @@ const PricingPage = () => {
         "Task assignment",
         "Email communications",
         "Budget & inventory tracking",
-        "Competition Analytics",
+        "Events Calendar",
         "Competition management",
-        "Events Calendar"
+        "Competition Analytics"
       ],
       notIncluded: [],
       popular: true,
