@@ -36,24 +36,24 @@ const MainApplication = () => {
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
-    if (path === '/') return 'dashboard';
-    if (path.startsWith('/tasks')) return 'tasks';
-    if (path.startsWith('/incidents')) return 'incident_management';
-    if (path.startsWith('/school')) return 'school-management';
-    if (path.startsWith('/users')) return 'user-admin';
-    if (path.startsWith('/email')) return 'email-management';
+    if (path === '/app' || path === '/app/') return 'dashboard';
+    if (path.startsWith('/app/tasks')) return 'tasks';
+    if (path.startsWith('/app/incidents')) return 'incident_management';
+    if (path.startsWith('/app/school')) return 'school-management';
+    if (path.startsWith('/app/users')) return 'user-admin';
+    if (path.startsWith('/app/email')) return 'email-management';
     
-    if (path.startsWith('/cadets')) return 'cadets';
-    if (path.startsWith('/job-board')) return 'job-board';
-    if (path.startsWith('/teams')) return 'teams';
-    if (path.startsWith('/inventory')) return 'inventory';
-    if (path.startsWith('/budget')) return 'budget';
-    if (path.startsWith('/contacts')) return 'contacts';
-    if (path.startsWith('/calendar')) return 'calendar';
-    if (path.startsWith('/competitions')) return 'competitions';
+    if (path.startsWith('/app/cadets')) return 'cadets';
+    if (path.startsWith('/app/job-board')) return 'job-board';
+    if (path.startsWith('/app/teams')) return 'teams';
+    if (path.startsWith('/app/inventory')) return 'inventory';
+    if (path.startsWith('/app/budget')) return 'budget';
+    if (path.startsWith('/app/contacts')) return 'contacts';
+    if (path.startsWith('/app/calendar')) return 'calendar';
+    if (path.startsWith('/app/competitions')) return 'competitions';
     
-    if (path.startsWith('/roles')) return 'role-management';
-    if (path.startsWith('/settings')) return 'settings';
+    if (path.startsWith('/app/roles')) return 'role-management';
+    if (path.startsWith('/app/settings')) return 'settings';
     return 'dashboard';
   });
 
@@ -61,24 +61,24 @@ const MainApplication = () => {
     setActiveModule(module);
     // Navigate to the appropriate route based on module
     const routes: { [key: string]: string } = {
-      'dashboard': '/',
-      'tasks': '/tasks',
-      'incident_management': '/incidents',
-      'school-management': '/school',
-      'user-admin': '/users',
-      'email-management': '/email',
+      'dashboard': '/app',
+      'tasks': '/app/tasks',
+      'incident_management': '/app/incidents',
+      'school-management': '/app/school',
+      'user-admin': '/app/users',
+      'email-management': '/app/email',
       
-      'cadets': '/cadets',
-      'job-board': '/job-board',
-      'teams': '/teams',
-      'inventory': '/inventory',
-      'budget': '/budget',
-      'contacts': '/contacts',
-      'calendar': '/calendar',
-      'competitions': '/competitions',
+      'cadets': '/app/cadets',
+      'job-board': '/app/job-board',
+      'teams': '/app/teams',
+      'inventory': '/app/inventory',
+      'budget': '/app/budget',
+      'contacts': '/app/contacts',
+      'calendar': '/app/calendar',
+      'competitions': '/app/competitions',
       
-      'role-management': '/roles',
-      'settings': '/settings'
+      'role-management': '/app/roles',
+      'settings': '/app/settings'
     };
     
     const route = routes[module];
