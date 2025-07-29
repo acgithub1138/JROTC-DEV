@@ -88,12 +88,12 @@ export const useConnectionEditor = (
       // Clear any existing reports_to connection
       sourceUpdates.reports_to = targetJob.role;
       sourceUpdates.reports_to_source_handle = editState.sourceHandle;
-      sourceUpdates.reports_to_target_handle = targetHandle;
+      // Don't update target handle to prevent cascading updates
     } else {
       // Clear any existing assistant connection  
       sourceUpdates.assistant = targetJob.role;
       sourceUpdates.assistant_source_handle = editState.sourceHandle;
-      sourceUpdates.assistant_target_handle = targetHandle;
+      // Don't update target handle to prevent cascading updates
     }
 
     // Apply updates to source job
