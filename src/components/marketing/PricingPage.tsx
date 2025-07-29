@@ -8,40 +8,42 @@ const PricingPage = () => {
   const plans = [
     {
       name: "Basic",
-      price: "$29",
-      period: "per month",
-      description: "Perfect for small JROTC programs",
+      price: "$2,000",
+      period: "per year",
+      description: "Perfect for JROTC programs",
       features: [
-        "Up to 50 cadets",
-        "Basic cadet management",
+        "Unlimited cadets",
+        "Full cadet management",
         "Task assignment",
         "Email communications",
+        "Budget & inventory tracking",
+        "Analytics dashboard",
         "Standard support",
-        "Mobile app access"
+        "Mobile app access",
+        "Custom reporting",
+        "Calendar integration"
       ],
       notIncluded: [
-        "Competition management",
-        "Advanced analytics",
-        "Custom reporting",
-        "Priority support"
+        "Competition management"
       ],
       popular: false,
       cta: "Get Started"
     },
     {
       name: "Competitions",
-      price: "$79",
-      period: "per month",
+      price: "$2,500",
+      period: "per year",
       description: "Most popular for competitive programs",
       features: [
-        "Up to 200 cadets",
+        "Unlimited cadets",
         "Full cadet management",
-        "Complete task system",
-        "Competition management",
+        "Task assignment",
+        "Email communications",
         "Budget & inventory tracking",
-        "Advanced email templates",
         "Analytics dashboard",
+        "Competition management",
         "Priority support",
+        "Mobile app access",
         "Custom reporting",
         "Calendar integration"
       ],
@@ -54,7 +56,7 @@ const PricingPage = () => {
   const faqs = [
     {
       question: "What's your pricing model?",
-      answer: "We offer transparent monthly pricing with no hidden fees. Choose from our Basic or Competitions plans based on your program size and needs."
+      answer: "We offer transparent annual pricing with no hidden fees. Choose from our Basic or Competitions plans based on whether you need competition management features."
     },
     {
       question: "Can I change plans later?",
