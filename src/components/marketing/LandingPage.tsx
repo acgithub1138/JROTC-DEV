@@ -75,7 +75,7 @@ const LandingPage = () => {
   const benefits = ["Save 10+ hours per week on administrative tasks", "Improve cadet engagement and tracking by 300%", "Streamline communication with automated systems", "Reduce paperwork and manual processes by 80%", "Enhanced competition planning and scoring", "Better budget and inventory management"];
   return <div className="min-h-screen">
       {/* Hero Section */}
-      <section className="relative py-20 lg:py-32 bg-gradient-to-br from-background via-muted/30 to-background">
+      <section className="relative py-10 lg:py-16 bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
