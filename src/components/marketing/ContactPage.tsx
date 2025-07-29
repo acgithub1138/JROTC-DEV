@@ -57,7 +57,7 @@ const ContactPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto mb-16">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Get Started with <span className="text-primary">JROTC Pro</span>
+              Get Started with <span className="text-primary">JROTC CCC</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               Ready to transform your JROTC program management? Get in touch with our team 
