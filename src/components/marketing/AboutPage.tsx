@@ -1,50 +1,33 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Target, Users, Award } from "lucide-react";
-
 const AboutPage = () => {
-  const values = [
-    {
-      icon: Shield,
-      title: "Military Excellence",
-      description: "Built by educators who understand the unique needs and standards of military education programs."
-    },
-    {
-      icon: Target,
-      title: "Purpose-Driven",
-      description: "Every feature is designed specifically for JROTC programs, not adapted from generic solutions."
-    },
-    {
-      icon: Users,
-      title: "Community Focused",
-      description: "We listen to our users and continuously improve based on real instructor feedback and needs."
-    },
-    {
-      icon: Award,
-      title: "Excellence in Service",
-      description: "Committed to providing the highest quality platform and support for military educators."
-    }
-  ];
-
-  const team = [
-    {
-      name: "Colonel (Ret.) Michael Johnson",
-      title: "Founder & CEO",
-      bio: "30 years of military service including 10 years as a JROTC instructor. Understands the challenges of program management firsthand."
-    },
-    {
-      name: "Sarah Chen",
-      title: "Head of Product",
-      bio: "Former education technology specialist with expertise in building platforms that actually work for educators."
-    },
-    {
-      name: "Major (Ret.) David Rodriguez",
-      title: "Customer Success",
-      bio: "15 years JROTC instruction experience, now dedicated to helping other instructors succeed with our platform."
-    }
-  ];
-
-  return (
-    <div className="min-h-screen">
+  const values = [{
+    icon: Shield,
+    title: "Military Excellence",
+    description: "Built by educators who understand the unique needs and standards of military education programs."
+  }, {
+    icon: Target,
+    title: "Purpose-Driven",
+    description: "Every feature is designed specifically for JROTC programs, not adapted from generic solutions."
+  }, {
+    icon: Users,
+    title: "Community Focused",
+    description: "We listen to our users and continuously improve based on real instructor feedback and needs."
+  }, {
+    icon: Award,
+    title: "Excellence in Service",
+    description: "Committed to providing the highest quality platform and support for military educators."
+  }];
+  const team = [{
+    name: "Aaron Carey",
+    title: "Founder & CEO",
+    bio: "30 years of IT & Process experience. Understands the challenges of program management from having his kids in the JROTC program."
+  }, {
+    name: "David Copland",
+    title: "Sarge",
+    bio: "Air Force JROTC instructor at Flower Mound High School."
+  }];
+  return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-20 lg:py-32">
         <div className="container mx-auto px-4">
@@ -53,10 +36,7 @@ const AboutPage = () => {
               Built by <span className="text-primary">Military Educators</span>,<br />
               for Military Educators
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">
-              JROTC Pro was created by instructors who experienced the frustration of managing 
-              programs with outdated tools. We built the solution we wished we had.
-            </p>
+            <p className="text-xl text-muted-foreground mb-8">JROTC CCC was created out of a collaboration between cadets & instructors who experienced the frustration of managing programs with outdated tools. We built the solution we wished we had.</p>
           </div>
         </div>
       </section>
@@ -68,9 +48,9 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold text-center mb-12">Our Story</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
               <p>
-                It started with a simple frustration. Colonel Michael Johnson, after transitioning from active duty 
-                to JROTC instruction, found himself spending more time on paperwork and administrative tasks than 
-                actually teaching and mentoring cadets.
+                It started with a simple frustration. Aaron Carey saw his kids struggling to meet deadlines and keep things organized as they
+                moved into leadership roles in their program.  He started discussing with Sarge how a better system could help him and the cadets
+                make the program better.
               </p>
               <p>
                 Hours were wasted tracking cadet progress on spreadsheets, manually organizing competitions, 
@@ -82,7 +62,7 @@ const AboutPage = () => {
                 designed for military education.
               </p>
               <p>
-                That's when we decided to build JROTC Pro – a platform designed specifically for JROTC programs, 
+                That's when we decided to build JROTC CCC – a platform designed specifically for JROTC programs, 
                 by people who understand the unique challenges of military education. Every feature is built with 
                 real instructor input, solving real problems that we've experienced ourselves.
               </p>
@@ -103,8 +83,7 @@ const AboutPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            {values.map((value, index) => (
-              <Card key={index} className="text-center">
+            {values.map((value, index) => <Card key={index} className="text-center">
                 <CardHeader>
                   <div className="flex justify-center mb-4">
                     <div className="p-3 rounded-full bg-primary/10 text-primary">
@@ -118,8 +97,7 @@ const AboutPage = () => {
                     {value.description}
                   </CardDescription>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -135,8 +113,7 @@ const AboutPage = () => {
           </div>
           
           <div className="grid md:grid-cols-3 gap-8 max-w-5xl mx-auto">
-            {team.map((member, index) => (
-              <Card key={index} className="text-center">
+            {team.map((member, index) => <Card key={index} className="text-center">
                 <CardHeader>
                   <div className="w-24 h-24 bg-primary/10 rounded-full mx-auto mb-4 flex items-center justify-center">
                     <Users className="h-12 w-12 text-primary" />
@@ -149,8 +126,7 @@ const AboutPage = () => {
                 <CardContent>
                   <p className="text-muted-foreground">{member.bio}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -197,17 +173,12 @@ const AboutPage = () => {
             we can help your JROTC program succeed.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a 
-              href="mailto:hello@jrotcpro.com" 
-              className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-8 py-3 text-lg font-medium hover:bg-primary-foreground/90 transition-colors"
-            >
+            <a href="mailto:hello@jrotcpro.com" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-8 py-3 text-lg font-medium hover:bg-primary-foreground/90 transition-colors">
               Contact Us
             </a>
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default AboutPage;
