@@ -31,34 +31,24 @@ const ProductPage = ({ module }: ProductPageProps) => {
       icon: Users,
       title: "Cadet Management",
       subtitle: "Comprehensive cadet tracking and development system",
-      description: "Track every aspect of your cadets' journey from enrollment to graduation. Monitor progress, maintain discipline records, track achievements, and support their leadership development with our comprehensive cadet management system.",
+      description: "Track every aspect of your cadets' journey from enrollment to graduation. Monitor progress, maintain PT records, track achievements, and support their leadership development with our comprehensive cadet management system.",
       features: [
         {
           title: "Profile Management",
-          description: "Complete cadet profiles with photos, contact information, emergency contacts, and academic records.",
-          benefits: ["Centralized cadet information", "Quick access to critical data", "Automated record keeping"]
+          description: "Complete cadet profiles with rank, fight, & year.",
+          benefits: ["Centralized cadet information", "Quick access to critical data", "Historical tracking"]
         },
         {
           title: "Progress Tracking",
-          description: "Monitor academic progress, leadership development, physical fitness, and skill acquisition.",
-          benefits: ["Visual progress indicators", "Milestone tracking", "Performance analytics"]
+          description: "Monitor leadership development, physical fitness, and skill acquisition.",
+          benefits: ["PT tracking", "LDR tracking"]
         },
-        {
-          title: "Discipline Records",
-          description: "Document and track disciplinary actions, counseling sessions, and behavioral improvements.",
-          benefits: ["Transparent documentation", "Pattern recognition", "Improvement tracking"]
-        },
-        {
-          title: "Achievement System",
-          description: "Track awards, ribbons, promotions, and special recognitions throughout their JROTC career.",
-          benefits: ["Motivation enhancement", "Recognition management", "Career progression tracking"]
-        }
       ],
       integrations: ["Task Management", "Team Management", "Email Management"],
       testimonial: {
-        content: "The cadet management system has revolutionized how we track our 200+ cadets. Everything is organized and accessible.",
-        author: "MSgt Jennifer Rodriguez",
-        title: "Senior Army Instructor"
+//        content: "The cadet management system has revolutionized how we track our 200+ cadets. Everything is organized and accessible.",
+//        author: "MSgt Jennifer Rodriguez",
+//        title: "Senior Army Instructor"
       }
     },
     task: {
@@ -69,43 +59,38 @@ const ProductPage = ({ module }: ProductPageProps) => {
       features: [
         {
           title: "Assignment Creation",
-          description: "Create detailed tasks with due dates, priorities, attachments, and specific instructions.",
+          description: "Create detailed tasks with due dates, priorities, and specific instructions.",
           benefits: ["Standardized task formats", "Clear expectations", "Reduced confusion"]
         },
         {
           title: "Progress Monitoring",
           description: "Real-time tracking of task completion, submission status, and quality assessment.",
-          benefits: ["Live progress updates", "Early intervention alerts", "Performance insights"]
+          benefits: ["Live progress updates", "Early intervention alerts", "Template notifications"]
         },
         {
           title: "Automated Reminders",
           description: "Smart notification system for upcoming deadlines and overdue assignments.",
           benefits: ["Improved completion rates", "Reduced missed deadlines", "Better time management"]
-        },
-        {
-          title: "Completion Verification",
-          description: "Digital submission system with approval workflows and feedback mechanisms.",
-          benefits: ["Paperless submissions", "Quality assurance", "Instant feedback"]
         }
       ],
       integrations: ["Cadet Management", "Calendar Management", "Email Management"],
       testimonial: {
-        content: "Task management has eliminated the chaos of tracking assignments. Our completion rates improved by 40%.",
-        author: "Colonel Sarah Thompson",
-        title: "JROTC Program Director"
+//        content: "Task management has eliminated the chaos of tracking assignments. Our completion rates improved by 40%.",
+//        author: "Colonel Sarah Thompson",
+//        title: "JROTC Program Director"
       }
     },
     competition: {
       icon: Trophy,
       title: "Competition Management",
-      subtitle: "Complete event planning and scoring system",
-      description: "Plan, execute, and analyze JROTC competitions with our comprehensive management system. From drill meets to academic bowls, handle every aspect of competitive events.",
+      subtitle: "Competition scoring system",
+      description: "Track and analyze JROTC competitions from drill meets to academic bowls!",
       features: [
-        {
-          title: "Event Planning",
-          description: "Complete event management from registration to awards ceremony with timeline tracking.",
-          benefits: ["Streamlined organization", "Automated scheduling", "Resource coordination"]
-        },
+//        {
+//          title: "Event Planning",
+//          description: "Complete event management from registration to awards ceremony with timeline tracking.",
+//          benefits: ["Streamlined organization", "Automated scheduling", "Resource coordination"]
+//        },
         {
           title: "Scoring System",
           description: "Digital scoring with multiple judge support, real-time calculations, and instant results.",
@@ -118,15 +103,15 @@ const ProductPage = ({ module }: ProductPageProps) => {
         },
         {
           title: "Award Management",
-          description: "Automated award calculations, certificate generation, and recognition tracking.",
-          benefits: ["Consistent recognition", "Automated documentation", "Motivation enhancement"]
+          description: "Track each award you achieved in the competition.",
+          benefits: ["Award tracking"]
         }
       ],
       integrations: ["Cadet Management", "Team Management", "Calendar Management"],
       testimonial: {
-        content: "Our drill meets run smoother than ever. The scoring system eliminated disputes and saves hours of work.",
-        author: "Major Robert Kim",
-        title: "Competition Coordinator"
+//        content: "Our drill meets run smoother than ever. The scoring system eliminated disputes and saves hours of work.",
+//        author: "Major Robert Kim",
+//        title: "Competition Coordinator"
       }
     },
     // ... continue for other modules
