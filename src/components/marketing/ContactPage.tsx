@@ -32,7 +32,7 @@ const ContactPage = () => {
       support: "Technical Support"
     };
 
-    const subject = `JROTC CCC - IM INTERESTED IN ${typeLabels[formData.type] || formData.type}`;
+    const subject = `JROTC CCC - ${typeLabels[formData.type] || formData.type}`;
     
     const body = `
 Name: ${formData.name}
