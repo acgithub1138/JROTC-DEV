@@ -155,9 +155,7 @@ const PricingPage = () => {
               "Data backup & security",
               "Regular updates",
               "Email notifications",
-              "User training materials",
-              "Community forum access",
-              "99.9% uptime guarantee"
+              "User training materials"
             ].map((feature, index) => (
               <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
