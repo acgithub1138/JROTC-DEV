@@ -155,7 +155,7 @@ const LandingPage = () => {
             </h2>
             <div className="grid md:grid-cols-2 gap-8 mb-12">
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-destructive">Before JROTC Pro:</h3>
+                <h3 className="text-xl font-semibold text-destructive">Before JROTC CCC:</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Hours spent on paperwork and manual tracking</li>
                   <li>• Scattered information across multiple systems</li>
@@ -165,7 +165,7 @@ const LandingPage = () => {
                 </ul>
               </div>
               <div className="space-y-4">
-                <h3 className="text-xl font-semibold text-primary">After JROTC Pro:</h3>
+                <h3 className="text-xl font-semibold text-primary">After JROTC CCC:</h3>
                 <ul className="space-y-2 text-muted-foreground">
                   <li>• Automated tracking and reporting</li>
                   <li>• All information centralized in one platform</li>
