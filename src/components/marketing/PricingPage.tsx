@@ -29,10 +29,10 @@ const PricingPage = () => {
       cta: "Get Started"
     },
     {
-      name: "Professional",
+      name: "Competitions",
       price: "$79",
       period: "per month",
-      description: "Most popular for growing programs",
+      description: "Most popular for competitive programs",
       features: [
         "Up to 200 cadets",
         "Full cadet management",
@@ -45,40 +45,16 @@ const PricingPage = () => {
         "Custom reporting",
         "Calendar integration"
       ],
-      notIncluded: [
-        "Multi-school management",
-        "API access"
-      ],
+      notIncluded: [],
       popular: true,
       cta: "Get Started"
-    },
-    {
-      name: "Enterprise",
-      price: "$149",
-      period: "per month",
-      description: "For large programs and districts",
-      features: [
-        "Unlimited cadets",
-        "All Professional features",
-        "Multi-school management",
-        "Advanced role management",
-        "Custom integrations",
-        "API access",
-        "Dedicated support",
-        "Custom training",
-        "White-label options",
-        "Advanced security"
-      ],
-      notIncluded: [],
-      popular: false,
-      cta: "Contact Sales"
     }
   ];
 
   const faqs = [
     {
       question: "What's your pricing model?",
-      answer: "We offer transparent monthly pricing with no hidden fees. Choose from our Basic, Professional, or Enterprise plans based on your program size and needs."
+      answer: "We offer transparent monthly pricing with no hidden fees. Choose from our Basic or Competitions plans based on your program size and needs."
     },
     {
       question: "Can I change plans later?",
@@ -86,7 +62,7 @@ const PricingPage = () => {
     },
     {
       question: "What kind of support do you provide?",
-      answer: "We offer email support for Basic plans, priority email and phone support for Professional plans, and dedicated support with custom training for Enterprise plans."
+      answer: "We offer email support for Basic plans and priority email and phone support for Competitions plans."
     },
     {
       question: "Is my data secure?",
@@ -114,7 +90,7 @@ const PricingPage = () => {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-3 gap-8 max-w-6xl mx-auto">
+          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
             {plans.map((plan, index) => (
               <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
                 {plan.popular && (
