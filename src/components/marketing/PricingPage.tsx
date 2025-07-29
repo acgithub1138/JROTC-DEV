@@ -103,7 +103,7 @@ const PricingPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {["Cloud-based access", "Mobile app support", "Data backup & security", "Regular updates", "Email notifications", "User training materials"].map((feature, index) => <div key={index} className="flex items-center gap-2">
+            {["Cloud-based access", "Mobile browser support", "Data backup & security", "Regular updates", "Email notifications", "User training materials"].map((feature, index) => <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
                 <span className="text-sm">{feature}</span>
               </div>)}
