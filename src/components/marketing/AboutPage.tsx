@@ -132,35 +132,7 @@ const AboutPage = () => {
       </section>
 
       {/* Stats Section */}
-      <section className="py-16">
-        <div className="container mx-auto px-4">
-          <div className="text-center mb-12">
-            <h2 className="text-3xl font-bold mb-4">By the Numbers</h2>
-            <p className="text-xl text-muted-foreground">
-              The impact we're making in JROTC programs nationwide
-            </p>
-          </div>
-          
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-8 max-w-4xl mx-auto text-center">
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">500+</div>
-              <div className="text-muted-foreground">Programs Using JROTC Pro</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">25,000+</div>
-              <div className="text-muted-foreground">Cadets Managed</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">10hrs</div>
-              <div className="text-muted-foreground">Average Time Saved Weekly</div>
-            </div>
-            <div>
-              <div className="text-4xl font-bold text-primary mb-2">99.9%</div>
-              <div className="text-muted-foreground">Uptime Guarantee</div>
-            </div>
-          </div>
-        </div>
-      </section>
+      
 
       {/* Contact CTA */}
       <section className="py-20 bg-primary text-primary-foreground">
