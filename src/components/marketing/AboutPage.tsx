@@ -33,8 +33,7 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Built by <span className="text-primary">Military Educators</span>,<br />
-              for Military Educators
+              Built for Military Educators
             </h1>
             <p className="text-xl text-muted-foreground mb-8">JROTC CCC was created out of a collaboration between cadets & instructors who experienced the frustration of managing programs with outdated tools. We built the solution we wished we had.</p>
           </div>
