@@ -16,6 +16,8 @@ import { arrayMove, SortableContext, sortableKeyboardCoordinates, horizontalList
 import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AddRoleDialog } from './AddRoleDialog';
+import { UserRolesTable } from './UserRolesTable';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // Helper function to get role colors
 const getRoleColor = (roleName: string): string => {
   const colorMap: Record<string, string> = {
@@ -206,11 +208,18 @@ export const RoleManagementPage: React.FC = () => {
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Role Management</h1>
         <p className="text-gray-600">
-          Configure permissions for each user role. Changes take effect immediately.
+          Configure permissions for each user role and manage role definitions.
         </p>
       </div>
 
-      <Card className="mb-6">
+      <Tabs defaultValue="permissions" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
+          <TabsTrigger value="roles">Manage Roles</TabsTrigger>
+        </TabsList>
+
+        <TabsContent value="permissions">
+          <Card className="mb-6">
         <CardHeader>
           <CardTitle className="flex items-center justify-between">
             <span>Role Permissions</span>
@@ -299,5 +308,11 @@ export const RoleManagementPage: React.FC = () => {
             </div>}
         </CardContent>
       </Card>
+        </TabsContent>
+
+        <TabsContent value="roles">
+          <UserRolesTable />
+        </TabsContent>
+      </Tabs>
     </div>;
 };

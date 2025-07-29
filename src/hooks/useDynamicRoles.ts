@@ -6,6 +6,9 @@ export interface RoleOption {
   role_name: string;
   role_label: string;
   can_be_assigned?: boolean;
+  admin_only?: boolean;
+  is_active?: boolean;
+  sort_order?: number;
 }
 
 export const useDynamicRoles = () => {
@@ -46,19 +49,13 @@ export const useDynamicRoles = () => {
       displayLabel?: string;
       isAdminOnly?: boolean;
     }) => {
-      // First, add the role to the enum
-      const { error: addRoleError } = await supabase.rpc('add_user_role', {
-        role_name: roleName,
-        display_label: displayLabel,
-        is_admin_only: isAdminOnly || false
+      // Add the role to the user_roles table
+      const { error: addRoleError } = await supabase.rpc('add_user_role_to_table', {
+        role_name_param: roleName,
+        role_label_param: displayLabel,
+        admin_only_param: isAdminOnly || false
       });
       if (addRoleError) throw addRoleError;
-
-      // Then, set up permissions for the role (this needs to happen after the enum is committed)
-      const { error: setupError } = await supabase.rpc('setup_role_permissions', {
-        role_name: roleName
-      });
-      if (setupError) throw setupError;
     },
     onSuccess: () => {
       // Invalidate and refetch role-related queries

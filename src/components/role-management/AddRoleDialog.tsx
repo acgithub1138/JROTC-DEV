@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Plus, Loader2 } from 'lucide-react';
-import { useDynamicRoles } from '@/hooks/useDynamicRoles';
+import { useUserRolesManagement } from '@/hooks/useUserRolesManagement';
 
 export const AddRoleDialog = () => {
   const [open, setOpen] = useState(false);
@@ -13,7 +13,7 @@ export const AddRoleDialog = () => {
   const [displayLabel, setDisplayLabel] = useState('');
   const [isAdminOnly, setIsAdminOnly] = useState(false);
   
-  const { addRole, isAddingRole } = useDynamicRoles();
+  const { addRole, isAdding } = useUserRolesManagement();
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -24,16 +24,15 @@ export const AddRoleDialog = () => {
 
     addRole({
       roleName: roleName.trim(),
-      displayLabel: displayLabel.trim() || undefined,
-      isAdminOnly
-    }, {
-      onSuccess: () => {
-        setOpen(false);
-        setRoleName('');
-        setDisplayLabel('');
-        setIsAdminOnly(false);
-      }
+      roleLabel: displayLabel.trim() || previewLabel,
+      adminOnly: isAdminOnly
     });
+    
+    // Reset form (success handling is in the hook)
+    setOpen(false);
+    setRoleName('');
+    setDisplayLabel('');
+    setIsAdminOnly(false);
   };
 
   // Generate display label from role name if not provided
@@ -98,15 +97,15 @@ export const AddRoleDialog = () => {
               type="button"
               variant="outline"
               onClick={() => setOpen(false)}
-              disabled={isAddingRole}
+              disabled={isAdding}
             >
               Cancel
             </Button>
             <Button
               type="submit"
-              disabled={!roleName.trim() || isAddingRole}
+              disabled={!roleName.trim() || isAdding}
             >
-              {isAddingRole && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
+              {isAdding && <Loader2 className="w-4 h-4 mr-2 animate-spin" />}
               Add Role
             </Button>
           </div>
