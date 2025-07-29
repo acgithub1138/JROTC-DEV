@@ -70,9 +70,12 @@ export const createFlowEdges = (
     const targetJob = jobMap.get(edge.target);
     
     if (edge.type === 'assistant') {
-      // Assistant relationships: use stored handle preferences or defaults
+      // Assistant relationships: use stored source handle, calculate target dynamically
       const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
-      const targetHandle = targetJob?.assistant_target_handle || 'left-target';
+      // Calculate target handle based on source to avoid conflicts
+      const targetHandle = sourceHandle.includes('right') ? 'left-target' : 
+                          sourceHandle.includes('left') ? 'right-target' :
+                          sourceHandle.includes('top') ? 'bottom-target' : 'top-target';
       
       const edgeObj = {
         id: edge.id,
@@ -89,9 +92,12 @@ export const createFlowEdges = (
       console.log('📎 Created assistant edge:', edgeObj);
       return edgeObj;
     } else {
-      // Reports_to relationships: use stored handle preferences or defaults
+      // Reports_to relationships: use stored source handle, calculate target dynamically  
       const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
-      const targetHandle = targetJob?.reports_to_target_handle || 'top-target';
+      // Calculate target handle based on source to avoid conflicts
+      const targetHandle = sourceHandle.includes('bottom') ? 'top-target' : 
+                          sourceHandle.includes('top') ? 'bottom-target' :
+                          sourceHandle.includes('left') ? 'right-target' : 'left-target';
       
       const edgeObj = {
         id: edge.id,

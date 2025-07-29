@@ -137,15 +137,25 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       return;
     }
 
+    console.log('=== CONNECTION SAVE DEBUG ===');
+    console.log('Source Job:', connectionEditModal.sourceJob.role);
+    console.log('Target Job:', connectionEditModal.targetJob.role);
+    console.log('Connection Type:', connectionEditModal.connectionType);
+    console.log('Source Handle:', sourceHandle);
+    console.log('Target Handle:', targetHandle);
+    
     // Update only source job with source handle (avoid updating shared target handles)
     const sourceUpdates: Partial<JobBoardWithCadet> = {};
     
     if (connectionEditModal.connectionType === 'reports_to') {
       sourceUpdates.reports_to_source_handle = sourceHandle;
+      console.log('Updating reports_to_source_handle to:', sourceHandle);
     } else {
       sourceUpdates.assistant_source_handle = sourceHandle;
+      console.log('Updating assistant_source_handle to:', sourceHandle);
     }
 
+    console.log('Source updates:', sourceUpdates);
     // Update only the source job to prevent affecting other connections to the same target
     onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
   }, [connectionEditModal, onUpdateJob]);
