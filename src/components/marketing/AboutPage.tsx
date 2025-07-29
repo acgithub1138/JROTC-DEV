@@ -24,7 +24,7 @@ const AboutPage = () => {
     bio: "30 years of IT & Process experience. Understands the challenges of program management from having his kids in the JROTC program."
   }, {
     name: "David Copland",
-    title: "Sarge",
+    title: "Consultant",
     bio: "Air Force JROTC instructor at Flower Mound High School."
   }];
   return <div className="min-h-screen">
