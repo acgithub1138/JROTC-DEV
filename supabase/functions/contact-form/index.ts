@@ -17,12 +17,15 @@ interface ContactFormData {
 }
 
 serve(async (req) => {
-  console.log('Contact form function called with method:', req.method);
+  console.log('=== Contact Form Function Called ===');
+  console.log('Method:', req.method);
+  console.log('URL:', req.url);
+  console.log('Headers:', Object.fromEntries(req.headers.entries()));
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     console.log('Handling CORS preflight request');
-    return new Response(null, { 
+    return new Response('ok', { 
       status: 200,
       headers: corsHeaders 
     });
@@ -43,26 +46,24 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Contact form POST request received');
+    console.log('=== Processing POST Request ===');
     
     // Parse the request body
     const formData: ContactFormData = await req.json();
-    console.log('Form data parsed successfully:', { 
-      name: formData.name, 
-      email: formData.email, 
-      school: formData.school,
-      type: formData.type 
-    });
+    console.log('Form data received:', formData);
 
-    // Log the complete form data for now
-    console.log('Complete contact form data:', formData);
+    // Simple success response
+    const response = {
+      success: true,
+      message: 'Contact form submitted successfully',
+      timestamp: new Date().toISOString(),
+      data: formData
+    };
+
+    console.log('Sending success response');
 
     return new Response(
-      JSON.stringify({ 
-        success: true, 
-        message: 'Contact form submitted successfully',
-        data: formData
-      }),
+      JSON.stringify(response),
       {
         status: 200,
         headers: {
@@ -73,12 +74,14 @@ serve(async (req) => {
     );
 
   } catch (error) {
-    console.error('Error processing contact form:', error);
+    console.error('=== Error in Contact Form ===');
+    console.error('Error details:', error);
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to submit contact form' 
+        error: error.message || 'Failed to submit contact form',
+        timestamp: new Date().toISOString()
       }),
       {
         status: 500,
