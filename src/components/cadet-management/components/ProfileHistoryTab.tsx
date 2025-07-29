@@ -2,7 +2,6 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
 
 interface ProfileHistoryTabProps {
@@ -85,28 +84,30 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
             <p>No profile changes recorded yet</p>
           </div>
         ) : (
-          <div className="h-full overflow-y-auto space-y-4">
+          <div className="h-full overflow-y-auto space-y-3">
             {history.map((item) => (
-              <div key={item.id} className="border rounded-lg p-4">
-                <div className="flex items-center justify-between mb-2">
-                  <div className="flex items-center gap-2">
-                    <span className="font-medium text-sm">
+              <div key={item.id} className="border rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <p className="text-sm text-gray-700">
+                    <span className="font-medium">
                       {item.changed_by_profile ? 
                         `${item.changed_by_profile.first_name} ${item.changed_by_profile.last_name}` : 
                         'System'
                       }
                     </span>
-                    <Badge variant="secondary" className="text-xs">
+                    {' '}changed{' '}
+                    <span className="font-medium text-blue-600">
                       {formatFieldName(item.field_name)}
-                    </Badge>
-                  </div>
-                  <span className="text-xs text-gray-500">
+                    </span>
+                    {' '}from{' '}
+                    <span className="font-medium text-red-600">"{formatValue(item.old_value)}"</span>
+                    {' '}to{' '}
+                    <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
+                  </p>
+                  <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
                     {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
                   </span>
                 </div>
-                <p className="text-sm text-gray-700">
-                  Changed from <span className="font-medium text-red-600">"{formatValue(item.old_value)}"</span> to <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
-                </p>
               </div>
             ))}
           </div>
