@@ -71,7 +71,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
   }
 
   return (
-    <div className="h-full flex flex-col p-4">
+    <div className="h-full flex flex-col p-4 overflow-y-auto">
       <div className="flex-shrink-0 mb-4">
         <h3 className="text-lg font-semibold">Profile Change History</h3>
       </div>
