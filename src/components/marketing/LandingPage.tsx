@@ -27,7 +27,7 @@ const LandingPage = () => {
       title: "Cadet Management",
       description: "Track cadet profiles, progress, discipline records, and achievements in one centralized system.",
       href: "/products/cadet-management",
-      features: ["Profile tracking", "Progress monitoring", "Discipline records", "Achievement tracking"]
+      features: ["Profile tracking", "PT tracking", "Leadership Development tracking"]
     },
     {
       icon: ClipboardList,
@@ -39,13 +39,13 @@ const LandingPage = () => {
     {
       icon: Trophy,
       title: "Competition Management",
-      description: "Plan events, manage scoring, track performance analytics, and celebrate achievements.",
+      description: "Manage scoring, track performance analytics, and celebrate achievements.",
       href: "/products/competition-management",
-      features: ["Event planning", "Scoring system", "Performance analytics", "Achievement tracking"]
+      features: ["Scoring system", "Performance analytics", "Achievement tracking"]
     },
     {
       icon: UserCheck,
-      title: "Team Management",
+      title: "Chain of Command & Team Management",
       description: "Organize units, define leadership structures, and manage team communications effectively.",
       href: "/products/team-management",
       features: ["Unit organization", "Leadership tracking", "Team communications", "Role assignments"]
@@ -53,23 +53,23 @@ const LandingPage = () => {
     {
       icon: DollarSign,
       title: "Budget Management",
-      description: "Track expenses, monitor budgets, manage financial resources with detailed reporting.",
+      description: "Track expenses & monitor budgets",
       href: "/products/budget-management",
-      features: ["Expense tracking", "Budget monitoring", "Financial reporting", "Resource allocation"]
+      features: ["Expense tracking", "Budget monitoring", "Resource allocation"]
     },
     {
       icon: Package,
       title: "Inventory Management",
-      description: "Manage equipment, track maintenance schedules, and ensure resource availability.",
+      description: "Manage equipment and ensure resource availability.",
       href: "/products/inventory-management",
-      features: ["Equipment tracking", "Maintenance schedules", "Resource monitoring", "Usage analytics"]
+      features: ["Equipment tracking", "Resource monitoring"]
     },
     {
       icon: Calendar,
       title: "Calendar Management",
       description: "Schedule events, track deadlines, coordinate activities with integrated calendar system.",
       href: "/products/calendar-management",
-      features: ["Event scheduling", "Deadline tracking", "Activity coordination", "Automated notifications"]
+      features: ["Event scheduling", "Deadline tracking", "Activity coordination"]
     },
     {
       icon: Mail,
@@ -81,24 +81,25 @@ const LandingPage = () => {
   ];
 
   const testimonials = [
-    {
-      name: "Colonel Sarah Martinez",
-      title: "JROTC Instructor, Lincoln High",
-      content: "JROTC Pro has transformed how we manage our program. What used to take hours now takes minutes.",
-      rating: 5
-    },
-    {
-      name: "Major Robert Chen",
-      title: "Senior Army Instructor",
-      content: "The cadet tracking and competition management features are game-changers for our unit.",
-      rating: 5
-    },
-    {
-      name: "MSG Jennifer Williams",
-      title: "JROTC Administrator",
-      content: "Finally, a system that understands the unique needs of JROTC programs. Highly recommended!",
-      rating: 5
-    }
+//    {
+//      name: "Colonel Sarah Martinez",
+//      title: "JROTC Instructor, Lincoln High",
+//      content: "JROTC Pro has transformed how we manage our program. What used to take hours now takes minutes.",
+//      rating: 5
+//    },
+//    {
+//      name: "Major Robert Chen",
+//      title: "Senior Army Instructor",
+//      content: "The cadet tracking and competition management features are game-changers for our unit.",
+//      rating: 5
+//    },
+//    {
+//      name: "MSG Jennifer Williams",
+//      title: "JROTC Administrator",
+//      content: "Finally, a system that understands the unique needs of JROTC programs. Highly recommended!",
+//      rating: 5
+//    }
+    
   ];
 
   const benefits = [
