@@ -47,20 +47,20 @@ const ContactPage = () => {
     {
       icon: Mail,
       title: "Email Us",
-      content: "hello@jrotcpro.com",
+      content: "jortc_ccc@careyunlimited.com.com",
       description: "We respond within 24 hours"
     },
     {
       icon: Phone,
       title: "Call Us",
-      content: "1-800-JROTC-PRO",
-      description: "Mon-Fri, 8AM-6PM EST"
+      content: "904-803-8292",
+      description: "Mon-Fri, 8AM-5PM CST"
     },
     {
       icon: MapPin,
       title: "Office",
-      content: "San Antonio, TX",
-      description: "Home of military education"
+      content: "Flower Mound, TX",
+      description: "Home base"
     },
     {
       icon: Clock,
