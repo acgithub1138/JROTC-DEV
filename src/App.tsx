@@ -8,6 +8,13 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { PermissionProvider } from "@/contexts/PermissionContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MainApplication from "@/components/MainApplication";
+import MarketingLayout from "@/components/marketing/MarketingLayout";
+import LandingPage from "@/components/marketing/LandingPage";
+import ProductPage from "@/components/marketing/ProductPage";
+import PricingPage from "@/components/marketing/PricingPage";
+import AboutPage from "@/components/marketing/AboutPage";
+import ContactPage from "@/components/marketing/ContactPage";
+import LoginPage from "@/components/marketing/LoginPage";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,14 +28,31 @@ const App = () => (
           <Sonner />
           <BrowserRouter>
             <Routes>
+              {/* Public Marketing Routes */}
+              <Route path="/" element={<MarketingLayout />}>
+                <Route index element={<LandingPage />} />
+                <Route path="features" element={<LandingPage />} />
+                <Route path="pricing" element={<PricingPage />} />
+                <Route path="about" element={<AboutPage />} />
+                <Route path="contact" element={<ContactPage />} />
+                <Route path="login" element={<LoginPage />} />
+                
+                {/* Product Module Pages */}
+                <Route path="products/cadet-management" element={<ProductPage module="cadet" />} />
+                <Route path="products/task-management" element={<ProductPage module="task" />} />
+                <Route path="products/competition-management" element={<ProductPage module="competition" />} />
+              </Route>
+              
+              {/* Protected Application Routes */}
               <Route 
-                path="/*" 
+                path="/app/*" 
                 element={
                   <ProtectedRoute>
                     <MainApplication />
                   </ProtectedRoute>
                 } 
               />
+              
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
