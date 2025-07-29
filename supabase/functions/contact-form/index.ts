@@ -3,6 +3,7 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
 interface ContactFormData {
@@ -16,34 +17,51 @@ interface ContactFormData {
 }
 
 serve(async (req) => {
+  console.log('Contact form function called with method:', req.method);
+  
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    return new Response(null, { headers: corsHeaders });
+    console.log('Handling CORS preflight request');
+    return new Response(null, { 
+      status: 200,
+      headers: corsHeaders 
+    });
+  }
+
+  if (req.method !== 'POST') {
+    console.log('Method not allowed:', req.method);
+    return new Response(
+      JSON.stringify({ error: 'Method not allowed' }),
+      {
+        status: 405,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      }
+    );
   }
 
   try {
-    console.log('Contact form submission received');
+    console.log('Contact form POST request received');
     
     // Parse the request body
     const formData: ContactFormData = await req.json();
-    console.log('Form data received:', { name: formData.name, email: formData.email, school: formData.school });
-
-    // For now, just log the submission and return success
-    // This can be enhanced later to send actual emails
-    console.log('Contact form data:', {
-      name: formData.name,
-      email: formData.email,
-      phone: formData.phone,
+    console.log('Form data parsed successfully:', { 
+      name: formData.name, 
+      email: formData.email, 
       school: formData.school,
-      cadets: formData.cadets,
-      message: formData.message,
-      type: formData.type
+      type: formData.type 
     });
+
+    // Log the complete form data for now
+    console.log('Complete contact form data:', formData);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: 'Contact form submitted successfully' 
+        message: 'Contact form submitted successfully',
+        data: formData
       }),
       {
         status: 200,
