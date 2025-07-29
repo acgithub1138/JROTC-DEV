@@ -273,7 +273,7 @@ const LandingPage = () => {
             Ready to Transform Your JROTC Program?
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Join hundreds of JROTC instructors who have already streamlined their program management 
+            Join now and help streamline your program management 
             with our comprehensive platform.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
