@@ -3,73 +3,40 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { CheckCircle, X } from "lucide-react";
-
 const PricingPage = () => {
-  const plans = [
-    {
-      name: "Basic",
-      price: "$2,000",
-      period: "per year",
-      description: "Perfect for JROTC programs",
-      features: [
-        "Unlimited cadets",
-        "Full cadet management",
-        "Task assignment",
-        "Email communications",
-        "Budget & inventory tracking",
-        "Events Calendar",
-
-      ],
-      notIncluded: [
-        "Competition management",
-        "Competition Analytics"
-      ],
-      popular: false,
-      cta: "Get Started"
-    },
-    {
-      name: "Competition",
-      price: "$2,500",
-      period: "per year",
-      description: "Most popular for competitive programs",
-      features: [
-        "Unlimited cadets",
-        "Full cadet management",
-        "Task assignment",
-        "Email communications",
-        "Budget & inventory tracking",
-        "Events Calendar",
-        "Competition management",
-        "Competition Analytics",
-        "Competition & Event organization (Coming soon...)"
-      ],
-      notIncluded: [],
-      popular: true,
-      cta: "Get Started"
-    }
-  ];
-
-  const faqs = [
-    {
-      question: "What's your pricing model?",
-      answer: "We offer transparent annual pricing with no hidden fees. Choose from our Basic or Competitions plans based on whether you need competition management features."
-    },
-    {
-      question: "Can I change plans later?",
-      answer: "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle."
-    },
-    {
-      question: "What kind of support do you provide?",
-      answer: "We offer email support for both plans."
-    },
-    {
-      question: "Is my data secure?",
-      answer: "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud."
-    },
-  ];
-
-  return (
-    <div className="min-h-screen">
+  const plans = [{
+    name: "Basic",
+    price: "$2,000",
+    period: "per year",
+    description: "Perfect for JROTC programs",
+    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar"],
+    notIncluded: ["Competition management", "Competition Analytics"],
+    popular: false,
+    cta: "Get Started"
+  }, {
+    name: "Competition",
+    price: "$2,500",
+    period: "per year",
+    description: "Most popular for competitive programs",
+    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition management", "Competition Analytics", "Competition & Event organization (Coming soon...)"],
+    notIncluded: [],
+    popular: true,
+    cta: "Get Started"
+  }];
+  const faqs = [{
+    question: "What's your pricing model?",
+    answer: "We offer transparent annual pricing with no hidden fees. Choose from our Basic or Competitions plans based on whether you need competition management features."
+  }, {
+    question: "Can I change plans later?",
+    answer: "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle."
+  }, {
+    question: "What kind of support do you provide?",
+    answer: "We offer email support for both plans."
+  }, {
+    question: "Is my data secure?",
+    answer: "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud."
+  }];
+  return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-10 lg:py-16">
         <div className="container mx-auto px-4">
@@ -85,13 +52,10 @@ const PricingPage = () => {
 
           {/* Pricing Cards */}
           <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
-            {plans.map((plan, index) => (
-              <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
-                {plan.popular && (
-                  <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
+            {plans.map((plan, index) => <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
+                {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
                     Most Popular
-                  </Badge>
-                )}
+                  </Badge>}
                 <CardHeader className="text-center">
                   <CardTitle className="text-2xl">{plan.name}</CardTitle>
                   <CardDescription className="text-base">{plan.description}</CardDescription>
@@ -102,30 +66,20 @@ const PricingPage = () => {
                 </CardHeader>
                 <CardContent className="space-y-4">
                   <ul className="space-y-3">
-                    {plan.features.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
+                    {plan.features.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2">
                         <CheckCircle className="h-5 w-5 text-primary" />
                         <span className="text-sm">{feature}</span>
-                      </li>
-                    ))}
-                    {plan.notIncluded.map((feature, featureIndex) => (
-                      <li key={featureIndex} className="flex items-center gap-2">
+                      </li>)}
+                    {plan.notIncluded.map((feature, featureIndex) => <li key={featureIndex} className="flex items-center gap-2">
                         <X className="h-5 w-5 text-muted-foreground" />
                         <span className="text-sm text-muted-foreground">{feature}</span>
-                      </li>
-                    ))}
+                      </li>)}
                   </ul>
-                  <Button 
-                    className={`w-full ${plan.popular ? '' : 'variant-outline'}`}
-                    variant={plan.popular ? 'default' : 'outline'}
-                    size="lg"
-                    asChild
-                  >
+                  <Button className={`w-full ${plan.popular ? '' : 'variant-outline'}`} variant={plan.popular ? 'default' : 'outline'} size="lg" asChild>
                     <Link to="/contact">{plan.cta}</Link>
                   </Button>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
 
           {/* Money Back Guarantee */}
@@ -149,19 +103,10 @@ const PricingPage = () => {
           </div>
           
           <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8 max-w-6xl mx-auto">
-            {[
-              "Cloud-based access",
-              "Mobile app support",
-              "Data backup & security",
-              "Regular updates",
-              "Email notifications",
-              "User training materials"
-            ].map((feature, index) => (
-              <div key={index} className="flex items-center gap-2">
+            {["Cloud-based access", "Mobile app support", "Data backup & security", "Regular updates", "Email notifications", "User training materials"].map((feature, index) => <div key={index} className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
                 <span className="text-sm">{feature}</span>
-              </div>
-            ))}
+              </div>)}
           </div>
         </div>
       </section>
@@ -171,22 +116,18 @@ const PricingPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Frequently Asked Questions</h2>
-            <p className="text-xl text-muted-foreground">
-              Get answers to common questions about JROTC Pro pricing and features
-            </p>
+            <p className="text-xl text-muted-foreground">Get answers to common questions about JROTC CCC pricing and features</p>
           </div>
           
           <div className="max-w-4xl mx-auto space-y-6">
-            {faqs.map((faq, index) => (
-              <Card key={index}>
+            {faqs.map((faq, index) => <Card key={index}>
                 <CardHeader>
                   <CardTitle className="text-lg">{faq.question}</CardTitle>
                 </CardHeader>
                 <CardContent>
                   <p className="text-muted-foreground">{faq.answer}</p>
                 </CardContent>
-              </Card>
-            ))}
+              </Card>)}
           </div>
         </div>
       </section>
@@ -210,8 +151,6 @@ const PricingPage = () => {
           </div>
         </div>
       </section>
-    </div>
-  );
+    </div>;
 };
-
 export default PricingPage;
