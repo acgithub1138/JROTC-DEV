@@ -57,16 +57,7 @@ const MarketingFooter = () => {
           </div>
 
           {/* Products */}
-          <div>
-            <h3 className="font-semibold mb-4">Products</h3>
-            <ul className="space-y-2">
-              {productLinks.map(link => <li key={link.href}>
-                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
-                    {link.name}
-                  </Link>
-                </li>)}
-            </ul>
-          </div>
+          
 
           {/* Company */}
           <div>
