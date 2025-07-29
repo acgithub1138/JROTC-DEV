@@ -153,7 +153,7 @@ const ContactPage = () => {
               <div>
                 <h2 className="text-3xl font-bold mb-4">Get in Touch</h2>
                 <p className="text-lg text-muted-foreground">
-                  Our team of former JROTC instructors is here to help you succeed. 
+                  Our team is here to help you succeed. 
                   We understand your challenges because we've faced them too.
                 </p>
               </div>
