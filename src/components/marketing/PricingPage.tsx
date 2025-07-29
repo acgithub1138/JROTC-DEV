@@ -60,16 +60,12 @@ const PricingPage = () => {
     },
     {
       question: "What kind of support do you provide?",
-      answer: "We offer email support for Basic plans and priority email and phone support for Competitions plans."
+      answer: "We offer email support for both plans."
     },
     {
       question: "Is my data secure?",
       answer: "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud."
     },
-    {
-      question: "Do you offer discounts for multiple schools?",
-      answer: "Yes! We offer district pricing for multiple schools. Contact our sales team for custom pricing based on your needs."
-    }
   ];
 
   return (
