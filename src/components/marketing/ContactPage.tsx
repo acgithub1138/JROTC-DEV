@@ -45,13 +45,8 @@ const ContactPage = () => {
     icon: Mail,
     title: "Email Us",
     content: "jortc_ccc@careyunlimited.com.com",
-    description: "We respond within 24 hours"
-  }, {
-    icon: Phone,
-    title: "Call Us",
-    content: "904-803-8292",
-    description: "Mon-Fri, 8AM-5PM CST"
-  }, {
+    description: "We are here to help!"
+  },{
     icon: MapPin,
     title: "Office",
     content: "Flower Mound, TX",
@@ -198,7 +193,7 @@ const ContactPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Most programs are up and running within 24-48 hours. We provide setup 
+                  Most programs are up and running within 3-5 days. We provide setup 
                   assistance and training to ensure a smooth transition.
                 </p>
               </CardContent>
@@ -222,7 +217,7 @@ const ContactPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Absolutely. We can help you import cadet records, historical data, 
+                  Absolutely. We can help you import cadet records, WINGS Inventory data, 
                   and other information from spreadsheets or existing systems.
                 </p>
               </CardContent>
@@ -234,8 +229,7 @@ const ContactPage = () => {
               </CardHeader>
               <CardContent>
                 <p className="text-muted-foreground">
-                  Our support team includes former JROTC instructors who understand your needs. 
-                  We're available via email, phone, and live chat.
+                  Our support team is available via email.
                 </p>
               </CardContent>
             </Card>
