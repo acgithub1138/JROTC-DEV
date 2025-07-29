@@ -1,4 +1,5 @@
-import { useDynamicRoles } from './useDynamicRoles';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import { useMemo } from 'react';
 
 export interface CadetRoleOption {
@@ -7,7 +8,15 @@ export interface CadetRoleOption {
 }
 
 export const useCadetRoles = () => {
-  const { assignableRoles, isLoadingAssignableRoles } = useDynamicRoles();
+  // Get assignable roles from the new user_roles table
+  const { data: assignableRoles, isLoading: isLoadingAssignableRoles } = useQuery({
+    queryKey: ['assignable-roles'],
+    queryFn: async () => {
+      const { data, error } = await supabase.rpc('get_assignable_roles');
+      if (error) throw error;
+      return data as { role_name: string; role_label: string; can_be_assigned: boolean }[];
+    }
+  });
 
   // Convert to cadet management format
   const roleOptions = useMemo(() => {
