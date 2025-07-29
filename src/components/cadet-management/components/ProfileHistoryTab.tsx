@@ -74,7 +74,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
   }
 
   return (
-    <Card className="h-[600px] flex flex-col">
+    <Card className="h-full flex flex-col">
       <CardHeader className="flex-shrink-0">
         <CardTitle>Profile Change History</CardTitle>
       </CardHeader>
