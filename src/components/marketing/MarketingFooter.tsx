@@ -1,32 +1,46 @@
 import { Link } from "react-router-dom";
 import { Shield, Mail, Phone, MapPin } from "lucide-react";
-
 const MarketingFooter = () => {
-  const productLinks = [
-    { name: "Cadet Management", href: "/products/cadet-management" },
-    { name: "Task Management", href: "/products/task-management" },
-    { name: "Competition Management", href: "/products/competition-management" },
-    { name: "Team Management", href: "/products/team-management" },
-    { name: "Budget Management", href: "/products/budget-management" },
-    { name: "Inventory Management", href: "/products/inventory-management" },
-  ];
-
-  const companyLinks = [
-    { name: "About", href: "/about" },
-    { name: "Pricing", href: "/pricing" },
-    { name: "Contact", href: "/contact" },
-    { name: "Support", href: "/contact" },
-  ];
-
-  return (
-    <footer className="bg-muted/30 border-t">
+  const productLinks = [{
+    name: "Cadet Management",
+    href: "/products/cadet-management"
+  }, {
+    name: "Task Management",
+    href: "/products/task-management"
+  }, {
+    name: "Competition Management",
+    href: "/products/competition-management"
+  }, {
+    name: "Team Management",
+    href: "/products/team-management"
+  }, {
+    name: "Budget Management",
+    href: "/products/budget-management"
+  }, {
+    name: "Inventory Management",
+    href: "/products/inventory-management"
+  }];
+  const companyLinks = [{
+    name: "About",
+    href: "/about"
+  }, {
+    name: "Pricing",
+    href: "/pricing"
+  }, {
+    name: "Contact",
+    href: "/contact"
+  }, {
+    name: "Support",
+    href: "/contact"
+  }];
+  return <footer className="bg-muted/30 border-t">
       <div className="container mx-auto px-4 py-12">
         <div className="grid md:grid-cols-4 gap-8">
           {/* Logo and Description */}
           <div className="space-y-4">
             <Link to="/" className="flex items-center space-x-2">
               <Shield className="h-8 w-8 text-primary" />
-              <span className="text-xl font-bold">JROTC Pro</span>
+              <span className="text-xl font-bold">JROTC CCC</span>
             </Link>
             <p className="text-sm text-muted-foreground">
               The comprehensive platform designed specifically for JROTC program management. 
@@ -35,15 +49,12 @@ const MarketingFooter = () => {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span>hello@jrotcpro.com</span>
+                <span>jrotc_ccc@careyunlimited.com</span>
               </div>
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" />
-                <span>1-800-JROTC-PRO</span>
-              </div>
+              
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" />
-                <span>San Antonio, TX</span>
+                <span>Flower Mound, TX</span>
               </div>
             </div>
           </div>
@@ -52,16 +63,11 @@ const MarketingFooter = () => {
           <div>
             <h3 className="font-semibold mb-4">Products</h3>
             <ul className="space-y-2">
-              {productLinks.map((link) => (
-                <li key={link.href}>
-                  <Link 
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
+              {productLinks.map(link => <li key={link.href}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.name}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -69,16 +75,11 @@ const MarketingFooter = () => {
           <div>
             <h3 className="font-semibold mb-4">Company</h3>
             <ul className="space-y-2">
-              {companyLinks.map((link) => (
-                <li key={link.href}>
-                  <Link 
-                    to={link.href}
-                    className="text-sm text-muted-foreground hover:text-foreground transition-colors"
-                  >
+              {companyLinks.map(link => <li key={link.href}>
+                  <Link to={link.href} className="text-sm text-muted-foreground hover:text-foreground transition-colors">
                     {link.name}
                   </Link>
-                </li>
-              ))}
+                </li>)}
             </ul>
           </div>
 
@@ -88,10 +89,7 @@ const MarketingFooter = () => {
             <p className="text-sm text-muted-foreground mb-4">
               Ready to streamline your JROTC program management?
             </p>
-            <Link 
-              to="/contact"
-              className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
-            >
+            <Link to="/contact" className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors">
               Get Started
             </Link>
           </div>
@@ -111,8 +109,6 @@ const MarketingFooter = () => {
           </div>
         </div>
       </div>
-    </footer>
-  );
+    </footer>;
 };
-
 export default MarketingFooter;
