@@ -42,10 +42,7 @@ const MarketingFooter = () => {
               <Shield className="h-8 w-8 text-primary" />
               <span className="text-xl font-bold">JROTC CCC</span>
             </Link>
-            <p className="text-sm text-muted-foreground">
-              The comprehensive platform designed specifically for JROTC program management. 
-              Built by military educators, for military educators.
-            </p>
+            <p className="text-sm text-muted-foreground">The comprehensive platform designed specifically for JROTC program management.</p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
