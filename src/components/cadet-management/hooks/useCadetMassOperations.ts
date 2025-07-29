@@ -142,7 +142,7 @@ export const useCadetMassOperations = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          role: role as 'cadet' | 'command_staff' | 'instructor' | 'admin',
+          role: role as any,
           updated_at: new Date().toISOString()
         })
         .in('id', selectedCadets);

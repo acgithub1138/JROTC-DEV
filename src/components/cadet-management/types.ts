@@ -18,7 +18,7 @@ export interface NewCadet {
   first_name: string;
   last_name: string;
   email: string;
-  role: 'cadet' | 'command_staff';
+  role: string;
   grade?: string;
   rank?: string;
   flight?: string;

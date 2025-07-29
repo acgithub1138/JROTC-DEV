@@ -33,7 +33,7 @@ export const useCadetManagement = () => {
         .from('profiles')
         .select('*')
         .eq('school_id', userProfile?.school_id)
-        .in('role', ['cadet', 'command_staff'])
+        .neq('role', 'instructor')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
@@ -213,7 +213,7 @@ export const useCadetManagement = () => {
           rank: editingProfile.rank || null,
           flight: editingProfile.flight || null,
           cadet_year: editingProfile.cadet_year ? editingProfile.cadet_year as '1st' | '2nd' | '3rd' | '4th' : null,
-          role: editingProfile.role as 'cadet' | 'command_staff' | 'instructor' | 'admin',
+          role: editingProfile.role as any,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProfile.id);

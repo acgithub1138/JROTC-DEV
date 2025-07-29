@@ -42,9 +42,9 @@ export const PTTestDialog = ({ open, onOpenChange, onSuccess }: PTTestDialogProp
     mileTime: ''
   });
 
-  // Filter to only show cadets and command staff, sorted by last name
+  // Filter to exclude instructors, sorted by last name
   const cadets = schoolUsers
-    .filter(user => user.role === 'cadet' || user.role === 'command_staff')
+    .filter(user => user.role !== 'instructor')
     .sort((a, b) => a.last_name.localeCompare(b.last_name));
 
   const handleSubmit = async (e: React.FormEvent) => {

@@ -53,7 +53,7 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
           first_name: row['First Name'] || '',
           last_name: row['Last Name'] || '',
           email: row['Email'] || '',
-          role: (row['Role']?.toLowerCase() === 'command_staff' ? 'command_staff' : 'cadet') as 'cadet' | 'command_staff',
+          role: row['Role']?.toLowerCase() || 'cadet',
           grade: row['Grade'] || '',
           rank: row['Rank'] || '',
           flight: row['Flight'] || ''
@@ -286,7 +286,9 @@ export const BulkImportDialog = ({ open, onOpenChange, onBulkImport }: BulkImpor
                               ))}
                             </SelectContent>
                           </Select>
-                        ) : (cadet.role === 'command_staff' ? 'Command Staff' : 'Cadet')}
+                        ) : (
+                          roleOptions.find(r => r.value === cadet.role)?.label || cadet.role
+                        )}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? (

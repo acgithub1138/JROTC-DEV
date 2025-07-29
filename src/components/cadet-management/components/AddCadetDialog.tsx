@@ -70,7 +70,7 @@ export const AddCadetDialog = ({ open, onOpenChange, newCadet, setNewCadet, onSu
             <Label htmlFor="role">Role *</Label>
             <Select
               value={newCadet.role}
-              onValueChange={(value: 'cadet' | 'command_staff') => setNewCadet({ ...newCadet, role: value })}
+              onValueChange={(value: string) => setNewCadet({ ...newCadet, role: value })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />

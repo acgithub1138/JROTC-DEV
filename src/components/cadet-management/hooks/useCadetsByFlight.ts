@@ -25,7 +25,7 @@ export const useCadetsByFlight = (flight?: string) => {
         .eq('school_id', userProfile?.school_id)
         .eq('flight', flight)
         .eq('active', true)
-        .in('role', ['cadet', 'command_staff'])
+        .neq('role', 'instructor')
         .order('last_name');
 
       if (error) {

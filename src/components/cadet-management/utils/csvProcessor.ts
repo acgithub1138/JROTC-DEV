@@ -44,8 +44,8 @@ export function validateCadetData(cadet: NewCadet): string[] {
   }
 
   // Role validation
-  if (!['cadet', 'command_staff'].includes(cadet.role)) {
-    errors.push('Role must be either "cadet" or "command_staff"');
+  if (!cadet.role || cadet.role.trim() === '') {
+    errors.push('Role is required');
   }
 
   return errors;
