@@ -137,22 +137,17 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       return;
     }
 
-    // Update source job with source handle
+    // Update only source job with source handle (avoid updating shared target handles)
     const sourceUpdates: Partial<JobBoardWithCadet> = {};
-    // Update target job with target handle  
-    const targetUpdates: Partial<JobBoardWithCadet> = {};
     
     if (connectionEditModal.connectionType === 'reports_to') {
       sourceUpdates.reports_to_source_handle = sourceHandle;
-      targetUpdates.reports_to_target_handle = targetHandle;
     } else {
       sourceUpdates.assistant_source_handle = sourceHandle;
-      targetUpdates.assistant_target_handle = targetHandle;
     }
 
-    // Update both jobs - only the specific fields that changed
+    // Update only the source job to prevent affecting other connections to the same target
     onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
-    onUpdateJob(connectionEditModal.targetJob.id, targetUpdates);
   }, [connectionEditModal, onUpdateJob]);
 
   const chartContent = (
