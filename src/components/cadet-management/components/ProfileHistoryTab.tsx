@@ -85,7 +85,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
             <p>No profile changes recorded yet</p>
           </div>
         ) : (
-          <ScrollArea className="h-[600px]">
+          <ScrollArea className="h-[300px]">
             <div className="space-y-3 pr-4">
               {history.map((item) => (
                 <div key={item.id} className="border rounded-lg p-3">
