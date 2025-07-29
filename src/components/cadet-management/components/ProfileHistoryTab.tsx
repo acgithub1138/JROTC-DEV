@@ -2,6 +2,7 @@ import React from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { format } from 'date-fns';
 
 interface ProfileHistoryTabProps {
@@ -74,43 +75,45 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
   }
 
   return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0">
+    <Card>
+      <CardHeader>
         <CardTitle>Profile Change History</CardTitle>
       </CardHeader>
-      <CardContent className="flex-1 overflow-hidden">
+      <CardContent>
         {history.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             <p>No profile changes recorded yet</p>
           </div>
         ) : (
-          <div className="h-full overflow-y-auto space-y-3">
-            {history.map((item) => (
-              <div key={item.id} className="border rounded-lg p-3">
-                <div className="flex items-center justify-between">
-                  <p className="text-sm text-gray-700">
-                    <span className="font-medium">
-                      {item.changed_by_profile ? 
-                        `${item.changed_by_profile.first_name} ${item.changed_by_profile.last_name}` : 
-                        'System'
-                      }
+          <ScrollArea className="h-[400px]">
+            <div className="space-y-3 pr-4">
+              {history.map((item) => (
+                <div key={item.id} className="border rounded-lg p-3">
+                  <div className="flex items-center justify-between">
+                    <p className="text-sm text-gray-700">
+                      <span className="font-medium">
+                        {item.changed_by_profile ? 
+                          `${item.changed_by_profile.first_name} ${item.changed_by_profile.last_name}` : 
+                          'System'
+                        }
+                      </span>
+                      {' '}changed{' '}
+                      <span className="font-medium text-blue-600">
+                        {formatFieldName(item.field_name)}
+                      </span>
+                      {' '}from{' '}
+                      <span className="font-medium text-red-600">"{formatValue(item.old_value)}"</span>
+                      {' '}to{' '}
+                      <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
+                    </p>
+                    <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
+                      {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
                     </span>
-                    {' '}changed{' '}
-                    <span className="font-medium text-blue-600">
-                      {formatFieldName(item.field_name)}
-                    </span>
-                    {' '}from{' '}
-                    <span className="font-medium text-red-600">"{formatValue(item.old_value)}"</span>
-                    {' '}to{' '}
-                    <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
-                  </p>
-                  <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
-                    {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
-                  </span>
+                  </div>
                 </div>
-              </div>
-            ))}
-          </div>
+              ))}
+            </div>
+          </ScrollArea>
         )}
       </CardContent>
     </Card>
