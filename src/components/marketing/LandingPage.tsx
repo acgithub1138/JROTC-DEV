@@ -224,11 +224,6 @@ const LandingPage = () => {
                       </li>
                     ))}
                   </ul>
-                  <Button variant="outline" className="w-full group-hover:bg-primary group-hover:text-primary-foreground" asChild>
-                    <Link to={module.href}>
-                      Learn More <ArrowRight className="h-4 w-4 ml-2" />
-                    </Link>
-                  </Button>
                 </CardContent>
               </Card>
             ))}
