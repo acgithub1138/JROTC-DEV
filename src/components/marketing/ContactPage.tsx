@@ -61,12 +61,6 @@ const ContactPage = () => {
       title: "Office",
       content: "Flower Mound, TX",
       description: "Home base"
-    },
-    {
-      icon: Clock,
-      title: "Support Hours",
-      content: "24/7 Emergency",
-      description: "Critical issues only"
     }
   ];
 
