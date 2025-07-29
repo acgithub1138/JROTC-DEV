@@ -28,7 +28,7 @@ const PricingPage = () => {
       cta: "Get Started"
     },
     {
-      name: "Competitions",
+      name: "Competition",
       price: "$2,500",
       period: "per year",
       description: "Most popular for competitive programs",
@@ -40,7 +40,8 @@ const PricingPage = () => {
         "Budget & inventory tracking",
         "Events Calendar",
         "Competition management",
-        "Competition Analytics"
+        "Competition Analytics",
+        "Competition & Event organization (Coming soon...)"
       ],
       notIncluded: [],
       popular: true,
