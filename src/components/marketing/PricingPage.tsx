@@ -26,7 +26,7 @@ const PricingPage = () => {
         "Priority support"
       ],
       popular: false,
-      cta: "Start Basic Trial"
+      cta: "Get Started"
     },
     {
       name: "Professional",
@@ -50,7 +50,7 @@ const PricingPage = () => {
         "API access"
       ],
       popular: true,
-      cta: "Start Professional Trial"
+      cta: "Get Started"
     },
     {
       name: "Enterprise",
@@ -77,8 +77,8 @@ const PricingPage = () => {
 
   const faqs = [
     {
-      question: "Is there a free trial?",
-      answer: "Yes! All plans include a 30-day free trial with no credit card required. You can explore all features and see how JROTC Pro fits your program."
+      question: "What's your pricing model?",
+      answer: "We offer transparent monthly pricing with no hidden fees. Choose from our Basic, Professional, or Enterprise plans based on your program size and needs."
     },
     {
       question: "Can I change plans later?",
@@ -109,7 +109,7 @@ const PricingPage = () => {
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
               Choose the plan that fits your JROTC program size and needs. 
-              All plans include a 30-day free trial with no credit card required.
+              All plans include full support and training.
             </p>
           </div>
 
@@ -162,7 +162,7 @@ const PricingPage = () => {
           <div className="text-center mt-16">
             <div className="inline-flex items-center gap-2 bg-muted/50 rounded-lg px-6 py-3">
               <CheckCircle className="h-5 w-5 text-primary" />
-              <span className="text-sm">30-day money-back guarantee • Cancel anytime • No setup fees</span>
+              <span className="text-sm">Professional support • Custom setup • No setup fees</span>
             </div>
           </div>
         </div>
@@ -230,11 +230,11 @@ const PricingPage = () => {
             Ready to Get Started?
           </h2>
           <p className="text-xl mb-8 opacity-90 max-w-2xl mx-auto">
-            Start your free trial today and see how JROTC Pro can transform your program management.
+            Start your JROTC Pro subscription today and see how our platform can transform your program management.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-              <Link to="/contact">Start Free Trial</Link>
+              <Link to="/contact">Get Started</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
               <Link to="/contact">Contact Sales</Link>

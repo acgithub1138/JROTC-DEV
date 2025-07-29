@@ -125,7 +125,7 @@ const LandingPage = () => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button size="lg" className="text-lg px-8" asChild>
-                <Link to="/contact">Start Free Trial</Link>
+                <Link to="/contact">Get Started</Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8" asChild>
                 <Link to="/products/cadet-management">View Demo</Link>
@@ -134,15 +134,15 @@ const LandingPage = () => {
             <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
-                <span>30-day free trial</span>
+                <span>Full support included</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
-                <span>No credit card required</span>
+                <span>Custom setup available</span>
               </div>
               <div className="flex items-center gap-2">
                 <CheckCircle className="h-5 w-5 text-primary" />
-                <span>Setup support included</span>
+                <span>Training provided</span>
               </div>
             </div>
           </div>
@@ -285,14 +285,14 @@ const LandingPage = () => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-              <Link to="/contact">Start Your Free Trial</Link>
+              <Link to="/contact">Get Started Today</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
               <Link to="/pricing">View Pricing</Link>
             </Button>
           </div>
           <p className="text-sm mt-4 opacity-75">
-            30-day free trial • No credit card required • Full support included
+            Full support included • Custom setup available • Training provided
           </p>
         </div>
       </section>

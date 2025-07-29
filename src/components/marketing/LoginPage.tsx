@@ -123,7 +123,7 @@ const LoginPage = () => {
             <div className="text-center text-sm text-muted-foreground">
               Don't have an account?{" "}
               <Link to="/contact" className="text-primary hover:underline">
-                Start your free trial
+                Contact us to get started
               </Link>
             </div>
           </CardContent>
@@ -134,10 +134,10 @@ const LoginPage = () => {
           <CardContent className="pt-6 text-center">
             <h3 className="font-semibold mb-2">New to JROTC Pro?</h3>
             <p className="text-sm text-muted-foreground mb-4">
-              Start your 30-day free trial and see how we can transform your program management.
+              Contact our team to learn more about how we can transform your program management.
             </p>
             <Button variant="outline" asChild>
-              <Link to="/contact">Start Free Trial</Link>
+              <Link to="/contact">Get Started</Link>
             </Button>
           </CardContent>
         </Card>

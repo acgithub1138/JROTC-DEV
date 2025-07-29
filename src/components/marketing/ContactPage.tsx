@@ -17,7 +17,7 @@ const ContactPage = () => {
     school: "",
     cadets: "",
     message: "",
-    type: "trial"
+    type: "demo"
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -35,7 +35,7 @@ const ContactPage = () => {
       school: "",
       cadets: "",
       message: "",
-      type: "trial"
+      type: "demo"
     });
   };
 
@@ -80,8 +80,8 @@ const ContactPage = () => {
               Get Started with <span className="text-primary">JROTC Pro</span>
             </h1>
             <p className="text-xl text-muted-foreground mb-8">
-              Ready to transform your JROTC program management? Start your free trial 
-              or get in touch with our team for a personalized demo.
+              Ready to transform your JROTC program management? Get in touch with our team 
+              to learn more or schedule a personalized demo.
             </p>
           </div>
 
@@ -89,9 +89,9 @@ const ContactPage = () => {
             {/* Contact Form */}
             <Card>
               <CardHeader>
-                <CardTitle className="text-2xl">Start Your Free Trial</CardTitle>
+                <CardTitle className="text-2xl">Contact Us</CardTitle>
                 <CardDescription>
-                  Fill out the form below and we'll set up your account or schedule a demo.
+                  Fill out the form below and we'll get back to you or schedule a demo.
                 </CardDescription>
               </CardHeader>
               <CardContent>
@@ -161,9 +161,9 @@ const ContactPage = () => {
                           <SelectValue />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem value="trial">Free Trial</SelectItem>
                           <SelectItem value="demo">Schedule Demo</SelectItem>
                           <SelectItem value="pricing">Pricing Information</SelectItem>
+                          <SelectItem value="setup">Get Started</SelectItem>
                           <SelectItem value="support">Technical Support</SelectItem>
                         </SelectContent>
                       </Select>
@@ -225,7 +225,7 @@ const ContactPage = () => {
                     set up and running within 24 hours.
                   </p>
                   <Button variant="secondary" size="sm">
-                    Request Expedited Setup
+                    Request Setup
                   </Button>
                 </CardContent>
               </Card>

@@ -92,7 +92,7 @@ const MarketingFooter = () => {
               to="/contact"
               className="inline-flex items-center justify-center rounded-md bg-primary text-primary-foreground px-4 py-2 text-sm font-medium hover:bg-primary/90 transition-colors"
             >
-              Start Free Trial
+              Get Started
             </Link>
           </div>
         </div>

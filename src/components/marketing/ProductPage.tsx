@@ -159,7 +159,7 @@ const ProductPage = ({ module }: ProductPageProps) => {
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
               <Button size="lg" className="text-lg px-8" asChild>
-                <Link to="/contact">Start Free Trial</Link>
+                <Link to="/contact">Get Started</Link>
               </Button>
               <Button variant="outline" size="lg" className="text-lg px-8" asChild>
                 <Link to="/contact">Schedule Demo</Link>
@@ -280,14 +280,14 @@ const ProductPage = ({ module }: ProductPageProps) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
-              <Link to="/contact">Start Your Free Trial</Link>
+              <Link to="/contact">Get Started Today</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
               <Link to="/">Explore All Features</Link>
             </Button>
           </div>
           <p className="text-sm mt-4 opacity-75">
-            30-day free trial • No credit card required • Full support included
+            Full support included • Custom setup available • Training provided
           </p>
         </div>
       </section>

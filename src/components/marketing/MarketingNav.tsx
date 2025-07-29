@@ -102,7 +102,7 @@ const MarketingNav = () => {
               <Link to="/login">Sign In</Link>
             </Button>
             <Button asChild>
-              <Link to="/contact">Start Free Trial</Link>
+              <Link to="/contact">Get Started</Link>
             </Button>
           </div>
 
@@ -148,7 +148,7 @@ const MarketingNav = () => {
                 </Link>
                 <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>
                   <Button className="w-full mt-2">
-                    Start Free Trial
+                    Get Started
                   </Button>
                 </Link>
               </div>
