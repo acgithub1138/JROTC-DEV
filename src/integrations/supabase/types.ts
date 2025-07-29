@@ -526,6 +526,7 @@ export type Database = {
           id: string
           module_id: string
           role: Database["public"]["Enums"]["user_role"]
+          role_id: string | null
         }
         Insert: {
           action_id: string
@@ -534,6 +535,7 @@ export type Database = {
           id?: string
           module_id: string
           role: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
         }
         Update: {
           action_id?: string
@@ -542,6 +544,7 @@ export type Database = {
           id?: string
           module_id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
         }
         Relationships: [
           {
@@ -556,6 +559,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "default_role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -1819,6 +1829,7 @@ export type Database = {
           phone: string | null
           rank: string | null
           role: Database["public"]["Enums"]["user_role"]
+          role_id: string | null
           school_id: string
           updated_at: string
         }
@@ -1837,6 +1848,7 @@ export type Database = {
           phone?: string | null
           rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           school_id: string
           updated_at?: string
         }
@@ -1855,10 +1867,18 @@ export type Database = {
           phone?: string | null
           rank?: string | null
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           school_id?: string
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_school_id_fkey"
             columns: ["school_id"]
@@ -1930,6 +1950,7 @@ export type Database = {
           id: string
           module_id: string
           role: Database["public"]["Enums"]["user_role"]
+          role_id: string | null
           updated_at: string
         }
         Insert: {
@@ -1939,6 +1960,7 @@ export type Database = {
           id?: string
           module_id: string
           role: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           updated_at?: string
         }
         Update: {
@@ -1948,6 +1970,7 @@ export type Database = {
           id?: string
           module_id?: string
           role?: Database["public"]["Enums"]["user_role"]
+          role_id?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -1963,6 +1986,13 @@ export type Database = {
             columns: ["module_id"]
             isOneToOne: false
             referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "role_permissions_role_id_fkey"
+            columns: ["role_id"]
+            isOneToOne: false
+            referencedRelation: "user_roles"
             referencedColumns: ["id"]
           },
         ]
@@ -2209,13 +2239,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "subtasks_parent_task_id_fkey"
-            columns: ["parent_task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "subtasks_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
@@ -2250,13 +2273,6 @@ export type Database = {
           user_id?: string
         }
         Relationships: [
-          {
-            foreignKeyName: "task_comments_task_id_fkey"
-            columns: ["task_id"]
-            isOneToOne: false
-            referencedRelation: "tasks"
-            referencedColumns: ["id"]
-          },
           {
             foreignKeyName: "task_comments_user_id_fkey"
             columns: ["user_id"]
@@ -2574,6 +2590,39 @@ export type Database = {
         }
         Relationships: []
       }
+      user_roles: {
+        Row: {
+          admin_only: boolean
+          created_at: string
+          id: string
+          is_active: boolean
+          role_label: string
+          role_name: string
+          sort_order: number
+          updated_at: string
+        }
+        Insert: {
+          admin_only?: boolean
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          role_label: string
+          role_name: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Update: {
+          admin_only?: boolean
+          created_at?: string
+          id?: string
+          is_active?: boolean
+          role_label?: string
+          role_name?: string
+          sort_order?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       user_sidebar_preferences: {
         Row: {
           competitions_columns: string[] | null
@@ -2655,6 +2704,14 @@ export type Database = {
         }
         Returns: undefined
       }
+      add_user_role_to_table: {
+        Args: {
+          role_name_param: string
+          role_label_param?: string
+          admin_only_param?: boolean
+        }
+        Returns: string
+      }
       check_email_queue_health: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -2690,7 +2747,7 @@ export type Database = {
         }[]
       }
       get_assignable_roles: {
-        Args: { current_user_role?: string }
+        Args: Record<PropertyKey, never> | { current_user_role?: string }
         Returns: {
           role_name: string
           role_label: string
@@ -2827,7 +2884,9 @@ export type Database = {
         Returns: boolean
       }
       validate_role_transition: {
-        Args: { user_id: string; old_role: string; new_role: string }
+        Args:
+          | { user_id: string; old_role: string; new_role: string }
+          | { user_id: string; old_role_id: string; new_role_id: string }
         Returns: boolean
       }
       validate_task_priority: {
