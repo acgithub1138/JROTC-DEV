@@ -2747,10 +2747,11 @@ export type Database = {
         }[]
       }
       get_assignable_roles: {
-        Args: Record<PropertyKey, never> | { current_user_role?: string }
+        Args: Record<PropertyKey, never>
         Returns: {
           role_name: string
           role_label: string
+          can_be_assigned: boolean
         }[]
       }
       get_current_user_role: {
