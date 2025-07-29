@@ -17,10 +17,11 @@ export const useContactForm = () => {
 
   const submitContactForm = useMutation({
     mutationFn: async (formData: ContactFormData) => {
-      // Call the contact form edge function
-      const { data, error } = await supabase.functions.invoke('contact-form', {
-        body: formData
-      });
+      // Insert into contact_us table
+      const { data, error } = await supabase
+        .from('contact_us')
+        .insert([formData])
+        .select();
 
       if (error) throw error;
       return data;

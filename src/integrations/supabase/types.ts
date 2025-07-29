@@ -451,6 +451,45 @@ export type Database = {
           },
         ]
       }
+      contact_us: {
+        Row: {
+          cadets: string | null
+          created_at: string
+          email: string
+          id: string
+          message: string | null
+          name: string
+          phone: string | null
+          school: string
+          type: string
+          updated_at: string
+        }
+        Insert: {
+          cadets?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          message?: string | null
+          name: string
+          phone?: string | null
+          school: string
+          type?: string
+          updated_at?: string
+        }
+        Update: {
+          cadets?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string | null
+          name?: string
+          phone?: string | null
+          school?: string
+          type?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       contacts: {
         Row: {
           cadet_id: string | null
