@@ -8,11 +8,14 @@ import { Shield } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/contexts/AuthContext";
-
 const LoginPage = () => {
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { user } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    user
+  } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
   const [formData, setFormData] = useState({
     email: "",
@@ -25,31 +28,32 @@ const LoginPage = () => {
       navigate("/app");
     }
   }, [user, navigate]);
-
   const handleChange = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const { error } = await supabase.auth.signInWithPassword({
+      const {
+        error
+      } = await supabase.auth.signInWithPassword({
         email: formData.email,
-        password: formData.password,
+        password: formData.password
       });
-
       if (error) {
         toast({
           title: "Sign In Failed",
           description: error.message,
-          variant: "destructive",
+          variant: "destructive"
         });
       } else {
         toast({
           title: "Welcome back!",
-          description: "You have been successfully signed in.",
+          description: "You have been successfully signed in."
         });
         navigate("/app");
       }
@@ -57,15 +61,13 @@ const LoginPage = () => {
       toast({
         title: "Error",
         description: "An unexpected error occurred. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
     }
   };
-
-  return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background py-12 px-4">
+  return <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background via-muted/30 to-background py-12 px-4">
       <div className="w-full max-w-md">
         {/* Logo and Header */}
         <div className="text-center mb-8">
@@ -91,24 +93,11 @@ const LoginPage = () => {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  placeholder="your.email@school.edu"
-                  value={formData.email}
-                  onChange={(e) => handleChange("email", e.target.value)}
-                  required
-                />
+                <Input id="email" type="email" placeholder="your.email@school.edu" value={formData.email} onChange={e => handleChange("email", e.target.value)} required />
               </div>
               <div className="space-y-2">
                 <Label htmlFor="password">Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  value={formData.password}
-                  onChange={(e) => handleChange("password", e.target.value)}
-                  required
-                />
+                <Input id="password" type="password" value={formData.password} onChange={e => handleChange("password", e.target.value)} required />
               </div>
               <div className="flex items-center justify-between text-sm">
                 <Link to="/forgot-password" className="text-primary hover:underline">
@@ -132,7 +121,7 @@ const LoginPage = () => {
         {/* Trial CTA */}
         <Card className="mt-6 bg-primary/5 border-primary/20">
           <CardContent className="pt-6 text-center">
-            <h3 className="font-semibold mb-2">New to JROTC Pro?</h3>
+            <h3 className="font-semibold mb-2">New to JROTC CCC?</h3>
             <p className="text-sm text-muted-foreground mb-4">
               Contact our team to learn more about how we can transform your program management.
             </p>
@@ -157,8 +146,6 @@ const LoginPage = () => {
           </div>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
-
 export default LoginPage;
