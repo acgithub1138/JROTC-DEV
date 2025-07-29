@@ -111,13 +111,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       return;
     }
 
-    // Determine connection type based on the edge
-    let connectionType: 'reports_to' | 'assistant' | null = null;
-    if (targetJob.reports_to === sourceJob.role) {
-      connectionType = 'reports_to';
-    } else if (targetJob.assistant === sourceJob.role) {
-      connectionType = 'assistant';
-    }
+    // Get connection type directly from edge data
+    const connectionType = edge.data?.connectionType as 'reports_to' | 'assistant' | null;
 
     console.log('Connection type determined:', connectionType);
 
