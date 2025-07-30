@@ -41,7 +41,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           enabled,
           module:permission_modules(name),
           action:permission_actions(name),
-          role_id!inner(role_name)
+          role_id:user_roles!inner(role_name)
         `)
         .eq('role_id.role_name', userProfile.role);
       
