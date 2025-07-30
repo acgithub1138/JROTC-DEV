@@ -20,7 +20,7 @@ const LandingPage = () => {
     title: "Chain of Command & Team Management",
     description: "Organize units, define leadership structures, and manage team communications effectively.",
     href: "/products/team-management",
-    features: ["Unit organization", "Leadership tracking", "Team communications", "Role assignments"]
+    features: ["Unit organization", "Leadership tracking", "Team communications", "Role assignments", "Visual Hierarchy  Chart"]
   }, {
     icon: DollarSign,
     title: "Budget Management",
