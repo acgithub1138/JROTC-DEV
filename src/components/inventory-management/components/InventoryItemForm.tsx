@@ -40,6 +40,7 @@ interface InventoryItemFormProps {
   initialData?: Tables<'inventory_items'> | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  onDataChange?: (data: any) => void;
   readOnly?: boolean;
 }
 
@@ -47,6 +48,7 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   initialData,
   onSubmit,
   onCancel,
+  onDataChange,
   readOnly = false,
 }) => {
   const { categories, subCategories, isCategoriesLoading, isSubCategoriesLoading, getSubCategoriesForCategory } = useInventoryCategories();
@@ -96,6 +98,13 @@ export const InventoryItemForm: React.FC<InventoryItemFormProps> = ({
   });
 
   const watchedValues = watch();
+
+  // Notify parent of data changes
+  useEffect(() => {
+    if (onDataChange) {
+      onDataChange(watchedValues);
+    }
+  }, [watchedValues, onDataChange]);
 
   // Update filtered subcategories when category changes
   useEffect(() => {
