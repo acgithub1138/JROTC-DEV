@@ -121,7 +121,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell className="text-center py-[8px]">
                 {canView ? (
                   <button 
-                    onClick={() => onIncidentSelect(incident)} 
+                    onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)} 
                     className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
                   >
                     {incident.incident_number}
@@ -130,18 +130,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                   <span className="font-bold">{incident.incident_number}</span>
                 )}
               </TableCell>
-              <TableCell>
-                {canView ? (
-                  <button
-                    onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}
-                    className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
-                  >
-                    {incident.title}
-                  </button>
-                ) : (
-                  incident.title
-                )}
-              </TableCell>
+              <TableCell>{incident.title}</TableCell>
               <TableCell>
                 <Badge variant="secondary" className={getStatusBadgeClass(incident.status)}>
                   {incident.status.replace('_', ' ')}
