@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -28,6 +28,7 @@ export const ViewCadetDialog = ({
   profile,
   onEditProfile
 }: ViewCadetDialogProps) => {
+  const [isEditMode, setIsEditMode] = useState(false);
   const {
     jobRole
   } = useJobRole(profile?.id);
@@ -37,6 +38,23 @@ export const ViewCadetDialog = ({
   const {
     canUpdate
   } = useCadetPermissions();
+
+  const handleEdit = () => {
+    setIsEditMode(true);
+  };
+
+  const handleUpdate = () => {
+    if (onEditProfile && profile) {
+      onEditProfile(profile);
+    }
+    setIsEditMode(false);
+    onOpenChange(false);
+  };
+
+  const handleClose = () => {
+    setIsEditMode(false);
+    onOpenChange(false);
+  };
   if (!profile) return null;
   return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
@@ -135,6 +153,17 @@ export const ViewCadetDialog = ({
             </Tabs>
           </div>
         </div>
+
+        <DialogFooter className="flex-shrink-0">
+          <Button variant="outline" onClick={handleClose}>
+            Close
+          </Button>
+          {canUpdate && (
+            <Button onClick={isEditMode ? handleUpdate : handleEdit}>
+              {isEditMode ? 'Update' : 'Edit'}
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
     </Dialog>;
 };
