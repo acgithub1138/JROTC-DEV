@@ -139,7 +139,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   // Determine if user can edit this incident
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
-  const canEditIncident = !readOnly && !viewOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
+  const canEditIncident = !readOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
+  const canShowEditButton = canEditIncident && !viewOnly;
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -471,7 +472,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   </Button>
                 </>
               )}
-              {!isEditing && (canUpdate || (canUpdateAssigned && isAssignedToIncident)) && (
+              {!isEditing && canEditIncident && (
                 <Button size="sm" onClick={handleEdit}>
                   Edit
                 </Button>
@@ -482,7 +483,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   Close
                 </Button>
               )}
-              {isEditing && canEditIncident && viewOnly && (
+              {isEditing && viewOnly && (
                 <Button size="sm" variant="outline" onClick={handleViewMode}>
                   View Mode
                 </Button>
