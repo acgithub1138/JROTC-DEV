@@ -9,12 +9,14 @@ interface ContactTableProps {
   contacts: Contact[];
   isLoading: boolean;
   onEdit: (contact: Contact) => void;
+  onView: (contact: Contact) => void;
   onDelete: (id: string) => void;
 }
 export const ContactTable: React.FC<ContactTableProps> = ({
   contacts,
   isLoading,
   onEdit,
+  onView,
   onDelete
 }) => {
   const {
@@ -89,17 +91,23 @@ export const ContactTable: React.FC<ContactTableProps> = ({
       </StandardTableHeader>
       <StandardTableBody emptyMessage="No contacts found" colSpan={6}>
         {contacts.map(contact => <TableRow key={contact.id}>
-            <TableCell className="font-medium py-[8px]">{contact.name}</TableCell>
+            <TableCell className="font-medium py-[8px]">
+              <button
+                onClick={() => onView(contact)}
+                className="text-left hover:text-primary hover:underline transition-colors"
+              >
+                {contact.name}
+              </button>
+            </TableCell>
             <TableCell>{getTypeBadge(contact.type)}</TableCell>
             <TableCell>{getStatusBadge(contact.status)}</TableCell>
             <TableCell>{contact.phone || '-'}</TableCell>
             <TableCell>{contact.email || '-'}</TableCell>
             <TableCell>
                <TableActionButtons
-                 canView={canViewDetails}
+                 canView={false}
                  canEdit={canUpdate}
                  canDelete={canDelete}
-                 onView={() => onEdit(contact)}
                  onEdit={() => onEdit(contact)}
                  onDelete={() => onDelete(contact.id)}
                />

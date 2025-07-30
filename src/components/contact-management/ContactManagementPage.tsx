@@ -6,6 +6,7 @@ import { ContactTable } from './components/ContactTable';
 import { ContactCards } from './components/ContactCards';
 import { AddContactDialog } from './components/AddContactDialog';
 import { EditContactDialog } from './components/EditContactDialog';
+import { ViewContactDialog } from './components/ViewContactDialog';
 import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -29,6 +30,7 @@ const ContactManagementPage = () => {
   const { canCreate } = useTablePermissions('contacts');
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
+  const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const isMobile = useIsMobile();
 
@@ -78,6 +80,7 @@ const ContactManagementPage = () => {
             contacts={contacts}
             isLoading={isLoading}
             onEdit={setEditingContact}
+            onView={setViewingContact}
             onDelete={deleteContact}
           />
         )}
@@ -95,6 +98,18 @@ const ContactManagementPage = () => {
           onOpenChange={() => setEditingContact(null)}
           contact={editingContact}
           onSubmit={updateContact}
+        />
+      )}
+
+      {viewingContact && (
+        <ViewContactDialog
+          open={!!viewingContact}
+          onOpenChange={() => setViewingContact(null)}
+          contact={viewingContact}
+          onEdit={() => {
+            setEditingContact(viewingContact);
+            setViewingContact(null);
+          }}
         />
       )}
     </div>
