@@ -25,13 +25,24 @@ export const TaskDueDateField: React.FC<TaskDueDateFieldProps> = ({ form }) => {
               onChange={(e) => {
                 const dateValue = e.target.value;
                 if (dateValue) {
-                  // Create date object from input value
+                  // Create date object from input value with validation
                   const date = new Date(dateValue + 'T00:00:00');
-                  field.onChange(date);
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  tomorrow.setHours(0, 0, 0, 0);
+                  
+                  if (date >= tomorrow) {
+                    field.onChange(date);
+                  }
                 } else {
                   field.onChange(undefined);
                 }
               }}
+              min={(() => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                return format(tomorrow, 'yyyy-MM-dd');
+              })()}
               className="w-full"
             />
           </FormControl>
