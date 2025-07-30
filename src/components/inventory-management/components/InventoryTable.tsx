@@ -14,6 +14,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
 import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
+import { ViewInventoryItemDialog } from './ViewInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
 
 type InventoryItem = Tables<'inventory_items'>;
@@ -40,6 +41,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onDelete,
 }) => {
   const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
+  const [viewingItem, setViewingItem] = useState<InventoryItem | null>(null);
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
   const { getPaddingClass } = useTableSettings();
@@ -56,7 +58,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   };
 
   const handleView = (item: InventoryItem) => {
-    onView(item);
+    setViewingItem(item);
   };
 
   const handleEditSubmit = async (updatedItem: any) => {
@@ -233,20 +235,16 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                   onCheckedChange={(checked) => handleSelectItem(item.id, !!checked)}
               />
               </TableCell>
-                {isColumnVisible('item_id') && (
-                  <TableCell className={`font-medium ${getPaddingClass()}`}>
-                    {canViewDetails ? (
-                      <button
-                        onClick={() => handleView(item)}
-                        className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
-                      >
-                        {item.item_id}
-                      </button>
-                    ) : (
-                      item.item_id
-                    )}
-                  </TableCell>
-                )}
+                 {isColumnVisible('item_id') && (
+                   <TableCell className={`font-medium ${getPaddingClass()}`}>
+                     <button
+                       onClick={() => handleView(item)}
+                       className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                     >
+                       {item.item_id}
+                     </button>
+                   </TableCell>
+                 )}
                {isColumnVisible('item') && (
                  <TableCell className={getPaddingClass()}>{item.item}</TableCell>
                )}
@@ -327,28 +325,37 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                     {item.issued_to && item.issued_to.length > 0 && (
                       <IssuedUsersPopover issuedTo={item.issued_to} />
                     )}
-                    <TableActionButtons
-                      canView={canViewDetails}
-                      canEdit={canUpdate}
-                      canDelete={canDelete}
-                      onView={() => handleView(item)}
-                      onEdit={() => handleEdit(item)}
-                      onDelete={() => onDelete(item.id)}
-                      customActions={[
-                        {
-                          icon: <History className="w-3 h-3" />,
-                          label: "View history",
-                          onClick: () => setHistoryItem(item),
-                          show: true
-                        }
-                      ]}
-                    />
+                     <TableActionButtons
+                       canView={false}
+                       canEdit={canUpdate}
+                       canDelete={canDelete}
+                       onEdit={() => handleEdit(item)}
+                       onDelete={() => onDelete(item.id)}
+                       customActions={[
+                         {
+                           icon: <History className="w-3 h-3" />,
+                           label: "View history",
+                           onClick: () => setHistoryItem(item),
+                           show: true
+                         }
+                       ]}
+                     />
                   </div>
               </TableCell>
             </TableRow>
           ))}
         </StandardTableBody>
       </StandardTable>
+
+      <ViewInventoryItemDialog
+        item={viewingItem}
+        open={!!viewingItem}
+        onOpenChange={(open) => !open && setViewingItem(null)}
+        onEdit={(item) => {
+          setEditingItem(item);
+          setViewingItem(null);
+        }}
+      />
 
       {editingItem && (
         <EditInventoryItemDialog
