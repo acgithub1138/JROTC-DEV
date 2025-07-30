@@ -82,7 +82,6 @@ const ViewIncidentDialog: React.FC<ViewIncidentDialogProps> = ({
 
   const handleEdit = () => {
     onEdit?.(incident);
-    onClose();
   };
 
   return (
