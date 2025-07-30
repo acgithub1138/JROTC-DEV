@@ -78,7 +78,7 @@ const ViewIncidentDialog: React.FC<ViewIncidentDialogProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const { canUpdate } = useIncidentPermissions();
-  const { comments } = useIncidentComments(incident.id);
+  const { comments, addComment } = useIncidentComments(incident.id);
 
   const handleEdit = () => {
     onEdit?.(incident);
@@ -199,8 +199,8 @@ const ViewIncidentDialog: React.FC<ViewIncidentDialogProps> = ({
           {/* Comments Section */}
           <IncidentCommentsSection
             comments={comments}
-            isAddingComment={false}
-            onAddComment={() => {}} // Read-only mode
+            isAddingComment={addComment.isPending}
+            onAddComment={(comment) => addComment.mutate({ comment_text: comment })}
           />
         </div>
       </DialogContent>
