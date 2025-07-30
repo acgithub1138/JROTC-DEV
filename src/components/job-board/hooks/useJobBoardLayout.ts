@@ -2,7 +2,6 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Node } from '@xyflow/react';
 import { useCallback, useMemo } from 'react';
 
@@ -20,11 +19,10 @@ interface SavedPosition {
   y: number;
 }
 
-export const useJobBoardLayout = () => {
+export const useJobBoardLayout = (canAssign?: boolean) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { canAssign } = useJobBoardPermissions();
 
   // Use a system user ID for school-wide layouts
   const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';

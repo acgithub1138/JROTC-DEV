@@ -1,3 +1,4 @@
+import React, { useMemo } from 'react';
 import { usePermissionContext } from '@/contexts/PermissionContext';
 
 // Helper hook for module permissions
@@ -77,17 +78,17 @@ export const useCompetitionPermissions = () => {
 };
 
 
-// Job Board specific permissions
+// Job Board specific permissions - memoized
 export const useJobBoardPermissions = () => {
   const modulePermissions = useModulePermissions('job_board');
   const { hasPermission } = usePermissionContext();
   
-  return {
+  return useMemo(() => ({
     ...modulePermissions,
     canView: modulePermissions.canRead,
     canAssign: hasPermission('job_board', 'assign'),
     canManageHierarchy: hasPermission('job_board', 'manage_hierarchy'),
-  };
+  }), [modulePermissions, hasPermission]);
 };
 
 // Inventory-specific permissions

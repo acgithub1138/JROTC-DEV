@@ -20,21 +20,23 @@ interface JobBoardChartProps {
   onRefresh?: () => void;
   onUpdateJob?: (jobId: string, updates: Partial<JobBoardWithCadet>) => void;
   readOnly?: boolean;
+  permissions?: {
+    canAssign: boolean;
+  };
 }
 
 const nodeTypes = {
   jobRole: JobRoleNode,
 };
 
-const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
-  const { canAssign } = useJobBoardPermissions();
-  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly = false, permissions }: JobBoardChartProps) => {
+  // Use passed permissions or fallback to hook
+  const hookPermissions = useJobBoardPermissions();
+  const { canAssign } = permissions || hookPermissions;
+  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canAssign);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // Debug logging for permissions
-  console.log('JobBoard permissions:', { canAssign, readOnly });
-  
-  // Chart is read-only only if user doesn't have assign permission (ignore explicit readOnly for permissions)
+  // Chart is read-only only if user doesn't have assign permission
   const isChartReadOnly = !canAssign;
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
@@ -309,9 +311,12 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       </Dialog>
     </>
   );
-};
+});
 
 export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
+  // Get permissions at parent level to avoid multiple calls
+  const permissions = useJobBoardPermissions();
+  
   if (jobs.length === 0) {
     return (
       <div className="flex items-center justify-center h-96 text-gray-500">
@@ -327,6 +332,7 @@ export const JobBoardChart = ({ jobs, onRefresh, onUpdateJob, readOnly = false }
         onRefresh={onRefresh}
         onUpdateJob={onUpdateJob}
         readOnly={readOnly}
+        permissions={permissions}
       />
     </ReactFlowProvider>
   );
