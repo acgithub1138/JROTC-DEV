@@ -47,7 +47,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onToggleExpanded,
   selectedTasks,
 }) => {
-  const { canCreate, canUpdate } = useTaskPermissions();
+  const { canCreate, canUpdate, canViewDetails } = useTaskPermissions();
   const { updateTask } = useTasks();
   const { handleSystemComment } = useTaskSystemComments();
   const { addComment } = useTaskComments(task.id);
@@ -154,16 +154,26 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
                 {/* Placeholder for alignment - no dot */}
               </div>
             )}
-            <button
-              onClick={() => onTaskSelect(task)}
-              className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
+            {canViewDetails ? (
+              <button
+                onClick={() => onTaskSelect(task)}
+                className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
+                  task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
+                    ? 'bg-red-100 text-red-800 hover:text-red-900'
+                    : ''
+                }`}
+              >
+                {task.task_number || 'N/A'}
+              </button>
+            ) : (
+              <span className={`px-2 py-1 rounded font-bold ${
                 task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
-                  ? 'bg-red-100 text-red-800 hover:text-red-900'
+                  ? 'bg-red-100 text-red-800'
                   : ''
-              }`}
-            >
-              {task.task_number || 'N/A'}
-            </button>
+              }`}>
+                {task.task_number || 'N/A'}
+              </span>
+            )}
           </div>
         </TableCell>
         <TableCell className="font-medium py-2">
