@@ -10,8 +10,9 @@ interface ConnectionEditModalProps {
   sourceJob: JobBoardWithCadet;
   targetJob: JobBoardWithCadet;
   connectionType: 'reports_to' | 'assistant';
-  currentSourceHandle: string;
-  currentTargetHandle: string;
+  connectionId?: string | null;
+  currentSourceHandle: string | null;
+  currentTargetHandle: string | null;
   onSave: (sourceHandle: string, targetHandle: string) => void;
 }
 
@@ -28,17 +29,22 @@ export const ConnectionEditModal = ({
   sourceJob,
   targetJob,
   connectionType,
+  connectionId,
   currentSourceHandle,
   currentTargetHandle,
   onSave,
 }: ConnectionEditModalProps) => {
-  const [sourceHandle, setSourceHandle] = useState(currentSourceHandle.split('-')[0]);
-  const [targetHandle, setTargetHandle] = useState(currentTargetHandle.split('-')[0]);
+  const [sourceHandle, setSourceHandle] = useState(
+    currentSourceHandle ? currentSourceHandle.split('-')[0] : 'bottom'
+  );
+  const [targetHandle, setTargetHandle] = useState(
+    currentTargetHandle ? currentTargetHandle.split('-')[0] : 'top'
+  );
 
   // Update state when props change
   useEffect(() => {
-    setSourceHandle(currentSourceHandle.split('-')[0]);
-    setTargetHandle(currentTargetHandle.split('-')[0]);
+    setSourceHandle(currentSourceHandle ? currentSourceHandle.split('-')[0] : 'bottom');
+    setTargetHandle(currentTargetHandle ? currentTargetHandle.split('-')[0] : 'top');
   }, [currentSourceHandle, currentTargetHandle]);
 
   const handleSave = () => {

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
 import { Edge } from '@xyflow/react';
-import { JobBoardWithCadet } from '../types';
+import { JobBoardWithCadet, Connection } from '../types';
 
 interface ConnectionEditState {
   isEditing: boolean;
@@ -17,10 +17,48 @@ interface ConnectionEditState {
   } | null;
 }
 
-export const useConnectionEditor = (
-  jobs: JobBoardWithCadet[],
-  onUpdateConnection: (jobId: string, updates: Partial<JobBoardWithCadet>) => void
-) => {
+interface UseConnectionEditorProps {
+  onUpdateConnection: (
+    sourceJobId: string,
+    targetJobId: string,
+    connectionType: 'reports_to' | 'assistant',
+    sourceHandle: string,
+    targetHandle: string
+  ) => void;
+  onUpdateConnectionHandle: (
+    sourceJobId: string,
+    connectionId: string,
+    sourceHandle: string,
+    targetHandle: string
+  ) => void;
+}
+
+interface UseConnectionEditorReturn {
+  editState: ConnectionEditState;
+  startConnectionDrag: (handleId: string, job: JobBoardWithCadet, event: React.MouseEvent) => void;
+  updateDragPosition: (event: React.MouseEvent) => void;
+  completeConnectionDrop: (targetJobId: string, targetHandle: string) => void;
+  cancelConnectionEdit: () => void;
+  isValidDropTarget: (jobId: string, handleId: string) => boolean;
+  onUpdateConnection: (
+    sourceJobId: string,
+    targetJobId: string,
+    connectionType: 'reports_to' | 'assistant',
+    sourceHandle: string,
+    targetHandle: string
+  ) => void;
+  onUpdateConnectionHandle: (
+    sourceJobId: string,
+    connectionId: string,
+    sourceHandle: string,
+    targetHandle: string
+  ) => void;
+}
+
+export const useConnectionEditor = ({
+  onUpdateConnection,
+  onUpdateConnectionHandle
+}: UseConnectionEditorProps): UseConnectionEditorReturn => {
   const [editState, setEditState] = useState<ConnectionEditState>({
     isEditing: false,
     sourceJobId: null,
@@ -68,10 +106,7 @@ export const useConnectionEditor = (
       return;
     }
 
-    const sourceJob = jobs.find(j => j.id === editState.sourceJobId);
-    const targetJob = jobs.find(j => j.id === targetJobId);
-    
-    if (!sourceJob || !targetJob || editState.sourceJobId === targetJobId) {
+    if (editState.sourceJobId === targetJobId) {
       cancelConnectionEdit();
       return;
     }
@@ -80,24 +115,14 @@ export const useConnectionEditor = (
     const isVerticalConnection = editState.sourceHandle.includes('bottom') || editState.sourceHandle.includes('top');
     const connectionType = isVerticalConnection ? 'reports_to' : 'assistant';
     
-    // Create updates for source job
-    const sourceUpdates: Partial<JobBoardWithCadet> = {};
-    
-    // First, clear the old connection if we're moving an existing one
-    if (connectionType === 'reports_to') {
-      // Clear any existing reports_to connection
-      sourceUpdates.reports_to = targetJob.role;
-      sourceUpdates.reports_to_source_handle = editState.sourceHandle;
-      // Don't update target handle to prevent cascading updates
-    } else {
-      // Clear any existing assistant connection  
-      sourceUpdates.assistant = targetJob.role;
-      sourceUpdates.assistant_source_handle = editState.sourceHandle;
-      // Don't update target handle to prevent cascading updates
-    }
-
-    // Apply updates to source job
-    onUpdateConnection(editState.sourceJobId, sourceUpdates);
+    // Use the new connection creation method
+    onUpdateConnection(
+      editState.sourceJobId,
+      targetJobId,
+      connectionType,
+      editState.sourceHandle,
+      targetHandle
+    );
     
     setEditState({
       isEditing: false,
@@ -109,7 +134,7 @@ export const useConnectionEditor = (
       isDragging: false,
       dragPreview: null,
     });
-  }, [editState, jobs, onUpdateConnection]);
+  }, [editState, onUpdateConnection]);
 
   const cancelConnectionEdit = useCallback(() => {
     setEditState({
@@ -147,9 +172,11 @@ export const useConnectionEditor = (
   return {
     editState,
     startConnectionDrag,
-    completeConnectionDrop,
     updateDragPosition,
+    completeConnectionDrop,
     cancelConnectionEdit,
     isValidDropTarget,
+    onUpdateConnection,
+    onUpdateConnectionHandle
   };
 };

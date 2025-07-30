@@ -1631,6 +1631,7 @@ export type Database = {
           assistant_source_handle: string | null
           assistant_target_handle: string | null
           cadet_id: string | null
+          connections: Json | null
           created_at: string
           email_address: string | null
           id: string
@@ -1646,6 +1647,7 @@ export type Database = {
           assistant_source_handle?: string | null
           assistant_target_handle?: string | null
           cadet_id?: string | null
+          connections?: Json | null
           created_at?: string
           email_address?: string | null
           id?: string
@@ -1661,6 +1663,7 @@ export type Database = {
           assistant_source_handle?: string | null
           assistant_target_handle?: string | null
           cadet_id?: string | null
+          connections?: Json | null
           created_at?: string
           email_address?: string | null
           id?: string

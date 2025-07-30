@@ -36,15 +36,17 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     sourceJob: JobBoardWithCadet | null;
     targetJob: JobBoardWithCadet | null;
     connectionType: 'reports_to' | 'assistant' | null;
-    currentSourceHandle: string;
-    currentTargetHandle: string;
+    connectionId: string | null;
+    currentSourceHandle: string | null;
+    currentTargetHandle: string | null;
   }>({
     isOpen: false,
     sourceJob: null,
     targetJob: null,
     connectionType: null,
-    currentSourceHandle: '',
-    currentTargetHandle: '',
+    connectionId: null,
+    currentSourceHandle: null,
+    currentTargetHandle: null,
   });
   const { fitView } = useReactFlow();
 
@@ -127,6 +129,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       sourceJob,
       targetJob,
       connectionType,
+      connectionId: (edge.data?.connectionId as string) || null,
       currentSourceHandle: edge.sourceHandle || 'bottom-source',
       currentTargetHandle: edge.targetHandle || 'top-target',
     });
@@ -141,23 +144,50 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     console.log('Source Job:', connectionEditModal.sourceJob.role);
     console.log('Target Job:', connectionEditModal.targetJob.role);
     console.log('Connection Type:', connectionEditModal.connectionType);
+    console.log('Connection ID:', connectionEditModal.connectionId);
     console.log('Source Handle:', sourceHandle);
     console.log('Target Handle:', targetHandle);
     
-    // Update only source job with source handle (avoid updating shared target handles)
-    const sourceUpdates: Partial<JobBoardWithCadet> = {};
-    
-    if (connectionEditModal.connectionType === 'reports_to') {
-      sourceUpdates.reports_to_source_handle = sourceHandle;
-      console.log('Updating reports_to_source_handle to:', sourceHandle);
-    } else {
-      sourceUpdates.assistant_source_handle = sourceHandle;
-      console.log('Updating assistant_source_handle to:', sourceHandle);
-    }
+    // If we have a connectionId, update the specific connection in the connections array
+    if (connectionEditModal.connectionId) {
+      const sourceJob = connectionEditModal.sourceJob;
+      const updatedConnections = (sourceJob.connections || []).map(conn => 
+        conn.id === connectionEditModal.connectionId 
+          ? { 
+              ...conn, 
+              source_handle: sourceHandle + '-source', 
+              target_handle: targetHandle + '-target' 
+            }
+          : conn
+      );
 
-    console.log('Source updates:', sourceUpdates);
-    // Update only the source job to prevent affecting other connections to the same target
-    onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
+      console.log('🔄 Updating connections array:', { updatedConnections });
+      onUpdateJob(sourceJob.id, { connections: updatedConnections });
+    } else {
+      // Fallback to legacy method for backward compatibility
+      const sourceUpdates: Partial<JobBoardWithCadet> = {};
+      
+      if (connectionEditModal.connectionType === 'reports_to') {
+        sourceUpdates.reports_to_source_handle = sourceHandle + '-source';
+        console.log('Updating reports_to_source_handle to:', sourceHandle + '-source');
+      } else {
+        sourceUpdates.assistant_source_handle = sourceHandle + '-source';
+        console.log('Updating assistant_source_handle to:', sourceHandle + '-source');
+      }
+
+      console.log('Legacy source updates:', sourceUpdates);
+      onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
+    }
+    
+    setConnectionEditModal({ 
+      isOpen: false, 
+      sourceJob: null, 
+      targetJob: null, 
+      connectionType: null,
+      connectionId: null,
+      currentSourceHandle: null,
+      currentTargetHandle: null
+    });
   }, [connectionEditModal, onUpdateJob]);
 
   const chartContent = (
@@ -215,12 +245,14 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
             sourceJob: null,
             targetJob: null,
             connectionType: null,
-            currentSourceHandle: '',
-            currentTargetHandle: '',
+            connectionId: null,
+            currentSourceHandle: null,
+            currentTargetHandle: null,
           })}
           sourceJob={connectionEditModal.sourceJob}
           targetJob={connectionEditModal.targetJob}
           connectionType={connectionEditModal.connectionType!}
+          connectionId={connectionEditModal.connectionId}
           currentSourceHandle={connectionEditModal.currentSourceHandle}
           currentTargetHandle={connectionEditModal.currentTargetHandle}
           onSave={handleConnectionSave}

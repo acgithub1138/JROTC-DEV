@@ -1,4 +1,12 @@
 
+export interface Connection {
+  id: string;
+  type: 'reports_to' | 'assistant';
+  target_role: string;
+  source_handle: string;
+  target_handle: string;
+}
+
 export interface JobBoard {
   id: string;
   cadet_id: string;
@@ -11,6 +19,7 @@ export interface JobBoard {
   reports_to_target_handle?: string;
   assistant_source_handle?: string;
   assistant_target_handle?: string;
+  connections?: Connection[];
   school_id: string;
   created_at: string;
   updated_at: string;
@@ -37,4 +46,5 @@ export interface NewJobBoard {
   reports_to_target_handle?: string;
   assistant_source_handle?: string;
   assistant_target_handle?: string;
+  connections?: Connection[];
 }

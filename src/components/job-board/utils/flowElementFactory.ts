@@ -1,21 +1,25 @@
 
 import { Node, Edge, Position } from '@xyflow/react';
-import { JobBoardWithCadet } from '../types';
+import { JobBoardWithCadet, Connection } from '../types';
 import { HierarchyResult } from './hierarchyBuilder';
 
 const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithCadet): Set<string> => {
   const occupiedHandles = new Set<string>();
 
-  // Check if this job has outgoing connections (source handles only)
+  // Get occupied source handles from the connections array
+  if (currentJob.connections && currentJob.connections.length > 0) {
+    currentJob.connections.forEach(connection => {
+      occupiedHandles.add(connection.source_handle);
+    });
+  }
+
+  // Fallback to old fields for backward compatibility during migration
   if (currentJob.reports_to && currentJob.reports_to_source_handle) {
     occupiedHandles.add(currentJob.reports_to_source_handle);
   }
   if (currentJob.assistant && currentJob.assistant_source_handle) {
     occupiedHandles.add(currentJob.assistant_source_handle);
   }
-
-  // Note: We no longer track target handles since they're calculated dynamically
-  // This prevents cascading updates when editing connections
 
   return occupiedHandles;
 };
@@ -49,57 +53,87 @@ export const createFlowEdges = (
   hierarchyResult: HierarchyResult,
   jobs: JobBoardWithCadet[]
 ): Edge[] => {
-  console.log('🔗 Creating flow edges:', { hierarchyEdgesCount: hierarchyResult.edges.length });
+  console.log('🔗 Creating flow edges from connections:', { hierarchyEdgesCount: hierarchyResult.edges.length });
   
-  // Create a map for quick job lookup
   const jobMap = new Map(jobs.map(job => [job.id, job]));
+  const flowEdges: Edge[] = [];
   
-  const flowEdges = hierarchyResult.edges.map((edge) => {
-    const sourceJob = jobMap.get(edge.source);
-    
-    if (edge.type === 'assistant') {
-      // Assistant relationships: use stored source handle with consistent default
-      const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
-      // Always use left-target for assistant connections to maintain consistency
-      const targetHandle = 'left-target';
-      
-      const edgeObj = {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        sourceHandle,
-        targetHandle,
-        type: 'smoothstep',
-        animated: false,
-        style: { pointerEvents: 'all' as const },
-        data: { connectionType: 'assistant' }
-      };
-      
-      console.log('📎 Created assistant edge:', edgeObj);
-      return edgeObj;
-    } else {
-      // Reports_to relationships: use stored source handle with consistent default
-      const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
-      // Always use top-target for reports_to connections to maintain consistency
-      const targetHandle = 'top-target';
-      
-      const edgeObj = {
-        id: edge.id,
-        source: edge.source,
-        target: edge.target,
-        sourceHandle,
-        targetHandle,
-        type: 'smoothstep',
-        animated: false,
-        style: { pointerEvents: 'all' as const },
-        data: { connectionType: 'reports_to' }
-      };
-      
-      console.log('📎 Created reports_to edge:', edgeObj);
-      return edgeObj;
+  // Create edges from connections data
+  jobs.forEach(job => {
+    if (job.connections && job.connections.length > 0) {
+      job.connections.forEach(connection => {
+        // Find the target job by role
+        const targetJob = jobs.find(j => j.role === connection.target_role);
+        if (!targetJob) {
+          console.warn(`Target job not found for role: ${connection.target_role}`);
+          return;
+        }
+
+        const edgeObj = {
+          id: connection.id,
+          source: job.id,
+          target: targetJob.id,
+          sourceHandle: connection.source_handle,
+          targetHandle: connection.target_handle,
+          type: 'smoothstep',
+          animated: false,
+          style: { pointerEvents: 'all' as const },
+          data: { 
+            connectionType: connection.type,
+            connectionId: connection.id
+          }
+        };
+        
+        console.log(`📎 Created ${connection.type} edge from connections:`, edgeObj);
+        flowEdges.push(edgeObj);
+      });
     }
   });
+
+  // Fallback to legacy hierarchy system for jobs without connections
+  const legacyEdges = hierarchyResult.edges
+    .filter(edge => {
+      const sourceJob = jobMap.get(edge.source);
+      return !sourceJob?.connections || sourceJob.connections.length === 0;
+    })
+    .map((edge) => {
+      const sourceJob = jobMap.get(edge.source);
+      
+      if (edge.type === 'assistant') {
+        const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
+        const targetHandle = 'left-target';
+        
+        return {
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle,
+          targetHandle,
+          type: 'smoothstep',
+          animated: false,
+          style: { pointerEvents: 'all' as const },
+          data: { connectionType: 'assistant' }
+        };
+      } else {
+        const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
+        const targetHandle = 'top-target';
+        
+        return {
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          sourceHandle,
+          targetHandle,
+          type: 'smoothstep',
+          animated: false,
+          style: { pointerEvents: 'all' as const },
+          data: { connectionType: 'reports_to' }
+        };
+      }
+    });
+
+  flowEdges.push(...legacyEdges);
   
-  console.log('✅ Flow edges created:', flowEdges.length);
+  console.log('✅ Total flow edges created:', flowEdges.length);
   return flowEdges;
 };
