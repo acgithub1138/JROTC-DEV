@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { format } from 'date-fns';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { EditableDateCell } from '@/components/tasks/table/editable-cells/EditableDateCell';
 
 interface CreateSubtaskDialogProps {
   isOpen: boolean;
@@ -157,17 +157,9 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
 
             <div>
               <Label>Due Date</Label>
-              <Input
-                type="date"
-                value={formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  const dateValue = e.target.value;
-                  setFormData({ 
-                    ...formData, 
-                    due_date: dateValue ? new Date(dateValue) : null 
-                  });
-                }}
-                className="w-full"
+              <EditableDateCell
+                value={formData.due_date}
+                onValueChange={(date) => setFormData({ ...formData, due_date: date })}
               />
             </div>
           </div>

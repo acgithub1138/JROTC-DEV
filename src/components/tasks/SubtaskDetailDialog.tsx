@@ -6,13 +6,12 @@ import { Separator } from '@/components/ui/separator';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Calendar } from '@/components/ui/calendar';
-import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
+import { EditableDateCell } from '@/components/tasks/table/editable-cells/EditableDateCell';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
 import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -426,18 +425,9 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Due Date:</span>
                    {canEdit ? (
-                     <Input
-                       type="date"
-                       value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''}
-                       onChange={(e) => {
-                         const dateValue = e.target.value;
-                         if (dateValue) {
-                           setEditData({...editData, due_date: new Date(dateValue + 'T00:00:00')});
-                         } else {
-                           setEditData({...editData, due_date: null});
-                         }
-                       }}
-                       className="h-8 w-auto min-w-[150px]"
+                     <EditableDateCell
+                       value={editData.due_date}
+                       onValueChange={(date) => setEditData({...editData, due_date: date})}
                      />
                    ) : (
                      <span className="text-sm font-medium">
