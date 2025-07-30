@@ -45,8 +45,8 @@ const MarketingFooter = () => {
             <p className="text-sm text-muted-foreground">The comprehensive platform designed specifically for JROTC program management.</p>
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
-                <Mail className="h-4 w-4" />
-                <span>jrotc_ccc@careyunlimited.com</span>
+                <eMail className="h-4 w-4" />
+                <span><a href="mailto:jrotc_ccc@careyunlimited.com">jrotc_ccc@careyunlimited.com</a></span>
               </div>
               
               <div className="flex items-center gap-2">
