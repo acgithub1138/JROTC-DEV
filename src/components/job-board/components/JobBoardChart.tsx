@@ -1,5 +1,5 @@
 
-import React, { useCallback, useState, useEffect, useRef } from 'react';
+import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
@@ -102,6 +102,19 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     });
   };
 
+  // Check if there are unsaved changes
+  const hasUnsavedChanges = useMemo(() => {
+    return nodes.some(node => {
+      const savedPosition = savedPositionsMap.get(node.id);
+      if (!savedPosition || !node.position) return false;
+      
+      // Check if current position differs from saved position (with small tolerance for floating point differences)
+      const tolerance = 1;
+      return Math.abs(node.position.x - savedPosition.x) > tolerance || 
+             Math.abs(node.position.y - savedPosition.y) > tolerance;
+    });
+  }, [nodes, savedPositionsMap]);
+
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
     console.log('🔥 EDGE DOUBLE CLICK FIRED!', { readOnly, edgeId: edge.id, edge });
     
@@ -200,6 +213,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onToggleFullscreen={handleToggleFullscreen}
         onExport={handleExport}
         onSave={handleSave}
+        hasUnsavedChanges={hasUnsavedChanges}
         isResetting={isResetting}
         isFullscreen={isFullscreen}
         snapToGrid={snapToGrid}

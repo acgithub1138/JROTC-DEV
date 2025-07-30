@@ -8,6 +8,7 @@ interface JobBoardToolbarProps {
   onToggleFullscreen: () => void;
   onExport: () => void;
   onSave: () => void;
+  hasUnsavedChanges?: boolean;
   isResetting: boolean;
   isFullscreen: boolean;
   snapToGrid: boolean;
@@ -19,6 +20,7 @@ export const JobBoardToolbar = ({
   onToggleFullscreen,
   onExport,
   onSave,
+  hasUnsavedChanges = false,
   isResetting,
   isFullscreen,
   snapToGrid,
@@ -72,12 +74,17 @@ export const JobBoardToolbar = ({
         
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="sm" onClick={onSave}>
+            <Button 
+              variant="outline" 
+              size="sm" 
+              onClick={onSave}
+              className={hasUnsavedChanges ? 'text-red-600 border-red-200 hover:bg-red-50' : ''}
+            >
               <Save className="w-4 h-4" />
             </Button>
           </TooltipTrigger>
           <TooltipContent>
-            <p>Save current layout</p>
+            <p>{hasUnsavedChanges ? 'Save unsaved changes' : 'Save current layout'}</p>
           </TooltipContent>
         </Tooltip>
         
