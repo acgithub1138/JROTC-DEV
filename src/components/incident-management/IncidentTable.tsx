@@ -119,12 +119,16 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                 </TableCell>
               )}
               <TableCell className="text-center py-[8px]">
-                <button 
-                  onClick={() => onIncidentSelect(incident)} 
-                  className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
-                >
-                  {incident.incident_number}
-                </button>
+                {canView ? (
+                  <button 
+                    onClick={() => onIncidentSelect(incident)} 
+                    className="text-blue-600 hover:text-blue-800 hover:underline transition-colors font-bold"
+                  >
+                    {incident.incident_number}
+                  </button>
+                ) : (
+                  <span className="font-bold">{incident.incident_number}</span>
+                )}
               </TableCell>
               <TableCell>{incident.title}</TableCell>
               <TableCell>
