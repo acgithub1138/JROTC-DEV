@@ -4,7 +4,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit2 } from 'lucide-react';
+import { Eye, Edit2, MapPin } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ListViewProps {
   events: Event[];
@@ -48,75 +49,88 @@ export const ListView: React.FC<ListViewProps> = ({
   }
 
   return (
-    <div className="bg-card rounded-lg border">
-      <div className="p-4 border-b">
-        <h3 className="text-lg font-semibold">Upcoming Events ({sortedEvents.length})</h3>
-        <p className="text-sm text-muted-foreground">Next 25 events in chronological order</p>
-      </div>
-      
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead>Event</TableHead>
-            <TableHead>Type</TableHead>
-            <TableHead>Date & Time</TableHead>
-            <TableHead>Location</TableHead>
-            <TableHead className="text-center">Actions</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sortedEvents.map((event) => (
-            <TableRow key={event.id} className="hover:bg-muted/50">
-              <TableCell>
-                <div>
-                  <div className="font-medium">{event.title}</div>
-                  {event.description && (
-                    <div className="text-sm text-muted-foreground line-clamp-2">
-                      {event.description}
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <Badge className={getEventTypeColor(event.event_type)}>
-                  {event.event_type}
-                </Badge>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  {formatDateTime(event.start_date)}
-                  {event.end_date && event.end_date !== event.start_date && (
-                    <div className="text-muted-foreground">
-                      to {formatDateTime(event.end_date)}
-                    </div>
-                  )}
-                </div>
-              </TableCell>
-              <TableCell>
-                <div className="text-sm">
-                  {event.location || '—'}
-                </div>
-              </TableCell>
-              <TableCell className="text-center">
-                {onEventClick && (
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onEventClick(event)}
-                    className="h-8 w-8 p-0"
-                  >
-                    {readOnly ? (
-                      <Eye className="h-4 w-4" />
-                    ) : (
-                      <Edit2 className="h-4 w-4" />
-                    )}
-                  </Button>
-                )}
-              </TableCell>
+    <TooltipProvider>
+      <div className="bg-card rounded-lg border">
+        <div className="p-4 border-b">
+          <h3 className="text-lg font-semibold">Upcoming Events ({sortedEvents.length})</h3>
+          <p className="text-sm text-muted-foreground">Next 25 events in chronological order</p>
+        </div>
+        
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Event</TableHead>
+              <TableHead>Type</TableHead>
+              <TableHead>Date & Time</TableHead>
+              <TableHead className="text-center">Location</TableHead>
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
-          ))}
-        </TableBody>
-      </Table>
-    </div>
+          </TableHeader>
+          <TableBody>
+            {sortedEvents.map((event) => (
+              <TableRow key={event.id} className="hover:bg-muted/50">
+                <TableCell>
+                  <div>
+                    <div className="font-medium">{event.title}</div>
+                    {event.description && (
+                      <div className="text-sm text-muted-foreground line-clamp-2">
+                        {event.description}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Badge className={getEventTypeColor(event.event_type)}>
+                    {event.event_type}
+                  </Badge>
+                </TableCell>
+                <TableCell>
+                  <div className="text-sm">
+                    {formatDateTime(event.start_date)}
+                    {event.end_date && event.end_date !== event.start_date && (
+                      <div className="text-muted-foreground">
+                        to {formatDateTime(event.end_date)}
+                      </div>
+                    )}
+                  </div>
+                </TableCell>
+                <TableCell className="text-center">
+                  {event.location ? (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
+                          <MapPin className="h-4 w-4 text-muted-foreground" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>{event.location}</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  ) : (
+                    <span className="text-muted-foreground">—</span>
+                  )}
+                </TableCell>
+                <TableCell className="text-center">
+                  {onEventClick && (
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => onEventClick(event)}
+                      className="h-8 w-8 p-0"
+                    >
+                      {readOnly ? (
+                        <Eye className="h-4 w-4" />
+                      ) : (
+                        <Edit2 className="h-4 w-4" />
+                      )}
+                    </Button>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
+    </TooltipProvider>
   );
 };
