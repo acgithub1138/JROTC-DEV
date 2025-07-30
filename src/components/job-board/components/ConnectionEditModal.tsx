@@ -125,18 +125,11 @@ export const ConnectionEditModal = ({
                 />
               </div>
 
-              {/* Connection Line */}
-              <div className="flex-1 mx-4 relative">
-                <div className="absolute inset-0 flex items-center">
-                  <div className="w-full h-0.5 bg-primary/60 relative">
-                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rotate-45 transform origin-center"/>
-                  </div>
-                </div>
-                <div className="text-center">
-                  <span className="bg-background px-2 py-1 text-xs text-muted-foreground rounded">
-                    {connectionTypeLabel}
-                  </span>
-                </div>
+              {/* Connection Text */}
+              <div className="flex-1 mx-4 flex items-center justify-center">
+                <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
+                  {connectionTypeLabel}
+                </span>
               </div>
 
               {/* Source Job Card */}
