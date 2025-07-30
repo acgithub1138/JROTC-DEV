@@ -186,7 +186,7 @@ const MainApplication = () => {
             } />
             
             <Route path="/roles" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdminRole={true}>
                 <RoleManagementPage />
               </ProtectedRoute>
             } />
