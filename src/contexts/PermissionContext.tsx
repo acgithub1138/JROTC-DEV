@@ -40,9 +40,10 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         .select(`
           enabled,
           module:permission_modules(name),
-          action:permission_actions(name)
+          action:permission_actions(name),
+          role_id:user_roles(role_name)
         `)
-        .eq('role', userProfile.role);
+        .eq('user_roles.role_name', userProfile.role);
       
       if (error) {
         console.error('Permission query error:', error);

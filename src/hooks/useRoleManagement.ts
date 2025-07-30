@@ -56,7 +56,8 @@ export const useRoleManagement = () => {
         .select(`
           *,
           module:permission_modules(*),
-          action:permission_actions(*)
+          action:permission_actions(*),
+          role_id:user_roles(role_name)
         `);
       
       if (error) throw error;
@@ -72,7 +73,7 @@ export const useRoleManagement = () => {
       rolePerms[module.name] = {};
       actions.forEach(action => {
         const permission = allRolePermissions.find(
-          p => p.role === role && 
+          p => p.role_id?.role_name === role && 
                p.module?.name === module.name && 
                p.action?.name === action.name
         );
@@ -91,15 +92,24 @@ export const useRoleManagement = () => {
       actionId: string;
       enabled: boolean;
     }) => {
+      // First get the role_id for the given role name
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', role)
+        .single();
+      
+      if (roleError) throw roleError;
+      
       const { data, error } = await supabase
         .from('role_permissions')
         .upsert({
-          role,
+          role_id: roleData.id,
           module_id: moduleId,
           action_id: actionId,
           enabled,
         }, {
-          onConflict: 'role,module_id,action_id'
+          onConflict: 'role_id,module_id,action_id'
         })
         .select();
       
@@ -114,17 +124,29 @@ export const useRoleManagement = () => {
   // Reset to defaults mutation
   const resetToDefaultsMutation = useMutation({
     mutationFn: async (role: UserRole) => {
-      // First delete existing permissions for the role
+      // First get the role_id for the given role name
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', role)
+        .single();
+      
+      if (roleError) throw roleError;
+      
+      // Delete existing permissions for the role
       await supabase
         .from('role_permissions')
         .delete()
-        .eq('role', role);
+        .eq('role_id', roleData.id);
 
-      // Then copy from defaults
+      // Then copy from defaults - join with user_roles to get role_id
       const { data: defaults, error: defaultsError } = await supabase
         .from('default_role_permissions')
-        .select('*')
-        .eq('role', role);
+        .select(`
+          *,
+          role_id:user_roles!inner(id, role_name)
+        `)
+        .eq('user_roles.role_name', role);
 
       if (defaultsError) throw defaultsError;
 
@@ -133,7 +155,7 @@ export const useRoleManagement = () => {
           .from('role_permissions')
           .insert(
             defaults.map(d => ({
-              role: d.role,
+              role_id: d.role_id?.id,
               module_id: d.module_id,
               action_id: d.action_id,
               enabled: d.enabled,
