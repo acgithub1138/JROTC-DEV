@@ -148,6 +148,17 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: 
             </Tabs>
           </div>
         </div>
+        
+        <div className="flex justify-end gap-2 pt-4 border-t">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          {canUpdate && onEditProfile && (
+            <Button onClick={() => onEditProfile(profile)}>
+              Edit
+            </Button>
+          )}
+        </div>
       </DialogContent>
     </Dialog>
   );

@@ -111,13 +111,13 @@ export const CadetTable = ({
             </TableCell>
             <TableCell className="py-2">{profile.flight || '-'}</TableCell>
             <TableCell className="text-right py-2">
-              {activeTab === 'active' ? <TableActionButtons canView={canView} canEdit={canEdit} canDelete={canDelete} onView={() => onViewProfile(profile)} onEdit={() => onEditProfile(profile)} customActions={[{
+              {activeTab === 'active' ? <TableActionButtons canEdit={canEdit} canDelete={canDelete} onEdit={() => onEditProfile(profile)} customActions={[{
             icon: <X className="w-4 h-4" />,
             label: "Deactivate profile",
             onClick: () => onToggleStatus(profile),
             show: canDelete,
             className: "text-red-600 hover:text-red-700 hover:border-red-300"
-          }]} /> : <TableActionButtons canView={canView} onView={() => onViewProfile(profile)} customActions={[{
+          }]} /> : <TableActionButtons customActions={[{
             icon: <><CheckCircle className="w-4 h-4 mr-1" />Activate</>,
             label: "Activate profile",
             onClick: () => onToggleStatus(profile),
