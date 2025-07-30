@@ -119,7 +119,7 @@ const MainApplication = () => {
               </ProtectedRoute>
             } />
             <Route path="/school" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdminRole={true}>
                 <SchoolManagementPage />
               </ProtectedRoute>
             } />
@@ -135,7 +135,7 @@ const MainApplication = () => {
             } />
             
             <Route path="/settings" element={
-              <ProtectedRoute>
+              <ProtectedRoute requireAdminRole={true}>
                 <SettingsPage />
               </ProtectedRoute>
             } />
