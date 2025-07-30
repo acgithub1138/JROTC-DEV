@@ -322,9 +322,7 @@ const DashboardOverview = () => {
                       year: 'numeric',
                       hour: event.is_all_day ? undefined : 'numeric',
                       minute: event.is_all_day ? undefined : '2-digit'
-                    })}
-                        </p>
-                        <p className="font-medium text-foreground text-base">{event.title}</p>
+                    })} - {event.title}</p>
                         <p className="text-muted-foreground capitalize text-sm">{event.event_type.replace('_', ' ')} • {event.location || 'No location'}</p>
                       </div>
                     </div>) : <div className="text-center py-8 text-muted-foreground">
