@@ -132,6 +132,8 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const { templates } = useEmailTemplates();
+  const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
@@ -159,6 +161,16 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       due_date: incidentToUse.due_date ? new Date(incidentToUse.due_date) : null,
     });
   }, [incident, incidents]);
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    setIsEditing(false);
+    onClose();
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
 
   const hasChanges = () => {
     return editData.title !== currentIncident.title ||
@@ -746,12 +758,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
     </>
   );
 };
