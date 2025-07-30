@@ -6,7 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
-import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Plus } from 'lucide-react';
 import { format } from 'date-fns';
@@ -24,7 +24,7 @@ interface EventFormProps {
   event?: Event | null;
   selectedDate?: Date | null;
   onSubmit: (eventData: any) => Promise<void>;
-  onCancel: () => void;
+  onCancel: (hasUnsavedChanges: boolean) => void;
   onDelete?: () => Promise<void>;
 }
 
@@ -60,8 +60,6 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [showAddEventTypeDialog, setShowAddEventTypeDialog] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
-  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingClose, setPendingClose] = useState(false);
   const [initialFormData, setInitialFormData] = useState({
     title: '',
     description: '',
@@ -213,25 +211,9 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-      setPendingClose(true);
-    } else {
-      onCancel();
-    }
+    onCancel(hasUnsavedChanges);
   };
 
-  const handleDiscardChanges = () => {
-    resetChanges();
-    setShowUnsavedDialog(false);
-    setPendingClose(false);
-    onCancel();
-  };
-
-  const handleContinueEditing = () => {
-    setShowUnsavedDialog(false);
-    setPendingClose(false);
-  };
 
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
@@ -519,12 +501,6 @@ export const EventForm: React.FC<EventFormProps> = ({
       </div>
     </form>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
     </>
   );
 };
