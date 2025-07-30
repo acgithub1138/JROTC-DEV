@@ -14,11 +14,11 @@ const PricingPage = () => {
     popular: false,
     cta: "Get Started"
   }, {
-    name: "Competition",
+    name: "Competition Tracking",
     price: "$2,500",
     period: "per year",
     description: "Most popular for competitive programs",
-    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition management", "Competition Analytics", "Competition & Event organization (Coming soon...)"],
+    features: ["All Basic features", "Competition management", "Competition Analytics"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
@@ -26,10 +26,10 @@ const PricingPage = () => {
     name: "Competition Management",
     price: "$2,500",
     period: "per year",
-    description: "Most popular for JORTC programs that host competitions",
-    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition Tracking", "Competition Analytics", "Competition Event Management (Coming soon...)"],
+    description: "Perfect for JORTC programs that host competitions",
+    features: ["All Basic & Competition Tracking features", "Competition Event Management (Coming soon...)"],
     notIncluded: [],
-    popular: true,
+    popular: false,
     cta: "Get Started"
   }];
   const faqs = [{
