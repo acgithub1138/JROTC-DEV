@@ -636,28 +636,6 @@ const SchoolManagementPage = () => {
                 </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="timezone">Timezone</Label>
-                <Select
-                  value={editingSchool.timezone || 'America/New_York'}
-                  onValueChange={(value) => setEditingSchool({
-                    ...editingSchool,
-                    timezone: value
-                  })}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select timezone" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border shadow-md z-50">
-                    {COMMON_TIMEZONES.map((tz) => (
-                      <SelectItem key={tz.value} value={tz.value}>
-                        {tz.label}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone</Label>
@@ -791,6 +769,28 @@ const SchoolManagementPage = () => {
                   placeholder="Additional notes about this school..."
                   rows={3}
                 />
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select
+                  value={editingSchool.timezone || 'America/New_York'}
+                  onValueChange={(value) => setEditingSchool({
+                    ...editingSchool,
+                    timezone: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-md z-50">
+                    {COMMON_TIMEZONES.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="flex justify-end space-x-2">
