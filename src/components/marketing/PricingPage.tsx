@@ -9,7 +9,7 @@ const PricingPage = () => {
     price: "$2,000",
     period: "per year",
     description: "Perfect for JROTC programs",
-    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar"],
+    features: ["Unlimited cadets", "Cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
