@@ -155,8 +155,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         conn.id === connectionEditModal.connectionId 
           ? { 
               ...conn, 
-              source_handle: sourceHandle + '-source', 
-              target_handle: targetHandle + '-target' 
+              source_handle: sourceHandle, 
+              target_handle: targetHandle 
             }
           : conn
       );
@@ -168,11 +168,11 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       const sourceUpdates: Partial<JobBoardWithCadet> = {};
       
       if (connectionEditModal.connectionType === 'reports_to') {
-        sourceUpdates.reports_to_source_handle = sourceHandle + '-source';
-        console.log('Updating reports_to_source_handle to:', sourceHandle + '-source');
+        sourceUpdates.reports_to_source_handle = sourceHandle;
+        console.log('Updating reports_to_source_handle to:', sourceHandle);
       } else {
-        sourceUpdates.assistant_source_handle = sourceHandle + '-source';
-        console.log('Updating assistant_source_handle to:', sourceHandle + '-source');
+        sourceUpdates.assistant_source_handle = sourceHandle;
+        console.log('Updating assistant_source_handle to:', sourceHandle);
       }
 
       console.log('Legacy source updates:', sourceUpdates);
