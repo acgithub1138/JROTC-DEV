@@ -6,7 +6,7 @@ import { HierarchyResult } from './hierarchyBuilder';
 const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithCadet): Set<string> => {
   const occupiedHandles = new Set<string>();
 
-  // Check if this job has outgoing connections (source handles)
+  // Check if this job has outgoing connections (source handles only)
   if (currentJob.reports_to && currentJob.reports_to_source_handle) {
     occupiedHandles.add(currentJob.reports_to_source_handle);
   }
@@ -14,19 +14,8 @@ const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithC
     occupiedHandles.add(currentJob.assistant_source_handle);
   }
 
-  // Check if other jobs point to this job (target handles)
-  jobs.forEach(otherJob => {
-    if (otherJob.id !== currentJob.id) {
-      // Check reports_to relationships pointing to current job
-      if (otherJob.reports_to === currentJob.role && otherJob.reports_to_target_handle) {
-        occupiedHandles.add(otherJob.reports_to_target_handle);
-      }
-      // Check assistant relationships pointing to current job
-      if (otherJob.assistant === currentJob.role && otherJob.assistant_target_handle) {
-        occupiedHandles.add(otherJob.assistant_target_handle);
-      }
-    }
-  });
+  // Note: We no longer track target handles since they're calculated dynamically
+  // This prevents cascading updates when editing connections
 
   return occupiedHandles;
 };
@@ -67,15 +56,12 @@ export const createFlowEdges = (
   
   const flowEdges = hierarchyResult.edges.map((edge) => {
     const sourceJob = jobMap.get(edge.source);
-    const targetJob = jobMap.get(edge.target);
     
     if (edge.type === 'assistant') {
-      // Assistant relationships: use stored source handle, calculate target dynamically
+      // Assistant relationships: use stored source handle with consistent default
       const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
-      // Calculate target handle based on source to avoid conflicts
-      const targetHandle = sourceHandle.includes('right') ? 'left-target' : 
-                          sourceHandle.includes('left') ? 'right-target' :
-                          sourceHandle.includes('top') ? 'bottom-target' : 'top-target';
+      // Always use left-target for assistant connections to maintain consistency
+      const targetHandle = 'left-target';
       
       const edgeObj = {
         id: edge.id,
@@ -92,12 +78,10 @@ export const createFlowEdges = (
       console.log('📎 Created assistant edge:', edgeObj);
       return edgeObj;
     } else {
-      // Reports_to relationships: use stored source handle, calculate target dynamically  
+      // Reports_to relationships: use stored source handle with consistent default
       const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
-      // Calculate target handle based on source to avoid conflicts
-      const targetHandle = sourceHandle.includes('bottom') ? 'top-target' : 
-                          sourceHandle.includes('top') ? 'bottom-target' :
-                          sourceHandle.includes('left') ? 'right-target' : 'left-target';
+      // Always use top-target for reports_to connections to maintain consistency
+      const targetHandle = 'top-target';
       
       const edgeObj = {
         id: edge.id,
