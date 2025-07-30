@@ -4,11 +4,12 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity, Users } from 'lucide-react';
+import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity, Users, Eye } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { format } from 'date-fns';
+import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
 const getStatusColor = (status: string) => {
   switch (status) {
     case 'pending':
@@ -35,6 +36,7 @@ export const EmailQueueTab: React.FC = () => {
   const queryClient = useQueryClient();
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isMonitoring, setIsMonitoring] = React.useState(false);
+  const [viewingEmail, setViewingEmail] = React.useState(null);
   const handleRefresh = () => {
     queryClient.invalidateQueries({
       queryKey: ['email-queue']
@@ -284,6 +286,7 @@ export const EmailQueueTab: React.FC = () => {
                     <TableHead>Status</TableHead>
                     <TableHead>Scheduled</TableHead>
                     <TableHead>Source</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -349,6 +352,16 @@ export const EmailQueueTab: React.FC = () => {
                       <TableCell className="text-sm py-2">
                         {item.email_templates?.name || 'Manual'}
                       </TableCell>
+                      <TableCell className="py-2">
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => setViewingEmail(item)}
+                          className="h-8 w-8 p-0"
+                        >
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      </TableCell>
                     </TableRow>
                     );
                   })}
@@ -357,5 +370,13 @@ export const EmailQueueTab: React.FC = () => {
             </div>}
         </CardContent>
       </Card>
+      
+      {viewingEmail && (
+        <EmailViewDialog
+          open={!!viewingEmail}
+          onOpenChange={(open) => !open && setViewingEmail(null)}
+          email={viewingEmail}
+        />
+      )}
     </>;
 };
