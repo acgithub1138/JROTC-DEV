@@ -10,7 +10,7 @@ const PricingPage = () => {
     period: "per year",
     description: "Perfect for JROTC programs",
     features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar"],
-    notIncluded: ["Competition management", "Competition Analytics"],
+    notIncluded: [],
     popular: false,
     cta: "Get Started"
   }, {
