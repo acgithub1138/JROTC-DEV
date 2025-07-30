@@ -14,6 +14,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Calendar } from '@/components/ui/calendar';
 import { format, addYears } from 'date-fns';
+import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 import { 
   Pagination,
   PaginationContent,
@@ -54,6 +55,7 @@ interface School {
   subscription_end?: string;
   referred_by?: string;
   notes?: string;
+  timezone?: string;
   created_at: string;
 }
 
@@ -150,6 +152,7 @@ const SchoolManagementPage = () => {
           subscription_end: editingSchool.subscription_end,
           referred_by: editingSchool.referred_by,
           notes: editingSchool.notes,
+          timezone: editingSchool.timezone,
         })
         .eq('id', editingSchool.id);
 
@@ -631,6 +634,28 @@ const SchoolManagementPage = () => {
                     })}
                   />
                 </div>
+              </div>
+
+              <div className="space-y-2">
+                <Label htmlFor="timezone">Timezone</Label>
+                <Select
+                  value={editingSchool.timezone || 'America/New_York'}
+                  onValueChange={(value) => setEditingSchool({
+                    ...editingSchool,
+                    timezone: value
+                  })}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select timezone" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background border shadow-md z-50">
+                    {COMMON_TIMEZONES.map((tz) => (
+                      <SelectItem key={tz.value} value={tz.value}>
+                        {tz.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
 
               <div className="grid grid-cols-2 gap-4">
