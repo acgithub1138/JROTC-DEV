@@ -315,7 +315,7 @@ const DashboardOverview = () => {
                     </div>) : upcomingEvents.length > 0 ? upcomingEvents.map(event => <div key={event.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors px-[6px] py-[2px] rounded-lg">
                       <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
                       <div className="flex-1 min-w-0">
-                        <p className="text-muted-foreground mt-1 text-base">
+                        <p className="font-medium text-foreground text-base">
                           {new Date(event.start_date).toLocaleDateString('en-US', {
                       month: 'short',
                       day: 'numeric',
