@@ -7,6 +7,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -47,6 +49,30 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   const subjectRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<ReactQuill>(null);
   const [showPreview, setShowPreview] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  const initialFormData = template && mode === 'edit' ? {
+    name: template.name,
+    subject: template.subject,
+    body: template.body,
+    source_table: template.source_table,
+    recipient_field: template.recipient_field || '',
+    is_active: template.is_active,
+  } : {
+    name: '',
+    subject: '',
+    body: '',
+    source_table: '',
+    recipient_field: '',
+    is_active: true,
+  };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: open,
+  });
 
   const { data: columns = [] } = useTableColumns(formData.source_table);
   const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
@@ -78,6 +104,36 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     setFormData(prev => ({ ...prev, ...updates }));
   };
 
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
@@ -97,6 +153,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
       });
     }
     
+    resetChanges();
     onOpenChange(false);
   };
 
@@ -138,7 +195,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
   return (
     <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
@@ -214,7 +271,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
               </Button>
               
               <div className="flex space-x-2">
-                <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                <Button type="button" variant="outline" onClick={handleCancel}>
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -225,6 +282,13 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
           </form>
         </DialogContent>
       </Dialog>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
 
       <EmailPreviewDialog
         open={showPreview}

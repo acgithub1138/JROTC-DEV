@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
 import { Eye, EyeOff } from 'lucide-react';
 import { useAuth } from '@/contexts/AuthContext';
@@ -35,6 +37,66 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
   const [newPassword, setNewPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  const initialData = editingProfile ? {
+    grade: editingProfile.grade || '',
+    flight: editingProfile.flight || '',
+    cadet_year: editingProfile.cadet_year || '',
+    role: editingProfile.role || '',
+    rank: editingProfile.rank || '',
+  } : {};
+
+  const currentData = editingProfile ? {
+    grade: editingProfile.grade || '',
+    flight: editingProfile.flight || '',
+    cadet_year: editingProfile.cadet_year || '',
+    role: editingProfile.role || '',
+    rank: editingProfile.rank || '',
+  } : {};
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData,
+    enabled: open && !!editingProfile,
+  });
+
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onSubmit(e);
+    resetChanges();
+  };
 
   if (!editingProfile) return null;
 
@@ -91,202 +153,211 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl">
-        <DialogHeader>
-          <DialogTitle>Edit Cadet Information</DialogTitle>
-          <DialogDescription>
-            Update the cadet's grade, rank, and flight information.
-          </DialogDescription>
-        </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label>Name</Label>
-              <Input
-                value={`${editingProfile.first_name} ${editingProfile.last_name}`}
-                disabled
-                className="bg-gray-50"
-              />
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="max-w-2xl">
+          <DialogHeader>
+            <DialogTitle>Edit Cadet Information</DialogTitle>
+            <DialogDescription>
+              Update the cadet's grade, rank, and flight information.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Name</Label>
+                <Input
+                  value={`${editingProfile.first_name} ${editingProfile.last_name}`}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Email</Label>
+                <Input
+                  value={editingProfile.email}
+                  disabled
+                  className="bg-gray-50"
+                />
+              </div>
             </div>
-            <div className="space-y-2">
-              <Label>Email</Label>
-              <Input
-                value={editingProfile.email}
-                disabled
-                className="bg-gray-50"
-              />
-            </div>
-          </div>
 
-          <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="grade">Grade</Label>
+                <Select
+                  value={editingProfile.grade || ""}
+                  onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
+                  disabled={!canUpdate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select grade" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {gradeOptions.map((grade) => (
+                      <SelectItem key={grade} value={grade}>
+                        {grade}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="flight">Flight</Label>
+                <Select
+                  value={editingProfile.flight || ""}
+                  onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
+                  disabled={!canUpdate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select flight" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {flightOptions.map((flight) => (
+                      <SelectItem key={flight} value={flight}>
+                        {flight}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="cadet_year">Cadet Year</Label>
+                <Select
+                  value={editingProfile.cadet_year || ""}
+                  onValueChange={(value) => setEditingProfile({ ...editingProfile, cadet_year: value })}
+                  disabled={!canUpdate}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select year" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cadetYearOptions.map((year) => (
+                      <SelectItem key={year} value={year}>
+                        {year}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
             <div className="space-y-2">
-              <Label htmlFor="grade">Grade</Label>
+              <Label htmlFor="role">Role</Label>
               <Select
-                value={editingProfile.grade || ""}
-                onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
+                value={editingProfile.role || ""}
+                onValueChange={(value) => setEditingProfile({ ...editingProfile, role: value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select grade" />
+                  <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  {gradeOptions.map((grade) => (
-                    <SelectItem key={grade} value={grade}>
-                      {grade}
+                  {roleOptions.map((roleOption) => (
+                    <SelectItem key={roleOption.value} value={roleOption.value}>
+                      {roleOption.label}
                     </SelectItem>
                   ))}
                 </SelectContent>
               </Select>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="flight">Flight</Label>
+              <Label htmlFor="rank">Rank</Label>
               <Select
-                value={editingProfile.flight || ""}
-                onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
+                value={editingProfile.rank || ""}
+                onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
-                  <SelectValue placeholder="Select flight" />
+                  <SelectValue placeholder="Select rank" />
                 </SelectTrigger>
                 <SelectContent>
-                  {flightOptions.map((flight) => (
-                    <SelectItem key={flight} value={flight}>
-                      {flight}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="cadet_year">Cadet Year</Label>
-              <Select
-                value={editingProfile.cadet_year || ""}
-                onValueChange={(value) => setEditingProfile({ ...editingProfile, cadet_year: value })}
-                disabled={!canUpdate}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select year" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cadetYearOptions.map((year) => (
-                    <SelectItem key={year} value={year}>
-                      {year}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role">Role</Label>
-            <Select
-              value={editingProfile.role || ""}
-              onValueChange={(value) => setEditingProfile({ ...editingProfile, role: value })}
-              disabled={!canUpdate}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roleOptions.map((roleOption) => (
-                  <SelectItem key={roleOption.value} value={roleOption.value}>
-                    {roleOption.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="rank">Rank</Label>
-            <Select
-              value={editingProfile.rank || ""}
-              onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
-              disabled={!canUpdate}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select rank" />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="none">No rank</SelectItem>
-                {ranks.map((rank) => (
-                  <SelectItem 
-                    key={rank.id} 
-                    value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}
-                  >
-                    {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-          
-          <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={!canUpdate}>
-              Update Cadet
-            </Button>
-          </div>
-        </form>
-
-        {/* Password Reset Section */}
-        {canResetPassword && (
-          <Accordion type="single" collapsible className="mt-6">
-            <AccordionItem value="password-reset">
-              <AccordionTrigger className="text-lg font-semibold">
-                Reset Password
-              </AccordionTrigger>
-              <AccordionContent className="space-y-4">
-                <p className="text-sm text-muted-foreground">
-                  Reset the cadet's password. They will need to use the new password to sign in.
-                </p>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="newPassword">New Password</Label>
-                  <div className="relative">
-                    <Input
-                      id="newPassword"
-                      type={showPassword ? "text" : "password"}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                      placeholder="Enter new password"
-                      className="pr-10"
-                    />
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="sm"
-                      className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                      onClick={() => setShowPassword(!showPassword)}
+                  <SelectItem value="none">No rank</SelectItem>
+                  {ranks.map((rank) => (
+                    <SelectItem 
+                      key={rank.id} 
+                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}
                     >
-                      {showPassword ? (
-                        <EyeOff className="h-4 w-4" />
-                      ) : (
-                        <Eye className="h-4 w-4" />
-                      )}
-                    </Button>
-                  </div>
-                </div>
+                      {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+                </Select>
+              </div>
+              
+              <div className="flex justify-end space-x-2">
+                <Button type="button" variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!canUpdate}>
+                  Update Cadet
+                </Button>
+              </div>
+            </form>
 
-                <div className="flex justify-end">
-                  <Button
-                    type="button"
-                    onClick={handleResetPassword}
-                    disabled={passwordResetLoading || !newPassword.trim()}
-                    variant="destructive"
-                  >
-                    {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
-                  </Button>
-                </div>
-              </AccordionContent>
-            </AccordionItem>
-          </Accordion>
-        )}
-      </DialogContent>
-    </Dialog>
-  );
+            {/* Password Reset Section */}
+            {canResetPassword && (
+              <Accordion type="single" collapsible className="mt-6">
+                <AccordionItem value="password-reset">
+                  <AccordionTrigger className="text-lg font-semibold">
+                    Reset Password
+                  </AccordionTrigger>
+                  <AccordionContent className="space-y-4">
+                    <p className="text-sm text-muted-foreground">
+                      Reset the cadet's password. They will need to use the new password to sign in.
+                    </p>
+                    
+                    <div className="space-y-2">
+                      <Label htmlFor="newPassword">New Password</Label>
+                      <div className="relative">
+                        <Input
+                          id="newPassword"
+                          type={showPassword ? "text" : "password"}
+                          value={newPassword}
+                          onChange={(e) => setNewPassword(e.target.value)}
+                          placeholder="Enter new password"
+                          className="pr-10"
+                        />
+                        <Button
+                          type="button"
+                          variant="ghost"
+                          size="sm"
+                          className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
+                          onClick={() => setShowPassword(!showPassword)}
+                        >
+                          {showPassword ? (
+                            <EyeOff className="h-4 w-4" />
+                          ) : (
+                            <Eye className="h-4 w-4" />
+                          )}
+                        </Button>
+                      </div>
+                    </div>
+
+                    <div className="flex justify-end">
+                      <Button
+                        type="button"
+                        onClick={handleResetPassword}
+                        disabled={passwordResetLoading || !newPassword.trim()}
+                        variant="destructive"
+                      >
+                        {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
+                      </Button>
+                    </div>
+                  </AccordionContent>
+                </AccordionItem>
+              </Accordion>
+            )}
+          </DialogContent>
+        </Dialog>
+
+        <UnsavedChangesDialog
+          open={showUnsavedDialog}
+          onOpenChange={setShowUnsavedDialog}
+          onDiscard={handleDiscardChanges}
+          onCancel={handleContinueEditing}
+        />
+      </>
+    );
 };

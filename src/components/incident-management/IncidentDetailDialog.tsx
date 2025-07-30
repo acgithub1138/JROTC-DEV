@@ -39,6 +39,8 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { supabase } from "@/integrations/supabase/client";
 import { resolveUserEmail } from "@/hooks/useEmailResolution";
 import { useToast } from "@/hooks/use-toast";
+import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import type { Incident } from "@/hooks/incidents/types";
 
 interface IncidentDetailDialogProps {
@@ -743,6 +745,13 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
     </>
   );
 };

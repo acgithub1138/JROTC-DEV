@@ -6,6 +6,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
@@ -58,6 +60,28 @@ export const EventForm: React.FC<EventFormProps> = ({
   const [showAddEventTypeDialog, setShowAddEventTypeDialog] = useState(false);
   const [newEventTypeName, setNewEventTypeName] = useState('');
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  const initialData = {
+    title: '',
+    description: '',
+    start_date: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
+    end_date: '',
+    end_time_hour: '10',
+    end_time_minute: '00',
+    location: '',
+    event_type: 'other',
+    is_all_day: false,
+  };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: event ? formData : initialData,
+    currentData: formData,
+    enabled: true,
+  });
 
   const canEdit = event ? canUpdate : canCreate;
   const canDeleteEvent = event ? canDelete : false;
@@ -173,6 +197,27 @@ export const EventForm: React.FC<EventFormProps> = ({
     }
   };
 
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onCancel();
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onCancel();
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+
   const handleChange = (field: string, value: any) => {
     setFormData(prev => {
       const newData = {
@@ -219,7 +264,8 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
+    <>
+      <form onSubmit={handleSubmit} className="space-y-4">
       <div>
         <Label htmlFor="title">Event Title *</Label>
         <Input
@@ -448,7 +494,7 @@ export const EventForm: React.FC<EventFormProps> = ({
           </Button>
         )}
         <div className="flex gap-2 ml-auto">
-          <Button type="button" variant="outline" onClick={onCancel}>
+          <Button type="button" variant="outline" onClick={handleCancel}>
             Cancel
           </Button>
           <Button type="submit" disabled={isSubmitting || !canEdit}>
@@ -457,5 +503,13 @@ export const EventForm: React.FC<EventFormProps> = ({
         </div>
       </div>
     </form>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+    </>
   );
 };

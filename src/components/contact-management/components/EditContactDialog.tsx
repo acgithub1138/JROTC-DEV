@@ -8,6 +8,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import {
   Form,
   FormControl,
@@ -65,18 +67,28 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
   const { userProfile } = useAuth();
   const { canEdit: canUpdate } = useTablePermissions('contacts');
   const [cadets, setCadets] = useState<Cadet[]>([]);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
   
+  const initialData = {
+    name: contact.name,
+    type: contact.type,
+    status: contact.status,
+    cadet_id: contact.cadet_id || 'none',
+    phone: contact.phone || '',
+    email: contact.email || '',
+    notes: contact.notes || '',
+  };
+
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
-    defaultValues: {
-      name: contact.name,
-      type: contact.type,
-      status: contact.status,
-      cadet_id: contact.cadet_id || 'none',
-      phone: contact.phone || '',
-      email: contact.email || '',
-      notes: contact.notes || '',
-    },
+    defaultValues: initialData,
+  });
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData: form.watch(),
+    enabled: open,
   });
 
   useEffect(() => {
@@ -108,6 +120,36 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
     }
   }, [open, contact, userProfile?.school_id, form]);
 
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+
   const handleSubmit = (data: ContactFormData) => {
     onSubmit(contact.id, {
       name: data.name,
@@ -118,162 +160,172 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       email: data.email || null,
       notes: data.notes || null,
     });
+    resetChanges();
     onOpenChange(false);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>Edit Contact</DialogTitle>
-        </DialogHeader>
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
+    <>
+      <Dialog open={open} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Edit Contact</DialogTitle>
+          </DialogHeader>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="name"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter contact name" {...field} disabled={!canUpdate} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Type</FormLabel>
+                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                           <SelectTrigger disabled={!canUpdate}>
+                            <SelectValue placeholder="Select contact type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="parent">Parent</SelectItem>
+                          <SelectItem value="relative">Relative</SelectItem>
+                          <SelectItem value="friend">Friend</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Status</FormLabel>
+                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                           <SelectTrigger disabled={!canUpdate}>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="semi_active">Semi-Active</SelectItem>
+                          <SelectItem value="not_active">Not Active</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="cadet_id"
+                  render={({ field }) => (
+                    <FormItem className="col-span-2">
+                      <FormLabel>Cadet (Optional)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger disabled={!canUpdate}>
+                            <SelectValue placeholder="Select cadet" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No cadet selected</SelectItem>
+                          {cadets.map((cadet) => (
+                            <SelectItem key={cadet.id} value={cadet.id}>
+                              {cadet.last_name}, {cadet.first_name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Phone number" {...field} disabled={!canUpdate} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="Email address" {...field} disabled={!canUpdate} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+              </div>
+
               <FormField
                 control={form.control}
-                name="name"
+                name="notes"
                 render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Name</FormLabel>
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
                     <FormControl>
-                      <Input placeholder="Enter contact name" {...field} disabled={!canUpdate} />
+                      <Textarea
+                        placeholder="Additional notes"
+                        className="resize-none"
+                        {...field}
+                         disabled={!canUpdate}
+                      />
                     </FormControl>
                     <FormMessage />
                   </FormItem>
                 )}
               />
 
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Type</FormLabel>
-                     <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                      <FormControl>
-                         <SelectTrigger disabled={!canUpdate}>
-                          <SelectValue placeholder="Select contact type" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="parent">Parent</SelectItem>
-                        <SelectItem value="relative">Relative</SelectItem>
-                        <SelectItem value="friend">Friend</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="flex justify-end space-x-2">
+                <Button variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!canUpdate}>Update Contact</Button>
+              </div>
+            </form>
+          </Form>
+        </DialogContent>
+      </Dialog>
 
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Status</FormLabel>
-                     <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                      <FormControl>
-                         <SelectTrigger disabled={!canUpdate}>
-                          <SelectValue placeholder="Select status" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="active">Active</SelectItem>
-                        <SelectItem value="semi_active">Semi-Active</SelectItem>
-                        <SelectItem value="not_active">Not Active</SelectItem>
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="cadet_id"
-                render={({ field }) => (
-                  <FormItem className="col-span-2">
-                    <FormLabel>Cadet (Optional)</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                      <FormControl>
-                        <SelectTrigger disabled={!canUpdate}>
-                          <SelectValue placeholder="Select cadet" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No cadet selected</SelectItem>
-                        {cadets.map((cadet) => (
-                          <SelectItem key={cadet.id} value={cadet.id}>
-                            {cadet.last_name}, {cadet.first_name}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Phone</FormLabel>
-                    <FormControl>
-                      <Input placeholder="Phone number" {...field} disabled={!canUpdate} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Email</FormLabel>
-                    <FormControl>
-                      <Input type="email" placeholder="Email address" {...field} disabled={!canUpdate} />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-            </div>
-
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Notes</FormLabel>
-                  <FormControl>
-                    <Textarea
-                      placeholder="Additional notes"
-                      className="resize-none"
-                      {...field}
-                       disabled={!canUpdate}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-
-            <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!canUpdate}>Update Contact</Button>
-            </div>
-          </form>
-        </Form>
-      </DialogContent>
-    </Dialog>
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
+    </>
   );
 };
