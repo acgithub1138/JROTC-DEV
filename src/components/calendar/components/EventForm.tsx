@@ -62,8 +62,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   const { eventTypes, isLoading: eventTypesLoading, createEventType } = useEventTypes();
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
-
-  const initialData = {
+  const [initialFormData, setInitialFormData] = useState({
     title: '',
     description: '',
     start_date: '',
@@ -75,10 +74,10 @@ export const EventForm: React.FC<EventFormProps> = ({
     location: '',
     event_type: 'other',
     is_all_day: false,
-  };
+  });
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData: event ? formData : initialData,
+    initialData: initialFormData,
     currentData: formData,
     enabled: true,
   });
@@ -92,7 +91,7 @@ export const EventForm: React.FC<EventFormProps> = ({
       const startDate = convertToSchoolTimezone(event.start_date, timezone);
       const endDate = event.end_date ? convertToSchoolTimezone(event.end_date, timezone) : null;
       
-      setFormData({
+      const eventFormData = {
         title: event.title,
         description: event.description || '',
         start_date: format(startDate, 'yyyy-MM-dd'),
@@ -104,7 +103,10 @@ export const EventForm: React.FC<EventFormProps> = ({
         location: event.location || '',
         event_type: event.event_type,
         is_all_day: event.is_all_day,
-      });
+      };
+
+      setFormData(eventFormData);
+      setInitialFormData(eventFormData);
 
       // Set recurrence data for existing events
       setIsRecurring(event.is_recurring || false);
@@ -115,11 +117,13 @@ export const EventForm: React.FC<EventFormProps> = ({
       // Convert selected date to school timezone for display
       const schoolDate = convertToSchoolTimezone(selectedDate, timezone);
       const dateStr = format(schoolDate, 'yyyy-MM-dd');
-      setFormData(prev => ({
-        ...prev,
+      const newFormData = {
+        ...formData,
         start_date: dateStr,
         end_date: dateStr,
-      }));
+      };
+      setFormData(newFormData);
+      setInitialFormData(newFormData);
     }
   }, [event, selectedDate, timezone, timezoneLoading]);
 

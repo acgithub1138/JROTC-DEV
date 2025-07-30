@@ -39,26 +39,42 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
+  
+  // Separate form data state to prevent direct mutation of props
+  const [formData, setFormData] = useState({
+    grade: '',
+    flight: '',
+    cadet_year: '',
+    role: '',
+    rank: '',
+  });
+  
+  const [initialFormData, setInitialFormData] = useState({
+    grade: '',
+    flight: '',
+    cadet_year: '',
+    role: '',
+    rank: '',
+  });
 
-  const initialData = editingProfile ? {
-    grade: editingProfile.grade || '',
-    flight: editingProfile.flight || '',
-    cadet_year: editingProfile.cadet_year || '',
-    role: editingProfile.role || '',
-    rank: editingProfile.rank || '',
-  } : {};
-
-  const currentData = editingProfile ? {
-    grade: editingProfile.grade || '',
-    flight: editingProfile.flight || '',
-    cadet_year: editingProfile.cadet_year || '',
-    role: editingProfile.role || '',
-    rank: editingProfile.rank || '',
-  } : {};
+  // Initialize form data when dialog opens or editingProfile changes
+  React.useEffect(() => {
+    if (editingProfile && open) {
+      const data = {
+        grade: editingProfile.grade || '',
+        flight: editingProfile.flight || '',
+        cadet_year: editingProfile.cadet_year || '',
+        role: editingProfile.role || '',
+        rank: editingProfile.rank || '',
+      };
+      setFormData(data);
+      setInitialFormData(data);
+    }
+  }, [editingProfile, open]);
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData,
-    currentData,
+    initialData: initialFormData,
+    currentData: formData,
     enabled: open && !!editingProfile,
   });
 
@@ -94,6 +110,13 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    // Update editingProfile with form data before submitting
+    if (editingProfile) {
+      setEditingProfile({
+        ...editingProfile,
+        ...formData,
+      });
+    }
     onSubmit(e);
     resetChanges();
   };
@@ -186,8 +209,8 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <div className="space-y-2">
                 <Label htmlFor="grade">Grade</Label>
                 <Select
-                  value={editingProfile.grade || ""}
-                  onValueChange={(value) => setEditingProfile({ ...editingProfile, grade: value })}
+                  value={formData.grade}
+                  onValueChange={(value) => setFormData({ ...formData, grade: value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
@@ -205,8 +228,8 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <div className="space-y-2">
                 <Label htmlFor="flight">Flight</Label>
                 <Select
-                  value={editingProfile.flight || ""}
-                  onValueChange={(value) => setEditingProfile({ ...editingProfile, flight: value })}
+                  value={formData.flight}
+                  onValueChange={(value) => setFormData({ ...formData, flight: value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
@@ -224,8 +247,8 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
               <div className="space-y-2">
                 <Label htmlFor="cadet_year">Cadet Year</Label>
                 <Select
-                  value={editingProfile.cadet_year || ""}
-                  onValueChange={(value) => setEditingProfile({ ...editingProfile, cadet_year: value })}
+                  value={formData.cadet_year}
+                  onValueChange={(value) => setFormData({ ...formData, cadet_year: value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
@@ -245,8 +268,8 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             <div className="space-y-2">
               <Label htmlFor="role">Role</Label>
               <Select
-                value={editingProfile.role || ""}
-                onValueChange={(value) => setEditingProfile({ ...editingProfile, role: value })}
+                value={formData.role}
+                onValueChange={(value) => setFormData({ ...formData, role: value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
@@ -265,8 +288,8 @@ export const EditCadetDialog = ({ open, onOpenChange, editingProfile, setEditing
             <div className="space-y-2">
               <Label htmlFor="rank">Rank</Label>
               <Select
-                value={editingProfile.rank || ""}
-                onValueChange={(value) => setEditingProfile({ ...editingProfile, rank: value === "none" ? "" : value })}
+                value={formData.rank}
+                onValueChange={(value) => setFormData({ ...formData, rank: value === "none" ? "" : value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
