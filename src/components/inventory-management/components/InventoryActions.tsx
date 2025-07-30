@@ -24,7 +24,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
         <Download className="w-4 h-4 mr-2" />
         Export CSV
       </Button>
-      {(canBulkImport || isLoading) && (
+      {(canCreate || isLoading) && (
         <Button variant="outline" onClick={onBulkOperations} disabled={isLoading}>
           <Upload className="w-4 h-4 mr-2" />
           Bulk Operations
