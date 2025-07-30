@@ -40,6 +40,16 @@ export const ListView: React.FC<ListViewProps> = ({
     return format(eventDate, 'MMM d, yyyy');
   };
 
+  const formatAddress = (address: string) => {
+    // Split by common address delimiters and clean up
+    const parts = address
+      .split(/[,;]/)
+      .map(part => part.trim())
+      .filter(part => part.length > 0);
+    
+    return parts;
+  };
+
   if (sortedEvents.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
@@ -102,8 +112,14 @@ export const ListView: React.FC<ListViewProps> = ({
                           <MapPin className="h-4 w-4 text-muted-foreground" />
                         </Button>
                       </TooltipTrigger>
-                      <TooltipContent>
-                        <p>{event.location}</p>
+                      <TooltipContent className="max-w-xs">
+                        <div className="space-y-1">
+                          {formatAddress(event.location).map((line, index) => (
+                            <div key={index} className="text-sm">
+                              {line}
+                            </div>
+                          ))}
+                        </div>
                       </TooltipContent>
                     </Tooltip>
                   ) : (
