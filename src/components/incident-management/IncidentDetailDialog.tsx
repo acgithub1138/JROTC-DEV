@@ -479,7 +479,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               )}
               {!isEditing && (
                 <Button size="sm" variant="outline" onClick={() => onClose()}>
-                  <X className="w-4 h-4 mr-1" />
+                  <X className="w-4 h-4 mr-2" />
                   Close
                 </Button>
               )}
