@@ -11,6 +11,7 @@ import { ConnectionEditModal } from './ConnectionEditModal';
 import { ExportModal } from './ExportModal';
 import { useJobBoardExport } from '../hooks/useJobBoardExport';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { VisuallyHidden } from '@radix-ui/react-visually-hidden';
 
 interface JobBoardChartProps {
@@ -27,6 +28,7 @@ const nodeTypes = {
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [showExportModal, setShowExportModal] = useState(false);
@@ -87,6 +89,15 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const handleToggleFullscreen = () => {
     setIsFullscreen(!isFullscreen);
+  };
+
+  const handleResetLayoutClick = () => {
+    setShowResetConfirmation(true);
+  };
+
+  const handleResetConfirm = () => {
+    resetLayout();
+    setShowResetConfirmation(false);
   };
 
   const handleExport = () => {
@@ -187,7 +198,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     >
       <JobBoardToolbar
         onRefresh={onRefresh}
-        onResetLayout={resetLayout}
+        onResetLayout={handleResetLayoutClick}
         onToggleFullscreen={handleToggleFullscreen}
         onExport={handleExport}
         isResetting={isResetting}
@@ -254,8 +265,25 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onClose={() => setShowExportModal(false)}
         onExport={exportChart}
         isExporting={isExporting}
-      />
-    </div>
+        />
+
+        <AlertDialog open={showResetConfirmation} onOpenChange={setShowResetConfirmation}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Reset Layout</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to reset the layout? This will move all job cards back to their default positions and cannot be undone.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleResetConfirm}>
+                Reset Layout
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </div>
   );
 
   return (
