@@ -42,7 +42,6 @@ export const ViewCadetDialog = ({
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle>Cadet Profile</DialogTitle>
-          {canUpdate && onEditProfile}
         </DialogHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col">
