@@ -94,7 +94,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
             <TableCell className="font-medium py-[8px]">
               <button
                 onClick={() => onView(contact)}
-                className="text-left hover:text-primary hover:underline transition-colors"
+                className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
               >
                 {contact.name}
               </button>
