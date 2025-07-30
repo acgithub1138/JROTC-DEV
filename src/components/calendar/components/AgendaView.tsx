@@ -40,14 +40,15 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
     );
   }
   
-  const monthStart = startOfMonth(currentDate);
-  const monthEnd = endOfMonth(currentDate);
+  // Get month boundaries in school timezone
+  const monthStartKey = getSchoolDateKey(startOfMonth(currentDate), timezone);
+  const monthEndKey = getSchoolDateKey(endOfMonth(currentDate), timezone);
   
-  // Get events for the current month and sort by date/time
+  // Get events for the current month using timezone-aware date comparison
   const monthEvents = events
     .filter(event => {
-      const eventDate = new Date(event.start_date);
-      return eventDate >= monthStart && eventDate <= monthEnd;
+      const eventDateKey = getSchoolDateKey(event.start_date, timezone);
+      return eventDateKey >= monthStartKey && eventDateKey <= monthEndKey;
     })
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
 
