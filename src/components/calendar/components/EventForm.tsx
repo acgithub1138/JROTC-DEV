@@ -82,6 +82,9 @@ export const EventForm: React.FC<EventFormProps> = ({
     enabled: true,
   });
 
+  // Debug logging
+  console.log('EventForm unsaved changes:', { hasUnsavedChanges, initialFormData, formData });
+
   const canEdit = event ? canUpdate : canCreate;
   const canDeleteEvent = event ? canDelete : false;
 
