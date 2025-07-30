@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Node } from '@xyflow/react';
 import { useCallback, useMemo } from 'react';
 
@@ -23,17 +24,21 @@ export const useJobBoardLayout = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { canAssign } = useJobBoardPermissions();
 
-  // Fetch saved layout preferences
+  // Use a system user ID for school-wide layouts
+  const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
+
+  // Fetch saved layout preferences (school-wide)
   const { data: layoutPreferences = [], isLoading } = useQuery({
-    queryKey: ['job-board-layout', userProfile?.id, userProfile?.school_id],
+    queryKey: ['job-board-layout', userProfile?.school_id],
     queryFn: async () => {
-      if (!userProfile?.id || !userProfile?.school_id) return [];
+      if (!userProfile?.school_id) return [];
       
       const { data, error } = await supabase
         .from('job_board_layout_preferences')
         .select('*')
-        .eq('user_id', userProfile.id)
+        .eq('user_id', SYSTEM_USER_ID)
         .eq('school_id', userProfile.school_id);
 
       if (error) {
@@ -42,20 +47,24 @@ export const useJobBoardLayout = () => {
       }
       return data as LayoutPreference[];
     },
-    enabled: !!userProfile?.id && !!userProfile?.school_id,
+    enabled: !!userProfile?.school_id,
   });
 
   // Save position mutation with better error handling and immediate cache update
   const savePositionMutation = useMutation({
     mutationFn: async ({ jobId, position }: { jobId: string; position: { x: number; y: number } }) => {
-      if (!userProfile?.id || !userProfile?.school_id) {
+      if (!canAssign) {
+        throw new Error('Permission denied: Cannot modify layout');
+      }
+      
+      if (!userProfile?.school_id) {
         throw new Error('User not authenticated');
       }
 
       const { error } = await supabase
         .from('job_board_layout_preferences')
         .upsert({
-          user_id: userProfile.id,
+          user_id: SYSTEM_USER_ID,
           school_id: userProfile.school_id,
           job_id: jobId,
           position_x: position.x,
@@ -69,10 +78,10 @@ export const useJobBoardLayout = () => {
     },
     onSuccess: (position) => {
       // Optimistically update the cache instead of invalidating
-      queryClient.setQueryData(['job-board-layout', userProfile?.id, userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
+      queryClient.setQueryData(['job-board-layout', userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
         const existingIndex = oldData.findIndex(pref => 
           pref.job_id === savePositionMutation.variables?.jobId && 
-          pref.user_id === userProfile?.id
+          pref.user_id === SYSTEM_USER_ID
         );
         
         if (existingIndex >= 0) {
@@ -89,7 +98,7 @@ export const useJobBoardLayout = () => {
           return [...oldData, {
             id: `temp-${Date.now()}`,
             job_id: savePositionMutation.variables?.jobId || '',
-            user_id: userProfile?.id || '',
+            user_id: SYSTEM_USER_ID,
             school_id: userProfile?.school_id || '',
             position_x: position?.x || 0,
             position_y: position?.y || 0,
@@ -110,14 +119,18 @@ export const useJobBoardLayout = () => {
   // Clear all layout preferences
   const clearLayoutMutation = useMutation({
     mutationFn: async () => {
-      if (!userProfile?.id || !userProfile?.school_id) {
+      if (!canAssign) {
+        throw new Error('Permission denied: Cannot modify layout');
+      }
+      
+      if (!userProfile?.school_id) {
         throw new Error('User not authenticated');
       }
 
       const { error } = await supabase
         .from('job_board_layout_preferences')
         .delete()
-        .eq('user_id', userProfile.id)
+        .eq('user_id', SYSTEM_USER_ID)
         .eq('school_id', userProfile.school_id);
 
       if (error) throw error;
@@ -156,8 +169,17 @@ export const useJobBoardLayout = () => {
 
   // Debounced save position function with immediate visual feedback
   const savePosition = useCallback((jobId: string, position: { x: number; y: number }) => {
+    if (!canAssign) {
+      toast({
+        title: "Permission Denied",
+        description: "You don't have permission to modify the layout",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     // Optimistically update local state immediately for smooth UX
-    queryClient.setQueryData(['job-board-layout', userProfile?.id, userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
+    queryClient.setQueryData(['job-board-layout', userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
       const existingIndex = oldData.findIndex(pref => pref.job_id === jobId);
       if (existingIndex >= 0) {
         const updated = [...oldData];
@@ -167,6 +189,8 @@ export const useJobBoardLayout = () => {
         return [...oldData, {
           id: `temp-${jobId}-${Date.now()}`,
           job_id: jobId,
+          user_id: SYSTEM_USER_ID,
+          school_id: userProfile?.school_id || '',
           position_x: position.x,
           position_y: position.y,
         } as LayoutPreference];
@@ -175,7 +199,7 @@ export const useJobBoardLayout = () => {
     
     // Then persist to database
     savePositionMutation.mutate({ jobId, position });
-  }, [savePositionMutation, queryClient, userProfile?.id, userProfile?.school_id]);
+  }, [savePositionMutation, queryClient, userProfile?.school_id, canAssign, toast, SYSTEM_USER_ID]);
 
   // Reset layout to default
   const resetLayout = useCallback(() => {

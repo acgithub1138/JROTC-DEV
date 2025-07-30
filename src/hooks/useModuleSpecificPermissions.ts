@@ -85,6 +85,7 @@ export const useJobBoardPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead,
+    canAssign: hasPermission('job_board', 'assign'),
     canManageHierarchy: hasPermission('job_board', 'manage_hierarchy'),
   };
 };

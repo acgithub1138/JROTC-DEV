@@ -36,7 +36,7 @@ export const modulePermissionMappings = {
     'bulk_import'
   ],
   'job_board': [
-    'sidebar', 'read', 'create', 'view', 'update', 'delete'
+    'sidebar', 'read', 'create', 'view', 'update', 'delete', 'assign'
   ],
   'teams': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'

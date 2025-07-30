@@ -11,6 +11,7 @@ interface JobBoardToolbarProps {
   isFullscreen: boolean;
   snapToGrid: boolean;
   onToggleSnapToGrid: () => void;
+  readOnly?: boolean;
 }
 export const JobBoardToolbar = ({
   onRefresh,
@@ -20,7 +21,8 @@ export const JobBoardToolbar = ({
   isResetting,
   isFullscreen,
   snapToGrid,
-  onToggleSnapToGrid
+  onToggleSnapToGrid,
+  readOnly = false
 }: JobBoardToolbarProps) => {
   return <TooltipProvider>
       <div className="absolute top-2 right-2 z-10 flex items-center gap-2 bg-white/90 backdrop-blur-sm rounded-lg p-2 shadow-md">
@@ -35,7 +37,7 @@ export const JobBoardToolbar = ({
             </TooltipContent>
           </Tooltip>}
         
-        <Tooltip>
+        {!readOnly && <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" size="sm" onClick={onResetLayout} disabled={isResetting}>
               <RotateCcw className="w-4 h-4" />
@@ -44,9 +46,9 @@ export const JobBoardToolbar = ({
           <TooltipContent>
             <p>Reset layout</p>
           </TooltipContent>
-        </Tooltip>
+        </Tooltip>}
         
-        <Tooltip>
+        {!readOnly && <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" size="sm" onClick={onToggleSnapToGrid} className={snapToGrid ? 'bg-blue-50' : ''}>
               <Grid3X3 className="w-4 h-4" />
@@ -55,7 +57,7 @@ export const JobBoardToolbar = ({
           <TooltipContent>
             <p>{snapToGrid ? 'Disable' : 'Enable'} snap to grid</p>
           </TooltipContent>
-        </Tooltip>
+        </Tooltip>}
         
         <Tooltip>
           <TooltipTrigger asChild>

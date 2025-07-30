@@ -6,6 +6,7 @@ import { JobBoardWithCadet } from '../types';
 import { JobRoleNode } from './JobRoleNode';
 import { useJobBoardLayout } from '../hooks/useJobBoardLayout';
 import { useJobBoardNodes } from '../hooks/useJobBoardNodes';
+import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { JobBoardToolbar } from './JobBoardToolbar';
 import { ConnectionEditModal } from './ConnectionEditModal';
 import { ExportModal } from './ExportModal';
@@ -26,8 +27,12 @@ const nodeTypes = {
 };
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
+  const { canAssign } = useJobBoardPermissions();
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
+  
+  // Chart is read-only if explicitly set or user doesn't have assign permission
+  const isChartReadOnly = readOnly || !canAssign;
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -105,9 +110,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
-    console.log('🔥 EDGE DOUBLE CLICK FIRED!', { readOnly, edgeId: edge.id, edge });
+    console.log('🔥 EDGE DOUBLE CLICK FIRED!', { isChartReadOnly, edgeId: edge.id, edge });
     
-    if (readOnly) {
+    if (isChartReadOnly) {
       console.log('❌ Read-only mode, cancelling edge edit');
       return;
     }
@@ -205,12 +210,13 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         isFullscreen={isFullscreen}
         snapToGrid={snapToGrid}
         onToggleSnapToGrid={() => setSnapToGrid(!snapToGrid)}
+        readOnly={isChartReadOnly}
       />
       
       <ReactFlow
         nodes={nodes}
         edges={edges}
-        onNodesChange={handleNodeChange}
+        onNodesChange={isChartReadOnly ? undefined : handleNodeChange}
         onEdgesChange={onEdgesChange}
         onEdgeDoubleClick={handleEdgeDoubleClick}
         nodeTypes={nodeTypes}
@@ -224,6 +230,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onInit={() => {
           setIsReactFlowInitialized(true);
         }}
+        nodesDraggable={!isChartReadOnly}
         edgesReconnectable={false}
         edgesFocusable={true}
         snapToGrid={snapToGrid}
