@@ -118,9 +118,17 @@ export const EventForm: React.FC<EventFormProps> = ({
       const schoolDate = convertToSchoolTimezone(selectedDate, timezone);
       const dateStr = format(schoolDate, 'yyyy-MM-dd');
       const newFormData = {
-        ...formData,
+        title: '',
+        description: '',
         start_date: dateStr,
+        start_time_hour: '09',
+        start_time_minute: '00',
         end_date: dateStr,
+        end_time_hour: '10',
+        end_time_minute: '00',
+        location: '',
+        event_type: 'other',
+        is_all_day: false,
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
