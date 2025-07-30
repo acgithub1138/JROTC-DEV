@@ -106,20 +106,20 @@ export const ConnectionEditModal = ({
           {/* Visual Preview - 2/3 width */}
           <div className="w-2/3 relative bg-muted/20 rounded-lg p-4 min-h-[200px]">
             <div className="relative h-full flex items-center justify-between">
-              {/* Source Job Card */}
+              {/* Target Job Card */}
               <div className="relative">
                 <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
-                  <div className="text-xs font-medium truncate">{sourceJob.role}</div>
+                  <div className="text-xs font-medium truncate">{targetJob.role}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
+                    {targetJob.cadet ? `${targetJob.cadet.last_name}` : 'Unassigned'}
                   </div>
                 </div>
-                {/* Source Handle Indicator */}
+                {/* Target Handle Indicator */}
                 <div 
                   className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${
-                    sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
-                    sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
-                    sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
+                    targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
+                    targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
+                    targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
                     '-right-1 top-1/2 -translate-y-1/2'
                   }`}
                 />
@@ -139,20 +139,20 @@ export const ConnectionEditModal = ({
                 </div>
               </div>
 
-              {/* Target Job Card */}
+              {/* Source Job Card */}
               <div className="relative">
                 <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
-                  <div className="text-xs font-medium truncate">{targetJob.role}</div>
+                  <div className="text-xs font-medium truncate">{sourceJob.role}</div>
                   <div className="text-xs text-muted-foreground truncate">
-                    {targetJob.cadet ? `${targetJob.cadet.last_name}` : 'Unassigned'}
+                    {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
                   </div>
                 </div>
-                {/* Target Handle Indicator */}
+                {/* Source Handle Indicator */}
                 <div 
                   className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${
-                    targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
-                    targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
-                    targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
+                    sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
+                    sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
+                    sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
                     '-right-1 top-1/2 -translate-y-1/2'
                   }`}
                 />
