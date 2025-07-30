@@ -5,7 +5,7 @@ import { CalendarToolbar, CalendarViewType } from './CalendarToolbar';
 import { MonthView } from './MonthView';
 import { WeekView } from './WeekView';
 import { DayView } from './DayView';
-import { AgendaView } from './AgendaView';
+import { ListView } from './ListView';
 import { format, startOfMonth, startOfWeek, startOfDay } from 'date-fns';
 
 interface CalendarViewProps {
@@ -146,6 +146,14 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             events={events}
             onEventClick={onEventEdit || onEventView}
             onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
+          />
+        )}
+        
+        {viewType === 'list' && (
+          <ListView
+            events={events}
+            onEventClick={onEventEdit || onEventView}
+            readOnly={readOnly}
           />
         )}
       </div>

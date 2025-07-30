@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucid
 import { format, addDays, addWeeks, addMonths, startOfWeek, startOfMonth, startOfDay } from 'date-fns';
 import { useEventTypes } from '../hooks/useEventTypes';
 
-export type CalendarViewType = 'month' | 'week' | 'day';
+export type CalendarViewType = 'month' | 'week' | 'day' | 'list';
 
 interface CalendarToolbarProps {
   currentDate: Date;
@@ -99,6 +99,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               <SelectItem value="month">Month</SelectItem>
               <SelectItem value="week">Week</SelectItem>
               <SelectItem value="day">Day</SelectItem>
+              <SelectItem value="list">List</SelectItem>
             </SelectContent>
           </Select>
         </div>
