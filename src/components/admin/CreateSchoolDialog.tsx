@@ -12,6 +12,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format, addYears } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 
 interface CreateSchoolDialogProps {
   open: boolean;
@@ -32,6 +33,7 @@ interface NewSchool {
   subscription_end?: string;
   referred_by: string;
   notes: string;
+  timezone: string;
 }
 
 export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
@@ -49,7 +51,8 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: '',
-    notes: ''
+    notes: '',
+    timezone: 'America/New_York',
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,7 +87,8 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         subscription_start: undefined,
         subscription_end: undefined,
         referred_by: '',
-        notes: ''
+        notes: '',
+        timezone: 'America/New_York',
       });
       
       onOpenChange(false);
@@ -302,6 +306,25 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
               placeholder="Additional notes about this school..."
               rows={3}
             />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="timezone">Timezone</Label>
+            <Select
+              value={newSchool.timezone}
+              onValueChange={(value) => setNewSchool({ ...newSchool, timezone: value })}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select timezone" />
+              </SelectTrigger>
+              <SelectContent className="bg-background border shadow-md z-50">
+                {COMMON_TIMEZONES.map((tz) => (
+                  <SelectItem key={tz.value} value={tz.value}>
+                    {tz.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
