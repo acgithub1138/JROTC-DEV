@@ -18,7 +18,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Most popular for competitive programs",
-    features: ["All Basic features", "Competition management", "Competition Analytics"],
+    features: ["All Basic features", "Competition Tracking", "Competition Analytics"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
@@ -27,7 +27,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Perfect for JORTC programs that host competitions",
-    features: ["All Basic & Competition Tracking features", "Competition Event Management (Coming soon...)"],
+    features: ["All Basic features", "All Competition Tracking features", "Competition Event Management (Coming soon...)"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
