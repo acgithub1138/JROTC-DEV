@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -36,6 +36,8 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 const editSchema = z.object({
@@ -71,13 +73,32 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
 }) => {
   const { canEdit: canUpdate } = useTablePermissions('budget');
   const isReadOnly = viewOnly || !canUpdate;
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [initialFormData, setInitialFormData] = useState<EditFormData>({
+    item: '',
+    type: '',
+    description: '',
+    date: new Date(),
+    amount: 0,
+    payment_method: '',
+    status: '',
+  });
+  
   const form = useForm<EditFormData>({
     resolver: zodResolver(editSchema),
   });
 
+  const formData = form.watch();
+  
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: !isReadOnly,
+  });
+
   useEffect(() => {
     if (item && open) {
-      form.reset({
+      const formData = {
         item: item.item,
         type: item.type,
         description: item.description || '',
@@ -85,7 +106,10 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
         amount: Number(item.amount),
         payment_method: item.payment_method || '',
         status: item.status || '',
-      });
+      };
+      
+      form.reset(formData);
+      setInitialFormData(formData);
     }
   }, [item, open, form]);
 
@@ -125,8 +149,34 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
     }
   };
 
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && hasUnsavedChanges && !isReadOnly) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+    onOpenChange(newOpen);
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges && !isReadOnly) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>{viewOnly ? 'View' : 'Edit'} {item.category === 'income' ? 'Income' : 'Expense'}</DialogTitle>
@@ -309,7 +359,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
             />
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={handleCancel}>
                 {viewOnly ? 'Close' : 'Cancel'}
               </Button>
               {viewOnly && canUpdate && onSwitchToEdit && (
@@ -325,5 +375,13 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
         </Form>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+    </>
   );
 };
