@@ -41,12 +41,37 @@ export const ListView: React.FC<ListViewProps> = ({
   };
 
   const formatAddress = (address: string) => {
-    // Split by common address delimiters and clean up
+    // Split by common address delimiters
     const parts = address
       .split(/[,;]/)
       .map(part => part.trim())
       .filter(part => part.length > 0);
     
+    if (parts.length === 0) return [address];
+    
+    // Try to identify venue name vs street address
+    // Venue name is typically the first part that doesn't start with a number
+    // Street address typically starts with a number
+    const venueIndex = parts.findIndex(part => !/^\d/.test(part));
+    const addressIndex = parts.findIndex(part => /^\d/.test(part));
+    
+    if (venueIndex !== -1 && addressIndex !== -1 && venueIndex < addressIndex) {
+      // We have a venue name followed by a street address
+      const venueName = parts.slice(0, addressIndex).join(', ');
+      const streetAddress = parts.slice(addressIndex).join(', ');
+      return [venueName, streetAddress];
+    }
+    
+    // Fallback: if no clear pattern, split roughly in half
+    if (parts.length > 2) {
+      const midpoint = Math.ceil(parts.length / 2);
+      return [
+        parts.slice(0, midpoint).join(', '),
+        parts.slice(midpoint).join(', ')
+      ];
+    }
+    
+    // If only 1-2 parts, return as is
     return parts;
   };
 
