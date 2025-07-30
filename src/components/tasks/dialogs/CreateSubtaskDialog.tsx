@@ -5,10 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { format } from 'date-fns';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
-import { EditableDateCell } from '@/components/tasks/table/editable-cells/EditableDateCell';
 
 interface CreateSubtaskDialogProps {
   isOpen: boolean;
@@ -157,9 +157,31 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
 
             <div>
               <Label>Due Date</Label>
-              <EditableDateCell
-                value={formData.due_date}
-                onValueChange={(date) => setFormData({ ...formData, due_date: date })}
+              <Input
+                type="date"
+                value={formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : ''}
+                onChange={(e) => {
+                  const dateValue = e.target.value;
+                  if (dateValue) {
+                    // Create date object from input value with validation
+                    const date = new Date(dateValue + 'T00:00:00');
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    tomorrow.setHours(0, 0, 0, 0);
+                    
+                    if (date >= tomorrow) {
+                      setFormData({ ...formData, due_date: date });
+                    }
+                  } else {
+                    setFormData({ ...formData, due_date: null });
+                  }
+                }}
+                min={(() => {
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  return format(tomorrow, 'yyyy-MM-dd');
+                })()}
+                className="w-full"
               />
             </div>
           </div>
