@@ -477,7 +477,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Category:</span>
-                  {isEditing && canEditIncident ? (
+                  {isEditing && canAssign ? (
                     <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -499,7 +499,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {isEditing && canEditIncident ? (
+                  {isEditing && canAssign ? (
                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -521,7 +521,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {isEditing && canEditIncident ? (
+                  {isEditing && canAssign ? (
                     <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
@@ -543,7 +543,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Due Date:</span>
-                  {isEditing && canEditIncident ? (
+                  {isEditing && canAssign ? (
                     <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="h-8 text-left">
