@@ -58,6 +58,7 @@ interface EditBudgetItemDialogProps {
   item: BudgetTransaction;
   onSubmit: (id: string, updates: Partial<BudgetTransaction>) => void;
   viewOnly?: boolean;
+  onSwitchToEdit?: () => void;
 }
 
 export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
@@ -66,6 +67,7 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
   item,
   onSubmit,
   viewOnly = false,
+  onSwitchToEdit,
 }) => {
   const { canEdit: canUpdate } = useTablePermissions('budget');
   const isReadOnly = viewOnly || !canUpdate;
@@ -310,6 +312,11 @@ export const EditBudgetItemDialog: React.FC<EditBudgetItemDialogProps> = ({
               <Button variant="outline" onClick={() => onOpenChange(false)}>
                 {viewOnly ? 'Close' : 'Cancel'}
               </Button>
+              {viewOnly && canUpdate && onSwitchToEdit && (
+                <Button onClick={onSwitchToEdit}>
+                  Edit
+                </Button>
+              )}
               {!viewOnly && (
                 <Button type="submit" disabled={!canUpdate}>Update</Button>
               )}

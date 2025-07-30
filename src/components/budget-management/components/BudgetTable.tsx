@@ -180,10 +180,8 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             </TableCell>
             <TableCell className={getPaddingClass()}>
               <TableActionButtons
-                canView={canViewDetails}
                 canEdit={canUpdate}
                 canDelete={canDelete}
-                onView={() => onView(transaction)}
                 onEdit={() => onEdit(transaction)}
                 onDelete={() => onDelete(transaction.id)}
               />

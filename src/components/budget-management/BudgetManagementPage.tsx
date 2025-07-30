@@ -112,7 +112,17 @@ const BudgetManagementPage = () => {
 
       {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
       
-      {viewingItem && <EditBudgetItemDialog open={!!viewingItem} onOpenChange={() => setViewingItem(null)} item={viewingItem} onSubmit={updateTransaction} viewOnly />}
+      {viewingItem && <EditBudgetItemDialog 
+        open={!!viewingItem} 
+        onOpenChange={() => setViewingItem(null)} 
+        item={viewingItem} 
+        onSubmit={updateTransaction} 
+        viewOnly 
+        onSwitchToEdit={() => {
+          setEditingItem(viewingItem);
+          setViewingItem(null);
+        }}
+      />}
     </div>;
 };
 export default BudgetManagementPage;

@@ -123,22 +123,6 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 pt-2">
-               {canViewDetails && (
-                 <Tooltip>
-                   <TooltipTrigger asChild>
-                     <Button
-                       variant="outline"
-                       size="sm"
-                       onClick={() => onView(transaction)}
-                     >
-                       <Eye className="w-4 h-4" />
-                     </Button>
-                   </TooltipTrigger>
-                   <TooltipContent>
-                     <p>View transaction</p>
-                   </TooltipContent>
-                 </Tooltip>
-               )}
               {canUpdate && (
                 <Tooltip>
                   <TooltipTrigger asChild>
