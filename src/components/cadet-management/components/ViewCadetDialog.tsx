@@ -16,37 +16,33 @@ import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
 import { useAuth } from '@/contexts/AuthContext';
 import { JROTCProgram } from '@/utils/jrotcRanks';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 interface ViewCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   profile: Profile | null;
   onEditProfile?: (profile: Profile) => void;
 }
-
-export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: ViewCadetDialogProps) => {
-  const { jobRole } = useJobRole(profile?.id);
-  const { userProfile } = useAuth();
-  const { canUpdate } = useCadetPermissions();
-
+export const ViewCadetDialog = ({
+  open,
+  onOpenChange,
+  profile,
+  onEditProfile
+}: ViewCadetDialogProps) => {
+  const {
+    jobRole
+  } = useJobRole(profile?.id);
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canUpdate
+  } = useCadetPermissions();
   if (!profile) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle>Cadet Profile</DialogTitle>
-          {canUpdate && onEditProfile && (
-            <Button 
-              variant="outline" 
-              size="sm" 
-              onClick={() => onEditProfile(profile)}
-              className="flex items-center gap-2"
-            >
-              <Edit className="h-4 w-4" />
-              Edit
-            </Button>
-          )}
+          {canUpdate && onEditProfile}
         </DialogHeader>
         
         <div className="flex-1 overflow-hidden flex flex-col">
@@ -69,13 +65,9 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: 
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Grade</p>
-                  {profile.grade ? (
-                    <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
+                  {profile.grade ? <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
                       {profile.grade}
-                    </Badge>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">-</p>
-                  )}
+                    </Badge> : <p className="text-sm text-muted-foreground">-</p>}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Rank</p>
@@ -89,13 +81,9 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: 
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Cadet Year</p>
-                  {profile.cadet_year ? (
-                    <Badge variant="outline" className="text-xs">
+                  {profile.cadet_year ? <Badge variant="outline" className="text-xs">
                       {profile.cadet_year}
-                    </Badge>
-                  ) : (
-                    <p className="text-sm text-muted-foreground">-</p>
-                  )}
+                    </Badge> : <p className="text-sm text-muted-foreground">-</p>}
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Job Title</p>
@@ -148,18 +136,6 @@ export const ViewCadetDialog = ({ open, onOpenChange, profile, onEditProfile }: 
             </Tabs>
           </div>
         </div>
-        
-        <div className="flex justify-end gap-2 pt-4 border-t">
-          <Button variant="outline" onClick={() => onOpenChange(false)}>
-            Close
-          </Button>
-          {canUpdate && onEditProfile && (
-            <Button onClick={() => onEditProfile(profile)}>
-              Edit
-            </Button>
-          )}
-        </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
