@@ -15,7 +15,7 @@ const LandingPage = () => {
     description: "Create, assign, and monitor tasks with automated progress tracking and deadline management.",
     href: "/products/task-management",
     features: ["Assignment creation", "Progress tracking", "Deadline monitoring", "Automated reminders"]
-  } {
+  }, {
     icon: UserCheck,
     title: "Chain of Command & Team Management",
     description: "Organize units, define leadership structures, and manage team communications effectively.",
