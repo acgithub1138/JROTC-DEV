@@ -64,7 +64,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Add</p>
+              <p>Add Subtask</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -96,7 +96,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Edit</p>
+              <p>Edit Task</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
@@ -128,7 +128,7 @@ export const TableActionButtons: React.FC<TableActionButtonsProps> = ({
               </Button>
             </TooltipTrigger>
             <TooltipContent>
-              <p>Cancel</p>
+              <p>Cancel Task</p>
             </TooltipContent>
           </Tooltip>
         </TooltipProvider>
