@@ -58,13 +58,14 @@ export const ConnectionEditModal = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-2xl">
         <DialogHeader>
           <DialogTitle>Edit {connectionTypeLabel} Connection</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-6">
-          <div className="space-y-4">
+        <div className="flex gap-6">
+          {/* Controls - 1/3 width */}
+          <div className="w-1/3 space-y-4">
             <div>
               <h4 className="font-semibold text-sm mb-2">
                 To: {targetJob.role} {targetJob.cadet ? `(${targetJob.cadet.last_name}, ${targetJob.cadet.first_name})` : '(Unassigned)'}
@@ -102,14 +103,71 @@ export const ConnectionEditModal = ({
             </div>
           </div>
 
-          <div className="flex justify-end space-x-2">
-            <Button variant="outline" onClick={onClose}>
-              Cancel
-            </Button>
-            <Button onClick={handleSave}>
-              Save Changes
-            </Button>
+          {/* Visual Preview - 2/3 width */}
+          <div className="w-2/3 relative bg-muted/20 rounded-lg p-4 min-h-[200px]">
+            <div className="relative h-full flex items-center justify-between">
+              {/* Source Job Card */}
+              <div className="relative">
+                <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
+                  <div className="text-xs font-medium truncate">{sourceJob.role}</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {sourceJob.cadet ? `${sourceJob.cadet.last_name}` : 'Unassigned'}
+                  </div>
+                </div>
+                {/* Source Handle Indicator */}
+                <div 
+                  className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${
+                    sourceHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
+                    sourceHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
+                    sourceHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
+                    '-right-1 top-1/2 -translate-y-1/2'
+                  }`}
+                />
+              </div>
+
+              {/* Connection Line */}
+              <div className="flex-1 mx-4 relative">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full h-0.5 bg-primary/60 relative">
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-2 h-2 bg-primary rotate-45 transform origin-center"/>
+                  </div>
+                </div>
+                <div className="text-center">
+                  <span className="bg-background px-2 py-1 text-xs text-muted-foreground rounded">
+                    {connectionTypeLabel}
+                  </span>
+                </div>
+              </div>
+
+              {/* Target Job Card */}
+              <div className="relative">
+                <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
+                  <div className="text-xs font-medium truncate">{targetJob.role}</div>
+                  <div className="text-xs text-muted-foreground truncate">
+                    {targetJob.cadet ? `${targetJob.cadet.last_name}` : 'Unassigned'}
+                  </div>
+                </div>
+                {/* Target Handle Indicator */}
+                <div 
+                  className={`absolute w-2 h-2 bg-primary rounded-full transition-all duration-200 ${
+                    targetHandle === 'top' ? '-top-1 left-1/2 -translate-x-1/2' :
+                    targetHandle === 'bottom' ? '-bottom-1 left-1/2 -translate-x-1/2' :
+                    targetHandle === 'left' ? '-left-1 top-1/2 -translate-y-1/2' :
+                    '-right-1 top-1/2 -translate-y-1/2'
+                  }`}
+                />
+              </div>
+            </div>
           </div>
+        </div>
+
+        <div className="flex justify-end space-x-2 mt-6">
+          <Button variant="outline" onClick={onClose}>
+            Cancel
+          </Button>
+          <Button onClick={handleSave}>
+            Save Changes
+          </Button>
         </div>
       </DialogContent>
     </Dialog>
