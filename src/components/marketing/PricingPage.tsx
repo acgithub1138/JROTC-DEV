@@ -14,20 +14,11 @@ const PricingPage = () => {
     popular: false,
     cta: "Get Started"
   }, {
-    name: "Competition Tracking",
-    price: "$2,250",
-    period: "per year",
-    description: "Most popular for JORTC programs that participate in competitions",
-    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition Tracking", "Competition Analytics"],
-    notIncluded: [],
-    popular: true,
-    cta: "Get Started"
-  }, {
-    name: "Competition Management",
+    name: "Competition",
     price: "$2,500",
     period: "per year",
-    description: "Most popular for JORTC programs that host competitions",
-    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition Tracking", "Competition Analytics", "Competition Event Management (Coming soon...)"],
+    description: "Most popular for competitive programs",
+    features: ["Unlimited cadets", "Full cadet management", "Task assignment", "Email communications", "Budget & inventory tracking", "Events Calendar", "Competition management", "Competition Analytics", "Competition & Event organization (Coming soon...)"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
@@ -60,7 +51,7 @@ const PricingPage = () => {
           </div>
 
           {/* Pricing Cards */}
-          <div className="grid md:grid-cols-2 gap-8 max-w-4xl mx-auto">
+          <div className="grid md:grid-cols-3 gap-8 max-w-4xl mx-auto">
             {plans.map((plan, index) => <Card key={index} className={`relative ${plan.popular ? 'border-primary shadow-lg scale-105' : 'border-border'}`}>
                 {plan.popular && <Badge className="absolute -top-3 left-1/2 transform -translate-x-1/2 bg-primary text-primary-foreground">
                     Most Popular
