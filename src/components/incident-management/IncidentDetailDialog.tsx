@@ -471,9 +471,15 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   </Button>
                 </>
               )}
-              {!isEditing && canEditIncident && (
+              {!isEditing && (canUpdate || (canUpdateAssigned && isAssignedToIncident)) && (
                 <Button size="sm" onClick={handleEdit}>
                   Edit
+                </Button>
+              )}
+              {!isEditing && (
+                <Button size="sm" variant="outline" onClick={() => onClose()}>
+                  <X className="w-4 h-4 mr-2" />
+                  Close
                 </Button>
               )}
               {isEditing && canEditIncident && viewOnly && (
