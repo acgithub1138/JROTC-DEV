@@ -89,14 +89,26 @@ const ViewIncidentDialog: React.FC<ViewIncidentDialogProps> = ({
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-xl flex items-center">
-            {incident.incident_number && (
-              <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-mono mr-3">
-                #{incident.incident_number}
-              </span>
-            )}
-            {incident.title}
-          </DialogTitle>
+          <div className="flex items-center justify-between">
+            <DialogTitle className="text-xl flex items-center">
+              {incident.incident_number && (
+                <span className="bg-blue-100 text-blue-800 px-2 py-1 rounded text-sm font-mono mr-3">
+                  #{incident.incident_number}
+                </span>
+              )}
+              {incident.title}
+            </DialogTitle>
+            <div className="flex gap-2">
+              {canUpdate && (
+                <Button onClick={handleEdit}>
+                  Edit
+                </Button>
+              )}
+              <Button variant="outline" onClick={onClose}>
+                Close
+              </Button>
+            </div>
+          </div>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -191,19 +203,6 @@ const ViewIncidentDialog: React.FC<ViewIncidentDialogProps> = ({
             onAddComment={() => {}} // Read-only mode
           />
         </div>
-
-        <DialogFooter className="flex-col sm:flex-row gap-2">
-          <div className="flex gap-2 justify-end">
-            {canUpdate && (
-              <Button onClick={handleEdit}>
-                Edit
-              </Button>
-            )}
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
-          </div>
-        </DialogFooter>
       </DialogContent>
     </Dialog>
   );
