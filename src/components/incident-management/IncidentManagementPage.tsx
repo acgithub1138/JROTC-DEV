@@ -9,7 +9,6 @@ import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
-import ViewIncidentDialog from "./components/ViewIncidentDialog";
 import { AccessDeniedDialog } from "./AccessDeniedDialog";
 import IncidentTable from "./IncidentTable";
 import { BulkEditToolbar } from "./BulkEditToolbar";
@@ -22,8 +21,8 @@ const IncidentManagementPage: React.FC = () => {
   
   const [selectedIncident, setSelectedIncident] = useState<Incident | null>(null);
   const [showCreateForm, setShowCreateForm] = useState(false);
-  const [showEditDialog, setShowEditDialog] = useState(false);
-  const [showViewDialog, setShowViewDialog] = useState(false);
+  const [showIncidentDialog, setShowIncidentDialog] = useState(false);
+  const [incidentDialogMode, setIncidentDialogMode] = useState<'view' | 'edit'>('view');
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [searchValue, setSearchValue] = useState("");
   const [activeTab, setActiveTab] = useState("my-incidents");
@@ -84,7 +83,8 @@ const IncidentManagementPage: React.FC = () => {
     // Check if user has update permissions
     if (canUpdate || canUpdateAssigned) {
       setSelectedIncident(incident);
-      setShowEditDialog(true);
+      setIncidentDialogMode('edit');
+      setShowIncidentDialog(true);
     } else {
       setShowAccessDenied(true);
     }
@@ -93,7 +93,8 @@ const IncidentManagementPage: React.FC = () => {
   const handleIncidentView = (incident: Incident) => {
     // View mode - always accessible if user has view permissions
     setSelectedIncident(incident);
-    setShowViewDialog(true);
+    setIncidentDialogMode('view');
+    setShowIncidentDialog(true);
   };
 
   const handleCreateIncident = () => {
@@ -303,32 +304,17 @@ const IncidentManagementPage: React.FC = () => {
         />
       )}
 
-      {selectedIncident && showEditDialog && (
+      {selectedIncident && showIncidentDialog && (
         <IncidentDetailDialog
           incident={selectedIncident}
-          isOpen={showEditDialog}
+          isOpen={showIncidentDialog}
           onClose={() => {
-            setShowEditDialog(false);
+            setShowIncidentDialog(false);
             setSelectedIncident(null);
           }}
           onEdit={() => {}} // Not needed since the dialog handles updates internally
-          startInEditMode={true}
-        />
-      )}
-
-      {selectedIncident && showViewDialog && (
-        <ViewIncidentDialog
-          incident={selectedIncident}
-          isOpen={showViewDialog}
-          onClose={() => {
-            setShowViewDialog(false);
-            setSelectedIncident(null);
-          }}
-          onEdit={(incident) => {
-            setSelectedIncident(incident);
-            setShowEditDialog(true);
-            setShowViewDialog(false);
-          }}
+          startInEditMode={incidentDialogMode === 'edit'}
+          viewOnly={incidentDialogMode === 'view'}
         />
       )}
 

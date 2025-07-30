@@ -48,6 +48,7 @@ interface IncidentDetailDialogProps {
   onEdit: (incident: Incident) => void;
   readOnly?: boolean;
   startInEditMode?: boolean;
+  viewOnly?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -102,6 +103,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   onEdit,
   readOnly = false,
   startInEditMode = false,
+  viewOnly = false,
 }) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
@@ -113,7 +115,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
-  const [isEditing, setIsEditing] = useState(startInEditMode || !readOnly); // Start in edit mode if requested or unless read-only
+  const [isEditing, setIsEditing] = useState(!viewOnly && (startInEditMode || !readOnly)); // Start in view mode if viewOnly
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
@@ -137,7 +139,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
 
   // Determine if user can edit this incident
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
-  const canEditIncident = !readOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
+  const canEditIncident = !readOnly && !viewOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -378,6 +380,19 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     setIsEditing(true);
   };
 
+  const handleViewMode = () => {
+    setIsEditing(false);
+    setEditData({
+      title: currentIncident.title || '',
+      description: currentIncident.description || '',
+      status: currentIncident.status || 'open',
+      priority: currentIncident.priority || 'medium',
+      category: currentIncident.category || 'issue',
+      assigned_to_admin: currentIncident.assigned_to_admin || '',
+      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null,
+    });
+  };
+
   const handleClose = () => {
     // Check if there are unsaved changes when in edit mode
     if (isEditing && hasChanges()) {
@@ -456,9 +471,14 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   </Button>
                 </>
               )}
-              {!isEditing && !readOnly && canEditIncident && (
+              {!isEditing && canEditIncident && (
                 <Button size="sm" onClick={handleEdit}>
                   Edit
+                </Button>
+              )}
+              {isEditing && canEditIncident && viewOnly && (
+                <Button size="sm" variant="outline" onClick={handleViewMode}>
+                  View Mode
                 </Button>
               )}
             </div>
