@@ -15,13 +15,7 @@ const LandingPage = () => {
     description: "Create, assign, and monitor tasks with automated progress tracking and deadline management.",
     href: "/products/task-management",
     features: ["Assignment creation", "Progress tracking", "Deadline monitoring", "Automated reminders"]
-  }, {
-    icon: Trophy,
-    title: "Competition Management",
-    description: "Manage scoring, track performance analytics, and celebrate achievements.",
-    href: "/products/competition-management",
-    features: ["Scoring system", "Performance analytics", "Achievement tracking"]
-  }, {
+  } {
     icon: UserCheck,
     title: "Chain of Command & Team Management",
     description: "Organize units, define leadership structures, and manage team communications effectively.",
@@ -51,7 +45,19 @@ const LandingPage = () => {
     description: "Automated communications, template management, and targeted messaging for all stakeholders.",
     href: "/products/email-management",
     features: ["Automated emails", "Template library", "Targeted messaging", "Communication tracking"]
-  }];
+  }, {
+    icon: Trophy,
+    title: "Competition Tracking",
+    description: "Manage scoring, track performance analytics, and celebrate achievements.",
+    href: "/products/competition-management",
+    features: ["Scoring system", "Performance analytics", "Achievement tracking"]
+  }, {
+    icon: Trophy,
+    title: "Competition Event Management (Coming Soon...)",
+    description: "Manage your entire competition event with resource management, participant management and real time scoring!",
+    href: "/products/competition-management",
+    features: ["Event Planning", "Participant Management", "Real-Time Scoring"]
+  },];
   const testimonials = [
     //    {
     //      name: "Colonel Sarah Martinez",
