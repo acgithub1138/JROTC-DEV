@@ -22,7 +22,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   onDelete,
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [pendingClose, setPendingClose] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
 
   const handleSubmit = async (eventData: any) => {
     await onSubmit(eventData);
@@ -36,31 +36,31 @@ export const EventDialog: React.FC<EventDialogProps> = ({
   };
 
   const handleOpenChange = (newOpen: boolean) => {
-    if (!newOpen) {
-      // We'll let the EventForm handle this through onCancel
+    if (!newOpen && hasUnsavedChanges) {
+      // User clicked outside or pressed ESC with unsaved changes
+      setShowUnsavedDialog(true);
       return;
     }
     onOpenChange(newOpen);
   };
 
-  const handleCancel = (hasUnsavedChanges: boolean) => {
-    if (hasUnsavedChanges) {
-      setShowUnsavedDialog(true);
-      setPendingClose(true);
-    } else {
-      onOpenChange(false);
-    }
+  const handleCancel = () => {
+    // Cancel button should close immediately without checking for unsaved changes
+    onOpenChange(false);
+  };
+
+  const handleUnsavedChangesUpdate = (hasChanges: boolean) => {
+    setHasUnsavedChanges(hasChanges);
   };
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    setPendingClose(false);
+    setHasUnsavedChanges(false);
     onOpenChange(false);
   };
 
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
-    setPendingClose(false);
   };
 
   return (
@@ -78,6 +78,7 @@ export const EventDialog: React.FC<EventDialogProps> = ({
             onSubmit={handleSubmit}
             onCancel={handleCancel}
             onDelete={event && onDelete ? handleDelete : undefined}
+            onUnsavedChangesUpdate={handleUnsavedChangesUpdate}
           />
           <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
             Location search powered by{' '}

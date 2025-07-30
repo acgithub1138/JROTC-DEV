@@ -24,8 +24,9 @@ interface EventFormProps {
   event?: Event | null;
   selectedDate?: Date | null;
   onSubmit: (eventData: any) => Promise<void>;
-  onCancel: (hasUnsavedChanges: boolean) => void;
+  onCancel: () => void;
   onDelete?: () => Promise<void>;
+  onUnsavedChangesUpdate?: (hasUnsavedChanges: boolean) => void;
 }
 
 export const EventForm: React.FC<EventFormProps> = ({
@@ -34,6 +35,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   onSubmit,
   onCancel,
   onDelete,
+  onUnsavedChangesUpdate,
 }) => {
   const { canUpdate, canDelete, canCreate } = useCalendarPermissions();
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
@@ -80,8 +82,10 @@ export const EventForm: React.FC<EventFormProps> = ({
     enabled: true,
   });
 
-  // Debug logging
-  console.log('EventForm unsaved changes:', { hasUnsavedChanges, initialFormData, formData });
+  // Report unsaved changes to parent
+  React.useEffect(() => {
+    onUnsavedChangesUpdate?.(hasUnsavedChanges);
+  }, [hasUnsavedChanges, onUnsavedChangesUpdate]);
 
   const canEdit = event ? canUpdate : canCreate;
   const canDeleteEvent = event ? canDelete : false;
@@ -211,7 +215,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   };
 
   const handleCancel = () => {
-    onCancel(hasUnsavedChanges);
+    onCancel();
   };
 
 
