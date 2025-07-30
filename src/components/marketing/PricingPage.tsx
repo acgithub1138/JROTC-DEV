@@ -18,7 +18,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Most popular for competitive programs",
-    features: ["All Basic features", "Competition Tracking", "Competition Analytics"],
+    features: ["All Basic features", "Competition Tracking", "Score Sheet Templates", "Competition Reporting"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
