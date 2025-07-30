@@ -15,6 +15,8 @@ import { useCalendarPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AddressLookupField } from './AddressLookupField';
 import { RecurrenceSettings } from './RecurrenceSettings';
 import { RecurrenceRule } from '@/utils/recurrence';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { convertToSchoolTimezone, convertFromSchoolTimezone, formatInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface EventFormProps {
   event?: Event | null;
@@ -32,6 +34,7 @@ export const EventForm: React.FC<EventFormProps> = ({
   onDelete,
 }) => {
   const { canUpdate, canDelete, canCreate } = useCalendarPermissions();
+  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -60,9 +63,10 @@ export const EventForm: React.FC<EventFormProps> = ({
   const canDeleteEvent = event ? canDelete : false;
 
   useEffect(() => {
-    if (event) {
-      const startDate = new Date(event.start_date);
-      const endDate = event.end_date ? new Date(event.end_date) : null;
+    if (event && !timezoneLoading) {
+      // Convert UTC event dates to school timezone for display
+      const startDate = convertToSchoolTimezone(event.start_date, timezone);
+      const endDate = event.end_date ? convertToSchoolTimezone(event.end_date, timezone) : null;
       
       setFormData({
         title: event.title,
@@ -83,15 +87,17 @@ export const EventForm: React.FC<EventFormProps> = ({
       if (event.recurrence_rule) {
         setRecurrenceRule(event.recurrence_rule);
       }
-    } else if (selectedDate) {
-      const dateStr = format(selectedDate, 'yyyy-MM-dd');
+    } else if (selectedDate && !timezoneLoading) {
+      // Convert selected date to school timezone for display
+      const schoolDate = convertToSchoolTimezone(selectedDate, timezone);
+      const dateStr = format(schoolDate, 'yyyy-MM-dd');
       setFormData(prev => ({
         ...prev,
         start_date: dateStr,
         end_date: dateStr,
       }));
     }
-  }, [event, selectedDate]);
+  }, [event, selectedDate, timezone, timezoneLoading]);
 
   const validateDateTime = () => {
     if (!formData.start_date) return { isValid: true, error: '' };
@@ -125,8 +131,13 @@ export const EventForm: React.FC<EventFormProps> = ({
     setIsSubmitting(true);
 
     try {
-      const startDateTime = `${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`;
-      const endDateTime = formData.end_date ? `${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00` : null;
+      // Create dates in school timezone, then convert to UTC for storage
+      const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
+      const endDateTime = formData.end_date ? new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`) : null;
+      
+      // Convert from school timezone to UTC
+      const startDateUTC = convertFromSchoolTimezone(startDateTime, timezone);
+      const endDateUTC = endDateTime ? convertFromSchoolTimezone(endDateTime, timezone) : null;
       
       const eventData = {
         title: formData.title,
@@ -134,12 +145,12 @@ export const EventForm: React.FC<EventFormProps> = ({
         location: formData.location,
         event_type: formData.event_type || 'other', // Ensure we have a valid enum value
         is_all_day: formData.is_all_day,
-        start_date: new Date(startDateTime).toISOString(),
-        end_date: endDateTime ? new Date(endDateTime).toISOString() : null,
+        start_date: startDateUTC.toISOString(),
+        end_date: endDateUTC ? endDateUTC.toISOString() : null,
         is_recurring: isRecurring,
         recurrence_rule: isRecurring ? recurrenceRule : null,
         recurrence_end_date: isRecurring && recurrenceRule.endType === 'date' && recurrenceRule.endDate 
-          ? new Date(recurrenceRule.endDate).toISOString() 
+          ? convertFromSchoolTimezone(new Date(recurrenceRule.endDate), timezone).toISOString() 
           : null,
       };
       

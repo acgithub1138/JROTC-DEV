@@ -2040,6 +2040,7 @@ export type Database = {
           subscription_start: string | null
           subtask_number: number | null
           task_number: number | null
+          timezone: string | null
           updated_at: string
           zip_code: string | null
         }
@@ -2061,6 +2062,7 @@ export type Database = {
           subscription_start?: string | null
           subtask_number?: number | null
           task_number?: number | null
+          timezone?: string | null
           updated_at?: string
           zip_code?: string | null
         }
@@ -2082,6 +2084,7 @@ export type Database = {
           subscription_start?: string | null
           subtask_number?: number | null
           task_number?: number | null
+          timezone?: string | null
           updated_at?: string
           zip_code?: string | null
         }

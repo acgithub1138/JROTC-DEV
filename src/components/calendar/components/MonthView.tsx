@@ -5,6 +5,8 @@ import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOf
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
 import { RotateCcw } from 'lucide-react';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { isSameDayInSchoolTimezone, formatInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface MonthViewProps {
   currentDate: Date;
@@ -32,6 +34,7 @@ export const MonthView: React.FC<MonthViewProps> = ({
   onDateClick,
   onDateDoubleClick,
 }) => {
+  const { timezone, isLoading } = useSchoolTimezone();
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   const calendarStart = startOfWeek(monthStart, { weekStartsOn: 0 });
@@ -41,8 +44,17 @@ export const MonthView: React.FC<MonthViewProps> = ({
   const weekDays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
 
   const getEventsForDate = (date: Date) => {
-    return events.filter(event => isSameDay(new Date(event.start_date), date));
+    if (isLoading) return [];
+    return events.filter(event => isSameDayInSchoolTimezone(event.start_date, date, timezone));
   };
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   return (
     <div className="bg-card rounded-lg border">
@@ -98,9 +110,9 @@ export const MonthView: React.FC<MonthViewProps> = ({
                      {event.is_recurring && (
                        <RotateCcw className="w-3 h-3 flex-shrink-0" />
                      )}
-                     <span className="truncate">
-                       {event.is_all_day ? event.title : `${format(new Date(event.start_date), 'HH:mm')} ${event.title}`}
-                     </span>
+                      <span className="truncate">
+                        {event.is_all_day ? event.title : `${formatInSchoolTimezone(event.start_date, 'HH:mm', timezone)} ${event.title}`}
+                      </span>
                    </div>
                 ))}
                 

@@ -5,6 +5,8 @@ import { format, startOfMonth, endOfMonth, isSameDay, startOfDay, addDays } from
 import { Event } from '../CalendarManagementPage';
 import { MapPin, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { getSchoolDateKey, formatInSchoolTimezone, isSameDayInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface AgendaViewProps {
   currentDate: Date;
@@ -28,6 +30,16 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
   events,
   onEventClick,
 }) => {
+  const { timezone, isLoading } = useSchoolTimezone();
+  
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+  
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);
   
@@ -39,9 +51,9 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
     })
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
 
-  // Group events by date
+  // Group events by date using school timezone
   const groupedEvents = monthEvents.reduce((acc, event) => {
-    const dateKey = format(new Date(event.start_date), 'yyyy-MM-dd');
+    const dateKey = getSchoolDateKey(event.start_date, timezone);
     if (!acc[dateKey]) {
       acc[dateKey] = [];
     }
@@ -49,7 +61,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
     return acc;
   }, {} as Record<string, Event[]>);
 
-  const today = startOfDay(new Date());
+  const today = new Date();
 
   return (
     <div className="space-y-4">
@@ -63,7 +75,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
       ) : (
         Object.entries(groupedEvents).map(([dateKey, dayEvents]) => {
           const eventDate = new Date(dateKey);
-          const isToday = isSameDay(eventDate, today);
+          const isToday = isSameDayInSchoolTimezone(dateKey, today, timezone);
           const isPast = eventDate < today;
           
           return (
@@ -78,7 +90,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
                   isToday && "text-primary",
                   isPast && !isToday && "text-muted-foreground"
                 )}>
-                  {format(eventDate, 'EEEE, MMMM d, yyyy')}
+                  {formatInSchoolTimezone(dateKey, 'EEEE, MMMM d, yyyy', timezone)}
                   {isToday && (
                     <Badge variant="outline" className="ml-2 text-primary border-primary">
                       Today
@@ -119,16 +131,16 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
                           <div className="flex items-center gap-4 text-sm text-muted-foreground mb-2">
                             <div className="flex items-center gap-1">
                               <Clock className="w-4 h-4" />
-                              {event.is_all_day ? (
-                                'All day'
-                              ) : (
-                                <>
-                                   {format(new Date(event.start_date), 'HH:mm')}
-                                   {event.end_date && (
-                                     <span> - {format(new Date(event.end_date), 'HH:mm')}</span>
-                                   )}
-                                </>
-                              )}
+                               {event.is_all_day ? (
+                                 'All day'
+                               ) : (
+                                 <>
+                                    {formatInSchoolTimezone(event.start_date, 'HH:mm', timezone)}
+                                    {event.end_date && (
+                                      <span> - {formatInSchoolTimezone(event.end_date, 'HH:mm', timezone)}</span>
+                                    )}
+                                 </>
+                               )}
                             </div>
                             
                             {event.location && (
