@@ -42,13 +42,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
   const [viewType, setViewType] = useState<CalendarViewType>('month');
   const isMobile = useIsMobile();
 
-  // Mobile view - simplified agenda view
+  const handleDateSelect = (date: Date) => {
+    setCurrentDate(date);
+    onDateSelect(date);
+  };
+
+  // Mobile view - simplified month view
   if (isMobile) {
     return (
       <div className="space-y-4">
         <CalendarToolbar
           currentDate={currentDate}
-          viewType="agenda"
+          viewType="month"
           onDateChange={setCurrentDate}
           onViewChange={() => {}} // No view switching on mobile
           onCreateEvent={onCreateEvent}
@@ -57,19 +62,17 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
           readOnly={readOnly}
         />
         
-        <AgendaView
+        <MonthView
           currentDate={currentDate}
           events={events}
           onEventClick={onEventEdit || onEventView}
+          onDateClick={handleDateSelect}
+          onDateDoubleClick={readOnly ? undefined : onDateDoubleClick}
         />
       </div>
     );
   }
 
-  const handleDateSelect = (date: Date) => {
-    setCurrentDate(date);
-    onDateSelect(date);
-  };
 
   const handleTimeSlotClick = (date: Date, hour: number) => {
     if (readOnly || !onCreateEvent) return;
@@ -91,7 +94,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
         setCurrentDate(startOfWeek(currentDate, { weekStartsOn: 0 }));
         break;
       case 'month':
-      case 'agenda':
         setCurrentDate(startOfMonth(currentDate));
         break;
     }
@@ -144,14 +146,6 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
             events={events}
             onEventClick={onEventEdit || onEventView}
             onTimeSlotClick={readOnly ? undefined : handleTimeSlotClick}
-          />
-        )}
-        
-        {viewType === 'agenda' && (
-          <AgendaView
-            currentDate={currentDate}
-            events={events}
-            onEventClick={onEventEdit || onEventView}
           />
         )}
       </div>

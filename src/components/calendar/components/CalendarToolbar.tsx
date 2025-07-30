@@ -5,7 +5,7 @@ import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucid
 import { format, addDays, addWeeks, addMonths, startOfWeek, startOfMonth, startOfDay } from 'date-fns';
 import { useEventTypes } from '../hooks/useEventTypes';
 
-export type CalendarViewType = 'month' | 'week' | 'day' | 'agenda';
+export type CalendarViewType = 'month' | 'week' | 'day';
 
 interface CalendarToolbarProps {
   currentDate: Date;
@@ -38,7 +38,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         onDateChange(addWeeks(currentDate, -1));
         break;
       case 'month':
-      case 'agenda':
         onDateChange(addMonths(currentDate, -1));
         break;
     }
@@ -53,7 +52,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         onDateChange(addWeeks(currentDate, 1));
         break;
       case 'month':
-      case 'agenda':
         onDateChange(addMonths(currentDate, 1));
         break;
     }
@@ -69,7 +67,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         onDateChange(startOfWeek(today, { weekStartsOn: 0 }));
         break;
       case 'month':
-      case 'agenda':
         onDateChange(startOfMonth(today));
         break;
     }
@@ -84,8 +81,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
         const weekEnd = addDays(weekStart, 6);
         return `${format(weekStart, 'MMM d')} - ${format(weekEnd, 'MMM d, yyyy')}`;
       case 'month':
-        return format(currentDate, 'MMMM yyyy');
-      case 'agenda':
         return format(currentDate, 'MMMM yyyy');
       default:
         return format(currentDate, 'MMMM yyyy');
@@ -104,7 +99,6 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
               <SelectItem value="month">Month</SelectItem>
               <SelectItem value="week">Week</SelectItem>
               <SelectItem value="day">Day</SelectItem>
-              <SelectItem value="agenda">Agenda</SelectItem>
             </SelectContent>
           </Select>
         </div>
