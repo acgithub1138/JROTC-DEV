@@ -1,12 +1,13 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { RefreshCw, RotateCcw, Maximize, Minimize, Download, Grid3X3 } from 'lucide-react';
+import { RefreshCw, RotateCcw, Maximize, Minimize, Download, Grid3X3, Save } from 'lucide-react';
 interface JobBoardToolbarProps {
   onRefresh?: () => void;
   onResetLayout: () => void;
   onToggleFullscreen: () => void;
   onExport: () => void;
+  onSave: () => void;
   isResetting: boolean;
   isFullscreen: boolean;
   snapToGrid: boolean;
@@ -17,6 +18,7 @@ export const JobBoardToolbar = ({
   onResetLayout,
   onToggleFullscreen,
   onExport,
+  onSave,
   isResetting,
   isFullscreen,
   snapToGrid,
@@ -37,7 +39,9 @@ export const JobBoardToolbar = ({
         
         <Tooltip>
           <TooltipTrigger asChild>
-            
+            <Button variant="outline" size="sm" onClick={onResetLayout} disabled={isResetting}>
+              <RotateCcw className="w-4 h-4" />
+            </Button>
           </TooltipTrigger>
           <TooltipContent>
             <p>Reset layout</p>
@@ -63,6 +67,17 @@ export const JobBoardToolbar = ({
           </TooltipTrigger>
           <TooltipContent>
             <p>{isFullscreen ? 'Exit fullscreen' : 'Enter fullscreen'}</p>
+          </TooltipContent>
+        </Tooltip>
+        
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="sm" onClick={onSave}>
+              <Save className="w-4 h-4" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Save current layout</p>
           </TooltipContent>
         </Tooltip>
         

@@ -25,7 +25,7 @@ const nodeTypes = {
 };
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
-  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
+  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting, savePosition } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -91,6 +91,15 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
 
   const handleExport = () => {
     setShowExportModal(true);
+  };
+
+  const handleSave = () => {
+    // Save all current node positions
+    nodes.forEach(node => {
+      if (node.position) {
+        savePosition(node.id, node.position);
+      }
+    });
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
@@ -190,6 +199,7 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
         onResetLayout={resetLayout}
         onToggleFullscreen={handleToggleFullscreen}
         onExport={handleExport}
+        onSave={handleSave}
         isResetting={isResetting}
         isFullscreen={isFullscreen}
         snapToGrid={snapToGrid}
