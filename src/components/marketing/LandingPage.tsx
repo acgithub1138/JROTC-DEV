@@ -57,7 +57,7 @@ const LandingPage = () => {
     description: "Manage your entire competition event with resource management, participant management and real time scoring!",
     href: "/products/competition-management",
     features: ["Event Planning", "Participant Management", "Real-Time Scoring"]
-  },];
+  }];
   const testimonials = [
     //    {
     //      name: "Colonel Sarah Martinez",
