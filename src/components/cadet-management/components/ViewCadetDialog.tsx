@@ -40,6 +40,9 @@ export const ViewCadetDialog = ({
   } = useCadetPermissions();
 
   const handleEdit = () => {
+    if (onEditProfile && profile) {
+      onEditProfile(profile);
+    }
     setIsEditMode(true);
   };
 
