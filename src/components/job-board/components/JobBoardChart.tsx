@@ -31,6 +31,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout();
   const [isFullscreen, setIsFullscreen] = useState(false);
   
+  // Debug logging for permissions
+  console.log('JobBoard permissions:', { canAssign, readOnly });
+  
   // Chart is read-only if explicitly set or user doesn't have assign permission
   const isChartReadOnly = readOnly || !canAssign;
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
