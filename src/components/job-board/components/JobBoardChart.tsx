@@ -1,5 +1,6 @@
 
 import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import { useToast } from '@/hooks/use-toast';
 import { ReactFlow, ReactFlowProvider, Background, Controls, useReactFlow, ConnectionMode, Edge } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
 import { JobBoardWithCadet } from '../types';
@@ -26,6 +27,7 @@ const nodeTypes = {
 
 const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: JobBoardChartProps) => {
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting, savePosition } = useJobBoardLayout();
+  const { toast } = useToast();
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -93,14 +95,34 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
     setShowExportModal(true);
   };
 
-  const handleSave = () => {
-    // Save all current node positions
+  const handleSave = useCallback(() => {
+    // Capture current positions to avoid any movement during save
+    const currentPositions = new Map();
     nodes.forEach(node => {
       if (node.position) {
-        savePosition(node.id, node.position);
+        currentPositions.set(node.id, { x: node.position.x, y: node.position.y });
       }
     });
-  };
+
+    // Save all positions using a timeout to batch the saves
+    let savedCount = 0;
+    const totalToSave = currentPositions.size;
+    
+    currentPositions.forEach((position, jobId) => {
+      setTimeout(() => {
+        savePosition(jobId, position);
+        savedCount++;
+        
+        // Show toast when all positions are saved
+        if (savedCount === totalToSave) {
+          toast({
+            title: "Layout saved",
+            description: `Saved positions for ${totalToSave} cards`,
+          });
+        }
+      }, 0);
+    });
+  }, [nodes, savePosition, toast]);
 
   // Check if there are unsaved changes
   const hasUnsavedChanges = useMemo(() => {
