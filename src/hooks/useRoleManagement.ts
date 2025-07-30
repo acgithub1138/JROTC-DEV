@@ -108,7 +108,7 @@ export const useRoleManagement = () => {
           module_id: moduleId,
           action_id: actionId,
           enabled,
-        }, {
+        } as any, {
           onConflict: 'role_id,module_id,action_id'
         })
         .select();
@@ -159,7 +159,7 @@ export const useRoleManagement = () => {
               module_id: d.module_id,
               action_id: d.action_id,
               enabled: d.enabled,
-            }))
+            })) as any
           );
 
         if (insertError) throw insertError;

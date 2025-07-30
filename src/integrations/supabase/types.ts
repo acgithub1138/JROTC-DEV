@@ -1940,7 +1940,6 @@ export type Database = {
           enabled: boolean
           id: string
           module_id: string
-          role: Database["public"]["Enums"]["user_role"]
           role_id: string | null
           updated_at: string
         }
@@ -1950,7 +1949,6 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_id: string
-          role: Database["public"]["Enums"]["user_role"]
           role_id?: string | null
           updated_at?: string
         }
@@ -1960,7 +1958,6 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_id?: string
-          role?: Database["public"]["Enums"]["user_role"]
           role_id?: string | null
           updated_at?: string
         }
