@@ -108,28 +108,11 @@ const LoginPage = () => {
                 {isLoading ? "Signing In..." : "Sign In"}
               </Button>
             </form>
-            
-            <div className="text-center text-sm text-muted-foreground">
-              Don't have an account?{" "}
-              <Link to="/contact" className="text-primary hover:underline">
-                Contact us to get started
-              </Link>
-            </div>
           </CardContent>
         </Card>
 
         {/* Trial CTA */}
-        <Card className="mt-6 bg-primary/5 border-primary/20">
-          <CardContent className="pt-6 text-center">
-            <h3 className="font-semibold mb-2">New to JROTC CCC?</h3>
-            <p className="text-sm text-muted-foreground mb-4">
-              Contact our team to learn more about how we can transform your program management.
-            </p>
-            <Button variant="outline" asChild>
-              <Link to="/contact">Get Started</Link>
-            </Button>
-          </CardContent>
-        </Card>
+        
 
         {/* Features reminder */}
         
