@@ -15,7 +15,7 @@ const PricingPage = () => {
     cta: "Get Started"
   }, {
     name: "Competition Tracking",
-    price: "$2,500",
+    price: "$2,250",
     period: "per year",
     description: "Most popular for competitive programs",
     features: ["All Basic features", "Competition Tracking", "Score Sheet Templates", "Competition Reporting"],
