@@ -9,6 +9,7 @@ import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
 import IncidentForm from "./IncidentForm";
 import IncidentDetailDialog from "./IncidentDetailDialog";
+import ViewIncidentDialog from "./components/ViewIncidentDialog";
 import { AccessDeniedDialog } from "./AccessDeniedDialog";
 import IncidentTable from "./IncidentTable";
 import { BulkEditToolbar } from "./BulkEditToolbar";
@@ -315,15 +316,18 @@ const IncidentManagementPage: React.FC = () => {
       )}
 
       {selectedIncident && showViewDialog && (
-        <IncidentDetailDialog
+        <ViewIncidentDialog
           incident={selectedIncident}
           isOpen={showViewDialog}
           onClose={() => {
             setShowViewDialog(false);
             setSelectedIncident(null);
           }}
-          onEdit={() => {}} // Not needed for view-only mode
-          readOnly={true}
+          onEdit={(incident) => {
+            setSelectedIncident(incident);
+            setShowEditDialog(true);
+            setShowViewDialog(false);
+          }}
         />
       )}
 

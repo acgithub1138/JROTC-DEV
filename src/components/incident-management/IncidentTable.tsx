@@ -130,7 +130,18 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                   <span className="font-bold">{incident.incident_number}</span>
                 )}
               </TableCell>
-              <TableCell>{incident.title}</TableCell>
+              <TableCell>
+                {canView ? (
+                  <button
+                    onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}
+                    className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
+                  >
+                    {incident.title}
+                  </button>
+                ) : (
+                  incident.title
+                )}
+              </TableCell>
               <TableCell>
                 <Badge variant="secondary" className={getStatusBadgeClass(incident.status)}>
                   {incident.status.replace('_', ' ')}
@@ -161,18 +172,6 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
                   <TooltipProvider>
-                    {canView && (
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)}>
-                            <Eye className="h-3 w-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Incident</p>
-                        </TooltipContent>
-                      </Tooltip>
-                    )}
                     {canDelete && incident.status !== 'canceled' && (
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -186,7 +185,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                           </Button>
                         </TooltipTrigger>
                         <TooltipContent>
-                          <p>Cancle Incident</p>
+                          <p>Cancel Incident</p>
                         </TooltipContent>
                       </Tooltip>
                     )}
