@@ -323,7 +323,7 @@ const DashboardOverview = () => {
                       hour: event.is_all_day ? undefined : 'numeric',
                       minute: event.is_all_day ? undefined : '2-digit'
                     })} - {event.title}</p>
-                        <p className="text-muted-foreground capitalize text-sm">{event.event_type.replace('_', ' ')} • {event.location || 'No location'}</p>
+                        <p className="text-muted-foreground capitalize text-sm">{event.event_type.replace('_', ' ')} • {event.description || ''}</p>
                       </div>
                     </div>) : <div className="text-center py-8 text-muted-foreground">
                     <p className="text-sm">No upcoming events</p>
