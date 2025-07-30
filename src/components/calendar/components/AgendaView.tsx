@@ -6,7 +6,7 @@ import { Event } from '../CalendarManagementPage';
 import { MapPin, Clock } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { getSchoolDateKey, formatInSchoolTimezone, isSameDayInSchoolTimezone } from '@/utils/timezoneUtils';
+import { getSchoolDateKey, formatInSchoolTimezone, isSameDayInSchoolTimezone, isDatePastInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface AgendaViewProps {
   currentDate: Date;
@@ -74,9 +74,8 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
         </Card>
       ) : (
         Object.entries(groupedEvents).map(([dateKey, dayEvents]) => {
-          const eventDate = new Date(dateKey);
           const isToday = isSameDayInSchoolTimezone(dateKey, today, timezone);
-          const isPast = eventDate < today;
+          const isPast = isDatePastInSchoolTimezone(dateKey, timezone);
           
           return (
             <div key={dateKey} className="space-y-2">

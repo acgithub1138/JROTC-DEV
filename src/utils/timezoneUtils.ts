@@ -78,6 +78,18 @@ export const COMMON_TIMEZONES = [
 ];
 
 /**
+ * Checks if a date (in YYYY-MM-DD format) is in the past relative to today in the school's timezone
+ * @param dateKey - Date key in YYYY-MM-DD format
+ * @param schoolTimezone - School's timezone
+ * @returns True if the date is in the past in school timezone
+ */
+export const isDatePastInSchoolTimezone = (dateKey: string, schoolTimezone: string): boolean => {
+  const today = new Date();
+  const todayKey = getSchoolDateKey(today, schoolTimezone);
+  return dateKey < todayKey;
+};
+
+/**
  * Gets the display name for a timezone
  * @param timezone - IANA timezone string
  * @returns Human-readable timezone name

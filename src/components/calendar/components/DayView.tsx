@@ -2,6 +2,8 @@ import React from 'react';
 import { format, isSameDay, addHours } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { isSameDayInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface DayViewProps {
   currentDate: Date;
@@ -27,12 +29,21 @@ export const DayView: React.FC<DayViewProps> = ({
   onEventClick,
   onTimeSlotClick,
 }) => {
+  const { timezone, isLoading } = useSchoolTimezone();
   const hours = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
   const currentTime = new Date();
-  const isToday = isSameDay(currentDate, currentTime);
+  const isToday = isSameDayInSchoolTimezone(currentDate, currentTime, timezone);
+
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
 
   const getEventsForDay = () => {
-    return events.filter(event => isSameDay(new Date(event.start_date), currentDate));
+    return events.filter(event => isSameDayInSchoolTimezone(event.start_date, currentDate, timezone));
   };
 
   const getAllDayEvents = () => {

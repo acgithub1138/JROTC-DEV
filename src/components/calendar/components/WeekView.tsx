@@ -2,6 +2,8 @@ import React from 'react';
 import { format, startOfWeek, addDays, isSameDay, addHours, startOfDay } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { isSameDayInSchoolTimezone } from '@/utils/timezoneUtils';
 
 interface WeekViewProps {
   currentDate: Date;
@@ -27,12 +29,21 @@ export const WeekView: React.FC<WeekViewProps> = ({
   onEventClick,
   onTimeSlotClick,
 }) => {
+  const { timezone, isLoading } = useSchoolTimezone();
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));
   const hours = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
 
+  if (isLoading) {
+    return (
+      <div className="flex justify-center items-center h-64">
+        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+      </div>
+    );
+  }
+
   const getEventsForDay = (date: Date) => {
-    return events.filter(event => isSameDay(new Date(event.start_date), date));
+    return events.filter(event => isSameDayInSchoolTimezone(event.start_date, date, timezone));
   };
 
   const getAllDayEvents = (date: Date) => {
@@ -65,7 +76,7 @@ export const WeekView: React.FC<WeekViewProps> = ({
             <div className="font-semibold">{format(day, 'EEE')}</div>
             <div className={cn(
               "text-2xl mt-1",
-              isSameDay(day, new Date()) && "text-primary font-bold"
+              isSameDayInSchoolTimezone(day, new Date(), timezone) && "text-primary font-bold"
             )}>
               {format(day, 'd')}
             </div>
