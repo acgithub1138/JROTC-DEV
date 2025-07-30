@@ -312,6 +312,7 @@ const IncidentManagementPage: React.FC = () => {
             setSelectedIncident(null);
           }}
           onEdit={() => {}} // Not needed since the dialog handles updates internally
+          startInEditMode={true}
         />
       )}
 

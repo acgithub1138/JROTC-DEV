@@ -47,6 +47,7 @@ interface IncidentDetailDialogProps {
   onClose: () => void;
   onEdit: (incident: Incident) => void;
   readOnly?: boolean;
+  startInEditMode?: boolean;
 }
 
 const getStatusBadgeClass = (status: string) => {
@@ -100,6 +101,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   onClose,
   onEdit,
   readOnly = false,
+  startInEditMode = false,
 }) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
@@ -111,7 +113,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const { data: categoryOptions = [] } = useIncidentCategoryOptions();
   const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
-  const [isEditing, setIsEditing] = useState(!readOnly); // Start in edit mode unless read-only
+  const [isEditing, setIsEditing] = useState(startInEditMode || !readOnly); // Start in edit mode if requested or unless read-only
   const [editData, setEditData] = useState({
     title: incident.title,
     description: incident.description || '',
