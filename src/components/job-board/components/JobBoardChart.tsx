@@ -34,8 +34,8 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
   // Debug logging for permissions
   console.log('JobBoard permissions:', { canAssign, readOnly });
   
-  // Chart is read-only if explicitly set or user doesn't have assign permission
-  const isChartReadOnly = readOnly || !canAssign;
+  // Chart is read-only only if user doesn't have assign permission (ignore explicit readOnly for permissions)
+  const isChartReadOnly = !canAssign;
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
