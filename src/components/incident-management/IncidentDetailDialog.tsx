@@ -483,11 +483,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                   Close
                 </Button>
               )}
-              {isEditing && viewOnly && (
-                <Button size="sm" variant="outline" onClick={handleViewMode}>
-                  View Mode
-                </Button>
-              )}
             </div>
           </div>
         </DialogHeader>
