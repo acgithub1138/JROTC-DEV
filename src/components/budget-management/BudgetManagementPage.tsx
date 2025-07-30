@@ -8,6 +8,7 @@ import { BudgetFilters } from './components/BudgetFilters';
 import { AddIncomeDialog } from './components/AddIncomeDialog';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
+import { ViewBudgetItemDialog } from './components/ViewBudgetItemDialog';
 import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -112,13 +113,11 @@ const BudgetManagementPage = () => {
 
       {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
       
-      {viewingItem && <EditBudgetItemDialog 
+      {viewingItem && <ViewBudgetItemDialog 
         open={!!viewingItem} 
         onOpenChange={() => setViewingItem(null)} 
         item={viewingItem} 
-        onSubmit={updateTransaction} 
-        viewOnly 
-        onSwitchToEdit={() => {
+        onEdit={() => {
           setEditingItem(viewingItem);
           setViewingItem(null);
         }}
