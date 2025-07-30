@@ -56,9 +56,7 @@ export const useJobBoardNodes = ({
       if (previousJob) {
         // Only check fields that affect visual representation
         const fieldsToCheck = [
-          'role', 'cadet_id', 'reports_to', 'assistant',
-          'reports_to_source_handle', 'reports_to_target_handle',
-          'assistant_source_handle', 'assistant_target_handle'
+          'role', 'cadet_id', 'reports_to', 'assistant', 'connections'
         ] as const;
         
         const hasChanges = fieldsToCheck.some(field => 

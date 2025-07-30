@@ -164,19 +164,9 @@ const JobBoardChartInner = ({ jobs, onRefresh, onUpdateJob, readOnly = false }: 
       console.log('🔄 Updating connections array:', { updatedConnections });
       onUpdateJob(sourceJob.id, { connections: updatedConnections });
     } else {
-      // Fallback to legacy method for backward compatibility
-      const sourceUpdates: Partial<JobBoardWithCadet> = {};
-      
-      if (connectionEditModal.connectionType === 'reports_to') {
-        sourceUpdates.reports_to_source_handle = sourceHandle;
-        console.log('Updating reports_to_source_handle to:', sourceHandle);
-      } else {
-        sourceUpdates.assistant_source_handle = sourceHandle;
-        console.log('Updating assistant_source_handle to:', sourceHandle);
-      }
-
-      console.log('Legacy source updates:', sourceUpdates);
-      onUpdateJob(connectionEditModal.sourceJob.id, sourceUpdates);
+      // Legacy connections should no longer exist - this fallback should not be reached
+      console.warn('Using legacy connection fallback - this should not happen');
+      return;
     }
     
     setConnectionEditModal({ 

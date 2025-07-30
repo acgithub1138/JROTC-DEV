@@ -13,14 +13,6 @@ const getOccupiedHandles = (jobs: JobBoardWithCadet[], currentJob: JobBoardWithC
     });
   }
 
-  // Fallback to old fields for backward compatibility during migration
-  if (currentJob.reports_to && currentJob.reports_to_source_handle) {
-    occupiedHandles.add(currentJob.reports_to_source_handle);
-  }
-  if (currentJob.assistant && currentJob.assistant_source_handle) {
-    occupiedHandles.add(currentJob.assistant_source_handle);
-  }
-
   return occupiedHandles;
 };
 
@@ -90,50 +82,7 @@ export const createFlowEdges = (
     }
   });
 
-  // Fallback to legacy hierarchy system for jobs without connections
-  const legacyEdges = hierarchyResult.edges
-    .filter(edge => {
-      const sourceJob = jobMap.get(edge.source);
-      return !sourceJob?.connections || sourceJob.connections.length === 0;
-    })
-    .map((edge) => {
-      const sourceJob = jobMap.get(edge.source);
-      
-      if (edge.type === 'assistant') {
-        const sourceHandle = sourceJob?.assistant_source_handle || 'right-source';
-        const targetHandle = 'left-target';
-        
-        return {
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          sourceHandle,
-          targetHandle,
-          type: 'smoothstep',
-          animated: false,
-          style: { pointerEvents: 'all' as const },
-          data: { connectionType: 'assistant' }
-        };
-      } else {
-        const sourceHandle = sourceJob?.reports_to_source_handle || 'bottom-source';
-        const targetHandle = 'top-target';
-        
-        return {
-          id: edge.id,
-          source: edge.source,
-          target: edge.target,
-          sourceHandle,
-          targetHandle,
-          type: 'smoothstep',
-          animated: false,
-          style: { pointerEvents: 'all' as const },
-          data: { connectionType: 'reports_to' }
-        };
-      }
-    });
-
-  flowEdges.push(...legacyEdges);
-  
+  // All jobs should now use the connections system
   console.log('✅ Total flow edges created:', flowEdges.length);
   return flowEdges;
 };

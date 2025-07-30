@@ -15,10 +15,6 @@ export interface JobBoard {
   reports_to?: string;
   assistant?: string;
   tier?: string;
-  reports_to_source_handle?: string;
-  reports_to_target_handle?: string;
-  assistant_source_handle?: string;
-  assistant_target_handle?: string;
   connections?: Connection[];
   school_id: string;
   created_at: string;
@@ -42,9 +38,5 @@ export interface NewJobBoard {
   reports_to?: string;
   assistant?: string;
   tier?: string;
-  reports_to_source_handle?: string;
-  reports_to_target_handle?: string;
-  assistant_source_handle?: string;
-  assistant_target_handle?: string;
   connections?: Connection[];
 }
