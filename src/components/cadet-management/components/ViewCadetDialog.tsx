@@ -44,6 +44,7 @@ export const ViewCadetDialog = ({
       onEditProfile(profile);
     }
     setIsEditMode(true);
+    onOpenChange(false);
   };
 
   const handleUpdate = () => {
