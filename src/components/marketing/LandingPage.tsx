@@ -48,15 +48,15 @@ const LandingPage = () => {
   }, {
     icon: Trophy,
     title: "Competition Tracking",
-    description: "Manage scoring, track performance analytics, and celebrate achievements.",
+    description: "Track event scoring, performance analytics, and achievements.",
     href: "/products/competition-management",
     features: ["Scoring system", "Performance analytics", "Achievement tracking"]
   }, {
     icon: Trophy,
     title: "Competition Event Management (Coming Soon...)",
-    description: "Manage your entire competition event with resource management, participant management and real time scoring!",
+    description: "Manage your entire competition event with resource management, participant management, and real-time scoring!",
     href: "/products/competition-management",
-    features: ["Event Planning", "Participant Management", "Real-Time Scoring"]
+    features: ["Event Planning", "Resource Management", "Participant Management", "Real-Time Scoring"]
   }];
   const testimonials = [
     //    {
