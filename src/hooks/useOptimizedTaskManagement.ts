@@ -3,13 +3,13 @@ import { Task, useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
-import { filterTasks } from '../components/TaskFilters';
+import { filterTasks } from '../components/tasks/components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
 import { Subtask } from '@/hooks/tasks/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 
-export const useTaskManagement = () => {
+export const useOptimizedTaskManagement = () => {
   const { tasks, refetch: refetchTasks } = useTasks();
   const { data: mySubtasks = [], refetch: refetchSubtasks } = useMySubtasksQuery();
   const { userProfile } = useAuth();

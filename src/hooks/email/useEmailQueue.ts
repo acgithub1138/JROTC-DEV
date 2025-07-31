@@ -2,6 +2,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useWindowFocus } from '@/hooks/useWindowFocus';
 
 export interface EmailQueueItem {
   id: string;
@@ -29,6 +30,7 @@ export interface EmailQueueItem {
 export const useEmailQueue = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isWindowFocused = useWindowFocus();
 
   const { data: queueItems = [], isLoading } = useQuery({
     queryKey: ['email-queue'],
@@ -48,7 +50,9 @@ export const useEmailQueue = () => {
       if (error) throw error;
       return data as EmailQueueItem[];
     },
-    refetchInterval: 30000, // Auto-refresh every 30 seconds
+    refetchInterval: isWindowFocused ? 60000 : false, // Reduced from 30s to 60s, pause when window not focused
+    staleTime: 30000, // Cache for 30 seconds
+    refetchOnWindowFocus: false,
   });
 
   const retryEmail = useMutation({

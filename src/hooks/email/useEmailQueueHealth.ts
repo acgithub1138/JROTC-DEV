@@ -1,6 +1,7 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useWindowFocus } from '@/hooks/useWindowFocus';
 
 export interface EmailQueueHealth {
   id: string;
@@ -37,6 +38,7 @@ export interface BatchProcessResult {
 export const useEmailQueueHealth = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const isWindowFocused = useWindowFocus();
 
   // Get health history
   const { data: healthHistory = [], isLoading: isLoadingHealth } = useQuery({
@@ -51,7 +53,9 @@ export const useEmailQueueHealth = () => {
       if (error) throw error;
       return data as EmailQueueHealth[];
     },
-    refetchInterval: 30000, // Refresh every 30 seconds
+    refetchInterval: isWindowFocused ? 120000 : false, // Reduced from 30s to 2 minutes, pause when window not focused
+    staleTime: 60000, // Cache for 1 minute
+    refetchOnWindowFocus: false,
   });
 
   // Check current queue health
