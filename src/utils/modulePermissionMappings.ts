@@ -40,6 +40,15 @@ export const modulePermissionMappings = {
   ],
   'teams': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_competitions': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_events': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_judges': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ]
 };
 

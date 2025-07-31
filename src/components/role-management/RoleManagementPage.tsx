@@ -17,6 +17,7 @@ import { useSortable } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { AddRoleDialog } from './AddRoleDialog';
 import { UserRolesTable } from './UserRolesTable';
+import { PortalPermissionsTable } from './PortalPermissionsTable';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 // Helper function to get role colors
 const getRoleColor = (roleName: string): string => {
@@ -219,95 +220,56 @@ export const RoleManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="permissions">
-          <Card className="mb-6">
-        <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            <span>Role Permissions</span>
-            <div className="flex items-center gap-4">
-              <AddRoleDialog />
-              <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
-                <RefreshCw className="w-4 h-4" />
-                Refresh
-              </Button>
-              <Button variant="outline" size="sm" onClick={handleResetToDefaults} disabled={isResetting} className="flex items-center gap-2">
-                <RotateCcw className="w-4 h-4" />
-                Reset to Defaults
-              </Button>
-              
-            </div>
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="mb-6">
-            <label className="block text-sm font-medium text-gray-700 mb-2">
-              Select Role
-            </label>
-            <div className="flex items-center gap-4">
-              <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
-                <SelectTrigger className="w-64">
-                  <SelectValue placeholder="Select a role" />
-                </SelectTrigger>
-                <SelectContent>
-                  {isLoadingAllRoles ? (
-                    <SelectItem value="loading" disabled>
-                      Loading roles...
-                    </SelectItem>
-                  ) : availableRoles.map(role => {
-                    const {
-                      enabled,
-                      total
-                    } = getPermissionCount(role.value);
-                    return <SelectItem key={role.value} value={role.value}>
-                          <div className="flex items-center justify-between w-full">
-                            <span>{role.label}</span>
-                            <Badge variant="secondary" className="ml-2">
-                              {enabled}/{total}
-                            </Badge>
-                          </div>
-                        </SelectItem>;
-                  })}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
+          <Tabs defaultValue="ccc" className="w-full">
+            <TabsList className="mb-6">
+              <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
+              <TabsTrigger value="competition">Comp Portal Permissions</TabsTrigger>
+            </TabsList>
 
-          <div className="overflow-x-auto">
-            <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-              <table className="w-full border-collapse">
-                <thead>
-                  <tr className="border-b">
-                    <th className="text-left p-3 font-medium">Module</th>
-                    <SortableContext items={orderedActions.map(action => action.id)} strategy={horizontalListSortingStrategy}>
-                      {orderedActions.map(action => <SortableColumnHeader key={action.id} action={action}>
-                          {action.name === 'sidebar' ? 'Module Access' : action.label}
-                        </SortableColumnHeader>)}
-                    </SortableContext>
-                  </tr>
-                </thead>
-                <tbody>
-                  {modules.map(module => <tr key={module.id} className="border-b hover:bg-gray-50">
-                      <td className="p-3 font-medium">
-                        <div className="font-medium">{module.label}</div>
-                      </td>
-                      {orderedActions.map(action => {
-                    const isRelevant = isPermissionRelevantForModule(module.name, action.name);
-                    const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-                    return <td key={action.id} className="p-3 text-center">
-                            {isRelevant ? <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} /> : null}
-                          </td>;
-                  })}
-                    </tr>)}
-                </tbody>
-              </table>
-            </DndContext>
-          </div>
+            <TabsContent value="ccc">
+              <PortalPermissionsTable 
+                portal="ccc"
+                selectedRole={selectedRole}
+                availableRoles={availableRoles}
+                isLoadingAllRoles={isLoadingAllRoles}
+                setSelectedRole={setSelectedRole}
+                modules={modules}
+                actions={actions}
+                orderedActions={orderedActions}
+                rolePermissions={rolePermissions}
+                isUpdating={isUpdating}
+                isResetting={isResetting}
+                sensors={sensors}
+                handleDragEnd={handleDragEnd}
+                handlePermissionChange={handlePermissionChange}
+                handleResetToDefaults={handleResetToDefaults}
+                refreshData={refreshData}
+                getPermissionCount={getPermissionCount}
+              />
+            </TabsContent>
 
-          {isUpdating && <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
-              <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
-              Updating permissions...
-            </div>}
-        </CardContent>
-      </Card>
+            <TabsContent value="competition">
+              <PortalPermissionsTable 
+                portal="competition"
+                selectedRole={selectedRole}
+                availableRoles={availableRoles}
+                isLoadingAllRoles={isLoadingAllRoles}
+                setSelectedRole={setSelectedRole}
+                modules={modules}
+                actions={actions}
+                orderedActions={orderedActions}
+                rolePermissions={rolePermissions}
+                isUpdating={isUpdating}
+                isResetting={isResetting}
+                sensors={sensors}
+                handleDragEnd={handleDragEnd}
+                handlePermissionChange={handlePermissionChange}
+                handleResetToDefaults={handleResetToDefaults}
+                refreshData={refreshData}
+                getPermissionCount={getPermissionCount}
+              />
+            </TabsContent>
+          </Tabs>
         </TabsContent>
 
         <TabsContent value="roles">
