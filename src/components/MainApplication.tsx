@@ -127,13 +127,6 @@ const MainApplication = () => {
         )}
         <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
           <Routes>
-            {/* Competition Portal Routes */}
-            <Route path="/competition-portal/*" element={
-              <ProtectedRoute>
-                <CompetitionPortalRoutes />
-              </ProtectedRoute>
-            } />
-            
             <Route path="/" element={
               <ProtectedRoute>
                 <DashboardOverview />
