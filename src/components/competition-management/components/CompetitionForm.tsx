@@ -77,29 +77,23 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
-  const handleLocationSelect = async (selectedLocation: string) => {
+  const handleLocationSelect = (selectedLocation: string) => {
     updateFormData('location', selectedLocation);
     
-    // Parse the address from the selected location
-    try {
-      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(selectedLocation)}&format=json&addressdetails=1&limit=1`);
-      const data = await response.json();
+    // Parse the selected location string to extract address components
+    // This assumes the format from Nominatim: "Name, Street, City, State, Zip, Country"
+    const parts = selectedLocation.split(', ');
+    if (parts.length >= 4) {
+      // Extract address components from the selected string
+      const possibleAddress = parts[1] || '';
+      const possibleCity = parts[2] || '';
+      const possibleState = parts[3] || '';
+      const possibleZip = parts[4] || '';
       
-      if (data && data.length > 0) {
-        const addressDetails = data[0].address;
-        
-        // Extract address components
-        const houseNumber = addressDetails.house_number || '';
-        const road = addressDetails.road || '';
-        const fullAddress = `${houseNumber} ${road}`.trim();
-        
-        updateFormData('address', fullAddress);
-        updateFormData('city', addressDetails.city || addressDetails.town || addressDetails.village || '');
-        updateFormData('state', addressDetails.state || '');
-        updateFormData('zip', addressDetails.postcode || '');
-      }
-    } catch (error) {
-      console.error('Error parsing address:', error);
+      updateFormData('address', possibleAddress);
+      updateFormData('city', possibleCity);
+      updateFormData('state', possibleState);
+      updateFormData('zip', possibleZip);
     }
   };
 
