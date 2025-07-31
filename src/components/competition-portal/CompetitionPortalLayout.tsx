@@ -7,6 +7,7 @@ import CompetitionsPage from './CompetitionsPage';
 import { EventsPage } from './EventsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
+import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 
 const CompetitionPortalLayout = () => {
   const [activeModule, setActiveModule] = useState('competition-dashboard');
@@ -61,6 +62,8 @@ const CompetitionPortalLayout = () => {
       return <CompetitionDashboard />;
     } else if (path === '/app/competition-portal/competitions') {
       return <CompetitionsPage />;
+    } else if (path.startsWith('/app/competition-portal/competition-details/')) {
+      return <CompetitionDetailsPage />;
     } else if (path === '/app/competition-portal/events') {
       return <EventsPage />;
     } else if (path === '/app/competition-portal/teams') {

@@ -518,6 +518,222 @@ export type Database = {
           },
         ]
       }
+      cp_comp_events: {
+        Row: {
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          end_time: string | null
+          event: string | null
+          id: string
+          judges: string[] | null
+          location: string | null
+          max_participants: number | null
+          notes: string | null
+          resources: string[] | null
+          school_id: string
+          schools: string[] | null
+          sop: string | null
+          sop_link: string | null
+          sop_text: string | null
+          start_time: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          event?: string | null
+          id?: string
+          judges?: string[] | null
+          location?: string | null
+          max_participants?: number | null
+          notes?: string | null
+          resources?: string[] | null
+          school_id: string
+          schools?: string[] | null
+          sop?: string | null
+          sop_link?: string | null
+          sop_text?: string | null
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          event?: string | null
+          id?: string
+          judges?: string[] | null
+          location?: string | null
+          max_participants?: number | null
+          notes?: string | null
+          resources?: string[] | null
+          school_id?: string
+          schools?: string[] | null
+          sop?: string | null
+          sop_link?: string | null
+          sop_text?: string | null
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_event_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "cp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_comp_resources: {
+        Row: {
+          assignment_details: string | null
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          end_time: string | null
+          id: string
+          location: string | null
+          resource: string
+          school_id: string
+          start_time: string | null
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          assignment_details?: string | null
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          resource: string
+          school_id: string
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          assignment_details?: string | null
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          end_time?: string | null
+          id?: string
+          location?: string | null
+          resource?: string
+          school_id?: string
+          start_time?: string | null
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_resources_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_resources_resource_fkey"
+            columns: ["resource"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_resources_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_comp_schools: {
+        Row: {
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          id: string
+          notes: string | null
+          resource: string | null
+          school_id: string
+          status: string
+          updated_at: string
+          updated_by: string | null
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          resource?: string | null
+          school_id: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          id?: string
+          notes?: string | null
+          resource?: string | null
+          school_id?: string
+          status?: string
+          updated_at?: string
+          updated_by?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "cp_comp_schools_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_schools_resource_fkey"
+            columns: ["resource"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_schools_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       cp_competitions: {
         Row: {
           address: string | null

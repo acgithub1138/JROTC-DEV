@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { Button } from '@/components/ui/button';
@@ -35,6 +36,7 @@ interface School {
   name: string;
 }
 const CompetitionsPage = () => {
+  const navigate = useNavigate();
   const {
     userProfile
   } = useAuth();
@@ -138,8 +140,7 @@ const CompetitionsPage = () => {
     setShowViewModal(true);
   };
   const handleEditCompetition = (competition: Competition) => {
-    // TODO: Implement edit functionality
-    toast.info('Edit functionality coming soon');
+    navigate(`/app/competition-portal/competition-details/${competition.id}`);
   };
 
   const handleCancelCompetition = async (competition: Competition) => {
