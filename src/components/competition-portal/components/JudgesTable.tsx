@@ -1,17 +1,9 @@
 import React from 'react';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Edit, Trash2 } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-
 interface Judge {
   id: string;
   name: string;
@@ -20,36 +12,31 @@ interface Judge {
   available: boolean;
   created_at: string;
 }
-
 interface JudgesTableProps {
   judges: Judge[];
   isLoading: boolean;
   onEdit: (judge: Judge) => void;
   onDelete: (id: string) => void;
 }
-
 export const JudgesTable: React.FC<JudgesTableProps> = ({
   judges,
   isLoading,
   onEdit,
-  onDelete,
+  onDelete
 }) => {
-  const { canEdit, canDelete } = useTablePermissions('cp_judges');
-
+  const {
+    canEdit,
+    canDelete
+  } = useTablePermissions('cp_judges');
   if (isLoading) {
     return <div className="text-center py-8">Loading judges...</div>;
   }
-
   if (judges.length === 0) {
-    return (
-      <div className="text-center py-8 text-muted-foreground">
+    return <div className="text-center py-8 text-muted-foreground">
         No judges found. Create your first judge to get started.
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="border rounded-lg">
+  return <div className="border rounded-lg">
       <Table>
         <TableHeader>
           <TableRow>
@@ -62,9 +49,8 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
           </TableRow>
         </TableHeader>
         <TableBody>
-          {judges.map((judge) => (
-            <TableRow key={judge.id}>
-              <TableCell className="font-medium">{judge.name}</TableCell>
+          {judges.map(judge => <TableRow key={judge.id}>
+              <TableCell className="font-medium py-[8px]">{judge.name}</TableCell>
               <TableCell>{judge.phone || '-'}</TableCell>
               <TableCell>{judge.email || '-'}</TableCell>
               <TableCell>
@@ -77,32 +63,16 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
               </TableCell>
               <TableCell>
                 <div className="flex items-center justify-center gap-2">
-                  {canEdit && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-6 w-6"
-                      onClick={() => onEdit(judge)}
-                    >
+                  {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(judge)}>
                       <Edit className="w-3 h-3" />
-                    </Button>
-                  )}
-                  {canDelete && (
-                    <Button
-                      variant="outline"
-                      size="icon"
-                      className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                      onClick={() => onDelete(judge.id)}
-                    >
+                    </Button>}
+                  {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(judge.id)}>
                       <Trash2 className="w-3 h-3" />
-                    </Button>
-                  )}
+                    </Button>}
                 </div>
               </TableCell>
-            </TableRow>
-          ))}
+            </TableRow>)}
         </TableBody>
       </Table>
-    </div>
-  );
+    </div>;
 };
