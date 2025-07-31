@@ -8,7 +8,6 @@ import { useCallback, useMemo } from 'react';
 interface LayoutPreference {
   id: string;
   job_id: string;
-  user_id: string;
   school_id: string;
   position_x: number;
   position_y: number;
@@ -24,8 +23,6 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  // Use a system user ID for school-wide layouts
-  const SYSTEM_USER_ID = '00000000-0000-0000-0000-000000000000';
 
   // Fetch saved layout preferences (school-wide)
   const { data: layoutPreferences = [], isLoading } = useQuery({
@@ -36,7 +33,6 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
       const { data, error } = await supabase
         .from('job_board_layout_preferences')
         .select('*')
-        .eq('user_id', SYSTEM_USER_ID)
         .eq('school_id', userProfile.school_id);
 
       if (error) {
@@ -62,13 +58,12 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
       const { error } = await supabase
         .from('job_board_layout_preferences')
         .upsert({
-          user_id: SYSTEM_USER_ID,
           school_id: userProfile.school_id,
           job_id: jobId,
           position_x: position.x,
           position_y: position.y,
         }, {
-          onConflict: 'user_id,job_id'
+          onConflict: 'school_id,job_id'
         });
 
       if (error) throw error;
@@ -78,8 +73,7 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
       // Optimistically update the cache instead of invalidating
       queryClient.setQueryData(['job-board-layout', userProfile?.school_id], (oldData: LayoutPreference[] = []) => {
         const existingIndex = oldData.findIndex(pref => 
-          pref.job_id === savePositionMutation.variables?.jobId && 
-          pref.user_id === SYSTEM_USER_ID
+          pref.job_id === savePositionMutation.variables?.jobId
         );
         
         if (existingIndex >= 0) {
@@ -96,7 +90,6 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
           return [...oldData, {
             id: `temp-${Date.now()}`,
             job_id: savePositionMutation.variables?.jobId || '',
-            user_id: SYSTEM_USER_ID,
             school_id: userProfile?.school_id || '',
             position_x: position?.x || 0,
             position_y: position?.y || 0,
@@ -128,7 +121,6 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
       const { error } = await supabase
         .from('job_board_layout_preferences')
         .delete()
-        .eq('user_id', SYSTEM_USER_ID)
         .eq('school_id', userProfile.school_id);
 
       if (error) throw error;
@@ -187,7 +179,6 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
         return [...oldData, {
           id: `temp-${jobId}-${Date.now()}`,
           job_id: jobId,
-          user_id: SYSTEM_USER_ID,
           school_id: userProfile?.school_id || '',
           position_x: position.x,
           position_y: position.y,
@@ -197,7 +188,7 @@ export const useJobBoardLayout = (canAssign?: boolean) => {
     
     // Then persist to database
     savePositionMutation.mutate({ jobId, position });
-  }, [savePositionMutation, queryClient, userProfile?.school_id, canAssign, toast, SYSTEM_USER_ID]);
+  }, [savePositionMutation, queryClient, userProfile?.school_id, canAssign, toast]);
 
   // Reset layout to default
   const resetLayout = useCallback(() => {

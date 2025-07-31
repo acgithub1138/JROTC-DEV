@@ -1649,7 +1649,6 @@ export type Database = {
           position_y: number
           school_id: string
           updated_at: string
-          user_id: string
         }
         Insert: {
           created_at?: string
@@ -1659,7 +1658,6 @@ export type Database = {
           position_y: number
           school_id: string
           updated_at?: string
-          user_id: string
         }
         Update: {
           created_at?: string
@@ -1669,7 +1667,6 @@ export type Database = {
           position_y?: number
           school_id?: string
           updated_at?: string
-          user_id?: string
         }
         Relationships: [
           {
@@ -1684,13 +1681,6 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "job_board_layout_preferences_user_id_fkey"
-            columns: ["user_id"]
-            isOneToOne: false
-            referencedRelation: "profiles"
             referencedColumns: ["id"]
           },
         ]
