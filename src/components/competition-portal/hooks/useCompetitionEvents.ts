@@ -49,7 +49,7 @@ export const useCompetitionEvents = () => {
     }
   };
 
-  const createEvent = async (eventData: { name: string; description?: string | null; score_sheet?: string | null }) => {
+  const createEvent = async (eventData: { name: string; description?: string | null; score_sheet?: string | null; jrotc_program?: string | null }) => {
     if (!userProfile?.school_id) return;
 
     try {
