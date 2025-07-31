@@ -58,7 +58,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
             <TableHead>Email</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
-            <TableHead className="w-24">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -76,24 +76,25 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                 {new Date(judge.created_at).toLocaleDateString()}
               </TableCell>
               <TableCell>
-                <div className="flex items-center gap-2">
+                <div className="flex items-center justify-center gap-2">
                   {canEdit && (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6"
                       onClick={() => onEdit(judge)}
                     >
-                      <Edit className="w-4 h-4" />
+                      <Edit className="w-3 h-3" />
                     </Button>
                   )}
                   {canDelete && (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon"
+                      className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                       onClick={() => onDelete(judge.id)}
-                      className="text-destructive hover:text-destructive"
                     >
-                      <Trash2 className="w-4 h-4" />
+                      <Trash2 className="w-3 h-3" />
                     </Button>
                   )}
                 </div>
