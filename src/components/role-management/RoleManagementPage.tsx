@@ -212,6 +212,13 @@ export const RoleManagementPage: React.FC = () => {
           Configure permissions for each user role and manage role definitions.
         </p>
       </div>
+      <Tabs defaultValue="permissions" className="w-full">
+        <TabsList className="mb-6">
+          <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
+          <TabsTrigger value="roles">Manage Roles</TabsTrigger>
+        </TabsList>
+
+
 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
@@ -245,15 +252,8 @@ export const RoleManagementPage: React.FC = () => {
                   </Select>
                 </div>
               </div>
-    
-    
-    
-      <Tabs defaultValue="permissions" className="w-full">
-        <TabsList className="mb-6">
-          <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
-          <TabsTrigger value="roles">Manage Roles</TabsTrigger>
-        </TabsList>
-
+        
+        
         <TabsContent value="permissions">
           <Card className="mb-6">
             <CardHeader>
