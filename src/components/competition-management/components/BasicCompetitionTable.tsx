@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus, Eye, X } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
@@ -14,7 +14,6 @@ interface BasicCompetitionTableProps {
   isLoading: boolean;
   onEdit: (competition: any) => void;
   onDelete: (id: string) => void;
-  onCancel?: (id: string) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
@@ -81,7 +80,6 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   isLoading,
   onEdit,
   onDelete,
-  onCancel,
   onAddEvent,
   onViewScoreSheets,
   onView,
@@ -182,17 +180,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                           <p>Edit Competition</p>
                         </TooltipContent>
                       </Tooltip>}
-                     {onCancel && competition.status !== 'cancelled' && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6 text-orange-600 hover:text-orange-700 hover:border-orange-300" onClick={() => onCancel(competition.id)}>
-                            <X className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Cancel Competition</p>
-                        </TooltipContent>
-                      </Tooltip>}
-                     {onDelete && <Tooltip>
+                    {onDelete && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
                             <Trash2 className="w-3 h-3" />

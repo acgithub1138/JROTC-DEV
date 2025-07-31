@@ -83,7 +83,7 @@ export const useCompetitionEvents = () => {
     try {
       const { data, error } = await supabase
         .from('cp_events')
-        .update(updates as any)
+        .update(updates)
         .eq('id', id)
         .select()
         .single();

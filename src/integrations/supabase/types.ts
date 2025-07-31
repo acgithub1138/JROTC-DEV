@@ -332,7 +332,6 @@ export type Database = {
             | null
           registration_deadline: string | null
           school_id: string | null
-          status: string | null
           teams: string[] | null
           unarmed_color_guard:
             | Database["public"]["Enums"]["comp_placement"]
@@ -380,7 +379,6 @@ export type Database = {
             | null
           registration_deadline?: string | null
           school_id?: string | null
-          status?: string | null
           teams?: string[] | null
           unarmed_color_guard?:
             | Database["public"]["Enums"]["comp_placement"]
@@ -428,7 +426,6 @@ export type Database = {
             | null
           registration_deadline?: string | null
           school_id?: string | null
-          status?: string | null
           teams?: string[] | null
           unarmed_color_guard?:
             | Database["public"]["Enums"]["comp_placement"]
@@ -589,42 +586,67 @@ export type Database = {
       }
       cp_events: {
         Row: {
-          active: boolean
+          competition_id: string
           created_at: string
           created_by: string | null
           description: string | null
+          end_time: string | null
+          event_date: string | null
           id: string
-          jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
+          max_participants: number | null
           name: string
           school_id: string
           score_sheet: string | null
+          sop: string
+          sop_link: string | null
+          sop_text: string | null
+          start_time: string | null
           updated_at: string
         }
         Insert: {
-          active?: boolean
+          competition_id: string
           created_at?: string
           created_by?: string | null
           description?: string | null
+          end_time?: string | null
+          event_date?: string | null
           id?: string
-          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          max_participants?: number | null
           name: string
           school_id: string
           score_sheet?: string | null
+          sop?: string
+          sop_link?: string | null
+          sop_text?: string | null
+          start_time?: string | null
           updated_at?: string
         }
         Update: {
-          active?: boolean
+          competition_id?: string
           created_at?: string
           created_by?: string | null
           description?: string | null
+          end_time?: string | null
+          event_date?: string | null
           id?: string
-          jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          max_participants?: number | null
           name?: string
           school_id?: string
           score_sheet?: string | null
+          sop?: string
+          sop_link?: string | null
+          sop_text?: string | null
+          start_time?: string | null
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "cp_events_competition_id_fkey"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cp_events_score_sheet_fkey"
             columns: ["score_sheet"]
