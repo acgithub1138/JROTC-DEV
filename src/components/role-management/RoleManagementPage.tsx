@@ -222,6 +222,43 @@ export const RoleManagementPage: React.FC = () => {
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
                 <span>Role Permissions</span>
+
+                
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Role
+                </label>
+                <div className="flex items-center gap-4">
+                  <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isLoadingAllRoles ? (
+                        <SelectItem value="loading" disabled>
+                          Loading roles...
+                        </SelectItem>
+                      ) : availableRoles.map(role => {
+                        const {
+                          enabled,
+                          total
+                        } = getPermissionCount(role.value);
+                        return <SelectItem key={role.value} value={role.value}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{role.label}</span>
+                                <Badge variant="secondary" className="ml-2">
+                                  {enabled}/{total}
+                                </Badge>
+                              </div>
+                            </SelectItem>;
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>                
+                
+                
+                
                 <div className="flex items-center gap-4">
                   <AddRoleDialog />
                   <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
