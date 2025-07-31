@@ -2,6 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search, ArrowUpDown } from 'lucide-react';
 import { ColumnSelector } from '@/components/ui/column-selector';
 import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
@@ -47,12 +48,14 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
+  const [activeTab, setActiveTab] = useState('active');
   const {
     competitions,
     isLoading,
     createCompetition,
     updateCompetition,
-    deleteCompetition
+    deleteCompetition,
+    cancelCompetition
   } = useCompetitions();
   const {
     createEvent
@@ -66,16 +69,29 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     isLoading: columnsLoading
   } = useColumnPreferences('competitions', defaultColumns);
 
-  // Filter competitions based on search term
+  // Filter competitions based on search term and active tab
   const filteredCompetitions = useMemo(() => {
-    if (!searchTerm) return competitions;
-    const searchLower = searchTerm.toLowerCase();
-    return competitions.filter(comp => 
-      comp.name.toLowerCase().includes(searchLower) || 
-      comp.location?.toLowerCase().includes(searchLower) || 
-      formatCompetitionDateFull(comp.competition_date).includes(searchLower)
-    );
-  }, [competitions, searchTerm]);
+    let filtered = competitions;
+    
+    // Filter by active tab
+    if (activeTab === 'active') {
+      filtered = competitions.filter(comp => comp.status !== 'cancelled');
+    } else {
+      filtered = competitions.filter(comp => comp.status === 'cancelled');
+    }
+    
+    // Filter by search term
+    if (searchTerm) {
+      const searchLower = searchTerm.toLowerCase();
+      filtered = filtered.filter(comp => 
+        comp.name.toLowerCase().includes(searchLower) || 
+        comp.location?.toLowerCase().includes(searchLower) || 
+        formatCompetitionDateFull(comp.competition_date).includes(searchLower)
+      );
+    }
+    
+    return filtered;
+  }, [competitions, searchTerm, activeTab]);
 
   // Add sorting functionality
   const {
@@ -113,47 +129,66 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     }
   };
   return <div className="space-y-6">
-      <div>
-        
-        
-      </div>
+      <Tabs value={activeTab} onValueChange={setActiveTab}>
+        <TabsList>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="non-active">Non-Active</TabsTrigger>
+        </TabsList>
 
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
-            <Input placeholder="Search competitions by name, date, or location..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
-          </div>
-          <Button variant="outline" onClick={() => handleSort('competition_date')} className="flex items-center gap-2">
-            <ArrowUpDown className="w-4 h-4" />
-            Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
-          </Button>
-        </div>
-        <div className="flex items-center gap-2">
-          <ColumnSelector 
-            columns={columns}
-            onToggleColumn={toggleColumn}
-            isLoading={columnsLoading}
-          />
-          {!readOnly && canCreate && (
-            <Button onClick={() => setShowAddDialog(true)}>
-              <Plus className="w-4 h-4 mr-2" />
-              Add Competition
+        <div className="flex items-center justify-between mt-4">
+          <div className="flex items-center gap-4">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+              <Input placeholder="Search competitions by name, date, or location..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
+            </div>
+            <Button variant="outline" onClick={() => handleSort('competition_date')} className="flex items-center gap-2">
+              <ArrowUpDown className="w-4 h-4" />
+              Sort by Date {sortConfig?.key === 'competition_date' && (sortConfig.direction === 'asc' ? '↑' : '↓')}
             </Button>
-          )}
+          </div>
+          <div className="flex items-center gap-2">
+            <ColumnSelector 
+              columns={columns}
+              onToggleColumn={toggleColumn}
+              isLoading={columnsLoading}
+            />
+            {!readOnly && canCreate && (
+              <Button onClick={() => setShowAddDialog(true)}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Competition
+              </Button>
+            )}
+          </div>
         </div>
-      </div>
 
-      <BasicCompetitionTable 
-        competitions={sortedData} 
-        isLoading={isLoading} 
-        onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
-        onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
-        onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onView={canViewDetails ? setViewingCompetition : undefined}
-        visibleColumns={visibleColumns}
-        canViewDetails={canViewDetails}
-      />
+        <TabsContent value="active" className="space-y-4">
+          <BasicCompetitionTable 
+            competitions={sortedData} 
+            isLoading={isLoading} 
+            onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
+            onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
+            onCancel={readOnly || !canUpdate ? undefined : cancelCompetition}
+            onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
+            onView={canViewDetails ? setViewingCompetition : undefined}
+            visibleColumns={visibleColumns}
+            canViewDetails={canViewDetails}
+          />
+        </TabsContent>
+
+        <TabsContent value="non-active" className="space-y-4">
+          <BasicCompetitionTable 
+            competitions={sortedData} 
+            isLoading={isLoading} 
+            onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
+            onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
+            onCancel={readOnly || !canUpdate ? undefined : cancelCompetition}
+            onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
+            onView={canViewDetails ? setViewingCompetition : undefined}
+            visibleColumns={visibleColumns}
+            canViewDetails={canViewDetails}
+          />
+        </TabsContent>
+      </Tabs>
 
       {!readOnly && canCreate && (
         <>

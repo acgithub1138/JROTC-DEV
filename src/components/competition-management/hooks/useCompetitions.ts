@@ -100,6 +100,29 @@ export const useCompetitions = () => {
     }
   };
 
+  const cancelCompetition = async (id: string) => {
+    try {
+      const { data, error } = await supabase
+        .from('competitions')
+        .update({ status: 'cancelled' })
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setCompetitions(prev => 
+        prev.map(comp => comp.id === id ? data : comp)
+      );
+      toast.success('Competition cancelled successfully');
+      return data;
+    } catch (error) {
+      console.error('Error cancelling competition:', error);
+      toast.error('Failed to cancel competition');
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchCompetitions();
   }, [userProfile?.school_id]);
@@ -110,6 +133,7 @@ export const useCompetitions = () => {
     createCompetition,
     updateCompetition,
     deleteCompetition,
+    cancelCompetition,
     refetch: fetchCompetitions
   };
 };

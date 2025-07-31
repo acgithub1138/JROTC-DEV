@@ -10,6 +10,7 @@ export interface Competition {
   comp_type?: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   teams?: string[];
   cadets?: string[];
+  status?: 'active' | 'cancelled' | 'completed' | 'draft';
   overall_placement?: CompetitionPlacement;
   overall_armed_placement?: CompetitionPlacement;
   overall_unarmed_placement?: CompetitionPlacement;
