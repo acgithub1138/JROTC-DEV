@@ -251,7 +251,7 @@ const MainApplication = () => {
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/templates" element={
+            <Route path="/competition-portal/judges" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>

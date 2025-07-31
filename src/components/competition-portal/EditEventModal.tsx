@@ -88,7 +88,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         name: formData.name,
         description: formData.description || null,
         score_sheet: formData.score_sheet || null,
-        jrotc_program: formData.jrotc_program || null
+        jrotc_program: (formData.jrotc_program as any) || null
       });
       
       onOpenChange(false);

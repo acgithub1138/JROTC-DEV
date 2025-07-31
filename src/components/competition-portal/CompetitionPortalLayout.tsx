@@ -6,6 +6,7 @@ import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
 import { EventsPage } from './EventsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
+import { JudgesPage } from './JudgesPage';
 
 const CompetitionPortalLayout = () => {
   const [activeModule, setActiveModule] = useState('competition-dashboard');
@@ -21,7 +22,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/events': 'events',
     '/app/competition-portal/teams': 'teams',
     '/app/competition-portal/score-sheets': 'score-sheets',
-    '/app/competition-portal/templates': 'templates',
+    '/app/competition-portal/judges': 'judges',
     '/app/competition-portal/analytics': 'analytics',
     '/app/competition-portal/settings': 'competition-settings',
   };
@@ -33,7 +34,7 @@ const CompetitionPortalLayout = () => {
     'events': '/app/competition-portal/events',
     'teams': '/app/competition-portal/teams',
     'score-sheets': '/app/competition-portal/score-sheets',
-    'templates': '/app/competition-portal/templates',
+    'judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
     'competition-settings': '/app/competition-portal/settings',
   };
@@ -66,8 +67,8 @@ const CompetitionPortalLayout = () => {
       return <div className="p-6"><h1 className="text-2xl font-bold">Teams & Participants</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/score-sheets') {
       return <ScoreSheetsPage />;
-    } else if (path === '/app/competition-portal/templates') {
-      return <div className="p-6"><h1 className="text-2xl font-bold">Templates</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/judges') {
+      return <JudgesPage />;
     } else if (path === '/app/competition-portal/analytics') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/settings') {

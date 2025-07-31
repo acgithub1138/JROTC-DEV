@@ -53,10 +53,10 @@ const competitionMenuItems = [{
   icon: Users,
   path: '/app/competition-portal/teams'
 }, {
-  id: 'templates',
-  label: 'Templates',
-  icon: FileText,
-  path: '/app/competition-portal/templates'
+  id: 'judges',
+  label: 'Judges',
+  icon: Shield,
+  path: '/app/competition-portal/judges'
 }, {
   id: 'analytics',
   label: 'Analytics & Reports',

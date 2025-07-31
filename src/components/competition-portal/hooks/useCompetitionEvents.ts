@@ -3,22 +3,12 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 
-// Define the updated types based on actual database structure
-type CpEvent = {
-  id: string;
-  school_id: string;
-  name: string;
-  description?: string | null;
-  score_sheet?: string | null;
-  jrotc_program?: string | null;
-  created_at: string;
-  updated_at: string;
-  created_by?: string | null;
-  active?: boolean;
-};
+// Import the proper types from Supabase
+import { Database } from '@/integrations/supabase/types';
 
-type CpEventInsert = Omit<CpEvent, 'id' | 'created_at' | 'updated_at'>;
-type CpEventUpdate = Partial<Omit<CpEvent, 'id' | 'created_at' | 'updated_at'>>;
+type CpEvent = Database['public']['Tables']['cp_events']['Row'];
+type CpEventInsert = Database['public']['Tables']['cp_events']['Insert'];
+type CpEventUpdate = Database['public']['Tables']['cp_events']['Update'];
 
 export const useCompetitionEvents = () => {
   const { userProfile } = useAuth();
