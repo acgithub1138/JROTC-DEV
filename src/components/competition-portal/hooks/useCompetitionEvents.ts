@@ -13,6 +13,7 @@ type CpEvent = {
   created_at: string;
   updated_at: string;
   created_by?: string | null;
+  active?: boolean;
 };
 
 type CpEventInsert = Omit<CpEvent, 'id' | 'created_at' | 'updated_at'>;
@@ -28,14 +29,18 @@ export const useCompetitionEvents = () => {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      const query = supabase
         .from('cp_events')
         .select('*')
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: false });
+      
+      const { data, error } = await query;
 
       if (error) throw error;
-      setEvents(data || []);
+      // Filter out inactive events on the client side until types are updated
+      const activeEvents = (data || []).filter((event: any) => event.active !== false);
+      setEvents(activeEvents);
     } catch (error) {
       console.error('Error fetching competition events:', error);
       toast.error('Failed to load events');
@@ -97,16 +102,16 @@ export const useCompetitionEvents = () => {
     try {
       const { error } = await supabase
         .from('cp_events')
-        .delete()
+        .update({ active: false } as any)
         .eq('id', id);
 
       if (error) throw error;
 
       setEvents(prev => prev.filter(event => event.id !== id));
-      toast.success('Event deleted successfully');
+      toast.success('Event archived successfully');
     } catch (error) {
-      console.error('Error deleting event:', error);
-      toast.error('Failed to delete event');
+      console.error('Error archiving event:', error);
+      toast.error('Failed to archive event');
       throw error;
     }
   };
