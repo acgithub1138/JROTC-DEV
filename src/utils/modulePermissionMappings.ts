@@ -49,6 +49,15 @@ export const modulePermissionMappings = {
   ],
   'cp_judges': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_comp_schools': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_comp_events': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_comp_resources': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ]
 };
 
