@@ -112,6 +112,10 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       // Keep dialog open on error so user can retry
     }
   };
+
+  const handleViewScoreSheets = (competition: any) => {
+    navigate(`/app/competitions/score-sheets/${competition.id}`);
+  };
   return <div className="space-y-6">
       <div>
         
@@ -150,6 +154,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
         onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
+        onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         onView={canViewDetails ? setViewingCompetition : undefined}
         visibleColumns={visibleColumns}
         canViewDetails={canViewDetails}
