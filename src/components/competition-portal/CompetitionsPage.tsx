@@ -12,7 +12,6 @@ import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
-
 interface Competition {
   id: string;
   name: string;
@@ -29,14 +28,14 @@ interface Competition {
   created_at: string;
   created_by?: string;
 }
-
 interface School {
   id: string;
   name: string;
 }
-
 const CompetitionsPage = () => {
-  const { userProfile } = useAuth();
+  const {
+    userProfile
+  } = useAuth();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [loading, setLoading] = useState(true);
@@ -45,20 +44,19 @@ const CompetitionsPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
-
   useEffect(() => {
     fetchCompetitions();
     fetchSchools();
   }, []);
-
   const fetchCompetitions = async () => {
     try {
       setLoading(true);
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('*')
-        .order('start_date', { ascending: true });
-
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('*').order('start_date', {
+        ascending: true
+      });
       if (error) throw error;
       setCompetitions(data || []);
     } catch (error) {
@@ -68,65 +66,57 @@ const CompetitionsPage = () => {
       setLoading(false);
     }
   };
-
   const fetchSchools = async () => {
     try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('id, name')
-        .order('name');
-
+      const {
+        data,
+        error
+      } = await supabase.from('schools').select('id, name').order('name');
       if (error) throw error;
       setSchools(data || []);
     } catch (error) {
       console.error('Error fetching schools:', error);
     }
   };
-
   const getSchoolName = (schoolId: string) => {
     const school = schools.find(s => s.id === schoolId);
     return school?.name || 'Unknown School';
   };
-
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'draft': return 'secondary';
-      case 'open': return 'default';
-      case 'registration_closed': return 'outline';
-      case 'in_progress': return 'default';
-      case 'completed': return 'secondary';
-      case 'cancelled': return 'destructive';
-      default: return 'secondary';
+      case 'draft':
+        return 'secondary';
+      case 'open':
+        return 'default';
+      case 'registration_closed':
+        return 'outline';
+      case 'in_progress':
+        return 'default';
+      case 'completed':
+        return 'secondary';
+      case 'cancelled':
+        return 'destructive';
+      default:
+        return 'secondary';
     }
   };
-
   const filteredCompetitions = competitions.filter(competition => {
-    const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         competition.location.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                         getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
-    
+    const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
-    
     return matchesSearch && matchesStatus;
   });
-
-  const canCreateCompetition = userProfile?.role === 'admin' || 
-                               userProfile?.role === 'instructor' || 
-                               userProfile?.role === 'command_staff';
-
+  const canCreateCompetition = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const handleCreateCompetition = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('cp_competitions')
-        .insert([{
-          ...data,
-          school_id: userProfile?.school_id,
-          created_by: userProfile?.id,
-          status: 'draft'
-        }]);
-
+      const {
+        error
+      } = await supabase.from('cp_competitions').insert([{
+        ...data,
+        school_id: userProfile?.school_id,
+        created_by: userProfile?.id,
+        status: 'draft'
+      }]);
       if (error) throw error;
-      
       toast.success('Competition created successfully');
       fetchCompetitions();
       setShowCreateDialog(false);
@@ -135,41 +125,32 @@ const CompetitionsPage = () => {
       toast.error('Failed to create competition');
     }
   };
-
   const handleViewCompetition = (competition: Competition) => {
     setSelectedCompetition(competition);
     setShowViewModal(true);
   };
-
   const handleEditCompetition = (competition: Competition) => {
     // TODO: Implement edit functionality
     toast.info('Edit functionality coming soon');
   };
-
   if (loading) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center justify-center h-64">
           <div className="text-lg">Loading competitions...</div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Competitions</h1>
           <p className="text-muted-foreground">Manage tournament competitions and events</p>
         </div>
-        {canCreateCompetition && (
-          <Button onClick={() => setShowCreateDialog(true)}>
+        {canCreateCompetition && <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Competition
-          </Button>
-        )}
+          </Button>}
       </div>
 
       {/* Filters */}
@@ -179,12 +160,7 @@ const CompetitionsPage = () => {
             <div className="flex-1">
               <div className="relative">
                 <Search className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                <Input
-                  placeholder="Search competitions..."
-                  value={searchTerm}
-                  onChange={(e) => setSearchTerm(e.target.value)}
-                  className="pl-10"
-                />
+                <Input placeholder="Search competitions..." value={searchTerm} onChange={e => setSearchTerm(e.target.value)} className="pl-10" />
               </div>
             </div>
             <div className="min-w-[200px]">
@@ -209,22 +185,14 @@ const CompetitionsPage = () => {
       </Card>
 
       {/* Competitions Table */}
-      {filteredCompetitions.length === 0 ? (
-        <Card>
+      {filteredCompetitions.length === 0 ? <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
               {competitions.length === 0 ? 'No competitions found.' : 'No competitions match your search criteria.'}
             </div>
           </CardContent>
-        </Card>
-      ) : (
-        <Card>
-          <CardHeader>
-            <CardTitle>All Competitions</CardTitle>
-            <CardDescription>
-              Showing {filteredCompetitions.length} of {competitions.length} competitions
-            </CardDescription>
-          </CardHeader>
+        </Card> : <Card>
+          
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
@@ -239,23 +207,15 @@ const CompetitionsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCompetitions.map((competition) => (
-                    <TableRow key={competition.id}>
+                  {filteredCompetitions.map(competition => <TableRow key={competition.id}>
                       <TableCell>
-                        <button
-                          onClick={() => handleViewCompetition(competition)}
-                          className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
-                        >
+                        <button onClick={() => handleViewCompetition(competition)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                           {competition.name}
                         </button>
                       </TableCell>
                       <TableCell>
                         <div className="max-w-xs">
-                          {competition.description ? (
-                            <span className="text-sm">{competition.description}</span>
-                          ) : (
-                            <span className="text-sm text-muted-foreground">-</span>
-                          )}
+                          {competition.description ? <span className="text-sm">{competition.description}</span> : <span className="text-sm text-muted-foreground">-</span>}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -264,11 +224,9 @@ const CompetitionsPage = () => {
                             <CalendarDays className="w-4 h-4 mr-1 text-muted-foreground" />
                             {format(new Date(competition.start_date), 'MMM d, yyyy')}
                           </div>
-                          {competition.start_date !== competition.end_date && (
-                            <div className="text-xs text-muted-foreground">
+                          {competition.start_date !== competition.end_date && <div className="text-xs text-muted-foreground">
                               to {format(new Date(competition.end_date), 'MMM d, yyyy')}
-                            </div>
-                          )}
+                            </div>}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -285,43 +243,23 @@ const CompetitionsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleEditCompetition(competition)}
-                              className="h-8 w-8 p-0"
-                            >
+                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && <Button variant="ghost" size="sm" onClick={() => handleEditCompetition(competition)} className="h-8 w-8 p-0">
                               <Edit className="h-4 w-4" />
-                            </Button>
-                          )}
+                            </Button>}
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Create Competition Dialog */}
-      <CompetitionDialog
-        open={showCreateDialog}
-        onOpenChange={setShowCreateDialog}
-        onSubmit={handleCreateCompetition}
-      />
+      <CompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
       {/* View Competition Modal */}
-      <ViewCompetitionModal
-        competition={selectedCompetition}
-        open={showViewModal}
-        onOpenChange={setShowViewModal}
-        hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''}
-      />
-    </div>
-  );
+      <ViewCompetitionModal competition={selectedCompetition} open={showViewModal} onOpenChange={setShowViewModal} hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} />
+    </div>;
 };
-
 export default CompetitionsPage;
