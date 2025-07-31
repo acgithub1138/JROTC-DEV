@@ -25,6 +25,10 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     name: competition?.name || '',
     description: competition?.description || '',
     location: competition?.location || '',
+    address: '',
+    city: '',
+    state: '',
+    zip: '',
     competition_date: competition?.competition_date || '',
     comp_type: competition?.comp_type || 'air_force',
     overall_placement: competition?.overall_placement || 'NA',
@@ -95,6 +99,32 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     setFormData(prev => ({ ...prev, [field]: value }));
   };
 
+  const handleLocationSelect = async (selectedLocation: string) => {
+    updateFormData('location', selectedLocation);
+    
+    // Parse the address from the selected location
+    try {
+      const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(selectedLocation)}&format=json&addressdetails=1&limit=1`);
+      const data = await response.json();
+      
+      if (data && data.length > 0) {
+        const addressDetails = data[0].address;
+        
+        // Extract address components
+        const houseNumber = addressDetails.house_number || '';
+        const road = addressDetails.road || '';
+        const fullAddress = `${houseNumber} ${road}`.trim();
+        
+        updateFormData('address', fullAddress);
+        updateFormData('city', addressDetails.city || addressDetails.town || addressDetails.village || '');
+        updateFormData('state', addressDetails.state || '');
+        updateFormData('zip', addressDetails.postcode || '');
+      }
+    } catch (error) {
+      console.error('Error parsing address:', error);
+    }
+  };
+
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -137,12 +167,56 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
       </div>
 
       <div className="space-y-2">
-        <Label htmlFor="location">Location</Label>
+        <Label htmlFor="location">Location Search</Label>
         <AddressLookupField
           value={formData.location}
-          onValueChange={(value) => updateFormData('location', value)}
-          placeholder="Enter location or search address"
+          onValueChange={handleLocationSelect}
+          placeholder="Search for an address to auto-fill location details"
         />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="address">Address</Label>
+          <Input
+            id="address"
+            value={formData.address}
+            onChange={(e) => updateFormData('address', e.target.value)}
+            placeholder="Street address"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="city">City</Label>
+          <Input
+            id="city"
+            value={formData.city}
+            onChange={(e) => updateFormData('city', e.target.value)}
+            placeholder="City"
+          />
+        </div>
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <div className="space-y-2">
+          <Label htmlFor="state">State</Label>
+          <Input
+            id="state"
+            value={formData.state}
+            onChange={(e) => updateFormData('state', e.target.value)}
+            placeholder="State"
+          />
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="zip">Zip Code</Label>
+          <Input
+            id="zip"
+            value={formData.zip}
+            onChange={(e) => updateFormData('zip', e.target.value)}
+            placeholder="Zip code"
+          />
+        </div>
       </div>
 
       <div className="space-y-2">
