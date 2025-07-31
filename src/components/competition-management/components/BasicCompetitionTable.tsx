@@ -160,16 +160,6 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 {isColumnVisible('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
                 <TableCell className="text-right">
                   <div className="flex items-center justify-center gap-2">
-                    {onViewScoreSheets && canViewDetails && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Score Sheets</p>
-                        </TooltipContent>
-                       </Tooltip>}
                     {onAddEvent && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="default" size="icon" className="h-6 w-6" onClick={() => onAddEvent(competition)}>
@@ -178,6 +168,16 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>Add Event Score Sheet</p>
+                        </TooltipContent>
+                       </Tooltip>}
+                    {onViewScoreSheets && canViewDetails && <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
+                            <Eye className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Score Sheets</p>
                         </TooltipContent>
                        </Tooltip>}
                     {onEdit && <Tooltip>
