@@ -24,7 +24,7 @@ const getRoleColor = (roleName: string): string => {
   const colorMap: Record<string, string> = {
     instructor: 'bg-purple-100 text-purple-800',
     command_staff: 'bg-blue-100 text-blue-800',
-    cadet: 'bg-green-100 text-green-800',
+    cadet: 'bg-green-100 text-green-800'
   };
   return colorMap[roleName] || 'bg-gray-100 text-gray-800';
 };
@@ -97,35 +97,40 @@ export const RoleManagementPage: React.FC = () => {
     isResetting,
     refreshData
   } = useRoleManagement();
-  const { allRoles, isLoadingAllRoles } = useDynamicRoles();
-  const { toast } = useToast();
+  const {
+    allRoles,
+    isLoadingAllRoles
+  } = useDynamicRoles();
+  const {
+    toast
+  } = useToast();
 
   // Convert dynamic roles to the expected format, excluding admin and parent for role management UI
   const availableRoles = useMemo(() => {
     if (!allRoles?.length) return [];
-    
-    return allRoles
-      .filter(role => !['admin'].includes(role.role_name))
-      .map(role => ({
-        value: role.role_name as UserRole,
-        label: role.role_label
-      }));
+    return allRoles.filter(role => !['admin'].includes(role.role_name)).map(role => ({
+      value: role.role_name as UserRole,
+      label: role.role_label
+    }));
   }, [allRoles]);
 
   // Use database-backed column ordering
   const defaultActionIds = React.useMemo(() => actions.map(action => action.id), [actions]);
-  const { actionOrder, setActionOrder, isLoading: isLoadingOrder } = useRoleManagementColumnOrder(defaultActionIds);
-  
+  const {
+    actionOrder,
+    setActionOrder,
+    isLoading: isLoadingOrder
+  } = useRoleManagementColumnOrder(defaultActionIds);
+
   // Create ordered actions based on saved order
   const orderedActions = React.useMemo(() => {
     if (actions.length === 0 || actionOrder.length === 0) return actions;
-    
+
     // Map action IDs to actual action objects
     const orderedActionObjects = actionOrder.map(id => actions.find(action => action.id === id)).filter(Boolean);
-    
+
     // Add any new actions that might not be in the saved order
     const missingActions = actions.filter(action => !actionOrder.includes(action.id));
-    
     return [...orderedActionObjects, ...missingActions];
   }, [actions, actionOrder]);
 
@@ -134,12 +139,15 @@ export const RoleManagementPage: React.FC = () => {
     coordinateGetter: sortableKeyboardCoordinates
   }));
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+    const {
+      active,
+      over
+    } = event;
     if (over && active.id !== over.id) {
       const oldIndex = actionOrder.findIndex(id => id === active.id);
       const newIndex = actionOrder.findIndex(id => id === over.id);
       const newOrder = arrayMove(actionOrder, oldIndex, newIndex);
-      
+
       // Save the new order to database
       setActionOrder(newOrder);
     }
@@ -232,11 +240,9 @@ export const RoleManagementPage: React.FC = () => {
                       <SelectValue placeholder="Select a role" />
                     </SelectTrigger>
                     <SelectContent>
-                      {isLoadingAllRoles ? (
-                        <SelectItem value="loading" disabled>
+                      {isLoadingAllRoles ? <SelectItem value="loading" disabled>
                           Loading roles...
-                        </SelectItem>
-                      ) : availableRoles.map(role => {
+                        </SelectItem> : availableRoles.map(role => {
                         const {
                           enabled,
                           total
@@ -271,38 +277,7 @@ export const RoleManagementPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="mb-6">
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Select Role
-                </label>
-                <div className="flex items-center gap-4">
-                  <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
-                    <SelectTrigger className="w-64">
-                      <SelectValue placeholder="Select a role" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {isLoadingAllRoles ? (
-                        <SelectItem value="loading" disabled>
-                          Loading roles...
-                        </SelectItem>
-                      ) : availableRoles.map(role => {
-                        const {
-                          enabled,
-                          total
-                        } = getPermissionCount(role.value);
-                        return <SelectItem key={role.value} value={role.value}>
-                              <div className="flex items-center justify-between w-full">
-                                <span>{role.label}</span>
-                                <Badge variant="secondary" className="ml-2">
-                                  {enabled}/{total}
-                                </Badge>
-                              </div>
-                            </SelectItem>;
-                      })}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              
 
               <Tabs defaultValue="ccc" className="w-full">
                 <TabsList className="mb-6">
@@ -311,31 +286,11 @@ export const RoleManagementPage: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="ccc">
-                  <PortalPermissionsTable 
-                    portal="ccc"
-                    modules={modules}
-                    actions={actions}
-                    orderedActions={orderedActions}
-                    rolePermissions={rolePermissions}
-                    isUpdating={isUpdating}
-                    sensors={sensors}
-                    handleDragEnd={handleDragEnd}
-                    handlePermissionChange={handlePermissionChange}
-                  />
+                  <PortalPermissionsTable portal="ccc" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
                 </TabsContent>
 
                 <TabsContent value="competition">
-                  <PortalPermissionsTable 
-                    portal="competition"
-                    modules={modules}
-                    actions={actions}
-                    orderedActions={orderedActions}
-                    rolePermissions={rolePermissions}
-                    isUpdating={isUpdating}
-                    sensors={sensors}
-                    handleDragEnd={handleDragEnd}
-                    handlePermissionChange={handlePermissionChange}
-                  />
+                  <PortalPermissionsTable portal="competition" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
                 </TabsContent>
               </Tabs>
             </CardContent>
