@@ -38,6 +38,11 @@ const competitionMenuItems = [{
   icon: Award,
   path: '/app/competition-portal/competitions'
 }, {
+  id: 'score-sheets',
+  label: 'Score Sheets',
+  icon: Clipboard,
+  path: '/app/competition-portal/score-sheets'
+},{
   id: 'events',
   label: 'Events',
   icon: Calendar,
@@ -47,11 +52,6 @@ const competitionMenuItems = [{
   label: 'Teams & Participants',
   icon: Users,
   path: '/app/competition-portal/teams'
-}, {
-  id: 'score-sheets',
-  label: 'Score Sheets',
-  icon: Clipboard,
-  path: '/app/competition-portal/score-sheets'
 }, {
   id: 'templates',
   label: 'Templates',
