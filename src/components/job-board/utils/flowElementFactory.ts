@@ -54,6 +54,11 @@ export const createFlowEdges = (
   jobs.forEach(job => {
     if (job.connections && job.connections.length > 0) {
       job.connections.forEach(connection => {
+        // Skip connections with "NA" target role as it's not an actual job
+        if (connection.target_role === 'NA') {
+          return;
+        }
+        
         // Find the target job by role
         const targetJob = jobs.find(j => j.role === connection.target_role);
         if (!targetJob) {
