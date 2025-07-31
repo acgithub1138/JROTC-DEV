@@ -5,7 +5,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, Edit2, Save, X, Lightbulb, Globe } from 'lucide-react';
+import { Trash2, Plus, Edit2, Save, X, Lightbulb, Globe, Sparkles } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { Separator } from '@/components/ui/separator';
 
@@ -47,6 +47,9 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
   const [editingName, setEditingName] = useState('');
   const [suggestions, setSuggestions] = useState<SimilarMapping[]>([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [allSuggestions, setAllSuggestions] = useState<Array<{criteria: string, suggestions: SimilarMapping[]}>>([]);
+  const [showAllSuggestions, setShowAllSuggestions] = useState(false);
+  const [loadingSuggestions, setLoadingSuggestions] = useState(false);
 
   // Get criteria that are not yet mapped
   const unmappedCriteria = availableCriteria.filter(criteria => 
@@ -121,6 +124,51 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
   const handleUseSuggestion = (suggestion: SimilarMapping) => {
     setNewMappingName(suggestion.display_name);
     setShowSuggestions(false);
+  };
+
+  const handleGetAllSuggestions = async () => {
+    if (!findSimilarMappings || unmappedCriteria.length === 0) return;
+    
+    setLoadingSuggestions(true);
+    try {
+      const allSuggestionsData = await Promise.all(
+        unmappedCriteria.map(async (criteria) => {
+          const suggestions = await findSimilarMappings(criteria);
+          return {
+            criteria,
+            suggestions: suggestions.filter(s => s.similarity_score > 0.1).slice(0, 3)
+          };
+        })
+      );
+      
+      setAllSuggestions(allSuggestionsData.filter(item => item.suggestions.length > 0));
+      setShowAllSuggestions(true);
+    } catch (error) {
+      console.error('Failed to load suggestions:', error);
+    } finally {
+      setLoadingSuggestions(false);
+    }
+  };
+
+  const handleAcceptSuggestion = (criteria: string, suggestion: SimilarMapping) => {
+    const newMapping: CriteriaMapping = {
+      id: Date.now().toString(),
+      displayName: suggestion.display_name,
+      originalCriteria: [criteria]
+    };
+    
+    onMappingsChange([...mappings, newMapping]);
+    
+    // Remove this criteria from all suggestions
+    setAllSuggestions(prev => 
+      prev.filter(item => item.criteria !== criteria)
+    );
+  };
+
+  const handleRejectSuggestion = (criteria: string) => {
+    setAllSuggestions(prev => 
+      prev.filter(item => item.criteria !== criteria)
+    );
   };
 
   if (!selectedEvent || availableCriteria.length === 0) {
@@ -239,6 +287,106 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                     </div>
                   </div>
                 </div>
+              </div>
+            )}
+
+            {/* See Suggested Mappings Button */}
+            {unmappedCriteria.length > 0 && findSimilarMappings && (
+              <div className="border-t pt-4">
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h4 className="font-medium flex items-center gap-2">
+                      <Sparkles className="h-4 w-4 text-blue-500" />
+                      AI-Powered Suggestions
+                    </h4>
+                    <p className="text-sm text-muted-foreground">
+                      See what other schools have named similar criteria
+                    </p>
+                  </div>
+                  <Button 
+                    onClick={handleGetAllSuggestions}
+                    disabled={loadingSuggestions}
+                    variant="outline"
+                    className="flex items-center gap-2"
+                  >
+                    <Globe className="h-4 w-4" />
+                    {loadingSuggestions ? 'Loading...' : 'See Suggested Mappings'}
+                  </Button>
+                </div>
+
+                {/* All Suggestions Display */}
+                {showAllSuggestions && allSuggestions.length > 0 && (
+                  <div className="space-y-4 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg p-4">
+                    <div className="flex items-center justify-between">
+                      <h5 className="font-medium text-blue-900">Smart Mapping Suggestions</h5>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowAllSuggestions(false)}
+                        className="text-blue-700 hover:text-blue-900"
+                      >
+                        <X className="h-4 w-4" />
+                      </Button>
+                    </div>
+                    
+                    <div className="space-y-3">
+                      {allSuggestions.map((item) => (
+                        <div key={item.criteria} className="bg-white rounded-lg border p-3">
+                          <div className="font-medium text-sm mb-2 text-gray-900">
+                            "{item.criteria}"
+                          </div>
+                          <div className="space-y-2">
+                            {item.suggestions.map((suggestion, index) => (
+                              <div key={suggestion.id} className="flex items-center justify-between bg-gray-50 rounded p-2">
+                                <div className="flex-1">
+                                  <div className="font-medium text-sm text-gray-900">
+                                    {suggestion.display_name}
+                                  </div>
+                                  <div className="text-xs text-gray-600">
+                                    Used by {suggestion.usage_count} schools
+                                  </div>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Badge 
+                                    variant="outline" 
+                                    className="text-xs bg-green-50 text-green-700 border-green-200"
+                                  >
+                                    {Math.round(suggestion.similarity_score * 100)}% match
+                                  </Badge>
+                                  <Button
+                                    size="sm"
+                                    onClick={() => handleAcceptSuggestion(item.criteria, suggestion)}
+                                    className="h-7 px-3 text-xs bg-green-600 hover:bg-green-700"
+                                  >
+                                    Accept
+                                  </Button>
+                                </div>
+                              </div>
+                            ))}
+                          </div>
+                          <div className="mt-2 pt-2 border-t border-gray-200">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleRejectSuggestion(item.criteria)}
+                              className="text-xs text-gray-600 hover:text-gray-800"
+                            >
+                              No suggestions work - I'll create my own
+                            </Button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {showAllSuggestions && allSuggestions.length === 0 && (
+                  <div className="text-center text-muted-foreground py-8 bg-gray-50 rounded-lg border-2 border-dashed">
+                    <Lightbulb className="h-8 w-8 mx-auto mb-2 text-gray-400" />
+                    <p className="font-medium">No suggestions found</p>
+                    <p className="text-sm">These criteria appear to be unique to your competition.</p>
+                  </div>
+                )}
               </div>
             )}
 
