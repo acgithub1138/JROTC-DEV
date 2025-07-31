@@ -16,6 +16,7 @@ interface BasicCompetitionTableProps {
   onDelete: (id: string) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
+  onView?: (competition: any) => void;
   visibleColumns?: string[];
   canViewDetails?: boolean;
 }
@@ -81,6 +82,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onDelete,
   onAddEvent,
   onViewScoreSheets,
+  onView,
   visibleColumns = [],
   canViewDetails = false
 }) => {
@@ -96,7 +98,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
-    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} canViewDetails={canViewDetails} />;
+    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} onView={onView} canViewDetails={canViewDetails} />;
   }
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
@@ -130,9 +132,9 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
             {competitions.map(competition => <TableRow key={competition.id}>
                 {isColumnVisible('name') && (
                   <TableCell className="font-medium py-[8px]">
-                    {canViewDetails ? (
+                    {onView ? (
                       <button
-                        onClick={() => onEdit(competition)}
+                        onClick={() => onView(competition)}
                         className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
                       >
                         {competition.name}
@@ -167,17 +169,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         <TooltipContent>
                           <p>Add Event Score Sheet</p>
                         </TooltipContent>
-                      </Tooltip>}
-                    {onViewScoreSheets && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Score Sheets</p>
-                        </TooltipContent>
-                      </Tooltip>}
+                       </Tooltip>}
                     {onEdit && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(competition)}>

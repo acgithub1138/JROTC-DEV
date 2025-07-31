@@ -7,7 +7,7 @@ import { ColumnSelector } from '@/components/ui/column-selector';
 import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
-import { ViewScoreSheetDialog } from '../components/ViewScoreSheetDialog';
+import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
@@ -43,6 +43,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const { canViewDetails } = useTablePermissions('competitions');
   const [showAddDialog, setShowAddDialog] = useState(false);
   const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
+  const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
@@ -101,9 +102,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     setSelectedCompetition(competition);
     setShowAddEventDialog(true);
   };
-  const handleViewScoreSheets = (competition: Competition) => {
-    navigate(`/app/competitions/score-sheets/${competition.id}`);
-  };
   const handleEventCreated = async (eventData: any) => {
     try {
       await createEvent(eventData);
@@ -152,7 +150,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
         onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
+        onView={canViewDetails ? setViewingCompetition : undefined}
         visibleColumns={visibleColumns}
         canViewDetails={canViewDetails}
       />
@@ -168,6 +166,18 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
 
           {selectedCompetition && <AddEventDialog open={showAddEventDialog} onOpenChange={setShowAddEventDialog} competitionId={selectedCompetition.id} onEventCreated={handleEventCreated} />}
         </>
+      )}
+
+      {viewingCompetition && (
+        <ViewCompetitionDialog
+          open={!!viewingCompetition}
+          onOpenChange={() => setViewingCompetition(null)}
+          competition={viewingCompetition}
+          onEdit={() => {
+            setEditingCompetition(viewingCompetition);
+            setViewingCompetition(null);
+          }}
+        />
       )}
     </div>;
 };

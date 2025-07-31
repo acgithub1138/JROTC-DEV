@@ -14,6 +14,7 @@ interface CompetitionCardsProps {
   onDelete: (id: string) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
+  onView?: (competition: any) => void;
   canViewDetails?: boolean;
 }
 
@@ -67,6 +68,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
   onDelete,
   onAddEvent,
   onViewScoreSheets,
+  onView,
   canViewDetails = false
 }) => {
   if (isLoading) {
@@ -106,10 +108,10 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
             <CardHeader className="pb-3">
               <div className="flex items-start justify-between">
                 <div className="flex-1">
-                  {canViewDetails ? (
+                  {onView ? (
                     <CardTitle 
                       className="text-lg font-semibold line-clamp-2 text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline"
-                      onClick={() => onEdit(competition)}
+                      onClick={() => onView(competition)}
                     >
                       {competition.name}
                     </CardTitle>
@@ -133,18 +135,6 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>Add Event Score Sheet</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                  {onViewScoreSheets && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="outline" size="sm" onClick={() => onViewScoreSheets(competition)}>
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>View Score Sheets</p>
                       </TooltipContent>
                     </Tooltip>
                   )}
