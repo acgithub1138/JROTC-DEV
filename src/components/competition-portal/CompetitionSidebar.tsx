@@ -39,7 +39,7 @@ const competitionMenuItems = [{
   path: '/app/competition-portal/competitions'
 }, {
   id: 'events',
-  label: 'Events & Scheduling',
+  label: 'Events',
   icon: Calendar,
   path: '/app/competition-portal/events'
 }, {
