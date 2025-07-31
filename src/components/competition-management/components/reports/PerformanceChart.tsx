@@ -119,9 +119,9 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             />
             <Tooltip 
               labelFormatter={formatTooltipDate}
-              trigger="click"
               content={({ active, payload, label }) => {
-                if (active && payload && payload.length === 1) {
+                if (active && payload && payload.length > 0) {
+                  // Show only the first item in payload (the hovered line)
                   const data = payload[0];
                   return (
                     <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
