@@ -81,11 +81,9 @@ export const EventsPage = () => {
               <TableHeader>
                 <TableRow>
                   <TableHead>Event Name</TableHead>
-                  <TableHead>Competition</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Time</TableHead>
-                  <TableHead>Max Participants</TableHead>
-                  <TableHead>SOP</TableHead>
+                  <TableHead>Description</TableHead>
+                  <TableHead>Score Sheet</TableHead>
+                  <TableHead>Created</TableHead>
                   <TableHead>Actions</TableHead>
                 </TableRow>
               </TableHeader>
@@ -93,26 +91,15 @@ export const EventsPage = () => {
                 {events.map((event) => (
                   <TableRow key={event.id}>
                     <TableCell className="font-medium">{event.name}</TableCell>
+                    <TableCell>{event.description || 'No description'}</TableCell>
                     <TableCell>
-                      {(event as any).cp_competitions?.name || 'Unknown'}
+                      {event.score_sheet ? (
+                        <Badge variant="default">Assigned</Badge>
+                      ) : (
+                        <Badge variant="secondary">No template</Badge>
+                      )}
                     </TableCell>
-                    <TableCell>{formatDate(event.event_date)}</TableCell>
-                    <TableCell>
-                      {event.start_time && event.end_time 
-                        ? `${formatTime(event.start_time)} - ${formatTime(event.end_time)}`
-                        : event.start_time 
-                        ? formatTime(event.start_time)
-                        : 'Not set'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      {event.max_participants ? event.max_participants.toString() : 'Unlimited'}
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={event.sop === 'text' ? 'default' : 'secondary'}>
-                        {event.sop === 'text' ? 'Text' : 'Link'}
-                      </Badge>
-                    </TableCell>
+                    <TableCell>{formatDate(event.created_at)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Button

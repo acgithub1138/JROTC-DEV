@@ -2,11 +2,21 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
-import type { Database } from '@/integrations/supabase/types';
 
-type CpEvent = Database['public']['Tables']['cp_events']['Row'];
-type CpEventInsert = Database['public']['Tables']['cp_events']['Insert'];
-type CpEventUpdate = Database['public']['Tables']['cp_events']['Update'];
+// Define the updated types based on actual database structure
+type CpEvent = {
+  id: string;
+  school_id: string;
+  name: string;
+  description?: string | null;
+  score_sheet?: string | null;
+  created_at: string;
+  updated_at: string;
+  created_by?: string | null;
+};
+
+type CpEventInsert = Omit<CpEvent, 'id' | 'created_at' | 'updated_at'>;
+type CpEventUpdate = Partial<Omit<CpEvent, 'id' | 'created_at' | 'updated_at'>>;
 
 export const useCompetitionEvents = () => {
   const { userProfile } = useAuth();
@@ -20,9 +30,9 @@ export const useCompetitionEvents = () => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('cp_events')
-        .select('*, cp_competitions(name)')
+        .select('*')
         .eq('school_id', userProfile.school_id)
-        .order('event_date', { ascending: true });
+        .order('created_at', { ascending: false });
 
       if (error) throw error;
       setEvents(data || []);
@@ -34,7 +44,7 @@ export const useCompetitionEvents = () => {
     }
   };
 
-  const createEvent = async (eventData: Omit<CpEventInsert, 'school_id' | 'created_by'>) => {
+  const createEvent = async (eventData: { name: string; description?: string | null; score_sheet?: string | null }) => {
     if (!userProfile?.school_id) return;
 
     try {
@@ -44,8 +54,8 @@ export const useCompetitionEvents = () => {
           ...eventData,
           school_id: userProfile.school_id,
           created_by: userProfile.id
-        })
-        .select('*, cp_competitions(name)')
+        } as any)
+        .select()
         .single();
 
       if (error) throw error;
@@ -66,7 +76,7 @@ export const useCompetitionEvents = () => {
         .from('cp_events')
         .update(updates)
         .eq('id', id)
-        .select('*, cp_competitions(name)')
+        .select()
         .single();
 
       if (error) throw error;
