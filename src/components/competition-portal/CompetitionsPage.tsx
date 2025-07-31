@@ -216,9 +216,8 @@ const CompetitionsPage = () => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Competition</TableHead>
-                    <TableHead>Host School</TableHead>
-                    <TableHead>Location</TableHead>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Description</TableHead>
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Registered Schools</TableHead>
@@ -229,20 +228,15 @@ const CompetitionsPage = () => {
                   {filteredCompetitions.map((competition) => (
                     <TableRow key={competition.id}>
                       <TableCell>
-                        <div>
-                          <div className="font-medium">{competition.name}</div>
-                          {competition.description && (
-                            <div className="text-sm text-muted-foreground truncate max-w-xs">
-                              {competition.description}
-                            </div>
-                          )}
-                        </div>
+                        <div className="font-medium">{competition.name}</div>
                       </TableCell>
-                      <TableCell>{getSchoolName(competition.school_id)}</TableCell>
                       <TableCell>
-                        <div className="flex items-center">
-                          <MapPin className="w-4 h-4 mr-1 text-muted-foreground" />
-                          {competition.location}
+                        <div className="max-w-xs">
+                          {competition.description ? (
+                            <span className="text-sm">{competition.description}</span>
+                          ) : (
+                            <span className="text-sm text-muted-foreground">-</span>
+                          )}
                         </div>
                       </TableCell>
                       <TableCell>
@@ -272,14 +266,8 @@ const CompetitionsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          <Button variant="outline" size="sm">
-                            View Details
-                          </Button>
-                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
-                            <Button variant="outline" size="sm">
-                              Edit
-                            </Button>
-                          )}
+                          {/* Custom actions can be added here in the future */}
+                          <span className="text-sm text-muted-foreground">-</span>
                         </div>
                       </TableCell>
                     </TableRow>
