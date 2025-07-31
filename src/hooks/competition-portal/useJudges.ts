@@ -117,12 +117,66 @@ export const useJudges = () => {
     },
   });
 
+  const bulkImportJudges = async (
+    judges: Omit<Judge, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>[],
+    onProgress?: (current: number, total: number) => void
+  ): Promise<{ success: number; failed: number; errors: string[] }> => {
+    const results = { success: 0, failed: 0, errors: [] as string[] };
+    
+    for (let i = 0; i < judges.length; i++) {
+      try {
+        await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to prevent overwhelming the API
+        
+        const { error } = await supabase
+          .from('cp_judges')
+          .insert({
+            ...judges[i],
+            created_by: userProfile?.id,
+            school_id: userProfile?.school_id,
+          });
+
+        if (error) {
+          results.failed++;
+          results.errors.push(`Failed to create judge "${judges[i].name}": ${error.message}`);
+        } else {
+          results.success++;
+        }
+        
+        onProgress?.(i + 1, judges.length);
+      } catch (error: any) {
+        results.failed++;
+        results.errors.push(`Failed to create judge "${judges[i].name}": ${error.message}`);
+        onProgress?.(i + 1, judges.length);
+      }
+    }
+    
+    // Invalidate queries to refresh the list
+    queryClient.invalidateQueries({ queryKey: ['cp-judges'] });
+    
+    // Show toast notification
+    if (results.success > 0) {
+      toast({
+        title: "Bulk import completed",
+        description: `Successfully imported ${results.success} judge(s).${results.failed > 0 ? ` ${results.failed} failed.` : ''}`,
+      });
+    } else {
+      toast({
+        title: "Import failed",
+        description: "No judges were imported successfully.",
+        variant: "destructive",
+      });
+    }
+    
+    return results;
+  };
+
   return {
     judges,
     isLoading,
     createJudge: createJudge.mutate,
     updateJudge: updateJudge.mutate,
     deleteJudge: deleteJudge.mutate,
+    bulkImportJudges,
     isCreating: createJudge.isPending,
     isUpdating: updateJudge.isPending,
     isDeleting: deleteJudge.isPending,

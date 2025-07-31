@@ -2,9 +2,10 @@ import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
-import { Plus, Search } from 'lucide-react';
+import { Plus, Search, Upload } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
 import { JudgeDialog } from './components/JudgeDialog';
+import { JudgesBulkImportDialog } from './components/JudgesBulkImportDialog';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 export const JudgesPage: React.FC = () => {
@@ -16,9 +17,11 @@ export const JudgesPage: React.FC = () => {
     isLoading,
     createJudge,
     updateJudge,
-    deleteJudge
+    deleteJudge,
+    bulkImportJudges
   } = useJudges();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
   const [editingJudge, setEditingJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const handleEdit = (judge: any) => {
@@ -60,10 +63,18 @@ export const JudgesPage: React.FC = () => {
           <h1 className="text-3xl font-bold">Judges</h1>
           <p className="text-muted-foreground">Manage judges for your competitions</p>
         </div>
-        {canCreate && <Button onClick={() => setShowCreateDialog(true)}>
-            <Plus className="w-4 h-4 mr-2" />
-            Create Judge
-          </Button>}
+        {canCreate && (
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={() => setShowBulkImportDialog(true)}>
+              <Upload className="w-4 h-4 mr-2" />
+              Bulk Upload
+            </Button>
+            <Button onClick={() => setShowCreateDialog(true)}>
+              <Plus className="w-4 h-4 mr-2" />
+              Create Judge
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Search Filter */}
@@ -94,5 +105,10 @@ export const JudgesPage: React.FC = () => {
         </Card>}
 
       <JudgeDialog open={showCreateDialog || !!editingJudge} onOpenChange={handleCloseDialog} judge={editingJudge} onSubmit={handleSubmit} />
+      <JudgesBulkImportDialog 
+        open={showBulkImportDialog} 
+        onOpenChange={setShowBulkImportDialog} 
+        onBulkImport={bulkImportJudges}
+      />
     </div>;
 };
