@@ -12,6 +12,7 @@ const CompetitionPortalLayout = () => {
   // Map routes to modules
   const routeToModuleMap: { [key: string]: string } = {
     '/app/competition-portal': 'competition-dashboard',
+    '/app/competition-portal/': 'competition-dashboard',
     '/app/competition-portal/dashboard': 'competition-dashboard',
     '/app/competition-portal/competitions': 'competitions',
     '/app/competition-portal/events': 'events',
@@ -24,7 +25,7 @@ const CompetitionPortalLayout = () => {
 
   // Map modules to routes
   const moduleToRouteMap: { [key: string]: string } = {
-    'competition-dashboard': '/app/competition-portal/dashboard',
+    'competition-dashboard': '/app/competition-portal',
     'competitions': '/app/competition-portal/competitions',
     'events': '/app/competition-portal/events',
     'teams': '/app/competition-portal/teams',
