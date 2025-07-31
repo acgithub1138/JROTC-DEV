@@ -38,7 +38,7 @@ export const ScoreSheetPage = () => {
   }, [selectedEvent, events]);
 
   const handleBack = () => {
-    navigate('/competitions');
+    navigate('/app/competitions');
   };
 
   const handleEventCreated = async (eventData: any) => {
