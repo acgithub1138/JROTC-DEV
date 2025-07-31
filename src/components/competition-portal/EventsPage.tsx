@@ -41,7 +41,6 @@ export const EventsPage = () => {
     setSelectedEvent(event);
     setIsEditModalOpen(true);
   };
-
   const handleDelete = async (eventId: string) => {
     if (window.confirm('Are you sure you want to archive this event? It will be hidden from the list.')) {
       await deleteEvent(eventId);
@@ -52,8 +51,7 @@ export const EventsPage = () => {
         <div className="text-center">Loading events...</div>
       </div>;
   }
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <div className="p-6 space-y-6">
         <div className="flex justify-between items-center">
           <div>
@@ -68,15 +66,12 @@ export const EventsPage = () => {
 
         <Card>
           <CardContent>
-            {events.length === 0 ? (
-              <div className="text-center py-8">
+            {events.length === 0 ? <div className="text-center py-8">
                 <p className="text-muted-foreground">No events found</p>
                 <Button variant="outline" className="mt-4" onClick={() => setIsCreateModalOpen(true)}>
                   Create your first event
                 </Button>
-              </div>
-            ) : (
-              <Table>
+              </div> : <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>Event Name</TableHead>
@@ -87,16 +82,11 @@ export const EventsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.map(event => (
-                    <TableRow key={event.id}>
-                      <TableCell className="font-medium">{event.name}</TableCell>
+                  {events.map(event => <TableRow key={event.id}>
+                      <TableCell className="font-medium py-[8px]">{event.name}</TableCell>
                       <TableCell>{event.description || 'No description'}</TableCell>
                       <TableCell>
-                        {event.score_sheet ? (
-                          <Badge variant="default">Assigned</Badge>
-                        ) : (
-                          <Badge variant="secondary">No template</Badge>
-                        )}
+                        {event.score_sheet ? <Badge variant="default">Assigned</Badge> : <Badge variant="secondary">No template</Badge>}
                       </TableCell>
                       <TableCell>{formatDate(event.created_at)}</TableCell>
                       <TableCell>
@@ -123,21 +113,14 @@ export const EventsPage = () => {
                           </Tooltip>
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
-              </Table>
-            )}
+              </Table>}
           </CardContent>
         </Card>
 
         <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
-        <EditEventModal 
-          open={isEditModalOpen} 
-          onOpenChange={setIsEditModalOpen}
-          event={selectedEvent}
-        />
+        <EditEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} />
       </div>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
