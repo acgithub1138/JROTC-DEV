@@ -179,7 +179,7 @@ const MainApplication = () => {
                 <CompetitionManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/app/competitions/score-sheets/:competitionId" element={
+            <Route path="/competitions/score-sheets/:competitionId" element={
               <ProtectedRoute module="competitions">
                 <ScoreSheetPage />
               </ProtectedRoute>
