@@ -4,6 +4,7 @@ import { Header } from '@/components/layout/Header';
 import { CompetitionSidebar } from './CompetitionSidebar';
 import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
+import { EventsPage } from './EventsPage';
 
 const CompetitionPortalLayout = () => {
   const [activeModule, setActiveModule] = useState('competition-dashboard');
@@ -59,7 +60,7 @@ const CompetitionPortalLayout = () => {
     } else if (path === '/app/competition-portal/competitions') {
       return <CompetitionsPage />;
     } else if (path === '/app/competition-portal/events') {
-      return <div className="p-6"><h1 className="text-2xl font-bold">Events & Scheduling</h1><p>Coming soon...</p></div>;
+      return <EventsPage />;
     } else if (path === '/app/competition-portal/teams') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Teams & Participants</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/score-sheets') {
