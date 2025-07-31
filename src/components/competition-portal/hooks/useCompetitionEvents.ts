@@ -65,7 +65,10 @@ export const useCompetitionEvents = () => {
 
       if (error) throw error;
 
-      setEvents(prev => [data, ...prev]);
+      // Only add to state if the event is active (consistent with fetchEvents filtering)
+      if ((data as any).active !== false) {
+        setEvents(prev => [data, ...prev]);
+      }
       toast.success('Event created successfully');
       return data;
     } catch (error) {
