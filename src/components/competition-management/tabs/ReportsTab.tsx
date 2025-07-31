@@ -102,7 +102,6 @@ export const ReportsTab = () => {
             mappings={mappings}
             onMappingsChange={setMappings}
             selectedEvent={selectedEvent}
-            findSimilarMappings={findSimilarMappings}
             isLoading={isMappingsLoading}
           />
         </div>
