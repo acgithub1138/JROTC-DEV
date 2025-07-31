@@ -208,7 +208,7 @@ const CompetitionsPage = () => {
                 </TableHeader>
                 <TableBody>
                   {filteredCompetitions.map(competition => <TableRow key={competition.id}>
-                      <TableCell>
+                      <TableCell className="py-[8px]">
                         <button onClick={() => handleViewCompetition(competition)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                           {competition.name}
                         </button>
@@ -243,11 +243,9 @@ const CompetitionsPage = () => {
                       </TableCell>
                       <TableCell>
                          <div className="flex items-center justify-center gap-2">
-                           {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
-                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
+                           {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
                                <Edit className="w-3 h-3" />
-                             </Button>
-                           )}
+                             </Button>}
                          </div>
                       </TableCell>
                     </TableRow>)}
