@@ -9,6 +9,7 @@ import {
   CommandItem,
   CommandList,
 } from '@/components/ui/command';
+import { supabase } from '@/integrations/supabase/client';
 
 interface AddressSuggestion {
   display_name: string;
@@ -46,16 +47,16 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
 
     setIsLoading(true);
     try {
-      const response = await fetch(
-        `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`
-      );
+      const { data, error } = await supabase.functions.invoke('geocode-search', {
+        body: { query }
+      });
       
-      if (response.ok) {
-        const data = await response.json();
+      if (error) {
+        console.error('Geocoding error:', error);
+        setSuggestions([]);
+      } else {
         setSuggestions(data || []);
         setShowSuggestions(true);
-      } else {
-        setSuggestions([]);
       }
     } catch (error) {
       console.error('Address search error:', error);
