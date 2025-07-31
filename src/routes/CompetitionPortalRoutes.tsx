@@ -7,6 +7,7 @@ import NotFound from '@/pages/NotFound';
 const CompetitionPortalRoutes = () => {
   return (
     <Routes>
+      <Route index element={<CompetitionDashboard />} />
       <Route path="dashboard" element={<CompetitionDashboard />} />
       <Route path="competitions" element={<CompetitionsPage />} />
       <Route path="events" element={<div className="p-6"><h1 className="text-2xl font-bold">Events & Scheduling</h1><p>Coming soon...</p></div>} />
