@@ -7,6 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -40,6 +41,7 @@ const CompetitionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [showCreateDialog, setShowCreateDialog] = useState(false);
 
   useEffect(() => {
     fetchCompetitions();
@@ -109,6 +111,27 @@ const CompetitionsPage = () => {
                                userProfile?.role === 'instructor' || 
                                userProfile?.role === 'command_staff';
 
+  const handleCreateCompetition = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('cp_competitions')
+        .insert([{
+          ...data,
+          school_id: userProfile?.school_id,
+          created_by: userProfile?.id,
+          status: 'draft'
+        }]);
+
+      if (error) throw error;
+      
+      toast.success('Competition created successfully');
+      fetchCompetitions();
+    } catch (error) {
+      console.error('Error creating competition:', error);
+      toast.error('Failed to create competition');
+    }
+  };
+
   if (loading) {
     return (
       <div className="p-6">
@@ -128,7 +151,7 @@ const CompetitionsPage = () => {
           <p className="text-muted-foreground">Manage tournament competitions and events</p>
         </div>
         {canCreateCompetition && (
-          <Button>
+          <Button onClick={() => setShowCreateDialog(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Create Competition
           </Button>
@@ -267,6 +290,13 @@ const CompetitionsPage = () => {
           </CardContent>
         </Card>
       )}
+
+      {/* Create Competition Dialog */}
+      <CompetitionDialog
+        open={showCreateDialog}
+        onOpenChange={setShowCreateDialog}
+        onSubmit={handleCreateCompetition}
+      />
     </div>
   );
 };
