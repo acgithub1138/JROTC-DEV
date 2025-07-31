@@ -221,8 +221,6 @@ export const RoleManagementPage: React.FC = () => {
           <Card className="mb-6">
             <CardHeader>
               <CardTitle className="flex items-center justify-between">
-                <span>Role Permissions</span>
-
                 
               <div className="mb-6">
                 <label className="block text-sm font-medium text-gray-700 mb-2">
