@@ -44,7 +44,7 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
   const handleCreateMapping = () => {
     if (newMappingName.trim() && selectedCriteria.length > 0) {
       const newMapping: CriteriaMapping = {
-        id: Date.now().toString(),
+        id: crypto.randomUUID(),
         displayName: newMappingName.trim(),
         originalCriteria: [...selectedCriteria]
       };
