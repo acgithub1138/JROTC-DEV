@@ -79,22 +79,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
 
   const handleLocationSelect = (selectedLocation: string) => {
     updateFormData('location', selectedLocation);
-    
-    // Parse the selected location string to extract address components
-    // This assumes the format from Nominatim: "Name, Street, City, State, Zip, Country"
-    const parts = selectedLocation.split(', ');
-    if (parts.length >= 4) {
-      // Extract address components from the selected string
-      const possibleAddress = parts[1] || '';
-      const possibleCity = parts[2] || '';
-      const possibleState = parts[3] || '';
-      const possibleZip = parts[4] || '';
-      
-      updateFormData('address', possibleAddress);
-      updateFormData('city', possibleCity);
-      updateFormData('state', possibleState);
-      updateFormData('zip', possibleZip);
-    }
   };
 
   return (
@@ -143,7 +127,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         <AddressLookupField
           value={formData.location}
           onValueChange={handleLocationSelect}
-          placeholder="Search for an address to auto-fill location details"
+          placeholder="Search for a location"
         />
       </div>
 
