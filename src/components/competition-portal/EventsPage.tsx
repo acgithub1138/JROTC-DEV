@@ -114,7 +114,7 @@ export const EventsPage = () => {
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="icon" onClick={() => handleDelete(event.id)}>
-                                <X className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" />
+                                <Trash2 className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
