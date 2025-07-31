@@ -109,7 +109,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="jrotc_program">JROTC Program *</Label>
+            <Label htmlFor="jrotc_program">Event Type *</Label>
             <Select 
               value={formData.jrotc_program} 
               onValueChange={(value) => setFormData(prev => ({ ...prev, jrotc_program: value }))}
