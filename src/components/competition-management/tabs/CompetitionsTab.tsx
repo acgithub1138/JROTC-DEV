@@ -102,7 +102,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     setShowAddEventDialog(true);
   };
   const handleViewScoreSheets = (competition: Competition) => {
-    navigate(`/competitions/score-sheets/${competition.id}`);
+    navigate(`/app/competitions/score-sheets/${competition.id}`);
   };
   const handleEventCreated = async (eventData: any) => {
     try {
