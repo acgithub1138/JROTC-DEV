@@ -26,24 +26,10 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     name: competition?.name || '',
     description: competition?.description || '',
     location: competition?.location || '',
-    address: '',
-    city: '',
-    state: '',
-    zip: '',
-    competition_date: competition?.competition_date || '',
-    comp_type: competition?.comp_type || 'air_force',
+    competition_date: '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
-
-  const competitionTypeOptions = [
-    { value: 'air_force', label: 'Air Force' },
-    { value: 'army', label: 'Army' },
-    { value: 'navy', label: 'Navy' },
-    { value: 'marine_corps', label: 'Marine Corps' },
-    { value: 'coast_guard', label: 'Coast Guard' },
-    { value: 'space_force', label: 'Space Force' }
-  ];
 
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -88,8 +74,8 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         name: formData.name,
         description: formData.description,
         location: formData.location,
-        competition_date: formData.competition_date,
-        comp_type: formData.comp_type,
+        start_date: formData.competition_date,
+        end_date: formData.competition_date,
         ...addressData
       };
       
@@ -134,21 +120,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="comp_type">Competition Type</Label>
-        <Select value={formData.comp_type} onValueChange={(value) => updateFormData('comp_type', value)}>
-          <SelectTrigger>
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent>
-            {competitionTypeOptions.map((option) => (
-              <SelectItem key={option.value} value={option.value}>
-                {option.label}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="location">Location Search</Label>
