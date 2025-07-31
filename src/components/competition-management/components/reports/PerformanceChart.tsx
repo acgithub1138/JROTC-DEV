@@ -118,10 +118,26 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             />
             <Tooltip 
               labelFormatter={formatTooltipDate}
-              formatter={(value: number, name: string) => [
-                `${value.toFixed(2)} (avg)`,
-                name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
-              ]}
+              content={({ active, payload, label }) => {
+                if (active && payload && payload.length) {
+                  // Show only the first (active) payload item
+                  const activePayload = payload[0];
+                  if (activePayload) {
+                    const name = typeof activePayload.name === 'string' 
+                      ? activePayload.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())
+                      : String(activePayload.name);
+                    return (
+                      <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
+                        <p className="text-sm font-medium">{formatTooltipDate(label)}</p>
+                        <p className="text-sm text-primary">
+                          {name}: {Number(activePayload.value).toFixed(2)} (avg)
+                        </p>
+                      </div>
+                    );
+                  }
+                }
+                return null;
+              }}
             />
             {visibleCriteria.map((criteria, index) => (
               <Line
