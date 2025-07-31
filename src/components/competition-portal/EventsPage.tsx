@@ -4,10 +4,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { CreateEventModal } from './CreateEventModal';
 import { EditEventModal } from './EditEventModal';
+import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
 import { format } from 'date-fns';
 export const EventsPage = () => {
   const {
@@ -18,6 +19,10 @@ export const EventsPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const [sortConfig, setSortConfig] = useState<{
+    key: string;
+    direction: 'asc' | 'desc';
+  } | null>(null);
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
     try {
@@ -26,21 +31,68 @@ export const EventsPage = () => {
       return 'Invalid date';
     }
   };
-  const formatTime = (timeString: string | null) => {
-    if (!timeString) return 'Not set';
-    try {
-      const [hours, minutes] = timeString.split(':');
-      const time = new Date();
-      time.setHours(parseInt(hours), parseInt(minutes));
-      return format(time, 'h:mm a');
-    } catch {
-      return 'Invalid time';
-    }
+
+  const getEventTypeLabel = (value: string | null) => {
+    if (!value) return 'Not set';
+    const option = JROTC_PROGRAM_OPTIONS.find(opt => opt.value === value);
+    return option ? option.label : value;
   };
+
+  const handleSort = (key: string) => {
+    let direction: 'asc' | 'desc' = 'asc';
+    if (sortConfig?.key === key && sortConfig.direction === 'asc') {
+      direction = 'desc';
+    }
+    setSortConfig({ key, direction });
+  };
+
+  const sortedEvents = [...events].sort((a, b) => {
+    if (!sortConfig) return 0;
+
+    const { key, direction } = sortConfig;
+    let aValue: any = a[key as keyof typeof a];
+    let bValue: any = b[key as keyof typeof b];
+
+    // Handle special cases
+    if (key === 'jrotc_program') {
+      aValue = getEventTypeLabel(aValue);
+      bValue = getEventTypeLabel(bValue);
+    }
+
+    if (aValue === null || aValue === undefined) aValue = '';
+    if (bValue === null || bValue === undefined) bValue = '';
+
+    if (typeof aValue === 'string' && typeof bValue === 'string') {
+      aValue = aValue.toLowerCase();
+      bValue = bValue.toLowerCase();
+    }
+
+    if (aValue < bValue) {
+      return direction === 'asc' ? -1 : 1;
+    }
+    if (aValue > bValue) {
+      return direction === 'asc' ? 1 : -1;
+    }
+    return 0;
+  });
+
+  const SortableHeader = ({ children, sortKey }: { children: React.ReactNode; sortKey: string }) => (
+    <TableHead 
+      className="cursor-pointer hover:bg-muted/50 select-none"
+      onClick={() => handleSort(sortKey)}
+    >
+      <div className="flex items-center gap-2">
+        {children}
+        <ArrowUpDown className="h-4 w-4 opacity-50" />
+      </div>
+    </TableHead>
+  );
+
   const handleEdit = (event: typeof events[0]) => {
     setSelectedEvent(event);
     setIsEditModalOpen(true);
   };
+
   const handleDelete = async (eventId: string) => {
     if (window.confirm('Are you sure you want to archive this event? It will be hidden from the list.')) {
       await deleteEvent(eventId);
@@ -74,16 +126,20 @@ export const EventsPage = () => {
               </div> : <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Event Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Score Sheet</TableHead>
-                    <TableHead>Created</TableHead>
+                    <SortableHeader sortKey="name">Event Name</SortableHeader>
+                    <SortableHeader sortKey="jrotc_program">Event Type</SortableHeader>
+                    <SortableHeader sortKey="description">Description</SortableHeader>
+                    <SortableHeader sortKey="score_sheet">Score Sheet</SortableHeader>
+                    <SortableHeader sortKey="created_at">Created</SortableHeader>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {events.map(event => <TableRow key={event.id}>
+                  {sortedEvents.map(event => <TableRow key={event.id}>
                       <TableCell className="font-medium py-[8px]">{event.name}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline">{getEventTypeLabel(event.jrotc_program)}</Badge>
+                      </TableCell>
                       <TableCell>{event.description || 'No description'}</TableCell>
                       <TableCell>
                         {event.score_sheet ? <Badge variant="default">Assigned</Badge> : <Badge variant="secondary">No template</Badge>}
