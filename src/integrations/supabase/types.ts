@@ -520,6 +520,8 @@ export type Database = {
       }
       cp_competitions: {
         Row: {
+          address: string | null
+          city: string | null
           created_at: string
           created_by: string | null
           description: string | null
@@ -533,10 +535,14 @@ export type Database = {
           registration_deadline: string | null
           school_id: string
           start_date: string
+          state: string | null
           status: string
           updated_at: string
+          zip: string | null
         }
         Insert: {
+          address?: string | null
+          city?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -550,10 +556,14 @@ export type Database = {
           registration_deadline?: string | null
           school_id: string
           start_date: string
+          state?: string | null
           status?: string
           updated_at?: string
+          zip?: string | null
         }
         Update: {
+          address?: string | null
+          city?: string | null
           created_at?: string
           created_by?: string | null
           description?: string | null
@@ -567,8 +577,10 @@ export type Database = {
           registration_deadline?: string | null
           school_id?: string
           start_date?: string
+          state?: string | null
           status?: string
           updated_at?: string
+          zip?: string | null
         }
         Relationships: []
       }

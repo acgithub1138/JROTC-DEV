@@ -69,6 +69,10 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         name: formData.name,
         description: formData.description,
         location: formData.location,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip,
         competition_date: formData.competition_date,
         comp_type: formData.comp_type,
         
