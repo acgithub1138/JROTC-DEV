@@ -101,7 +101,6 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   };
   const handleMenuItemClick = (item: typeof competitionMenuItems[0]) => {
     onModuleChange(item.id);
-    navigate(item.path);
   };
   return <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} style={{
     backgroundColor: currentTheme.primary_color
