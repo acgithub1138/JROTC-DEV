@@ -1,4 +1,6 @@
 import { useState, useEffect } from 'react';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 import type { CriteriaMapping } from '../components/reports/AdvancedCriteriaMapping';
 
 interface UseCriteriaMappingProps {
@@ -33,31 +35,110 @@ export const sortCriteriaByNumber = (criteria: string[]): string[] => {
 };
 
 export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCriteriaMappingProps) => {
+  const { userProfile } = useAuth();
   const [mappings, setMappings] = useState<CriteriaMapping[]>([]);
+  const [similarMappings, setSimilarMappings] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
 
-  // Load mappings from localStorage when event changes
+  // Load mappings from database when event changes
   useEffect(() => {
-    if (selectedEvent) {
-      const savedMappings = localStorage.getItem(`criteria-mappings-${selectedEvent}`);
-      if (savedMappings) {
-        try {
-          setMappings(JSON.parse(savedMappings));
-        } catch (error) {
-          console.error('Failed to parse saved mappings:', error);
-          setMappings([]);
-        }
-      } else {
-        setMappings([]);
+    if (selectedEvent && userProfile?.school_id) {
+      loadMappings();
+    }
+  }, [selectedEvent, userProfile?.school_id]);
+
+  const loadMappings = async () => {
+    if (!selectedEvent || !userProfile?.school_id) return;
+    
+    setIsLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('criteria_mappings')
+        .select('*')
+        .eq('event_type', selectedEvent)
+        .or(`school_id.eq.${userProfile.school_id},is_global.eq.true`)
+        .order('usage_count', { ascending: false });
+
+      if (error) throw error;
+
+      // Convert database format to component format
+      const formattedMappings: CriteriaMapping[] = data.map(mapping => ({
+        id: mapping.id,
+        displayName: mapping.display_name,
+        originalCriteria: mapping.original_criteria as string[]
+      }));
+
+      setMappings(formattedMappings);
+    } catch (error) {
+      console.error('Failed to load mappings:', error);
+      setMappings([]);
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const saveMappings = async (newMappings: CriteriaMapping[]) => {
+    if (!selectedEvent || !userProfile?.school_id) return;
+
+    try {
+      // Delete existing mappings for this event and school
+      await supabase
+        .from('criteria_mappings')
+        .delete()
+        .eq('event_type', selectedEvent)
+        .eq('school_id', userProfile.school_id)
+        .eq('is_global', false);
+
+      // Insert new mappings
+      const mappingsToInsert = newMappings.map(mapping => ({
+        event_type: selectedEvent,
+        display_name: mapping.displayName,
+        original_criteria: mapping.originalCriteria,
+        school_id: userProfile.school_id,
+        created_by: userProfile.id,
+        is_global: false
+      }));
+
+      if (mappingsToInsert.length > 0) {
+        const { error } = await supabase
+          .from('criteria_mappings')
+          .insert(mappingsToInsert);
+
+        if (error) throw error;
       }
-    }
-  }, [selectedEvent]);
 
-  // Save mappings to localStorage whenever they change
-  useEffect(() => {
-    if (selectedEvent && mappings.length >= 0) {
-      localStorage.setItem(`criteria-mappings-${selectedEvent}`, JSON.stringify(mappings));
+      setMappings(newMappings);
+    } catch (error) {
+      console.error('Failed to save mappings:', error);
     }
-  }, [selectedEvent, mappings]);
+  };
+
+  const findSimilarMappings = async (criteriaText: string) => {
+    if (!selectedEvent) return [];
+
+    try {
+      const { data, error } = await supabase.rpc('find_similar_criteria', {
+        criteria_text: criteriaText,
+        event_type_param: selectedEvent
+      });
+
+      if (error) throw error;
+      
+      // Convert the data to the expected format
+      return (data || []).map((item: any) => ({
+        id: item.id,
+        display_name: item.display_name,
+        original_criteria: Array.isArray(item.original_criteria) 
+          ? item.original_criteria 
+          : [],
+        usage_count: item.usage_count,
+        similarity_score: item.similarity_score
+      }));
+    } catch (error) {
+      console.error('Failed to find similar mappings:', error);
+      return [];
+    }
+  };
 
   // Apply mappings to criteria list
   const getMappedCriteria = (): string[] => {
@@ -117,8 +198,12 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
 
   return {
     mappings,
-    setMappings,
+    setMappings: saveMappings,
     getMappedCriteria,
-    applyMappingsToData
+    applyMappingsToData,
+    findSimilarMappings,
+    isLoading,
+    similarMappings,
+    setSimilarMappings
   };
 };

@@ -14,8 +14,15 @@ export const ReportsTab = () => {
   // Get original criteria before mapping for the advanced widget
   const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
 
-  // Use the criteria mapping hook for proper localStorage persistence
-  const { mappings, setMappings, getMappedCriteria, applyMappingsToData } = useCriteriaMapping({
+  // Use the criteria mapping hook for database persistence
+  const { 
+    mappings, 
+    setMappings, 
+    getMappedCriteria, 
+    applyMappingsToData, 
+    findSimilarMappings,
+    isLoading: isMappingsLoading
+  } = useCriteriaMapping({
     selectedEvent,
     originalCriteria
   });
@@ -95,6 +102,8 @@ export const ReportsTab = () => {
             mappings={mappings}
             onMappingsChange={setMappings}
             selectedEvent={selectedEvent}
+            findSimilarMappings={findSimilarMappings}
+            isLoading={isMappingsLoading}
           />
         </div>
       )}

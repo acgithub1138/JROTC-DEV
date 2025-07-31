@@ -518,6 +518,45 @@ export type Database = {
           },
         ]
       }
+      criteria_mappings: {
+        Row: {
+          created_at: string
+          created_by: string | null
+          display_name: string
+          event_type: string
+          id: string
+          is_global: boolean
+          original_criteria: Json
+          school_id: string
+          updated_at: string
+          usage_count: number
+        }
+        Insert: {
+          created_at?: string
+          created_by?: string | null
+          display_name: string
+          event_type: string
+          id?: string
+          is_global?: boolean
+          original_criteria?: Json
+          school_id: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Update: {
+          created_at?: string
+          created_by?: string | null
+          display_name?: string
+          event_type?: string
+          id?: string
+          is_global?: boolean
+          original_criteria?: Json
+          school_id?: string
+          updated_at?: string
+          usage_count?: number
+        }
+        Relationships: []
+      }
       default_role_permissions: {
         Row: {
           action_id: string
@@ -2715,6 +2754,16 @@ export type Database = {
         Args: { password_text: string }
         Returns: string
       }
+      find_similar_criteria: {
+        Args: { criteria_text: string; event_type_param: string }
+        Returns: {
+          id: string
+          display_name: string
+          original_criteria: Json
+          usage_count: number
+          similarity_score: number
+        }[]
+      }
       generate_incident_number: {
         Args: Record<PropertyKey, never>
         Returns: string
@@ -2775,6 +2824,10 @@ export type Database = {
       get_user_school_id: {
         Args: Record<PropertyKey, never>
         Returns: string
+      }
+      increment_mapping_usage: {
+        Args: { mapping_id: string }
+        Returns: undefined
       }
       is_current_user_admin: {
         Args: Record<PropertyKey, never>

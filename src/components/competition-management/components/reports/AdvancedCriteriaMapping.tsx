@@ -5,8 +5,9 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
-import { Trash2, Plus, Edit2, Save, X } from 'lucide-react';
+import { Trash2, Plus, Edit2, Save, X, Lightbulb, Globe } from 'lucide-react';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
+import { Separator } from '@/components/ui/separator';
 
 export interface CriteriaMapping {
   id: string;
@@ -14,24 +15,38 @@ export interface CriteriaMapping {
   originalCriteria: string[];
 }
 
+interface SimilarMapping {
+  id: string;
+  display_name: string;
+  original_criteria: string[];
+  usage_count: number;
+  similarity_score: number;
+}
+
 interface AdvancedCriteriaMappingProps {
   availableCriteria: string[];
   mappings: CriteriaMapping[];
   onMappingsChange: (mappings: CriteriaMapping[]) => void;
   selectedEvent: string | null;
+  findSimilarMappings?: (criteriaText: string) => Promise<SimilarMapping[]>;
+  isLoading?: boolean;
 }
 
 export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = ({
   availableCriteria,
   mappings,
   onMappingsChange,
-  selectedEvent
+  selectedEvent,
+  findSimilarMappings,
+  isLoading
 }) => {
   const [isOpen, setIsOpen] = useState(false);
   const [editingMapping, setEditingMapping] = useState<string | null>(null);
   const [newMappingName, setNewMappingName] = useState('');
   const [selectedCriteria, setSelectedCriteria] = useState<string[]>([]);
   const [editingName, setEditingName] = useState('');
+  const [suggestions, setSuggestions] = useState<SimilarMapping[]>([]);
+  const [showSuggestions, setShowSuggestions] = useState(false);
 
   // Get criteria that are not yet mapped
   const unmappedCriteria = availableCriteria.filter(criteria => 
@@ -81,7 +96,7 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
     setEditingName('');
   };
 
-  const handleCriteriaToggle = (criteria: string) => {
+  const handleCriteriaToggle = async (criteria: string) => {
     setSelectedCriteria(prev => {
       const newSelected = prev.includes(criteria) 
         ? prev.filter(c => c !== criteria)
@@ -90,10 +105,22 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
       // If this is the first criteria being selected and display name is empty, set it
       if (!prev.includes(criteria) && !newMappingName.trim()) {
         setNewMappingName(criteria);
+        // Find similar mappings for suggestions
+        if (findSimilarMappings) {
+          findSimilarMappings(criteria).then(similarMappings => {
+            setSuggestions(similarMappings.filter(s => s.similarity_score > 0.1));
+            setShowSuggestions(similarMappings.length > 0);
+          });
+        }
       }
       
       return newSelected;
     });
+  };
+
+  const handleUseSuggestion = (suggestion: SimilarMapping) => {
+    setNewMappingName(suggestion.display_name);
+    setShowSuggestions(false);
   };
 
   if (!selectedEvent || availableCriteria.length === 0) {
@@ -148,6 +175,48 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
                       Create Mapping
                     </Button>
                   </div>
+
+                  {/* Smart Suggestions */}
+                  {showSuggestions && suggestions.length > 0 && (
+                    <div className="bg-muted/30 border rounded-lg p-3">
+                      <div className="flex items-center gap-2 mb-2">
+                        <Lightbulb className="h-4 w-4 text-orange-500" />
+                        <span className="text-sm font-medium">Smart Suggestions</span>
+                        <Globe className="h-3 w-3 text-muted-foreground" />
+                      </div>
+                      <p className="text-xs text-muted-foreground mb-2">
+                        Other schools have used these names for similar criteria:
+                      </p>
+                      <div className="space-y-1">
+                        {suggestions.slice(0, 3).map((suggestion) => (
+                          <div key={suggestion.id} className="flex items-center justify-between">
+                            <span className="text-sm">{suggestion.display_name}</span>
+                            <div className="flex items-center gap-2">
+                              <Badge variant="outline" className="text-xs">
+                                {suggestion.usage_count} schools
+                              </Badge>
+                              <Button
+                                size="sm"
+                                variant="outline"
+                                onClick={() => handleUseSuggestion(suggestion)}
+                                className="h-6 px-2 text-xs"
+                              >
+                                Use
+                              </Button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setShowSuggestions(false)}
+                        className="w-full mt-2 h-6 text-xs"
+                      >
+                        Dismiss suggestions
+                      </Button>
+                    </div>
+                  )}
 
                   <div>
                     <Label>Select Criteria to Group:</Label>
