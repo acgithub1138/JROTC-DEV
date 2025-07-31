@@ -81,25 +81,25 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
     if (!selectedEvent || !userProfile?.school_id) return;
 
     try {
-      // Delete existing mappings for this event and school
-      await supabase
-        .from('criteria_mappings')
-        .delete()
-        .eq('event_type', selectedEvent)
-        .eq('school_id', userProfile.school_id)
-        .eq('is_global', false);
+      // Separate existing mappings (have database UUIDs) from new ones (have temporary IDs)
+      const existingMappings = newMappings.filter(mapping => 
+        mappings.some(existing => existing.id === mapping.id)
+      );
+      const trulyNewMappings = newMappings.filter(mapping => 
+        !mappings.some(existing => existing.id === mapping.id)
+      );
 
-      // Insert new mappings
-      const mappingsToInsert = newMappings.map(mapping => ({
-        event_type: selectedEvent,
-        display_name: mapping.displayName,
-        original_criteria: mapping.originalCriteria,
-        school_id: userProfile.school_id,
-        created_by: userProfile.id,
-        is_global: false
-      }));
+      // Only insert truly new mappings
+      if (trulyNewMappings.length > 0) {
+        const mappingsToInsert = trulyNewMappings.map(mapping => ({
+          event_type: selectedEvent,
+          display_name: mapping.displayName,
+          original_criteria: mapping.originalCriteria,
+          school_id: userProfile.school_id,
+          created_by: userProfile.id,
+          is_global: false
+        }));
 
-      if (mappingsToInsert.length > 0) {
         const { error } = await supabase
           .from('criteria_mappings')
           .insert(mappingsToInsert);
@@ -107,7 +107,8 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
         if (error) throw error;
       }
 
-      setMappings(newMappings);
+      // Reload mappings from database to get the correct IDs
+      await loadMappings();
     } catch (error) {
       console.error('Failed to save mappings:', error);
     }
