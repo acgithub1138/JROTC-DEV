@@ -1,8 +1,7 @@
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus, Download, Upload } from 'lucide-react';
-import { useInventoryPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { usePermissionContext } from '@/contexts/PermissionContext';
+import { useInventoryActionsPermissions } from '@/hooks/useOptimizedInventoryPermissions';
 
 interface InventoryActionsProps {
   onAddItem: () => void;
@@ -15,8 +14,7 @@ export const InventoryActions: React.FC<InventoryActionsProps> = ({
   onBulkOperations,
   onExport
 }) => {
-  const { canCreate, canBulkImport } = useInventoryPermissions();
-  const { isLoading } = usePermissionContext();
+  const { canCreate, canBulkImport, isLoading } = useInventoryActionsPermissions();
 
   return (
     <>

@@ -91,7 +91,7 @@ export const useJobBoardPermissions = () => {
   }), [modulePermissions, hasPermission]);
 };
 
-// Inventory-specific permissions
+// Inventory-specific permissions - use optimized version
 export const useInventoryPermissions = () => {
   const modulePermissions = useModulePermissions('inventory');
   const { hasPermission, isLoading } = usePermissionContext();
@@ -103,14 +103,6 @@ export const useInventoryPermissions = () => {
     canBulkImport: hasPermission('inventory', 'bulk_import'),
   };
 
-  // Debug logging for inventory permissions
-  console.log('Inventory permissions:', {
-    ...permissions,
-    isLoading,
-    timestamp: new Date().toISOString()
-  });
-  console.log('Module permissions:', modulePermissions);
-  
   return permissions;
 };
 
