@@ -7,6 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { useCompetitionTemplates } from '../competition-management/hooks/useCompetitionTemplates';
+import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
 
 type CpEvent = {
   id: string;
@@ -14,6 +15,7 @@ type CpEvent = {
   name: string;
   description?: string | null;
   score_sheet?: string | null;
+  jrotc_program?: string | null;
   created_at: string;
   updated_at: string;
   created_by?: string | null;
@@ -37,7 +39,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    score_sheet: ''
+    score_sheet: '',
+    jrotc_program: ''
   });
 
   // Reset form when event changes or modal opens
@@ -46,14 +49,34 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       setFormData({
         name: event.name || '',
         description: event.description || '',
-        score_sheet: event.score_sheet || ''
+        score_sheet: event.score_sheet || '',
+        jrotc_program: event.jrotc_program || ''
       });
     }
   }, [event, open]);
 
+  const handleScoreSheetChange = (value: string) => {
+    setFormData(prev => ({ ...prev, score_sheet: value }));
+    
+    // Auto-populate event name and jrotc_program from score sheet template
+    const selectedTemplate = templates.find(template => template.id === value);
+    if (selectedTemplate?.template_name) {
+      const parts = selectedTemplate.template_name.split(' - ');
+      if (parts.length > 1) {
+        // Take everything after the first hyphen
+        const eventName = parts.slice(1).join(' - ').trim();
+        setFormData(prev => ({ 
+          ...prev, 
+          name: eventName,
+          jrotc_program: selectedTemplate.jrotc_program
+        }));
+      }
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name || !event) {
+    if (!formData.name || !formData.score_sheet || !formData.jrotc_program || !event) {
       return;
     }
 
@@ -62,7 +85,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       await updateEvent(event.id, {
         name: formData.name,
         description: formData.description || null,
-        score_sheet: formData.score_sheet || null
+        score_sheet: formData.score_sheet || null,
+        jrotc_program: formData.jrotc_program || null
       });
       
       onOpenChange(false);
@@ -81,6 +105,46 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="score_sheet">Score Sheet *</Label>
+            <Select 
+              value={formData.score_sheet} 
+              onValueChange={handleScoreSheetChange}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select score sheet template" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map((template) => (
+                  <SelectItem key={template.id} value={template.id}>
+                    {template.template_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="jrotc_program">Event Type *</Label>
+            <Select 
+              value={formData.jrotc_program} 
+              onValueChange={(value) => setFormData(prev => ({ ...prev, jrotc_program: value }))}
+              required
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select JROTC program" />
+              </SelectTrigger>
+              <SelectContent>
+                {JROTC_PROGRAM_OPTIONS.map((option) => (
+                  <SelectItem key={option.value} value={option.value}>
+                    {option.label}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="name">Event Name *</Label>
             <Input
@@ -101,25 +165,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
               placeholder="Enter event description"
               rows={3}
             />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="score_sheet">Score Sheet</Label>
-            <Select 
-              value={formData.score_sheet} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, score_sheet: value }))}
-            >
-              <SelectTrigger>
-                <SelectValue placeholder="Select score sheet template" />
-              </SelectTrigger>
-              <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
-                    {template.template_name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
           </div>
 
           <div className="flex justify-end gap-3 pt-4">

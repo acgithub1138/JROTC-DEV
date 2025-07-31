@@ -10,6 +10,7 @@ type CpEvent = {
   name: string;
   description?: string | null;
   score_sheet?: string | null;
+  jrotc_program?: string | null;
   created_at: string;
   updated_at: string;
   created_by?: string | null;
