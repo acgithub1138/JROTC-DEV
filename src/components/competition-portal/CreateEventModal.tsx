@@ -12,11 +12,13 @@ import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants
 interface CreateEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  onSuccess?: () => void;
 }
 
 export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   open,
-  onOpenChange
+  onOpenChange,
+  onSuccess
 }) => {
   const { createEvent } = useCompetitionEvents();
   const { templates } = useCompetitionTemplates();
@@ -73,6 +75,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       });
       
       onOpenChange(false);
+      onSuccess?.();
     } catch (error) {
       // Error is handled in the hook
     } finally {

@@ -14,7 +14,8 @@ export const EventsPage = () => {
   const {
     events,
     isLoading,
-    deleteEvent
+    deleteEvent,
+    refetch
   } = useCompetitionEvents();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
@@ -175,8 +176,8 @@ export const EventsPage = () => {
           </CardContent>
         </Card>
 
-        <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
-        <EditEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} />
+        <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} onSuccess={refetch} />
+        <EditEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} onSuccess={refetch} />
       </div>
     </TooltipProvider>;
 };

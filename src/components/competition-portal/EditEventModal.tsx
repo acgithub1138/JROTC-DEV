@@ -25,12 +25,14 @@ interface EditEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   event: CpEvent | null;
+  onSuccess?: () => void;
 }
 
 export const EditEventModal: React.FC<EditEventModalProps> = ({
   open,
   onOpenChange,
-  event
+  event,
+  onSuccess
 }) => {
   const { updateEvent } = useCompetitionEvents();
   const { templates } = useCompetitionTemplates();
@@ -90,6 +92,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       });
       
       onOpenChange(false);
+      onSuccess?.();
     } catch (error) {
       // Error is handled in the hook
     } finally {
