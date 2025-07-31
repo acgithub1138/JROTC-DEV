@@ -8,7 +8,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter } from 'lucide-react';
+import { ViewCompetitionModal } from './ViewCompetitionModal';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -42,6 +43,8 @@ const CompetitionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
 
   useEffect(() => {
     fetchCompetitions();
@@ -126,10 +129,21 @@ const CompetitionsPage = () => {
       
       toast.success('Competition created successfully');
       fetchCompetitions();
+      setShowCreateDialog(false);
     } catch (error) {
       console.error('Error creating competition:', error);
       toast.error('Failed to create competition');
     }
+  };
+
+  const handleViewCompetition = (competition: Competition) => {
+    setSelectedCompetition(competition);
+    setShowViewModal(true);
+  };
+
+  const handleEditCompetition = (competition: Competition) => {
+    // TODO: Implement edit functionality
+    toast.info('Edit functionality coming soon');
   };
 
   if (loading) {
@@ -228,7 +242,12 @@ const CompetitionsPage = () => {
                   {filteredCompetitions.map((competition) => (
                     <TableRow key={competition.id}>
                       <TableCell>
-                        <div className="font-medium">{competition.name}</div>
+                        <button
+                          onClick={() => handleViewCompetition(competition)}
+                          className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left"
+                        >
+                          {competition.name}
+                        </button>
                       </TableCell>
                       <TableCell>
                         <div className="max-w-xs">
@@ -266,8 +285,16 @@ const CompetitionsPage = () => {
                       </TableCell>
                       <TableCell>
                         <div className="flex gap-2">
-                          {/* Custom actions can be added here in the future */}
-                          <span className="text-sm text-muted-foreground">-</span>
+                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEditCompetition(competition)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>
@@ -284,6 +311,14 @@ const CompetitionsPage = () => {
         open={showCreateDialog}
         onOpenChange={setShowCreateDialog}
         onSubmit={handleCreateCompetition}
+      />
+
+      {/* View Competition Modal */}
+      <ViewCompetitionModal
+        competition={selectedCompetition}
+        open={showViewModal}
+        onOpenChange={setShowViewModal}
+        hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''}
       />
     </div>
   );

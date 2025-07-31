@@ -1,0 +1,155 @@
+import React from 'react';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Badge } from '@/components/ui/badge';
+import { CalendarDays, MapPin, Users, School, Clock } from 'lucide-react';
+import { format } from 'date-fns';
+
+interface Competition {
+  id: string;
+  name: string;
+  description?: string;
+  start_date: string;
+  end_date: string;
+  location: string;
+  max_participants?: number;
+  registration_deadline?: string;
+  registered_schools: string[];
+  status: string;
+  is_public: boolean;
+  school_id: string;
+  created_at: string;
+  created_by?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+}
+
+interface ViewCompetitionModalProps {
+  competition: Competition | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  hostSchoolName: string;
+}
+
+export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
+  competition,
+  open,
+  onOpenChange,
+  hostSchoolName,
+}) => {
+  if (!competition) return null;
+
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'draft': return 'secondary';
+      case 'open': return 'default';
+      case 'registration_closed': return 'outline';
+      case 'in_progress': return 'default';
+      case 'completed': return 'secondary';
+      case 'cancelled': return 'destructive';
+      default: return 'secondary';
+    }
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="text-2xl">{competition.name}</DialogTitle>
+          <DialogDescription>
+            Competition details and information
+          </DialogDescription>
+        </DialogHeader>
+
+        <div className="space-y-6">
+          {/* Status and Basic Info */}
+          <div className="flex items-center gap-4">
+            <Badge variant={getStatusBadgeVariant(competition.status)} className="text-sm">
+              {competition.status.replace('_', ' ').toUpperCase()}
+            </Badge>
+            {competition.is_public && (
+              <Badge variant="outline" className="text-sm">
+                Public Competition
+              </Badge>
+            )}
+          </div>
+
+          {/* Description */}
+          {competition.description && (
+            <div>
+              <h3 className="font-semibold mb-2">Description</h3>
+              <p className="text-muted-foreground">{competition.description}</p>
+            </div>
+          )}
+
+          {/* Host School */}
+          <div className="flex items-center gap-2">
+            <School className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">Host School:</span>
+            <span>{hostSchoolName}</span>
+          </div>
+
+          {/* Date Information */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <CalendarDays className="w-5 h-5 text-muted-foreground" />
+              <span className="font-medium">Competition Date:</span>
+              <span>{format(new Date(competition.start_date), 'MMMM d, yyyy')}</span>
+            </div>
+            {competition.start_date !== competition.end_date && (
+              <div className="flex items-center gap-2 ml-7">
+                <span className="font-medium">End Date:</span>
+                <span>{format(new Date(competition.end_date), 'MMMM d, yyyy')}</span>
+              </div>
+            )}
+            {competition.registration_deadline && (
+              <div className="flex items-center gap-2">
+                <Clock className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Registration Deadline:</span>
+                <span>{format(new Date(competition.registration_deadline), 'MMMM d, yyyy')}</span>
+              </div>
+            )}
+          </div>
+
+          {/* Location */}
+          <div className="space-y-2">
+            <div className="flex items-center gap-2">
+              <MapPin className="w-5 h-5 text-muted-foreground" />
+              <span className="font-medium">Location:</span>
+              <span>{competition.location}</span>
+            </div>
+            {(competition.address || competition.city || competition.state) && (
+              <div className="ml-7 text-sm text-muted-foreground">
+                {[competition.address, competition.city, competition.state, competition.zip]
+                  .filter(Boolean)
+                  .join(', ')}
+              </div>
+            )}
+          </div>
+
+          {/* Participants */}
+          <div className="flex items-center gap-2">
+            <Users className="w-5 h-5 text-muted-foreground" />
+            <span className="font-medium">Registered Schools:</span>
+            <span>{competition.registered_schools.length}</span>
+            {competition.max_participants && (
+              <span className="text-muted-foreground">/ {competition.max_participants} max</span>
+            )}
+          </div>
+
+          {/* Additional Info */}
+          <div className="text-sm text-muted-foreground">
+            <p>Created on {format(new Date(competition.created_at), 'MMMM d, yyyy')}</p>
+          </div>
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};
