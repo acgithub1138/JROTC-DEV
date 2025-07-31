@@ -117,24 +117,6 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             <YAxis 
               label={{ value: 'Average Score', angle: -90, position: 'insideLeft' }}
             />
-            <Tooltip 
-              labelFormatter={formatTooltipDate}
-              content={({ active, payload, label }) => {
-                if (active && payload && payload.length > 0) {
-                  // Show only the first item in payload (the hovered line)
-                  const data = payload[0];
-                  return (
-                    <div className="bg-background border border-border rounded-lg p-2 shadow-lg">
-                      <p className="text-sm font-medium">{formatTooltipDate(label)}</p>
-                      <p className="text-sm text-primary">
-                        {data.name?.toString().replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}: {Number(data.value).toFixed(2)} (avg)
-                      </p>
-                    </div>
-                  );
-                }
-                return null;
-              }}
-            />
             {visibleCriteria.map((criteria, index) => (
               <Line
                 key={criteria}
