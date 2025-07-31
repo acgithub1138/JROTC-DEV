@@ -5,6 +5,7 @@ import { CompetitionSidebar } from './CompetitionSidebar';
 import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
 import { EventsPage } from './EventsPage';
+import { ScoreSheetsPage } from './ScoreSheetsPage';
 
 const CompetitionPortalLayout = () => {
   const [activeModule, setActiveModule] = useState('competition-dashboard');
@@ -64,7 +65,7 @@ const CompetitionPortalLayout = () => {
     } else if (path === '/app/competition-portal/teams') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Teams & Participants</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/score-sheets') {
-      return <div className="p-6"><h1 className="text-2xl font-bold">Score Sheets</h1><p>Coming soon...</p></div>;
+      return <ScoreSheetsPage />;
     } else if (path === '/app/competition-portal/templates') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Templates</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/analytics') {
