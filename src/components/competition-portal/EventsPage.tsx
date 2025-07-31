@@ -6,6 +6,7 @@ import { Badge } from '@/components/ui/badge';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { CreateEventModal } from './CreateEventModal';
+import { EditEventModal } from './EditEventModal';
 import { format } from 'date-fns';
 export const EventsPage = () => {
   const {
@@ -14,6 +15,8 @@ export const EventsPage = () => {
     deleteEvent
   } = useCompetitionEvents();
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
   const formatDate = (dateString: string | null) => {
     if (!dateString) return 'Not set';
     try {
@@ -33,6 +36,11 @@ export const EventsPage = () => {
       return 'Invalid time';
     }
   };
+  const handleEdit = (event: typeof events[0]) => {
+    setSelectedEvent(event);
+    setIsEditModalOpen(true);
+  };
+
   const handleDelete = async (eventId: string) => {
     if (window.confirm('Are you sure you want to delete this event?')) {
       await deleteEvent(eventId);
@@ -83,7 +91,7 @@ export const EventsPage = () => {
                     <TableCell>{formatDate(event.created_at)}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
-                        <Button variant="ghost" size="sm" onClick={() => {/* TODO: Implement edit */}}>
+                        <Button variant="ghost" size="sm" onClick={() => handleEdit(event)}>
                           <Edit className="h-4 w-4" />
                         </Button>
                         <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id)}>
@@ -98,5 +106,10 @@ export const EventsPage = () => {
       </Card>
 
       <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} />
+      <EditEventModal 
+        open={isEditModalOpen} 
+        onOpenChange={setIsEditModalOpen}
+        event={selectedEvent}
+      />
     </div>;
 };
