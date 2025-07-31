@@ -5,6 +5,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
+import { supabase } from '@/integrations/supabase/client';
 import { Competition } from '../types';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -52,17 +53,44 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     try {
       setIsSubmitting(true);
       
+      let addressData = {
+        address: '',
+        city: '',
+        state: '',
+        zip: ''
+      };
+
+      // Parse location information if available
+      if (formData.location) {
+        try {
+          const { data, error } = await supabase.functions.invoke('geocode-search', {
+            body: { query: formData.location }
+          });
+
+          if (!error && data && data.length > 0) {
+            const result = data[0];
+            const address = result.address || {};
+            
+            addressData = {
+              address: [address.house_number, address.road].filter(Boolean).join(' ') || '',
+              city: address.town || address.city || '',
+              state: address.state || '',
+              zip: address.postcode || ''
+            };
+          }
+        } catch (geocodeError) {
+          console.warn('Could not parse location for address components:', geocodeError);
+        }
+      }
+      
       // Map form data to database structure with correct field mappings
       const submissionData = {
         name: formData.name,
         description: formData.description,
         location: formData.location,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zip,
         competition_date: formData.competition_date,
         comp_type: formData.comp_type,
+        ...addressData
       };
       
       await onSubmit(submissionData);
@@ -131,49 +159,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="address">Address</Label>
-          <Input
-            id="address"
-            value={formData.address}
-            onChange={(e) => updateFormData('address', e.target.value)}
-            placeholder="Street address"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
-          <Input
-            id="city"
-            value={formData.city}
-            onChange={(e) => updateFormData('city', e.target.value)}
-            placeholder="City"
-          />
-        </div>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="state">State</Label>
-          <Input
-            id="state"
-            value={formData.state}
-            onChange={(e) => updateFormData('state', e.target.value)}
-            placeholder="State"
-          />
-        </div>
-
-        <div className="space-y-2">
-          <Label htmlFor="zip">Zip Code</Label>
-          <Input
-            id="zip"
-            value={formData.zip}
-            onChange={(e) => updateFormData('zip', e.target.value)}
-            placeholder="Zip code"
-          />
-        </div>
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
