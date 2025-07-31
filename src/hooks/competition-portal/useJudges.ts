@@ -118,7 +118,7 @@ export const useJudges = () => {
   });
 
   const bulkImportJudges = async (
-    judges: Omit<Judge, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>[],
+    judges: any[], // Accept any array to handle ParsedJudge objects
     onProgress?: (current: number, total: number) => void
   ): Promise<{ success: number; failed: number; errors: string[] }> => {
     const results = { success: 0, failed: 0, errors: [] as string[] };
@@ -127,10 +127,12 @@ export const useJudges = () => {
       try {
         await new Promise(resolve => setTimeout(resolve, 100)); // Small delay to prevent overwhelming the API
         
+        // Filter out UI-only fields that don't exist in the database
+        const { id, errors, isValid, ...judgeData } = judges[i];
         const { error } = await supabase
           .from('cp_judges')
           .insert({
-            ...judges[i],
+            ...judgeData,
             created_by: userProfile?.id,
             school_id: userProfile?.school_id,
           });
