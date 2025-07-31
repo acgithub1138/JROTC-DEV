@@ -83,7 +83,7 @@ export const EventsPage = () => {
                     <TableHead>Description</TableHead>
                     <TableHead>Score Sheet</TableHead>
                     <TableHead>Created</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -100,11 +100,11 @@ export const EventsPage = () => {
                       </TableCell>
                       <TableCell>{formatDate(event.created_at)}</TableCell>
                       <TableCell>
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center justify-center gap-2">
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="ghost" size="sm" onClick={() => handleEdit(event)}>
-                                <Edit className="h-4 w-4" />
+                              <Button variant="outline" size="icon" onClick={() => handleEdit(event)}>
+                                <Edit className="h-6 w-6" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
@@ -113,8 +113,8 @@ export const EventsPage = () => {
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="ghost" size="sm" onClick={() => handleDelete(event.id)}>
-                                <Trash2 className="h-4 w-4" />
+                              <Button variant="outline" size="icon" onClick={() => handleDelete(event.id)}>
+                                <X className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" />
                               </Button>
                             </TooltipTrigger>
                             <TooltipContent>
