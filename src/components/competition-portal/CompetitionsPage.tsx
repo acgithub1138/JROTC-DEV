@@ -7,9 +7,11 @@ import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 interface Competition {
@@ -41,6 +43,7 @@ const CompetitionsPage = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
+  const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
@@ -103,7 +106,12 @@ const CompetitionsPage = () => {
   const filteredCompetitions = competitions.filter(competition => {
     const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
     const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
-    return matchesSearch && matchesStatus;
+    
+    // Filter by active/non-active tab
+    const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
+    const matchesTab = activeTab === 'active' ? isActive : !isActive;
+    
+    return matchesSearch && matchesStatus && matchesTab;
   });
   const canCreateCompetition = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const handleCreateCompetition = async (data: any) => {
@@ -133,6 +141,23 @@ const CompetitionsPage = () => {
     // TODO: Implement edit functionality
     toast.info('Edit functionality coming soon');
   };
+
+  const handleCancelCompetition = async (competition: Competition) => {
+    try {
+      const { error } = await supabase
+        .from('cp_competitions')
+        .update({ status: 'cancelled' })
+        .eq('id', competition.id);
+
+      if (error) throw error;
+
+      toast.success('Competition cancelled successfully');
+      fetchCompetitions();
+    } catch (error) {
+      console.error('Error cancelling competition:', error);
+      toast.error('Failed to cancel competition');
+    }
+  };
   if (loading) {
     return <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -140,7 +165,8 @@ const CompetitionsPage = () => {
         </div>
       </div>;
   }
-  return <div className="p-6 space-y-6">
+  return <TooltipProvider>
+    <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
         <div>
@@ -152,6 +178,15 @@ const CompetitionsPage = () => {
             Create Competition
           </Button>}
       </div>
+
+      {/* Active/Non-Active Tabs */}
+      <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'non-active')}>
+        <TabsList>
+          <TabsTrigger value="active">Active</TabsTrigger>
+          <TabsTrigger value="non-active">Non-Active</TabsTrigger>
+        </TabsList>
+        
+        <TabsContent value={activeTab} className="space-y-6">
 
       {/* Filters */}
       <Card>
@@ -241,13 +276,42 @@ const CompetitionsPage = () => {
                           {competition.max_participants && ` / ${competition.max_participants}`}
                         </div>
                       </TableCell>
-                      <TableCell>
-                         <div className="flex items-center justify-center gap-2">
-                           {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
-                               <Edit className="w-3 h-3" />
-                             </Button>}
-                         </div>
-                      </TableCell>
+                       <TableCell>
+                          <div className="flex items-center justify-center gap-2">
+                            {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
+                              <>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
+                                      <Edit className="w-3 h-3" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Edit Competition</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                
+                                {['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
+                                  <Tooltip>
+                                    <TooltipTrigger asChild>
+                                      <Button 
+                                        variant="outline" 
+                                        size="icon" 
+                                        className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" 
+                                        onClick={() => handleCancelCompetition(competition)}
+                                      >
+                                        <X className="w-3 h-3" />
+                                      </Button>
+                                    </TooltipTrigger>
+                                    <TooltipContent>
+                                      <p>Cancel Competition</p>
+                                    </TooltipContent>
+                                  </Tooltip>
+                                )}
+                              </>
+                            )}
+                          </div>
+                       </TableCell>
                     </TableRow>)}
                 </TableBody>
               </Table>
@@ -255,11 +319,15 @@ const CompetitionsPage = () => {
           </CardContent>
         </Card>}
 
+        </TabsContent>
+      </Tabs>
+
       {/* Create Competition Dialog */}
       <CompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
       {/* View Competition Modal */}
       <ViewCompetitionModal competition={selectedCompetition} open={showViewModal} onOpenChange={setShowViewModal} hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} />
-    </div>;
+    </div>
+  </TooltipProvider>;
 };
 export default CompetitionsPage;
