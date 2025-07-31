@@ -203,7 +203,7 @@ const CompetitionsPage = () => {
                     <TableHead>Date</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Registered Schools</TableHead>
-                    <TableHead>Actions</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -242,9 +242,9 @@ const CompetitionsPage = () => {
                         </div>
                       </TableCell>
                       <TableCell>
-                        <div className="flex gap-2">
-                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && <Button variant="ghost" size="sm" onClick={() => handleEditCompetition(competition)} className="h-8 w-8 p-0">
-                              <Edit className="h-4 w-4" />
+                        <div className="flex items-center justify-center gap-2">
+                          {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)} className="h-8 w-8 p-0">
+                              <Edit className="w-3 h-3" />
                             </Button>}
                         </div>
                       </TableCell>
