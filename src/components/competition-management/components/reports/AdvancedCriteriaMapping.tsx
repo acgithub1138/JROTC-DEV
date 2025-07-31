@@ -127,35 +127,13 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
   };
 
   const handleGetAllSuggestions = async () => {
-    console.log('Getting suggestions for criteria:', {
-      unmappedCriteria,
-      availableCriteria,
-      selectedEvent,
-      findSimilarMappings: !!findSimilarMappings
-    });
-    
-    if (!findSimilarMappings) {
-      console.error('findSimilarMappings function not available');
-      return;
-    }
-    
-    if (unmappedCriteria.length === 0) {
-      console.log('No unmapped criteria found');
-      return;
-    }
-    
-    if (!selectedEvent) {
-      console.error('No selected event');
-      return;
-    }
+    if (!findSimilarMappings || unmappedCriteria.length === 0) return;
     
     setLoadingSuggestions(true);
     try {
       const allSuggestionsData = await Promise.all(
         unmappedCriteria.map(async (criteria) => {
-          console.log('Finding suggestions for criteria:', criteria);
           const suggestions = await findSimilarMappings(criteria);
-          console.log('Suggestions found for', criteria, ':', suggestions);
           return {
             criteria,
             suggestions: suggestions.filter(s => s.similarity_score > 0.1).slice(0, 3)
@@ -163,11 +141,7 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
         })
       );
       
-      console.log('All suggestions data:', allSuggestionsData);
-      const filteredSuggestions = allSuggestionsData.filter(item => item.suggestions.length > 0);
-      console.log('Filtered suggestions:', filteredSuggestions);
-      
-      setAllSuggestions(filteredSuggestions);
+      setAllSuggestions(allSuggestionsData.filter(item => item.suggestions.length > 0));
       setShowAllSuggestions(true);
     } catch (error) {
       console.error('Failed to load suggestions:', error);
