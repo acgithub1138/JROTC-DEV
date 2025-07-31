@@ -220,56 +220,93 @@ export const RoleManagementPage: React.FC = () => {
         </TabsList>
 
         <TabsContent value="permissions">
-          <Tabs defaultValue="ccc" className="w-full">
-            <TabsList className="mb-6">
-              <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
-              <TabsTrigger value="competition">Comp Portal Permissions</TabsTrigger>
-            </TabsList>
+          <Card className="mb-6">
+            <CardHeader>
+              <CardTitle className="flex items-center justify-between">
+                <span>Role Permissions</span>
+                <div className="flex items-center gap-4">
+                  <AddRoleDialog />
+                  <Button variant="outline" size="sm" onClick={refreshData} className="flex items-center gap-2">
+                    <RefreshCw className="w-4 h-4" />
+                    Refresh
+                  </Button>
+                  <Button variant="outline" size="sm" onClick={handleResetToDefaults} disabled={isResetting} className="flex items-center gap-2">
+                    <RotateCcw className="w-4 h-4" />
+                    Reset to Defaults
+                  </Button>
+                </div>
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="mb-6">
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Select Role
+                </label>
+                <div className="flex items-center gap-4">
+                  <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
+                    <SelectTrigger className="w-64">
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {isLoadingAllRoles ? (
+                        <SelectItem value="loading" disabled>
+                          Loading roles...
+                        </SelectItem>
+                      ) : availableRoles.map(role => {
+                        const {
+                          enabled,
+                          total
+                        } = getPermissionCount(role.value);
+                        return <SelectItem key={role.value} value={role.value}>
+                              <div className="flex items-center justify-between w-full">
+                                <span>{role.label}</span>
+                                <Badge variant="secondary" className="ml-2">
+                                  {enabled}/{total}
+                                </Badge>
+                              </div>
+                            </SelectItem>;
+                      })}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
 
-            <TabsContent value="ccc">
-              <PortalPermissionsTable 
-                portal="ccc"
-                selectedRole={selectedRole}
-                availableRoles={availableRoles}
-                isLoadingAllRoles={isLoadingAllRoles}
-                setSelectedRole={setSelectedRole}
-                modules={modules}
-                actions={actions}
-                orderedActions={orderedActions}
-                rolePermissions={rolePermissions}
-                isUpdating={isUpdating}
-                isResetting={isResetting}
-                sensors={sensors}
-                handleDragEnd={handleDragEnd}
-                handlePermissionChange={handlePermissionChange}
-                handleResetToDefaults={handleResetToDefaults}
-                refreshData={refreshData}
-                getPermissionCount={getPermissionCount}
-              />
-            </TabsContent>
+              <Tabs defaultValue="ccc" className="w-full">
+                <TabsList className="mb-6">
+                  <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
+                  <TabsTrigger value="competition">Comp Portal Permissions</TabsTrigger>
+                </TabsList>
 
-            <TabsContent value="competition">
-              <PortalPermissionsTable 
-                portal="competition"
-                selectedRole={selectedRole}
-                availableRoles={availableRoles}
-                isLoadingAllRoles={isLoadingAllRoles}
-                setSelectedRole={setSelectedRole}
-                modules={modules}
-                actions={actions}
-                orderedActions={orderedActions}
-                rolePermissions={rolePermissions}
-                isUpdating={isUpdating}
-                isResetting={isResetting}
-                sensors={sensors}
-                handleDragEnd={handleDragEnd}
-                handlePermissionChange={handlePermissionChange}
-                handleResetToDefaults={handleResetToDefaults}
-                refreshData={refreshData}
-                getPermissionCount={getPermissionCount}
-              />
-            </TabsContent>
-          </Tabs>
+                <TabsContent value="ccc">
+                  <PortalPermissionsTable 
+                    portal="ccc"
+                    modules={modules}
+                    actions={actions}
+                    orderedActions={orderedActions}
+                    rolePermissions={rolePermissions}
+                    isUpdating={isUpdating}
+                    sensors={sensors}
+                    handleDragEnd={handleDragEnd}
+                    handlePermissionChange={handlePermissionChange}
+                  />
+                </TabsContent>
+
+                <TabsContent value="competition">
+                  <PortalPermissionsTable 
+                    portal="competition"
+                    modules={modules}
+                    actions={actions}
+                    orderedActions={orderedActions}
+                    rolePermissions={rolePermissions}
+                    isUpdating={isUpdating}
+                    sensors={sensors}
+                    handleDragEnd={handleDragEnd}
+                    handlePermissionChange={handlePermissionChange}
+                  />
+                </TabsContent>
+              </Tabs>
+            </CardContent>
+          </Card>
         </TabsContent>
 
         <TabsContent value="roles">
