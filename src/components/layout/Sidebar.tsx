@@ -7,6 +7,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useThemes } from '@/hooks/useThemes';
 import { SidebarCustomization } from './SidebarCustomization';
+import { usePortal } from '@/contexts/PortalContext';
+import { useNavigate } from 'react-router-dom';
 import {
   User,
   Users,
@@ -72,6 +74,8 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
   const { userProfile } = useAuth();
   const { menuItems, isLoading, refreshPreferences } = useSidebarPreferences();
   const { themes } = useThemes();
+  const { setPortal, canAccessCompetitionPortal } = usePortal();
+  const navigate = useNavigate();
   const [showCustomization, setShowCustomization] = useState(false);
 
   // Get the active theme that matches the user's JROTC program or use default
@@ -189,6 +193,36 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                 </Button>
               );
             })}
+
+            {/* Competition Portal Access Button */}
+            {canAccessCompetitionPortal && (
+              <div className="pt-4 border-t border-gray-700">
+                <Button
+                  variant="ghost"
+                  className="w-full justify-start text-left font-normal"
+                  style={{
+                    backgroundColor: 'transparent',
+                    color: currentTheme.link_text,
+                    border: `1px solid ${currentTheme.link_text}`,
+                  }}
+                  onMouseEnter={(e) => {
+                    e.currentTarget.style.backgroundColor = currentTheme.secondary_color;
+                    e.currentTarget.style.color = '#ffffff';
+                  }}
+                  onMouseLeave={(e) => {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = currentTheme.link_text;
+                  }}
+                  onClick={() => {
+                    setPortal('competition');
+                    navigate('/app/competition-portal/dashboard');
+                  }}
+                >
+                  <Trophy className="w-4 h-4 mr-3" />
+                  Competition Portal
+                </Button>
+              </div>
+            )}
           </div>
         </ScrollArea>
       </div>

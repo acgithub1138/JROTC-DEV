@@ -6,6 +6,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PermissionProvider } from "@/contexts/PermissionContext";
+import { PortalProvider } from "@/contexts/PortalContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MainApplication from "@/components/MainApplication";
 import MarketingLayout from "@/components/marketing/MarketingLayout";
@@ -24,9 +25,10 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <PermissionProvider>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
+          <PortalProvider>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
             <Routes>
               {/* Public Marketing Routes */}
               <Route path="/" element={<MarketingLayout />}>
@@ -56,6 +58,7 @@ const App = () => (
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>
+          </PortalProvider>
         </PermissionProvider>
       </AuthProvider>
     </TooltipProvider>

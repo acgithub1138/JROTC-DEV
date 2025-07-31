@@ -4,6 +4,9 @@ import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
 import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { usePortal } from '@/contexts/PortalContext';
+import CompetitionPortalLayout from './competition-portal/CompetitionPortalLayout';
+import CompetitionPortalRoutes from '@/routes/CompetitionPortalRoutes';
 import ProtectedRoute from './ProtectedRoute';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
@@ -33,9 +36,25 @@ const MainApplication = () => {
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { currentPortal } = usePortal();
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
+    
+    // Handle competition portal routes
+    if (path.startsWith('/app/competition-portal')) {
+      const portalPath = path.replace('/app/competition-portal/', '');
+      if (portalPath.startsWith('dashboard')) return 'competition-dashboard';
+      if (portalPath.startsWith('competitions')) return 'competitions';
+      if (portalPath.startsWith('events')) return 'events';
+      if (portalPath.startsWith('teams')) return 'teams';
+      if (portalPath.startsWith('score-sheets')) return 'score-sheets';
+      if (portalPath.startsWith('templates')) return 'templates';
+      if (portalPath.startsWith('analytics')) return 'analytics';
+      if (portalPath.startsWith('settings')) return 'competition-settings';
+      return 'competition-dashboard';
+    }
+    
     if (path === '/app' || path === '/app/') return 'dashboard';
     if (path.startsWith('/app/tasks')) return 'tasks';
     if (path.startsWith('/app/incidents')) return 'incident_management';
@@ -86,6 +105,11 @@ const MainApplication = () => {
       navigate(route);
     }
   };
+
+  // Render Competition Portal if that's the active portal or if on competition portal route
+  if (currentPortal === 'competition' || location.pathname.startsWith('/app/competition-portal')) {
+    return <CompetitionPortalLayout />;
+  }
 
   return (
     <div className="min-h-screen bg-gray-50">
