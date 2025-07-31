@@ -6,7 +6,7 @@ import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePortal } from '@/contexts/PortalContext';
 import CompetitionPortalLayout from './competition-portal/CompetitionPortalLayout';
-import CompetitionPortalRoutes from '@/routes/CompetitionPortalRoutes';
+
 import ProtectedRoute from './ProtectedRoute';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
@@ -214,6 +214,59 @@ const MainApplication = () => {
                 <RoleManagementPage />
               </ProtectedRoute>
             } />
+            
+            {/* Competition Portal Routes */}
+            <Route path="/competition-portal" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/dashboard" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/competitions" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/events" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/teams" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/score-sheets" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/templates" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/analytics" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            <Route path="/competition-portal/settings" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
+            
             <Route path="*" element={<NotFound />} />
           </Routes>
         </main>

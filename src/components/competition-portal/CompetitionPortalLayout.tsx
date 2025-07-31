@@ -2,7 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { Header } from '@/components/layout/Header';
 import { CompetitionSidebar } from './CompetitionSidebar';
-import CompetitionPortalRoutes from '@/routes/CompetitionPortalRoutes';
+import CompetitionDashboard from './CompetitionDashboard';
+import CompetitionsPage from './CompetitionsPage';
 
 const CompetitionPortalLayout = () => {
   const [activeModule, setActiveModule] = useState('competition-dashboard');
@@ -49,6 +50,32 @@ const CompetitionPortalLayout = () => {
     }
   };
 
+  // Function to render content based on current route
+  const renderContent = () => {
+    const path = location.pathname;
+    
+    if (path === '/app/competition-portal' || path === '/app/competition-portal/' || path === '/app/competition-portal/dashboard') {
+      return <CompetitionDashboard />;
+    } else if (path === '/app/competition-portal/competitions') {
+      return <CompetitionsPage />;
+    } else if (path === '/app/competition-portal/events') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Events & Scheduling</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/teams') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Teams & Participants</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/score-sheets') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Score Sheets</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/templates') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Templates</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/analytics') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
+    } else if (path === '/app/competition-portal/settings') {
+      return <div className="p-6"><h1 className="text-2xl font-bold">Competition Settings</h1><p>Coming soon...</p></div>;
+    }
+    
+    // Default to dashboard
+    return <CompetitionDashboard />;
+  };
+
   return (
     <div className="min-h-screen bg-background">
       <CompetitionSidebar 
@@ -58,7 +85,7 @@ const CompetitionPortalLayout = () => {
       <div className="ml-64">
         <Header activeModule={activeModule} onModuleChange={handleModuleChange} />
         <main className="min-h-[calc(100vh-4rem)]">
-          <CompetitionPortalRoutes />
+          {renderContent()}
         </main>
       </div>
     </div>
