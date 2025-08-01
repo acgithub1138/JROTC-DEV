@@ -185,28 +185,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div>
-                <Label htmlFor="name">Competition Name *</Label>
-                <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter competition name" required />
-              </div>
-              <div>
-                <Label htmlFor="status">Status *</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select Status" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="draft">Draft</SelectItem>
-                    <SelectItem value="open">Open</SelectItem>
-                    <SelectItem value="closed">Closed</SelectItem>
-                    <SelectItem value="completed">Completed</SelectItem>
-                    <SelectItem value="cancelled">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+            <div>
+              <Label htmlFor="name">Competition Name *</Label>
+              <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter competition name" required />
             </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="program">JROTC Program *</Label>
@@ -223,6 +205,21 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                <Label htmlFor="status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>              
             </div>
 
             <div>
