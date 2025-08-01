@@ -151,11 +151,25 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
                 <span className="font-medium">Location:</span>
               </div>
               <div className="ml-7 text-sm space-y-1">
-                {competition.address && <div>{competition.address}</div>}
+                {competition.address && (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline cursor-pointer"
+                  >
+                    {competition.address}
+                  </a>
+                )}
                 {(competition.city || competition.state || competition.zip) && (
-                  <div>
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline cursor-pointer"
+                  >
                     {[competition.city, competition.state, competition.zip].filter(Boolean).join(' ')}
-                  </div>
+                  </a>
                 )}
               </div>
             </div>
