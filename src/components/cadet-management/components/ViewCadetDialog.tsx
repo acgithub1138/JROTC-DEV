@@ -45,7 +45,6 @@ export const ViewCadetDialog = ({
       setIsEditMode(false);
     }
   }, [open]);
-
   const handleEdit = () => {
     if (onEditProfile && profile) {
       onEditProfile(profile);
@@ -53,7 +52,6 @@ export const ViewCadetDialog = ({
     setIsEditMode(true);
     onOpenChange(false);
   };
-
   const handleUpdate = () => {
     if (onEditProfile && profile) {
       onEditProfile(profile);
@@ -61,14 +59,13 @@ export const ViewCadetDialog = ({
     setIsEditMode(false);
     onOpenChange(false);
   };
-
   const handleClose = () => {
     setIsEditMode(false);
     onOpenChange(false);
   };
   if (!profile) return null;
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
           <DialogTitle>Cadet Profile</DialogTitle>
         </DialogHeader>
@@ -169,11 +166,9 @@ export const ViewCadetDialog = ({
           <Button variant="outline" onClick={handleClose}>
             Close
           </Button>
-          {canUpdate && (
-            <Button onClick={isEditMode ? handleUpdate : handleEdit}>
+          {canUpdate && <Button onClick={isEditMode ? handleUpdate : handleEdit}>
               {isEditMode ? 'Update' : 'Edit'}
-            </Button>
-          )}
+            </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>;
