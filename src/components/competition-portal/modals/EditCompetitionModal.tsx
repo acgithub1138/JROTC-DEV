@@ -150,9 +150,18 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     setIsSubmitting(true);
     try {
       const submitData = {
-        ...formData,
+        name: formData.name,
+        description: formData.description,
+        location: formData.location,
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip,
+        start_date: formData.start_date,
+        end_date: formData.end_date,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        registration_deadline: formData.registration_deadline || null
+        registration_deadline: formData.registration_deadline || null,
+        is_public: formData.is_public
       };
       await onSubmit(submitData);
     } finally {
