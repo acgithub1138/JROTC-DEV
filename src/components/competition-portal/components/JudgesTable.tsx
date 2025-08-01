@@ -2,6 +2,7 @@ import React from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2 } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 interface Judge {
@@ -17,17 +18,26 @@ interface JudgesTableProps {
   isLoading: boolean;
   onEdit: (judge: Judge) => void;
   onDelete: (id: string) => void;
+  selectedJudges: string[];
+  onSelectJudge: (judgeId: string, checked: boolean) => void;
+  onSelectAll: (checked: boolean) => void;
 }
 export const JudgesTable: React.FC<JudgesTableProps> = ({
   judges,
   isLoading,
   onEdit,
-  onDelete
+  onDelete,
+  selectedJudges,
+  onSelectJudge,
+  onSelectAll
 }) => {
   const {
     canEdit,
     canDelete
   } = useTablePermissions('cp_judges');
+  
+  const isAllSelected = judges.length > 0 && selectedJudges.length === judges.length;
+  const isIndeterminate = selectedJudges.length > 0 && selectedJudges.length < judges.length;
   if (isLoading) {
     return <div className="text-center py-8">Loading judges...</div>;
   }
@@ -40,6 +50,14 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
       <Table>
         <TableHeader>
           <TableRow>
+            <TableHead className="w-12">
+              <Checkbox
+                checked={isAllSelected}
+                onCheckedChange={onSelectAll}
+                aria-label="Select all judges"
+                className={isIndeterminate ? "data-[state=checked]:bg-primary data-[state=checked]:opacity-50" : ""}
+              />
+            </TableHead>
             <TableHead>Name</TableHead>
             <TableHead>Phone</TableHead>
             <TableHead>Email</TableHead>
@@ -50,6 +68,13 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
         </TableHeader>
         <TableBody>
           {judges.map(judge => <TableRow key={judge.id}>
+              <TableCell>
+                <Checkbox
+                  checked={selectedJudges.includes(judge.id)}
+                  onCheckedChange={(checked) => onSelectJudge(judge.id, checked as boolean)}
+                  aria-label={`Select ${judge.name}`}
+                />
+              </TableCell>
               <TableCell className="font-medium py-[8px]">{judge.name}</TableCell>
               <TableCell>{judge.phone || '-'}</TableCell>
               <TableCell>{judge.email || '-'}</TableCell>

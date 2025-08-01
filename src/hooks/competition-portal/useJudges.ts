@@ -172,6 +172,40 @@ export const useJudges = () => {
     return results;
   };
 
+  const bulkUpdateStatus = useMutation({
+    mutationFn: async ({ judgeIds, available }: { judgeIds: string[]; available: boolean }) => {
+      const promises = judgeIds.map(id => 
+        supabase
+          .from('cp_judges')
+          .update({ available })
+          .eq('id', id)
+      );
+      
+      const results = await Promise.all(promises);
+      const errors = results.filter(result => result.error);
+      
+      if (errors.length > 0) {
+        throw new Error(`Failed to update ${errors.length} judge(s)`);
+      }
+      
+      return results;
+    },
+    onSuccess: (_, { judgeIds, available }) => {
+      queryClient.invalidateQueries({ queryKey: ['cp-judges'] });
+      toast({
+        title: "Judges updated",
+        description: `${judgeIds.length} judge(s) marked as ${available ? 'available' : 'unavailable'}.`,
+      });
+    },
+    onError: (error: any) => {
+      toast({
+        title: "Error",
+        description: error.message || "Failed to update judges.",
+        variant: "destructive",
+      });
+    },
+  });
+
   return {
     judges,
     isLoading,
@@ -179,8 +213,10 @@ export const useJudges = () => {
     updateJudge: updateJudge.mutate,
     deleteJudge: deleteJudge.mutate,
     bulkImportJudges,
+    bulkUpdateStatus: bulkUpdateStatus.mutate,
     isCreating: createJudge.isPending,
     isUpdating: updateJudge.isPending,
     isDeleting: deleteJudge.isPending,
+    isBulkUpdating: bulkUpdateStatus.isPending,
   };
 };
