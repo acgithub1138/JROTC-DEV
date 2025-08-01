@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -51,8 +52,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     zip: '',
     start_date: '',
     end_date: '',
-    start_time: '',
-    end_time: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
+    end_time_hour: '17',
+    end_time_minute: '00',
     max_participants: '',
     registration_deadline: '',
     is_public: true
@@ -73,10 +76,12 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         city: competition.city || '',
         state: competition.state || '',
         zip: competition.zip || '',
-        start_date: competition.start_date || '',
-        end_date: competition.end_date || '',
-        start_time: startDate ? format(startDate, 'HH:mm') : '',
-        end_time: endDate ? format(endDate, 'HH:mm') : '',
+        start_date: startDate ? format(startDate, 'yyyy-MM-dd') : '',
+        end_date: endDate ? format(endDate, 'yyyy-MM-dd') : '',
+        start_time_hour: startDate ? format(startDate, 'HH') : '09',
+        start_time_minute: startDate ? format(startDate, 'mm') : '00',
+        end_time_hour: endDate ? format(endDate, 'HH') : '17',
+        end_time_minute: endDate ? format(endDate, 'mm') : '00',
         max_participants: competition.max_participants?.toString() || '',
         registration_deadline: competition.registration_deadline || '',
         is_public: competition.is_public
@@ -92,31 +97,54 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       [field]: value
     }));
   };
-  const handleDateChange = (field: 'start_date' | 'end_date' | 'registration_deadline', date: Date | undefined) => {
-    if (date) {
-      const currentTime = field === 'start_date' ? formData.start_time : field === 'end_date' ? formData.end_time : '';
-      const combinedDateTime = currentTime ? new Date(`${format(date, 'yyyy-MM-dd')}T${currentTime}:00`) : date;
+  const handleDateChange = (field: 'start_date' | 'end_date' | 'registration_deadline', dateValue: string) => {
+    if (field === 'registration_deadline') {
+      const date = dateValue ? new Date(dateValue) : undefined;
+      setRegistrationDeadline(date);
+      setFormData(prev => ({
+        ...prev,
+        registration_deadline: date ? date.toISOString() : ''
+      }));
+      return;
+    }
+
+    // For start_date and end_date, combine with current time
+    if (dateValue) {
+      const timeHour = field === 'start_date' ? formData.start_time_hour : formData.end_time_hour;
+      const timeMinute = field === 'start_date' ? formData.start_time_minute : formData.end_time_minute;
+      const combinedDateTime = new Date(`${dateValue}T${timeHour}:${timeMinute}:00`);
       const isoString = combinedDateTime.toISOString();
+      
       setFormData(prev => ({
         ...prev,
         [field]: isoString
       }));
-      if (field === 'start_date') setStartDate(date);
-      if (field === 'end_date') setEndDate(date);
-      if (field === 'registration_deadline') setRegistrationDeadline(date);
+      
+      if (field === 'start_date') setStartDate(new Date(dateValue));
+      if (field === 'end_date') setEndDate(new Date(dateValue));
     }
   };
-  const handleTimeChange = (field: 'start_time' | 'end_time', time: string) => {
+
+  const handleTimeChange = (field: 'start_time_hour' | 'start_time_minute' | 'end_time_hour' | 'end_time_minute', value: string) => {
     setFormData(prev => ({
       ...prev,
-      [field]: time
+      [field]: value
     }));
 
     // Update the corresponding date with the new time
-    const dateField = field === 'start_time' ? 'start_date' : 'end_date';
-    const currentDate = field === 'start_time' ? startDate : endDate;
-    if (currentDate && time) {
-      const combinedDateTime = new Date(`${format(currentDate, 'yyyy-MM-dd')}T${time}:00`);
+    const isStartTime = field.startsWith('start_time');
+    const dateField = isStartTime ? 'start_date' : 'end_date';
+    const currentDate = isStartTime ? startDate : endDate;
+    
+    if (currentDate) {
+      const timeHour = field === 'start_time_hour' ? value : 
+                     field === 'end_time_hour' ? value :
+                     isStartTime ? formData.start_time_hour : formData.end_time_hour;
+      const timeMinute = field === 'start_time_minute' ? value :
+                        field === 'end_time_minute' ? value :
+                        isStartTime ? formData.start_time_minute : formData.end_time_minute;
+      
+      const combinedDateTime = new Date(`${format(currentDate, 'yyyy-MM-dd')}T${timeHour}:${timeMinute}:00`);
       setFormData(prev => ({
         ...prev,
         [dateField]: combinedDateTime.toISOString()
@@ -194,57 +222,106 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Start Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={startDate} onSelect={date => handleDateChange('start_date', date)} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="start_date">Start Date *</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateChange('start_date', e.target.value)}
+                  required
+                />
               </div>
+
               <div>
-                <Label htmlFor="start_time">Start Time</Label>
-                <Input id="start_time" type="time" value={formData.start_time} onChange={e => handleTimeChange('start_time', e.target.value)} className="w-full" />
-              </div>
-            <div className="">
-              <div>
-                <Label>End Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={endDate} onSelect={date => handleDateChange('end_date', date)} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="end_date">End Date *</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateChange('end_date', e.target.value)}
+                  required
+                />
               </div>
             </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="end_time">End Time</Label>
-                <Input id="end_time" type="time" value={formData.end_time} onChange={e => handleTimeChange('end_time', e.target.value)} className="w-full" />
+                <Label>Start Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Select value={formData.start_time_hour} onValueChange={(value) => handleTimeChange('start_time_hour', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.start_time_minute} onValueChange={(value) => handleTimeChange('start_time_minute', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                          <SelectItem key={minute} value={minute}>
+                            {minute}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <Label>End Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Select value={formData.end_time_hour} onValueChange={(value) => handleTimeChange('end_time_hour', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select value={formData.end_time_minute} onValueChange={(value) => handleTimeChange('end_time_minute', value)}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                          <SelectItem key={minute} value={minute}>
+                            {minute}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
+
             <div>
-              <Label>Registration Deadline</Label>
-              <Popover>
-                <PopoverTrigger asChild>
-                  <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !registrationDeadline && "text-muted-foreground")}>
-                    <CalendarIcon className="mr-2 h-4 w-4" />
-                    {registrationDeadline ? format(registrationDeadline, "PPP") : "Pick a deadline"}
-                  </Button>
-                </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar mode="single" selected={registrationDeadline} onSelect={date => handleDateChange('registration_deadline', date)} initialFocus />
-                </PopoverContent>
-              </Popover>
+              <Label htmlFor="registration_deadline">Registration Deadline</Label>
+              <Input
+                id="registration_deadline"
+                type="date"
+                value={formData.registration_deadline ? format(new Date(formData.registration_deadline), 'yyyy-MM-dd') : ''}
+                onChange={(e) => handleDateChange('registration_deadline', e.target.value)}
+              />
             </div>
           </div>
 
