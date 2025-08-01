@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { IssuedUsersPopover } from './IssuedUsersPopover';
 import type { Tables } from '@/integrations/supabase/types';
 type InventoryItem = Tables<'inventory_items'>;
 interface ViewInventoryItemDialogProps {
@@ -184,10 +185,8 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
 
             {item.issued_to && item.issued_to.length > 0 && <div className="mt-4">
                 <label className="text-sm font-medium text-muted-foreground">Issued To</label>
-                <div className="mt-1 flex flex-wrap gap-1">
-                  {item.issued_to.map((userId, index) => <Badge key={index} variant="secondary" className="text-xs">
-                      {userId}
-                    </Badge>)}
+                <div className="mt-1">
+                  <IssuedUsersPopover issuedTo={item.issued_to} />
                 </div>
               </div>}
           </div>
