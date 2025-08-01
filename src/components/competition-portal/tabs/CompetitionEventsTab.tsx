@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
@@ -15,10 +15,13 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const {
     events,
     isLoading,
-    createEvent
+    createEvent,
+    deleteEvent
   } = useCompetitionEvents(competitionId);
   const {
-    canCreate
+    canCreate,
+    canEdit,
+    canDelete
   } = useTablePermissions('cp_comp_events');
   const [showAddModal, setShowAddModal] = useState(false);
   if (isLoading) {
@@ -43,28 +46,53 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
         <div className="border rounded-lg">
           <Table>
             <TableHeader>
-              <TableRow>
-                <TableHead>Event</TableHead>
-                <TableHead>Location</TableHead>
-                <TableHead>Start Time</TableHead>
-                <TableHead>End Time</TableHead>
-                <TableHead>Max Participants</TableHead>
-              </TableRow>
+               <TableRow>
+                 <TableHead>Event</TableHead>
+                 <TableHead>Location</TableHead>
+                 <TableHead>Start Time</TableHead>
+                 <TableHead>End Time</TableHead>
+                 <TableHead>Max Participants</TableHead>
+                 {(canEdit || canDelete) && <TableHead>Actions</TableHead>}
+               </TableRow>
             </TableHeader>
             <TableBody>
-              {events.map(event => (
-                <TableRow key={event.id}>
-                  <TableCell className="font-medium">{event.cp_events?.name || 'N/A'}</TableCell>
-                  <TableCell>{event.location || 'N/A'}</TableCell>
-                  <TableCell>
-                    {event.start_time ? format(new Date(event.start_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
-                  </TableCell>
-                  <TableCell>
-                    {event.end_time ? format(new Date(event.end_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
-                  </TableCell>
-                  <TableCell>{event.max_participants || 'N/A'}</TableCell>
-                </TableRow>
-              ))}
+               {events.map(event => (
+                 <TableRow key={event.id}>
+                   <TableCell className="font-medium">{event.cp_events?.name || 'N/A'}</TableCell>
+                   <TableCell>{event.location || 'N/A'}</TableCell>
+                   <TableCell>
+                     {event.start_time ? format(new Date(event.start_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
+                   </TableCell>
+                   <TableCell>
+                     {event.end_time ? format(new Date(event.end_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
+                   </TableCell>
+                   <TableCell>{event.max_participants || 'N/A'}</TableCell>
+                    {(canEdit || canDelete) && (
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          {canEdit && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {/* TODO: Add edit functionality */}}
+                            >
+                              <Edit className="w-4 h-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => deleteEvent(event.id)}
+                            >
+                              <Trash2 className="w-4 h-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
+                 </TableRow>
+               ))}
             </TableBody>
           </Table>
         </div>

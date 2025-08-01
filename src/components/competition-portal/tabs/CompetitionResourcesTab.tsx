@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -14,10 +14,13 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
   const {
     resources,
     isLoading,
-    createResource
+    createResource,
+    deleteResource
   } = useCompetitionResources(competitionId);
   const {
-    canCreate
+    canCreate,
+    canEdit,
+    canDelete
   } = useTablePermissions('cp_comp_resources');
   const [showAddModal, setShowAddModal] = useState(false);
   if (isLoading) {
@@ -39,16 +42,40 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
         </div> : <div className="space-y-2">
           {resources.map(resource => <div key={resource.id} className="p-4 border rounded-lg bg-card">
               <div className="flex items-center justify-between">
-                <div>
+                <div className="flex-1">
                   <h3 className="font-medium">Resource {resource.resource}</h3>
-                   <p className="text-sm text-muted-foreground">
-                     {resource.location && `Location: ${resource.location}`}
-                     {resource.start_time && ` • ${format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')}`}
-                   </p>
+                  <p className="text-sm text-muted-foreground">
+                    {resource.location && `Location: ${resource.location}`}
+                    {resource.start_time && ` • ${format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')}`}
+                  </p>
                 </div>
-                 <div className="text-sm text-muted-foreground">
-                   {resource.end_time && `Until: ${format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')}`}
-                 </div>
+                <div className="flex items-center gap-4">
+                  <div className="text-sm text-muted-foreground">
+                    {resource.end_time && `Until: ${format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')}`}
+                  </div>
+                  {(canEdit || canDelete) && (
+                    <div className="flex items-center gap-2">
+                      {canEdit && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => {/* TODO: Add edit functionality */}}
+                        >
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button
+                          variant="ghost"
+                          size="sm"
+                          onClick={() => deleteResource(resource.id)}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               {resource.assignment_details && <p className="mt-2 text-sm text-muted-foreground">{resource.assignment_details}</p>}
             </div>)}
