@@ -266,6 +266,11 @@ const MainApplication = () => {
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
+            <Route path="/competition-portal/open-competitions" element={
+              <ProtectedRoute>
+                <CompetitionPortalLayout />
+              </ProtectedRoute>
+            } />
             
             <Route path="*" element={<NotFound />} />
           </Routes>

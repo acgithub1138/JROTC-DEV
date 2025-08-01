@@ -9,9 +9,11 @@ import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
-
+import { OpenCompetitionsPage } from './OpenCompetitionsPage';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CompetitionPortalLayout = () => {
+  const { userProfile } = useAuth();
   const [activeModule, setActiveModule] = useState('competition-dashboard');
   const location = useLocation();
   const navigate = useNavigate();
@@ -27,6 +29,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/judges': 'judges',
     '/app/competition-portal/analytics': 'analytics',
     '/app/competition-portal/settings': 'competition-settings',
+    '/app/competition-portal/open-competitions': 'open-competitions',
   };
 
   // Map modules to routes
@@ -38,13 +41,22 @@ const CompetitionPortalLayout = () => {
     'judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
     'competition-settings': '/app/competition-portal/settings',
+    'open-competitions': '/app/competition-portal/open-competitions',
   };
 
   // Sync activeModule with current route
   useEffect(() => {
+    const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
     const currentModule = routeToModuleMap[location.pathname] || 'competition-dashboard';
+    
+    // If user doesn't have competition portal access, redirect to open competitions
+    if (!hasCompetitionPortal && currentModule !== 'open-competitions') {
+      navigate('/app/competition-portal/open-competitions');
+      return;
+    }
+    
     setActiveModule(currentModule);
-  }, [location.pathname]);
+  }, [location.pathname, userProfile, navigate]);
 
   const handleModuleChange = (module: string) => {
     setActiveModule(module);
@@ -74,6 +86,8 @@ const CompetitionPortalLayout = () => {
       return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/settings') {
       return <CompetitionSettingsPage />;
+    } else if (path === '/app/competition-portal/open-competitions') {
+      return <OpenCompetitionsPage />;
     }
     
     // Default to dashboard

@@ -6,7 +6,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Calendar, Users, FileText, BarChart3, Settings, ArrowLeft, Shield, Award, Target, Clipboard } from 'lucide-react';
+import { Trophy, Calendar, Users, FileText, BarChart3, Settings, ArrowLeft, Shield, Award, Target, Clipboard, Search } from 'lucide-react';
 interface CompetitionSidebarProps {
   className?: string;
   activeModule: string;
@@ -26,7 +26,7 @@ const DEFAULT_THEME = {
   link_hover: '#1f2937' // Hover background (gray-800)
 };
 
-// Competition portal specific menu items
+// Competition portal specific menu items for full access
 const competitionMenuItems = [{
   id: 'competition-dashboard',
   label: 'Dashboard',
@@ -63,6 +63,14 @@ const competitionMenuItems = [{
   icon: Settings,
   path: '/app/competition-portal/settings'
 }];
+
+// Limited menu items for schools without competition_portal access
+const limitedMenuItems = [{
+  id: 'open-competitions',
+  label: 'Open Competitions',
+  icon: Search,
+  path: '/app/competition-portal/open-competitions'
+}];
 export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   className,
   activeModule,
@@ -90,6 +98,10 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     link_selected_text: (activeTheme as any)?.link_selected_text || DEFAULT_THEME.link_selected_text,
     link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover
   };
+
+  // Determine which menu items to show based on competition_portal access
+  const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
+  const menuItems = hasCompetitionPortal ? competitionMenuItems : limitedMenuItems;
   const handleReturnToCCC = () => {
     setPortal('ccc');
     navigate('/app/dashboard');
@@ -112,7 +124,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-1">
-          {competitionMenuItems.map(item => {
+          {menuItems.map(item => {
           const Icon = item.icon;
           const isActive = activeModule === item.id;
           return <Button key={item.id} variant="ghost" className="w-full justify-start text-left font-normal" style={{
