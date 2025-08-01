@@ -132,7 +132,16 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                 id="start_time"
                 type="datetime-local"
                 value={formData.start_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
+                onChange={(e) => {
+                  setFormData(prev => ({ ...prev, start_time: e.target.value }));
+                  // Auto-set end time to 1 hour after start time
+                  if (e.target.value) {
+                    const startDate = new Date(e.target.value);
+                    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
+                    const endDateString = endDate.toISOString().slice(0, 16); // Format for datetime-local
+                    setFormData(prev => ({ ...prev, end_time: endDateString }));
+                  }
+                }}
               />
             </div>
             <div>

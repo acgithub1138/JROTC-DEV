@@ -99,7 +99,20 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
           }) => <FormItem>
                   <FormLabel>Start Time</FormLabel>
                   <FormControl>
-                    <Input type="datetime-local" {...field} />
+                    <Input 
+                      type="datetime-local" 
+                      {...field} 
+                      onChange={(e) => {
+                        field.onChange(e);
+                        // Auto-set end time to 1 hour after start time
+                        if (e.target.value) {
+                          const startDate = new Date(e.target.value);
+                          const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
+                          const endDateString = endDate.toISOString().slice(0, 16); // Format for datetime-local
+                          form.setValue('end_time', endDateString);
+                        }
+                      }}
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
