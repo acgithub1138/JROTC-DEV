@@ -75,7 +75,8 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                   </TableCell>}
               </TableRow>)}
           </TableBody>
-        </Table>}
+        </Table>
+      </div>}
 
       <AddResourceModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onResourceAdded={createResource} />
     </div>;
