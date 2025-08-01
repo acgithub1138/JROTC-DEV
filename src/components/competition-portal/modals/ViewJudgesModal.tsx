@@ -1,0 +1,88 @@
+import React, { useEffect, useState } from 'react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
+import type { Database } from '@/integrations/supabase/types';
+
+type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'];
+type Judge = Database['public']['Tables']['cp_judges']['Row'];
+
+interface ViewJudgesModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  event: CompEvent | null;
+}
+
+export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
+  open,
+  onOpenChange,
+  event
+}) => {
+  const [judges, setJudges] = useState<Judge[]>([]);
+  const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    if (!open || !event?.judges || event.judges.length === 0) {
+      setJudges([]);
+      return;
+    }
+
+    const fetchJudges = async () => {
+      try {
+        setIsLoading(true);
+        const { data, error } = await supabase
+          .from('cp_judges')
+          .select('*')
+          .in('id', event.judges);
+
+        if (error) throw error;
+        setJudges(data || []);
+      } catch (error) {
+        console.error('Error fetching judges:', error);
+        toast.error('Failed to load judges');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchJudges();
+  }, [open, event]);
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="max-w-md">
+        <DialogHeader>
+          <DialogTitle>Event Judges</DialogTitle>
+        </DialogHeader>
+        
+        <div className="space-y-4">
+          {isLoading ? (
+            <div className="space-y-2">
+              {[1, 2, 3].map(i => (
+                <div key={i} className="h-12 bg-muted rounded animate-pulse" />
+              ))}
+            </div>
+          ) : judges.length === 0 ? (
+            <p className="text-muted-foreground text-center py-4">
+              No judges assigned to this event
+            </p>
+          ) : (
+            <div className="space-y-2">
+              {judges.map(judge => (
+                <div key={judge.id} className="p-3 border rounded-lg">
+                  <h4 className="font-medium">{judge.name}</h4>
+                  {judge.email && (
+                    <p className="text-sm text-muted-foreground">{judge.email}</p>
+                  )}
+                  {judge.phone && (
+                    <p className="text-sm text-muted-foreground">{judge.phone}</p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+      </DialogContent>
+    </Dialog>
+  );
+};

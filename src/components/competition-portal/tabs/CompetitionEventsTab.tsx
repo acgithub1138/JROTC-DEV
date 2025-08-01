@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
 import { EditEventModal } from '@/components/competition-portal/modals/EditEventModal';
+import { ViewJudgesModal } from '@/components/competition-portal/modals/ViewJudgesModal';
+import { ViewResourcesModal } from '@/components/competition-portal/modals/ViewResourcesModal';
 import { format } from 'date-fns';
 interface CompetitionEventsTabProps {
   competitionId: string;
@@ -28,9 +30,22 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const [showJudgesModal, setShowJudgesModal] = useState(false);
+  const [showResourcesModal, setShowResourcesModal] = useState(false);
+  const [selectedEventForView, setSelectedEventForView] = useState<typeof events[0] | null>(null);
   const handleEditEvent = (event: typeof events[0]) => {
     setSelectedEvent(event);
     setShowEditModal(true);
+  };
+
+  const handleViewJudges = (event: typeof events[0]) => {
+    setSelectedEventForView(event);
+    setShowJudgesModal(true);
+  };
+
+  const handleViewResources = (event: typeof events[0]) => {
+    setSelectedEventForView(event);
+    setShowResourcesModal(true);
   };
   if (isLoading) {
     return <div className="space-y-4">
@@ -52,12 +67,14 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           <Table>
             <TableHeader>
                <TableRow>
-                 <TableHead>Event</TableHead>
-                 <TableHead>Location</TableHead>
-                 <TableHead>Start Time</TableHead>
-                 <TableHead>End Time</TableHead>
-                 <TableHead>Max</TableHead>
-                 <TableHead className="text-center">Actions</TableHead>
+                  <TableHead>Event</TableHead>
+                  <TableHead>Location</TableHead>
+                  <TableHead>Start Time</TableHead>
+                  <TableHead>End Time</TableHead>
+                  <TableHead>Max</TableHead>
+                  <TableHead className="text-center">Judges</TableHead>
+                  <TableHead className="text-center">Resources</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
@@ -70,17 +87,41 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                    <TableCell>
                      {event.end_time ? format(new Date(event.end_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
                    </TableCell>
-                   <TableCell>{event.max_participants || 'N/A'}</TableCell>
-                    {(canEdit || canDelete) && <TableCell>
-                        <div className="flex items-center justify-center gap-2">
-                          {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditEvent(event)}>
-                              <Edit className="w-3 h-3" />
-                            </Button>}
-                          {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
-                              <Trash2 className="w-3 h-3" />
-                            </Button>}
-                        </div>
-                      </TableCell>}
+                    <TableCell>{event.max_participants || 'N/A'}</TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-6 w-6" 
+                          onClick={() => handleViewJudges(event)}
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                    <TableCell>
+                      <div className="flex items-center justify-center">
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-6 w-6" 
+                          onClick={() => handleViewResources(event)}
+                        >
+                          <Eye className="w-3 h-3" />
+                        </Button>
+                      </div>
+                    </TableCell>
+                     {(canEdit || canDelete) && <TableCell>
+                         <div className="flex items-center justify-center gap-2">
+                           {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditEvent(event)}>
+                               <Edit className="w-3 h-3" />
+                             </Button>}
+                           {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
+                               <Trash2 className="w-3 h-3" />
+                             </Button>}
+                         </div>
+                       </TableCell>}
                  </TableRow>)}
             </TableBody>
           </Table>
@@ -88,5 +129,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
 
       <AddEventModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onEventAdded={createEvent} />
       <EditEventModal open={showEditModal} onOpenChange={setShowEditModal} event={selectedEvent} onEventUpdated={updateEvent} />
+      <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} event={selectedEventForView} />
+      <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} event={selectedEventForView} />
     </div>;
 };
