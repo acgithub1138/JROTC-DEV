@@ -99,6 +99,7 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
   };
 
   return (
+    <>
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
         <DialogHeader>
@@ -202,14 +203,17 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
           )}
         </DialogFooter>
       </DialogContent>
+    </Dialog>
 
-      {/* Edit Modal */}
+    {/* Edit Modal - Separate from main dialog */}
+    {showEditModal && (
       <EditCompetitionModal
         open={showEditModal}
         onOpenChange={setShowEditModal}
         competition={competition}
         onSubmit={handleEditSubmit}
       />
-    </Dialog>
+    )}
+    </>
   );
 };
