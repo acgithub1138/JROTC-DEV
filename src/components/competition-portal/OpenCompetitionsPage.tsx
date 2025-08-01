@@ -16,12 +16,7 @@ export const OpenCompetitionsPage = () => {
     queryFn: async () => {
       const { data, error } = await supabase
         .from('cp_competitions')
-        .select(`
-          *,
-          schools!school_id (
-            name
-          )
-        `)
+        .select('*')
         .eq('status', 'open')
         .eq('is_public', true)
         .order('start_date', { ascending: true });
@@ -96,9 +91,6 @@ export const OpenCompetitionsPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm text-gray-600">
-                  <div className="text-sm font-medium text-gray-700 mb-2">
-                    Hosted by {(competition as any).schools?.name || 'Unknown School'}
-                  </div>
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-4 h-4" />
                     <span>
