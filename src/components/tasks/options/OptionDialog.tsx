@@ -39,7 +39,7 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
           Add {type === 'status' ? 'Status' : 'Priority'}
         </Button>
       </DialogTrigger>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {isEditing ? `Edit ${type === 'status' ? 'Status' : 'Priority'}` : `Add New ${type === 'status' ? 'Status' : 'Priority'}`}
