@@ -74,44 +74,18 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
       setIsSubmitting(false);
     }
   };
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Competition Event</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-3">
-          <AddEventForm
-            selectedProgram={selectedProgram}
-            selectedEvent={selectedEvent}
-            selectedTemplateId={selectedTemplateId}
-            judgeNumber={judgeNumber}
-            teamName={teamName}
-            availablePrograms={availablePrograms}
-            availableEvents={availableEvents}
-            filteredTemplates={filteredTemplates}
-            templatesLoading={templatesLoading}
-            onProgramChange={handleProgramChange}
-            onEventChange={handleEventChange}
-            onTemplateChange={handleTemplateChange}
-            onJudgeNumberChange={setJudgeNumber}
-            onTeamNameChange={setTeamName}
-          />
+          <AddEventForm selectedProgram={selectedProgram} selectedEvent={selectedEvent} selectedTemplateId={selectedTemplateId} judgeNumber={judgeNumber} teamName={teamName} availablePrograms={availablePrograms} availableEvents={availableEvents} filteredTemplates={filteredTemplates} templatesLoading={templatesLoading} onProgramChange={handleProgramChange} onEventChange={handleEventChange} onTemplateChange={handleTemplateChange} onJudgeNumberChange={setJudgeNumber} onTeamNameChange={setTeamName} />
 
-          <CadetSelector
-            selectedCadetIds={selectedCadetIds}
-            judgeNumber={judgeNumber}
-            isCadetsOpen={isCadetsOpen}
-            onSelectedCadetsChange={setSelectedCadetIds}
-            onToggleOpen={setIsCadetsOpen}
-          />
+          <CadetSelector selectedCadetIds={selectedCadetIds} judgeNumber={judgeNumber} isCadetsOpen={isCadetsOpen} onSelectedCadetsChange={setSelectedCadetIds} onToggleOpen={setIsCadetsOpen} />
 
-          <ScoreSheetSection
-            selectedTemplate={selectedTemplate}
-            judgeNumber={judgeNumber}
-            onScoreChange={handleScoreChange}
-          />
+          <ScoreSheetSection selectedTemplate={selectedTemplate} judgeNumber={judgeNumber} onScoreChange={handleScoreChange} />
         </div>
 
         <DialogFooter>
@@ -123,6 +97,5 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
           </Button>
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
