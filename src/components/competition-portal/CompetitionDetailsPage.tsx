@@ -45,9 +45,7 @@ export const CompetitionDetailsPage = () => {
         
         <TabsContent value="resources">
           <Card>
-            <CardHeader>
-              <CardTitle>Competition Resources</CardTitle>
-            </CardHeader>
+            
             <CardContent>
               <CompetitionResourcesTab competitionId={competitionId} />
             </CardContent>
