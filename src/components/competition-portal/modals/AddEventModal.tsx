@@ -5,9 +5,11 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 
@@ -30,14 +32,23 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     start_time: '',
     end_time: '',
     max_participants: '',
-    notes: ''
+    notes: '',
+    judges: [] as string[],
+    resources: [] as string[]
   });
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
+  const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
+  
+  const {
+    users: schoolUsers,
+    isLoading: usersLoading
+  } = useSchoolUsers(true); // Only active users
 
   useEffect(() => {
     if (open) {
       fetchEvents();
+      fetchJudges();
     }
   }, [open]);
 
@@ -54,6 +65,38 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       console.error('Error fetching events:', error);
       toast.error('Failed to load events');
     }
+  };
+  const fetchJudges = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cp_judges')
+        .select('id, name')
+        .eq('available', true);
+      
+      if (error) throw error;
+      setJudges(data || []);
+    } catch (error) {
+      console.error('Error fetching judges:', error);
+      toast.error('Failed to load judges');
+    }
+  };
+
+  const handleJudgeToggle = (judgeId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      judges: prev.judges.includes(judgeId)
+        ? prev.judges.filter(id => id !== judgeId)
+        : [...prev.judges, judgeId]
+    }));
+  };
+
+  const handleResourceToggle = (resourceId: string) => {
+    setFormData(prev => ({
+      ...prev,
+      resources: prev.resources.includes(resourceId)
+        ? prev.resources.filter(id => id !== resourceId)
+        : [...prev.resources, resourceId]
+    }));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -72,7 +115,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         start_time: formData.start_time || null,
         end_time: formData.end_time || null,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        notes: formData.notes || null
+        notes: formData.notes || null,
+        judges: formData.judges,
+        resources: formData.resources
       };
 
       await onEventAdded(eventData);
@@ -83,7 +128,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         start_time: '',
         end_time: '',
         max_participants: '',
-        notes: ''
+        notes: '',
+        judges: [],
+        resources: []
       });
     } catch (error) {
       console.error('Error adding event:', error);
@@ -165,6 +212,50 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               onChange={(e) => setFormData(prev => ({ ...prev, max_participants: e.target.value }))}
               placeholder="Maximum number of participants"
             />
+          </div>
+
+          <div>
+            <Label htmlFor="judges">Judges</Label>
+            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
+              {judges.map(judge => (
+                <div key={judge.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`judge-${judge.id}`}
+                    checked={formData.judges.includes(judge.id)}
+                    onCheckedChange={() => handleJudgeToggle(judge.id)}
+                  />
+                  <label htmlFor={`judge-${judge.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {judge.name}
+                  </label>
+                </div>
+              ))}
+              {judges.length === 0 && (
+                <p className="text-sm text-muted-foreground">No judges available</p>
+              )}
+            </div>
+          </div>
+
+          <div>
+            <Label htmlFor="resources">Resources</Label>
+            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
+              {schoolUsers.map(user => (
+                <div key={user.id} className="flex items-center space-x-2">
+                  <Checkbox
+                    id={`resource-${user.id}`}
+                    checked={formData.resources.includes(user.id)}
+                    onCheckedChange={() => handleResourceToggle(user.id)}
+                  />
+                  <label htmlFor={`resource-${user.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
+                    {user.last_name}, {user.first_name}
+                  </label>
+                </div>
+              ))}
+              {schoolUsers.length === 0 && (
+                <p className="text-sm text-muted-foreground">
+                  {usersLoading ? "Loading users..." : "No users available"}
+                </p>
+              )}
+            </div>
           </div>
 
           <div>
