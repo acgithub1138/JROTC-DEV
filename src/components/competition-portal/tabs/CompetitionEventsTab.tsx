@@ -38,12 +38,10 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     setSelectedEvent(event);
     setShowEditModal(true);
   };
-
   const handleViewJudges = (event: typeof events[0]) => {
     setSelectedEventForView(event);
     setShowJudgesModal(true);
   };
-
   const handleViewResources = (event: typeof events[0]) => {
     setSelectedEventForView(event);
     setShowResourcesModal(true);
@@ -71,8 +69,8 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                <TableRow>
                   <TableHead>Event</TableHead>
                   <TableHead>Location</TableHead>
-                  <TableHead>Start Time</TableHead>
-                  <TableHead>End Time</TableHead>
+                  <TableHead>Start</TableHead>
+                  <TableHead>End</TableHead>
                   <TableHead>Max</TableHead>
                   <TableHead className="text-center">Judges</TableHead>
                   <TableHead className="text-center">Resources</TableHead>
@@ -94,12 +92,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                       <div className="flex items-center justify-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="icon" 
-                              className="h-6 w-6" 
-                              onClick={() => handleViewJudges(event)}
-                            >
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewJudges(event)}>
                               <Eye className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
@@ -113,12 +106,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                       <div className="flex items-center justify-center">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button 
-                              variant="outline" 
-                              size="icon" 
-                              className="h-6 w-6" 
-                              onClick={() => handleViewResources(event)}
-                            >
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewResources(event)}>
                               <Eye className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
@@ -130,8 +118,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     </TableCell>
                      {(canEdit || canDelete) && <TableCell>
                          <div className="flex items-center justify-center gap-2">
-                           {canEdit && (
-                             <Tooltip>
+                           {canEdit && <Tooltip>
                                <TooltipTrigger asChild>
                                  <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditEvent(event)}>
                                    <Edit className="w-3 h-3" />
@@ -140,10 +127,8 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                                <TooltipContent>
                                  <p>Edit Event</p>
                                </TooltipContent>
-                             </Tooltip>
-                           )}
-                           {canDelete && (
-                             <Tooltip>
+                             </Tooltip>}
+                           {canDelete && <Tooltip>
                                <TooltipTrigger asChild>
                                  <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
                                    <Trash2 className="w-3 h-3" />
@@ -152,8 +137,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                                <TooltipContent>
                                  <p>Delete Event</p>
                                </TooltipContent>
-                             </Tooltip>
-                           )}
+                             </Tooltip>}
                          </div>
                        </TableCell>}
                  </TableRow>)}
