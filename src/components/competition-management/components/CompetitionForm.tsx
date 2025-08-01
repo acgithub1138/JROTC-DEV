@@ -108,6 +108,8 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
           />
         </div>
 
+      </div>
+
         <div className="space-y-2">
           <Label htmlFor="competition_date">Competition Date *</Label>
           <Input
@@ -118,8 +120,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
             required
           />
         </div>
-      </div>
-
 
       <div className="space-y-2">
         <Label htmlFor="location">Location Search</Label>
