@@ -150,9 +150,16 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
               <span className="font-medium">Location:</span>
               <span>{competition.location}</span>
             </div>
-            {(competition.address || competition.city || competition.state) && <div className="ml-7 text-sm text-muted-foreground">
-                {[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ')}
-              </div>}
+            {(competition.address || competition.city || competition.state) && (
+              <div className="ml-7 text-sm text-muted-foreground space-y-1">
+                {competition.address && <div>{competition.address}</div>}
+                {(competition.city || competition.state || competition.zip) && (
+                  <div>
+                    {[competition.city, competition.state, competition.zip].filter(Boolean).join(' ')}
+                  </div>
+                )}
+              </div>
+            )}
           </div>
 
           {/* Participants */}
