@@ -92,7 +92,8 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
-
+  
+  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
   const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
 
   switch (role) {
