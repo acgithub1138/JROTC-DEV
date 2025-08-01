@@ -4,48 +4,38 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import type { Tables } from '@/integrations/supabase/types';
-
 type InventoryItem = Tables<'inventory_items'>;
-
 interface ViewInventoryItemDialogProps {
   item: InventoryItem | null;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit?: (item: InventoryItem) => void;
 }
-
 export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = ({
   item,
   open,
   onOpenChange,
-  onEdit,
+  onEdit
 }) => {
-  const { canEdit: canUpdate } = useTablePermissions('inventory');
-
+  const {
+    canEdit: canUpdate
+  } = useTablePermissions('inventory');
   if (!item) return null;
-
   const getGenderBadge = (gender: string | null) => {
     if (!gender) return <span className="text-muted-foreground">Not specified</span>;
-    return (
-      <Badge variant="outline" className="text-xs">
+    return <Badge variant="outline" className="text-xs">
         {gender}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const getUnitOfMeasureBadge = (unit: string | null) => {
     if (!unit) return <span className="text-muted-foreground">Not specified</span>;
-    return (
-      <Badge variant="outline" className="text-xs">
+    return <Badge variant="outline" className="text-xs">
         {unit}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const getAvailabilityStatus = (item: InventoryItem) => {
     const available = item.qty_available || 0;
     const total = item.qty_total || 0;
-    
     if (available === 0) {
       return <Badge variant="destructive" className="text-xs">Out of Stock</Badge>;
     } else if (available <= total * 0.2) {
@@ -54,28 +44,22 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
       return <Badge variant="secondary" className="text-xs bg-green-100 text-green-800">In Stock</Badge>;
     }
   };
-
   const getBooleanBadge = (value: boolean | null) => {
     if (value === null || value === undefined) {
       return <span className="text-muted-foreground">Not specified</span>;
     }
-    return (
-      <Badge variant={value ? "default" : "outline"} className="text-xs">
+    return <Badge variant={value ? "default" : "outline"} className="text-xs">
         {value ? "Yes" : "No"}
-      </Badge>
-    );
+      </Badge>;
   };
-
   const handleEdit = () => {
     if (canUpdate && onEdit) {
       onEdit(item);
       onOpenChange(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Inventory Item Details</DialogTitle>
         </DialogHeader>
@@ -188,37 +172,28 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
               </div>
             </div>
             
-            {item.description && (
-              <div className="mt-4">
+            {item.description && <div className="mt-4">
                 <label className="text-sm font-medium text-muted-foreground">Description</label>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{item.description}</p>
-              </div>
-            )}
+              </div>}
             
-            {item.notes && (
-              <div className="mt-4">
+            {item.notes && <div className="mt-4">
                 <label className="text-sm font-medium text-muted-foreground">Notes</label>
                 <p className="text-sm mt-1 whitespace-pre-wrap">{item.notes}</p>
-              </div>
-            )}
+              </div>}
 
-            {item.issued_to && item.issued_to.length > 0 && (
-              <div className="mt-4">
+            {item.issued_to && item.issued_to.length > 0 && <div className="mt-4">
                 <label className="text-sm font-medium text-muted-foreground">Issued To</label>
                 <div className="mt-1 flex flex-wrap gap-1">
-                  {item.issued_to.map((userId, index) => (
-                    <Badge key={index} variant="secondary" className="text-xs">
+                  {item.issued_to.map((userId, index) => <Badge key={index} variant="secondary" className="text-xs">
                       {userId}
-                    </Badge>
-                  ))}
+                    </Badge>)}
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Pending Operations */}
-          {(item.pending_updates || item.pending_issue_changes || item.pending_write_offs) ? (
-            <div>
+          {item.pending_updates || item.pending_issue_changes || item.pending_write_offs ? <div>
               <h3 className="text-lg font-semibold mb-3 text-foreground border-b pb-2">
                 Pending Operations
               </h3>
@@ -236,24 +211,17 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
                   <p className="text-sm mt-1">{item.pending_write_offs || 0}</p>
                 </div>
               </div>
-            </div>
-          ) : null}
+            </div> : null}
         </div>
 
         <DialogFooter className="gap-2">
-          <Button
-            variant="outline"
-            onClick={() => onOpenChange(false)}
-          >
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          {canUpdate && onEdit && (
-            <Button onClick={handleEdit}>
+          {canUpdate && onEdit && <Button onClick={handleEdit}>
               Edit
-            </Button>
-          )}
+            </Button>}
         </DialogFooter>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
