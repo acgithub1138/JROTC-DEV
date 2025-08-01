@@ -53,7 +53,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
             <TableBody>
               {events.map(event => (
                 <TableRow key={event.id}>
-                  <TableCell className="font-medium">{event.event || 'N/A'}</TableCell>
+                  <TableCell className="font-medium">{event.cp_events?.name || 'N/A'}</TableCell>
                   <TableCell>{event.location || 'N/A'}</TableCell>
                   <TableCell>
                     {event.start_time ? new Date(event.start_time).toLocaleString() : 'N/A'}

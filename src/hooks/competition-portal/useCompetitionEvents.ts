@@ -4,7 +4,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'];
+type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
+  cp_events?: { name: string } | null;
+};
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
 
@@ -20,7 +22,10 @@ export const useCompetitionEvents = (competitionId?: string) => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('cp_comp_events')
-        .select('*')
+        .select(`
+          *,
+          cp_events:event(name)
+        `)
         .eq('competition_id', competitionId)
         .order('start_time', { ascending: true });
 
