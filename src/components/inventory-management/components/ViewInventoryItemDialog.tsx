@@ -3,7 +3,8 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { IssuedUsersPopover } from './IssuedUsersPopover';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 import type { Tables } from '@/integrations/supabase/types';
 type InventoryItem = Tables<'inventory_items'>;
 interface ViewInventoryItemDialogProps {
@@ -21,6 +22,29 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
   const {
     canEdit: canUpdate
   } = useTablePermissions('inventory');
+
+  // Fetch issued users data
+  const { data: issuedUsers } = useQuery({
+    queryKey: ['issued-users', item?.issued_to],
+    queryFn: async () => {
+      if (!item?.issued_to || item.issued_to.length === 0) return [];
+      
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .in('id', item.issued_to)
+        .order('last_name', { ascending: true });
+      
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!(item?.issued_to && item.issued_to.length > 0),
+  });
+
+  const getIssuedToNames = () => {
+    if (!issuedUsers || issuedUsers.length === 0) return 'No users assigned';
+    return issuedUsers.map(user => `${user.last_name}, ${user.first_name}`).join(', ');
+  };
   if (!item) return null;
   const getGenderBadge = (gender: string | null) => {
     if (!gender) return <span className="text-muted-foreground">Not specified</span>;
@@ -185,9 +209,7 @@ export const ViewInventoryItemDialog: React.FC<ViewInventoryItemDialogProps> = (
 
             {item.issued_to && item.issued_to.length > 0 && <div className="mt-4">
                 <label className="text-sm font-medium text-muted-foreground">Issued To</label>
-                <div className="mt-1">
-                  <IssuedUsersPopover issuedTo={item.issued_to} />
-                </div>
+                <p className="text-sm mt-1">{getIssuedToNames()}</p>
               </div>}
           </div>
 
