@@ -90,9 +90,9 @@ export const OpenCompetitionsPage = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm text-gray-600">
+                <div className="space-y-2 text-primary">
                   <div className="flex items-center gap-2">
-                    <sapn>Hosting School {competition.hosting_school}</sapn>
+                    <sapn>Hosting School: {competition.hosting_school}</sapn>
                   </div>
                  </div> 
                 <div className="space-y-2 text-sm text-gray-600">
