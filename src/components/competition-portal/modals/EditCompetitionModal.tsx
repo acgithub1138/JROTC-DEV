@@ -61,7 +61,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     max_participants: '',
     registration_deadline: '',
     is_public: true,
-    program: 'air_force'
+    program: 'air_force',
+    status: 'draft'
   });
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -88,7 +89,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         max_participants: competition.max_participants?.toString() || '',
         registration_deadline: competition.registration_deadline || '',
         is_public: competition.is_public,
-        program: competition.program || 'air_force'
+        program: competition.program || 'air_force',
+        status: competition.status || 'draft'
       });
       setStartDate(startDate || undefined);
       setEndDate(endDate || undefined);
@@ -166,7 +168,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         registration_deadline: formData.registration_deadline || null,
         is_public: formData.is_public,
-        program: formData.program
+        program: formData.program,
+        status: formData.status
       };
       await onSubmit(submitData);
     } finally {
@@ -187,6 +190,24 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                 <Label htmlFor="name">Competition Name *</Label>
                 <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter competition name" required />
               </div>
+              <div>
+                <Label htmlFor="status">Status *</Label>
+                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select Status" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="draft">Draft</SelectItem>
+                    <SelectItem value="open">Open</SelectItem>
+                    <SelectItem value="closed">Closed</SelectItem>
+                    <SelectItem value="completed">Completed</SelectItem>
+                    <SelectItem value="cancelled">Cancelled</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="program">JROTC Program *</Label>
                 <Select value={formData.program} onValueChange={(value) => handleInputChange('program', value)}>
