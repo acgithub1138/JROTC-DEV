@@ -14,15 +14,19 @@ export const useCompetitions = () => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCompetitions = async () => {
-    if (!userProfile?.school_id) return;
-
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      let query = supabase
         .from('cp_competitions')
-        .select('*')
-        .or(`school_id.eq.${userProfile.school_id},is_public.eq.true`)
-        .order('start_date', { ascending: false });
+        .select('*');
+
+      if (userProfile?.school_id) {
+        query = query.or(`school_id.eq.${userProfile.school_id},is_public.eq.true`);
+      } else {
+        query = query.eq('is_public', true);
+      }
+
+      const { data, error } = await query.order('start_date', { ascending: false });
 
       if (error) throw error;
       setCompetitions(data || []);
