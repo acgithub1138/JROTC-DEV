@@ -54,9 +54,7 @@ export const CompetitionDetailsPage = () => {
         
         <TabsContent value="schools">
           <Card>
-            <CardHeader>
-              <CardTitle>Registered Schools</CardTitle>
-            </CardHeader>
+            
             <CardContent>
               <CompetitionSchoolsTab competitionId={competitionId} />
             </CardContent>
