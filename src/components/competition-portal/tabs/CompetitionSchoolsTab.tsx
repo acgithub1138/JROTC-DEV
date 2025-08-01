@@ -1,9 +1,10 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 
 interface CompetitionSchoolsTabProps {
   competitionId: string;
@@ -25,8 +26,9 @@ const getStatusVariant = (status: string) => {
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
-  const { schools, isLoading } = useCompetitionSchools(competitionId);
-  const { canCreate } = useTablePermissions('cp_competitions');
+  const { schools, isLoading, createSchool } = useCompetitionSchools(competitionId);
+  const { canCreate } = useTablePermissions('cp_comp_schools');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -43,7 +45,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
         {canCreate && (
-          <Button>
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add School
           </Button>
@@ -79,6 +81,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
           ))}
         </div>
       )}
+
+      <AddSchoolModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        competitionId={competitionId}
+        onSchoolAdded={createSchool}
+      />
     </div>
   );
 };

@@ -1,8 +1,9 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
 
 interface CompetitionResourcesTabProps {
   competitionId: string;
@@ -11,8 +12,9 @@ interface CompetitionResourcesTabProps {
 export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = ({
   competitionId
 }) => {
-  const { resources, isLoading } = useCompetitionResources(competitionId);
-  const { canCreate } = useTablePermissions('cp_events');
+  const { resources, isLoading, createResource } = useCompetitionResources(competitionId);
+  const { canCreate } = useTablePermissions('cp_comp_resources');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -29,7 +31,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Competition Resources</h2>
         {canCreate && (
-          <Button>
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Resource
           </Button>
@@ -63,6 +65,13 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           ))}
         </div>
       )}
+
+      <AddResourceModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        competitionId={competitionId}
+        onResourceAdded={createResource}
+      />
     </div>
   );
 };

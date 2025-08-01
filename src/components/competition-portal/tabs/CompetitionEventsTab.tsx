@@ -3,6 +3,7 @@ import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
 
 interface CompetitionEventsTabProps {
   competitionId: string;
@@ -11,8 +12,9 @@ interface CompetitionEventsTabProps {
 export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   competitionId
 }) => {
-  const { events, isLoading } = useCompetitionEvents(competitionId);
-  const { canCreate } = useTablePermissions('cp_events');
+  const { events, isLoading, createEvent } = useCompetitionEvents(competitionId);
+  const { canCreate } = useTablePermissions('cp_comp_events');
+  const [showAddModal, setShowAddModal] = useState(false);
 
   if (isLoading) {
     return (
@@ -29,7 +31,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Competition Events</h2>
         {canCreate && (
-          <Button>
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Event
           </Button>
@@ -66,6 +68,13 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           ))}
         </div>
       )}
+
+      <AddEventModal
+        open={showAddModal}
+        onOpenChange={setShowAddModal}
+        competitionId={competitionId}
+        onEventAdded={createEvent}
+      />
     </div>
   );
 };
