@@ -8,6 +8,7 @@ import { EventsPage } from './EventsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
+import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 
 
 const CompetitionPortalLayout = () => {
@@ -76,7 +77,7 @@ const CompetitionPortalLayout = () => {
     } else if (path === '/app/competition-portal/analytics') {
       return <div className="p-6"><h1 className="text-2xl font-bold">Analytics & Reports</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/settings') {
-      return <div className="p-6"><h1 className="text-2xl font-bold">Competition Settings</h1><p>Coming soon...</p></div>;
+      return <CompetitionSettingsPage />;
     }
     
     // Default to dashboard
