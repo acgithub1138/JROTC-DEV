@@ -114,17 +114,14 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       const timeMinute = field === 'start_date' ? formData.start_time_minute : formData.end_time_minute;
       const combinedDateTime = new Date(`${dateValue}T${timeHour}:${timeMinute}:00`);
       const isoString = combinedDateTime.toISOString();
-      
       setFormData(prev => ({
         ...prev,
         [field]: isoString
       }));
-      
       if (field === 'start_date') setStartDate(new Date(dateValue));
       if (field === 'end_date') setEndDate(new Date(dateValue));
     }
   };
-
   const handleTimeChange = (field: 'start_time_hour' | 'start_time_minute' | 'end_time_hour' | 'end_time_minute', value: string) => {
     setFormData(prev => ({
       ...prev,
@@ -135,15 +132,9 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     const isStartTime = field.startsWith('start_time');
     const dateField = isStartTime ? 'start_date' : 'end_date';
     const currentDate = isStartTime ? startDate : endDate;
-    
     if (currentDate) {
-      const timeHour = field === 'start_time_hour' ? value : 
-                     field === 'end_time_hour' ? value :
-                     isStartTime ? formData.start_time_hour : formData.end_time_hour;
-      const timeMinute = field === 'start_time_minute' ? value :
-                        field === 'end_time_minute' ? value :
-                        isStartTime ? formData.start_time_minute : formData.end_time_minute;
-      
+      const timeHour = field === 'start_time_hour' ? value : field === 'end_time_hour' ? value : isStartTime ? formData.start_time_hour : formData.end_time_hour;
+      const timeMinute = field === 'start_time_minute' ? value : field === 'end_time_minute' ? value : isStartTime ? formData.start_time_minute : formData.end_time_minute;
       const combinedDateTime = new Date(`${format(currentDate, 'yyyy-MM-dd')}T${timeHour}:${timeMinute}:00`);
       setFormData(prev => ({
         ...prev,
@@ -223,43 +214,35 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="start_date">Start Date *</Label>
-                <Input
-                  id="start_date"
-                  type="date"
-                  value={formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : ''}
-                  onChange={(e) => handleDateChange('start_date', e.target.value)}
-                  required
-                />
+                <Input id="start_date" type="date" value={formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : ''} onChange={e => handleDateChange('start_date', e.target.value)} required />
               </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="">
               <div>
                 <Label>Start Time</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Select value={formData.start_time_hour} onValueChange={(value) => handleTimeChange('start_time_hour', value)}>
+                    <Select value={formData.start_time_hour} onValueChange={value => handleTimeChange('start_time_hour', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Hour" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {Array.from({
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.start_time_minute} onValueChange={(value) => handleTimeChange('start_time_minute', value)}>
+                    <Select value={formData.start_time_minute} onValueChange={value => handleTimeChange('start_time_minute', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Min" />
                       </SelectTrigger>
                       <SelectContent>
-                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                          <SelectItem key={minute} value={minute}>
+                        {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                             {minute}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -269,43 +252,35 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
               <div>
                 <Label htmlFor="end_date">End Date *</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
-                  onChange={(e) => handleDateChange('end_date', e.target.value)}
-                  required
-                />
+                <Input id="end_date" type="date" value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''} onChange={e => handleDateChange('end_date', e.target.value)} required />
               </div>
 
               <div>
                 <Label>End Time</Label>
                 <div className="grid grid-cols-2 gap-2">
                   <div>
-                    <Select value={formData.end_time_hour} onValueChange={(value) => handleTimeChange('end_time_hour', value)}>
+                    <Select value={formData.end_time_hour} onValueChange={value => handleTimeChange('end_time_hour', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Hour" />
                       </SelectTrigger>
                       <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {Array.from({
+                        length: 24
+                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.end_time_minute} onValueChange={(value) => handleTimeChange('end_time_minute', value)}>
+                    <Select value={formData.end_time_minute} onValueChange={value => handleTimeChange('end_time_minute', value)}>
                       <SelectTrigger>
                         <SelectValue placeholder="Min" />
                       </SelectTrigger>
                       <SelectContent>
-                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                          <SelectItem key={minute} value={minute}>
+                        {['00', '10', '20', '30', '40', '50'].map(minute => <SelectItem key={minute} value={minute}>
                             {minute}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -315,12 +290,7 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
             <div>
               <Label htmlFor="registration_deadline">Registration Deadline</Label>
-              <Input
-                id="registration_deadline"
-                type="date"
-                value={formData.registration_deadline ? format(new Date(formData.registration_deadline), 'yyyy-MM-dd') : ''}
-                onChange={(e) => handleDateChange('registration_deadline', e.target.value)}
-              />
+              <Input id="registration_deadline" type="date" value={formData.registration_deadline ? format(new Date(formData.registration_deadline), 'yyyy-MM-dd') : ''} onChange={e => handleDateChange('registration_deadline', e.target.value)} />
             </div>
           </div>
 
