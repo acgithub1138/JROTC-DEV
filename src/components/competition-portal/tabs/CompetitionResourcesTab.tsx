@@ -47,7 +47,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
               <TableHead>Location</TableHead>
               <TableHead>Start</TableHead>
               <TableHead>End</TableHead>
-              <TableHead className="text-center">Actions</TableHead>}
+              <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>

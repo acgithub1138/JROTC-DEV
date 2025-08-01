@@ -57,7 +57,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                  <TableHead>Start Time</TableHead>
                  <TableHead>End Time</TableHead>
                  <TableHead>Max</TableHead>
-                 <TableHead className="text-center">Actions</TableHead>}
+                 <TableHead className="text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
