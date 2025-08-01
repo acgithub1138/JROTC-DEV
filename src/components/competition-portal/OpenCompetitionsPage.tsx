@@ -85,7 +85,7 @@ export const OpenCompetitionsPage = () => {
                   </div>
                   <Badge variant="secondary" className="ml-2">
                     <Trophy className="w-3 h-3 mr-1" />
-                    {competition.program}
+                    {competition.program.replace('_', ' ').toUpperCase()}
                   </Badge>
                 </div>
               </CardHeader>
