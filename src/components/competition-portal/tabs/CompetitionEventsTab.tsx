@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -52,7 +53,8 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
       </div>;
   }
-  return <div className="space-y-4">
+  return <TooltipProvider>
+    <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Competition Events</h2>
         {canCreate && <Button onClick={() => setShowAddModal(true)}>
@@ -90,36 +92,68 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     <TableCell>{event.max_participants || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-6 w-6" 
-                          onClick={() => handleViewJudges(event)}
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-6 w-6" 
+                              onClick={() => handleViewJudges(event)}
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Judges</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
-                        <Button 
-                          variant="outline" 
-                          size="icon" 
-                          className="h-6 w-6" 
-                          onClick={() => handleViewResources(event)}
-                        >
-                          <Eye className="w-3 h-3" />
-                        </Button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button 
+                              variant="outline" 
+                              size="icon" 
+                              className="h-6 w-6" 
+                              onClick={() => handleViewResources(event)}
+                            >
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Resources</p>
+                          </TooltipContent>
+                        </Tooltip>
                       </div>
                     </TableCell>
                      {(canEdit || canDelete) && <TableCell>
                          <div className="flex items-center justify-center gap-2">
-                           {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditEvent(event)}>
-                               <Edit className="w-3 h-3" />
-                             </Button>}
-                           {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
-                               <Trash2 className="w-3 h-3" />
-                             </Button>}
+                           {canEdit && (
+                             <Tooltip>
+                               <TooltipTrigger asChild>
+                                 <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditEvent(event)}>
+                                   <Edit className="w-3 h-3" />
+                                 </Button>
+                               </TooltipTrigger>
+                               <TooltipContent>
+                                 <p>Edit Event</p>
+                               </TooltipContent>
+                             </Tooltip>
+                           )}
+                           {canDelete && (
+                             <Tooltip>
+                               <TooltipTrigger asChild>
+                                 <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
+                                   <Trash2 className="w-3 h-3" />
+                                 </Button>
+                               </TooltipTrigger>
+                               <TooltipContent>
+                                 <p>Delete Event</p>
+                               </TooltipContent>
+                             </Tooltip>
+                           )}
                          </div>
                        </TableCell>}
                  </TableRow>)}
@@ -131,5 +165,6 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
       <EditEventModal open={showEditModal} onOpenChange={setShowEditModal} event={selectedEvent} onEventUpdated={updateEvent} />
       <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} event={selectedEventForView} />
       <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} event={selectedEventForView} />
-    </div>;
+    </div>
+  </TooltipProvider>;
 };
