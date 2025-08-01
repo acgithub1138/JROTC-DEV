@@ -30,8 +30,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   const [formData, setFormData] = useState({
     event: '',
     location: '',
-    start_time: '',
-    end_time: '',
+    start_date: '',
+    start_hour: '',
+    start_minute: '',
+    end_date: '',
+    end_hour: '',
+    end_minute: '',
     max_participants: '',
     notes: '',
     judges: [] as string[],
@@ -130,6 +134,11 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     return schoolUsers.filter(user => !formData.resources.includes(user.id));
   };
 
+  const combineDateTime = (date: string, hour: string, minute: string): string | null => {
+    if (!date || !hour || !minute) return null;
+    return `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.event) {
@@ -139,12 +148,15 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
     setIsLoading(true);
     try {
+      const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
+      const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
+
       const eventData: Omit<CompEventInsert, 'school_id' | 'created_by'> & { competition_id: string } = {
         competition_id: competitionId,
         event: formData.event,
         location: formData.location || null,
-        start_time: formData.start_time || null,
-        end_time: formData.end_time || null,
+        start_time: start_time || null,
+        end_time: end_time || null,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         notes: formData.notes || null,
         judges: formData.judges,
@@ -156,8 +168,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setFormData({
         event: '',
         location: '',
-        start_time: '',
-        end_time: '',
+        start_date: '',
+        start_hour: '',
+        start_minute: '',
+        end_date: '',
+        end_hour: '',
+        end_minute: '',
         max_participants: '',
         notes: '',
         judges: [],
@@ -203,33 +219,120 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="space-y-4">
             <div>
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input
-                id="start_time"
-                type="datetime-local"
-                value={formData.start_time}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, start_time: e.target.value }));
-                  // Auto-set end time to 1 hour after start time
-                  if (e.target.value) {
-                    const startDate = new Date(e.target.value);
-                    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
-                    const endDateString = endDate.toISOString().slice(0, 16); // Format for datetime-local
-                    setFormData(prev => ({ ...prev, end_time: endDateString }));
-                  }
-                }}
-              />
+              <Label>Start Date & Time</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="start_date" className="text-xs">Date</Label>
+                  <Input
+                    id="start_date"
+                    type="date"
+                    value={formData.start_date}
+                    onChange={(e) => {
+                      setFormData(prev => ({ ...prev, start_date: e.target.value }));
+                      // Auto-set end date if not set
+                      if (e.target.value && !formData.end_date) {
+                        setFormData(prev => ({ ...prev, end_date: e.target.value }));
+                      }
+                    }}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="start_hour" className="text-xs">Hour</Label>
+                  <Select 
+                    value={formData.start_hour} 
+                    onValueChange={(value) => {
+                      setFormData(prev => ({ ...prev, start_hour: value }));
+                      // Auto-set end hour if not set
+                      if (value && !formData.end_hour) {
+                        const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                        setFormData(prev => ({ ...prev, end_hour: nextHour > '23' ? '23' : nextHour }));
+                      }
+                    }}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Hr" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="start_minute" className="text-xs">Min</Label>
+                  <Select 
+                    value={formData.start_minute} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, start_minute: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Min" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 60 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
+
             <div>
-              <Label htmlFor="end_time">End Time</Label>
-              <Input
-                id="end_time"
-                type="datetime-local"
-                value={formData.end_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
-              />
+              <Label>End Date & Time</Label>
+              <div className="grid grid-cols-3 gap-2">
+                <div>
+                  <Label htmlFor="end_date" className="text-xs">Date</Label>
+                  <Input
+                    id="end_date"
+                    type="date"
+                    value={formData.end_date}
+                    onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="end_hour" className="text-xs">Hour</Label>
+                  <Select 
+                    value={formData.end_hour} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, end_hour: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Hr" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+                <div>
+                  <Label htmlFor="end_minute" className="text-xs">Min</Label>
+                  <Select 
+                    value={formData.end_minute} 
+                    onValueChange={(value) => setFormData(prev => ({ ...prev, end_minute: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Min" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {Array.from({ length: 60 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          {i.toString().padStart(2, '0')}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
             </div>
           </div>
 
