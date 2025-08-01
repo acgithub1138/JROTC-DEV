@@ -83,7 +83,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                             <Button
                               variant="outline"
                               size="icon"
-                              lassName="h-6 w-6"
+                              className="h-6 w-6"
                               onClick={() => handleEditEvent(event)}
                             >
                               <Edit className="w-3 h-3" />
