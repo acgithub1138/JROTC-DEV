@@ -1,28 +1,19 @@
-
 import React from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 interface TaskDescriptionModalProps {
   isOpen: boolean;
   onClose: () => void;
   taskTitle: string;
   taskDescription: string | null;
 }
-
 export const TaskDescriptionModal: React.FC<TaskDescriptionModalProps> = ({
   isOpen,
   onClose,
   taskTitle,
-  taskDescription,
+  taskDescription
 }) => {
-  return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+  return <Dialog open={isOpen} onOpenChange={onClose}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Task Description</DialogTitle>
         </DialogHeader>
@@ -38,6 +29,5 @@ export const TaskDescriptionModal: React.FC<TaskDescriptionModalProps> = ({
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
