@@ -74,7 +74,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
-                        <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user"} />
+                        <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a cadet"} />
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
