@@ -70,6 +70,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
     if (item.id === 'competitions') {
       const moduleKey = MODULE_MAPPING[item.id];
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
+      const hasCompetitionModule = userProfile?.schools?.competition_module === true;    
       const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
       return hasModulePermission && hasCompetitionPortal;
     }
@@ -104,7 +105,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         { id: 'settings', label: 'Settings', icon: 'Settings' },
       ];
     
@@ -118,7 +119,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'budget', label: 'Budget', icon: 'DollarSign' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'contacts', label: 'Contacts', icon: 'Contact' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
         { id: 'email-management', label: 'Email', icon: 'Mails' },
         { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
@@ -132,7 +133,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
       ];
     
     case 'cadet':
@@ -141,7 +142,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
+        ...(hasCompetitionModule ? [{ id: 'competitions', label: 'Competitions', icon: 'Trophy' }] : []),
       ];
     
     default:
