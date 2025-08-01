@@ -36,13 +36,13 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
       <DialogTrigger asChild>
         <Button onClick={onAddClick}>
           <Plus className="w-4 h-4 mr-2" />
-          Add Item
+          Add {type}
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            {isEditing ? `Edit Item` : `Add New Item'}`}
+            {isEditing ? `Edit Item` : `Add New Item`}
           </DialogTitle>
           <DialogDescription>
             Configure the {type} option for tasks
