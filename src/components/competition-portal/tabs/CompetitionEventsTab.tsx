@@ -83,12 +83,12 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                {events.map(event => <TableRow key={event.id}>
                    <TableCell className="font-medium py-[8px]">{event.cp_events?.name || 'N/A'}</TableCell>
                    <TableCell>{event.location || 'N/A'}</TableCell>
-                   <TableCell>
-                     {event.start_time ? format(new Date(event.start_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
-                   </TableCell>
-                   <TableCell>
-                     {event.end_time ? format(new Date(event.end_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
-                   </TableCell>
+                    <TableCell>
+                      {event.start_time ? format(new Date(event.start_time), 'MMM, d yyyy HH:mm') : 'N/A'}
+                    </TableCell>
+                    <TableCell>
+                      {event.end_time ? format(new Date(event.end_time), 'MMM, d yyyy HH:mm') : 'N/A'}
+                    </TableCell>
                     <TableCell>{event.max_participants || 'N/A'}</TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
