@@ -48,11 +48,6 @@ const competitionMenuItems = [{
   icon: Calendar,
   path: '/app/competition-portal/events'
 }, {
-  id: 'teams',
-  label: 'Teams & Participants',
-  icon: Users,
-  path: '/app/competition-portal/teams'
-}, {
   id: 'judges',
   label: 'Judges',
   icon: Shield,

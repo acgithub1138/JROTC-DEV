@@ -23,7 +23,6 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/dashboard': 'competition-dashboard',
     '/app/competition-portal/competitions': 'competitions',
     '/app/competition-portal/events': 'events',
-    '/app/competition-portal/teams': 'teams',
     '/app/competition-portal/score-sheets': 'score-sheets',
     '/app/competition-portal/judges': 'judges',
     '/app/competition-portal/analytics': 'analytics',
@@ -35,7 +34,6 @@ const CompetitionPortalLayout = () => {
     'competition-dashboard': '/app/competition-portal/dashboard',
     'competitions': '/app/competition-portal/competitions',
     'events': '/app/competition-portal/events',
-    'teams': '/app/competition-portal/teams',
     'score-sheets': '/app/competition-portal/score-sheets',
     'judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
@@ -68,8 +66,6 @@ const CompetitionPortalLayout = () => {
       return <CompetitionDetailsPage />;
     } else if (path === '/app/competition-portal/events') {
       return <EventsPage />;
-    } else if (path === '/app/competition-portal/teams') {
-      return <div className="p-6"><h1 className="text-2xl font-bold">Teams & Participants</h1><p>Coming soon...</p></div>;
     } else if (path === '/app/competition-portal/score-sheets') {
       return <ScoreSheetsPage />;
     } else if (path === '/app/competition-portal/judges') {
