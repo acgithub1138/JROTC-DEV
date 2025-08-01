@@ -5,7 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { Checkbox } from '@/components/ui/checkbox';
+import { Badge } from '@/components/ui/badge';
+import { X } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
@@ -81,22 +82,52 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     }
   };
 
-  const handleJudgeToggle = (judgeId: string) => {
+  const addJudge = (judgeId: string) => {
+    if (!formData.judges.includes(judgeId)) {
+      setFormData(prev => ({
+        ...prev,
+        judges: [...prev.judges, judgeId]
+      }));
+    }
+  };
+
+  const removeJudge = (judgeId: string) => {
     setFormData(prev => ({
       ...prev,
-      judges: prev.judges.includes(judgeId)
-        ? prev.judges.filter(id => id !== judgeId)
-        : [...prev.judges, judgeId]
+      judges: prev.judges.filter(id => id !== judgeId)
     }));
   };
 
-  const handleResourceToggle = (resourceId: string) => {
+  const addResource = (resourceId: string) => {
+    if (!formData.resources.includes(resourceId)) {
+      setFormData(prev => ({
+        ...prev,
+        resources: [...prev.resources, resourceId]
+      }));
+    }
+  };
+
+  const removeResource = (resourceId: string) => {
     setFormData(prev => ({
       ...prev,
-      resources: prev.resources.includes(resourceId)
-        ? prev.resources.filter(id => id !== resourceId)
-        : [...prev.resources, resourceId]
+      resources: prev.resources.filter(id => id !== resourceId)
     }));
+  };
+
+  const getSelectedJudges = () => {
+    return judges.filter(judge => formData.judges.includes(judge.id));
+  };
+
+  const getAvailableJudges = () => {
+    return judges.filter(judge => !formData.judges.includes(judge.id));
+  };
+
+  const getSelectedResources = () => {
+    return schoolUsers.filter(user => formData.resources.includes(user.id));
+  };
+
+  const getAvailableResources = () => {
+    return schoolUsers.filter(user => !formData.resources.includes(user.id));
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -215,45 +246,65 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="judges">Judges</Label>
-            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
-              {judges.map(judge => (
-                <div key={judge.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`judge-${judge.id}`}
-                    checked={formData.judges.includes(judge.id)}
-                    onCheckedChange={() => handleJudgeToggle(judge.id)}
-                  />
-                  <label htmlFor={`judge-${judge.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {judge.name}
-                  </label>
+            <Label>Judges</Label>
+            <div className="space-y-2">
+              <Select onValueChange={addJudge}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Add judges" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableJudges().map((judge) => (
+                    <SelectItem key={judge.id} value={judge.id}>
+                      {judge.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {getSelectedJudges().length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {getSelectedJudges().map((judge) => (
+                    <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
+                      {judge.name}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => removeJudge(judge.id)}
+                      />
+                    </Badge>
+                  ))}
                 </div>
-              ))}
-              {judges.length === 0 && (
-                <p className="text-sm text-muted-foreground">No judges available</p>
               )}
             </div>
           </div>
 
           <div>
-            <Label htmlFor="resources">Resources</Label>
-            <div className="max-h-32 overflow-y-auto border rounded-md p-2 space-y-2">
-              {schoolUsers.map(user => (
-                <div key={user.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={`resource-${user.id}`}
-                    checked={formData.resources.includes(user.id)}
-                    onCheckedChange={() => handleResourceToggle(user.id)}
-                  />
-                  <label htmlFor={`resource-${user.id}`} className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                    {user.last_name}, {user.first_name}
-                  </label>
+            <Label>Resources</Label>
+            <div className="space-y-2">
+              <Select onValueChange={addResource}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Add resources" />
+                </SelectTrigger>
+                <SelectContent>
+                  {getAvailableResources().map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.last_name}, {user.first_name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              
+              {getSelectedResources().length > 0 && (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {getSelectedResources().map((user) => (
+                    <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
+                      {user.last_name}, {user.first_name}
+                      <X
+                        className="h-3 w-3 cursor-pointer"
+                        onClick={() => removeResource(user.id)}
+                      />
+                    </Badge>
+                  ))}
                 </div>
-              ))}
-              {schoolUsers.length === 0 && (
-                <p className="text-sm text-muted-foreground">
-                  {usersLoading ? "Loading users..." : "No users available"}
-                </p>
               )}
             </div>
           </div>
