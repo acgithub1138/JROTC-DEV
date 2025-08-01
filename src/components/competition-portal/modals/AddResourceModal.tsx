@@ -70,7 +70,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
             <FormField control={form.control} name="resource" render={({
             field
           }) => <FormItem>
-                  <FormLabel>Cadet)</FormLabel>
+                  <FormLabel>Cadet</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
                       <SelectTrigger>
