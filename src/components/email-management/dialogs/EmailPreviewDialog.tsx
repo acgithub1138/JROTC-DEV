@@ -31,7 +31,7 @@ export const EmailPreviewDialog: React.FC<EmailPreviewDialogProps> = ({
     onOpenChange(false);
   };
   return <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Preview Email Template</DialogTitle>
         </DialogHeader>
