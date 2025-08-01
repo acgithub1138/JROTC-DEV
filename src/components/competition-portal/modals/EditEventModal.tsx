@@ -212,8 +212,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
               placeholder="Event location"
             />
           </div>
-
-          <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="start_time">Start Time</Label>
               <Input
@@ -241,8 +239,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
               />
             </div>
-          </div>
-
           <div>
             <Label htmlFor="max_participants">Max Participants</Label>
             <Input
