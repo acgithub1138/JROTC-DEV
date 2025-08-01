@@ -34,7 +34,7 @@ export const ViewTeamMembersDialog = ({
   const members = getTeamMembers();
   if (!team) return null;
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Team Members: {team.name}</DialogTitle>
         </DialogHeader>
