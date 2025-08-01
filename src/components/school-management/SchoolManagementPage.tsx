@@ -302,7 +302,7 @@ const SchoolManagementPage = () => {
                 <TableHead>
                   <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_module')}>
                     <span className="flex items-center gap-2">
-                      Comp Module
+                      Comp Tracking
                       {getSortIcon('competition_module')}
                     </span>
                   </Button>
