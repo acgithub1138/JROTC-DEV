@@ -564,7 +564,7 @@ const SchoolManagementPage = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="competition_module">Competition Module</Label>
+                  <Label htmlFor="competition_module">Competition Tracking</Label>
                   <div className="flex items-center space-x-2 pt-2">
                     <Checkbox id="competition_module" checked={editingSchool.competition_module || false} onCheckedChange={checked => setEditingSchool({
                   ...editingSchool,
