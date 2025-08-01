@@ -144,14 +144,13 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Location:</span>
-              <span>{competition.location}</span>
-            </div>
-            {(competition.address || competition.city || competition.state) && (
-              <div className="ml-7 text-sm text-muted-foreground space-y-1">
+          {(competition.address || competition.city || competition.state) && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Location:</span>
+              </div>
+              <div className="ml-7 text-sm space-y-1">
                 {competition.address && <div>{competition.address}</div>}
                 {(competition.city || competition.state || competition.zip) && (
                   <div>
@@ -159,8 +158,8 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
                   </div>
                 )}
               </div>
-            )}
-          </div>
+            </div>
+          )}
 
           {/* Participants */}
           <div className="flex items-center gap-2">
