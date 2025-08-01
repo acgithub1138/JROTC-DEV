@@ -38,12 +38,9 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           </Button>}
       </div>
 
-      {resources.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+      {resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div>
-      ) : (
-        <Table>
+        </div> : <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Cadet</TableHead>
@@ -54,58 +51,30 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
             </TableRow>
           </TableHeader>
           <TableBody>
-            {resources.map(resource => (
-              <TableRow key={resource.id}>
-                <TableCell>
-                  {resource.cadet_profile 
-                    ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}`
-                    : 'Unknown Cadet'
-                  }
+            {resources.map(resource => <TableRow key={resource.id}>
+                <TableCell className="py-[8px]">
+                  {resource.cadet_profile ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}` : 'Unknown Cadet'}
                 </TableCell>
                 <TableCell>{resource.location || '-'}</TableCell>
                 <TableCell>
-                  {resource.start_time 
-                    ? format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')
-                    : '-'
-                  }
+                  {resource.start_time ? format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm') : '-'}
                 </TableCell>
                 <TableCell>
-                  {resource.end_time 
-                    ? format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')
-                    : '-'
-                  }
+                  {resource.end_time ? format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm') : '-'}
                 </TableCell>
-                {(canEdit || canDelete) && (
-                  <TableCell>
+                {(canEdit || canDelete) && <TableCell>
                     <div className="flex items-center justify-center gap-2">
-                      {canEdit && (
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6"
-                          onClick={() => {/* TODO: Add edit functionality */}}
-                        >
+                      {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => {/* TODO: Add edit functionality */}}>
                           <Edit className="w-3 h-3" />
-                        </Button>
-                      )}
-                      {canDelete && (
-                        <Button
-                          variant="outline"
-                          size="icon"
-                          className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                          onClick={() => deleteResource(resource.id)}
-                        >
+                        </Button>}
+                      {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteResource(resource.id)}>
                           <Trash2 className="w-3 h-3" />
-                        </Button>
-                      )}
+                        </Button>}
                     </div>
-                  </TableCell>
-                )}
-              </TableRow>
-            ))}
+                  </TableCell>}
+              </TableRow>)}
           </TableBody>
-        </Table>
-      )}
+        </Table>}
 
       <AddResourceModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onResourceAdded={createResource} />
     </div>;
