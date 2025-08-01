@@ -194,33 +194,25 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           <div className="space-y-4">
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label>Start Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !startDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {startDate ? format(startDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={startDate} onSelect={date => handleDateChange('start_date', date)} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="start_date">Start Date *</Label>
+                <Input
+                  id="start_date"
+                  type="date"
+                  value={formData.start_date ? format(new Date(formData.start_date), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateChange('start_date', e.target.value ? new Date(e.target.value) : undefined)}
+                  required
+                />
               </div>
 
               <div>
-                <Label>End Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !endDate && "text-muted-foreground")}>
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {endDate ? format(endDate, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar mode="single" selected={endDate} onSelect={date => handleDateChange('end_date', date)} initialFocus />
-                  </PopoverContent>
-                </Popover>
+                <Label htmlFor="end_date">End Date *</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateChange('end_date', e.target.value ? new Date(e.target.value) : undefined)}
+                  required
+                />
               </div>
             </div>
 
