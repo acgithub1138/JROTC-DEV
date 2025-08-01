@@ -5,64 +5,62 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { useForm } from 'react-hook-form';
-
 interface JudgeDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   judge?: any | null;
   onSubmit: (data: any) => Promise<void>;
 }
-
 interface JudgeFormData {
   name: string;
   phone: string;
   email: string;
   available: boolean;
 }
-
 export const JudgeDialog: React.FC<JudgeDialogProps> = ({
   open,
   onOpenChange,
   judge,
-  onSubmit,
+  onSubmit
 }) => {
-  const { register, handleSubmit, reset, watch, setValue } = useForm<JudgeFormData>({
+  const {
+    register,
+    handleSubmit,
+    reset,
+    watch,
+    setValue
+  } = useForm<JudgeFormData>({
     defaultValues: {
       name: judge?.name || '',
       phone: judge?.phone || '',
       email: judge?.email || '',
-      available: judge?.available ?? true,
-    },
+      available: judge?.available ?? true
+    }
   });
-
   React.useEffect(() => {
     if (judge) {
       reset({
         name: judge.name || '',
         phone: judge.phone || '',
         email: judge.email || '',
-        available: judge.available ?? true,
+        available: judge.available ?? true
       });
     } else {
       reset({
         name: '',
         phone: '',
         email: '',
-        available: true,
+        available: true
       });
     }
   }, [judge, reset]);
-
   const handleFormSubmit = async (data: JudgeFormData) => {
     await onSubmit(data);
     reset();
   };
-
   const available = watch('available');
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {judge ? 'Edit Judge' : 'Create Judge'}
@@ -71,38 +69,23 @@ export const JudgeDialog: React.FC<JudgeDialogProps> = ({
         <form onSubmit={handleSubmit(handleFormSubmit)} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="name">Name *</Label>
-            <Input
-              id="name"
-              {...register('name', { required: true })}
-              placeholder="Enter judge name"
-            />
+            <Input id="name" {...register('name', {
+            required: true
+          })} placeholder="Enter judge name" />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input
-              id="phone"
-              {...register('phone')}
-              placeholder="Enter phone number"
-            />
+            <Input id="phone" {...register('phone')} placeholder="Enter phone number" />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input
-              id="email"
-              type="email"
-              {...register('email')}
-              placeholder="Enter email address"
-            />
+            <Input id="email" type="email" {...register('email')} placeholder="Enter email address" />
           </div>
 
           <div className="flex items-center space-x-2">
-            <Switch
-              id="available"
-              checked={available}
-              onCheckedChange={(checked) => setValue('available', checked)}
-            />
+            <Switch id="available" checked={available} onCheckedChange={checked => setValue('available', checked)} />
             <Label htmlFor="available">Available for judging</Label>
           </div>
 
@@ -116,6 +99,5 @@ export const JudgeDialog: React.FC<JudgeDialogProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
