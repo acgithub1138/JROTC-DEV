@@ -143,7 +143,7 @@ export const BulkImportDialog = ({
   const validCount = parsedCadets.filter(c => c.isValid).length;
   const invalidCount = parsedCadets.length - validCount;
   return <Dialog open={open} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Users className="w-5 h-5" />
