@@ -57,6 +57,9 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                     {resource.start_time && ` • ${new Date(resource.start_time).toLocaleString()}`}
                   </p>
                 </div>
+                <div className="text-sm text-muted-foreground">
+                  {resource.end_time && `Until: ${new Date(resource.end_time).toLocaleString()}`}
+                </div>
               </div>
               {resource.assignment_details && (
                 <p className="mt-2 text-sm text-muted-foreground">{resource.assignment_details}</p>

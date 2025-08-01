@@ -1,169 +1,162 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { Button } from '@/components/ui/button';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import type { Database } from '@/integrations/supabase/types';
 
-type CompResourceInsert = Database['public']['Tables']['cp_comp_resources']['Insert'];
+const formSchema = z.object({
+  resource: z.string().min(1, 'Resource is required'),
+  location: z.string().optional(),
+  start_time: z.string().optional(),
+  end_time: z.string().optional(),
+  assignment_details: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface AddResourceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
-  onResourceAdded: (resource: Omit<CompResourceInsert, 'school_id' | 'created_by'> & { competition_id: string }) => void;
+  onResourceAdded: (resourceData: any) => Promise<any>;
 }
 
 export const AddResourceModal: React.FC<AddResourceModalProps> = ({
   open,
   onOpenChange,
   competitionId,
-  onResourceAdded
+  onResourceAdded,
 }) => {
-  const [formData, setFormData] = useState({
-    resource: '',
-    location: '',
-    start_time: '',
-    end_time: '',
-    assignment_details: ''
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      resource: '',
+      location: '',
+      start_time: '',
+      end_time: '',
+      assignment_details: '',
+    },
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [resources, setResources] = useState<Array<{id: string, name: string}>>([]);
 
-  useEffect(() => {
-    if (open) {
-      fetchResources();
-    }
-  }, [open]);
-
-  const fetchResources = async () => {
+  const onSubmit = async (data: FormData) => {
     try {
-      // This would need to be updated to fetch from actual resources table
-      // For now, using placeholder data
-      setResources([
-        { id: '1', name: 'Venue A' },
-        { id: '2', name: 'Venue B' },
-        { id: '3', name: 'Equipment Set 1' },
-        { id: '4', name: 'Equipment Set 2' }
-      ]);
-    } catch (error) {
-      console.error('Error fetching resources:', error);
-      toast.error('Failed to load resources');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.resource) {
-      toast.error('Please select a resource');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const resourceData: Omit<CompResourceInsert, 'school_id' | 'created_by'> & { competition_id: string } = {
+      await onResourceAdded({
+        ...data,
         competition_id: competitionId,
-        resource: formData.resource,
-        location: formData.location || null,
-        start_time: formData.start_time || null,
-        end_time: formData.end_time || null,
-        assignment_details: formData.assignment_details || null
-      };
-
-      await onResourceAdded(resourceData);
-      onOpenChange(false);
-      setFormData({
-        resource: '',
-        location: '',
-        start_time: '',
-        end_time: '',
-        assignment_details: ''
+        start_time: data.start_time ? new Date(data.start_time).toISOString() : null,
+        end_time: data.end_time ? new Date(data.end_time).toISOString() : null,
       });
+      form.reset();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error adding resource:', error);
-    } finally {
-      setIsLoading(false);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add Competition Resource</DialogTitle>
+          <DialogTitle>Add Resource</DialogTitle>
+          <DialogDescription>
+            Add a new resource assignment for this competition.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="resource">Resource *</Label>
-            <Select value={formData.resource} onValueChange={(value) => setFormData(prev => ({ ...prev, resource: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a resource" />
-              </SelectTrigger>
-              <SelectContent>
-                {resources.map(resource => (
-                  <SelectItem key={resource.id} value={resource.id}>
-                    {resource.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="Resource location"
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="resource"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Resource ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter resource ID" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input
-                id="start_time"
-                type="datetime-local"
-                value={formData.start_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, start_time: e.target.value }))}
-              />
-            </div>
-            <div>
-              <Label htmlFor="end_time">End Time</Label>
-              <Input
-                id="end_time"
-                type="datetime-local"
-                value={formData.end_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
-              />
-            </div>
-          </div>
-
-          <div>
-            <Label htmlFor="assignment_details">Assignment Details</Label>
-            <Textarea
-              id="assignment_details"
-              value={formData.assignment_details}
-              onChange={(e) => setFormData(prev => ({ ...prev, assignment_details: e.target.value }))}
-              placeholder="Details about resource assignment"
-              rows={3}
+            <FormField
+              control={form.control}
+              name="location"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Location</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter location" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add Resource'}
-            </Button>
-          </div>
-        </form>
+            <FormField
+              control={form.control}
+              name="start_time"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Time</FormLabel>
+                  <FormControl>
+                    <Input type="datetime-local" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="end_time"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Time</FormLabel>
+                  <FormControl>
+                    <Input type="datetime-local" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="assignment_details"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Assignment Details</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter assignment details" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Adding...' : 'Add Resource'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
