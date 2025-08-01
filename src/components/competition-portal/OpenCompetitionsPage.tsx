@@ -92,6 +92,10 @@ export const OpenCompetitionsPage = () => {
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
+                    <sapn>Hosting School {competition.hosting_school}</sapn>
+                  </div>
+                <div className="space-y-2 text-sm text-gray-600">
+                  <div className="flex items-center gap-2">
                     <CalendarDays className="w-4 h-4" />
                     <span>
                       {format(new Date(competition.start_date), 'MMM d, yyyy')}
