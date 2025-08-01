@@ -42,7 +42,7 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
-            Add Item
+            {isEditing ? `Edit Item` : `Add New Item'}`}
           </DialogTitle>
           <DialogDescription>
             Configure the {type} option for tasks
