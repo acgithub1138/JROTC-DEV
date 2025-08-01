@@ -106,6 +106,14 @@ export const OpenCompetitionsPage = () => {
                     <span>
                       <div>{competition.address}</div>
                       <div>{competition.city}, {competition.state} {competition.zip}</div>
+                      <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline cursor-pointer"
+                  >
+                    {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
+                  </a>
                     </span>
                   </div>
                   {competition.max_participants && (
