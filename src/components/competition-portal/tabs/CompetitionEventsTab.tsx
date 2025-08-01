@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
+import { EditEventModal } from '@/components/competition-portal/modals/EditEventModal';
 import { format } from 'date-fns';
 interface CompetitionEventsTabProps {
   competitionId: string;
@@ -16,6 +17,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     events,
     isLoading,
     createEvent,
+    updateEvent,
     deleteEvent
   } = useCompetitionEvents(competitionId);
   const {
@@ -24,6 +26,13 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     canDelete
   } = useTablePermissions('cp_comp_events');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
+  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const handleEditEvent = (event: typeof events[0]) => {
+    setSelectedEvent(event);
+    setShowEditModal(true);
+  };
+
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
@@ -74,7 +83,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                             <Button
                               variant="ghost"
                               size="sm"
-                              onClick={() => {/* TODO: Add edit functionality */}}
+                              onClick={() => handleEditEvent(event)}
                             >
                               <Edit className="w-4 h-4" />
                             </Button>
@@ -99,5 +108,11 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
       )}
 
       <AddEventModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onEventAdded={createEvent} />
+      <EditEventModal 
+        open={showEditModal} 
+        onOpenChange={setShowEditModal} 
+        event={selectedEvent} 
+        onEventUpdated={updateEvent} 
+      />
     </div>;
 };
