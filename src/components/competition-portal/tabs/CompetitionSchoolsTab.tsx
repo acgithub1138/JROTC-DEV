@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { Badge } from '@/components/ui/badge';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
@@ -10,23 +9,10 @@ interface CompetitionSchoolsTabProps {
   competitionId: string;
 }
 
-const getStatusVariant = (status: string) => {
-  switch (status) {
-    case 'registered':
-      return 'default';
-    case 'canceled':
-      return 'destructive';
-    case 'no_show':
-      return 'secondary';
-    default:
-      return 'outline';
-  }
-};
-
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
-  const { schools, isLoading, createSchool } = useCompetitionSchools(competitionId);
+  const { schools, isLoading, createSchoolRegistration } = useCompetitionSchools(competitionId);
   const { canCreate } = useTablePermissions('cp_comp_schools');
   const [showAddModal, setShowAddModal] = useState(false);
 
@@ -47,7 +33,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         {canCreate && (
           <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
-            Add School
+            Register School
           </Button>
         )}
       </div>
@@ -67,12 +53,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <div>
                   <h3 className="font-medium">School {school.school_id}</h3>
                   <p className="text-sm text-muted-foreground">
-                    Resource: {school.resource || 'Not assigned'}
+                    Status: {school.status}
+                    {school.resource && ` • Resource: ${school.resource}`}
                   </p>
                 </div>
-                <Badge variant={getStatusVariant(school.status)}>
-                  {school.status.replace('_', ' ').toUpperCase()}
-                </Badge>
+                <div className="text-sm text-muted-foreground">
+                  Registered: {new Date(school.created_at).toLocaleDateString()}
+                </div>
               </div>
               {school.notes && (
                 <p className="mt-2 text-sm text-muted-foreground">{school.notes}</p>
@@ -86,7 +73,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         open={showAddModal}
         onOpenChange={setShowAddModal}
         competitionId={competitionId}
-        onSchoolAdded={createSchool}
+        onSchoolAdded={createSchoolRegistration}
       />
     </div>
   );

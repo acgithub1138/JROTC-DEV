@@ -1,182 +1,155 @@
-import React, { useState, useEffect } from 'react';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import React from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import * as z from 'zod';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { supabase } from '@/integrations/supabase/client';
-import { toast } from 'sonner';
-import type { Database } from '@/integrations/supabase/types';
 
-type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'];
+const formSchema = z.object({
+  school_id: z.string().min(1, 'School ID is required'),
+  status: z.string().default('registered'),
+  notes: z.string().optional(),
+  resource: z.string().optional(),
+});
+
+type FormData = z.infer<typeof formSchema>;
 
 interface AddSchoolModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
-  onSchoolAdded: (school: Omit<CompSchoolInsert, 'created_by'> & { competition_id: string }) => void;
+  onSchoolAdded: (schoolData: any) => Promise<any>;
 }
 
 export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   open,
   onOpenChange,
   competitionId,
-  onSchoolAdded
+  onSchoolAdded,
 }) => {
-  const [formData, setFormData] = useState({
-    school_id: '',
-    resource: '',
-    status: 'registered',
-    notes: ''
+  const form = useForm<FormData>({
+    resolver: zodResolver(formSchema),
+    defaultValues: {
+      school_id: '',
+      status: 'registered',
+      notes: '',
+      resource: '',
+    },
   });
-  const [isLoading, setIsLoading] = useState(false);
-  const [schools, setSchools] = useState<Array<{id: string, name: string}>>([]);
-  const [resources, setResources] = useState<Array<{id: string, name: string}>>([]);
 
-  useEffect(() => {
-    if (open) {
-      fetchSchools();
-      fetchResources();
-    }
-  }, [open]);
-
-  const fetchSchools = async () => {
+  const onSubmit = async (data: FormData) => {
     try {
-      const { data, error } = await supabase
-        .from('schools')
-        .select('id, name')
-        .order('name');
-      
-      if (error) throw error;
-      setSchools(data || []);
-    } catch (error) {
-      console.error('Error fetching schools:', error);
-      toast.error('Failed to load schools');
-    }
-  };
-
-  const fetchResources = async () => {
-    try {
-      // This would need to be updated to fetch from actual resources table
-      // For now, using placeholder data
-      setResources([
-        { id: '1', name: 'Venue A' },
-        { id: '2', name: 'Venue B' },
-        { id: '3', name: 'Equipment Set 1' },
-        { id: '4', name: 'Equipment Set 2' }
-      ]);
-    } catch (error) {
-      console.error('Error fetching resources:', error);
-      toast.error('Failed to load resources');
-    }
-  };
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!formData.school_id) {
-      toast.error('Please select a school');
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      const schoolData: Omit<CompSchoolInsert, 'created_by'> & { competition_id: string } = {
+      await onSchoolAdded({
+        ...data,
         competition_id: competitionId,
-        school_id: formData.school_id,
-        resource: formData.resource || null,
-        status: formData.status,
-        notes: formData.notes || null
-      };
-
-      await onSchoolAdded(schoolData);
-      onOpenChange(false);
-      setFormData({
-        school_id: '',
-        resource: '',
-        status: 'registered',
-        notes: ''
       });
+      form.reset();
+      onOpenChange(false);
     } catch (error) {
-      console.error('Error adding school:', error);
-    } finally {
-      setIsLoading(false);
+      console.error('Error registering school:', error);
     }
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+      <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Add School to Competition</DialogTitle>
+          <DialogTitle>Register School</DialogTitle>
+          <DialogDescription>
+            Register a new school for this competition.
+          </DialogDescription>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="school_id">School *</Label>
-            <Select value={formData.school_id} onValueChange={(value) => setFormData(prev => ({ ...prev, school_id: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a school" />
-              </SelectTrigger>
-              <SelectContent>
-                {schools.map(school => (
-                  <SelectItem key={school.id} value={school.id}>
-                    {school.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="resource">Assigned Resource</Label>
-            <Select value={formData.resource} onValueChange={(value) => setFormData(prev => ({ ...prev, resource: value }))}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select a resource (optional)" />
-              </SelectTrigger>
-              <SelectContent>
-                {resources.map(resource => (
-                  <SelectItem key={resource.id} value={resource.id}>
-                    {resource.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="status">Status</Label>
-            <Select value={formData.status} onValueChange={(value) => setFormData(prev => ({ ...prev, status: value }))}>
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="registered">Registered</SelectItem>
-                <SelectItem value="confirmed">Confirmed</SelectItem>
-                <SelectItem value="canceled">Canceled</SelectItem>
-                <SelectItem value="no_show">No Show</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Additional notes about this school's registration"
-              rows={3}
+        <Form {...form}>
+          <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="school_id"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>School ID</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter school ID" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
             />
-          </div>
-
-          <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
-              Cancel
-            </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Adding...' : 'Add School'}
-            </Button>
-          </div>
-        </form>
+            <FormField
+              control={form.control}
+              name="status"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Status</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select status" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="registered">Registered</SelectItem>
+                      <SelectItem value="confirmed">Confirmed</SelectItem>
+                      <SelectItem value="cancelled">Cancelled</SelectItem>
+                    </SelectContent>
+                  </Select>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="resource"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Resource (Optional)</FormLabel>
+                  <FormControl>
+                    <Input placeholder="Enter resource ID" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <FormField
+              control={form.control}
+              name="notes"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Notes</FormLabel>
+                  <FormControl>
+                    <Textarea placeholder="Enter any notes" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+            <DialogFooter>
+              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                Cancel
+              </Button>
+              <Button type="submit" disabled={form.formState.isSubmitting}>
+                {form.formState.isSubmitting ? 'Registering...' : 'Register School'}
+              </Button>
+            </DialogFooter>
+          </form>
+        </Form>
       </DialogContent>
     </Dialog>
   );
