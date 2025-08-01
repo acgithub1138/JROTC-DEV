@@ -15,6 +15,15 @@ import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+
+const STATUS_OPTIONS = [
+  { value: 'draft', label: 'Draft' },
+  { value: 'open', label: 'Open' },
+  { value: 'registration_closed', label: 'Registration Closed' },
+  { value: 'in_progress', label: 'In Progress' },
+  { value: 'completed', label: 'Completed' },
+  { value: 'cancelled', label: 'Cancelled' }
+];
 interface Competition {
   id: string;
   name: string;
@@ -49,6 +58,7 @@ const CompetitionsPage = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   useEffect(() => {
     fetchCompetitions();
     fetchSchools();
@@ -159,6 +169,26 @@ const CompetitionsPage = () => {
       toast.error('Failed to cancel competition');
     }
   };
+
+  const handleStatusChange = async (competitionId: string, newStatus: string) => {
+    try {
+      setUpdatingStatus(competitionId);
+      const { error } = await supabase
+        .from('cp_competitions')
+        .update({ status: newStatus })
+        .eq('id', competitionId);
+
+      if (error) throw error;
+
+      toast.success('Competition status updated successfully');
+      fetchCompetitions();
+    } catch (error) {
+      console.error('Error updating competition status:', error);
+      toast.error('Failed to update competition status');
+    } finally {
+      setUpdatingStatus(null);
+    }
+  };
   if (loading) {
     return <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -265,11 +295,32 @@ const CompetitionsPage = () => {
                             </div>}
                         </div>
                       </TableCell>
-                      <TableCell>
-                        <Badge variant={getStatusBadgeVariant(competition.status)}>
-                          {competition.status.replace('_', ' ').toUpperCase()}
-                        </Badge>
-                      </TableCell>
+                       <TableCell>
+                         {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') ? (
+                           <Select
+                             value={competition.status}
+                             onValueChange={(value) => handleStatusChange(competition.id, value)}
+                             disabled={updatingStatus === competition.id}
+                           >
+                             <SelectTrigger className="w-auto h-8 border-none p-0 bg-transparent hover:bg-muted">
+                               <Badge variant={getStatusBadgeVariant(competition.status)} className="cursor-pointer">
+                                 {competition.status.replace('_', ' ').toUpperCase()}
+                               </Badge>
+                             </SelectTrigger>
+                             <SelectContent className="bg-background border shadow-md z-50">
+                               {STATUS_OPTIONS.map((option) => (
+                                 <SelectItem key={option.value} value={option.value}>
+                                   {option.label}
+                                 </SelectItem>
+                               ))}
+                             </SelectContent>
+                           </Select>
+                         ) : (
+                           <Badge variant={getStatusBadgeVariant(competition.status)}>
+                             {competition.status.replace('_', ' ').toUpperCase()}
+                           </Badge>
+                         )}
+                       </TableCell>
                       <TableCell>
                         <div className="flex items-center">
                           <Users className="w-4 h-4 mr-1 text-muted-foreground" />
