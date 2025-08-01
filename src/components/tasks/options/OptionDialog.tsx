@@ -36,7 +36,7 @@ export const OptionDialog: React.FC<OptionDialogProps> = ({
       <DialogTrigger asChild>
         <Button onClick={onAddClick}>
           <Plus className="w-4 h-4 mr-2" />
-          Add {type === 'status' ? 'Status' : 'Priority'}
+          Add Item
         </Button>
       </DialogTrigger>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
