@@ -192,7 +192,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   const canPreview = formData.source_table && (formData.subject || formData.body);
   return <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {mode === 'edit' ? 'Edit Email Template' : 'Create Email Template'}
