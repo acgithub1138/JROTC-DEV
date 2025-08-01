@@ -13,7 +13,7 @@ export const TaskDescriptionModal: React.FC<TaskDescriptionModalProps> = ({
   taskDescription
 }) => {
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Task Description</DialogTitle>
         </DialogHeader>
