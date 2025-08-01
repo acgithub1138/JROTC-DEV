@@ -378,7 +378,13 @@ const CompetitionsPage = () => {
       <CompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
       {/* View Competition Modal */}
-      <ViewCompetitionModal competition={selectedCompetition} open={showViewModal} onOpenChange={setShowViewModal} hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} />
+      <ViewCompetitionModal 
+        competition={selectedCompetition} 
+        open={showViewModal} 
+        onOpenChange={setShowViewModal} 
+        hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
+        onCompetitionUpdated={fetchCompetitions}
+      />
     </div>
   </TooltipProvider>;
 };

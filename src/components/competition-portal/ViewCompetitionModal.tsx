@@ -1,14 +1,21 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
   DialogHeader,
   DialogTitle,
+  DialogFooter,
 } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { CalendarDays, MapPin, Users, School, Clock } from 'lucide-react';
+import { CalendarDays, MapPin, Users, School, Clock, Edit } from 'lucide-react';
 import { format } from 'date-fns';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useAuth } from '@/contexts/AuthContext';
+import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
+import { supabase } from '@/integrations/supabase/client';
+import { toast } from 'sonner';
 
 interface Competition {
   id: string;
@@ -36,6 +43,7 @@ interface ViewCompetitionModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   hostSchoolName: string;
+  onCompetitionUpdated?: () => void;
 }
 
 export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
@@ -43,7 +51,11 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
   open,
   onOpenChange,
   hostSchoolName,
+  onCompetitionUpdated,
 }) => {
+  const { userProfile } = useAuth();
+  const { canEdit } = useTablePermissions('cp_competitions');
+  const [showEditModal, setShowEditModal] = useState(false);
   if (!competition) return null;
 
   const getStatusBadgeVariant = (status: string) => {
@@ -56,6 +68,44 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
       case 'cancelled': return 'destructive';
       default: return 'secondary';
     }
+  };
+
+  const canEditCompetition = canEdit && (
+    competition?.school_id === userProfile?.school_id || userProfile?.role === 'admin'
+  );
+
+  const handleEditClick = () => {
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (data: any) => {
+    try {
+      const { error } = await supabase
+        .from('cp_competitions')
+        .update(data)
+        .eq('id', competition?.id);
+
+      if (error) throw error;
+
+      toast.success('Competition updated successfully');
+      if (onCompetitionUpdated) {
+        onCompetitionUpdated();
+      }
+      setShowEditModal(false);
+    } catch (error) {
+      console.error('Error updating competition:', error);
+      toast.error('Failed to update competition');
+    }
+  };
+
+  // Convert competition portal competition to competition management format
+  const convertCompetitionForEdit = (comp: Competition) => {
+    return {
+      ...comp,
+      competition_date: comp.start_date,
+      type: 'drill' as const, // Default type for editing
+      updated_at: comp.created_at // Use created_at as fallback
+    };
   };
 
   return (
@@ -149,7 +199,27 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
             <p>Created on {format(new Date(competition.created_at), 'MMMM d, yyyy')}</p>
           </div>
         </div>
+
+        <DialogFooter className="flex items-center justify-end gap-2">
+          <Button variant="outline" onClick={() => onOpenChange(false)}>
+            Close
+          </Button>
+          {canEditCompetition && (
+            <Button onClick={handleEditClick}>
+              <Edit className="w-4 h-4 mr-2" />
+              Edit
+            </Button>
+          )}
+        </DialogFooter>
       </DialogContent>
+
+      {/* Edit Modal */}
+      <CompetitionDialog
+        open={showEditModal}
+        onOpenChange={setShowEditModal}
+        competition={competition ? convertCompetitionForEdit(competition) : null}
+        onSubmit={handleEditSubmit}
+      />
     </Dialog>
   );
 };
