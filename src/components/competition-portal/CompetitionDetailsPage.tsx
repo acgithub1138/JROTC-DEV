@@ -3,7 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { ArrowLeft } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
+import { useCompetition } from '@/hooks/competition-portal/useCompetition';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
@@ -11,9 +11,7 @@ import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
 export const CompetitionDetailsPage: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const { competitions, isLoading } = useCompetitions();
-
-  const competition = competitions.find(comp => comp.id === id);
+  const { competition, isLoading } = useCompetition(id);
 
   if (isLoading) {
     return (
