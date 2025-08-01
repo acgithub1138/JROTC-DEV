@@ -23,7 +23,7 @@ export const useSchoolUsers = (activeOnly?: boolean) => {
         .from('profiles')
         .select('id, first_name, last_name, email, role, grade, active')
         .eq('school_id', userProfile?.school_id)
-        .order('first_name');
+        .order('last_name');
 
       if (activeOnly !== undefined) {
         query = query.eq('active', activeOnly);

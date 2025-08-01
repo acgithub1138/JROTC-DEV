@@ -79,7 +79,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
                     </FormControl>
                     <SelectContent>
                       {users.map(user => <SelectItem key={user.id} value={user.id}>
-                          {user.first_name} {user.last_name} ({user.role})
+                          {user.last_name}, {user.first_name}
                         </SelectItem>)}
                     </SelectContent>
                   </Select>
