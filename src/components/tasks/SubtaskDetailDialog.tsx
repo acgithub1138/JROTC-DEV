@@ -25,30 +25,54 @@ import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
-
 interface SubtaskDetailDialogProps {
   subtask: Subtask;
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onEdit: (subtask: Subtask) => void;
 }
-
-export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({ 
-  subtask, 
-  open, 
-  onOpenChange, 
-  onEdit 
+export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
+  subtask,
+  open,
+  onOpenChange,
+  onEdit
 }) => {
-  const { userProfile } = useAuth();
-  const { updateSubtask, subtasks, isUpdating } = useSubtasks(subtask.parent_task_id);
-  const { users } = useSchoolUsers(true); // Only fetch active users
-  const { comments, addComment, addSystemComment, isAddingComment } = useSubtaskComments(subtask.id);
-  const { statusOptions } = useTaskStatusOptions();
-  const { priorityOptions } = useTaskPriorityOptions();
-  const { canEdit: canUpdate, canDelete } = useTablePermissions('tasks');
-  const { templates } = useEmailTemplates();
-  const { rules } = useEmailRules();
-  const { toast } = useToast();
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    updateSubtask,
+    subtasks,
+    isUpdating
+  } = useSubtasks(subtask.parent_task_id);
+  const {
+    users
+  } = useSchoolUsers(true); // Only fetch active users
+  const {
+    comments,
+    addComment,
+    addSystemComment,
+    isAddingComment
+  } = useSubtaskComments(subtask.id);
+  const {
+    statusOptions
+  } = useTaskStatusOptions();
+  const {
+    priorityOptions
+  } = useTaskPriorityOptions();
+  const {
+    canEdit: canUpdate,
+    canDelete
+  } = useTablePermissions('tasks');
+  const {
+    templates
+  } = useEmailTemplates();
+  const {
+    rules
+  } = useEmailRules();
+  const {
+    toast
+  } = useToast();
   const canAssign = canUpdate; // For now, use update permission for assign
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
   const [sendNotification, setSendNotification] = useState(false);
@@ -64,24 +88,15 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     status: subtask.status,
     priority: subtask.priority,
     assigned_to: subtask.assigned_to || 'unassigned',
-    due_date: subtask.due_date ? new Date(subtask.due_date) : null,
+    due_date: subtask.due_date ? new Date(subtask.due_date) : null
   });
 
   // Filter templates for subtasks (use task templates)
-  const subtaskTemplates = templates.filter(template => 
-    template.is_active && template.source_table === 'tasks'
-  );
+  const subtaskTemplates = templates.filter(template => template.is_active && template.source_table === 'tasks');
 
   // Track changes for unsaved warning
   useEffect(() => {
-    const hasChanges = 
-      editData.title !== currentSubtask.title ||
-      editData.description !== (currentSubtask.description || '') ||
-      editData.status !== currentSubtask.status ||
-      editData.priority !== currentSubtask.priority ||
-      editData.assigned_to !== (currentSubtask.assigned_to || 'unassigned') ||
-      (editData.due_date?.getTime() !== (currentSubtask.due_date ? new Date(currentSubtask.due_date).getTime() : null));
-    
+    const hasChanges = editData.title !== currentSubtask.title || editData.description !== (currentSubtask.description || '') || editData.status !== currentSubtask.status || editData.priority !== currentSubtask.priority || editData.assigned_to !== (currentSubtask.assigned_to || 'unassigned') || editData.due_date?.getTime() !== (currentSubtask.due_date ? new Date(currentSubtask.due_date).getTime() : null);
     setHasUnsavedChanges(hasChanges || sendNotification);
   }, [editData, currentSubtask, sendNotification]);
 
@@ -96,70 +111,73 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       status: subtaskToUse.status,
       priority: subtaskToUse.priority,
       assigned_to: subtaskToUse.assigned_to || 'unassigned',
-      due_date: subtaskToUse.due_date ? new Date(subtaskToUse.due_date) : null,
+      due_date: subtaskToUse.due_date ? new Date(subtaskToUse.due_date) : null
     });
   }, [subtask, subtasks]);
-
   const canEdit = canUpdate || currentSubtask.assigned_to === userProfile?.id;
-
   const sendNotificationEmail = async () => {
     const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
     if (!sendNotification || !selectedTemplate || !newAssignedTo) {
       return;
     }
-
     try {
       // Find the assigned user for name information
-      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === newAssignedTo);
-      
+      let assignedUser: {
+        id: string;
+        first_name: string;
+        last_name: string;
+      } | undefined = users.find(u => u.id === newAssignedTo);
+
       // If user not found in school users, fetch directly
       if (!assignedUser) {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name')
-          .eq('id', newAssignedTo)
-          .single();
-          
+        const {
+          data: userData,
+          error: userError
+        } = await supabase.from('profiles').select('id, first_name, last_name').eq('id', newAssignedTo).single();
         if (userError || !userData) {
           console.error('Error fetching user data:', userError);
           toast({
             title: "Error",
             description: "Could not find the assigned user's information.",
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
-        
-        assignedUser = userData as { id: string; first_name: string; last_name: string };
+        assignedUser = userData as {
+          id: string;
+          first_name: string;
+          last_name: string;
+        };
       }
-      
+
       // Resolve email with job board priority
       const emailResult = await resolveUserEmail(newAssignedTo, currentSubtask.school_id);
-      
       if (!emailResult?.email) {
         toast({
-          title: "Error", 
+          title: "Error",
           description: "No email address found for the assigned user.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
 
       // Use the queue_email RPC function
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
+      const {
+        data: queueId,
+        error
+      } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
         recipient_email_param: emailResult.email,
         source_table_param: 'subtasks',
         record_id_param: currentSubtask.id,
         school_id_param: currentSubtask.school_id
       });
-
       if (error) {
         console.error('Error queuing notification email:', error);
         toast({
           title: "Error",
           description: "Failed to queue notification email.",
-          variant: "destructive",
+          variant: "destructive"
         });
         throw error;
       } else {
@@ -167,7 +185,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`
         });
       }
     } catch (emailError) {
@@ -175,57 +193,51 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       toast({
         title: "Error",
         description: "Failed to send notification email.",
-        variant: "destructive",
+        variant: "destructive"
       });
       throw emailError;
     }
   };
-
   const performSave = async () => {
     // Validate notification requirements
     if (sendNotification && !selectedTemplate) {
       toast({
         title: "Template Required",
         description: "Please select an email template to send notification.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     try {
-      const updateData: any = { id: currentSubtask.id };
-      
+      const updateData: any = {
+        id: currentSubtask.id
+      };
       if (editData.title !== currentSubtask.title) updateData.title = editData.title;
       if (editData.description !== (currentSubtask.description || '')) updateData.description = editData.description || null;
       if (editData.status !== currentSubtask.status) updateData.status = editData.status;
       if (editData.priority !== currentSubtask.priority) updateData.priority = editData.priority;
-      
       const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
       if (newAssignedTo !== currentSubtask.assigned_to) updateData.assigned_to = newAssignedTo;
-      
       if (editData.due_date !== (currentSubtask.due_date ? new Date(currentSubtask.due_date) : null)) {
         updateData.due_date = editData.due_date ? editData.due_date.toISOString() : null;
       }
-
       await updateSubtask(updateData);
-      
+
       // Send notification email if requested
       if (sendNotification) {
         await sendNotificationEmail();
       }
-      
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating subtask:', error);
     }
   };
-
   const handleSave = async () => {
     // Debug logging to track comment state
     console.log('🔍 handleSave called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
     console.log('🔍 newComment length:', newComment.length);
-    
+
     // Check for unsaved comment before saving
     if (newComment.trim()) {
       console.log('🔍 Found unsaved comment, showing modal');
@@ -233,11 +245,9 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       setShowUnsavedCommentModal(true);
       return;
     }
-    
     console.log('🔍 No unsaved comment, proceeding with save');
     await performSave();
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
@@ -245,25 +255,20 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       onOpenChange(false);
     }
   };
-
   const confirmClose = () => {
     setShowConfirmDialog(false);
     onOpenChange(false);
   };
-
   const saveAndClose = async () => {
     setShowConfirmDialog(false);
     await handleSave();
   };
-
   const stayOnForm = () => {
     setShowConfirmDialog(false);
   };
-
   const handleAddComment = async () => {
     console.log('🔍 handleAddComment called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
-    
     if (newComment.trim()) {
       console.log('🔍 Adding comment:', newComment.trim());
       await addComment(newComment.trim());
@@ -272,36 +277,29 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
-
   const handleDiscardComment = () => {
     setNewComment('');
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
-
-  const assigneeOptions = [
-    { value: 'unassigned', label: 'Unassigned' },
-    ...users
-      .sort((a, b) => a.last_name.localeCompare(b.last_name))
-      .map(user => ({
-        value: user.id,
-        label: `${user.last_name}, ${user.first_name}`
-      }))
-  ];
-
+  const assigneeOptions = [{
+    value: 'unassigned',
+    label: 'Unassigned'
+  }, ...users.sort((a, b) => a.last_name.localeCompare(b.last_name)).map(user => ({
+    value: user.id,
+    label: `${user.last_name}, ${user.first_name}`
+  }))];
   const handleCompleteSubtask = async () => {
-    await updateSubtask({ 
-      id: currentSubtask.id, 
+    await updateSubtask({
+      id: currentSubtask.id,
       status: getDefaultCompletionStatus(statusOptions),
       completed_at: new Date().toISOString()
     });
-    
+
     // Add system comment
     addSystemComment('Subtask completed');
-    
     onOpenChange(false);
   };
-
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
@@ -318,52 +316,32 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     if (taskCompletedRule?.is_active && editData.status === 'completed') {
       return false;
     }
-
     return true;
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleCancel : onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
-              {currentSubtask.task_number && (
-                <span className="text-blue-600 font-mono mr-2">
+              {currentSubtask.task_number && <span className="text-blue-600 font-mono mr-2">
                   {currentSubtask.task_number} -
-                </span>
-              )}
-              <Input
-                value={editData.title}
-                onChange={(e) => setEditData({...editData, title: e.target.value})}
-                className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                disabled={!canEdit}
-              />
+                </span>}
+              <Input value={editData.title} onChange={e => setEditData({
+                ...editData,
+                title: e.target.value
+              })} className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0" disabled={!canEdit} />
             </DialogTitle>
-            {canEdit && (
-              <div className="flex items-center gap-2">
-                {!isTaskDone(currentSubtask.status, statusOptions) && (
-                  <Button
-                    type="button"
-                    onClick={handleCompleteSubtask}
-                    className="flex items-center gap-2"
-                    variant="default"
-                  >
+            {canEdit && <div className="flex items-center gap-2">
+                {!isTaskDone(currentSubtask.status, statusOptions) && <Button type="button" onClick={handleCompleteSubtask} className="flex items-center gap-2" variant="default">
                     <Check className="w-4 h-4" />
                     Mark Complete
-                  </Button>
-                )}
-                <Button
-                  size="sm"
-                  onClick={handleSave}
-                  disabled={isUpdating}
-                >
+                  </Button>}
+                <Button size="sm" onClick={handleSave} disabled={isUpdating}>
                   <Save className="w-4 h-4 mr-2" />
                   Save
                 </Button>
-              </div>
-            )}
+              </div>}
           </div>
         </DialogHeader>
 
@@ -379,82 +357,71 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {canEdit ? (
-                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                  {canEdit ? <Select value={editData.status} onValueChange={value => setEditData({
+                    ...editData,
+                    status: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {statusOptions.filter(s => s.is_active).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {statusOptions.filter(s => s.is_active).map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                    </Select> : <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
                       {currentStatusOption?.label || editData.status.replace('_', ' ')}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>                
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {canEdit ? (
-                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                  {canEdit ? <Select value={editData.priority} onValueChange={value => setEditData({
+                    ...editData,
+                    priority: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {priorityOptions.filter(p => p.is_active).map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {priorityOptions.filter(p => p.is_active).map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                    </Select> : <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
                       {currentPriorityOption?.label || editData.priority}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Due Date:</span>
-                   {canEdit ? (
-                     <Input
-                       type="date"
-                       value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''}
-                       onChange={(e) => {
-                         const dateValue = e.target.value;
-                         if (dateValue) {
-                           // Create date object from input value with validation
-                           const date = new Date(dateValue + 'T00:00:00');
-                           const tomorrow = new Date();
-                           tomorrow.setDate(tomorrow.getDate() + 1);
-                           tomorrow.setHours(0, 0, 0, 0);
-                           
-                           if (date >= tomorrow) {
-                             setEditData({...editData, due_date: date});
-                           }
-                         } else {
-                           setEditData({...editData, due_date: null});
-                         }
-                       }}
-                       min={(() => {
-                         const tomorrow = new Date();
-                         tomorrow.setDate(tomorrow.getDate() + 1);
-                         return format(tomorrow, 'yyyy-MM-dd');
-                       })()}
-                       className="h-8 w-auto min-w-[150px]"
-                     />
-                   ) : (
-                     <span className="text-sm font-medium">
+                   {canEdit ? <Input type="date" value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''} onChange={e => {
+                    const dateValue = e.target.value;
+                    if (dateValue) {
+                      // Create date object from input value with validation
+                      const date = new Date(dateValue + 'T00:00:00');
+                      const tomorrow = new Date();
+                      tomorrow.setDate(tomorrow.getDate() + 1);
+                      tomorrow.setHours(0, 0, 0, 0);
+                      if (date >= tomorrow) {
+                        setEditData({
+                          ...editData,
+                          due_date: date
+                        });
+                      }
+                    } else {
+                      setEditData({
+                        ...editData,
+                        due_date: null
+                      });
+                    }
+                  }} min={(() => {
+                    const tomorrow = new Date();
+                    tomorrow.setDate(tomorrow.getDate() + 1);
+                    return format(tomorrow, 'yyyy-MM-dd');
+                  })()} className="h-8 w-auto min-w-[150px]" /> : <span className="text-sm font-medium">
                        {editData.due_date ? format(editData.due_date, 'PPP') : 'No due date'}
-                     </span>
-                   )}
+                     </span>}
                 </div>
               </CardContent>
             </Card>
@@ -468,37 +435,30 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
-                  {canEdit && canAssign ? (
-                    <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                  {canEdit && canAssign ? <Select value={editData.assigned_to} onValueChange={value => setEditData({
+                    ...editData,
+                    assigned_to: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {users.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
+                        {users.map(user => <SelectItem key={user.id} value={user.id}>
                             {user.last_name}, {user.first_name}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <span className="text-sm font-medium">
-                      {currentSubtask.assigned_to_profile 
-                        ? `${currentSubtask.assigned_to_profile.last_name}, ${currentSubtask.assigned_to_profile.first_name}` 
-                        : 'Unassigned'}
-                    </span>
-                  )}
+                    </Select> : <span className="text-sm font-medium">
+                      {currentSubtask.assigned_to_profile ? `${currentSubtask.assigned_to_profile.last_name}, ${currentSubtask.assigned_to_profile.first_name}` : 'Unassigned'}
+                    </span>}
                 </div>
-                {currentSubtask.assigned_by_profile && (
-                  <div className="flex items-center gap-2">
+                {currentSubtask.assigned_by_profile && <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-600">Created by:</span>
                     <span className="text-sm font-medium">
                       {currentSubtask.assigned_by_profile.last_name}, {currentSubtask.assigned_by_profile.first_name}
                     </span>
-                  </div>
-                )}
+                  </div>}
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
@@ -508,39 +468,29 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                  </div>
                  
                   {/* Send Notification Section */}
-                  {canEdit && subtaskTemplates.length > 0 && shouldShowNotificationCheckbox() && (
-                   <div className="pt-3 border-t space-y-3">
+                  {canEdit && subtaskTemplates.length > 0 && shouldShowNotificationCheckbox() && <div className="pt-3 border-t space-y-3">
                      <div className="flex items-center gap-2">
-                       <Checkbox
-                         id="send-notification-subtask"
-                         checked={sendNotification}
-                         onCheckedChange={(checked) => {
-                           setSendNotification(checked as boolean);
-                           if (!checked) setSelectedTemplate('');
-                         }}
-                       />
+                       <Checkbox id="send-notification-subtask" checked={sendNotification} onCheckedChange={checked => {
+                      setSendNotification(checked as boolean);
+                      if (!checked) setSelectedTemplate('');
+                    }} />
                        <label htmlFor="send-notification-subtask" className="text-sm font-medium">
                          Send Notification
                        </label>
                      </div>
-                     {sendNotification && (
-                       <div className="ml-6">
+                     {sendNotification && <div className="ml-6">
                          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                            <SelectTrigger className="h-8 w-full">
                              <SelectValue placeholder="Select template" />
                            </SelectTrigger>
                            <SelectContent>
-                             {subtaskTemplates.map((template) => (
-                               <SelectItem key={template.id} value={template.id}>
+                             {subtaskTemplates.map(template => <SelectItem key={template.id} value={template.id}>
                                  {template.name}
-                               </SelectItem>
-                             ))}
+                               </SelectItem>)}
                            </SelectContent>
                          </Select>
-                       </div>
-                     )}
-                   </div>
-                 )}
+                       </div>}
+                   </div>}
                </CardContent>
              </Card>
            </div>
@@ -548,29 +498,17 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            {canEdit ? (
-              <Textarea
-                value={editData.description}
-                onChange={(e) => setEditData({...editData, description: e.target.value})}
-                rows={4}
-                placeholder="Detailed description of the subtask..."
-              />
-            ) : (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+            {canEdit ? <Textarea value={editData.description} onChange={e => setEditData({
+              ...editData,
+              description: e.target.value
+            })} rows={4} placeholder="Detailed description of the subtask..." /> : <p className="text-sm text-gray-700 whitespace-pre-wrap">
                 {editData.description || 'No description'}
-              </p>
-            )}
+              </p>}
           </div>
 
           <Separator />
 
-          <TaskCommentsSection
-            comments={comments}
-            isAddingComment={isAddingComment}
-            onAddComment={addComment}
-            newComment={newComment}
-            onNewCommentChange={setNewComment}
-          />
+          <TaskCommentsSection comments={comments} isAddingComment={isAddingComment} onAddComment={addComment} newComment={newComment} onNewCommentChange={setNewComment} />
         </div>
       </DialogContent>
     </Dialog>
@@ -596,11 +534,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>
 
-    <UnsavedCommentModal
-      open={showUnsavedCommentModal}
-      onAddComment={handleAddComment}
-      onDiscard={handleDiscardComment}
-    />
-  </>
-  );
+    <UnsavedCommentModal open={showUnsavedCommentModal} onAddComment={handleAddComment} onDiscard={handleDiscardComment} />
+  </>;
 };
