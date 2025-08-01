@@ -1,11 +1,14 @@
 import React from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
 export const CompetitionDetailsPage = () => {
+  const navigate = useNavigate();
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
   console.log('Route params:', params);
@@ -25,6 +28,14 @@ export const CompetitionDetailsPage = () => {
           <h1 className="text-3xl font-bold">Competition Details</h1>
           <p className="text-muted-foreground">Manage events for this competition</p>
         </div>
+        <Button 
+          variant="outline" 
+          onClick={() => navigate('/app/competition-portal/competitions')}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Competitions
+        </Button>
       </div>
 
       <Tabs defaultValue="events" className="w-full">
