@@ -11,16 +11,15 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
-
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
-
 interface AddEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
-  onEventAdded: (event: Omit<CompEventInsert, 'school_id' | 'created_by'> & { competition_id: string }) => void;
+  onEventAdded: (event: Omit<CompEventInsert, 'school_id' | 'created_by'> & {
+    competition_id: string;
+  }) => void;
 }
-
 export const AddEventModal: React.FC<AddEventModalProps> = ({
   open,
   onOpenChange,
@@ -42,9 +41,14 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     resources: [] as string[]
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
-  const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
-  
+  const [events, setEvents] = useState<Array<{
+    id: string;
+    name: string;
+  }>>([]);
+  const [judges, setJudges] = useState<Array<{
+    id: string;
+    name: string;
+  }>>([]);
   const {
     users: schoolUsers,
     isLoading: usersLoading
@@ -56,14 +60,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       fetchJudges();
     }
   }, [open]);
-
   const fetchEvents = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cp_events')
-        .select('id, name')
-        .eq('active', true);
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_events').select('id, name').eq('active', true);
       if (error) throw error;
       setEvents(data || []);
     } catch (error) {
@@ -73,11 +75,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   };
   const fetchJudges = async () => {
     try {
-      const { data, error } = await supabase
-        .from('cp_judges')
-        .select('id, name')
-        .eq('available', true);
-      
+      const {
+        data,
+        error
+      } = await supabase.from('cp_judges').select('id, name').eq('available', true);
       if (error) throw error;
       setJudges(data || []);
     } catch (error) {
@@ -85,7 +86,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       toast.error('Failed to load judges');
     }
   };
-
   const addJudge = (judgeId: string) => {
     if (!formData.judges.includes(judgeId)) {
       setFormData(prev => ({
@@ -94,14 +94,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       }));
     }
   };
-
   const removeJudge = (judgeId: string) => {
     setFormData(prev => ({
       ...prev,
       judges: prev.judges.filter(id => id !== judgeId)
     }));
   };
-
   const addResource = (resourceId: string) => {
     if (!formData.resources.includes(resourceId)) {
       setFormData(prev => ({
@@ -110,48 +108,41 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       }));
     }
   };
-
   const removeResource = (resourceId: string) => {
     setFormData(prev => ({
       ...prev,
       resources: prev.resources.filter(id => id !== resourceId)
     }));
   };
-
   const getSelectedJudges = () => {
     return judges.filter(judge => formData.judges.includes(judge.id));
   };
-
   const getAvailableJudges = () => {
     return judges.filter(judge => !formData.judges.includes(judge.id));
   };
-
   const getSelectedResources = () => {
     return schoolUsers.filter(user => formData.resources.includes(user.id));
   };
-
   const getAvailableResources = () => {
     return schoolUsers.filter(user => !formData.resources.includes(user.id));
   };
-
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
     if (!date || !hour || !minute) return null;
     return `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.event) {
       toast.error('Please select an event');
       return;
     }
-
     setIsLoading(true);
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
-
-      const eventData: Omit<CompEventInsert, 'school_id' | 'created_by'> & { competition_id: string } = {
+      const eventData: Omit<CompEventInsert, 'school_id' | 'created_by'> & {
+        competition_id: string;
+      } = {
         competition_id: competitionId,
         event: formData.event,
         location: formData.location || null,
@@ -162,7 +153,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         judges: formData.judges,
         resources: formData.resources
       };
-
       await onEventAdded(eventData);
       onOpenChange(false);
       setFormData({
@@ -185,38 +175,35 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setIsLoading(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Competition Event</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="event">Event *</Label>
-            <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
+            <Select value={formData.event} onValueChange={value => setFormData(prev => ({
+            ...prev,
+            event: value
+          }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {events.map(event => (
-                  <SelectItem key={event.id} value={event.id}>
+                {events.map(event => <SelectItem key={event.id} value={event.id}>
                     {event.name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label htmlFor="location">Location</Label>
-            <Input
-              id="location"
-              value={formData.location}
-              onChange={(e) => setFormData(prev => ({ ...prev, location: e.target.value }))}
-              placeholder="Event location"
-            />
+            <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
+            ...prev,
+            location: e.target.value
+          }))} placeholder="Event location" />
           </div>
 
           <div className="space-y-4">
@@ -225,59 +212,63 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label htmlFor="start_date" className="text-xs">Date</Label>
-                  <Input
-                    id="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => {
-                      setFormData(prev => ({ ...prev, start_date: e.target.value }));
-                      // Auto-set end date if not set
-                      if (e.target.value && !formData.end_date) {
-                        setFormData(prev => ({ ...prev, end_date: e.target.value }));
-                      }
-                    }}
-                  />
+                  <Input id="start_date" type="date" value={formData.start_date} onChange={e => {
+                  setFormData(prev => ({
+                    ...prev,
+                    start_date: e.target.value
+                  }));
+                  // Auto-set end date if not set
+                  if (e.target.value && !formData.end_date) {
+                    setFormData(prev => ({
+                      ...prev,
+                      end_date: e.target.value
+                    }));
+                  }
+                }} />
                 </div>
                 <div>
                   <Label htmlFor="start_hour" className="text-xs">Hour</Label>
-                  <Select 
-                    value={formData.start_hour} 
-                    onValueChange={(value) => {
-                      setFormData(prev => ({ ...prev, start_hour: value }));
-                      // Auto-set end hour if not set
-                      if (value && !formData.end_hour) {
-                        const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
-                        setFormData(prev => ({ ...prev, end_hour: nextHour > '23' ? '23' : nextHour }));
-                      }
-                    }}
-                  >
+                  <Select value={formData.start_hour} onValueChange={value => {
+                  setFormData(prev => ({
+                    ...prev,
+                    start_hour: value
+                  }));
+                  // Auto-set end hour if not set
+                  if (value && !formData.end_hour) {
+                    const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                    setFormData(prev => ({
+                      ...prev,
+                      end_hour: nextHour > '23' ? '23' : nextHour
+                    }));
+                  }
+                }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hr" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="start_minute" className="text-xs">Min</Label>
-                  <Select 
-                    value={formData.start_minute} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, start_minute: value }))}
-                  >
+                  <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  start_minute: value
+                }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 60 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 60
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -289,46 +280,44 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               <div className="grid grid-cols-3 gap-2">
                 <div>
                   <Label htmlFor="end_date" className="text-xs">Date</Label>
-                  <Input
-                    id="end_date"
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
-                  />
+                  <Input id="end_date" type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
+                  ...prev,
+                  end_date: e.target.value
+                }))} />
                 </div>
                 <div>
                   <Label htmlFor="end_hour" className="text-xs">Hour</Label>
-                  <Select 
-                    value={formData.end_hour} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, end_hour: value }))}
-                  >
+                  <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  end_hour: value
+                }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Hr" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 24
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
                   <Label htmlFor="end_minute" className="text-xs">Min</Label>
-                  <Select 
-                    value={formData.end_minute} 
-                    onValueChange={(value) => setFormData(prev => ({ ...prev, end_minute: value }))}
-                  >
+                  <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
+                  ...prev,
+                  end_minute: value
+                }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({ length: 60 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({
+                      length: 60
+                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
                   </Select>
                 </div>
@@ -338,14 +327,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
           <div>
             <Label htmlFor="max_participants">Max Participants</Label>
-            <Input
-              id="max_participants"
-              type="number"
-              min="1"
-              value={formData.max_participants}
-              onChange={(e) => setFormData(prev => ({ ...prev, max_participants: e.target.value }))}
-              placeholder="Maximum number of participants"
-            />
+            <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
+            ...prev,
+            max_participants: e.target.value
+          }))} placeholder="Maximum number of participants" />
           </div>
 
           <div>
@@ -356,27 +341,18 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                   <SelectValue placeholder="Add judges" />
                 </SelectTrigger>
                 <SelectContent>
-                  {getAvailableJudges().map((judge) => (
-                    <SelectItem key={judge.id} value={judge.id}>
+                  {getAvailableJudges().map(judge => <SelectItem key={judge.id} value={judge.id}>
                       {judge.name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
               
-              {getSelectedJudges().length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getSelectedJudges().map((judge) => (
-                    <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
+              {getSelectedJudges().length > 0 && <div className="flex flex-wrap gap-2 mt-2">
+                  {getSelectedJudges().map(judge => <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
                       {judge.name}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeJudge(judge.id)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeJudge(judge.id)} />
+                    </Badge>)}
+                </div>}
             </div>
           </div>
 
@@ -388,39 +364,27 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                   <SelectValue placeholder="Add resources" />
                 </SelectTrigger>
                 <SelectContent>
-                  {getAvailableResources().map((user) => (
-                    <SelectItem key={user.id} value={user.id}>
+                  {getAvailableResources().map(user => <SelectItem key={user.id} value={user.id}>
                       {user.last_name}, {user.first_name}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
               
-              {getSelectedResources().length > 0 && (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {getSelectedResources().map((user) => (
-                    <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
+              {getSelectedResources().length > 0 && <div className="flex flex-wrap gap-2 mt-2">
+                  {getSelectedResources().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
                       {user.last_name}, {user.first_name}
-                      <X
-                        className="h-3 w-3 cursor-pointer"
-                        onClick={() => removeResource(user.id)}
-                      />
-                    </Badge>
-                  ))}
-                </div>
-              )}
+                      <X className="h-3 w-3 cursor-pointer" onClick={() => removeResource(user.id)} />
+                    </Badge>)}
+                </div>}
             </div>
           </div>
 
           <div>
             <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={formData.notes}
-              onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
-              placeholder="Additional notes for this event"
-              rows={3}
-            />
+            <Textarea id="notes" value={formData.notes} onChange={e => setFormData(prev => ({
+            ...prev,
+            notes: e.target.value
+          }))} placeholder="Additional notes for this event" rows={3} />
           </div>
 
           <div className="flex gap-2 justify-end">
@@ -433,6 +397,5 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
