@@ -60,7 +60,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                  <TableHead>Location</TableHead>
                  <TableHead>Start Time</TableHead>
                  <TableHead>End Time</TableHead>
-                 <TableHead>Max Participants</TableHead>
+                 <TableHead>Max</TableHead>
                  {(canEdit || canDelete) && <TableHead>Actions</TableHead>}
                </TableRow>
             </TableHeader>
