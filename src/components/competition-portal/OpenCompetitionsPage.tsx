@@ -18,7 +18,7 @@ export const OpenCompetitionsPage = () => {
         .from('cp_competitions')
         .select(`
           *,
-          schools:school_id (
+          schools!school_id (
             name
           )
         `)
