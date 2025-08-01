@@ -90,9 +90,6 @@ export const OpenCompetitionsPage = () => {
                 </div>
               </CardHeader>
               <CardContent className="space-y-4">
-                <div className="text-sm">
-                  <strong>Hosting School:</strong> {competition.hosting_school}
-                </div>
                 <div className="space-y-2 text-sm text-gray-600">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-4 h-4" />
@@ -140,6 +137,9 @@ export const OpenCompetitionsPage = () => {
                       <strong>Registration Deadline:</strong> {format(new Date(competition.registration_deadline), 'MMM d, yyyy')}
                     </div>
                   )}
+                  <div className="text-sm">
+                    <strong>Hosting School:</strong> {competition.hosting_school}
+                  </div>                  
                 </div>
                 
                 <Button 
