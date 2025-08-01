@@ -148,23 +148,20 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
       current: 0,
       total: validItems.length
     });
-    
     try {
       console.log('Starting bulk import of', validItems.length, 'items');
       setImportProgress({
         current: validItems.length,
         total: validItems.length
       });
-      
+
       // Import all items at once for much better performance
       await onImport(validItems);
-      
       toast({
         title: "Import Complete",
         description: `${validItems.length} items imported successfully`,
         duration: 5000
       });
-      
       onOpenChange(false);
       setImportFile(null);
       setParsedData([]);
@@ -193,7 +190,7 @@ export const BulkOperationsDialog: React.FC<BulkOperationsDialogProps> = ({
   const validItemsCount = parsedData.filter(item => item.isValid).length;
   const invalidItemsCount = parsedData.length - validItemsCount;
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[90vh] flex flex-col">
+      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Bulk Operations</DialogTitle>
         </DialogHeader>
