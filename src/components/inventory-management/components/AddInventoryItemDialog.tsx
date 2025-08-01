@@ -17,7 +17,7 @@ export const AddInventoryItemDialog: React.FC<AddInventoryItemDialogProps> = ({
     onOpenChange(false);
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Inventory Item</DialogTitle>
         </DialogHeader>
