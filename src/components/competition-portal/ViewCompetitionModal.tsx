@@ -96,13 +96,12 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="text-2xl">{competition.name}   
-            <div className="text-center">
-              <Badge variant={getStatusBadgeVariant(competition.program)} className="text-sm">
-                {competition.program.replace('_', ' ').toUpperCase()}
-              </Badge>
-            </div>
-          </DialogTitle>
+           <div className="text-center">
+            <Badge variant={getStatusBadgeVariant(competition.program)} className="text-sm">
+              {competition.program.replace('_', ' ').toUpperCase()}
+            </Badge>
+          </div>
+          <DialogTitle className="text-2xl">{competition.name}</DialogTitle>
           <DialogDescription>
             Competition details and information
           </DialogDescription>
