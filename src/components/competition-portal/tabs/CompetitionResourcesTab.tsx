@@ -60,10 +60,10 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                 </TableCell>
                 <TableCell>{resource.location || '-'}</TableCell>
                 <TableCell>
-                  {resource.start_time ? format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm') : '-'}
+                  {resource.start_time ? format(new Date(resource.start_time), 'MMM, d yyyy HH:mm') : '-'}
                 </TableCell>
                 <TableCell>
-                  {resource.end_time ? format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm') : '-'}
+                  {resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}
                 </TableCell>
                 {(canEdit || canDelete) && <TableCell>
                     <div className="flex items-center justify-center gap-2">
