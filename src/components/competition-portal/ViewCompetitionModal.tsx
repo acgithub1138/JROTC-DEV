@@ -1,12 +1,5 @@
 import React, { useState } from 'react';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogFooter,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { CalendarDays, MapPin, Users, School, Clock, Edit } from 'lucide-react';
@@ -16,7 +9,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { EditCompetitionModal } from './modals/EditCompetitionModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
-
 interface Competition {
   id: string;
   name: string;
@@ -37,7 +29,6 @@ interface Competition {
   state?: string;
   zip?: string;
 }
-
 interface ViewCompetitionModalProps {
   competition: Competition | null;
   open: boolean;
@@ -45,48 +36,49 @@ interface ViewCompetitionModalProps {
   hostSchoolName: string;
   onCompetitionUpdated?: () => void;
 }
-
 export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
   competition,
   open,
   onOpenChange,
   hostSchoolName,
-  onCompetitionUpdated,
+  onCompetitionUpdated
 }) => {
-  const { userProfile } = useAuth();
-  const { canEdit } = useTablePermissions('cp_competitions');
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canEdit
+  } = useTablePermissions('cp_competitions');
   const [showEditModal, setShowEditModal] = useState(false);
   if (!competition) return null;
-
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
-      case 'draft': return 'secondary';
-      case 'open': return 'default';
-      case 'registration_closed': return 'outline';
-      case 'in_progress': return 'default';
-      case 'completed': return 'secondary';
-      case 'cancelled': return 'destructive';
-      default: return 'secondary';
+      case 'draft':
+        return 'secondary';
+      case 'open':
+        return 'default';
+      case 'registration_closed':
+        return 'outline';
+      case 'in_progress':
+        return 'default';
+      case 'completed':
+        return 'secondary';
+      case 'cancelled':
+        return 'destructive';
+      default:
+        return 'secondary';
     }
   };
-
-  const canEditCompetition = canEdit && (
-    competition?.school_id === userProfile?.school_id || userProfile?.role === 'admin'
-  );
-
+  const canEditCompetition = canEdit && (competition?.school_id === userProfile?.school_id || userProfile?.role === 'admin');
   const handleEditClick = () => {
     setShowEditModal(true);
   };
-
   const handleEditSubmit = async (data: any) => {
     try {
-      const { error } = await supabase
-        .from('cp_competitions')
-        .update(data)
-        .eq('id', competition?.id);
-
+      const {
+        error
+      } = await supabase.from('cp_competitions').update(data).eq('id', competition?.id);
       if (error) throw error;
-
       toast.success('Competition updated successfully');
       if (onCompetitionUpdated) {
         onCompetitionUpdated();
@@ -99,11 +91,9 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
       toast.error('Failed to update competition');
     }
   };
-
-  return (
-    <>
+  return <>
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="text-2xl">{competition.name}</DialogTitle>
           <DialogDescription>
@@ -117,20 +107,16 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
             <Badge variant={getStatusBadgeVariant(competition.status)} className="text-sm">
               {competition.status.replace('_', ' ').toUpperCase()}
             </Badge>
-            {competition.is_public && (
-              <Badge variant="outline" className="text-sm">
+            {competition.is_public && <Badge variant="outline" className="text-sm">
                 Public Competition
-              </Badge>
-            )}
+              </Badge>}
           </div>
 
           {/* Description */}
-          {competition.description && (
-            <div>
+          {competition.description && <div>
               <h3 className="font-semibold mb-2">Description</h3>
               <p className="text-muted-foreground">{competition.description}</p>
-            </div>
-          )}
+            </div>}
 
           {/* Host School */}
           <div className="flex items-center gap-2">
@@ -146,19 +132,15 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
               <span className="font-medium">Competition Date:</span>
               <span>{format(new Date(competition.start_date), 'MMMM d, yyyy')}</span>
             </div>
-            {competition.start_date !== competition.end_date && (
-              <div className="flex items-center gap-2 ml-7">
+            {competition.start_date !== competition.end_date && <div className="flex items-center gap-2 ml-7">
                 <span className="font-medium">End Date:</span>
                 <span>{format(new Date(competition.end_date), 'MMMM d, yyyy')}</span>
-              </div>
-            )}
-            {competition.registration_deadline && (
-              <div className="flex items-center gap-2">
+              </div>}
+            {competition.registration_deadline && <div className="flex items-center gap-2">
                 <Clock className="w-5 h-5 text-muted-foreground" />
                 <span className="font-medium">Registration Deadline:</span>
                 <span>{format(new Date(competition.registration_deadline), 'MMMM d, yyyy')}</span>
-              </div>
-            )}
+              </div>}
           </div>
 
           {/* Location */}
@@ -168,13 +150,9 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
               <span className="font-medium">Location:</span>
               <span>{competition.location}</span>
             </div>
-            {(competition.address || competition.city || competition.state) && (
-              <div className="ml-7 text-sm text-muted-foreground">
-                {[competition.address, competition.city, competition.state, competition.zip]
-                  .filter(Boolean)
-                  .join(', ')}
-              </div>
-            )}
+            {(competition.address || competition.city || competition.state) && <div className="ml-7 text-sm text-muted-foreground">
+                {[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ')}
+              </div>}
           </div>
 
           {/* Participants */}
@@ -182,9 +160,7 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
             <Users className="w-5 h-5 text-muted-foreground" />
             <span className="font-medium">Registered Schools:</span>
             <span>{competition.registered_schools.length}</span>
-            {competition.max_participants && (
-              <span className="text-muted-foreground">/ {competition.max_participants} max</span>
-            )}
+            {competition.max_participants && <span className="text-muted-foreground">/ {competition.max_participants} max</span>}
           </div>
 
           {/* Additional Info */}
@@ -197,25 +173,15 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Close
           </Button>
-          {canEditCompetition && (
-            <Button onClick={handleEditClick}>
+          {canEditCompetition && <Button onClick={handleEditClick}>
               <Edit className="w-4 h-4 mr-2" />
               Edit
-            </Button>
-          )}
+            </Button>}
         </DialogFooter>
       </DialogContent>
     </Dialog>
 
     {/* Edit Modal - Separate from main dialog */}
-    {showEditModal && (
-      <EditCompetitionModal
-        open={showEditModal}
-        onOpenChange={setShowEditModal}
-        competition={competition}
-        onSubmit={handleEditSubmit}
-      />
-    )}
-    </>
-  );
+    {showEditModal && <EditCompetitionModal open={showEditModal} onOpenChange={setShowEditModal} competition={competition} onSubmit={handleEditSubmit} />}
+    </>;
 };
