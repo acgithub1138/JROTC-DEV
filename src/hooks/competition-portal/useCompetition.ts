@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -19,11 +19,15 @@ type Competition = {
 
 export const useCompetition = (competitionId?: string) => {
   const [competition, setCompetition] = useState<Competition | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
+  const [isLoading, setIsLoading] = useState(!!competitionId);
 
-  const fetchCompetition = async () => {
-    if (!competitionId) return;
+  const fetchCompetition = useCallback(async () => {
+    if (!competitionId) {
+      setIsLoading(false);
+      return;
+    }
 
+    console.log('Fetching competition with ID:', competitionId);
     setIsLoading(true);
     try {
       const { data, error } = await supabase
@@ -39,6 +43,7 @@ export const useCompetition = (competitionId?: string) => {
         return;
       }
 
+      console.log('Competition data received:', data);
       setCompetition(data);
     } catch (error) {
       console.error('Error fetching competition:', error);
@@ -46,11 +51,11 @@ export const useCompetition = (competitionId?: string) => {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [competitionId]);
 
   useEffect(() => {
     fetchCompetition();
-  }, [competitionId]);
+  }, [fetchCompetition]);
 
   return {
     competition,
