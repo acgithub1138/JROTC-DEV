@@ -107,10 +107,9 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
             required
           />
         </div>
-
       </div>
-
-        <div className="space-y-2">
+     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+         <div className="space-y-2">
           <Label htmlFor="competition_date">Competition Date *</Label>
           <Input
             id="competition_date"
@@ -120,7 +119,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
             required
           />
         </div>
-
       <div className="space-y-2">
         <Label htmlFor="location">Location Search</Label>
         <AddressLookupField
@@ -128,8 +126,8 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
           onValueChange={handleLocationSelect}
           placeholder="Search for a location"
         />
-      </div>
-
+      </div>       
+     </div>
 
       <div className="space-y-2">
         <Label htmlFor="description">Description</Label>
