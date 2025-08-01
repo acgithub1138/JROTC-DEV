@@ -4,7 +4,12 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 
 export const CompetitionDetailsPage = () => {
-  const { competitionId } = useParams<{ competitionId: string }>();
+  const params = useParams();
+  const competitionId = params.competitionId || window.location.pathname.split('/').pop();
+
+  console.log('Route params:', params);
+  console.log('Competition ID:', competitionId);
+  console.log('Current path:', window.location.pathname);
 
   if (!competitionId) {
     return (
