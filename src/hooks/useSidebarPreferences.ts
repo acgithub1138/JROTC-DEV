@@ -72,7 +72,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
       const hasCompetitionModule = userProfile?.schools?.competition_module === true;    
       const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
-      return hasModulePermission && hasCompetitionPortal;
+      return hasModulePermission && hasCompetitionPortal && hasCompetitionModule;
     }
 
     // Check permissions for regular items
