@@ -45,7 +45,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   }, [open]);
 
   useEffect(() => {
-    if (event) {
+    if (event && events.length > 0) {
       setFormData({
         event: event.event || '',
         location: event.location || '',
@@ -55,7 +55,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         notes: event.notes || ''
       });
     }
-  }, [event]);
+  }, [event, events]);
 
   const fetchEvents = async () => {
     try {
