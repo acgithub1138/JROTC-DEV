@@ -570,7 +570,8 @@ const SchoolManagementPage = () => {
                   ...editingSchool,
                   competition_module: checked as boolean
                 })} />
-                    <Label htmlFor="competition_module">Enable Competition Module</Label>
+                    <Label htmlFor="competition_module">Enable Competition Tracking
+                </Label>
                   </div>
                 </div>
                 <div className="space-y-2">
