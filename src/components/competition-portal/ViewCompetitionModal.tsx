@@ -13,7 +13,7 @@ import { CalendarDays, MapPin, Users, School, Clock, Edit } from 'lucide-react';
 import { format } from 'date-fns';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useAuth } from '@/contexts/AuthContext';
-import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
+import { EditCompetitionModal } from './modals/EditCompetitionModal';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 
@@ -96,16 +96,6 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
       console.error('Error updating competition:', error);
       toast.error('Failed to update competition');
     }
-  };
-
-  // Convert competition portal competition to competition management format
-  const convertCompetitionForEdit = (comp: Competition) => {
-    return {
-      ...comp,
-      competition_date: comp.start_date,
-      type: 'drill' as const, // Default type for editing
-      updated_at: comp.created_at // Use created_at as fallback
-    };
   };
 
   return (
@@ -214,10 +204,10 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
       </DialogContent>
 
       {/* Edit Modal */}
-      <CompetitionDialog
+      <EditCompetitionModal
         open={showEditModal}
         onOpenChange={setShowEditModal}
-        competition={competition ? convertCompetitionForEdit(competition) : null}
+        competition={competition}
         onSubmit={handleEditSubmit}
       />
     </Dialog>
