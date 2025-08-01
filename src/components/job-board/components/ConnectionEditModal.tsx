@@ -54,7 +54,7 @@ export const ConnectionEditModal = ({
   };
   const connectionTypeLabel = connectionType === 'reports_to' ? 'Reports To' : 'Assistant';
   return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit {connectionTypeLabel} Connection</DialogTitle>
         </DialogHeader>
