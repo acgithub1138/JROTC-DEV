@@ -207,7 +207,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         <DialogHeader>
           <DialogTitle>Edit Competition Event</DialogTitle>
         </DialogHeader>
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-3">
           <div>
             <Label htmlFor="event">Event *</Label>
             <Select value={formData.event} onValueChange={(value) => setFormData(prev => ({ ...prev, event: value }))}>
