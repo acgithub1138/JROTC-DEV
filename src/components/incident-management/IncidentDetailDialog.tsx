@@ -1,20 +1,6 @@
 import React, { useState, useEffect } from "react";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from "@/components/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/components/ui/alert-dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "@/components/ui/alert-dialog";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -42,7 +28,6 @@ import { useToast } from "@/hooks/use-toast";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import type { Incident } from "@/hooks/incidents/types";
-
 interface IncidentDetailDialogProps {
   incident: Incident;
   isOpen: boolean;
@@ -52,7 +37,6 @@ interface IncidentDetailDialogProps {
   startInEditMode?: boolean;
   viewOnly?: boolean;
 }
-
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'open':
@@ -67,7 +51,6 @@ const getStatusBadgeClass = (status: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 const getPriorityBadgeClass = (priority: string) => {
   switch (priority.toLowerCase()) {
     case 'low':
@@ -82,7 +65,6 @@ const getPriorityBadgeClass = (priority: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 const getCategoryBadgeClass = (category: string) => {
   switch (category.toLowerCase()) {
     case 'issue':
@@ -97,7 +79,6 @@ const getCategoryBadgeClass = (category: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   incident,
   isOpen,
@@ -105,17 +86,42 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   onEdit,
   readOnly = false,
   startInEditMode = false,
-  viewOnly = false,
+  viewOnly = false
 }) => {
-  const { userProfile } = useAuth();
-  const { toast } = useToast();
-  const { updateIncident, incidents } = useIncidents();
-  const { users, isLoading: usersLoading } = useSchoolUsers();
-  const { comments, isLoading: commentsLoading, addComment, addSystemComment } = useIncidentComments(incident.id);
-  const { data: statusOptions = [] } = useIncidentStatusOptions();
-  const { data: priorityOptions = [] } = useIncidentPriorityOptions();
-  const { data: categoryOptions = [] } = useIncidentCategoryOptions();
-  const { canUpdate, canAssign, canUpdateAssigned } = useIncidentPermissions();
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    updateIncident,
+    incidents
+  } = useIncidents();
+  const {
+    users,
+    isLoading: usersLoading
+  } = useSchoolUsers();
+  const {
+    comments,
+    isLoading: commentsLoading,
+    addComment,
+    addSystemComment
+  } = useIncidentComments(incident.id);
+  const {
+    data: statusOptions = []
+  } = useIncidentStatusOptions();
+  const {
+    data: priorityOptions = []
+  } = useIncidentPriorityOptions();
+  const {
+    data: categoryOptions = []
+  } = useIncidentCategoryOptions();
+  const {
+    canUpdate,
+    canAssign,
+    canUpdateAssigned
+  } = useIncidentPermissions();
   const [currentIncident, setCurrentIncident] = useState(incident);
   const [isEditing, setIsEditing] = useState(!viewOnly && (startInEditMode || !readOnly)); // Start in view mode if viewOnly
   const [editData, setEditData] = useState({
@@ -125,25 +131,27 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     priority: incident.priority,
     category: incident.category,
     assigned_to_admin: incident.assigned_to_admin || 'unassigned',
-    due_date: incident.due_date ? new Date(incident.due_date) : null,
+    due_date: incident.due_date ? new Date(incident.due_date) : null
   });
-  
+
   // Email notification state
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
-  const { templates } = useEmailTemplates();
+  const {
+    templates
+  } = useEmailTemplates();
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
   // Confirmation dialog state
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  
+
   // Filter templates for incidents table
   const incidentTemplates = templates.filter(template => template.source_table === 'incidents' && template.is_active);
 
   // Determine if user can edit this incident
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
-  const canEditIncident = !readOnly && (canUpdate || (canUpdateAssigned && isAssignedToIncident));
+  const canEditIncident = !readOnly && (canUpdate || canUpdateAssigned && isAssignedToIncident);
   const canShowEditButton = canEditIncident && !viewOnly;
 
   // Update currentIncident and editData when the incident prop changes
@@ -158,30 +166,20 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       priority: incidentToUse.priority,
       category: incidentToUse.category,
       assigned_to_admin: incidentToUse.assigned_to_admin || 'unassigned',
-      due_date: incidentToUse.due_date ? new Date(incidentToUse.due_date) : null,
+      due_date: incidentToUse.due_date ? new Date(incidentToUse.due_date) : null
     });
   }, [incident, incidents]);
-
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
     setIsEditing(false);
     onClose();
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
   const hasChanges = () => {
-    return editData.title !== currentIncident.title ||
-           editData.description !== (currentIncident.description || '') ||
-           editData.status !== currentIncident.status ||
-           editData.priority !== currentIncident.priority ||
-           editData.category !== currentIncident.category ||
-           (editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin) !== currentIncident.assigned_to_admin ||
-           (editData.due_date?.getTime() !== (currentIncident.due_date ? new Date(currentIncident.due_date).getTime() : null));
+    return editData.title !== currentIncident.title || editData.description !== (currentIncident.description || '') || editData.status !== currentIncident.status || editData.priority !== currentIncident.priority || editData.category !== currentIncident.category || (editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin) !== currentIncident.assigned_to_admin || editData.due_date?.getTime() !== (currentIncident.due_date ? new Date(currentIncident.due_date).getTime() : null);
   };
-
   const sendNotificationEmail = async () => {
     if (!sendNotification || !selectedTemplate || !currentIncident.created_by) {
       console.log('Notification requirements not met:', {
@@ -191,59 +189,64 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       });
       return;
     }
-
     try {
       // Find the user who created the incident for name information
-      let createdByUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === currentIncident.created_by);
-      
+      let createdByUser: {
+        id: string;
+        first_name: string;
+        last_name: string;
+      } | undefined = users.find(u => u.id === currentIncident.created_by);
+
       // If user not found in school users (could be from different school), fetch directly
       if (!createdByUser) {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name')
-          .eq('id', currentIncident.created_by)
-          .single();
-          
+        const {
+          data: userData,
+          error: userError
+        } = await supabase.from('profiles').select('id, first_name, last_name').eq('id', currentIncident.created_by).single();
         if (userError || !userData) {
           console.error('Error fetching user data:', userError);
           toast({
             title: "Error",
             description: "Could not find the incident creator's information.",
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
-        
-        createdByUser = userData as { id: string; first_name: string; last_name: string };
+        createdByUser = userData as {
+          id: string;
+          first_name: string;
+          last_name: string;
+        };
       }
-      
+
       // Resolve email with job board priority
       const emailResult = await resolveUserEmail(currentIncident.created_by, currentIncident.school_id);
-      
       if (!emailResult?.email) {
         toast({
-          title: "Error", 
+          title: "Error",
           description: "No email address found for the incident creator.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
 
       // Use the queue_email RPC function instead of manual processing
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
+      const {
+        data: queueId,
+        error
+      } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
         recipient_email_param: emailResult.email,
         source_table_param: 'incidents',
         record_id_param: currentIncident.id,
         school_id_param: currentIncident.school_id
       });
-
       if (error) {
         console.error('Error queuing notification email:', error);
         toast({
           title: "Error",
           description: "Failed to queue notification email.",
-          variant: "destructive",
+          variant: "destructive"
         });
         throw error;
       } else {
@@ -251,7 +254,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         addSystemComment.mutate(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`
         });
       }
     } catch (emailError) {
@@ -259,12 +262,11 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       toast({
         title: "Error",
         description: "Failed to send notification email.",
-        variant: "destructive",
+        variant: "destructive"
       });
       throw emailError;
     }
   };
-
   const handleSave = async () => {
     try {
       // Validate notification requirements
@@ -272,13 +274,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         toast({
           title: "Error",
           description: "Please select an email template to send notification.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
-
       const changesExist = hasChanges();
-      
+
       // If no changes and no notification, just close the modal
       if (!changesExist && !sendNotification) {
         onClose();
@@ -288,87 +289,106 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       // Update incident if there are changes
       if (changesExist) {
         const updateData: any = {};
-        const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
-        
+        const changes: Array<{
+          field: string;
+          oldValue: any;
+          newValue: any;
+        }> = [];
         if (editData.title !== currentIncident.title) {
           updateData.title = editData.title;
-          changes.push({ field: 'title', oldValue: currentIncident.title, newValue: editData.title });
+          changes.push({
+            field: 'title',
+            oldValue: currentIncident.title,
+            newValue: editData.title
+          });
         }
-        
         if (editData.description !== (currentIncident.description || '')) {
           updateData.description = editData.description || null;
-          changes.push({ field: 'description', oldValue: currentIncident.description || '', newValue: editData.description || '' });
+          changes.push({
+            field: 'description',
+            oldValue: currentIncident.description || '',
+            newValue: editData.description || ''
+          });
         }
-        
         if (editData.status !== currentIncident.status) {
           updateData.status = editData.status;
-          changes.push({ field: 'status', oldValue: currentIncident.status, newValue: editData.status });
-          
+          changes.push({
+            field: 'status',
+            oldValue: currentIncident.status,
+            newValue: editData.status
+          });
+
           // Auto-set completed_at when status changes to "resolved"
           if (editData.status === 'resolved' && !currentIncident.completed_at) {
             updateData.completed_at = new Date().toISOString();
           }
-          
+
           // Clear completed_at when status changes from resolved/canceled to another status
-          if ((currentIncident.status === 'resolved' || currentIncident.status === 'canceled') && 
-              editData.status !== 'resolved' && editData.status !== 'canceled') {
+          if ((currentIncident.status === 'resolved' || currentIncident.status === 'canceled') && editData.status !== 'resolved' && editData.status !== 'canceled') {
             updateData.completed_at = null;
           }
         }
-        
         if (editData.priority !== currentIncident.priority) {
           updateData.priority = editData.priority;
-          changes.push({ field: 'priority', oldValue: currentIncident.priority, newValue: editData.priority });
+          changes.push({
+            field: 'priority',
+            oldValue: currentIncident.priority,
+            newValue: editData.priority
+          });
         }
-        
         if (editData.category !== currentIncident.category) {
           updateData.category = editData.category;
-          changes.push({ field: 'category', oldValue: currentIncident.category, newValue: editData.category });
+          changes.push({
+            field: 'category',
+            oldValue: currentIncident.category,
+            newValue: editData.category
+          });
         }
-        
         const newAssignedTo = editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin;
         if (newAssignedTo !== currentIncident.assigned_to_admin) {
           updateData.assigned_to_admin = newAssignedTo;
-          changes.push({ field: 'assigned_to_admin', oldValue: currentIncident.assigned_to_admin, newValue: newAssignedTo });
+          changes.push({
+            field: 'assigned_to_admin',
+            oldValue: currentIncident.assigned_to_admin,
+            newValue: newAssignedTo
+          });
         }
-        
         const oldDueDate = currentIncident.due_date ? new Date(currentIncident.due_date) : null;
         const newDueDate = editData.due_date;
-        const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
-                                     (!oldDueDate && newDueDate) ||
-                                     (oldDueDate && !newDueDate);
-        
+        const dueDatesAreDifferent = oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime() || !oldDueDate && newDueDate || oldDueDate && !newDueDate;
         if (dueDatesAreDifferent) {
           updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
-          changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
+          changes.push({
+            field: 'due_date',
+            oldValue: oldDueDate,
+            newValue: newDueDate
+          });
         }
 
         // Update the incident
-        await updateIncident.mutateAsync({ id: currentIncident.id, data: updateData });
-        
+        await updateIncident.mutateAsync({
+          id: currentIncident.id,
+          data: updateData
+        });
+
         // Add system comments for tracked changes
         for (const change of changes) {
-          const commentText = formatIncidentFieldChangeComment(
-            change.field,
-            change.oldValue,
-            change.newValue,
-            statusOptions,
-            priorityOptions,
-            categoryOptions,
-            users
-          );
+          const commentText = formatIncidentFieldChangeComment(change.field, change.oldValue, change.newValue, statusOptions, priorityOptions, categoryOptions, users);
           addSystemComment.mutate(commentText);
         }
 
         // Update currentIncident with the new data for the notification
-        setCurrentIncident(prev => ({ ...prev, ...updateData }));
+        setCurrentIncident(prev => ({
+          ...prev,
+          ...updateData
+        }));
       }
-      
+
       // Send notification email if requested
       if (sendNotification) {
         await sendNotificationEmail();
       }
-      
+
       // Close the modal after successful operations
       onClose();
     } catch (error) {
@@ -376,7 +396,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       // Don't close the modal if there was an error
     }
   };
-
   const handleCancel = () => {
     setIsEditing(false);
     // Reset edit data to current incident values
@@ -387,14 +406,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       priority: currentIncident.priority,
       category: currentIncident.category,
       assigned_to_admin: currentIncident.assigned_to_admin || 'unassigned',
-      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null,
+      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null
     });
   };
-
   const handleEdit = () => {
     setIsEditing(true);
   };
-
   const handleViewMode = () => {
     setIsEditing(false);
     setEditData({
@@ -404,99 +421,69 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       priority: currentIncident.priority || 'medium',
       category: currentIncident.category || 'issue',
       assigned_to_admin: currentIncident.assigned_to_admin || '',
-      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null,
+      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null
     });
   };
-
   const handleClose = () => {
     // Check if there are unsaved changes when in edit mode
     if (isEditing && hasChanges()) {
       setShowConfirmDialog(true);
       return;
     }
-    
     setIsEditing(false);
     onClose();
   };
-
   const confirmClose = () => {
     setShowConfirmDialog(false);
     setIsEditing(false);
     onClose();
   };
-
   const handleSaveAndClose = async () => {
     setShowConfirmDialog(false);
     await handleSave();
   };
-
-  const adminOptions = [
-    { value: 'unassigned', label: 'Unassigned' },
-    ...users.filter(user => user.role === 'admin').map(user => ({
-      value: user.id,
-      label: `${user.last_name}, ${user.first_name}`
-    }))
-  ];
-
+  const adminOptions = [{
+    value: 'unassigned',
+    label: 'Unassigned'
+  }, ...users.filter(user => user.role === 'admin').map(user => ({
+    value: user.id,
+    label: `${user.last_name}, ${user.first_name}`
+  }))];
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
   const currentCategoryOption = categoryOptions.find(option => option.value === editData.category);
-
-  return (
-    <>
+  return <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl flex items-center">
-              {currentIncident.incident_number && (
-                <span className="text-blue-600 font-mono text-xl mr-2">
+              {currentIncident.incident_number && <span className="text-blue-600 font-mono text-xl mr-2">
                   {currentIncident.incident_number}
-                </span>
-              )}
-              {isEditing && canEditIncident ? (
-                <Input
-                  value={editData.title}
-                  onChange={(e) => setEditData({...editData, title: e.target.value})}
-                  className="text-2xl border-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                />
-              ) : (
-                <span className="text-2xl mb-2">{currentIncident.title}</span>
-              )}
+                </span>}
+              {isEditing && canEditIncident ? <Input value={editData.title} onChange={e => setEditData({
+                ...editData,
+                title: e.target.value
+              })} className="text-2xl border-none p-0 h-auto bg-transparent focus-visible:ring-0" /> : <span className="text-2xl mb-2">{currentIncident.title}</span>}
             </DialogTitle>
             <div className="flex items-center gap-2">
-              {isEditing && canEditIncident && (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleCancel}
-                    disabled={updateIncident.isPending}
-                  >
+              {isEditing && canEditIncident && <>
+                  <Button variant="outline" size="sm" onClick={handleCancel} disabled={updateIncident.isPending}>
                     <X className="w-4 h-4 mr-2" />
                     Cancel
                   </Button>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={updateIncident.isPending}
-                  >
+                  <Button size="sm" onClick={handleSave} disabled={updateIncident.isPending}>
                     <Save className="w-4 h-4 mr-2" />
                     Save
                   </Button>
-                </>
-              )}
-              {!isEditing && canEditIncident && (
-                <Button size="sm" onClick={handleEdit}>
+                </>}
+              {!isEditing && canEditIncident && <Button size="sm" onClick={handleEdit}>
                   Edit
-                </Button>
-              )}
-              {!isEditing && (
-                <Button size="sm" variant="outline" onClick={() => onClose()}>
+                </Button>}
+              {!isEditing && <Button size="sm" variant="outline" onClick={() => onClose()}>
                   <X className="w-4 h-4 mr-2" />
                   Close
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </DialogHeader>
@@ -513,74 +500,64 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <AlertTriangle className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Category:</span>
-                  {isEditing && canAssign ? (
-                    <Select value={editData.category} onValueChange={(value) => setEditData({...editData, category: value})}>
+                  {isEditing && canAssign ? <Select value={editData.category} onValueChange={value => setEditData({
+                    ...editData,
+                    category: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {categoryOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {categoryOptions.map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getCategoryBadgeClass(currentIncident.category)}>
+                    </Select> : <Badge className={getCategoryBadgeClass(currentIncident.category)}>
                       {currentCategoryOption?.label || currentIncident.category}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
                 <div className="flex items-center gap-2">
                   <Flag className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Priority:</span>
-                  {isEditing && canAssign ? (
-                    <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                  {isEditing && canAssign ? <Select value={editData.priority} onValueChange={value => setEditData({
+                    ...editData,
+                    priority: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {priorityOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {priorityOptions.map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getPriorityBadgeClass(currentIncident.priority)}>
+                    </Select> : <Badge className={getPriorityBadgeClass(currentIncident.priority)}>
                       {currentPriorityOption?.label || currentIncident.priority}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
                 <div className="flex items-center gap-2">
                   <MessageSquare className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Status:</span>
-                  {isEditing && canAssign ? (
-                    <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                  {isEditing && canAssign ? <Select value={editData.status} onValueChange={value => setEditData({
+                    ...editData,
+                    status: value
+                  })}>
                       <SelectTrigger className="h-8 w-auto min-w-[120px]">
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {statusOptions.map((option) => (
-                          <SelectItem key={option.value} value={option.value}>
+                        {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
                             {option.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <Badge className={getStatusBadgeClass(currentIncident.status)}>
+                    </Select> : <Badge className={getStatusBadgeClass(currentIncident.status)}>
                       {currentStatusOption?.label || currentIncident.status.replace('_', ' ')}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </div>
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Due Date:</span>
-                  {isEditing && canAssign ? (
-                    <Popover>
+                  {isEditing && canAssign ? <Popover>
                       <PopoverTrigger asChild>
                         <Button variant="outline" className="h-8 text-left">
                           <CalendarIcon className="mr-2 h-4 w-4" />
@@ -588,26 +565,19 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                         </Button>
                       </PopoverTrigger>
                       <PopoverContent className="w-auto p-0">
-                        <Calendar
-                          mode="single"
-                          selected={editData.due_date}
-                          onSelect={(date) => setEditData({...editData, due_date: date})}
-                          disabled={(date) => {
-                            const tomorrow = new Date();
-                            tomorrow.setDate(tomorrow.getDate() + 1);
-                            tomorrow.setHours(0, 0, 0, 0);
-                            return date < tomorrow;
-                          }}
-                          initialFocus
-                          className="pointer-events-auto"
-                        />
+                        <Calendar mode="single" selected={editData.due_date} onSelect={date => setEditData({
+                        ...editData,
+                        due_date: date
+                      })} disabled={date => {
+                        const tomorrow = new Date();
+                        tomorrow.setDate(tomorrow.getDate() + 1);
+                        tomorrow.setHours(0, 0, 0, 0);
+                        return date < tomorrow;
+                      }} initialFocus className="pointer-events-auto" />
                       </PopoverContent>
-                    </Popover>
-                  ) : (
-                    <span className="text-sm font-medium">
+                    </Popover> : <span className="text-sm font-medium">
                       {currentIncident.due_date ? format(new Date(currentIncident.due_date), 'PPP') : 'No due date'}
-                    </span>
-                  )}
+                    </span>}
                 </div>
               </CardContent>
             </Card>
@@ -621,41 +591,30 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 <div className="flex items-center gap-2">
                   <User className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Assigned to:</span>
-                  {isEditing && canUpdate && canAssign ? (
-                    usersLoading ? (
-                      <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-                    ) : (
-                      <Select value={editData.assigned_to_admin} onValueChange={(value) => setEditData({...editData, assigned_to_admin: value})}>
+                  {isEditing && canUpdate && canAssign ? usersLoading ? <div className="h-8 w-32 bg-muted animate-pulse rounded" /> : <Select value={editData.assigned_to_admin} onValueChange={value => setEditData({
+                    ...editData,
+                    assigned_to_admin: value
+                  })}>
                         <SelectTrigger className="h-8 w-auto min-w-[120px]">
                           <SelectValue placeholder={usersLoading ? "Loading..." : "Select admin"} />
                         </SelectTrigger>
                         <SelectContent>
                           <SelectItem value="unassigned">Unassigned</SelectItem>
-                          {users.filter(user => user.role === 'admin').map((user) => (
-                            <SelectItem key={user.id} value={user.id}>
+                          {users.filter(user => user.role === 'admin').map(user => <SelectItem key={user.id} value={user.id}>
                               {user.last_name}, {user.first_name}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    )
-                  ) : (
-                    <span className="text-sm font-medium">
-                      {(currentIncident as any).assigned_admin_profile 
-                        ? `${(currentIncident as any).assigned_admin_profile.last_name}, ${(currentIncident as any).assigned_admin_profile.first_name}` 
-                        : 'Unassigned'}
-                    </span>
-                  )}
+                      </Select> : <span className="text-sm font-medium">
+                      {(currentIncident as any).assigned_admin_profile ? `${(currentIncident as any).assigned_admin_profile.last_name}, ${(currentIncident as any).assigned_admin_profile.first_name}` : 'Unassigned'}
+                    </span>}
                 </div>
-                {(currentIncident as any).created_by_profile && (
-                  <div className="flex items-center gap-2">
+                {(currentIncident as any).created_by_profile && <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-600">Created by:</span>
                     <span className="text-sm font-medium">
                       {(currentIncident as any).created_by_profile.last_name}, {(currentIncident as any).created_by_profile.first_name}
                     </span>
-                  </div>
-                )}
+                  </div>}
                 <div className="flex items-center gap-2">
                   <CalendarIcon className="w-4 h-4 text-gray-500" />
                   <span className="text-sm text-gray-600">Created:</span>
@@ -665,42 +624,29 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
                 </div>
                 
                 {/* Send Notification - Only show in edit mode */}
-                {isEditing && canEditIncident && incidentTemplates.length > 0 && (
-                  <div className="space-y-3 pt-3 border-t">
+                {isEditing && canEditIncident && incidentTemplates.length > 0 && <div className="space-y-3 pt-3 border-t">
                     <div className="flex items-center space-x-4">
                       <div className="flex items-center space-x-2">
-                        <Checkbox 
-                          id="send-notification" 
-                          checked={sendNotification}
-                          onCheckedChange={(checked) => {
-                            setSendNotification(checked as boolean);
-                            if (!checked) setSelectedTemplate('');
-                          }}
-                        />
-                        <label 
-                          htmlFor="send-notification"
-                          className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-                        >
+                        <Checkbox id="send-notification" checked={sendNotification} onCheckedChange={checked => {
+                        setSendNotification(checked as boolean);
+                        if (!checked) setSelectedTemplate('');
+                      }} />
+                        <label htmlFor="send-notification" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
                           Send Notification
                         </label>
                       </div>
-                      {sendNotification && (
-                        <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
+                      {sendNotification && <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                           <SelectTrigger className="w-64">
                             <SelectValue placeholder="Select email template" />
                           </SelectTrigger>
                           <SelectContent>
-                            {incidentTemplates.map((template) => (
-                              <SelectItem key={template.id} value={template.id}>
+                            {incidentTemplates.map(template => <SelectItem key={template.id} value={template.id}>
                                 {template.name}
-                              </SelectItem>
-                            ))}
+                              </SelectItem>)}
                           </SelectContent>
-                        </Select>
-                      )}
+                        </Select>}
                     </div>
-                  </div>
-                )}
+                  </div>}
               </CardContent>
             </Card>
           </div>
@@ -708,29 +654,21 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            {isEditing && canEditIncident ? (
-              <Textarea
-                value={editData.description}
-                onChange={(e) => setEditData({...editData, description: e.target.value})}
-                rows={4}
-                placeholder="Detailed description of the incident..."
-              />
-            ) : (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+            {isEditing && canEditIncident ? <Textarea value={editData.description} onChange={e => setEditData({
+              ...editData,
+              description: e.target.value
+            })} rows={4} placeholder="Detailed description of the incident..." /> : <p className="text-sm text-gray-700 whitespace-pre-wrap">
                 {currentIncident.description || 'No description'}
-              </p>
-            )}
+              </p>}
           </div>
 
 
           <Separator />
 
           {/* Comments Section */}
-          <IncidentCommentsSection
-            comments={comments}
-            isAddingComment={addComment.isPending}
-            onAddComment={(comment) => addComment.mutate({ comment_text: comment })}
-          />
+          <IncidentCommentsSection comments={comments} isAddingComment={addComment.isPending} onAddComment={comment => addComment.mutate({
+            comment_text: comment
+          })} />
         </div>
       </DialogContent>
     </Dialog>
@@ -758,8 +696,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       </AlertDialogContent>
     </AlertDialog>
 
-    </>
-  );
+    </>;
 };
-
 export default IncidentDetailDialog;
