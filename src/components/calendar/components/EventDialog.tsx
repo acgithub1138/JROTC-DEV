@@ -3,7 +3,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { EventForm } from './EventForm';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { Event } from '../CalendarManagementPage';
-
 interface EventDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -12,29 +11,25 @@ interface EventDialogProps {
   onSubmit: (eventData: any) => Promise<void>;
   onDelete?: (event: Event) => void;
 }
-
 export const EventDialog: React.FC<EventDialogProps> = ({
   open,
   onOpenChange,
   event,
   selectedDate,
   onSubmit,
-  onDelete,
+  onDelete
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-
   const handleSubmit = async (eventData: any) => {
     await onSubmit(eventData);
     onOpenChange(false);
   };
-
   const handleDelete = async () => {
     if (event && onDelete) {
       await onDelete(event);
     }
   };
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && hasUnsavedChanges) {
       // User clicked outside or pressed ESC with unsaved changes
@@ -43,63 +38,39 @@ export const EventDialog: React.FC<EventDialogProps> = ({
     }
     onOpenChange(newOpen);
   };
-
   const handleCancel = () => {
     // Cancel button should close immediately without checking for unsaved changes
     onOpenChange(false);
   };
-
   const handleUnsavedChangesUpdate = (hasChanges: boolean) => {
     setHasUnsavedChanges(hasChanges);
   };
-
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
     setHasUnsavedChanges(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {event ? 'Edit Event' : 'Create Event'}
             </DialogTitle>
           </DialogHeader>
-          <EventForm
-            event={event}
-            selectedDate={selectedDate}
-            onSubmit={handleSubmit}
-            onCancel={handleCancel}
-            onDelete={event && onDelete ? handleDelete : undefined}
-            onUnsavedChangesUpdate={handleUnsavedChangesUpdate}
-          />
+          <EventForm event={event} selectedDate={selectedDate} onSubmit={handleSubmit} onCancel={handleCancel} onDelete={event && onDelete ? handleDelete : undefined} onUnsavedChangesUpdate={handleUnsavedChangesUpdate} />
           <div className="text-xs text-muted-foreground mt-2 pt-2 border-t">
             Location search powered by{' '}
-            <a 
-              href="https://www.openstreetmap.org/" 
-              target="_blank" 
-              rel="noopener noreferrer" 
-              className="underline hover:text-foreground"
-            >
+            <a href="https://www.openstreetmap.org/" target="_blank" rel="noopener noreferrer" className="underline hover:text-foreground">
               OpenStreetMap
             </a>
           </div>
         </DialogContent>
       </Dialog>
 
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleContinueEditing}
-      />
-    </>
-  );
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+    </>;
 };
