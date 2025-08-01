@@ -21,6 +21,14 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
@@ -45,6 +53,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
   competitionId,
   onResourceAdded,
 }) => {
+  const { users, isLoading: usersLoading } = useSchoolUsers(true); // Only active users
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -87,10 +96,21 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
               name="resource"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Resource ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter resource ID" {...field} />
-                  </FormControl>
+                  <FormLabel>Resource (User)</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={usersLoading ? "Loading users..." : "Select a user"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {users.map((user) => (
+                        <SelectItem key={user.id} value={user.id}>
+                          {user.first_name} {user.last_name} ({user.role})
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>
               )}
