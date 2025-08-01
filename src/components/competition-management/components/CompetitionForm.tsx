@@ -7,6 +7,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
 import { supabase } from '@/integrations/supabase/client';
 import { Competition } from '../types';
+import { JROTC_PROGRAM_OPTIONS } from '../utils/constants';
 import type { Database } from '@/integrations/supabase/types';
 
 type DatabaseCompetition = Database['public']['Tables']['competitions']['Row'];
@@ -27,6 +28,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     description: competition?.description || '',
     location: competition?.location || '',
     competition_date: '',
+    program: (competition as any)?.program || 'air_force',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -76,6 +78,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         location: formData.location,
         start_date: formData.competition_date,
         end_date: formData.competition_date,
+        program: formData.program,
         ...addressData
       };
       
@@ -106,6 +109,21 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
             onChange={(e) => updateFormData('name', e.target.value)}
             required
           />
+        </div>
+        <div className="space-y-2">
+          <Label htmlFor="program">JROTC Program *</Label>
+          <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select JROTC Program" />
+            </SelectTrigger>
+            <SelectContent>
+              {JROTC_PROGRAM_OPTIONS.map((option) => (
+                <SelectItem key={option.value} value={option.value}>
+                  {option.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

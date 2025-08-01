@@ -10,6 +10,7 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
+import { JROTC_PROGRAM_OPTIONS } from '@/components/competition-management/utils/constants';
 interface Competition {
   id: string;
   name: string;
@@ -29,6 +30,7 @@ interface Competition {
   city?: string;
   state?: string;
   zip?: string;
+  program?: string;
 }
 interface EditCompetitionModalProps {
   open: boolean;
@@ -58,7 +60,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     end_time_minute: '00',
     max_participants: '',
     registration_deadline: '',
-    is_public: true
+    is_public: true,
+    program: 'air_force'
   });
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -84,7 +87,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         end_time_minute: endDate ? format(endDate, 'mm') : '00',
         max_participants: competition.max_participants?.toString() || '',
         registration_deadline: competition.registration_deadline || '',
-        is_public: competition.is_public
+        is_public: competition.is_public,
+        program: competition.program || 'air_force'
       });
       setStartDate(startDate || undefined);
       setEndDate(endDate || undefined);
@@ -161,7 +165,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         end_date: formData.end_date,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         registration_deadline: formData.registration_deadline || null,
-        is_public: formData.is_public
+        is_public: formData.is_public,
+        program: formData.program
       };
       await onSubmit(submitData);
     } finally {
@@ -177,9 +182,26 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-6">
           {/* Basic Information */}
           <div className="space-y-4">
-            <div>
-              <Label htmlFor="name">Competition Name *</Label>
-              <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter competition name" required />
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="name">Competition Name *</Label>
+                <Input id="name" value={formData.name} onChange={e => handleInputChange('name', e.target.value)} placeholder="Enter competition name" required />
+              </div>
+              <div>
+                <Label htmlFor="program">JROTC Program *</Label>
+                <Select value={formData.program} onValueChange={(value) => handleInputChange('program', value)}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select JROTC Program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {JROTC_PROGRAM_OPTIONS.map((option) => (
+                      <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
             <div>
