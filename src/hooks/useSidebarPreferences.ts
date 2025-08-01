@@ -11,8 +11,8 @@ export interface MenuItem {
 
 // Module mapping for permissions
 const MODULE_MAPPING: Record<string, string> = {
-  'user-admin': 'cadets',
-  'school-management': 'cadets',
+  'user-admin': 'cadets', // Only admins should see this
+  'school-management': 'cadets', // Only admins should see this
   'cadets': 'cadets',
   'tasks': 'tasks',
   'job-board': 'job_board',
@@ -132,7 +132,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'inventory', label: 'Inventory', icon: 'Package' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' }
+        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
       ];
     
     case 'cadet':
@@ -141,8 +141,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'competitions', label: 'Competitions', icon: 'Trophy' }
-
+        { id: 'competitions', label: 'Competitions', icon: 'Trophy' },
       ];
     
     default:
