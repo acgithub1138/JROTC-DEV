@@ -74,7 +74,7 @@ export const UserEditDialog = ({
   if (!editingUser) return null;
   return <>
       <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto ">
+        <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto ">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle>Edit User Profile</DialogTitle>
           </DialogHeader>
