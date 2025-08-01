@@ -231,19 +231,6 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                   required
                 />
               </div>
-
-              <div>
-                <Label htmlFor="end_date">End Date *</Label>
-                <Input
-                  id="end_date"
-                  type="date"
-                  value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
-                  onChange={(e) => handleDateChange('end_date', e.target.value)}
-                  required
-                />
-              </div>
-            </div>
-
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label>Start Time</Label>
@@ -277,6 +264,18 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                     </Select>
                   </div>
                 </div>
+              </div>
+            </div>
+
+              <div>
+                <Label htmlFor="end_date">End Date *</Label>
+                <Input
+                  id="end_date"
+                  type="date"
+                  value={formData.end_date ? format(new Date(formData.end_date), 'yyyy-MM-dd') : ''}
+                  onChange={(e) => handleDateChange('end_date', e.target.value)}
+                  required
+                />
               </div>
 
               <div>
