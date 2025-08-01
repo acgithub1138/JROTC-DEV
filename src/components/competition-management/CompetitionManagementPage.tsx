@@ -4,18 +4,16 @@ import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { TemplatesTab } from './tabs/TemplatesTab';
 import { ReportsTab } from './tabs/ReportsTab';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 const CompetitionManagementPage = () => {
   const [activeTab, setActiveTab] = useState('competitions');
-  const { canCreate, canUpdate } = useCompetitionPermissions();
-
-  return (
-    <div className="p-6 space-y-6">
+  const {
+    canCreate,
+    canUpdate
+  } = useCompetitionPermissions();
+  return <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Competition Management</h1>
-        <p className="text-muted-foreground">
-          Manage competitions, score sheets, and track performance
-        </p>
+        <h1 className="text-3xl font-bold">Competition Tracking</h1>
+        <p className="text-muted-foreground">Track your competitions, score sheets, and performance</p>
       </div>
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
@@ -37,8 +35,6 @@ const CompetitionManagementPage = () => {
           <ReportsTab />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
-
 export default CompetitionManagementPage;
