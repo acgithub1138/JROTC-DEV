@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,38 +11,44 @@ import { TaskDescriptionField } from './forms/fields/TaskDescriptionField';
 import { TaskPriorityStatusFields } from './forms/fields/TaskPriorityStatusFields';
 import { TaskDueDateField } from './forms/fields/TaskDueDateField';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
-
 interface TaskFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   mode: 'create' | 'edit';
   task?: Task;
 }
-
-export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, task }) => {
-  const { userProfile } = useAuth();
-  const { canAssign, canUpdate, canUpdateAssigned } = useTaskPermissions();
-  
+export const TaskForm: React.FC<TaskFormProps> = ({
+  open,
+  onOpenChange,
+  mode,
+  task
+}) => {
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canAssign,
+    canUpdate,
+    canUpdateAssigned
+  } = useTaskPermissions();
   const canAssignTasks = canAssign;
-  const canEditThisTask = canUpdate || (canUpdateAssigned && task?.assigned_to === userProfile?.id);
-  
-  const { 
-    form, 
-    onSubmit, 
+  const canEditThisTask = canUpdate || canUpdateAssigned && task?.assigned_to === userProfile?.id;
+  const {
+    form,
+    onSubmit,
     onError,
-    isSubmitting, 
-    isLoading, 
-    statusOptions, 
-    priorityOptions 
+    isSubmitting,
+    isLoading,
+    statusOptions,
+    priorityOptions
   } = useTaskForm({
     mode,
     task,
     onOpenChange,
     canAssignTasks,
-    currentUserId: userProfile?.id || '',
+    currentUserId: userProfile?.id || ''
   });
   const isEditingAssignedTask = mode === 'edit' && task?.assigned_to === userProfile?.id;
-
   const getDialogTitle = () => {
     if (mode === 'create') {
       return 'Create New Task';
@@ -53,31 +58,23 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
     }
     return `Edit Task - ${task.title}`;
   };
-
   if (isLoading) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+    return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-2xl">
           <div className="flex items-center justify-center p-6">
             <div className="text-center">Loading task options...</div>
           </div>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-2xl">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {getDialogTitle()}
           </DialogTitle>
           <DialogDescription>
-            {mode === 'create' 
-              ? 'Fill in the details to create a new task.'
-              : 'Update the task details below.'
-            }
+            {mode === 'create' ? 'Fill in the details to create a new task.' : 'Update the task details below.'}
           </DialogDescription>
         </DialogHeader>
 
@@ -89,14 +86,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
             
             <TaskDescriptionField form={form} />
             
-            <TaskPriorityStatusFields 
-              form={form} 
-              canAssignTasks={canAssignTasks} 
-              canEditThisTask={canEditThisTask}
-              isEditingAssignedTask={isEditingAssignedTask}
-              statusOptions={statusOptions}
-              priorityOptions={priorityOptions}
-            />
+            <TaskPriorityStatusFields form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} isEditingAssignedTask={isEditingAssignedTask} statusOptions={statusOptions} priorityOptions={priorityOptions} />
             
             <TaskDueDateField form={form} />
 
@@ -108,6 +98,5 @@ export const TaskForm: React.FC<TaskFormProps> = ({ open, onOpenChange, mode, ta
           </form>
         </Form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
