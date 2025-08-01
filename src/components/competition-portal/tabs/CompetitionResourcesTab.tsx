@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
@@ -37,23 +38,45 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           </Button>}
       </div>
 
-      {resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {resources.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div> : <div className="space-y-2">
-          {resources.map(resource => <div key={resource.id} className="p-4 border rounded-lg bg-card">
-              <div className="flex items-center justify-between">
-                <div className="flex-1">
-                  <h3 className="font-medium">Resource {resource.resource}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {resource.location && `Location: ${resource.location}`}
-                    {resource.start_time && ` • ${format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')}`}
-                  </p>
-                </div>
-                <div className="flex items-center gap-4">
-                  <div className="text-sm text-muted-foreground">
-                    {resource.end_time && `Until: ${format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')}`}
-                  </div>
-                  {(canEdit || canDelete) && (
+        </div>
+      ) : (
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead>Cadet</TableHead>
+              <TableHead>Location</TableHead>
+              <TableHead>Start</TableHead>
+              <TableHead>End</TableHead>
+              {(canEdit || canDelete) && <TableHead className="w-24">Actions</TableHead>}
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {resources.map(resource => (
+              <TableRow key={resource.id}>
+                <TableCell>
+                  {resource.cadet_profile 
+                    ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}`
+                    : 'Unknown Cadet'
+                  }
+                </TableCell>
+                <TableCell>{resource.location || '-'}</TableCell>
+                <TableCell>
+                  {resource.start_time 
+                    ? format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')
+                    : '-'
+                  }
+                </TableCell>
+                <TableCell>
+                  {resource.end_time 
+                    ? format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')
+                    : '-'
+                  }
+                </TableCell>
+                {(canEdit || canDelete) && (
+                  <TableCell>
                     <div className="flex items-center gap-2">
                       {canEdit && (
                         <Button
@@ -74,12 +97,13 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                         </Button>
                       )}
                     </div>
-                  )}
-                </div>
-              </div>
-              {resource.assignment_details && <p className="mt-2 text-sm text-muted-foreground">{resource.assignment_details}</p>}
-            </div>)}
-        </div>}
+                  </TableCell>
+                )}
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      )}
 
       <AddResourceModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onResourceAdded={createResource} />
     </div>;

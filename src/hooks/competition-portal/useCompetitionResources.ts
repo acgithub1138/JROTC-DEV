@@ -8,9 +8,16 @@ type CompResource = Database['public']['Tables']['cp_comp_resources']['Row'];
 type CompResourceInsert = Database['public']['Tables']['cp_comp_resources']['Insert'];
 type CompResourceUpdate = Database['public']['Tables']['cp_comp_resources']['Update'];
 
+type CompResourceWithProfile = CompResource & {
+  cadet_profile?: {
+    first_name: string;
+    last_name: string;
+  };
+};
+
 export const useCompetitionResources = (competitionId?: string) => {
   const { userProfile } = useAuth();
-  const [resources, setResources] = useState<CompResource[]>([]);
+  const [resources, setResources] = useState<CompResourceWithProfile[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchResources = async () => {
@@ -20,7 +27,13 @@ export const useCompetitionResources = (competitionId?: string) => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('cp_comp_resources')
-        .select('*')
+        .select(`
+          *,
+          cadet_profile:profiles!cp_comp_resources_resource_fkey(
+            first_name,
+            last_name
+          )
+        `)
         .eq('competition_id', competitionId)
         .order('start_time', { ascending: true });
 
