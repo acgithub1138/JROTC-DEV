@@ -16,6 +16,7 @@ interface School {
   email?: string;
   jrotc_program?: string;
   competition_module?: boolean;
+  competition_portal?: boolean;
 }
 
 interface Profile {
@@ -82,7 +83,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             phone,
             email,
             jrotc_program,
-            competition_module
+            competition_module,
+            competition_portal
           )
         `)
         .eq('id', userId)
@@ -108,7 +110,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
           school_id: data.school_id,
           email: data.email
         });
-        setUserProfile(data);
+        setUserProfile(data as unknown as Profile);
       } else {
         console.log('No profile found for user:', userId);
         setUserProfile(null);
