@@ -278,11 +278,16 @@ const MainApplication = () => {
 // Settings Page Component
 const SettingsPage = () => {
   return (
-    <div className="space-y-6">
-      <div>
-        <h1 className="text-2xl font-bold text-gray-900">Settings</h1>
-        <p className="text-gray-600">Manage system settings and options</p>
+    <div className="p-6 space-y-6">
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Settings</h1>
+          <p className="text-muted-foreground">
+            Manage system settings and configuration options
+          </p>
+        </div>
       </div>
+      
       <Tabs defaultValue="tasks" className="w-full">
         <TabsList>
           <TabsTrigger value="tasks">Task Options</TabsTrigger>
