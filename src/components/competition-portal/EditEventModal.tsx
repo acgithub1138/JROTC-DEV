@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { useCompetitionTemplates } from '../competition-management/hooks/useCompetitionTemplates';
 import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
-
 type CpEvent = {
   id: string;
   school_id: string;
@@ -20,24 +19,25 @@ type CpEvent = {
   updated_at: string;
   created_by?: string | null;
 };
-
 interface EditEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   event: CpEvent | null;
   onSuccess?: () => void;
 }
-
 export const EditEventModal: React.FC<EditEventModalProps> = ({
   open,
   onOpenChange,
   event,
   onSuccess
 }) => {
-  const { updateEvent } = useCompetitionEvents();
-  const { templates } = useCompetitionTemplates();
+  const {
+    updateEvent
+  } = useCompetitionEvents();
+  const {
+    templates
+  } = useCompetitionTemplates();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -56,10 +56,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       });
     }
   }, [event, open]);
-
   const handleScoreSheetChange = (value: string) => {
-    setFormData(prev => ({ ...prev, score_sheet: value }));
-    
+    setFormData(prev => ({
+      ...prev,
+      score_sheet: value
+    }));
+
     // Auto-populate event name and jrotc_program from score sheet template
     const selectedTemplate = templates.find(template => template.id === value);
     if (selectedTemplate?.template_name) {
@@ -67,30 +69,27 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       if (parts.length > 1) {
         // Take everything after the first hyphen
         const eventName = parts.slice(1).join(' - ').trim();
-        setFormData(prev => ({ 
-          ...prev, 
+        setFormData(prev => ({
+          ...prev,
           name: eventName,
           jrotc_program: selectedTemplate.jrotc_program
         }));
       }
     }
   };
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name || !formData.score_sheet || !formData.jrotc_program || !event) {
       return;
     }
-
     setIsSubmitting(true);
     try {
       await updateEvent(event.id, {
         name: formData.name,
         description: formData.description || null,
         score_sheet: formData.score_sheet || null,
-        jrotc_program: (formData.jrotc_program as any) || null
+        jrotc_program: formData.jrotc_program as any || null
       });
-      
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
@@ -99,10 +98,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       setIsSubmitting(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-2xl max-h-[90vh] overflow-y-auto">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Event</DialogTitle>
         </DialogHeader>
@@ -110,73 +107,53 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         <form onSubmit={handleSubmit} className="space-y-4">
           <div className="space-y-2">
             <Label htmlFor="score_sheet">Score Sheet *</Label>
-            <Select 
-              value={formData.score_sheet} 
-              onValueChange={handleScoreSheetChange}
-              required
-            >
+            <Select value={formData.score_sheet} onValueChange={handleScoreSheetChange} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select score sheet template" />
               </SelectTrigger>
               <SelectContent>
-                {templates.map((template) => (
-                  <SelectItem key={template.id} value={template.id}>
+                {templates.map(template => <SelectItem key={template.id} value={template.id}>
                     {template.template_name}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="jrotc_program">Event Type *</Label>
-            <Select 
-              value={formData.jrotc_program} 
-              onValueChange={(value) => setFormData(prev => ({ ...prev, jrotc_program: value }))}
-              required
-            >
+            <Select value={formData.jrotc_program} onValueChange={value => setFormData(prev => ({
+            ...prev,
+            jrotc_program: value
+          }))} required>
               <SelectTrigger>
                 <SelectValue placeholder="Select JROTC program" />
               </SelectTrigger>
               <SelectContent>
-                {JROTC_PROGRAM_OPTIONS.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
+                {JROTC_PROGRAM_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
                     {option.label}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="name">Event Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter event name"
-              required
-            />
+            <Input id="name" value={formData.name} onChange={e => setFormData(prev => ({
+            ...prev,
+            name: e.target.value
+          }))} placeholder="Enter event name" required />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter event description"
-              rows={3}
-            />
+            <Textarea id="description" value={formData.description} onChange={e => setFormData(prev => ({
+            ...prev,
+            description: e.target.value
+          }))} placeholder="Enter event description" rows={3} />
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-              disabled={isSubmitting}
-            >
+            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -185,6 +162,5 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
