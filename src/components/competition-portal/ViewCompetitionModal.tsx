@@ -91,7 +91,9 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
       if (onCompetitionUpdated) {
         onCompetitionUpdated();
       }
+      // Close both the edit modal and the view modal
       setShowEditModal(false);
+      onOpenChange(false);
     } catch (error) {
       console.error('Error updating competition:', error);
       toast.error('Failed to update competition');
