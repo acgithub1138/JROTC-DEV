@@ -33,8 +33,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   const [formData, setFormData] = useState({
     event: '',
     location: '',
-    start_time: '',
-    end_time: '',
+    start_date: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
+    end_date: '',
+    end_time_hour: '10',
+    end_time_minute: '00',
     max_participants: '',
     notes: '',
     judges: [] as string[],
@@ -58,11 +62,19 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   useEffect(() => {
     if (event && events.length > 0) {
+      // Parse start time
+      const startDate = event.start_time ? new Date(event.start_time) : null;
+      const endDate = event.end_time ? new Date(event.end_time) : null;
+      
       setFormData({
         event: event.event || '',
         location: event.location || '',
-        start_time: event.start_time ? new Date(event.start_time).toISOString().slice(0, 16) : '',
-        end_time: event.end_time ? new Date(event.end_time).toISOString().slice(0, 16) : '',
+        start_date: startDate ? startDate.toISOString().split('T')[0] : '',
+        start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
+        start_time_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
+        end_date: endDate ? endDate.toISOString().split('T')[0] : '',
+        end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
+        end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
         max_participants: event.max_participants?.toString() || '',
         notes: event.notes || '',
         judges: event.judges || [],
@@ -158,11 +170,20 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
     setIsLoading(true);
     try {
+      // Combine date and time into ISO strings
+      const startDateTime = formData.start_date && formData.start_time_hour && formData.start_time_minute
+        ? new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`).toISOString()
+        : null;
+      
+      const endDateTime = formData.end_date && formData.end_time_hour && formData.end_time_minute
+        ? new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`).toISOString()
+        : null;
+
       const updates: CompEventUpdate = {
         event: formData.event,
         location: formData.location || null,
-        start_time: formData.start_time || null,
-        end_time: formData.end_time || null,
+        start_time: startDateTime,
+        end_time: endDateTime,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         notes: formData.notes || null,
         judges: formData.judges,
@@ -212,33 +233,101 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
               placeholder="Event location"
             />
           </div>
-            <div>
-              <Label htmlFor="start_time">Start Time</Label>
-              <Input
-                id="start_time"
-                type="datetime-local"
-                value={formData.start_time}
-                onChange={(e) => {
-                  setFormData(prev => ({ ...prev, start_time: e.target.value }));
-                  // Auto-set end time to 1 hour after start time
-                  if (e.target.value) {
-                    const startDate = new Date(e.target.value);
-                    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
-                    const endDateString = endDate.toISOString().slice(0, 16); // Format for datetime-local
-                    setFormData(prev => ({ ...prev, end_time: endDateString }));
-                  }
-                }}
-              />
+          <div>
+            <Label>Start Date & Time</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => {
+                    setFormData(prev => ({ ...prev, start_date: e.target.value }));
+                    // Auto-set end date if empty
+                    if (!formData.end_date) {
+                      setFormData(prev => ({ ...prev, end_date: e.target.value }));
+                    }
+                  }}
+                />
+              </div>
+              <div>
+                <Select value={formData.start_time_hour} onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, start_time_hour: value }));
+                  // Auto-set end time to 1 hour later
+                  const endHour = (parseInt(value) + 1) % 24;
+                  setFormData(prev => ({ ...prev, end_time_hour: endHour.toString().padStart(2, '0') }));
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Select value={formData.start_time_minute} onValueChange={(value) => {
+                  setFormData(prev => ({ ...prev, start_time_minute: value }));
+                  setFormData(prev => ({ ...prev, end_time_minute: value }));
+                }}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="end_time">End Time</Label>
-              <Input
-                id="end_time"
-                type="datetime-local"
-                value={formData.end_time}
-                onChange={(e) => setFormData(prev => ({ ...prev, end_time: e.target.value }))}
-              />
+          </div>
+
+          <div>
+            <Label>End Date & Time</Label>
+            <div className="grid grid-cols-4 gap-2">
+              <div className="col-span-2">
+                <Input
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Select value={formData.end_time_hour} onValueChange={(value) => setFormData(prev => ({ ...prev, end_time_hour: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Select value={formData.end_time_minute} onValueChange={(value) => setFormData(prev => ({ ...prev, end_time_minute: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
+          </div>
           <div>
             <Label htmlFor="max_participants">Max Participants</Label>
             <Input
