@@ -40,7 +40,8 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
 
       {resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div> : <Table>
+        </div> : <div className="border rounded-lg">
+          <Table>
           <TableHeader>
             <TableRow>
               <TableHead>Cadet</TableHead>
