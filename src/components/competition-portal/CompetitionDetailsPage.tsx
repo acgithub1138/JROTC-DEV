@@ -26,13 +26,9 @@ export const CompetitionDetailsPage = () => {
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Competition Details</h1>
-          <p className="text-muted-foreground">Manage events for this competition</p>
+          
         </div>
-        <Button 
-          variant="outline" 
-          onClick={() => navigate('/app/competition-portal/competitions')}
-          className="flex items-center gap-2"
-        >
+        <Button variant="outline" onClick={() => navigate('/app/competition-portal/competitions')} className="flex items-center gap-2">
           <ArrowLeft className="h-4 w-4" />
           Back to Competitions
         </Button>
