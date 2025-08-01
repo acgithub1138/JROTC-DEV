@@ -103,7 +103,7 @@ export const OpenCompetitionsPage = () => {
                   </div>
                   <div className="flex items-center gap-2">
                     <MapPin className="w-4 h-4" />
-                    <span>{competition.address}</br>{competition.city}, {competition.state} {competition.zip}</span>
+                    <span>{competition.address} {competition.city}, {competition.state} {competition.zip}</span>
                   </div>
                   {competition.max_participants && (
                     <div className="flex items-center gap-2">
