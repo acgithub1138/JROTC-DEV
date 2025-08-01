@@ -54,6 +54,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     zip: '',
     start_date: '',
     end_date: '',
+    start_time: '',
+    end_time: '',
     max_participants: '',
     registration_deadline: '',
     is_public: true,
@@ -66,6 +68,9 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
   React.useEffect(() => {
     if (competition) {
+      const startDate = competition.start_date ? new Date(competition.start_date) : null;
+      const endDate = competition.end_date ? new Date(competition.end_date) : null;
+      
       setFormData({
         name: competition.name || '',
         description: competition.description || '',
@@ -76,13 +81,15 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         zip: competition.zip || '',
         start_date: competition.start_date || '',
         end_date: competition.end_date || '',
+        start_time: startDate ? format(startDate, 'HH:mm') : '',
+        end_time: endDate ? format(endDate, 'HH:mm') : '',
         max_participants: competition.max_participants?.toString() || '',
         registration_deadline: competition.registration_deadline || '',
         is_public: competition.is_public,
       });
       
-      setStartDate(competition.start_date ? new Date(competition.start_date) : undefined);
-      setEndDate(competition.end_date ? new Date(competition.end_date) : undefined);
+      setStartDate(startDate || undefined);
+      setEndDate(endDate || undefined);
       setRegistrationDeadline(competition.registration_deadline ? new Date(competition.registration_deadline) : undefined);
     }
   }, [competition]);
@@ -96,7 +103,12 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
   const handleDateChange = (field: 'start_date' | 'end_date' | 'registration_deadline', date: Date | undefined) => {
     if (date) {
-      const isoString = date.toISOString();
+      const currentTime = field === 'start_date' ? formData.start_time : field === 'end_date' ? formData.end_time : '';
+      const combinedDateTime = currentTime ? 
+        new Date(`${format(date, 'yyyy-MM-dd')}T${currentTime}:00`) : 
+        date;
+      
+      const isoString = combinedDateTime.toISOString();
       setFormData(prev => ({
         ...prev,
         [field]: isoString
@@ -105,6 +117,22 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       if (field === 'start_date') setStartDate(date);
       if (field === 'end_date') setEndDate(date);
       if (field === 'registration_deadline') setRegistrationDeadline(date);
+    }
+  };
+
+  const handleTimeChange = (field: 'start_time' | 'end_time', time: string) => {
+    setFormData(prev => ({ ...prev, [field]: time }));
+    
+    // Update the corresponding date with the new time
+    const dateField = field === 'start_time' ? 'start_date' : 'end_date';
+    const currentDate = field === 'start_time' ? startDate : endDate;
+    
+    if (currentDate && time) {
+      const combinedDateTime = new Date(`${format(currentDate, 'yyyy-MM-dd')}T${time}:00`);
+      setFormData(prev => ({
+        ...prev,
+        [dateField]: combinedDateTime.toISOString()
+      }));
     }
   };
 
@@ -271,6 +299,30 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                     />
                   </PopoverContent>
                 </Popover>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="start_time">Start Time</Label>
+                <Input
+                  id="start_time"
+                  type="time"
+                  value={formData.start_time}
+                  onChange={(e) => handleTimeChange('start_time', e.target.value)}
+                  className="w-full"
+                />
+              </div>
+
+              <div>
+                <Label htmlFor="end_time">End Time</Label>
+                <Input
+                  id="end_time"
+                  type="time"
+                  value={formData.end_time}
+                  onChange={(e) => handleTimeChange('end_time', e.target.value)}
+                  className="w-full"
+                />
               </div>
             </div>
 
