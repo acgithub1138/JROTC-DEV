@@ -1,9 +1,8 @@
-import React, { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import React from 'react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { AddResourceModal } from '../modals/AddResourceModal';
 
 interface CompetitionResourcesTabProps {
   competitionId: string;
@@ -12,9 +11,8 @@ interface CompetitionResourcesTabProps {
 export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = ({
   competitionId
 }) => {
-  const { resources, isLoading, deleteResource } = useCompetitionResources(competitionId);
-  const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('cp_comp_resources');
-  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const { resources, isLoading } = useCompetitionResources(competitionId);
+  const { canCreate } = useTablePermissions('cp_events');
 
   if (isLoading) {
     return (
@@ -31,7 +29,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Competition Resources</h2>
         {canCreate && (
-          <Button onClick={() => setIsAddModalOpen(true)}>
+          <Button>
             <Plus className="w-4 h-4 mr-2" />
             Add Resource
           </Button>
@@ -57,28 +55,6 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                     {resource.start_time && ` • ${new Date(resource.start_time).toLocaleString()}`}
                   </p>
                 </div>
-                {(canUpdate || canDelete) && (
-                  <div className="flex gap-1">
-                    {canUpdate && (
-                      <Button variant="ghost" size="sm">
-                        <Edit className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {canDelete && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm"
-                        onClick={() => {
-                          if (confirm('Are you sure you want to delete this resource assignment?')) {
-                            deleteResource(resource.id);
-                          }
-                        }}
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                  </div>
-                )}
               </div>
               {resource.assignment_details && (
                 <p className="mt-2 text-sm text-muted-foreground">{resource.assignment_details}</p>
@@ -87,12 +63,6 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           ))}
         </div>
       )}
-
-      <AddResourceModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
-        competitionId={competitionId}
-      />
     </div>
   );
 };

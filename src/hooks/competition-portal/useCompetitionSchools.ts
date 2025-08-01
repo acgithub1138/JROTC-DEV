@@ -14,7 +14,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchSchools = async () => {
-    if (!competitionId) return;
+    if (!competitionId || !userProfile?.school_id) return;
 
     try {
       setIsLoading(true);
@@ -42,6 +42,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
         .from('cp_comp_schools')
         .insert({
           ...schoolData,
+          school_id: userProfile.school_id,
           created_by: userProfile.id
         })
         .select()
@@ -105,7 +106,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
 
   useEffect(() => {
     fetchSchools();
-  }, [competitionId]);
+  }, [competitionId, userProfile?.school_id]);
 
   return {
     schools,

@@ -14,7 +14,7 @@ export const useCompetitionResources = (competitionId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchResources = async () => {
-    if (!competitionId) return;
+    if (!competitionId || !userProfile?.school_id) return;
 
     try {
       setIsLoading(true);
@@ -111,7 +111,7 @@ export const useCompetitionResources = (competitionId?: string) => {
 
   useEffect(() => {
     fetchResources();
-  }, [competitionId]);
+  }, [competitionId, userProfile?.school_id]);
 
   return {
     resources,

@@ -14,7 +14,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchEvents = async () => {
-    if (!competitionId) return;
+    if (!competitionId || !userProfile?.school_id) return;
 
     try {
       setIsLoading(true);
@@ -111,7 +111,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
 
   useEffect(() => {
     fetchEvents();
-  }, [competitionId]);
+  }, [competitionId, userProfile?.school_id]);
 
   return {
     events,
