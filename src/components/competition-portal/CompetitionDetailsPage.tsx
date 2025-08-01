@@ -5,28 +5,21 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
-
 export const CompetitionDetailsPage = () => {
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
-
   console.log('Route params:', params);
   console.log('Competition ID:', competitionId);
   console.log('Current path:', window.location.pathname);
-
   if (!competitionId) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="text-center">
           <h1 className="text-2xl font-bold text-destructive">Invalid Competition</h1>
           <p className="text-muted-foreground">Competition ID is missing</p>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="p-6 space-y-6">
+  return <div className="p-6 space-y-6">
       <div className="flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold">Competition Details</h1>
@@ -43,9 +36,7 @@ export const CompetitionDetailsPage = () => {
         
         <TabsContent value="events">
           <Card>
-            <CardHeader>
-              <CardTitle>Competition Events</CardTitle>
-            </CardHeader>
+            
             <CardContent>
               <CompetitionEventsTab competitionId={competitionId} />
             </CardContent>
@@ -74,6 +65,5 @@ export const CompetitionDetailsPage = () => {
           </Card>
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
