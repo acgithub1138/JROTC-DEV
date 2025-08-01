@@ -211,7 +211,7 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                 <Label htmlFor="start_time">Start Time</Label>
                 <Input id="start_time" type="time" value={formData.start_time} onChange={e => handleTimeChange('start_time', e.target.value)} className="w-full" />
               </div>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="">
               <div>
                 <Label>End Date *</Label>
                 <Popover>
