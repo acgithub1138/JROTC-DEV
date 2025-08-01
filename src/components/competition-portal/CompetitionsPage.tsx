@@ -339,7 +339,7 @@ const CompetitionsPage = () => {
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Edit Competition</p>
+                                    <p>Manage Competition</p>
                                   </TooltipContent>
                                 </Tooltip>
                                 
