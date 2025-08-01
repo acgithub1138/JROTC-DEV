@@ -141,16 +141,36 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
           </div>
 
           {/* Location */}
-          <div className="space-y-2">
-            <div className="flex items-center gap-2">
-              <MapPin className="w-5 h-5 text-muted-foreground" />
-              <span className="font-medium">Location:</span>
-              <span>{competition.location}</span>
+          {(competition.address || competition.city || competition.state) && (
+            <div className="space-y-2">
+              <div className="flex items-center gap-2">
+                <MapPin className="w-5 h-5 text-muted-foreground" />
+                <span className="font-medium">Location:</span>
+              </div>
+              <div className="ml-7 text-sm space-y-1">
+                {competition.address && (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="text-primary hover:underline cursor-pointer"
+                  >
+                    {competition.address}
+                  </a>
+                )}
+                {(competition.city || competition.state || competition.zip) && (
+                  <a 
+                    href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="block text-primary hover:underline cursor-pointer"
+                  >
+                    {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
+                  </a>
+                )}
+              </div>
             </div>
-            {(competition.address || competition.city || competition.state) && <div className="ml-7 text-sm text-muted-foreground">
-                {[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ')}
-              </div>}
-          </div>
+          )}
 
           {/* Participants */}
           <div className="flex items-center gap-2">
