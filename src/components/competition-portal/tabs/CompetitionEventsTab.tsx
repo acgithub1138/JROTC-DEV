@@ -1,8 +1,9 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { AddEventModal } from '../modals/AddEventModal';
 
 interface CompetitionEventsTabProps {
   competitionId: string;
@@ -11,8 +12,9 @@ interface CompetitionEventsTabProps {
 export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   competitionId
 }) => {
-  const { events, isLoading } = useCompetitionEvents(competitionId);
-  const { canCreate } = useTablePermissions('cp_events');
+  const { events, isLoading, deleteEvent } = useCompetitionEvents(competitionId);
+  const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('cp_comp_events');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -29,7 +31,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Competition Events</h2>
         {canCreate && (
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Event
           </Button>
@@ -55,8 +57,32 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     {event.start_time && ` • ${new Date(event.start_time).toLocaleString()}`}
                   </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {event.max_participants && `Max: ${event.max_participants}`}
+                <div className="flex items-center gap-2">
+                  <div className="text-sm text-muted-foreground">
+                    {event.max_participants && `Max: ${event.max_participants}`}
+                  </div>
+                  {(canUpdate || canDelete) && (
+                    <div className="flex gap-1">
+                      {canUpdate && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to delete this event?')) {
+                              deleteEvent(event.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
                 </div>
               </div>
               {event.notes && (
@@ -66,6 +92,12 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           ))}
         </div>
       )}
+
+      <AddEventModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        competitionId={competitionId}
+      />
     </div>
   );
 };

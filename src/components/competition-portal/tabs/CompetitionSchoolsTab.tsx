@@ -1,9 +1,10 @@
-import React from 'react';
-import { Plus } from 'lucide-react';
+import React, { useState } from 'react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { AddSchoolModal } from '../modals/AddSchoolModal';
 
 interface CompetitionSchoolsTabProps {
   competitionId: string;
@@ -25,8 +26,9 @@ const getStatusVariant = (status: string) => {
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
-  const { schools, isLoading } = useCompetitionSchools(competitionId);
-  const { canCreate } = useTablePermissions('cp_competitions');
+  const { schools, isLoading, deleteSchool } = useCompetitionSchools(competitionId);
+  const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('cp_comp_schools');
+  const [isAddModalOpen, setIsAddModalOpen] = useState(false);
 
   if (isLoading) {
     return (
@@ -43,7 +45,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       <div className="flex items-center justify-between">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
         {canCreate && (
-          <Button>
+          <Button onClick={() => setIsAddModalOpen(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Add School
           </Button>
@@ -68,9 +70,33 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                     Resource: {school.resource || 'Not assigned'}
                   </p>
                 </div>
-                <Badge variant={getStatusVariant(school.status)}>
-                  {school.status.replace('_', ' ').toUpperCase()}
-                </Badge>
+                <div className="flex items-center gap-2">
+                  <Badge variant={getStatusVariant(school.status)}>
+                    {school.status.replace('_', ' ').toUpperCase()}
+                  </Badge>
+                  {(canUpdate || canDelete) && (
+                    <div className="flex gap-1">
+                      {canUpdate && (
+                        <Button variant="ghost" size="sm">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {canDelete && (
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => {
+                            if (confirm('Are you sure you want to remove this school from the competition?')) {
+                              deleteSchool(school.id);
+                            }
+                          }}
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                  )}
+                </div>
               </div>
               {school.notes && (
                 <p className="mt-2 text-sm text-muted-foreground">{school.notes}</p>
@@ -79,6 +105,12 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
           ))}
         </div>
       )}
+
+      <AddSchoolModal
+        isOpen={isAddModalOpen}
+        onClose={() => setIsAddModalOpen(false)}
+        competitionId={competitionId}
+      />
     </div>
   );
 };
