@@ -1,12 +1,6 @@
-
 import React, { useState, useEffect, useRef } from 'react';
 import ReactQuill from 'react-quill';
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
@@ -20,64 +14,70 @@ import { RichTextBodyField } from './components/RichTextBodyField';
 import { VariablesPanel } from './components/VariablesPanel';
 import { EmailPreviewDialog } from './EmailPreviewDialog';
 import { extractVariables } from '@/utils/templateProcessor';
-
 interface EmailTemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   template?: EmailTemplate | null;
   mode: 'create' | 'edit';
 }
-
 export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
   open,
   onOpenChange,
   template,
-  mode,
+  mode
 }) => {
-  const { createTemplate, updateTemplate } = useEmailTemplates();
-  const { data: availableTables = [] } = useAvailableTables();
-  
+  const {
+    createTemplate,
+    updateTemplate
+  } = useEmailTemplates();
+  const {
+    data: availableTables = []
+  } = useAvailableTables();
   const [formData, setFormData] = useState({
     name: '',
     subject: '',
     body: '',
     source_table: '',
     recipient_field: '',
-    is_active: true,
+    is_active: true
   });
-
   const subjectRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<ReactQuill>(null);
   const [showPreview, setShowPreview] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
-
   const initialFormData = template && mode === 'edit' ? {
     name: template.name,
     subject: template.subject,
     body: template.body,
     source_table: template.source_table,
     recipient_field: template.recipient_field || '',
-    is_active: template.is_active,
+    is_active: template.is_active
   } : {
     name: '',
     subject: '',
     body: '',
     source_table: '',
     recipient_field: '',
-    is_active: true,
+    is_active: true
   };
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
-    enabled: open,
+    enabled: open
   });
-
-  const { data: columns = [] } = useTableColumns(formData.source_table);
-  const { data: enhancedVariables = [] } = useEnhancedVariables(formData.source_table);
-  const { data: groupedReferenceFields = [] } = useGroupedReferenceFields(formData.source_table);
-
+  const {
+    data: columns = []
+  } = useTableColumns(formData.source_table);
+  const {
+    data: enhancedVariables = []
+  } = useEnhancedVariables(formData.source_table);
+  const {
+    data: groupedReferenceFields = []
+  } = useGroupedReferenceFields(formData.source_table);
   useEffect(() => {
     if (template && mode === 'edit') {
       setFormData({
@@ -86,7 +86,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         body: template.body,
         source_table: template.source_table,
         recipient_field: template.recipient_field || '',
-        is_active: template.is_active,
+        is_active: template.is_active
       });
     } else {
       setFormData({
@@ -95,15 +95,16 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         body: '',
         source_table: '',
         recipient_field: '',
-        is_active: true,
+        is_active: true
       });
     }
   }, [template, mode, open]);
-
   const handleFormChange = (updates: Partial<typeof formData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData(prev => ({
+      ...prev,
+      ...updates
+    }));
   };
-
   const handleClose = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -112,7 +113,6 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
       onOpenChange(false);
     }
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -121,45 +121,39 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     resetChanges();
     setShowUnsavedDialog(false);
     setPendingClose(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
   };
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     // Use the new template processor to extract variables
     const variables_used = extractVariables(formData.subject + ' ' + formData.body);
-    
     if (mode === 'edit' && template) {
       updateTemplate({
         id: template.id,
         ...formData,
-        variables_used,
+        variables_used
       });
     } else {
       createTemplate({
         ...formData,
-        variables_used,
+        variables_used
       });
     }
-    
     resetChanges();
     onOpenChange(false);
   };
-
   const insertVariableAtCursor = (variableName: string) => {
     const variable = `{{${variableName}}}`;
-    
+
     // Check if subject field is focused
     if (document.activeElement === subjectRef.current) {
       const input = subjectRef.current;
@@ -167,8 +161,9 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         const start = input.selectionStart || 0;
         const end = input.selectionEnd || 0;
         const newValue = formData.subject.slice(0, start) + variable + formData.subject.slice(end);
-        handleFormChange({ subject: newValue });
-        
+        handleFormChange({
+          subject: newValue
+        });
         setTimeout(() => {
           input.focus();
           input.setSelectionRange(start + variable.length, start + variable.length);
@@ -180,23 +175,24 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         const quill = quillRef.current.getEditor();
         const range = quill.getSelection();
         const position = range ? range.index : quill.getLength();
-        
         quill.insertText(position, variable);
-        quill.setSelection({ index: position + variable.length, length: 0 });
-        
+        quill.setSelection({
+          index: position + variable.length,
+          length: 0
+        });
+
         // Update the form data
         const newContent = quill.root.innerHTML;
-        handleFormChange({ body: newContent });
+        handleFormChange({
+          body: newContent
+        });
       }
     }
   };
-
   const canPreview = formData.source_table && (formData.subject || formData.body);
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleClose}>
-        <DialogContent className="max-w-5xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {mode === 'edit' ? 'Edit Email Template' : 'Create Email Template'}
@@ -204,20 +200,14 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
           </DialogHeader>
 
           <form onSubmit={handleSubmit} className="space-y-6">
-            <TemplateBasicFields
-              formData={formData}
-              onFormChange={handleFormChange}
-              availableTables={availableTables}
-            />
+            <TemplateBasicFields formData={formData} onFormChange={handleFormChange} availableTables={availableTables} />
 
             {/* Email Recipient Field */}
             <div className="space-y-2">
               <Label>Email Recipient</Label>
-              <Select
-                value={formData.recipient_field}
-                onValueChange={(value) => handleFormChange({ recipient_field: value })}
-                disabled={!formData.source_table}
-              >
+              <Select value={formData.recipient_field} onValueChange={value => handleFormChange({
+              recipient_field: value
+            })} disabled={!formData.source_table}>
                 <SelectTrigger className="w-1/3">
                   <SelectValue placeholder="Select recipient" />
                 </SelectTrigger>
@@ -230,43 +220,29 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
             <div className="grid grid-cols-4 gap-6">
               <div className="col-span-3 space-y-4">
-                <SubjectField
-                  value={formData.subject}
-                  onChange={(subject) => handleFormChange({ subject })}
-                  inputRef={subjectRef}
-                />
+                <SubjectField value={formData.subject} onChange={subject => handleFormChange({
+                subject
+              })} inputRef={subjectRef} />
 
-                <RichTextBodyField
-                  value={formData.body}
-                  onChange={(body) => handleFormChange({ body })}
-                  quillRef={quillRef}
-                />
+                <RichTextBodyField value={formData.body} onChange={body => handleFormChange({
+                body
+              })} quillRef={quillRef} />
               </div>
 
               <div className="space-y-2">
-                <VariablesPanel
-                  columns={columns.map(col => ({ 
-                    name: col.column_name, 
-                    label: col.display_label 
-                  }))}
-                  enhancedVariables={enhancedVariables.map(ev => ({ 
-                    name: ev.variable, 
-                    label: ev.label,
-                    description: 'Profile reference'
-                  }))}
-                  groupedReferenceFields={groupedReferenceFields}
-                  onVariableInsert={insertVariableAtCursor}
-                />
+                <VariablesPanel columns={columns.map(col => ({
+                name: col.column_name,
+                label: col.display_label
+              }))} enhancedVariables={enhancedVariables.map(ev => ({
+                name: ev.variable,
+                label: ev.label,
+                description: 'Profile reference'
+              }))} groupedReferenceFields={groupedReferenceFields} onVariableInsert={insertVariableAtCursor} />
               </div>
             </div>
 
             <div className="flex justify-between">
-              <Button 
-                type="button" 
-                variant="outline" 
-                onClick={() => setShowPreview(true)}
-                disabled={!canPreview}
-              >
+              <Button type="button" variant="outline" onClick={() => setShowPreview(true)} disabled={!canPreview}>
                 Preview Email
               </Button>
               
@@ -283,21 +259,9 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         </DialogContent>
       </Dialog>
 
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleContinueEditing}
-      />
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
 
-      <EmailPreviewDialog
-        open={showPreview}
-        onOpenChange={setShowPreview}
-        subject={formData.subject}
-        body={formData.body}
-        sourceTable={formData.source_table}
-      />
+      <EmailPreviewDialog open={showPreview} onOpenChange={setShowPreview} subject={formData.subject} body={formData.body} sourceTable={formData.source_table} />
 
-    </>
-  );
+    </>;
 };
