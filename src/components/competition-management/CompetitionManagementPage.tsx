@@ -18,7 +18,7 @@ const CompetitionManagementPage = () => {
 
       <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
         <TabsList className="grid w-full grid-cols-3">
-          <TabsTrigger value="competitions">Competitions</TabsTrigger>
+          <TabsTrigger value="competitions">My Competitions</TabsTrigger>
           <TabsTrigger value="templates">Score Sheet Templates</TabsTrigger>
           <TabsTrigger value="reports">Reports</TabsTrigger>
         </TabsList>
