@@ -58,8 +58,34 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     if (open) {
       fetchEvents();
       fetchJudges();
+      fetchCompetitionDate();
     }
   }, [open]);
+
+  const fetchCompetitionDate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cp_competitions')
+        .select('start_date, end_date')
+        .eq('id', competitionId)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.start_date) {
+        const startDate = new Date(data.start_date).toISOString().split('T')[0];
+        const endDate = data?.end_date ? new Date(data.end_date).toISOString().split('T')[0] : startDate;
+        
+        setFormData(prev => ({
+          ...prev,
+          start_date: startDate,
+          end_date: endDate
+        }));
+      }
+    } catch (error) {
+      console.error('Error fetching competition date:', error);
+    }
+  };
   const fetchEvents = async () => {
     try {
       const {
