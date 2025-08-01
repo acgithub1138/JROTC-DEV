@@ -5,6 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
+import { format } from 'date-fns';
 interface CompetitionEventsTabProps {
   competitionId: string;
 }
@@ -56,10 +57,10 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                   <TableCell className="font-medium">{event.cp_events?.name || 'N/A'}</TableCell>
                   <TableCell>{event.location || 'N/A'}</TableCell>
                   <TableCell>
-                    {event.start_time ? new Date(event.start_time).toLocaleString() : 'N/A'}
+                    {event.start_time ? format(new Date(event.start_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
                   </TableCell>
                   <TableCell>
-                    {event.end_time ? new Date(event.end_time).toLocaleString() : 'N/A'}
+                    {event.end_time ? format(new Date(event.end_time), 'yyyy-MM-dd HH:mm') : 'N/A'}
                   </TableCell>
                   <TableCell>{event.max_participants || 'N/A'}</TableCell>
                 </TableRow>

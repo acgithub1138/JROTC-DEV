@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
+import { format } from 'date-fns';
 interface CompetitionResourcesTabProps {
   competitionId: string;
 }
@@ -40,14 +41,14 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
               <div className="flex items-center justify-between">
                 <div>
                   <h3 className="font-medium">Resource {resource.resource}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {resource.location && `Location: ${resource.location}`}
-                    {resource.start_time && ` • ${new Date(resource.start_time).toLocaleString()}`}
-                  </p>
+                   <p className="text-sm text-muted-foreground">
+                     {resource.location && `Location: ${resource.location}`}
+                     {resource.start_time && ` • ${format(new Date(resource.start_time), 'yyyy-MM-dd HH:mm')}`}
+                   </p>
                 </div>
-                <div className="text-sm text-muted-foreground">
-                  {resource.end_time && `Until: ${new Date(resource.end_time).toLocaleString()}`}
-                </div>
+                 <div className="text-sm text-muted-foreground">
+                   {resource.end_time && `Until: ${format(new Date(resource.end_time), 'yyyy-MM-dd HH:mm')}`}
+                 </div>
               </div>
               {resource.assignment_details && <p className="mt-2 text-sm text-muted-foreground">{resource.assignment_details}</p>}
             </div>)}
