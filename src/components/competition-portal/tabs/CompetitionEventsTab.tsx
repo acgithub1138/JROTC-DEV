@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
@@ -33,25 +34,40 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           </Button>}
       </div>
 
-      {events.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {events.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No events configured for this competition</p>
-        </div> : <div className="space-y-2">
-          {events.map(event => <div key={event.id} className="p-4 border rounded-lg bg-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Event {event.event}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    {event.location && `Location: ${event.location}`}
-                    {event.start_time && ` • ${new Date(event.start_time).toLocaleString()}`}
-                  </p>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  {event.max_participants && `Max: ${event.max_participants}`}
-                </div>
-              </div>
-              {event.notes && <p className="mt-2 text-sm text-muted-foreground">{event.notes}</p>}
-            </div>)}
-        </div>}
+        </div>
+      ) : (
+        <div className="border rounded-lg">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Event</TableHead>
+                <TableHead>Location</TableHead>
+                <TableHead>Start Time</TableHead>
+                <TableHead>End Time</TableHead>
+                <TableHead>Max Participants</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {events.map(event => (
+                <TableRow key={event.id}>
+                  <TableCell className="font-medium">{event.event || 'N/A'}</TableCell>
+                  <TableCell>{event.location || 'N/A'}</TableCell>
+                  <TableCell>
+                    {event.start_time ? new Date(event.start_time).toLocaleString() : 'N/A'}
+                  </TableCell>
+                  <TableCell>
+                    {event.end_time ? new Date(event.end_time).toLocaleString() : 'N/A'}
+                  </TableCell>
+                  <TableCell>{event.max_participants || 'N/A'}</TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
+        </div>
+      )}
 
       <AddEventModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onEventAdded={createEvent} />
     </div>;
