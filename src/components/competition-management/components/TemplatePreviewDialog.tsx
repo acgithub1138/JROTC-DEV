@@ -127,7 +127,7 @@ export const TemplatePreviewDialog: React.FC<TemplatePreviewDialogProps> = ({
     }
   };
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             Template Preview: {template.template_name}
