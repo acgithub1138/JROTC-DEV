@@ -168,7 +168,7 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
                     rel="noopener noreferrer"
                     className="block text-primary hover:underline cursor-pointer"
                   >
-                    {[competition.city, competition.state, competition.zip].filter(Boolean).join(' ')}
+                    {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
                   </a>
                 )}
               </div>
