@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -31,21 +30,60 @@ import { UnsavedCommentModal } from './components/UnsavedCommentModal';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
-
-export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpenChange, onEdit }) => {
-  const { userProfile } = useAuth();
-  const { updateTask, duplicateTask, tasks, isUpdating, isDuplicating } = useTasks();
-  const { users, isLoading: usersLoading } = useSchoolUsers(true); // Only fetch active users
-  const { comments, addComment, addSystemComment, isAddingComment } = useTaskComments(task.id);
-  const { subtasks, updateSubtask } = useSubtasks(task.id);
-  const { statusOptions } = useTaskStatusOptions();
-  const { priorityOptions } = useTaskPriorityOptions();
-  const { canView, canUpdate, canUpdateAssigned, canAssign, canCreate } = useTaskPermissions();
-  const { templates } = useEmailTemplates();
-  const { rules } = useEmailRules();
-  const { toast } = useToast();
+export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
+  task,
+  open,
+  onOpenChange,
+  onEdit
+}) => {
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    updateTask,
+    duplicateTask,
+    tasks,
+    isUpdating,
+    isDuplicating
+  } = useTasks();
+  const {
+    users,
+    isLoading: usersLoading
+  } = useSchoolUsers(true); // Only fetch active users
+  const {
+    comments,
+    addComment,
+    addSystemComment,
+    isAddingComment
+  } = useTaskComments(task.id);
+  const {
+    subtasks,
+    updateSubtask
+  } = useSubtasks(task.id);
+  const {
+    statusOptions
+  } = useTaskStatusOptions();
+  const {
+    priorityOptions
+  } = useTaskPriorityOptions();
+  const {
+    canView,
+    canUpdate,
+    canUpdateAssigned,
+    canAssign,
+    canCreate
+  } = useTaskPermissions();
+  const {
+    templates
+  } = useEmailTemplates();
+  const {
+    rules
+  } = useEmailRules();
+  const {
+    toast
+  } = useToast();
   const [currentTask, setCurrentTask] = useState(task);
-  const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
+  const canEdit = canUpdate || canUpdateAssigned && task.assigned_to === userProfile?.id;
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');
@@ -61,47 +99,37 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     status: task.status,
     priority: task.priority,
     assigned_to: task.assigned_to || 'unassigned',
-    due_date: task.due_date ? new Date(task.due_date) : null,
+    due_date: task.due_date ? new Date(task.due_date) : null
   });
 
   // Filter templates for tasks
-  const taskTemplates = templates.filter(template => 
-    template.is_active && template.source_table === 'tasks'
-  );
+  const taskTemplates = templates.filter(template => template.is_active && template.source_table === 'tasks');
 
   // Check if email rules are enabled for status changes that should hide the Send Notification checkbox
   const shouldHideNotificationCheckbox = () => {
     const originalStatus = currentTask.status;
     const newStatus = editData.status;
-    
+
     // Only hide if status is actually changing
     if (originalStatus === newStatus) return false;
-    
+
     // Check if changing to "need_information" and the rule is enabled
     if (newStatus === 'need_information') {
       const infoNeededRule = rules.find(rule => rule.rule_type === 'task_information_needed');
       if (infoNeededRule?.is_active) return true;
     }
-    
+
     // Check if changing to "completed" and the rule is enabled
     if (newStatus === 'completed') {
       const completedRule = rules.find(rule => rule.rule_type === 'task_completed');
       if (completedRule?.is_active) return true;
     }
-    
     return false;
   };
 
   // Track changes for unsaved warning
   useEffect(() => {
-    const hasChanges = 
-      editData.title !== currentTask.title ||
-      editData.description !== (currentTask.description || '') ||
-      editData.status !== currentTask.status ||
-      editData.priority !== currentTask.priority ||
-      editData.assigned_to !== (currentTask.assigned_to || 'unassigned') ||
-      (editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null));
-    
+    const hasChanges = editData.title !== currentTask.title || editData.description !== (currentTask.description || '') || editData.status !== currentTask.status || editData.priority !== currentTask.priority || editData.assigned_to !== (currentTask.assigned_to || 'unassigned') || editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null);
     setHasUnsavedChanges(hasChanges || sendNotification);
   }, [editData, currentTask, sendNotification]);
 
@@ -116,68 +144,72 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       status: taskToUse.status,
       priority: taskToUse.priority,
       assigned_to: taskToUse.assigned_to || 'unassigned',
-      due_date: taskToUse.due_date ? new Date(taskToUse.due_date) : null,
+      due_date: taskToUse.due_date ? new Date(taskToUse.due_date) : null
     });
   }, [task, tasks]);
-
   const sendNotificationEmail = async () => {
     const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
     if (!sendNotification || !selectedTemplate || !newAssignedTo) {
       return;
     }
-
     try {
       // Find the assigned user for name information
-      let assignedUser: { id: string; first_name: string; last_name: string } | undefined = users.find(u => u.id === newAssignedTo);
-      
+      let assignedUser: {
+        id: string;
+        first_name: string;
+        last_name: string;
+      } | undefined = users.find(u => u.id === newAssignedTo);
+
       // If user not found in school users, fetch directly
       if (!assignedUser) {
-        const { data: userData, error: userError } = await supabase
-          .from('profiles')
-          .select('id, first_name, last_name')
-          .eq('id', newAssignedTo)
-          .single();
-          
+        const {
+          data: userData,
+          error: userError
+        } = await supabase.from('profiles').select('id, first_name, last_name').eq('id', newAssignedTo).single();
         if (userError || !userData) {
           console.error('Error fetching user data:', userError);
           toast({
             title: "Error",
             description: "Could not find the assigned user's information.",
-            variant: "destructive",
+            variant: "destructive"
           });
           return;
         }
-        
-        assignedUser = userData as { id: string; first_name: string; last_name: string };
+        assignedUser = userData as {
+          id: string;
+          first_name: string;
+          last_name: string;
+        };
       }
-      
+
       // Resolve email with job board priority
       const emailResult = await resolveUserEmail(newAssignedTo, currentTask.school_id);
-      
       if (!emailResult?.email) {
         toast({
-          title: "Error", 
+          title: "Error",
           description: "No email address found for the assigned user.",
-          variant: "destructive",
+          variant: "destructive"
         });
         return;
       }
 
       // Use the queue_email RPC function
-      const { data: queueId, error } = await supabase.rpc('queue_email', {
+      const {
+        data: queueId,
+        error
+      } = await supabase.rpc('queue_email', {
         template_id_param: selectedTemplate,
         recipient_email_param: emailResult.email,
         source_table_param: 'tasks',
         record_id_param: currentTask.id,
         school_id_param: currentTask.school_id
       });
-
       if (error) {
         console.error('Error queuing notification email:', error);
         toast({
           title: "Error",
           description: "Failed to queue notification email.",
-          variant: "destructive",
+          variant: "destructive"
         });
         throw error;
       } else {
@@ -185,7 +217,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
         toast({
           title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`,
+          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`
         });
       }
     } catch (emailError) {
@@ -193,18 +225,17 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       toast({
         title: "Error",
         description: "Failed to send notification email.",
-        variant: "destructive",
+        variant: "destructive"
       });
       throw emailError;
     }
   };
-
   const handleSave = async () => {
     // Debug logging to track comment state
     console.log('🔍 handleSave called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
     console.log('🔍 newComment length:', newComment.length);
-    
+
     // Check for unsaved comment before saving
     if (newComment.trim()) {
       console.log('🔍 Found unsaved comment, showing modal');
@@ -212,90 +243,100 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       setShowUnsavedCommentModal(true);
       return;
     }
-    
     console.log('🔍 No unsaved comment, proceeding with save');
     await performSave();
   };
-
   const performSave = async () => {
     // Validate notification requirements
     if (sendNotification && !selectedTemplate) {
       toast({
         title: "Template Required",
         description: "Please select an email template to send notification.",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     try {
-      const updateData: any = { id: currentTask.id };
-      const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
-      
+      const updateData: any = {
+        id: currentTask.id
+      };
+      const changes: Array<{
+        field: string;
+        oldValue: any;
+        newValue: any;
+      }> = [];
       if (editData.title !== currentTask.title) {
         updateData.title = editData.title;
-        changes.push({ field: 'title', oldValue: currentTask.title, newValue: editData.title });
+        changes.push({
+          field: 'title',
+          oldValue: currentTask.title,
+          newValue: editData.title
+        });
       }
-      
       if (editData.description !== (currentTask.description || '')) {
         updateData.description = editData.description || null;
-        changes.push({ field: 'description', oldValue: currentTask.description || '', newValue: editData.description || '' });
+        changes.push({
+          field: 'description',
+          oldValue: currentTask.description || '',
+          newValue: editData.description || ''
+        });
       }
-      
       if (editData.status !== currentTask.status) {
         updateData.status = editData.status;
-        changes.push({ field: 'status', oldValue: currentTask.status, newValue: editData.status });
+        changes.push({
+          field: 'status',
+          oldValue: currentTask.status,
+          newValue: editData.status
+        });
       }
-      
       if (editData.priority !== currentTask.priority) {
         updateData.priority = editData.priority;
-        changes.push({ field: 'priority', oldValue: currentTask.priority, newValue: editData.priority });
+        changes.push({
+          field: 'priority',
+          oldValue: currentTask.priority,
+          newValue: editData.priority
+        });
       }
-      
       const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
       if (newAssignedTo !== currentTask.assigned_to) {
         updateData.assigned_to = newAssignedTo;
-        changes.push({ field: 'assigned_to', oldValue: currentTask.assigned_to, newValue: newAssignedTo });
+        changes.push({
+          field: 'assigned_to',
+          oldValue: currentTask.assigned_to,
+          newValue: newAssignedTo
+        });
       }
-      
       const oldDueDate = currentTask.due_date ? new Date(currentTask.due_date) : null;
       const newDueDate = editData.due_date;
-      const dueDatesAreDifferent = (oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime()) ||
-                                   (!oldDueDate && newDueDate) ||
-                                   (oldDueDate && !newDueDate);
-      
+      const dueDatesAreDifferent = oldDueDate && newDueDate && oldDueDate.getTime() !== newDueDate.getTime() || !oldDueDate && newDueDate || oldDueDate && !newDueDate;
       if (dueDatesAreDifferent) {
         updateData.due_date = newDueDate ? newDueDate.toISOString() : null;
-        changes.push({ field: 'due_date', oldValue: oldDueDate, newValue: newDueDate });
+        changes.push({
+          field: 'due_date',
+          oldValue: oldDueDate,
+          newValue: newDueDate
+        });
       }
 
       // Update the task
       await updateTask(updateData);
-      
+
       // Add system comments for tracked changes
       for (const change of changes) {
-        const commentText = formatFieldChangeComment(
-          change.field,
-          change.oldValue,
-          change.newValue,
-          statusOptions,
-          priorityOptions,
-          users
-        );
+        const commentText = formatFieldChangeComment(change.field, change.oldValue, change.newValue, statusOptions, priorityOptions, users);
         addSystemComment(commentText);
       }
       // Send notification email if requested
       if (sendNotification) {
         await sendNotificationEmail();
       }
-      
+
       // Close the modal after successful save
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating task:', error);
     }
   };
-
   const handleCancel = () => {
     setIsEditing(false);
     // Reset edit data to current task values
@@ -305,14 +346,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       status: currentTask.status,
       priority: currentTask.priority,
       assigned_to: currentTask.assigned_to || 'unassigned',
-      due_date: currentTask.due_date ? new Date(currentTask.due_date) : null,
+      due_date: currentTask.due_date ? new Date(currentTask.due_date) : null
     });
   };
-
   const handleEdit = () => {
     setIsEditing(true);
   };
-
   const handleClose = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
@@ -321,22 +360,18 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
       onOpenChange(false);
     }
   };
-
   const confirmClose = () => {
     setIsEditing(false);
     setShowConfirmDialog(false);
     onOpenChange(false);
   };
-
   const saveAndClose = async () => {
     setShowConfirmDialog(false);
     await handleSave();
   };
-
   const handleAddComment = async () => {
     console.log('🔍 handleAddComment called with newComment:', newComment);
     console.log('🔍 newComment trimmed:', newComment.trim());
-    
     if (newComment.trim()) {
       console.log('🔍 Adding comment:', newComment.trim());
       await addComment(newComment.trim());
@@ -345,51 +380,42 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
-
   const handleDiscardComment = () => {
     setNewComment('');
     setShowUnsavedCommentModal(false);
     setPendingSaveAction(null);
   };
-
   const stayOnForm = () => {
     setShowConfirmDialog(false);
   };
-
-
-  const assigneeOptions = [
-    { value: 'unassigned', label: 'Unassigned' },
-    ...users
-      .sort((a, b) => a.last_name.localeCompare(b.last_name))
-      .map(user => ({
-        value: user.id,
-        label: `${user.last_name}, ${user.first_name}`
-      }))
-  ];
-
+  const assigneeOptions = [{
+    value: 'unassigned',
+    label: 'Unassigned'
+  }, ...users.sort((a, b) => a.last_name.localeCompare(b.last_name)).map(user => ({
+    value: user.id,
+    label: `${user.last_name}, ${user.first_name}`
+  }))];
   const handleCompleteTask = async () => {
     // Check if there are incomplete subtasks
     const incompleteSubtasks = subtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
-    
     if (incompleteSubtasks.length > 0) {
       // Show confirmation dialog
       setShowCompleteConfirmDialog(true);
       return;
     }
-    
+
     // No incomplete subtasks, proceed with completion
     await completeTaskAndSubtasks();
   };
-
   const completeTaskAndSubtasks = async (includeSubtasks = false) => {
     try {
       // Update the main task
-      await updateTask({ 
-        id: currentTask.id, 
+      await updateTask({
+        id: currentTask.id,
         status: getDefaultCompletionStatus(statusOptions),
         completed_at: new Date().toISOString()
       });
-      
+
       // Update subtasks if requested
       if (includeSubtasks && subtasks) {
         const incompleteSubtasks = subtasks.filter(subtask => !isTaskDone(subtask.status, statusOptions));
@@ -401,114 +427,75 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           });
         }
       }
-      
+
       // Add system comment
-      const commentText = includeSubtasks && subtasks?.some(s => !isTaskDone(s.status, statusOptions)) 
-        ? 'Task and all subtasks completed' 
-        : 'Task completed';
+      const commentText = includeSubtasks && subtasks?.some(s => !isTaskDone(s.status, statusOptions)) ? 'Task and all subtasks completed' : 'Task completed';
       addSystemComment(commentText);
-      
       onOpenChange(false);
     } catch (error) {
       console.error('Error completing task:', error);
     }
   };
-
   const handleCompleteConfirm = () => {
     setShowCompleteConfirmDialog(false);
     completeTaskAndSubtasks(true);
   };
-
   const handleCompleteCancel = () => {
     setShowCompleteConfirmDialog(false);
     // Do nothing - don't change the task status
   };
-
   const handleDuplicateTask = () => {
     if (!currentTask) return;
-    
     duplicateTask(currentTask.id, {
       onSuccess: () => {
         onOpenChange(false);
       }
     });
   };
-
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
   // If user doesn't have view permission, don't show the dialog content
   if (!canView) {
-    return (
-      <Dialog open={open} onOpenChange={onOpenChange}>
+    return <Dialog open={open} onOpenChange={onOpenChange}>
         <DialogContent className="sm:max-w-md">
           <DialogHeader>
             <DialogTitle>Access Denied</DialogTitle>
           </DialogHeader>
           <p className="text-sm text-gray-600">You don't have permission to view task details.</p>
         </DialogContent>
-      </Dialog>
-    );
+      </Dialog>;
   }
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
-      <DialogContent className="sm:max-w-4xl max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
             <DialogTitle className="text-xl">
-              {currentTask.task_number && (
-                <span className="text-blue-600 font-mono mr-2">
+              {currentTask.task_number && <span className="text-blue-600 font-mono mr-2">
                   {currentTask.task_number} -
-                </span>
-              )}
-              {isEditing ? (
-                <Input
-                  value={editData.title}
-                  onChange={(e) => setEditData({...editData, title: e.target.value})}
-                  className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0"
-                />
-              ) : (
-                <span className="text-lg font-semibold">{currentTask.title}</span>
-              )}
+                </span>}
+              {isEditing ? <Input value={editData.title} onChange={e => setEditData({
+                ...editData,
+                title: e.target.value
+              })} className="text-lg font-semibold border-none p-0 h-auto bg-transparent focus-visible:ring-0" /> : <span className="text-lg font-semibold">{currentTask.title}</span>}
             </DialogTitle>
             <div className="flex items-center gap-2">
-              {canEdit && !isTaskDone(currentTask.status, statusOptions) && (
-                <Button
-                  type="button"
-                  onClick={handleCompleteTask}
-                  className="flex items-center gap-2"
-                  variant="default"
-                >
+              {canEdit && !isTaskDone(currentTask.status, statusOptions) && <Button type="button" onClick={handleCompleteTask} className="flex items-center gap-2" variant="default">
                   <Check className="w-4 h-4" />
                   Mark Complete
-                </Button>
-              )}
+                </Button>}
               
-              {canCreate && (
-                <Button
-                  variant="outline"
-                  onClick={handleDuplicateTask}
-                  disabled={isDuplicating}
-                  className="flex items-center gap-2"
-                >
+              {canCreate && <Button variant="outline" onClick={handleDuplicateTask} disabled={isDuplicating} className="flex items-center gap-2">
                   <Copy className="w-4 h-4" />
                   {isDuplicating ? 'Duplicating...' : 'Duplicate'}
-                </Button>
-              )}
-              {isEditing && canEdit && (
-                <>
-                  <Button
-                    size="sm"
-                    onClick={handleSave}
-                    disabled={isUpdating}
-                  >
+                </Button>}
+              {isEditing && canEdit && <>
+                  <Button size="sm" onClick={handleSave} disabled={isUpdating}>
                     <Save className="w-4 h-4 mr-2" />
                     Save
                   </Button>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </DialogHeader>
@@ -525,69 +512,60 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  <div className="flex items-center gap-2">
                    <MessageSquare className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Status:</span>
-                    {isEditing && canEdit ? (
-                     <Select value={editData.status} onValueChange={(value) => setEditData({...editData, status: value})}>
+                    {isEditing && canEdit ? <Select value={editData.status} onValueChange={value => setEditData({
+                    ...editData,
+                    status: value
+                  })}>
                        <SelectTrigger className="h-8 w-auto min-w-[120px]">
                          <SelectValue />
                        </SelectTrigger>
                        <SelectContent>
-                         {statusOptions.filter(s => s.is_active).map((option) => (
-                           <SelectItem key={option.value} value={option.value}>
+                         {statusOptions.filter(s => s.is_active).map(option => <SelectItem key={option.value} value={option.value}>
                              {option.label}
-                           </SelectItem>
-                         ))}
+                           </SelectItem>)}
                        </SelectContent>
-                     </Select>
-                   ) : (
-                     <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                     </Select> : <Badge className={currentStatusOption?.color_class || 'bg-gray-100 text-gray-800'}>
                        {currentStatusOption?.label || currentTask.status.replace('_', ' ')}
-                     </Badge>
-                   )}
+                     </Badge>}
                  </div>                
                  <div className="flex items-center gap-2">
                    <Flag className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Priority:</span>
-                    {isEditing && canEdit ? (
-                     <Select value={editData.priority} onValueChange={(value) => setEditData({...editData, priority: value})}>
+                    {isEditing && canEdit ? <Select value={editData.priority} onValueChange={value => setEditData({
+                    ...editData,
+                    priority: value
+                  })}>
                        <SelectTrigger className="h-8 w-auto min-w-[120px]">
                          <SelectValue />
                        </SelectTrigger>
                        <SelectContent>
-                         {priorityOptions.filter(p => p.is_active).map((option) => (
-                           <SelectItem key={option.value} value={option.value}>
+                         {priorityOptions.filter(p => p.is_active).map(option => <SelectItem key={option.value} value={option.value}>
                              {option.label}
-                           </SelectItem>
-                         ))}
+                           </SelectItem>)}
                        </SelectContent>
-                     </Select>
-                   ) : (
-                     <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
+                     </Select> : <Badge className={currentPriorityOption?.color_class || 'bg-gray-100 text-gray-800'}>
                        {currentPriorityOption?.label || currentTask.priority}
-                     </Badge>
-                   )}
+                     </Badge>}
                  </div>
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Due Date:</span>
-                    {isEditing && canEdit ? (
-                      <Input
-                        type="date"
-                        value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''}
-                        onChange={(e) => {
-                          const dateValue = e.target.value;
-                          if (dateValue) {
-                            setEditData({...editData, due_date: new Date(dateValue + 'T00:00:00')});
-                          } else {
-                            setEditData({...editData, due_date: null});
-                          }
-                        }}
-                        className="h-8 w-auto min-w-[150px]"
-                      />
-                    ) : (
-                      <span className="text-sm font-medium">
+                    {isEditing && canEdit ? <Input type="date" value={editData.due_date ? format(editData.due_date, 'yyyy-MM-dd') : ''} onChange={e => {
+                    const dateValue = e.target.value;
+                    if (dateValue) {
+                      setEditData({
+                        ...editData,
+                        due_date: new Date(dateValue + 'T00:00:00')
+                      });
+                    } else {
+                      setEditData({
+                        ...editData,
+                        due_date: null
+                      });
+                    }
+                  }} className="h-8 w-auto min-w-[150px]" /> : <span className="text-sm font-medium">
                         {currentTask.due_date ? format(new Date(currentTask.due_date), 'PPP') : 'No due date'}
-                      </span>
-                    )}
+                      </span>}
                  </div>
               </CardContent>
             </Card>
@@ -601,41 +579,30 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  <div className="flex items-center gap-2">
                    <User className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Assigned to:</span>
-                     {isEditing && canEdit && canAssign ? (
-                      usersLoading ? (
-                        <div className="h-8 w-32 bg-muted animate-pulse rounded" />
-                      ) : (
-                        <Select value={editData.assigned_to} onValueChange={(value) => setEditData({...editData, assigned_to: value})}>
+                     {isEditing && canEdit && canAssign ? usersLoading ? <div className="h-8 w-32 bg-muted animate-pulse rounded" /> : <Select value={editData.assigned_to} onValueChange={value => setEditData({
+                    ...editData,
+                    assigned_to: value
+                  })}>
                           <SelectTrigger className="h-8 w-auto min-w-[120px]">
                             <SelectValue placeholder={usersLoading ? "Loading..." : "Select user"} />
                           </SelectTrigger>
                           <SelectContent>
                             <SelectItem value="unassigned">Unassigned</SelectItem>
-                            {users.map((user) => (
-                              <SelectItem key={user.id} value={user.id}>
+                            {users.map(user => <SelectItem key={user.id} value={user.id}>
                                 {user.last_name}, {user.first_name}
-                              </SelectItem>
-                            ))}
+                              </SelectItem>)}
                           </SelectContent>
-                        </Select>
-                      )
-                    ) : (
-                      <span className="text-sm font-medium">
-                        {currentTask.assigned_to_profile 
-                          ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` 
-                          : 'Unassigned'}
-                      </span>
-                    )}
+                        </Select> : <span className="text-sm font-medium">
+                        {currentTask.assigned_to_profile ? `${currentTask.assigned_to_profile.last_name}, ${currentTask.assigned_to_profile.first_name}` : 'Unassigned'}
+                      </span>}
                  </div>
-                {currentTask.assigned_by_profile && (
-                  <div className="flex items-center gap-2">
+                {currentTask.assigned_by_profile && <div className="flex items-center gap-2">
                     <User className="w-4 h-4 text-gray-500" />
                     <span className="text-sm text-gray-600">Created by:</span>
                     <span className="text-sm font-medium">
                       {currentTask.assigned_by_profile.last_name}, {currentTask.assigned_by_profile.first_name}
                     </span>
-                  </div>
-                )}
+                  </div>}
                  <div className="flex items-center gap-2">
                    <CalendarIcon className="w-4 h-4 text-gray-500" />
                    <span className="text-sm text-gray-600">Created:</span>
@@ -645,39 +612,29 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
                  </div>
                  
                   {/* Send Notification Section */}
-                  {isEditing && canEdit && taskTemplates.length > 0 && !shouldHideNotificationCheckbox() && (
-                   <div className="pt-3 border-t space-y-3">
+                  {isEditing && canEdit && taskTemplates.length > 0 && !shouldHideNotificationCheckbox() && <div className="pt-3 border-t space-y-3">
                      <div className="flex items-center gap-2">
-                       <Checkbox
-                         id="send-notification"
-                         checked={sendNotification}
-                         onCheckedChange={(checked) => {
-                           setSendNotification(checked as boolean);
-                           if (!checked) setSelectedTemplate('');
-                         }}
-                       />
+                       <Checkbox id="send-notification" checked={sendNotification} onCheckedChange={checked => {
+                      setSendNotification(checked as boolean);
+                      if (!checked) setSelectedTemplate('');
+                    }} />
                        <label htmlFor="send-notification" className="text-sm font-medium">
                          Send Notification
                        </label>
                      </div>
-                     {sendNotification && (
-                       <div className="ml-6">
+                     {sendNotification && <div className="ml-6">
                          <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
                            <SelectTrigger className="h-8 w-full">
                              <SelectValue placeholder="Select template" />
                            </SelectTrigger>
                            <SelectContent>
-                             {taskTemplates.map((template) => (
-                               <SelectItem key={template.id} value={template.id}>
+                             {taskTemplates.map(template => <SelectItem key={template.id} value={template.id}>
                                  {template.name}
-                               </SelectItem>
-                             ))}
+                               </SelectItem>)}
                            </SelectContent>
                          </Select>
-                       </div>
-                     )}
-                   </div>
-                 )}
+                       </div>}
+                   </div>}
                </CardContent>
              </Card>
            </div>
@@ -685,29 +642,17 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
           {/* Description */}
           <div>
             <h3 className="font-semibold mb-2">Description</h3>
-            {isEditing && canEdit ? (
-              <Textarea
-                value={editData.description}
-                onChange={(e) => setEditData({...editData, description: e.target.value})}
-                rows={4}
-                placeholder="Detailed description of the task..."
-              />
-            ) : (
-              <p className="text-sm text-gray-700 whitespace-pre-wrap">
+            {isEditing && canEdit ? <Textarea value={editData.description} onChange={e => setEditData({
+              ...editData,
+              description: e.target.value
+            })} rows={4} placeholder="Detailed description of the task..." /> : <p className="text-sm text-gray-700 whitespace-pre-wrap">
                 {currentTask.description || 'No description'}
-              </p>
-            )}
+              </p>}
           </div>
 
           <Separator />
 
-          <TaskCommentsSection
-            comments={comments}
-            isAddingComment={isAddingComment}
-            onAddComment={addComment}
-            newComment={newComment}
-            onNewCommentChange={setNewComment}
-          />
+          <TaskCommentsSection comments={comments} isAddingComment={isAddingComment} onAddComment={addComment} newComment={newComment} onNewCommentChange={setNewComment} />
         </div>
       </DialogContent>
     </Dialog>
@@ -751,11 +696,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({ task, open, onOpen
         </AlertDialogContent>
       </AlertDialog>
 
-      <UnsavedCommentModal
-        open={showUnsavedCommentModal}
-        onAddComment={handleAddComment}
-        onDiscard={handleDiscardComment}
-      />
-    </>
-  );
+      <UnsavedCommentModal open={showUnsavedCommentModal} onAddComment={handleAddComment} onDiscard={handleDiscardComment} />
+    </>;
 };
