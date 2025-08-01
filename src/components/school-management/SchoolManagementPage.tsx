@@ -31,6 +31,7 @@ interface School {
   phone?: string;
   email?: string;
   competition_module?: boolean;
+  competition_portal?: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by?: string;
@@ -70,6 +71,7 @@ const SchoolManagementPage = () => {
     phone: '',
     email: '',
     competition_module: false,
+    competition_portal: false,
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: '',
@@ -123,6 +125,7 @@ const SchoolManagementPage = () => {
         phone: editingSchool.phone,
         email: editingSchool.email,
         competition_module: editingSchool.competition_module,
+        competition_portal: editingSchool.competition_portal,
         subscription_start: editingSchool.subscription_start,
         subscription_end: editingSchool.subscription_end,
         referred_by: editingSchool.referred_by,
@@ -551,14 +554,15 @@ const SchoolManagementPage = () => {
                 </div>
               </div>
 
+              <div className="space-y-2">
+                <Label htmlFor="referred_by">Referred By</Label>
+                <Input id="referred_by" value={editingSchool.referred_by || ''} onChange={e => setEditingSchool({
+              ...editingSchool,
+              referred_by: e.target.value
+            })} placeholder="Who referred this school?" />
+              </div>
+
               <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="referred_by">Referred By</Label>
-                  <Input id="referred_by" value={editingSchool.referred_by || ''} onChange={e => setEditingSchool({
-                ...editingSchool,
-                referred_by: e.target.value
-              })} placeholder="Who referred this school?" />
-                </div>
                 <div className="space-y-2">
                   <Label htmlFor="competition_module">Competition Module</Label>
                   <div className="flex items-center space-x-2 pt-2">
@@ -567,6 +571,16 @@ const SchoolManagementPage = () => {
                   competition_module: checked as boolean
                 })} />
                     <Label htmlFor="competition_module">Enable Competition Module</Label>
+                  </div>
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="competition_portal">Competition Portal</Label>
+                  <div className="flex items-center space-x-2 pt-2">
+                    <Checkbox id="competition_portal" checked={editingSchool.competition_portal || false} onCheckedChange={checked => setEditingSchool({
+                  ...editingSchool,
+                  competition_portal: checked as boolean
+                })} />
+                    <Label htmlFor="competition_portal">Enable Competition Portal</Label>
                   </div>
                 </div>
               </div>

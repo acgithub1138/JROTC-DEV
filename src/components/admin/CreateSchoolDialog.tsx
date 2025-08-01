@@ -29,6 +29,7 @@ interface NewSchool {
   email: string;
   jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   competition_module: boolean;
+  competition_portal: boolean;
   subscription_start?: string;
   subscription_end?: string;
   referred_by: string;
@@ -48,6 +49,7 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     email: '',
     jrotc_program: 'air_force',
     competition_module: false,
+    competition_portal: false,
     subscription_start: undefined,
     subscription_end: undefined,
     referred_by: '',
@@ -84,6 +86,7 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         email: '',
         jrotc_program: 'air_force',
         competition_module: false,
+        competition_portal: false,
         subscription_start: undefined,
         subscription_end: undefined,
         referred_by: '',
@@ -271,16 +274,17 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
             </div>
           </div>
 
+          <div className="space-y-2">
+            <Label htmlFor="referred_by">Referred By</Label>
+            <Input
+              id="referred_by"
+              value={newSchool.referred_by}
+              onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
+              placeholder="Who referred this school?"
+            />
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-2">
-              <Label htmlFor="referred_by">Referred By</Label>
-              <Input
-                id="referred_by"
-                value={newSchool.referred_by}
-                onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
-                placeholder="Who referred this school?"
-              />
-            </div>
             <div className="space-y-2">
               <Label htmlFor="competition_module">Competition Module</Label>
               <div className="flex items-center space-x-2 pt-2">
@@ -293,6 +297,20 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
                   })}
                 />
                 <Label htmlFor="competition_module">Enable Competition Module</Label>
+              </div>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="competition_portal">Competition Portal</Label>
+              <div className="flex items-center space-x-2 pt-2">
+                <Checkbox
+                  id="competition_portal"
+                  checked={newSchool.competition_portal}
+                  onCheckedChange={(checked) => setNewSchool({ 
+                    ...newSchool, 
+                    competition_portal: checked as boolean 
+                  })}
+                />
+                <Label htmlFor="competition_portal">Enable Competition Portal</Label>
               </div>
             </div>
           </div>
