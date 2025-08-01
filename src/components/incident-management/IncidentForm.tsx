@@ -98,7 +98,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
 
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="max-w-2xl">
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Incident</DialogTitle>
         </DialogHeader>
