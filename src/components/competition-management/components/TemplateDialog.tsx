@@ -4,30 +4,26 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Button } from '@/components/ui/button';
 import { TemplateForm } from './TemplateForm';
 import { CompetitionTemplate } from '../types';
-
 interface TemplateDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   template?: CompetitionTemplate | null;
   onSubmit: (data: any) => Promise<void>;
 }
-
 export const TemplateDialog: React.FC<TemplateDialogProps> = ({
   open,
   onOpenChange,
   template,
-  onSubmit,
+  onSubmit
 }) => {
   const [useBuilder, setUseBuilder] = useState(true);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
   const handleSubmit = async (data: any) => {
     await onSubmit(data);
     setHasUnsavedChanges(false);
     onOpenChange(false);
   };
-
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen && hasUnsavedChanges) {
       setShowConfirmDialog(true);
@@ -38,46 +34,34 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
       }
     }
   };
-
   const confirmClose = () => {
     setShowConfirmDialog(false);
     setHasUnsavedChanges(false);
     onOpenChange(false);
   };
-
   const saveAndClose = async () => {
     setShowConfirmDialog(false);
     // The form will handle saving and closing via handleSubmit
     const form = document.querySelector('form');
     if (form) {
-      form.dispatchEvent(new Event('submit', { cancelable: true, bubbles: true }));
+      form.dispatchEvent(new Event('submit', {
+        cancelable: true,
+        bubbles: true
+      }));
     }
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-        <DialogContent className="max-w-3xl max-h-[90vh] overflow-y-auto">
+        <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
           <DialogHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
             <DialogTitle>
               {template ? 'Edit Template' : 'Create Template'}
             </DialogTitle>
-            <Button 
-              type="button" 
-              variant="outline" 
-              size="sm" 
-              onClick={() => setUseBuilder(!useBuilder)}
-            >
+            <Button type="button" variant="outline" size="sm" onClick={() => setUseBuilder(!useBuilder)}>
               {useBuilder ? 'Manual JSON' : 'Field Builder'}
             </Button>
           </DialogHeader>
-          <TemplateForm
-            template={template}
-            onSubmit={handleSubmit}
-            onCancel={() => handleOpenChange(false)}
-            onFormChange={setHasUnsavedChanges}
-            useBuilder={useBuilder}
-          />
+          <TemplateForm template={template} onSubmit={handleSubmit} onCancel={() => handleOpenChange(false)} onFormChange={setHasUnsavedChanges} useBuilder={useBuilder} />
         </DialogContent>
       </Dialog>
 
@@ -100,6 +84,5 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
+    </>;
 };
