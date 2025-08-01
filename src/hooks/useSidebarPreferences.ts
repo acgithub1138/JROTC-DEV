@@ -66,13 +66,12 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       return role === 'admin';
     }
 
-    // Special case for competitions - requires both permission and school setting
+    // Special case for competitions - requires permission and competition module
     if (item.id === 'competitions') {
       const moduleKey = MODULE_MAPPING[item.id];
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
       const hasCompetitionModule = userProfile?.schools?.competition_module === true;    
-      const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
-      return hasModulePermission && hasCompetitionPortal && hasCompetitionModule;
+      return hasModulePermission && hasCompetitionModule;
     }
 
     // Check permissions for regular items
