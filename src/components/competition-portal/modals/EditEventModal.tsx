@@ -236,7 +236,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           <div>
             <Label>Start Date & Time</Label>
             <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-1">
+              <div className="col-span-2">
                 <Input
                   type="date"
                   value={formData.start_date}
@@ -291,7 +291,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           <div>
             <Label>End Date & Time</Label>
             <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-1">
+              <div className="col-span-2">
                 <Input
                   type="date"
                   value={formData.end_date}
