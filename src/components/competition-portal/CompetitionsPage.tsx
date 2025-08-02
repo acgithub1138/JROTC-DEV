@@ -335,7 +335,7 @@ const CompetitionsPage = () => {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
-                                      <Edit className="w-3 h-3" />
+                                      <git-compare-arrows className="w-3 h-3" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
