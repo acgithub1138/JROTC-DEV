@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, createIcons, icons } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -335,7 +335,7 @@ const CompetitionsPage = () => {
                                 <Tooltip>
                                   <TooltipTrigger asChild>
                                     <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
-                                      <git-compare-arrows className="w-3 h-3" />
+                                      <GitCompareArrows className="w-3 h-3" />
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
