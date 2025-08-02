@@ -15,6 +15,7 @@ import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { git-compare-arrows } from 'lucide-react';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
