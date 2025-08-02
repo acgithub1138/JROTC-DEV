@@ -12,7 +12,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, git-compare-arrows } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
