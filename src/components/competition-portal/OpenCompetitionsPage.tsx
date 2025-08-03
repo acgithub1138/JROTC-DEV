@@ -1,17 +1,20 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye } from 'lucide-react';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 export const OpenCompetitionsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['open-competitions'],
@@ -28,6 +31,26 @@ export const OpenCompetitionsPage = () => {
     },
   });
 
+  const { data: competitionEvents, isLoading: isEventsLoading } = useQuery({
+    queryKey: ['competition-events', selectedCompetitionId],
+    queryFn: async () => {
+      if (!selectedCompetitionId) return [];
+      
+      const { data, error } = await supabase
+        .from('cp_comp_events')
+        .select(`
+          *,
+          event:cp_events(name, description)
+        `)
+        .eq('competition_id', selectedCompetitionId)
+        .order('start_time', { ascending: true });
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedCompetitionId && isModalOpen,
+  });
+
   const handleRegisterInterest = (competitionId: string) => {
     toast({
       title: "Interest Registered",
@@ -36,7 +59,8 @@ export const OpenCompetitionsPage = () => {
   };
 
   const handleViewDetails = (competitionId: string) => {
-    navigate(`/app/competition-portal/competition-details/${competitionId}`);
+    setSelectedCompetitionId(competitionId);
+    setIsModalOpen(true);
   };
 
   if (error) {
@@ -186,6 +210,113 @@ export const OpenCompetitionsPage = () => {
           </p>
         </div>
       )}
+
+      <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
+        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Competition Events
+              {selectedCompetitionId && competitions && (
+                <span className="text-sm font-normal text-muted-foreground ml-2">
+                  - {competitions.find(c => c.id === selectedCompetitionId)?.name}
+                </span>
+              )}
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {isEventsLoading ? (
+              <div className="space-y-4">
+                {[...Array(3)].map((_, i) => (
+                  <div key={i} className="animate-pulse">
+                    <div className="h-4 bg-gray-200 rounded mb-2"></div>
+                    <div className="h-20 bg-gray-200 rounded"></div>
+                  </div>
+                ))}
+              </div>
+            ) : competitionEvents && competitionEvents.length > 0 ? (
+              <div className="space-y-4">
+                {competitionEvents.map((event) => (
+                  <Card key={event.id}>
+                    <CardContent className="pt-6">
+                      <div className="space-y-3">
+                        <div className="flex items-center justify-between">
+                          <h3 className="text-lg font-semibold">
+                            {(event.event as any)?.name || 'Event Name Not Available'}
+                          </h3>
+                          {(event as any).fee && (
+                            <Badge variant="secondary">
+                              <DollarSign className="w-3 h-3 mr-1" />
+                              ${((event as any).fee as number).toFixed(2)}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {(event.event as any)?.description && (
+                          <p className="text-muted-foreground">
+                            {(event.event as any).description}
+                          </p>
+                        )}
+
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                          {event.start_time && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              <span>
+                                <strong>Start:</strong> {format(new Date(event.start_time), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {event.end_time && (
+                            <div className="flex items-center gap-2">
+                              <Clock className="w-4 h-4" />
+                              <span>
+                                <strong>End:</strong> {format(new Date(event.end_time), 'MMM d, yyyy h:mm a')}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {event.location && (
+                            <div className="flex items-center gap-2">
+                              <LocationIcon className="w-4 h-4" />
+                              <span>
+                                <strong>Location:</strong> {event.location}
+                              </span>
+                            </div>
+                          )}
+                          
+                          {event.max_participants && (
+                            <div className="flex items-center gap-2">
+                              <Users className="w-4 h-4" />
+                              <span>
+                                <strong>Max Participants:</strong> {event.max_participants}
+                              </span>
+                            </div>
+                          )}
+                        </div>
+
+                        {event.notes && (
+                          <div className="pt-2 border-t">
+                            <p className="text-sm text-muted-foreground">
+                              <strong>Notes:</strong> {event.notes}
+                            </p>
+                          </div>
+                        )}
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
+                <p>No events found for this competition.</p>
+              </div>
+            )}
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
