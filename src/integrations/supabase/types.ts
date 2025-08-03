@@ -533,7 +533,6 @@ export type Database = {
           notes: string | null
           resources: string[] | null
           school_id: string
-          schools: string[] | null
           sop: string | null
           sop_link: string | null
           sop_text: string | null
@@ -555,7 +554,6 @@ export type Database = {
           notes?: string | null
           resources?: string[] | null
           school_id: string
-          schools?: string[] | null
           sop?: string | null
           sop_link?: string | null
           sop_text?: string | null
@@ -577,7 +575,6 @@ export type Database = {
           notes?: string | null
           resources?: string[] | null
           school_id?: string
-          schools?: string[] | null
           sop?: string | null
           sop_link?: string | null
           sop_text?: string | null
@@ -753,7 +750,6 @@ export type Database = {
           max_participants: number | null
           name: string
           program: Database["public"]["Enums"]["jrotc_program"] | null
-          registered_schools: string[] | null
           registration_deadline: string | null
           school_id: string
           start_date: string
@@ -777,7 +773,6 @@ export type Database = {
           max_participants?: number | null
           name: string
           program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registered_schools?: string[] | null
           registration_deadline?: string | null
           school_id: string
           start_date: string
@@ -801,7 +796,6 @@ export type Database = {
           max_participants?: number | null
           name?: string
           program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registered_schools?: string[] | null
           registration_deadline?: string | null
           school_id?: string
           start_date?: string
