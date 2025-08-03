@@ -1,15 +1,17 @@
 import React from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
 export const OpenCompetitionsPage = () => {
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['open-competitions'],
@@ -31,6 +33,10 @@ export const OpenCompetitionsPage = () => {
       title: "Interest Registered",
       description: "We've noted your school's interest in this competition. The host school will contact you with more details.",
     });
+  };
+
+  const handleViewDetails = (competitionId: string) => {
+    navigate(`/app/competition-portal/competition-details/${competitionId}`);
   };
 
   if (error) {
@@ -150,12 +156,22 @@ export const OpenCompetitionsPage = () => {
                   </div>
                 </div>
                 
-                <Button 
-                  className="w-full" 
-                  onClick={() => handleRegisterInterest(competition.id)}
-                >
-                  Register Interest
-                </Button>
+                <div className="flex gap-2">
+                  <Button 
+                    variant="outline" 
+                    className="flex-1" 
+                    onClick={() => handleViewDetails(competition.id)}
+                  >
+                    <Eye className="w-4 h-4 mr-2" />
+                    View Details
+                  </Button>
+                  <Button 
+                    className="flex-1" 
+                    onClick={() => handleRegisterInterest(competition.id)}
+                  >
+                    Register
+                  </Button>
+                </div>
               </CardContent>
             </Card>
           ))}
