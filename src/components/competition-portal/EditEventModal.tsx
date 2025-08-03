@@ -42,7 +42,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     name: '',
     description: '',
     score_sheet: '',
-    jrotc_program: ''
+    jrotc_program: '',
+    fee: ''
   });
 
   // Reset form when event changes or modal opens
@@ -52,7 +53,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         name: event.name || '',
         description: event.description || '',
         score_sheet: event.score_sheet || '',
-        jrotc_program: event.jrotc_program || ''
+        jrotc_program: event.jrotc_program || '',
+        fee: (event as any).fee?.toString() || ''
       });
     }
   }, [event, open]);
@@ -88,8 +90,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         name: formData.name,
         description: formData.description || null,
         score_sheet: formData.score_sheet || null,
-        jrotc_program: formData.jrotc_program as any || null
-      });
+        jrotc_program: formData.jrotc_program as any || null,
+        fee: formData.fee ? parseFloat(formData.fee) : null
+      } as any);
       onOpenChange(false);
       onSuccess?.();
     } catch (error) {
@@ -142,6 +145,14 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
             ...prev,
             name: e.target.value
           }))} placeholder="Enter event name" required />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="fee">Event Fee</Label>
+            <Input id="fee" type="number" step="0.01" min="0" value={formData.fee} onChange={e => setFormData(prev => ({
+            ...prev,
+            fee: e.target.value
+          }))} placeholder="0.00" />
           </div>
 
           <div className="space-y-2">

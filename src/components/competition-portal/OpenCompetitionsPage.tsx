@@ -138,8 +138,8 @@ export const OpenCompetitionsPage = () => {
                     </div>
                   )}
                   <div className="text-sm">
-                    <strong>Hosting School:</strong> {competition.hosting_school}
-                  </div>                  
+                    <strong>Hosting School:</strong> {(competition as any).hosting_school || 'Not specified'}
+                  </div>
                 </div>
                 
                 <Button 

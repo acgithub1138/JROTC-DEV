@@ -62,7 +62,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     registration_deadline: '',
     is_public: true,
     program: 'air_force',
-    status: 'draft'
+    status: 'draft',
+    fee: ''
   });
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -90,7 +91,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         registration_deadline: competition.registration_deadline || '',
         is_public: competition.is_public,
         program: competition.program || 'air_force',
-        status: competition.status || 'draft'
+        status: competition.status || 'draft',
+        fee: (competition as any).fee?.toString() || ''
       });
       setStartDate(startDate || undefined);
       setEndDate(endDate || undefined);
@@ -169,7 +171,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         registration_deadline: formData.registration_deadline || null,
         is_public: formData.is_public,
         program: formData.program,
-        status: formData.status
+        status: formData.status,
+        fee: formData.fee ? parseFloat(formData.fee) : null
       };
       await onSubmit(submitData);
     } finally {
@@ -344,9 +347,15 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           </div>
 
           {/* Participants */}
-          <div>
-            <Label htmlFor="max_participants">Max Participants</Label>
-            <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => handleInputChange('max_participants', e.target.value)} placeholder="Enter maximum number of participants" min="1" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="max_participants">Max Participants</Label>
+              <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => handleInputChange('max_participants', e.target.value)} placeholder="Enter maximum number of participants" min="1" />
+            </div>
+            <div>
+              <Label htmlFor="fee">Entry Fee</Label>
+              <Input id="fee" type="number" step="0.01" min="0" value={formData.fee} onChange={e => handleInputChange('fee', e.target.value)} placeholder="0.00" />
+            </div>
           </div>
 
           <DialogFooter>

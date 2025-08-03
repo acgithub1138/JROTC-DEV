@@ -36,6 +36,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     end_hour: '',
     end_minute: '',
     max_participants: '',
+    fee: '',
     notes: '',
     judges: [] as string[],
     resources: [] as string[]
@@ -166,15 +167,14 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
-      const eventData: Omit<CompEventInsert, 'school_id' | 'created_by'> & {
-        competition_id: string;
-      } = {
+      const eventData: any = {
         competition_id: competitionId,
         event: formData.event,
         location: formData.location || null,
         start_time: start_time || null,
         end_time: end_time || null,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
+        fee: formData.fee ? parseFloat(formData.fee) : null,
         notes: formData.notes || null,
         judges: formData.judges,
         resources: formData.resources
@@ -191,6 +191,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         end_hour: '',
         end_minute: '',
         max_participants: '',
+        fee: '',
         notes: '',
         judges: [],
         resources: []
@@ -351,12 +352,21 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="max_participants">Max Participants</Label>
-            <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
-            ...prev,
-            max_participants: e.target.value
-          }))} placeholder="Maximum number of participants" />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="max_participants">Max Participants</Label>
+              <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
+              ...prev,
+              max_participants: e.target.value
+            }))} placeholder="Maximum number of participants" />
+            </div>
+            <div>
+              <Label htmlFor="fee">Event Fee</Label>
+              <Input id="fee" type="number" step="0.01" min="0" value={formData.fee} onChange={e => setFormData(prev => ({
+              ...prev,
+              fee: e.target.value
+            }))} placeholder="0.00" />
+            </div>
           </div>
 
           <div>

@@ -29,6 +29,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     location: competition?.location || '',
     competition_date: '',
     program: (competition as any)?.program || 'air_force',
+    fee: (competition as any)?.fee?.toString() || '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -79,6 +80,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         start_date: formData.competition_date,
         end_date: formData.competition_date,
         program: formData.program,
+        fee: formData.fee ? parseFloat(formData.fee) : null,
         ...addressData
       };
       
@@ -127,16 +129,28 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
         </div>
       </div>
      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-         <div className="space-y-2">
-          <Label htmlFor="competition_date">Competition Date *</Label>
-          <Input
-            id="competition_date"
-            type="date"
-            value={formData.competition_date}
-            onChange={(e) => updateFormData('competition_date', e.target.value)}
-            required
-          />
-        </div>
+       <div className="space-y-2">
+         <Label htmlFor="competition_date">Competition Date *</Label>
+         <Input
+           id="competition_date"
+           type="date"
+           value={formData.competition_date}
+           onChange={(e) => updateFormData('competition_date', e.target.value)}
+           required
+         />
+       </div>
+       <div className="space-y-2">
+         <Label htmlFor="fee">Entry Fee</Label>
+         <Input
+           id="fee"
+           type="number"
+           step="0.01"
+           min="0"
+           value={formData.fee}
+           onChange={(e) => updateFormData('fee', e.target.value)}
+           placeholder="0.00"
+         />
+       </div>
       <div className="space-y-2">
         <Label htmlFor="location">Location Search</Label>
         <AddressLookupField
