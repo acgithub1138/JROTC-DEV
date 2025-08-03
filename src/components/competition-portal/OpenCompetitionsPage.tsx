@@ -9,12 +9,15 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
+import { CompetitionRegistrationModal } from './CompetitionRegistrationModal';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const OpenCompetitionsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
 
   const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['open-competitions'],
@@ -48,14 +51,12 @@ export const OpenCompetitionsPage = () => {
       if (error) throw error;
       return data;
     },
-    enabled: !!selectedCompetitionId && isModalOpen,
+    enabled: !!selectedCompetitionId && (isModalOpen || isRegistrationModalOpen),
   });
 
   const handleRegisterInterest = (competitionId: string) => {
-    toast({
-      title: "Interest Registered",
-      description: "We've noted your school's interest in this competition. The host school will contact you with more details.",
-    });
+    setSelectedCompetitionId(competitionId);
+    setIsRegistrationModalOpen(true);
   };
 
   const handleViewDetails = (competitionId: string) => {
@@ -317,6 +318,14 @@ export const OpenCompetitionsPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <CompetitionRegistrationModal
+        isOpen={isRegistrationModalOpen}
+        onClose={() => setIsRegistrationModalOpen(false)}
+        competition={selectedCompetitionId && competitions ? competitions.find(c => c.id === selectedCompetitionId) || null : null}
+        events={competitionEvents || []}
+        isLoading={isEventsLoading}
+      />
     </div>
   );
 };
