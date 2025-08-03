@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, MapPin, Users, Trophy } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 
@@ -91,6 +91,14 @@ export const OpenCompetitionsPage = () => {
               </CardHeader>
               <CardContent className="space-y-4">
                 <div className="space-y-2 text-sm text-gray-600">
+                  {(competition as any).fee && (
+                    <div className="flex items-center gap-2">
+                      <DollarSign className="w-4 h-4" />
+                      <span className="font-medium text-green-600">
+                        ${((competition as any).fee as number).toFixed(2)} entry fee
+                      </span>
+                    </div>
+                  )}
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-4 h-4" />
                     <span>
