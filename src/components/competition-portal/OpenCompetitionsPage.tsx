@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export const OpenCompetitionsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
+  const { userProfile } = useAuth();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -32,6 +33,23 @@ export const OpenCompetitionsPage = () => {
       if (error) throw error;
       return data;
     },
+  });
+
+  // Query to check which competitions the user's school is registered for
+  const { data: registrations } = useQuery({
+    queryKey: ['school-registrations', userProfile?.school_id],
+    queryFn: async () => {
+      if (!userProfile?.school_id) return [];
+      
+      const { data, error } = await supabase
+        .from('cp_event_registrations')
+        .select('competition_id')
+        .eq('school_id', userProfile.school_id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!userProfile?.school_id,
   });
 
   const { data: competitionEvents, isLoading: isEventsLoading } = useQuery({
@@ -62,6 +80,10 @@ export const OpenCompetitionsPage = () => {
   const handleViewDetails = (competitionId: string) => {
     setSelectedCompetitionId(competitionId);
     setIsModalOpen(true);
+  };
+
+  const isRegistered = (competitionId: string) => {
+    return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
   };
 
   if (error) {
@@ -105,8 +127,15 @@ export const OpenCompetitionsPage = () => {
       ) : competitions && competitions.length > 0 ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {competitions.map((competition) => (
-            <Card key={competition.id} className="hover:shadow-lg transition-shadow">
-              <CardHeader>
+            <Card key={competition.id} className="hover:shadow-lg transition-shadow relative">
+              {isRegistered(competition.id) && (
+                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
+                  <Badge variant="default" className="bg-green-500 text-white">
+                    Registered
+                  </Badge>
+                </div>
+              )}
+              <CardHeader className={isRegistered(competition.id) ? "pt-12" : ""}>
                 <div className="flex items-start justify-between">
                   <div className="flex-1">
                     <CardTitle className="text-lg line-clamp-2">{competition.name}</CardTitle>
@@ -194,7 +223,7 @@ export const OpenCompetitionsPage = () => {
                     className="flex-1" 
                     onClick={() => handleRegisterInterest(competition.id)}
                   >
-                    Register
+                    {isRegistered(competition.id) ? 'Edit Registration' : 'Register'}
                   </Button>
                 </div>
               </CardContent>
