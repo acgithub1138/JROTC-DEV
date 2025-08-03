@@ -50,7 +50,10 @@ export const useCompetitionEvents = (competitionId?: string) => {
           school_id: userProfile.school_id,
           created_by: userProfile.id
         })
-        .select()
+        .select(`
+          *,
+          cp_events:event(name)
+        `)
         .single();
 
       if (error) throw error;
@@ -76,7 +79,10 @@ export const useCompetitionEvents = (competitionId?: string) => {
           updated_by: userProfile?.id
         })
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          cp_events:event(name)
+        `)
         .single();
 
       if (error) throw error;
