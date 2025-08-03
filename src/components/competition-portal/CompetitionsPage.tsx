@@ -33,7 +33,6 @@ interface Competition {
   location: string;
   max_participants?: number;
   registration_deadline?: string;
-  registered_schools: string[];
   status: string;
   is_public: boolean;
   school_id: string;
@@ -46,11 +45,10 @@ interface School {
 }
 const CompetitionsPage = () => {
   const navigate = useNavigate();
-  const {
-    userProfile
-  } = useAuth();
+  const { userProfile } = useAuth();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
+  const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
@@ -62,6 +60,7 @@ const CompetitionsPage = () => {
   useEffect(() => {
     fetchCompetitions();
     fetchSchools();
+    fetchRegistrationCounts();
   }, []);
   const fetchCompetitions = async () => {
     try {
@@ -91,6 +90,26 @@ const CompetitionsPage = () => {
       setSchools(data || []);
     } catch (error) {
       console.error('Error fetching schools:', error);
+    }
+  };
+
+  const fetchRegistrationCounts = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cp_comp_schools')
+        .select('competition_id');
+
+      if (error) throw error;
+
+      // Count registrations per competition
+      const counts: Record<string, number> = {};
+      data?.forEach(registration => {
+        counts[registration.competition_id] = (counts[registration.competition_id] || 0) + 1;
+      });
+      
+      setRegistrationCounts(counts);
+    } catch (error) {
+      console.error('Error fetching registration counts:', error);
     }
   };
   const getSchoolName = (schoolId: string) => {
@@ -139,6 +158,7 @@ const CompetitionsPage = () => {
       if (error) throw error;
       toast.success('Competition created successfully');
       fetchCompetitions();
+      fetchRegistrationCounts();
       setShowCreateDialog(false);
     } catch (error) {
       console.error('Error creating competition:', error);
@@ -321,13 +341,13 @@ const CompetitionsPage = () => {
                            </Badge>
                          )}
                        </TableCell>
-                      <TableCell>
-                        <div className="flex items-center">
-                          <Users className="w-4 h-4 mr-1 text-muted-foreground" />
-                          {competition.registered_schools.length}
-                          {competition.max_participants && ` / ${competition.max_participants}`}
-                        </div>
-                      </TableCell>
+                       <TableCell>
+                         <div className="flex items-center">
+                           <Users className="w-4 h-4 mr-1 text-muted-foreground" />
+                           {registrationCounts[competition.id] || 0}
+                           {competition.max_participants && ` / ${competition.max_participants}`}
+                         </div>
+                       </TableCell>
                        <TableCell>
                           <div className="flex items-center justify-center gap-2">
                             {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (

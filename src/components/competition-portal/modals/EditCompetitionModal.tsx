@@ -20,7 +20,6 @@ interface Competition {
   location: string;
   max_participants?: number;
   registration_deadline?: string;
-  registered_schools: string[];
   status: string;
   is_public: boolean;
   school_id: string;

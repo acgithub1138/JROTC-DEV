@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -18,7 +18,6 @@ interface Competition {
   location: string;
   max_participants?: number;
   registration_deadline?: string;
-  registered_schools: string[];
   status: string;
   is_public: boolean;
   school_id: string;
@@ -44,13 +43,33 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
   hostSchoolName,
   onCompetitionUpdated
 }) => {
-  const {
-    userProfile
-  } = useAuth();
-  const {
-    canEdit
-  } = useTablePermissions('cp_competitions');
+  const { userProfile } = useAuth();
+  const [registrationCount, setRegistrationCount] = useState<number>(0);
   const [showEditModal, setShowEditModal] = useState(false);
+
+  useEffect(() => {
+    if (competition && open) {
+      fetchRegistrationCount();
+    }
+  }, [competition, open]);
+
+  const fetchRegistrationCount = async () => {
+    if (!competition) return;
+    
+    try {
+      const { data, error } = await supabase
+        .from('cp_comp_schools')
+        .select('id')
+        .eq('competition_id', competition.id);
+
+      if (error) throw error;
+      setRegistrationCount(data?.length || 0);
+    } catch (error) {
+      console.error('Error fetching registration count:', error);
+    }
+  };
+
+  const { canEdit } = useTablePermissions('cp_competitions');
   if (!competition) return null;
   const getStatusBadgeVariant = (status: string) => {
     switch (status) {
@@ -182,7 +201,7 @@ export const ViewCompetitionModal: React.FC<ViewCompetitionModalProps> = ({
           <div className="flex items-center gap-2">
             <Users className="w-5 h-5 text-muted-foreground" />
             <span className="font-medium">Registered Schools:</span>
-            <span>{competition.registered_schools.length}</span>
+            <span>{registrationCount}</span>
             {competition.max_participants && <span className="text-muted-foreground">/ {competition.max_participants} max</span>}
           </div>
 
