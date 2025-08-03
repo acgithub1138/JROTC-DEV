@@ -16,7 +16,6 @@ interface CompetitionEvent {
   start_time: string | null;
   end_time: string | null;
   max_participants: number | null;
-  schools: string[] | null;
   event: {
     name: string;
     description: string | null;
@@ -29,7 +28,6 @@ interface Competition {
   fee: number | null;
   start_date: string;
   end_date: string;
-  registered_schools: string[] | null;
 }
 
 interface CompetitionRegistrationModalProps {
@@ -105,29 +103,21 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
 
       if (compError) throw compError;
 
-      // Update competition's registered_schools array
-      const { error: updateCompError } = await supabase
-        .from('cp_competitions')
-        .update({
-          registered_schools: [...(competition.registered_schools || []), userProfile.school_id]
-        })
-        .eq('id', competition.id);
+      // Register for selected events using the new cp_event_registrations table
+      const eventRegistrations = Array.from(selectedEvents).map(eventId => ({
+        competition_id: competition.id,
+        event_id: eventId,
+        school_id: userProfile.school_id,
+        status: 'registered',
+        created_by: userProfile.id
+      }));
 
-      if (updateCompError) throw updateCompError;
+      if (eventRegistrations.length > 0) {
+        const { error: eventRegError } = await supabase
+          .from('cp_event_registrations')
+          .insert(eventRegistrations);
 
-      // Update each selected event's schools array
-      for (const eventId of selectedEvents) {
-        const event = events.find(e => e.id === eventId);
-        if (event) {
-          const { error: updateEventError } = await supabase
-            .from('cp_comp_events')
-            .update({
-              schools: [...(event.schools || []), userProfile.school_id]
-            })
-            .eq('id', eventId);
-
-          if (updateEventError) throw updateEventError;
-        }
+        if (eventRegError) throw eventRegError;
       }
 
       toast({
