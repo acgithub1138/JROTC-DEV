@@ -43,13 +43,31 @@ export const OpenCompetitionsPage = () => {
       
       const { data, error } = await supabase
         .from('cp_event_registrations')
-        .select('competition_id')
+        .select('competition_id, event_id')
         .eq('school_id', userProfile.school_id);
 
       if (error) throw error;
       return data;
     },
     enabled: !!userProfile?.school_id,
+  });
+
+  // Query to get current registrations for the selected competition
+  const { data: currentRegistrations } = useQuery({
+    queryKey: ['current-registrations', selectedCompetitionId, userProfile?.school_id],
+    queryFn: async () => {
+      if (!selectedCompetitionId || !userProfile?.school_id) return [];
+      
+      const { data, error } = await supabase
+        .from('cp_event_registrations')
+        .select('event_id')
+        .eq('competition_id', selectedCompetitionId)
+        .eq('school_id', userProfile.school_id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedCompetitionId && !!userProfile?.school_id && isRegistrationModalOpen,
   });
 
   const { data: competitionEvents, isLoading: isEventsLoading } = useQuery({
@@ -354,6 +372,7 @@ export const OpenCompetitionsPage = () => {
         competition={selectedCompetitionId && competitions ? competitions.find(c => c.id === selectedCompetitionId) || null : null}
         events={competitionEvents || []}
         isLoading={isEventsLoading}
+        currentRegistrations={currentRegistrations || []}
       />
     </div>
   );

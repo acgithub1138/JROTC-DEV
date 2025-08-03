@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -36,6 +36,7 @@ interface CompetitionRegistrationModalProps {
   competition: Competition | null;
   events: CompetitionEvent[];
   isLoading: boolean;
+  currentRegistrations: { event_id: string }[];
 }
 
 export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModalProps> = ({
@@ -43,12 +44,24 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   onClose,
   competition,
   events,
-  isLoading
+  isLoading,
+  currentRegistrations
 }) => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [isRegistering, setIsRegistering] = useState(false);
+  const isEditing = currentRegistrations.length > 0;
+
+  // Initialize selected events with current registrations
+  useEffect(() => {
+    if (isOpen && currentRegistrations.length > 0) {
+      const registeredEventIds = new Set(currentRegistrations.map(reg => reg.event_id));
+      setSelectedEvents(registeredEventIds);
+    } else if (isOpen) {
+      setSelectedEvents(new Set());
+    }
+  }, [isOpen, currentRegistrations]);
 
   const totalCost = useMemo(() => {
     const competitionFee = competition?.fee || 0;
@@ -91,17 +104,28 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     setIsRegistering(true);
 
     try {
-      // Register for the competition
-      const { error: compError } = await supabase
-        .from('cp_comp_schools')
-        .insert({
-          competition_id: competition.id,
-          school_id: userProfile.school_id,
-          status: 'registered',
-          created_by: userProfile.id
-        });
+      if (isEditing) {
+        // For editing, first delete existing registrations, then insert new ones
+        const { error: deleteError } = await supabase
+          .from('cp_event_registrations')
+          .delete()
+          .eq('competition_id', competition.id)
+          .eq('school_id', userProfile.school_id);
 
-      if (compError) throw compError;
+        if (deleteError) throw deleteError;
+      } else {
+        // Register for the competition (only for new registrations)
+        const { error: compError } = await supabase
+          .from('cp_comp_schools')
+          .insert({
+            competition_id: competition.id,
+            school_id: userProfile.school_id,
+            status: 'registered',
+            created_by: userProfile.id
+          });
+
+        if (compError) throw compError;
+      }
 
       // Register for selected events using the new cp_event_registrations table
       const eventRegistrations = Array.from(selectedEvents).map(eventId => ({
@@ -121,8 +145,8 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       }
 
       toast({
-        title: "Registration Successful!",
-        description: `Successfully registered for ${competition.name} and ${selectedEvents.size} event(s). Total cost: $${totalCost.toFixed(2)}`,
+        title: isEditing ? "Registration Updated!" : "Registration Successful!",
+        description: `Successfully ${isEditing ? 'updated' : 'registered for'} ${competition.name} and ${selectedEvents.size} event(s). Total cost: $${totalCost.toFixed(2)}`,
       });
 
       onClose();
@@ -130,8 +154,8 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     } catch (error: any) {
       console.error('Registration error:', error);
       toast({
-        title: "Registration Failed",
-        description: error.message || "There was an error registering for the competition. Please try again.",
+        title: isEditing ? "Update Failed" : "Registration Failed",
+        description: error.message || `There was an error ${isEditing ? 'updating' : 'registering for'} the competition. Please try again.`,
         variant: "destructive"
       });
     } finally {
@@ -150,7 +174,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="w-5 h-5" />
-            Register for Competition
+            {isEditing ? 'Edit Registration' : 'Register for Competition'}
             {competition && (
               <span className="text-sm font-normal text-muted-foreground">
                 - {competition.name}
@@ -279,7 +303,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                 Cancel
               </Button>
               <Button onClick={handleRegister} disabled={isRegistering || selectedEvents.size === 0}>
-                {isRegistering ? 'Registering...' : 'Register'}
+                {isRegistering ? (isEditing ? 'Updating...' : 'Registering...') : (isEditing ? 'Update Registration' : 'Register')}
               </Button>
             </div>
           </div>
