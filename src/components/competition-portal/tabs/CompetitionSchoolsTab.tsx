@@ -39,7 +39,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
           {schools.map(school => <div key={school.id} className="p-4 border rounded-lg bg-card">
               <div className="flex items-center justify-between">
                 <div>
-                  <h3 className="font-medium">School {school.school_id}</h3>
+                  <h3 className="font-medium">{school.schools?.name || 'Unknown School'}</h3>
                   <p className="text-sm text-muted-foreground">
                     Status: {school.status}
                     {school.resource && ` • Resource: ${school.resource}`}

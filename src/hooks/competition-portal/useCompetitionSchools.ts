@@ -4,7 +4,12 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'];
+type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'] & {
+  schools?: {
+    id: string;
+    name: string;
+  };
+};
 type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'];
 type CompSchoolUpdate = Database['public']['Tables']['cp_comp_schools']['Update'];
 
@@ -20,7 +25,13 @@ export const useCompetitionSchools = (competitionId?: string) => {
       setIsLoading(true);
       const { data, error } = await supabase
         .from('cp_comp_schools')
-        .select('*')
+        .select(`
+          *,
+          schools!inner(
+            id,
+            name
+          )
+        `)
         .eq('competition_id', competitionId)
         .order('created_at', { ascending: true });
 
@@ -44,7 +55,13 @@ export const useCompetitionSchools = (competitionId?: string) => {
           ...schoolData,
           created_by: userProfile.id
         })
-        .select()
+        .select(`
+          *,
+          schools!inner(
+            id,
+            name
+          )
+        `)
         .single();
 
       if (error) throw error;
@@ -70,7 +87,13 @@ export const useCompetitionSchools = (competitionId?: string) => {
           updated_by: userProfile?.id
         })
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          schools!inner(
+            id,
+            name
+          )
+        `)
         .single();
 
       if (error) throw error;
