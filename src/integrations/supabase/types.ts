@@ -525,6 +525,7 @@ export type Database = {
           created_by: string | null
           end_time: string | null
           event: string | null
+          fee: number | null
           id: string
           judges: string[] | null
           location: string | null
@@ -546,6 +547,7 @@ export type Database = {
           created_by?: string | null
           end_time?: string | null
           event?: string | null
+          fee?: number | null
           id?: string
           judges?: string[] | null
           location?: string | null
@@ -567,6 +569,7 @@ export type Database = {
           created_by?: string | null
           end_time?: string | null
           event?: string | null
+          fee?: number | null
           id?: string
           judges?: string[] | null
           location?: string | null
@@ -742,11 +745,14 @@ export type Database = {
           created_by: string | null
           description: string | null
           end_date: string
+          fee: number | null
+          hosting_school: string | null
           id: string
           is_public: boolean
           location: string
           max_participants: number | null
           name: string
+          program: Database["public"]["Enums"]["jrotc_program"] | null
           registered_schools: string[] | null
           registration_deadline: string | null
           school_id: string
@@ -763,11 +769,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date: string
+          fee?: number | null
+          hosting_school?: string | null
           id?: string
           is_public?: boolean
           location: string
           max_participants?: number | null
           name: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
           registered_schools?: string[] | null
           registration_deadline?: string | null
           school_id: string
@@ -784,11 +793,14 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string
+          fee?: number | null
+          hosting_school?: string | null
           id?: string
           is_public?: boolean
           location?: string
           max_participants?: number | null
           name?: string
+          program?: Database["public"]["Enums"]["jrotc_program"] | null
           registered_schools?: string[] | null
           registration_deadline?: string | null
           school_id?: string
@@ -2420,6 +2432,7 @@ export type Database = {
           address: string | null
           city: string | null
           competition_module: boolean | null
+          competition_portal: boolean
           contact: string | null
           created_at: string
           email: string | null
@@ -2442,6 +2455,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           competition_module?: boolean | null
+          competition_portal?: boolean
           contact?: string | null
           created_at?: string
           email?: string | null
@@ -2464,6 +2478,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           competition_module?: boolean | null
+          competition_portal?: boolean
           contact?: string | null
           created_at?: string
           email?: string | null
