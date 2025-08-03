@@ -95,7 +95,7 @@ export const OpenCompetitionsPage = () => {
                     <div className="flex items-center gap-2">
                       <DollarSign className="w-4 h-4" />
                       <span className="font-medium text-green-600">
-                        ${((competition as any).fee as number).toFixed(2)} entry fee
+                        {((competition as any).fee as number).toFixed(2)} entry fee
                       </span>
                     </div>
                   )}
