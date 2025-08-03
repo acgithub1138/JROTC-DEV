@@ -97,7 +97,13 @@ const CompetitionsPage = () => {
     try {
       const { data, error } = await supabase
         .from('cp_comp_schools')
-        .select('competition_id');
+        .select(`
+          competition_id,
+          cp_competitions!inner(
+            school_id
+          )
+        `)
+        .eq('cp_competitions.school_id', userProfile?.school_id);
 
       if (error) throw error;
 
