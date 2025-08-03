@@ -682,6 +682,7 @@ export type Database = {
           notes: string | null
           resource: string | null
           school_id: string
+          school_name: string | null
           status: string
           updated_at: string
           updated_by: string | null
@@ -694,6 +695,7 @@ export type Database = {
           notes?: string | null
           resource?: string | null
           school_id: string
+          school_name?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
@@ -706,6 +708,7 @@ export type Database = {
           notes?: string | null
           resource?: string | null
           school_id?: string
+          school_name?: string | null
           status?: string
           updated_at?: string
           updated_by?: string | null
@@ -3294,6 +3297,10 @@ export type Database = {
           p_processing_time_ms?: number
           p_school_id?: string
         }
+        Returns: undefined
+      }
+      populate_comp_schools_names: {
+        Args: Record<PropertyKey, never>
         Returns: undefined
       }
       process_email_batch: {
