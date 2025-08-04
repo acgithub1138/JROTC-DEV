@@ -62,11 +62,6 @@ const competitionMenuItems = [{
   label: 'Analytics & Reports',
   icon: BarChart3,
   path: '/app/competition-portal/analytics'
-}, {
-  id: 'competition-settings',
-  label: 'Settings',
-  icon: Settings,
-  path: '/app/competition-portal/settings'
 }];
 
 // Limited menu items for schools without competition_portal access
