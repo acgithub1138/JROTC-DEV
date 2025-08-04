@@ -19,7 +19,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         value={value}
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
-        className="w-16 h-8 p-1 rounded"
+        className="w-8 h-8 p-1 rounded"
       />
       <Input
         type="text"
@@ -27,7 +27,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder="#3B82F6"
-        className="flex-1 h-2"
+        className="flex-1 h-8"
       />
     </div>
   );
