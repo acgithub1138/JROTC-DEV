@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -9,6 +9,8 @@ import { getRanksForProgram, JROTCProgram } from '@/utils/jrotcRanks';
 import { NewCadet } from '../types';
 import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 interface AddCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,6 +25,8 @@ export const AddCadetDialog = ({
   setNewCadet,
   onSubmit
 }: AddCadetDialogProps) => {
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
   const {
     userProfile
   } = useAuth();
@@ -30,7 +34,58 @@ export const AddCadetDialog = ({
   const {
     roleOptions
   } = useCadetRoles();
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const initialData = {
+    first_name: '',
+    last_name: '',
+    email: '',
+    role: '',
+    grade: '',
+    flight: '',
+    cadet_year: '',
+    rank: ''
+  };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData: newCadet,
+    enabled: open
+  });
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    onSubmit(e);
+    resetChanges();
+  };
+
+  const handleDiscardChanges = () => {
+    setNewCadet(initialData);
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Cadet</DialogTitle>
@@ -38,7 +93,7 @@ export const AddCadetDialog = ({
             Create a new cadet for your school.
           </DialogDescription>
         </DialogHeader>
-        <form onSubmit={onSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4">
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="first_name">First Name *</Label>
@@ -152,7 +207,7 @@ export const AddCadetDialog = ({
           </div>
           
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
             <Button type="submit">
@@ -161,5 +216,14 @@ export const AddCadetDialog = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+  </>
+  );
 };

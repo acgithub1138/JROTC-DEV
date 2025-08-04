@@ -9,6 +9,8 @@ import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { NewTeam } from '../types';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 interface AddTeamDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,9 +26,23 @@ export const AddTeamDialog = ({
   onAddTeam
 }: AddTeamDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const {
     users
   } = useSchoolUsers(true); // Only get active users
+
+  const initialData = {
+    name: '',
+    description: '',
+    team_lead_id: '',
+    member_ids: []
+  };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData: newTeam,
+    enabled: open
+  });
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,8 +50,36 @@ export const AddTeamDialog = ({
     const success = await onAddTeam(newTeam);
     setLoading(false);
     if (success) {
+      resetChanges();
       onOpenChange(false);
     }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setNewTeam(initialData);
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
   };
   const addMember = (userId: string) => {
     if (!newTeam.member_ids.includes(userId)) {
@@ -57,7 +101,9 @@ export const AddTeamDialog = ({
   const getAvailableUsers = () => {
     return users.filter(user => !newTeam.member_ids.includes(user.id) && user.id !== newTeam.team_lead_id);
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add New Team</DialogTitle>
@@ -122,7 +168,7 @@ export const AddTeamDialog = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading || !newTeam.name.trim()}>
@@ -131,5 +177,14 @@ export const AddTeamDialog = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+  </>
+  );
 };

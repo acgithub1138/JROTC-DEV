@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -22,6 +22,8 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 const formSchema = z.object({
   school_id: z.string().min(1, 'School ID is required'),
@@ -45,14 +47,24 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   competitionId,
   onSchoolAdded,
 }) => {
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const defaultValues = {
+    school_id: '',
+    status: 'registered' as const,
+    notes: '',
+    resource: '',
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      school_id: '',
-      status: 'registered',
-      notes: '',
-      resource: '',
-    },
+    defaultValues,
+  });
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: defaultValues,
+    currentData: form.watch(),
+    enabled: open
   });
 
   const onSubmit = async (data: FormData) => {
@@ -62,14 +74,43 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
         competition_id: competitionId,
       });
       form.reset();
+      resetChanges();
       onOpenChange(false);
     } catch (error) {
       console.error('Error registering school:', error);
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    form.reset();
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
           <DialogTitle>Register School</DialogTitle>
@@ -141,7 +182,7 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
               )}
             />
             <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+              <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -152,5 +193,13 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
         </Form>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+  </>
   );
 };

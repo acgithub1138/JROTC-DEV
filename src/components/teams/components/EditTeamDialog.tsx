@@ -10,6 +10,8 @@ import { X } from 'lucide-react';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { TeamWithMembers } from '../types';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 interface EditTeamDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -23,6 +25,7 @@ export const EditTeamDialog = ({
   onUpdateTeam
 }: EditTeamDialogProps) => {
   const [loading, setLoading] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -36,24 +39,74 @@ export const EditTeamDialog = ({
     canEdit: canUpdate
   } = useTablePermissions('teams');
   const isReadOnly = !canUpdate;
+
+  const initialData = team ? {
+    name: team.name || '',
+    description: team.description || '',
+    team_lead_id: team.team_lead_id || '',
+    member_ids: team.team_members?.map(member => member.cadet_id) || []
+  } : { name: '', description: '', team_lead_id: '', member_ids: [] };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData: formData,
+    enabled: open && !isReadOnly
+  });
   useEffect(() => {
     if (team) {
-      setFormData({
+      const newFormData = {
         name: team.name,
         description: team.description || '',
         team_lead_id: team.team_lead_id || '',
-        member_ids: team.team_members.map(member => member.cadet_id)
-      });
+        member_ids: team.team_members?.map(member => member.cadet_id) || []
+      };
+      setFormData(newFormData);
+      resetChanges();
     }
-  }, [team]);
+  }, [team, resetChanges]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     const success = await onUpdateTeam(formData);
     setLoading(false);
     if (success) {
+      resetChanges();
       onOpenChange(false);
     }
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    if (team) {
+      setFormData({
+        name: team.name,
+        description: team.description || '',
+        team_lead_id: team.team_lead_id || '',
+        member_ids: team.team_members?.map(member => member.cadet_id) || []
+      });
+    }
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
   };
   const addMember = (userId: string) => {
     if (!formData.member_ids.includes(userId)) {
@@ -76,7 +129,9 @@ export const EditTeamDialog = ({
     return users.filter(user => !formData.member_ids.includes(user.id) && user.id !== formData.team_lead_id);
   };
   if (!team) return null;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Team</DialogTitle>
@@ -145,7 +200,7 @@ export const EditTeamDialog = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleCancel}>
               {isReadOnly ? 'Close' : 'Cancel'}
             </Button>
             {!isReadOnly && <Button type="submit" disabled={loading || !formData.name.trim()}>
@@ -154,5 +209,14 @@ export const EditTeamDialog = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+  </>
+  );
 };

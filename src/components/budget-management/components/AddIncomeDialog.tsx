@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
@@ -14,6 +14,8 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { cn } from '@/lib/utils';
 import { BudgetTransaction } from '../BudgetManagementPage';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
   type: z.enum(['fundraiser', 'donation', 'other']),
@@ -34,15 +36,25 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
   onOpenChange,
   onSubmit
 }) => {
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const defaultValues = {
+    item: '',
+    type: 'other' as const,
+    description: '',
+    date: new Date(),
+    amount: 0
+  };
+
   const form = useForm<IncomeFormData>({
     resolver: zodResolver(incomeSchema),
-    defaultValues: {
-      item: '',
-      type: 'other',
-      description: '',
-      date: new Date(),
-      amount: 0
-    }
+    defaultValues
+  });
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: defaultValues,
+    currentData: form.watch(),
+    enabled: open
   });
   const handleSubmit = (data: IncomeFormData) => {
     onSubmit({
@@ -55,9 +67,39 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
       archive: false
     });
     form.reset();
+    resetChanges();
     onOpenChange(false);
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    form.reset();
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Income</DialogTitle>
@@ -134,7 +176,7 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
                 </FormItem>} />
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={handleCancel}>
                 Cancel
               </Button>
               <Button type="submit">Add Income</Button>
@@ -142,5 +184,14 @@ export const AddIncomeDialog: React.FC<AddIncomeDialogProps> = ({
           </form>
         </Form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+  </>
+  );
 };
