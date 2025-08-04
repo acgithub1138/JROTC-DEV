@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { useCompetitionTemplates } from '../competition-management/hooks/useCompetitionTemplates';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
 type CpEvent = {
   id: string;
@@ -38,6 +40,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     templates
   } = useCompetitionTemplates();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -46,16 +49,31 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     fee: ''
   });
 
+  const [initialFormData, setInitialFormData] = useState({
+    name: '',
+    description: '',
+    score_sheet: '',
+    jrotc_program: '',
+    fee: ''
+  });
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData
+  });
+
   // Reset form when event changes or modal opens
   useEffect(() => {
     if (event && open) {
-      setFormData({
+      const formDataValues = {
         name: event.name || '',
         description: event.description || '',
         score_sheet: event.score_sheet || '',
         jrotc_program: event.jrotc_program || '',
         fee: (event as any).fee?.toString() || ''
-      });
+      };
+      setFormData(formDataValues);
+      setInitialFormData(formDataValues);
     }
   }, [event, open]);
   const handleScoreSheetChange = (value: string) => {
@@ -101,7 +119,28 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setFormData(initialFormData);
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Event</DialogTitle>
@@ -164,7 +203,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -173,5 +212,14 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+    </>
+  );
 };

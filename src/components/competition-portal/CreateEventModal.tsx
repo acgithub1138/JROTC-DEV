@@ -5,8 +5,10 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { useCompetitionTemplates } from '../competition-management/hooks/useCompetitionTemplates';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
 interface CreateEventModalProps {
   open: boolean;
@@ -25,11 +27,24 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     templates
   } = useCompetitionTemplates();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     score_sheet: '',
     jrotc_program: ''
+  });
+
+  const initialFormData = {
+    name: '',
+    description: '',
+    score_sheet: '',
+    jrotc_program: ''
+  };
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData
   });
   const handleScoreSheetChange = (value: string) => {
     setFormData(prev => ({
@@ -81,7 +96,33 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setFormData({
+      name: '',
+      description: '',
+      score_sheet: '',
+      jrotc_program: ''
+    });
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  return (
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
@@ -136,7 +177,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
 
           <div className="flex justify-end gap-3 pt-4">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)} disabled={isSubmitting}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isSubmitting}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -145,5 +186,14 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+    </>
+  );
 };
