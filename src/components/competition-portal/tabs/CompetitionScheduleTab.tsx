@@ -117,30 +117,24 @@ export const CompetitionScheduleTab = ({
         {/* Print-only table for my schedule */}
         <div className="hidden print:block">
           <h2 className="text-lg font-bold mb-4 text-center">My Competition Schedule</h2>
-          {myScheduleData.length > 0 ? (
-            <table className="w-full border-collapse border border-black">
-              <thead>
-                <tr>
-                  <th className="border border-black p-2 text-left font-bold">Time</th>
-                  <th className="border border-black p-2 text-left font-bold">Event</th>
-                  <th className="border border-black p-2 text-left font-bold">Location</th>
+          <table className="w-full border-collapse border border-black">
+            <thead>
+              <tr>
+                <th className="border border-black p-2 text-left font-bold">Time</th>
+                <th className="border border-black p-2 text-left font-bold">Event</th>
+                <th className="border border-black p-2 text-left font-bold">Location</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myScheduleData.map((item, index) => (
+                <tr key={index}>
+                  <td className="border border-black p-2">{item.time}</td>
+                  <td className="border border-black p-2">{item.event}</td>
+                  <td className="border border-black p-2">{item.location}</td>
                 </tr>
-              </thead>
-              <tbody>
-                {myScheduleData.map((item, index) => (
-                  <tr key={index}>
-                    <td className="border border-black p-2">{item.time}</td>
-                    <td className="border border-black p-2">{item.event}</td>
-                    <td className="border border-black p-2">{item.location}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            <div className="text-center p-8">
-              <p className="text-lg">No schedule assignments found for your school.</p>
-            </div>
-          )}
+              ))}
+            </tbody>
+          </table>
         </div>
 
         <div className="flex items-center justify-between print:hidden">

@@ -145,20 +145,8 @@
     color-adjust: exact !important;
     font-size: 12px !important;
   }
-
-  body * {
-    visibility: hidden;
-  }
-
-  .schedule-print-container,
-  .schedule-print-container * {
-    visibility: visible;
-  }
-
+  
   .schedule-print-container {
-    position: absolute;
-    left: 0;
-    top: 0;
     width: 100% !important;
     max-width: none !important;
     overflow: visible !important;
