@@ -10,6 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CPCompetitionDialog } from './components/CPCompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
@@ -57,6 +58,8 @@ const CompetitionsPage = () => {
   const [showViewModal, setShowViewModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
+  const [competitionToCancel, setCompetitionToCancel] = useState<Competition | null>(null);
   useEffect(() => {
     fetchCompetitions();
     fetchSchools();
@@ -173,17 +176,26 @@ const CompetitionsPage = () => {
     navigate(`/app/competition-portal/competition-details/${competition.id}`);
   };
 
-  const handleCancelCompetition = async (competition: Competition) => {
+  const handleCancelCompetitionClick = (competition: Competition) => {
+    setCompetitionToCancel(competition);
+    setShowCancelDialog(true);
+  };
+
+  const handleCancelCompetition = async () => {
+    if (!competitionToCancel) return;
+
     try {
       const { error } = await supabase
         .from('cp_competitions')
         .update({ status: 'cancelled' })
-        .eq('id', competition.id);
+        .eq('id', competitionToCancel.id);
 
       if (error) throw error;
 
       toast.success('Competition cancelled successfully');
       fetchCompetitions();
+      setShowCancelDialog(false);
+      setCompetitionToCancel(null);
     } catch (error) {
       console.error('Error cancelling competition:', error);
       toast.error('Failed to cancel competition');
@@ -370,7 +382,7 @@ const CompetitionsPage = () => {
                                         variant="outline" 
                                         size="icon" 
                                         className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" 
-                                        onClick={() => handleCancelCompetition(competition)}
+                                        onClick={() => handleCancelCompetitionClick(competition)}
                                       >
                                         <X className="w-3 h-3" />
                                       </Button>
@@ -398,13 +410,31 @@ const CompetitionsPage = () => {
       <CPCompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
       {/* View Competition Modal */}
-      <ViewCompetitionModal 
+       <ViewCompetitionModal 
         competition={selectedCompetition} 
         open={showViewModal} 
         onOpenChange={setShowViewModal} 
         hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
         onCompetitionUpdated={fetchCompetitions}
       />
+
+      {/* Cancel Competition Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Competition</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel "{competitionToCancel?.name}"? This action will set the competition status to cancelled and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleCancelCompetition} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Yes, Cancel Competition
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   </TooltipProvider>;
 };
