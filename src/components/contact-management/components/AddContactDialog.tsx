@@ -29,6 +29,8 @@ import {
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Contact } from '../ContactManagementPage';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
@@ -61,6 +63,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const [cadets, setCadets] = useState<Cadet[]>([]);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   
   const form = useForm<ContactFormData>({
     resolver: zodResolver(contactSchema),
@@ -74,6 +77,53 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
       notes: '',
     },
   });
+
+  // Initial form data for comparison
+  const initialFormData = {
+    name: '',
+    type: 'parent' as const,
+    status: 'active' as const,
+    cadet_id: 'none',
+    phone: '',
+    email: '',
+    notes: '',
+  };
+
+  // Get current form values with proper defaults
+  const watchedData = form.watch();
+  const currentFormData = {
+    name: watchedData.name || '',
+    type: watchedData.type || 'parent' as const,
+    status: watchedData.status || 'active' as const, 
+    cadet_id: watchedData.cadet_id || 'none',
+    phone: watchedData.phone || '',
+    email: watchedData.email || '',
+    notes: watchedData.notes || '',
+  };
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: currentFormData,
+    enabled: open
+  });
+
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(newOpen);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    form.reset();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
 
   useEffect(() => {
     const fetchCadets = async () => {
@@ -110,7 +160,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Contact</DialogTitle>
@@ -253,7 +303,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
             />
 
             <div className="flex justify-end space-x-2">
-              <Button variant="outline" onClick={() => onOpenChange(false)}>
+              <Button variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
               <Button type="submit">Add Contact</Button>
@@ -261,6 +311,13 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
           </form>
         </Form>
       </DialogContent>
+      
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
     </Dialog>
   );
 };
