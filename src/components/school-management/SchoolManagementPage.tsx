@@ -41,7 +41,7 @@ interface School {
   timezone?: string;
   created_at: string;
 }
-type SortField = 'name' | 'contact' | 'competition_module' | 'subscription_start' | 'subscription_end';
+type SortField = 'name' | 'contact' | 'competition_module' | 'competition_portal' | 'subscription_start' | 'subscription_end';
 type SortDirection = 'asc' | 'desc';
 const SchoolManagementPage = () => {
   const {
@@ -208,7 +208,7 @@ const SchoolManagementPage = () => {
       if (bValue === null || bValue === undefined) bValue = '';
 
       // Handle different data types
-      if (sortField === 'competition_module') {
+      if (sortField === 'competition_module' || sortField === 'competition_portal') {
         aValue = aValue ? 1 : 0;
         bValue = bValue ? 1 : 0;
       } else if (sortField === 'subscription_start' || sortField === 'subscription_end') {
@@ -345,6 +345,14 @@ const SchoolManagementPage = () => {
                   </Button>
                 </TableHead>
                 <TableHead>
+                  <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('competition_portal')}>
+                    <span className="flex items-center gap-2">
+                      Competition Portal
+                      {getSortIcon('competition_portal')}
+                    </span>
+                  </Button>
+                </TableHead>
+                <TableHead>
                   <Button variant="ghost" className="h-auto p-0 font-semibold hover:bg-transparent" onClick={() => handleSort('subscription_start')}>
                     <span className="flex items-center gap-2">
                       Subscription Start
@@ -370,6 +378,7 @@ const SchoolManagementPage = () => {
                   </TableCell>
                   <TableCell className="py-2">{school.contact || '-'}</TableCell>
                   <TableCell className="py-2">{school.competition_module ? 'Yes' : 'No'}</TableCell>
+                  <TableCell className="py-2">{school.competition_portal ? 'Yes' : 'No'}</TableCell>
                   <TableCell className="py-2">
                     {school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : '-'}
                   </TableCell>
