@@ -144,12 +144,21 @@
     -webkit-print-color-adjust: exact !important;
     color-adjust: exact !important;
     font-size: 12px !important;
+    background: white !important;
   }
   
-  .schedule-print-container {
+  /* Hide everything except the schedule print container */
+  body * {
+    visibility: hidden !important;
+  }
+  
+  .schedule-print-container,
+  .schedule-print-container * {
+    visibility: visible !important;
     width: 100% !important;
     max-width: none !important;
     overflow: visible !important;
+    background: white !important;
   }
   
   .schedule-print-container table {
