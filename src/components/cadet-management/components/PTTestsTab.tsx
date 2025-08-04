@@ -7,7 +7,7 @@ import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
-import { CalendarIcon, Plus, Search, ArrowUpDown, Edit2, Trash2, Loader2 } from 'lucide-react';
+import { CalendarIcon, Plus, Search, ArrowUpDown, Edit, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -291,7 +291,7 @@ export const PTTestsTab = ({
                               onClick={() => setEditingPTTest(test)}
                               className="h-6 w-6"
                             >
-                              <Edit2 className="w-3 h-3" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                           )}
                            {canDelete && (
