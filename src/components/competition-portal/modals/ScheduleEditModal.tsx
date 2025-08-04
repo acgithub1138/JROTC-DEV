@@ -16,7 +16,6 @@ interface ScheduleEditModalProps {
   onClose: () => void;
   updateScheduleSlot: (eventId: string, timeSlot: Date, schoolId: string | null) => Promise<void>;
   getAvailableSchools: (eventId: string) => Promise<AvailableSchool[]>;
-  refetch: () => Promise<void>;
 }
 interface AvailableSchool {
   id: string;
@@ -28,8 +27,7 @@ export const ScheduleEditModal = ({
   isOpen,
   onClose,
   updateScheduleSlot,
-  getAvailableSchools,
-  refetch
+  getAvailableSchools
 }: ScheduleEditModalProps) => {
   const {
     timezone
@@ -117,7 +115,7 @@ export const ScheduleEditModal = ({
       
       await loadAvailableSchools(); // Refresh available schools
       resetChanges();
-      onClose();
+      onClose(); // This will trigger refetch in parent
     } catch (error) {
       console.error('Error updating schedule:', error);
       toast({

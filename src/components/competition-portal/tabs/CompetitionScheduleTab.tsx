@@ -37,6 +37,12 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
     setSelectedEvent(event);
   };
 
+  const handleModalClose = async () => {
+    setSelectedEvent(null);
+    // Refetch data after modal closes to avoid race conditions
+    await refetch();
+  };
+
   const getAssignedSchoolForSlot = (eventId: string, timeSlot: Date) => {
     const event = events.find(e => e.id === eventId);
     if (!event) return null;
@@ -146,10 +152,9 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
           event={selectedEvent}
           competitionId={competitionId}
           isOpen={!!selectedEvent}
-          onClose={() => setSelectedEvent(null)}
+          onClose={handleModalClose}
           updateScheduleSlot={updateScheduleSlot}
           getAvailableSchools={getAvailableSchools}
-          refetch={refetch}
         />
       )}
     </div>
