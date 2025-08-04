@@ -36,9 +36,11 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
 
   const handleTogglePaid = async (schoolId: string, currentPaid: boolean) => {
     try {
+      console.log('Updating payment status for school:', schoolId, 'from', currentPaid, 'to', !currentPaid);
       await updateSchoolRegistration(schoolId, { paid: !currentPaid });
     } catch (error) {
       console.error('Error updating payment status:', error);
+      console.error('Full error details:', JSON.stringify(error, null, 2));
     }
   };
   if (isLoading) {
