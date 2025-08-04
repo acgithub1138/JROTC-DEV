@@ -278,7 +278,7 @@ export const PTTestsTab = ({
                               onClick={() => {/* TODO: Handle edit */}}
                               className="h-6 w-6"
                             >
-                              <Edit className="h-3 w-3" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                           )}
                           {canDelete && (
