@@ -274,11 +274,11 @@ export const PTTestsTab = ({
                           {canUpdate && (
                             <Button
                               variant="outline"
-                              size="icon" className="h-6 w-6"
+                              size="icon"
                               onClick={() => {/* TODO: Handle edit */}}
                               className="h-6 w-6"
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit2 className="w-3 h-3" />
                             </Button>
                           )}
                           {canDelete && (
