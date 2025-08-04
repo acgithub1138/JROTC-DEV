@@ -85,7 +85,7 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
               }}>
                 <div className="font-medium text-sm">Time Slots</div>
                 {events.map(event => (
-                  <div key={event.id} className="flex items-center justify-between min-w-0">
+                  <div key={event.id} className="flex items-center justify-center gap-2">
                     {canManageSchedule && (
                       <Button
                         variant="outline"
