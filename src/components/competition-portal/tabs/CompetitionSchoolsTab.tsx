@@ -1,9 +1,20 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Eye, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
+import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
+import type { Database } from '@/integrations/supabase/types';
+
+// Extend the type to include the paid field
+type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row'] & {
+  paid: boolean;
+};
 interface CompetitionSchoolsTabProps {
   competitionId: string;
 }
@@ -13,46 +24,139 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   const {
     schools,
     isLoading,
-    createSchoolRegistration
+    createSchoolRegistration,
+    updateSchoolRegistration
   } = useCompetitionSchools(competitionId);
   const {
-    canCreate
+    canCreate,
+    canEdit
   } = useTablePermissions('cp_comp_schools');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
+
+  const handleTogglePaid = async (schoolId: string, currentPaid: boolean) => {
+    try {
+      await updateSchoolRegistration(schoolId, { paid: !currentPaid });
+    } catch (error) {
+      console.error('Error updating payment status:', error);
+    }
+  };
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
       </div>;
   }
-  return <div className="space-y-4">
+  return (
+    <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
-        {canCreate && <Button onClick={() => setShowAddModal(true)}>
+        {canCreate && (
+          <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Register School
-          </Button>}
+          </Button>
+        )}
       </div>
 
-      {schools.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {schools.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No schools registered for this competition</p>
-        </div> : <div className="space-y-2">
-          {schools.map(school => <div key={school.id} className="p-4 border rounded-lg bg-card">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">{school.school_name || 'Unknown School'}</h3>
-                  <p className="text-sm text-muted-foreground">
-                    Status: {school.status}
-                    {school.resource && ` • Resource: ${school.resource}`}
-                  </p>
-                </div>
-                <div className="text-sm text-muted-foreground">
-                  Registered: {new Date(school.created_at).toLocaleDateString()}
-                </div>
-              </div>
-              {school.notes && <p className="mt-2 text-sm text-muted-foreground">{school.notes}</p>}
-            </div>)}
-        </div>}
+        </div>
+      ) : (
+        <TooltipProvider>
+          <Card>
+            <CardContent className="p-0">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>School Name</TableHead>
+                    <TableHead>Events</TableHead>
+                    <TableHead>Status</TableHead>
+                    <TableHead>Paid</TableHead>
+                    <TableHead className="text-center">Actions</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {schools.map((school: CompSchoolWithPaid) => (
+                    <TableRow key={school.id}>
+                      <TableCell className="font-medium">
+                        {school.school_name || 'Unknown School'}
+                      </TableCell>
+                      <TableCell>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8"
+                              onClick={() => setSelectedSchoolForEvents(school.id)}
+                            >
+                              <Eye className="w-4 h-4" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View registered events</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      </TableCell>
+                      <TableCell>
+                        <Badge 
+                          variant={
+                            school.status === 'confirmed' ? 'default' :
+                            school.status === 'cancelled' ? 'destructive' : 'secondary'
+                          }
+                        >
+                          {school.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={school.paid ? 'default' : 'secondary'}>
+                          {school.paid ? 'Paid' : 'Unpaid'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          {canEdit && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8"
+                                  onClick={() => handleTogglePaid(school.id, school.paid)}
+                                >
+                                  <DollarSign className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{school.paid ? 'Mark as unpaid' : 'Mark as paid'}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
+            </CardContent>
+          </Card>
+        </TooltipProvider>
+      )}
 
-      <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
-    </div>;
+      <AddSchoolModal 
+        open={showAddModal} 
+        onOpenChange={setShowAddModal} 
+        competitionId={competitionId} 
+        onSchoolAdded={createSchoolRegistration} 
+      />
+      
+      <ViewSchoolEventsModal
+        open={!!selectedSchoolForEvents}
+        onOpenChange={() => setSelectedSchoolForEvents(null)}
+        competitionId={competitionId}
+        schoolId={selectedSchoolForEvents || ''}
+      />
+    </div>
+  );
 };

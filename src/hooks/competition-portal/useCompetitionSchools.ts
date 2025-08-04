@@ -4,9 +4,10 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'];
-type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'];
-type CompSchoolUpdate = Database['public']['Tables']['cp_comp_schools']['Update'];
+// Extend types to include the paid field since it exists in DB but not in generated types yet
+type CompSchool = Database['public']['Tables']['cp_comp_schools']['Row'] & { paid: boolean };
+type CompSchoolInsert = Database['public']['Tables']['cp_comp_schools']['Insert'] & { paid?: boolean };
+type CompSchoolUpdate = Database['public']['Tables']['cp_comp_schools']['Update'] & { paid?: boolean };
 
 export const useCompetitionSchools = (competitionId?: string) => {
   const { userProfile } = useAuth();
@@ -26,7 +27,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
         .order('created_at', { ascending: true });
 
       if (error) throw error;
-      setSchools(data || []);
+      setSchools((data || []) as CompSchool[]);
     } catch (error) {
       console.error('Error fetching competition schools:', error);
       toast.error('Failed to load registered schools');
@@ -50,7 +51,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
 
       if (error) throw error;
 
-      setSchools(prev => [...prev, data].sort((a, b) => 
+      setSchools(prev => [...prev, data as CompSchool].sort((a, b) => 
         new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
       ));
       toast.success('School registered successfully');
@@ -77,7 +78,7 @@ export const useCompetitionSchools = (competitionId?: string) => {
       if (error) throw error;
 
       setSchools(prev => 
-        prev.map(school => school.id === id ? data : school)
+        prev.map(school => school.id === id ? data as CompSchool : school)
           .sort((a, b) => 
             new Date(a.created_at).getTime() - new Date(b.created_at).getTime()
           )
