@@ -270,25 +270,25 @@ export const PTTestsTab = ({
                     </TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="text-center">
-                        <div className="flex justify-center gap-1">
+                        <div className="flex items-center justify-center gap-2">
                           {canUpdate && (
                             <Button
-                              variant="ghost"
-                              size="sm"
+                              variant="outline"
+                              size="icon" className="h-6 w-6"
                               onClick={() => {/* TODO: Handle edit */}}
-                              className="h-8 w-8 p-0"
+                              className="h-6 w-6"
                             >
-                              <Edit2 className="h-4 w-4" />
+                              <Edit className="h-3 w-3" />
                             </Button>
                           )}
                           {canDelete && (
                             <Button
-                              variant="ghost"
-                              size="sm"
+                              variant="outline"
+                              size="icon"
                               onClick={() => {/* TODO: Handle delete */}}
-                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                              className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                             >
-                              <Trash2 className="h-4 w-4" />
+                              <Trash2 className="h-3 w-3" />
                             </Button>
                           )}
                         </div>
