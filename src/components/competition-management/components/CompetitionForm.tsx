@@ -16,12 +16,14 @@ interface CompetitionFormProps {
   competition?: Competition | DatabaseCompetition | null;
   onSubmit: (data: any) => Promise<void>;
   onCancel: () => void;
+  onFormInteraction?: () => void;
 }
 
 export const CompetitionForm: React.FC<CompetitionFormProps> = ({
   competition,
   onSubmit,
-  onCancel
+  onCancel,
+  onFormInteraction
 }) => {
   const [formData, setFormData] = useState({
     name: competition?.name || '',
@@ -94,6 +96,7 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({ ...prev, [field]: value }));
+    onFormInteraction?.(); // Notify parent of form interaction
   };
 
   const handleLocationSelect = (selectedLocation: string) => {

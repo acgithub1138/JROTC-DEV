@@ -3,13 +3,14 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { CompetitionForm } from './CompetitionForm';
 import { Competition } from '../types';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+
 interface CompetitionDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competition?: Competition | null;
   onSubmit: (data: any) => Promise<void>;
 }
+
 export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
   open,
   onOpenChange,
@@ -17,36 +18,27 @@ export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
   onSubmit
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  const [formData, setFormData] = useState<any>(competition || {});
-
-  const initialData = competition || {};
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData,
-    currentData: formData,
-    enabled: open
-  });
+  const [hasInteracted, setHasInteracted] = useState(false);
 
   const handleSubmit = async (data: any) => {
     await onSubmit(data);
-    resetChanges();
+    setHasInteracted(false);
     onOpenChange(false);
   };
 
-  const handleFormDataChange = (data: any) => {
-    setFormData(data);
-  };
-
-  const handleOpenChange = (open: boolean) => {
-    if (!open && hasUnsavedChanges) {
+  const handleOpenChange = (newOpen: boolean) => {
+    if (!newOpen && hasInteracted) {
       setShowUnsavedDialog(true);
     } else {
-      onOpenChange(open);
+      onOpenChange(newOpen);
+      if (!newOpen) {
+        setHasInteracted(false);
+      }
     }
   };
 
   const handleCancel = () => {
-    if (hasUnsavedChanges) {
+    if (hasInteracted) {
       setShowUnsavedDialog(true);
     } else {
       onOpenChange(false);
@@ -54,8 +46,7 @@ export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
   };
 
   const handleDiscardChanges = () => {
-    setFormData(competition || {});
-    resetChanges();
+    setHasInteracted(false);
     setShowUnsavedDialog(false);
     onOpenChange(false);
   };
@@ -63,6 +54,14 @@ export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
+
+  // Track when user starts interacting with the form
+  const handleFormInteraction = () => {
+    if (!hasInteracted) {
+      setHasInteracted(true);
+    }
+  };
+
   return (
     <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -76,6 +75,7 @@ export const CompetitionDialog: React.FC<CompetitionDialogProps> = ({
             competition={competition} 
             onSubmit={handleSubmit} 
             onCancel={handleCancel}
+            onFormInteraction={handleFormInteraction}
           />
         </DialogContent>
       </Dialog>
