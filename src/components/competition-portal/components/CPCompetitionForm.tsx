@@ -22,8 +22,12 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     name: competition?.name || '',
     description: competition?.description || '',
     location: competition?.location || '',
-    start_date: competition?.start_date ? new Date(competition.start_date).toISOString().slice(0, 16) : '',
-    end_date: competition?.end_date ? new Date(competition.end_date).toISOString().slice(0, 16) : '',
+    start_date: competition?.start_date ? new Date(competition.start_date).toISOString().split('T')[0] : '',
+    start_time_hour: competition?.start_date ? new Date(competition.start_date).getHours().toString().padStart(2, '0') : '09',
+    start_time_minute: competition?.start_date ? new Date(competition.start_date).getMinutes().toString().padStart(2, '0') : '00',
+    end_date: competition?.end_date ? new Date(competition.end_date).toISOString().split('T')[0] : '',
+    end_time_hour: competition?.end_date ? new Date(competition.end_date).getHours().toString().padStart(2, '0') : '17',
+    end_time_minute: competition?.end_date ? new Date(competition.end_date).getMinutes().toString().padStart(2, '0') : '00',
     program: competition?.program || 'air_force',
     fee: competition?.fee?.toString() || '',
     address: competition?.address || '',
@@ -31,7 +35,9 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     state: competition?.state || '',
     zip: competition?.zip || '',
     max_participants: competition?.max_participants?.toString() || '',
-    registration_deadline: competition?.registration_deadline ? new Date(competition.registration_deadline).toISOString().slice(0, 16) : '',
+    registration_deadline_date: competition?.registration_deadline ? new Date(competition.registration_deadline).toISOString().split('T')[0] : '',
+    registration_deadline_hour: competition?.registration_deadline ? new Date(competition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
+    registration_deadline_minute: competition?.registration_deadline ? new Date(competition.registration_deadline).getMinutes().toString().padStart(2, '0') : '59',
     hosting_school: competition?.hosting_school || '',
   });
 
@@ -47,13 +53,20 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     try {
       setIsSubmitting(true);
       
+      // Combine date and time fields into datetime strings
+      const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
+      const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      const registrationDeadline = formData.registration_deadline_date 
+        ? new Date(`${formData.registration_deadline_date}T${formData.registration_deadline_hour}:${formData.registration_deadline_minute}:00`)
+        : null;
+
       // Submit data that matches cp_competitions schema
       const submissionData = {
         name: formData.name,
         description: formData.description,
         location: formData.location,
-        start_date: formData.start_date,
-        end_date: formData.end_date,
+        start_date: startDateTime.toISOString(),
+        end_date: endDateTime.toISOString(),
         program: formData.program,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         address: formData.address,
@@ -61,7 +74,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         state: formData.state,
         zip: formData.zip,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
-        registration_deadline: formData.registration_deadline || null,
+        registration_deadline: registrationDeadline ? registrationDeadline.toISOString() : null,
         hosting_school: formData.hosting_school,
       };
       
@@ -114,26 +127,89 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         </Select>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="start_date">Start Date & Time *</Label>
-          <Input
-            id="start_date"
-            type="datetime-local"
-            value={formData.start_date}
-            onChange={(e) => updateFormData('start_date', e.target.value)}
-            required
-          />
+      <div className="space-y-4">
+        <div>
+          <Label>Start Date & Time *</Label>
+          <div className="grid grid-cols-4 gap-2">
+            <div className="col-span-2">
+              <Input
+                type="date"
+                value={formData.start_date}
+                onChange={(e) => updateFormData('start_date', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Select value={formData.start_time_hour} onValueChange={(value) => updateFormData('start_time_hour', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Hour" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {i.toString().padStart(2, '0')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Select value={formData.start_time_minute} onValueChange={(value) => updateFormData('start_time_minute', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Min" />
+                </SelectTrigger>
+                <SelectContent>
+                  {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                    <SelectItem key={minute} value={minute}>
+                      {minute}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
-        <div className="space-y-2">
-          <Label htmlFor="end_date">End Date & Time *</Label>
-          <Input
-            id="end_date"
-            type="datetime-local"
-            value={formData.end_date}
-            onChange={(e) => updateFormData('end_date', e.target.value)}
-            required
-          />
+
+        <div>
+          <Label>End Date & Time *</Label>
+          <div className="grid grid-cols-4 gap-2">
+            <div className="col-span-2">
+              <Input
+                type="date"
+                value={formData.end_date}
+                onChange={(e) => updateFormData('end_date', e.target.value)}
+                required
+              />
+            </div>
+            <div>
+              <Select value={formData.end_time_hour} onValueChange={(value) => updateFormData('end_time_hour', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Hour" />
+                </SelectTrigger>
+                <SelectContent>
+                  {Array.from({ length: 24 }, (_, i) => (
+                    <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {i.toString().padStart(2, '0')}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Select value={formData.end_time_minute} onValueChange={(value) => updateFormData('end_time_minute', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Min" />
+                </SelectTrigger>
+                <SelectContent>
+                  {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                    <SelectItem key={minute} value={minute}>
+                      {minute}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -224,14 +300,45 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="registration_deadline">Registration Deadline</Label>
-        <Input
-          id="registration_deadline"
-          type="datetime-local"
-          value={formData.registration_deadline}
-          onChange={(e) => updateFormData('registration_deadline', e.target.value)}
-        />
+      <div>
+        <Label>Registration Deadline</Label>
+        <div className="grid grid-cols-4 gap-2">
+          <div className="col-span-2">
+            <Input
+              type="date"
+              value={formData.registration_deadline_date}
+              onChange={(e) => updateFormData('registration_deadline_date', e.target.value)}
+            />
+          </div>
+          <div>
+            <Select value={formData.registration_deadline_hour} onValueChange={(value) => updateFormData('registration_deadline_hour', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Hour" />
+              </SelectTrigger>
+              <SelectContent>
+                {Array.from({ length: 24 }, (_, i) => (
+                  <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                    {i.toString().padStart(2, '0')}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          <div>
+            <Select value={formData.registration_deadline_minute} onValueChange={(value) => updateFormData('registration_deadline_minute', value)}>
+              <SelectTrigger>
+                <SelectValue placeholder="Min" />
+              </SelectTrigger>
+              <SelectContent>
+                {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                  <SelectItem key={minute} value={minute}>
+                    {minute}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+        </div>
       </div>
 
       <div className="flex justify-end space-x-2 pt-4">
