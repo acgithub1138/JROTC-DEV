@@ -41,13 +41,13 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         onChange={(e) => setTempValue(e.target.value)}
         disabled={disabled}
         placeholder="#3B82F6"
-        className="w-16 h-6 text-xs"
+        className="w-24 h-8 text-xs"
       />
       {hasChanged && (
         <>
           <Button
-            size="sm"
-            variant="ghost"
+            size="icon"
+            variant="outline"
             onClick={handleSave}
             disabled={disabled}
             className="h-6 w-6 p-0"
@@ -55,8 +55,8 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
             <Check className="h-3 w-3" />
           </Button>
           <Button
-            size="sm"
-            variant="ghost"
+            size="icon"
+            variant="outline"
             onClick={handleCancel}
             disabled={disabled}
             className="h-6 w-6 p-0"
