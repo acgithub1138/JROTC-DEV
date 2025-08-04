@@ -34,10 +34,15 @@ const competitionMenuItems = [{
   path: '/app/competition-portal/dashboard'
 }, {
   id: 'competitions',
-  label: 'Competitions',
+  label: 'Hosting Competitions',
   icon: Award,
   path: '/app/competition-portal/competitions'
 }, {
+  id: 'open-competitions',
+  label: 'Open Competitions',
+  icon: Search,
+  path: '/app/competition-portal/open-competitions'
+  {
   id: 'score-sheets',
   label: 'Score Sheets',
   icon: Clipboard,
