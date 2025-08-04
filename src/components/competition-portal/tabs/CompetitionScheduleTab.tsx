@@ -2,11 +2,14 @@ import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { Switch } from '@/components/ui/switch';
+import { Label } from '@/components/ui/label';
 import { Edit } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useAuth } from '@/contexts/AuthContext';
 import { ScheduleEditModal } from '../modals/ScheduleEditModal';
 interface CompetitionScheduleTabProps {
   competitionId: string;
@@ -29,7 +32,9 @@ export const CompetitionScheduleTab = ({
   const {
     timezone
   } = useSchoolTimezone();
+  const { userProfile } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
+  const [showOnlyMySchedule, setShowOnlyMySchedule] = useState(false);
 
   // Generate unified time slots from all events
   const getAllTimeSlots = () => {
@@ -57,6 +62,12 @@ export const CompetitionScheduleTab = ({
     const slot = event.timeSlots.find(s => s.time.getTime() === timeSlot.getTime());
     return slot?.assignedSchool || null;
   };
+
+  const shouldShowSlot = (eventId: string, timeSlot: Date) => {
+    if (!showOnlyMySchedule) return true;
+    const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
+    return assignedSchool?.id === userProfile?.school_id;
+  };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -71,10 +82,27 @@ export const CompetitionScheduleTab = ({
       </div>;
   }
   const allTimeSlots = getAllTimeSlots();
+  const filteredTimeSlots = showOnlyMySchedule 
+    ? allTimeSlots.filter(timeSlot => 
+        events.some(event => shouldShowSlot(event.id, timeSlot))
+      )
+    : allTimeSlots;
   return <TooltipProvider>
       <div className="space-y-4">
-        <div className="text-sm text-muted-foreground">
-          Competition Schedule - View and manage time slot assignments for each event
+        <div className="flex items-center justify-between">
+          <div className="text-sm text-muted-foreground">
+            Competition Schedule - View and manage time slot assignments for each event
+          </div>
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-only-my-schedule"
+              checked={showOnlyMySchedule}
+              onCheckedChange={setShowOnlyMySchedule}
+            />
+            <Label htmlFor="show-only-my-schedule" className="text-sm">
+              Show only my schedule
+            </Label>
+          </div>
         </div>
 
         <Card>
@@ -105,7 +133,7 @@ export const CompetitionScheduleTab = ({
 
                 {/* Time Slots Grid */}
                 <div className="max-h-96 overflow-y-auto">
-                  {allTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
+                  {filteredTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
                   gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
                 }}>
                       <div className="text-sm font-medium ">
@@ -113,8 +141,10 @@ export const CompetitionScheduleTab = ({
                       </div>
                       {events.map(event => {
                     const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                    const showSlot = shouldShowSlot(event.id, timeSlot);
+                    
                     return <div key={event.id} className="text-sm min-w-0">
-                            {assignedSchool ? <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
+                            {assignedSchool && (!showOnlyMySchedule || showSlot) ? <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
                         backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
                       }}>
                                 {assignedSchool.name}
