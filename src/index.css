@@ -165,6 +165,27 @@
     width: 100% !important;
     border-collapse: collapse !important;
     font-size: 12px !important;
+    table-layout: fixed !important;
+  }
+  
+  .schedule-print-container th:nth-child(1), /* Time */
+  .schedule-print-container td:nth-child(1) {
+    width: 15% !important;
+  }
+  
+  .schedule-print-container th:nth-child(2), /* Event */
+  .schedule-print-container td:nth-child(2) {
+    width: 30% !important;
+  }
+  
+  .schedule-print-container th:nth-child(3), /* Location */
+  .schedule-print-container td:nth-child(3) {
+    width: 20% !important;
+  }
+  
+  .schedule-print-container th:nth-child(4), /* Judge */
+  .schedule-print-container td:nth-child(4) {
+    width: 35% !important;
   }
   
   .schedule-print-container th,
