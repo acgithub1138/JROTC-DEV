@@ -19,7 +19,7 @@ interface BudgetTableProps {
   isLoading: boolean;
   onEdit: (transaction: BudgetTransaction) => void;
   onView: (transaction: BudgetTransaction) => void;
-  onDelete: (id: string) => void;
+  onDelete: (transaction: BudgetTransaction) => void;
 }
 
 export const BudgetTable: React.FC<BudgetTableProps> = ({
@@ -87,7 +87,10 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
     const confirmMessage = `Are you sure you want to delete ${selectedTransactions.length} transaction${selectedTransactions.length > 1 ? 's' : ''}?`;
     if (confirm(confirmMessage)) {
       selectedTransactions.forEach(transactionId => {
-        onDelete(transactionId);
+        const transaction = sortedTransactions.find(t => t.id === transactionId);
+        if (transaction) {
+          onDelete(transaction);
+        }
       });
       setSelectedTransactions([]);
     }
@@ -182,7 +185,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
                 canEdit={canUpdate}
                 canDelete={canDelete}
                 onEdit={() => onEdit(transaction)}
-                onDelete={() => onDelete(transaction.id)}
+                onDelete={() => onDelete(transaction)}
               />
             </TableCell>
           </TableRow>

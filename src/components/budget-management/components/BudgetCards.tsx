@@ -13,7 +13,7 @@ interface BudgetCardsProps {
   transactions: BudgetTransaction[];
   onEdit: (transaction: BudgetTransaction) => void;
   onView: (transaction: BudgetTransaction) => void;
-  onDelete: (id: string) => void;
+  onDelete: (transaction: BudgetTransaction) => void;
 }
 
 export const BudgetCards: React.FC<BudgetCardsProps> = ({
@@ -148,7 +148,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      onClick={() => onDelete(transaction.id)}
+                      onClick={() => onDelete(transaction)}
                       className="text-red-600 hover:text-red-700"
                     >
                       <Trash2 className="w-4 h-4" />

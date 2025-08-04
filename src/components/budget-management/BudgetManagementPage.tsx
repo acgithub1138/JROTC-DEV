@@ -9,6 +9,7 @@ import { AddIncomeDialog } from './components/AddIncomeDialog';
 import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
 import { ViewBudgetItemDialog } from './components/ViewBudgetItemDialog';
+import { DeleteBudgetDialog } from './components/DeleteBudgetDialog';
 import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -46,6 +47,7 @@ const BudgetManagementPage = () => {
   const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
   const [viewingItem, setViewingItem] = useState<BudgetTransaction | null>(null);
+  const [deletingItem, setDeletingItem] = useState<BudgetTransaction | null>(null);
   const [filters, setFilters] = useState<BudgetFilters>({
     search: '',
     category: '',
@@ -69,6 +71,17 @@ const BudgetManagementPage = () => {
     const currentYear = new Date().getFullYear();
     const budgetYear = `${currentYear - 1} - ${currentYear}`;
     await archiveAllTransactions(budgetYear);
+  };
+
+  const handleDeleteTransaction = (transaction: BudgetTransaction) => {
+    setDeletingItem(transaction);
+  };
+
+  const handleConfirmDelete = () => {
+    if (deletingItem) {
+      deleteTransaction(deletingItem.id);
+      setDeletingItem(null);
+    }
   };
   return <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
@@ -101,9 +114,9 @@ const BudgetManagementPage = () => {
 
       <div className="rounded-lg border bg-card">
         {isMobile ? (
-          <BudgetCards transactions={transactions} onEdit={setEditingItem} onView={setViewingItem} onDelete={deleteTransaction} />
+          <BudgetCards transactions={transactions} onEdit={setEditingItem} onView={setViewingItem} onDelete={handleDeleteTransaction} />
         ) : (
-          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onView={setViewingItem} onDelete={deleteTransaction} />
+          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onView={setViewingItem} onDelete={handleDeleteTransaction} />
         )}
       </div>
 
@@ -122,6 +135,14 @@ const BudgetManagementPage = () => {
           setViewingItem(null);
         }}
       />}
+
+      <DeleteBudgetDialog 
+        open={!!deletingItem} 
+        onOpenChange={() => setDeletingItem(null)} 
+        transaction={deletingItem} 
+        onConfirm={handleConfirmDelete} 
+        loading={false}
+      />
     </div>;
 };
 export default BudgetManagementPage;
