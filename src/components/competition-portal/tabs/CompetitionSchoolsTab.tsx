@@ -106,12 +106,12 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button
-                              variant="ghost"
+                              variant="outline"
                               size="icon"
-                              className="h-8 w-8"
+                              className="h-6 w-6"
                               onClick={() => setSelectedSchoolForEvents(school.id)}
                             >
-                              <Eye className="w-4 h-4" />
+                              <Eye className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
