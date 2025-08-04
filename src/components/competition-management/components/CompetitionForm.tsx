@@ -29,9 +29,8 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     name: competition?.name || '',
     description: competition?.description || '',
     location: competition?.location || '',
-    competition_date: '',
-    program: (competition as any)?.program || 'air_force',
-    fee: (competition as any)?.fee?.toString() || '',
+    competition_date: competition?.competition_date ? new Date(competition.competition_date).toISOString().split('T')[0] : '',
+    comp_type: (competition as any)?.comp_type || 'air_force',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,46 +43,13 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
     try {
       setIsSubmitting(true);
       
-      let addressData = {
-        address: '',
-        city: '',
-        state: '',
-        zip: ''
-      };
-
-      // Parse location information if available
-      if (formData.location) {
-        try {
-          const { data, error } = await supabase.functions.invoke('geocode-search', {
-            body: { query: formData.location }
-          });
-
-          if (!error && data && data.length > 0) {
-            const result = data[0];
-            const address = result.address || {};
-            
-            addressData = {
-              address: [address.house_number, address.road].filter(Boolean).join(' ') || '',
-              city: address.town || address.city || '',
-              state: address.state || '',
-              zip: address.postcode || ''
-            };
-          }
-        } catch (geocodeError) {
-          console.warn('Could not parse location for address components:', geocodeError);
-        }
-      }
-      
-      // Map form data to database structure with correct field mappings
+      // Submit only the fields that exist in the competitions table
       const submissionData = {
         name: formData.name,
         description: formData.description,
         location: formData.location,
-        start_date: formData.competition_date,
-        end_date: formData.competition_date,
-        program: formData.program,
-        fee: formData.fee ? parseFloat(formData.fee) : null,
-        ...addressData
+        competition_date: formData.competition_date,
+        comp_type: formData.comp_type,
       };
       
       await onSubmit(submissionData);
@@ -116,8 +82,8 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
           />
         </div>
         <div className="space-y-2">
-          <Label htmlFor="program">JROTC Program *</Label>
-          <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)}>
+          <Label htmlFor="comp_type">JROTC Program *</Label>
+          <Select value={formData.comp_type} onValueChange={(value) => updateFormData('comp_type', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select JROTC Program" />
             </SelectTrigger>
@@ -140,18 +106,6 @@ export const CompetitionForm: React.FC<CompetitionFormProps> = ({
            value={formData.competition_date}
            onChange={(e) => updateFormData('competition_date', e.target.value)}
            required
-         />
-       </div>
-       <div className="space-y-2">
-         <Label htmlFor="fee">Entry Fee</Label>
-         <Input
-           id="fee"
-           type="number"
-           step="0.01"
-           min="0"
-           value={formData.fee}
-           onChange={(e) => updateFormData('fee', e.target.value)}
-           placeholder="0.00"
          />
        </div>
       <div className="space-y-2">
