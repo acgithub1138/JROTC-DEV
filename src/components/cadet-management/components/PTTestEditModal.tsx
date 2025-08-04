@@ -6,6 +6,8 @@ import { Label } from '@/components/ui/label';
 import { Loader2, Trash2 } from 'lucide-react';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { usePTTestEdit } from '../hooks/usePTTestEdit';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
 interface PTTest {
   id: string;
@@ -35,7 +37,8 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
   const [sitUps, setSitUps] = useState('');
   const [plankTime, setPlankTime] = useState('');
   const [mileTime, setMileTime] = useState('');
-  const [hasChanges, setHasChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
 
   const { 
     updatePTTest, 
@@ -46,6 +49,33 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
     formatSecondsToTime 
   } = usePTTestEdit();
 
+  // Initial data for comparison
+  const initialData = ptTest ? {
+    pushUps: ptTest.push_ups?.toString() || '',
+    sitUps: ptTest.sit_ups?.toString() || '',
+    plankTime: formatSecondsToTime(ptTest.plank_time),
+    mileTime: formatSecondsToTime(ptTest.mile_time),
+  } : {
+    pushUps: '',
+    sitUps: '',
+    plankTime: '',
+    mileTime: '',
+  };
+
+  // Current data for comparison
+  const currentData = {
+    pushUps,
+    sitUps,
+    plankTime,
+    mileTime,
+  };
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData,
+    enabled: open && !!ptTest,
+  });
+
   // Populate form when ptTest changes
   useEffect(() => {
     if (ptTest && open) {
@@ -53,26 +83,9 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
       setSitUps(ptTest.sit_ups?.toString() || '');
       setPlankTime(formatSecondsToTime(ptTest.plank_time));
       setMileTime(formatSecondsToTime(ptTest.mile_time));
-      setHasChanges(false);
+      resetChanges();
     }
-  }, [ptTest?.id, open]); // Only depend on ptTest ID and open state
-
-  // Track changes
-  useEffect(() => {
-    if (!ptTest) return;
-    
-    const originalPushUps = ptTest.push_ups?.toString() || '';
-    const originalSitUps = ptTest.sit_ups?.toString() || '';
-    const originalPlankTime = formatSecondsToTime(ptTest.plank_time);
-    const originalMileTime = formatSecondsToTime(ptTest.mile_time);
-
-    const changed = pushUps !== originalPushUps || 
-                   sitUps !== originalSitUps || 
-                   plankTime !== originalPlankTime || 
-                   mileTime !== originalMileTime;
-    
-    setHasChanges(changed);
-  }, [pushUps, sitUps, plankTime, mileTime, ptTest?.push_ups, ptTest?.sit_ups, ptTest?.plank_time, ptTest?.mile_time]); // Don't include formatSecondsToTime
+  }, [ptTest?.id, open, resetChanges]);
 
   const handleSave = async () => {
     if (!ptTest) return;
@@ -104,106 +117,141 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
   };
 
   const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDialogOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(open);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    resetChanges();
     onOpenChange(false);
+  };
+
+  const handleCancelClose = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
   };
 
   if (!ptTest) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-md">
-        <DialogHeader>
-          <DialogTitle>Edit PT Test</DialogTitle>
-          <div className="text-sm text-muted-foreground">
-            {ptTest.profiles?.first_name} {ptTest.profiles?.last_name} - {new Date(ptTest.date).toLocaleDateString()}
-          </div>
-        </DialogHeader>
+    <>
+      <Dialog open={open} onOpenChange={handleDialogOpenChange}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit PT Test</DialogTitle>
+            <div className="text-sm text-muted-foreground">
+              {ptTest.profiles?.first_name} {ptTest.profiles?.last_name} - {new Date(ptTest.date).toLocaleDateString()}
+            </div>
+          </DialogHeader>
 
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="push-ups">Push-Ups</Label>
-            <Input
-              id="push-ups"
-              type="number"
-              placeholder="0"
-              min="0"
-              value={pushUps}
-              onChange={(e) => setPushUps(e.target.value)}
-            />
+          <div className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="push-ups">Push-Ups</Label>
+              <Input
+                id="push-ups"
+                type="number"
+                placeholder="0"
+                min="0"
+                value={pushUps}
+                onChange={(e) => setPushUps(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="sit-ups">Sit-Ups</Label>
+              <Input
+                id="sit-ups"
+                type="number"
+                placeholder="0"
+                min="0"
+                value={sitUps}
+                onChange={(e) => setSitUps(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="plank-time">Plank Time</Label>
+              <Input
+                id="plank-time"
+                placeholder="MM:SS or seconds"
+                value={plankTime}
+                onChange={(e) => setPlankTime(e.target.value)}
+              />
+            </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="mile-time">Mile Time</Label>
+              <Input
+                id="mile-time"
+                placeholder="MM:SS or seconds"
+                value={mileTime}
+                onChange={(e) => setMileTime(e.target.value)}
+              />
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="sit-ups">Sit-Ups</Label>
-            <Input
-              id="sit-ups"
-              type="number"
-              placeholder="0"
-              min="0"
-              value={sitUps}
-              onChange={(e) => setSitUps(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="plank-time">Plank Time</Label>
-            <Input
-              id="plank-time"
-              placeholder="MM:SS or seconds"
-              value={plankTime}
-              onChange={(e) => setPlankTime(e.target.value)}
-            />
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="mile-time">Mile Time</Label>
-            <Input
-              id="mile-time"
-              placeholder="MM:SS or seconds"
-              value={mileTime}
-              onChange={(e) => setMileTime(e.target.value)}
-            />
-          </div>
-        </div>
-
-        <div className="flex justify-between pt-4 border-t">
-          <AlertDialog>
-            <AlertDialogTrigger asChild>
-              <Button variant="outline" size="sm" disabled={isDeleting || isUpdating}>
-                <Trash2 className="w-4 h-4 mr-2" />
-                Delete
-              </Button>
-            </AlertDialogTrigger>
-            <AlertDialogContent>
-              <AlertDialogHeader>
-                <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
-                <AlertDialogDescription>
-                  Are you sure you want to delete this PT test? This action cannot be undone.
-                </AlertDialogDescription>
-              </AlertDialogHeader>
-              <AlertDialogFooter>
-                <AlertDialogCancel>Cancel</AlertDialogCancel>
-                <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
-                  {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+          <div className="flex justify-between pt-4 border-t">
+            <AlertDialog>
+              <AlertDialogTrigger asChild>
+                <Button variant="outline" size="sm" disabled={isDeleting || isUpdating}>
+                  <Trash2 className="w-4 h-4 mr-2" />
                   Delete
-                </AlertDialogAction>
-              </AlertDialogFooter>
-            </AlertDialogContent>
-          </AlertDialog>
+                </Button>
+              </AlertDialogTrigger>
+              <AlertDialogContent>
+                <AlertDialogHeader>
+                  <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
+                  <AlertDialogDescription>
+                    Are you sure you want to delete this PT test? This action cannot be undone.
+                  </AlertDialogDescription>
+                </AlertDialogHeader>
+                <AlertDialogFooter>
+                  <AlertDialogCancel>Cancel</AlertDialogCancel>
+                  <AlertDialogAction onClick={handleDelete} disabled={isDeleting}>
+                    {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                    Delete
+                  </AlertDialogAction>
+                </AlertDialogFooter>
+              </AlertDialogContent>
+            </AlertDialog>
 
-          <div className="flex space-x-2">
-            <Button variant="outline" onClick={handleClose} disabled={isUpdating || isDeleting}>
-              Cancel
-            </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={!hasChanges || isUpdating || isDeleting}
-            >
-              {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              Save Changes
-            </Button>
+            <div className="flex space-x-2">
+              <Button variant="outline" onClick={handleClose} disabled={isUpdating || isDeleting}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleSave} 
+                disabled={!hasUnsavedChanges || isUpdating || isDeleting}
+              >
+                {isUpdating && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                Save Changes
+              </Button>
+            </div>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleCancelClose}
+      />
+    </>
   );
 };
