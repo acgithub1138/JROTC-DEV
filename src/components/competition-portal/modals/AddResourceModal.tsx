@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -12,6 +12,8 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
 import { supabase } from '@/integrations/supabase/client';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
@@ -41,19 +43,29 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  const initialFormData = {
+    resource: '',
+    location: '',
+    start_date: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
+    end_date: '',
+    end_time_hour: '10',
+    end_time_minute: '00',
+    assignment_details: ''
+  };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      resource: '',
-      location: '',
-      start_date: '',
-      start_time_hour: '09',
-      start_time_minute: '00',
-      end_date: '',
-      end_time_hour: '10',
-      end_time_minute: '00',
-      assignment_details: ''
-    }
+    defaultValues: initialFormData
+  });
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: form.watch(),
+    enabled: open
   });
 
   useEffect(() => {
@@ -109,12 +121,30 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
         end_time: endTime
       });
       form.reset();
-      onOpenChange(false);
+      handleClose();
     } catch (error) {
       console.error('Error adding resource:', error);
     }
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleClose = () => {
+    if (hasUnsavedChanges && !form.formState.isSubmitting) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+  return <>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Resource</DialogTitle>
@@ -330,8 +360,8 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+             <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit" disabled={form.formState.isSubmitting}>
@@ -341,5 +371,13 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
           </form>
         </Form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+  </>;
 };

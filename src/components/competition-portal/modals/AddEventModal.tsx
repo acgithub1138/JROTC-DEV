@@ -13,6 +13,8 @@ import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 interface AddEventModalProps {
   open: boolean;
@@ -57,6 +59,30 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  // Track initial data for unsaved changes
+  const initialFormData = {
+    event: '',
+    location: '',
+    start_date: '',
+    start_hour: '',
+    start_minute: '',
+    end_date: '',
+    end_hour: '',
+    end_minute: '',
+    max_participants: '',
+    fee: '',
+    notes: '',
+    judges: [] as string[],
+    resources: [] as string[]
+  };
+  
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: open
+  });
 
   useEffect(() => {
     if (open) {
@@ -183,7 +209,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         resources: formData.resources
       };
       await onEventAdded(eventData);
-      onOpenChange(false);
+      handleClose();
       setFormData({
         event: '',
         location: '',
@@ -205,7 +231,25 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       setIsLoading(false);
     }
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleClose = () => {
+    if (hasUnsavedChanges && !isLoading) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+  return <>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Add Competition Event</DialogTitle>
@@ -427,7 +471,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -436,5 +480,13 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+  </>;
 };

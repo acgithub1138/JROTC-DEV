@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,6 +10,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { format } from 'date-fns';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
@@ -50,19 +52,28 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
     users,
     isLoading: usersLoading
   } = useSchoolUsers(true);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [initialFormData, setInitialFormData] = useState({
+    resource: '',
+    location: '',
+    start_date: '',
+    start_time_hour: '09',
+    start_time_minute: '00',
+    end_date: '',
+    end_time_hour: '10',
+    end_time_minute: '00',
+    assignment_details: ''
+  });
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      resource: '',
-      location: '',
-      start_date: '',
-      start_time_hour: '09',
-      start_time_minute: '00',
-      end_date: '',
-      end_time_hour: '10',
-      end_time_minute: '00',
-      assignment_details: ''
-    }
+    defaultValues: initialFormData
+  });
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: form.watch(),
+    enabled: open
   });
 
   // Populate form when resource changes
@@ -74,7 +85,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
       const endDate = resource.end_time ? format(new Date(resource.end_time), 'yyyy-MM-dd') : '';
       const endHour = resource.end_time ? format(new Date(resource.end_time), 'HH') : '10';
       const endMinute = resource.end_time ? format(new Date(resource.end_time), 'mm') : '00';
-      form.reset({
+      
+      const newFormData = {
         resource: resource.resource || '',
         location: resource.location || '',
         start_date: startDate,
@@ -84,7 +96,10 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         end_time_hour: endHour,
         end_time_minute: endMinute,
         assignment_details: resource.assignment_details || ''
-      });
+      };
+      
+      form.reset(newFormData);
+      setInitialFormData(newFormData);
     }
   }, [resource, open, form]);
   const onSubmit = async (data: FormData) => {
@@ -111,10 +126,27 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         start_time: startTime,
         end_time: endTime
       });
-      onOpenChange(false);
+      handleClose();
     } catch (error) {
       console.error('Error updating resource:', error);
     }
+  };
+
+  const handleClose = () => {
+    if (hasUnsavedChanges && !form.formState.isSubmitting) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
   };
   const generateTimeOptions = () => {
     const hours = [];
@@ -131,7 +163,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
     return minutes;
   };
   if (!resource) return null;
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+  return <>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Resource</DialogTitle>
@@ -272,8 +305,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                   <FormMessage />
                 </FormItem>} />
 
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+             <DialogFooter>
+              <Button type="button" variant="outline" onClick={handleClose}>
                 Cancel
               </Button>
               <Button type="submit">Update Resource</Button>
@@ -281,5 +314,13 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
           </form>
         </Form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+  </>;
 };

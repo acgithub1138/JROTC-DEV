@@ -11,6 +11,8 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { JROTC_PROGRAM_OPTIONS } from '@/components/competition-management/utils/constants';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface Competition {
   id: string;
   name: string;
@@ -68,11 +70,21 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [registrationDeadline, setRegistrationDeadline] = useState<Date | undefined>(undefined);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [pendingClose, setPendingClose] = useState(false);
+
+  // Track initial data for unsaved changes
+  const [initialFormData, setInitialFormData] = useState(formData);
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: open
+  });
   React.useEffect(() => {
     if (competition) {
       const startDate = competition.start_date ? new Date(competition.start_date) : null;
       const endDate = competition.end_date ? new Date(competition.end_date) : null;
-      setFormData({
+      const newFormData = {
         name: competition.name || '',
         description: competition.description || '',
         location: competition.location || '',
@@ -92,7 +104,9 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         program: competition.program || 'air_force',
         status: competition.status || 'draft',
         fee: (competition as any).fee?.toString() || ''
-      });
+      };
+      setFormData(newFormData);
+      setInitialFormData(newFormData);
       setStartDate(startDate || undefined);
       setEndDate(endDate || undefined);
       setRegistrationDeadline(competition.registration_deadline ? new Date(competition.registration_deadline) : undefined);
@@ -178,7 +192,28 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       setIsSubmitting(false);
     }
   };
-  return <Dialog open={open} onOpenChange={onOpenChange}>
+
+  const handleClose = () => {
+    if (hasUnsavedChanges && !isSubmitting) {
+      setShowUnsavedDialog(true);
+      setPendingClose(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+    setPendingClose(false);
+  };
+  return <>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Competition</DialogTitle>
@@ -358,7 +393,7 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           </div>
 
           <DialogFooter>
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isSubmitting}>
@@ -367,5 +402,13 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           </DialogFooter>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+  </>;
 };

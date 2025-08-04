@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   cp_events?: { name: string } | null;
@@ -48,11 +50,19 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   const [isLoading, setIsLoading] = useState(false);
   const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
   const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [initialFormData, setInitialFormData] = useState(formData);
   
   const {
     users: schoolUsers,
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: open
+  });
 
   useEffect(() => {
     if (open) {
@@ -67,7 +77,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       const startDate = event.start_time ? new Date(event.start_time) : null;
       const endDate = event.end_time ? new Date(event.end_time) : null;
       
-      setFormData({
+      const newFormData = {
         event: event.event || '',
         location: event.location || '',
         start_date: startDate ? startDate.toISOString().split('T')[0] : '',
@@ -81,7 +91,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         notes: event.notes || '',
         judges: event.judges || [],
         resources: event.resources || []
-      });
+      };
+      setFormData(newFormData);
+      setInitialFormData(newFormData);
     }
   }, [event, events]);
 
@@ -194,7 +206,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       } as any;
 
       await onEventUpdated(event.id, updates);
-      onOpenChange(false);
+      handleClose();
     } catch (error) {
       console.error('Error updating event:', error);
     } finally {
@@ -202,10 +214,28 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     }
   };
 
+  const handleClose = () => {
+    if (hasUnsavedChanges && !isLoading) {
+      setShowUnsavedDialog(true);
+    } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+
   if (!event) return null;
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+    <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Competition Event</DialogTitle>
@@ -433,7 +463,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           </div>
 
           <div className="flex gap-2 justify-end">
-            <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+            <Button type="button" variant="outline" onClick={handleClose}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -443,5 +473,13 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         </form>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+    </>
   );
 };
