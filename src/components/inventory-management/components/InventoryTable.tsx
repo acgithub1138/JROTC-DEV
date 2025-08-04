@@ -27,7 +27,7 @@ interface InventoryTableProps {
   onSelectionChange: (selectedIds: string[]) => void;
   onEdit: (item: any) => Promise<void>;
   onView: (item: any) => void;
-  onDelete: (id: string) => Promise<void>;
+  onDelete: (item: any) => void;
 }
 
 export const InventoryTable: React.FC<InventoryTableProps> = ({
@@ -330,7 +330,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                        canEdit={canUpdate}
                        canDelete={canDelete}
                        onEdit={() => handleEdit(item)}
-                       onDelete={() => onDelete(item.id)}
+                       onDelete={() => onDelete(item)}
                        customActions={[
                          {
                            icon: <History className="w-3 h-3" />,

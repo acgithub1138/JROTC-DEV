@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { InventoryTable } from './components/InventoryTable';
 import { AddInventoryItemDialog } from './components/AddInventoryItemDialog';
 import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
+import { DeleteInventoryDialog } from './components/DeleteInventoryDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { InventoryActions } from './components/InventoryActions';
 import { InventoryFilters } from './components/InventoryFilters';
@@ -19,6 +20,7 @@ const InventoryManagementPage = () => {
   const [isBulkDialogOpen, setIsBulkDialogOpen] = useState(false);
   const [selectedItems, setSelectedItems] = useState<string[]>([]);
   const [viewingItem, setViewingItem] = useState<any>(null);
+  const [deletingItem, setDeletingItem] = useState<any>(null);
   const { toast } = useToast();
 
   // Define available columns for the inventory table
@@ -90,16 +92,20 @@ const InventoryManagementPage = () => {
   const handleViewItem = (item: any) => {
     setViewingItem(item);
   };
-  const handleDeleteItem = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this inventory item?')) {
-      return;
-    }
+  const handleDeleteItem = (item: any) => {
+    setDeletingItem(item);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingItem) return;
+    
     try {
-      await deleteItem(id);
+      await deleteItem(deletingItem.id);
       toast({
         title: "Success",
         description: "Inventory item deleted successfully"
       });
+      setDeletingItem(null);
     } catch (error) {
       toast({
         title: "Error",
@@ -195,6 +201,14 @@ const InventoryManagementPage = () => {
           viewOnly={true}
         />
       )}
+
+      <DeleteInventoryDialog 
+        open={!!deletingItem} 
+        onOpenChange={() => setDeletingItem(null)} 
+        item={deletingItem} 
+        onConfirm={handleConfirmDelete} 
+        loading={false}
+      />
     </div>;
 };
 export default InventoryManagementPage;
