@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TrendingUp } from 'lucide-react';
-import { formatDistanceToNow } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
 interface PTTest {
   id: string;
@@ -21,6 +22,7 @@ interface ProfilePTTestsTabProps {
 }
 
 export const ProfilePTTestsTab = ({ profileId }: ProfilePTTestsTabProps) => {
+  const { timezone } = useSchoolTimezone();
   const { data: ptTests = [], isLoading } = useQuery({
     queryKey: ['pt-tests', profileId],
     queryFn: async () => {
@@ -84,7 +86,7 @@ export const ProfilePTTestsTab = ({ profileId }: ProfilePTTestsTabProps) => {
           {ptTests.map((test) => (
             <TableRow key={test.id}>
               <TableCell className="font-medium">
-                {new Date(test.date).toLocaleDateString()}
+                {formatTimeForDisplay(test.date, TIME_FORMATS.DATE_ONLY, timezone)}
               </TableCell>
               <TableCell>{test.push_ups || '-'}</TableCell>
               <TableCell>{test.sit_ups || '-'}</TableCell>

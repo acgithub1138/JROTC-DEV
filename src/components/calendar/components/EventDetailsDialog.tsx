@@ -2,7 +2,8 @@ import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
-import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { Event } from '../CalendarManagementPage';
 
 interface EventDetailsDialogProps {
@@ -16,6 +17,8 @@ export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
   onOpenChange,
   event,
 }) => {
+  const { timezone } = useSchoolTimezone();
+  
   if (!event) return null;
 
   const formatEventType = (type: string) => {
@@ -23,11 +26,10 @@ export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
   };
 
   const formatDateTime = (dateStr: string, isAllDay: boolean) => {
-    const date = new Date(dateStr);
     if (isAllDay) {
-      return format(date, 'EEEE, MMMM d, yyyy');
+      return formatTimeForDisplay(dateStr, TIME_FORMATS.FULL_DATE, timezone);
     }
-    return format(date, 'EEEE, MMMM d, yyyy \'at\' HH:mm');
+    return formatTimeForDisplay(dateStr, TIME_FORMATS.FULL_DATETIME_24H, timezone);
   };
 
   return (
@@ -90,12 +92,12 @@ export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
           <div className="border-t pt-4 space-y-2">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />
-              <span>Created: {format(new Date(event.created_at), 'MMM d, yyyy \'at\' HH:mm')}</span>
+              <span>Created: {formatTimeForDisplay(event.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}</span>
             </div>
             {event.updated_at !== event.created_at && (
               <div className="flex items-center gap-3 text-sm text-muted-foreground">
                 <Clock className="w-4 h-4" />
-                <span>Updated: {format(new Date(event.updated_at), 'MMM d, yyyy \'at\' HH:mm')}</span>
+                <span>Updated: {formatTimeForDisplay(event.updated_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}</span>
               </div>
             )}
           </div>

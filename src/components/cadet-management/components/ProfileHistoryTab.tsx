@@ -3,7 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { ScrollArea } from '@/components/ui/scroll-area';
-import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
 interface ProfileHistoryTabProps {
   profileId: string;
@@ -23,6 +24,7 @@ interface ProfileHistoryItem {
 }
 
 export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
+  const { timezone } = useSchoolTimezone();
   const { data: history = [], isLoading } = useQuery({
     queryKey: ['profile-history', profileId],
     queryFn: async () => {
@@ -107,7 +109,7 @@ export const ProfileHistoryTab = ({ profileId }: ProfileHistoryTabProps) => {
                       <span className="font-medium text-green-600">"{formatValue(item.new_value)}"</span>
                     </p>
                     <span className="text-xs text-gray-500 ml-4 flex-shrink-0">
-                      {format(new Date(item.created_at), 'MMM d, yyyy HH:mm')}
+                      {formatTimeForDisplay(item.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}
                     </span>
                   </div>
                 </div>

@@ -4,7 +4,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
-import { format } from 'date-fns';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 interface ProfileCompetitionsTabProps {
   profileId: string;
 }
@@ -20,6 +21,7 @@ interface CompetitionEvent {
 export const ProfileCompetitionsTab = ({
   profileId
 }: ProfileCompetitionsTabProps) => {
+  const { timezone } = useSchoolTimezone();
   const {
     data: competitions = [],
     isLoading
@@ -95,7 +97,7 @@ export const ProfileCompetitionsTab = ({
                       </Badge>
                     </TableCell>
                     <TableCell>
-                      {format(new Date(comp.competition.competition_date), 'MMM d, yyyy')}
+                      {formatTimeForDisplay(comp.competition.competition_date, TIME_FORMATS.SHORT_DATE, timezone)}
                     </TableCell>
                   </TableRow>)}
               </TableBody>

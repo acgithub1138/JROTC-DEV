@@ -10,6 +10,8 @@ import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, formatCurrency as formatCurrencyUtil, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetTableProps {
@@ -30,16 +32,13 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
   const [selectedTransactions, setSelectedTransactions] = useState<string[]>([]);
   const { getPaddingClass } = useTableSettings();
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
+  const { timezone } = useSchoolTimezone();
   
   const { sortedData: sortedTransactions, sortConfig, handleSort } = useSortableTable({
     data: transactions
   });
-  const formatCurrency = (amount: number) => {
-    return `$${amount.toLocaleString('en-US', { minimumFractionDigits: 2 })}`;
-  };
-
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return formatTimeForDisplay(dateString, TIME_FORMATS.DATE_ONLY, timezone);
   };
 
   const getCategoryBadge = (category: string) => {
@@ -167,7 +166,7 @@ export const BudgetTable: React.FC<BudgetTableProps> = ({
             <TableCell className={`capitalize ${getPaddingClass()}`}>{transaction.type}</TableCell>
             <TableCell className={getPaddingClass()}>{formatDate(transaction.date)}</TableCell>
             <TableCell className={`${transaction.category === 'income' ? 'text-green-600' : 'text-red-600'} ${getPaddingClass()}`}>
-              {formatCurrency(transaction.amount)}
+              {formatCurrencyUtil(transaction.amount)}
             </TableCell>
             <TableCell className={`capitalize ${getPaddingClass()}`}>
               {transaction.payment_method?.replace('_', ' ') || '-'}

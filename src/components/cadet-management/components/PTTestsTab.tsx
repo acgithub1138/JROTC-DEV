@@ -15,6 +15,8 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
@@ -44,6 +46,7 @@ export const PTTestsTab = ({
   const {
     canCreate
   } = useCadetPermissions();
+  const { timezone } = useSchoolTimezone();
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -247,7 +250,7 @@ export const PTTestsTab = ({
                         </Badge> : '-'}
                     </TableCell>
                     <TableCell>
-                      {format(new Date(test.date), 'MMM d, yyyy')}
+                      {formatTimeForDisplay(test.date, TIME_FORMATS.SHORT_DATE, timezone)}
                     </TableCell>
                     <TableCell className="text-center">
                       {test.push_ups || '-'}

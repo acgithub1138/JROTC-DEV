@@ -5,6 +5,8 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, DollarSign, Calendar, CreditCard, Eye } from 'lucide-react';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { BudgetTransaction } from '../BudgetManagementPage';
 
 interface BudgetCardsProps {
@@ -21,6 +23,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   onDelete,
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('budget');
+  const { timezone } = useSchoolTimezone();
   const getCategoryColor = (category: string) => {
     switch (category) {
       case 'income': return 'bg-green-100 text-green-800';
@@ -39,7 +42,7 @@ export const BudgetCards: React.FC<BudgetCardsProps> = ({
   };
 
   const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleDateString();
+    return formatTimeForDisplay(dateString, TIME_FORMATS.DATE_ONLY, timezone);
   };
 
   const formatAmount = (amount: number, category: string) => {
