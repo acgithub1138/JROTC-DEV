@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
-import { Edit } from 'lucide-react';
+import { Edit, Printer } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
@@ -68,6 +68,10 @@ export const CompetitionScheduleTab = ({
     const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
     return assignedSchool?.id === userProfile?.school_id;
   };
+
+  const handlePrint = () => {
+    window.print();
+  };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -88,20 +92,31 @@ export const CompetitionScheduleTab = ({
       )
     : allTimeSlots;
   return <TooltipProvider>
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
+      <div className="space-y-4 print:space-y-2 schedule-print-container">
+        <div className="flex items-center justify-between print:hidden">
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
           </div>
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="show-only-my-schedule"
-              checked={showOnlyMySchedule}
-              onCheckedChange={setShowOnlyMySchedule}
-            />
-            <Label htmlFor="show-only-my-schedule" className="text-sm">
-              Show only my schedule
-            </Label>
+          <div className="flex items-center space-x-4">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={handlePrint}
+              className="flex items-center gap-2"
+            >
+              <Printer className="h-4 w-4" />
+              Print Schedule
+            </Button>
+            <div className="flex items-center space-x-2">
+              <Switch
+                id="show-only-my-schedule"
+                checked={showOnlyMySchedule}
+                onCheckedChange={setShowOnlyMySchedule}
+              />
+              <Label htmlFor="show-only-my-schedule" className="text-sm">
+                Show only my schedule
+              </Label>
+            </div>
           </div>
         </div>
 
@@ -132,8 +147,8 @@ export const CompetitionScheduleTab = ({
                 </div>
 
                 {/* Time Slots Grid */}
-                <div className="max-h-96 overflow-y-auto">
-                  {filteredTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
+                 <div className="max-h-96 overflow-y-auto print:max-h-none print:overflow-visible">
+                   {filteredTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
                   gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
                 }}>
                       <div className="text-sm font-medium ">

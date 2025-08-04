@@ -132,3 +132,31 @@
     @apply bg-background text-foreground;
   }
 }
+
+/* Print styles for schedule */
+@media print {
+  @page {
+    size: landscape;
+    margin: 0.5in;
+  }
+  
+  body {
+    -webkit-print-color-adjust: exact !important;
+    color-adjust: exact !important;
+  }
+  
+  .schedule-print-container {
+    width: 100% !important;
+    max-width: none !important;
+    overflow: visible !important;
+  }
+  
+  .schedule-print-container .overflow-x-auto {
+    overflow: visible !important;
+  }
+  
+  .schedule-print-container .min-w-full {
+    width: 100% !important;
+    min-width: auto !important;
+  }
+}
