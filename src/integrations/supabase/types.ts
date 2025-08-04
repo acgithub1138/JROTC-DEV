@@ -912,6 +912,7 @@ export type Database = {
           id: string
           scheduled_time: string
           school_id: string
+          school_name: string | null
           updated_at: string
         }
         Insert: {
@@ -923,6 +924,7 @@ export type Database = {
           id?: string
           scheduled_time: string
           school_id: string
+          school_name?: string | null
           updated_at?: string
         }
         Update: {
@@ -934,6 +936,7 @@ export type Database = {
           id?: string
           scheduled_time?: string
           school_id?: string
+          school_name?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -2283,6 +2286,7 @@ export type Database = {
           id: string
           label: string
           name: string
+          order: number | null
           updated_at: string
         }
         Insert: {
@@ -2291,6 +2295,7 @@ export type Database = {
           id?: string
           label: string
           name: string
+          order?: number | null
           updated_at?: string
         }
         Update: {
@@ -2299,6 +2304,7 @@ export type Database = {
           id?: string
           label?: string
           name?: string
+          order?: number | null
           updated_at?: string
         }
         Relationships: []

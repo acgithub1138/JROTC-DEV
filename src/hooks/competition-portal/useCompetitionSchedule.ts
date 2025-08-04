@@ -58,10 +58,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       // Fetch all schedule slots for this competition
       const { data: schedulesData, error: schedulesError } = await supabase
         .from('cp_event_schedules')
-        .select(`
-          *,
-          schools(name)
-        `)
+        .select('*')
         .eq('competition_id', competitionId);
 
       if (schedulesError) throw schedulesError;
@@ -86,7 +83,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             duration: interval,
             assignedSchool: scheduleForSlot ? {
               id: scheduleForSlot.school_id,
-              name: scheduleForSlot.schools?.name || 'Unknown School'
+              name: scheduleForSlot.school_name || 'Unknown School'
             } : undefined
           });
 
