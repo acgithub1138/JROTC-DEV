@@ -40,8 +40,10 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
 
   const handleModalClose = async () => {
     setSelectedEvent(null);
-    // Refetch data after modal closes to avoid race conditions
-    await refetch();
+    // Small delay to ensure modal is fully closed before refetching
+    setTimeout(async () => {
+      await refetch();
+    }, 100);
   };
 
   const getAssignedSchoolForSlot = (eventId: string, timeSlot: Date) => {
