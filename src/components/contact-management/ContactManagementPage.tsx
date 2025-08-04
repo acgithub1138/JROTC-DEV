@@ -7,6 +7,7 @@ import { ContactCards } from './components/ContactCards';
 import { AddContactDialog } from './components/AddContactDialog';
 import { EditContactDialog } from './components/EditContactDialog';
 import { ViewContactDialog } from './components/ViewContactDialog';
+import { DeleteContactDialog } from './components/DeleteContactDialog';
 import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -31,6 +32,7 @@ const ContactManagementPage = () => {
   const [showAddContact, setShowAddContact] = useState(false);
   const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
+  const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
   const isMobile = useIsMobile();
 
@@ -41,6 +43,16 @@ const ContactManagementPage = () => {
     updateContact,
     deleteContact,
   } = useContacts(searchValue);
+
+  const handleDeleteContact = (contact: Contact) => {
+    setDeletingContact(contact);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingContact) return;
+    await deleteContact(deletingContact.id);
+    setDeletingContact(null);
+  };
 
   return (
     <div className="p-6 space-y-6">
@@ -73,7 +85,7 @@ const ContactManagementPage = () => {
             contacts={contacts}
             isLoading={isLoading}
             onEdit={setEditingContact}
-            onDelete={deleteContact}
+            onDelete={handleDeleteContact}
           />
         ) : (
           <ContactTable
@@ -81,7 +93,7 @@ const ContactManagementPage = () => {
             isLoading={isLoading}
             onEdit={setEditingContact}
             onView={setViewingContact}
-            onDelete={deleteContact}
+            onDelete={handleDeleteContact}
           />
         )}
       </StandardTableWrapper>
@@ -112,6 +124,14 @@ const ContactManagementPage = () => {
           }}
         />
       )}
+
+      <DeleteContactDialog 
+        open={!!deletingContact} 
+        onOpenChange={() => setDeletingContact(null)} 
+        contact={deletingContact} 
+        onConfirm={handleConfirmDelete} 
+        loading={false}
+      />
     </div>
   );
 };

@@ -10,7 +10,7 @@ interface ContactCardsProps {
   contacts: Contact[];
   isLoading: boolean;
   onEdit: (contact: Contact) => void;
-  onDelete: (id: string) => void;
+  onDelete: (contact: Contact) => void;
 }
 
 export const ContactCards: React.FC<ContactCardsProps> = ({
@@ -152,7 +152,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onDelete(contact.id)}
+                  onClick={() => onDelete(contact)}
                   className="text-red-600 hover:text-red-700"
                 >
                   <Trash2 className="w-4 h-4" />

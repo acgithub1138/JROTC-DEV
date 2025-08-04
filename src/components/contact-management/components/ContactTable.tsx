@@ -10,7 +10,7 @@ interface ContactTableProps {
   isLoading: boolean;
   onEdit: (contact: Contact) => void;
   onView: (contact: Contact) => void;
-  onDelete: (id: string) => void;
+  onDelete: (contact: Contact) => void;
 }
 export const ContactTable: React.FC<ContactTableProps> = ({
   contacts,
@@ -109,7 +109,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
                  canEdit={canUpdate}
                  canDelete={canDelete}
                  onEdit={() => onEdit(contact)}
-                 onDelete={() => onDelete(contact.id)}
+                 onDelete={() => onDelete(contact)}
                />
             </TableCell>
           </TableRow>)}
