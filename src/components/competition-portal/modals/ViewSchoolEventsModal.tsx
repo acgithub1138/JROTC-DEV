@@ -87,7 +87,7 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
             </TableHeader>
             <TableBody>
               {eventRegistrations.map(registration => <TableRow key={registration.id}>
-                  <TableCell className="font-medium py-[4px]">
+                  <TableCell className="font-medium py-[6px]">
                     {registration.cp_comp_events?.cp_events?.name || 'Unknown Event'}
                   </TableCell>
                   <TableCell>
