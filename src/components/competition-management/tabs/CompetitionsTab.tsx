@@ -9,6 +9,7 @@ import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
 import { CompetitionScheduleModal } from '../components/CompetitionScheduleModal';
+import { DeleteCompetitionDialog } from '../components/DeleteCompetitionDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
 import { useSortableTable } from '@/hooks/useSortableTable';
@@ -53,6 +54,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const [viewingCompetition, setViewingCompetition] = useState<ExtendedCompetition | null>(null);
   const [selectedCompetition, setSelectedCompetition] = useState<ExtendedCompetition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
+  const [deletingCompetition, setDeletingCompetition] = useState<ExtendedCompetition | null>(null);
   const [scheduleCompetition, setScheduleCompetition] = useState<ExtendedCompetition | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const {
@@ -128,6 +130,16 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const handleViewSchedule = (competition: ExtendedCompetition) => {
     setScheduleCompetition(competition);
   };
+
+  const handleDeleteCompetition = (competition: ExtendedCompetition) => {
+    setDeletingCompetition(competition);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deletingCompetition) return;
+    await deleteCompetition(deletingCompetition.id);
+    setDeletingCompetition(null);
+  };
   return <div className="space-y-6">
       <div>
         
@@ -168,12 +180,11 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           if (competition.source_type === 'portal') return;
           setEditingCompetition(competition);
         }} 
-        onDelete={readOnly || !canDelete ? undefined : (id) => {
+        onDelete={readOnly || !canDelete ? undefined : (competition) => {
           // Don't allow deleting portal events
-          const competition = sortedData.find(c => c.id === id);
-          if (competition?.source_type === 'portal') return;
-          deleteCompetition(id);
-        }} 
+          if (competition.source_type === 'portal') return;
+          handleDeleteCompetition(competition);
+        }}
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
         onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         onView={canViewDetails ? setViewingCompetition : undefined}
@@ -215,5 +226,13 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           competitionName={scheduleCompetition.name}
         />
       )}
+
+      <DeleteCompetitionDialog 
+        open={!!deletingCompetition} 
+        onOpenChange={() => setDeletingCompetition(null)} 
+        competition={deletingCompetition} 
+        onConfirm={handleConfirmDelete} 
+        loading={false}
+      />
     </div>;
 };

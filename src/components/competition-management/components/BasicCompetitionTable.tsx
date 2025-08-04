@@ -13,7 +13,7 @@ interface BasicCompetitionTableProps {
   competitions: any[];
   isLoading: boolean;
   onEdit: (competition: any) => void;
-  onDelete: (id: string) => void;
+  onDelete: (competition: any) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
@@ -216,7 +216,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                        </Tooltip>}
                       {onDelete && competition.source_type !== 'portal' && <Tooltip>
                          <TooltipTrigger asChild>
-                           <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
+                           <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition)}>
                              <Trash2 className="w-3 h-3" />
                            </Button>
                          </TooltipTrigger>

@@ -11,7 +11,7 @@ interface CompetitionCardsProps {
   competitions: any[];
   isLoading: boolean;
   onEdit: (competition: any) => void;
-  onDelete: (id: string) => void;
+  onDelete: (competition: any) => void;
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
@@ -167,7 +167,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                     {onDelete && competition.source_type !== 'portal' && (
                       <Tooltip>
                         <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
+                          <Button variant="outline" size="sm" onClick={() => onDelete(competition)}>
                             <Trash2 className="w-4 h-4" />
                           </Button>
                         </TooltipTrigger>
