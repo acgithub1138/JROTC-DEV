@@ -42,7 +42,7 @@ const competitionMenuItems = [{
   label: 'Open Competitions',
   icon: Search,
   path: '/app/competition-portal/open-competitions'
-  {
+}, {
   id: 'score-sheets',
   label: 'Score Sheets',
   icon: Clipboard,
