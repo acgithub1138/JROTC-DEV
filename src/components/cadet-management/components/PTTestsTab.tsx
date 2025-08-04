@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Search, ArrowUpDown } from 'lucide-react';
+import { CalendarIcon, Plus, Search, ArrowUpDown, Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -44,7 +44,9 @@ export const PTTestsTab = ({
     userProfile
   } = useAuth();
   const {
-    canCreate
+    canCreate,
+    canUpdate,
+    canDelete
   } = useCadetPermissions();
   const {
     timezone
@@ -236,6 +238,9 @@ export const PTTestsTab = ({
                       {getSortIcon('mile_time')}
                     </Button>
                   </TableHead>
+                  {(canUpdate || canDelete) && (
+                    <TableHead className="text-center">Actions</TableHead>
+                  )}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -263,6 +268,32 @@ export const PTTestsTab = ({
                     <TableCell className="text-center">
                       {formatTime(test.mile_time)}
                     </TableCell>
+                    {(canUpdate || canDelete) && (
+                      <TableCell className="text-center">
+                        <div className="flex justify-center gap-1">
+                          {canUpdate && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {/* TODO: Handle edit */}}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                          {canDelete && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {/* TODO: Handle delete */}}
+                              className="h-8 w-8 p-0 text-destructive hover:text-destructive"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>)}
               </TableBody>
             </Table>
