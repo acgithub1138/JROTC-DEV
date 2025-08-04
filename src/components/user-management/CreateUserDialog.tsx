@@ -8,6 +8,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
 import { UserRole } from './types';
 
@@ -27,13 +29,23 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
-  const [formData, setFormData] = useState({
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const initialFormData = {
     email: '',
     password: '',
     firstName: '',
     lastName: '',
     role: '' as UserRole | '',
     schoolId: '',
+  };
+  
+  const [formData, setFormData] = useState(initialFormData);
+  
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: formData,
+    enabled: open,
   });
 
   const fetchSchools = async () => {
@@ -80,14 +92,8 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     });
     
     if (!error) {
-      setFormData({
-        email: '',
-        password: '',
-        firstName: '',
-        lastName: '',
-        role: '',
-        schoolId: '',
-      });
+      setFormData(initialFormData);
+      resetChanges();
       setOpen(false);
       if (onUserCreated) {
         onUserCreated();
@@ -123,8 +129,28 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     return userProfile?.role === 'admin';
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+    setOpen(open);
+  };
+
+  const handleDiscardChanges = () => {
+    setFormData(initialFormData);
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setOpen(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogTrigger asChild>
         {trigger || (
           <Button>
@@ -230,7 +256,7 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
           </div>
           
           <div className="flex justify-end space-x-2">
-            <Button type="button" variant="outline" onClick={() => setOpen(false)}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
               Cancel
             </Button>
             <Button type="submit" disabled={loading}>
@@ -240,6 +266,14 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
         </form>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+    </>
   );
 };
 

@@ -19,6 +19,8 @@ import { useToast } from '@/hooks/use-toast';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Building2, Edit, Trash2, Search, Plus, CalendarIcon, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface School {
   id: string;
   name: string;
@@ -59,6 +61,13 @@ const SchoolManagementPage = () => {
   const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: schools.find(s => s.id === editingSchool?.id) || {},
+    currentData: editingSchool || {},
+    enabled: editDialogOpen && !!editingSchool,
+  });
   const RECORDS_PER_PAGE = 25;
   const emptySchool: Omit<School, 'id' | 'created_at'> = {
     name: '',
@@ -137,6 +146,7 @@ const SchoolManagementPage = () => {
         title: "Success",
         description: "School updated successfully"
       });
+      resetChanges();
       setEditDialogOpen(false);
       setEditingSchool(null);
       fetchSchools();
@@ -241,6 +251,33 @@ const SchoolManagementPage = () => {
     const subscriptionEnd = new Date(endDate);
     return subscriptionEnd <= threeMonthsFromNow && subscriptionEnd >= today;
   };
+
+  const handleEditDialogOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+    setEditDialogOpen(open);
+    if (!open) {
+      setEditingSchool(null);
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    const originalSchool = schools.find(s => s.id === editingSchool?.id);
+    if (originalSchool) {
+      setEditingSchool(originalSchool);
+    }
+    resetChanges();
+    setShowUnsavedDialog(false);
+    setEditDialogOpen(false);
+    setEditingSchool(null);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   if (loading) {
     return <div className="p-6">
         <div className="animate-pulse">
@@ -420,7 +457,7 @@ const SchoolManagementPage = () => {
     }} />
 
       {/* Edit School Dialog */}
-      <Dialog open={editDialogOpen} onOpenChange={setEditDialogOpen}>
+      <Dialog open={editDialogOpen} onOpenChange={handleEditDialogOpenChange}>
         <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto ">
           <DialogHeader>
             <DialogTitle>Edit School</DialogTitle>
@@ -612,7 +649,7 @@ const SchoolManagementPage = () => {
               </div>
               
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => setEditDialogOpen(false)}>
+                <Button type="button" variant="outline" onClick={() => handleEditDialogOpenChange(false)}>
                   Cancel
                 </Button>
                 <Button type="submit">
@@ -647,6 +684,13 @@ const SchoolManagementPage = () => {
           </div>
         </DialogContent>
       </Dialog>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
     </div>;
 };
 export default SchoolManagementPage;

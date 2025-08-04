@@ -13,6 +13,8 @@ import { format, addYears } from 'date-fns';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
 interface CreateSchoolDialogProps {
   open: boolean;
@@ -39,7 +41,9 @@ interface NewSchool {
 
 export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
-  const [newSchool, setNewSchool] = useState<NewSchool>({
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const initialSchool: NewSchool = {
     name: '',
     address: '',
     city: '',
@@ -55,6 +59,14 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     referred_by: '',
     notes: '',
     timezone: 'America/New_York',
+  };
+  
+  const [newSchool, setNewSchool] = useState<NewSchool>(initialSchool);
+  
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: initialSchool,
+    currentData: newSchool,
+    enabled: open,
   });
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -76,24 +88,8 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
       toast.success('School created successfully');
       
       // Reset form
-      setNewSchool({
-        name: '',
-        address: '',
-        city: '',
-        state: '',
-        zip_code: '',
-        phone: '',
-        email: '',
-        jrotc_program: 'air_force',
-        competition_module: false,
-        competition_portal: false,
-        subscription_start: undefined,
-        subscription_end: undefined,
-        referred_by: '',
-        notes: '',
-        timezone: 'America/New_York',
-      });
-      
+      setNewSchool(initialSchool);
+      resetChanges();
       onOpenChange(false);
     } catch (error) {
       console.error('Error creating school:', error);
@@ -103,8 +99,28 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     }
   };
 
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+    onOpenChange(open);
+  };
+
+  const handleDiscardChanges = () => {
+    setNewSchool(initialSchool);
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New School</DialogTitle>
@@ -349,7 +365,7 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
             <Button
               type="button"
               variant="outline"
-              onClick={() => onOpenChange(false)}
+              onClick={() => handleOpenChange(false)}
               disabled={isLoading}
             >
               Cancel
@@ -361,5 +377,13 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         </form>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
+    </>
   );
 };

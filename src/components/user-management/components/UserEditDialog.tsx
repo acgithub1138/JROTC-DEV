@@ -9,6 +9,8 @@ import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Key } from 'lucide-react';
 import { User, UserRole, School } from '../types';
 import { ProfileHistoryTab } from '@/components/cadet-management/components/ProfileHistoryTab';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface UserEditDialogProps {
   user: User | null;
   schools: School[];
@@ -36,6 +38,13 @@ export const UserEditDialog = ({
   const [showPassword, setShowPassword] = useState(false);
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
   const [passwordResetConfirmOpen, setPasswordResetConfirmOpen] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: user || {},
+    currentData: editingUser || {},
+    enabled: open && !!user,
+  });
   React.useEffect(() => {
     if (user && open) {
       setEditingUser({
@@ -43,8 +52,9 @@ export const UserEditDialog = ({
       });
       setNewPassword('');
       setShowPassword(false);
+      resetChanges();
     }
-  }, [user, open]);
+  }, [user, open, resetChanges]);
   const generateRandomPassword = () => {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789!@#$%^&*';
     let password = '';
@@ -57,6 +67,7 @@ export const UserEditDialog = ({
     e.preventDefault();
     if (!editingUser) return;
     await onUpdateUser(editingUser.id, editingUser);
+    resetChanges();
     onOpenChange(false);
   };
   const handlePasswordReset = async () => {
@@ -71,9 +82,31 @@ export const UserEditDialog = ({
       setPasswordResetLoading(false);
     }
   };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+      return;
+    }
+    onOpenChange(open);
+  };
+
+  const handleDiscardChanges = () => {
+    if (user) {
+      setEditingUser({ ...user });
+      resetChanges();
+    }
+    setShowUnsavedDialog(false);
+    onOpenChange(false);
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
   if (!editingUser) return null;
   return <>
-      <Dialog open={open} onOpenChange={onOpenChange}>
+      <Dialog open={open} onOpenChange={handleOpenChange}>
         <DialogContent className="sm:max-w-[700px] max-h-[90vh] overflow-y-auto ">
           <DialogHeader className="flex-shrink-0">
             <DialogTitle>Edit User Profile</DialogTitle>
@@ -183,7 +216,7 @@ export const UserEditDialog = ({
                         </>}
                       
                       <div className="flex justify-end space-x-2">
-                        <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
+                        <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                           Cancel
                         </Button>
                         <Button type="submit">
@@ -228,5 +261,12 @@ export const UserEditDialog = ({
             </div>
           </DialogContent>
         </Dialog>}
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
     </>;
 };
