@@ -108,7 +108,15 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
                   </TableCell>
                   <TableCell>
                     {registration.cp_comp_events?.start_time 
-                      ? new Date(registration.cp_comp_events.start_time).toLocaleString()
+                      ? new Date(registration.cp_comp_events.start_time).toLocaleString('en-US', {
+                          timeZone: 'UTC',
+                          year: 'numeric',
+                          month: 'short',
+                          day: 'numeric',
+                          hour: 'numeric',
+                          minute: '2-digit',
+                          hour12: true
+                        })
                       : '-'}
                   </TableCell>
                   <TableCell>
