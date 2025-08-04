@@ -86,9 +86,6 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
                 <div className="font-medium text-sm">Time Slots</div>
                 {events.map(event => (
                   <div key={event.id} className="flex items-center justify-between min-w-0">
-                    <div className="font-medium text-sm truncate" title={event.event_name}>
-                      {event.event_name}
-                    </div>
                     {canManageSchedule && (
                       <Button
                         variant="outline"
@@ -99,6 +96,9 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
                         <Edit className="h-3 w-3" />
                       </Button>
                     )}
+                    <div className="font-medium text-sm truncate" title={event.event_name}>
+                      {event.event_name}
+                    </div>
                   </div>
                 ))}
               </div>
