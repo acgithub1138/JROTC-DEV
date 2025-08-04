@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
+import { EditResourceModal } from '@/components/competition-portal/modals/EditResourceModal';
 import { format } from 'date-fns';
 interface CompetitionResourcesTabProps {
   competitionId: string;
@@ -17,6 +19,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     resources,
     isLoading,
     createResource,
+    updateResource,
     deleteResource
   } = useCompetitionResources(competitionId);
   const {
@@ -25,6 +28,19 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     canDelete
   } = useTablePermissions('cp_comp_resources');
   const [showAddModal, setShowAddModal] = useState(false);
+  const [editingResource, setEditingResource] = useState(null);
+  const [deletingResourceId, setDeletingResourceId] = useState(null);
+  
+  const handleEdit = (resource) => {
+    setEditingResource(resource);
+  };
+
+  const handleDelete = async (id) => {
+    setDeletingResourceId(id);
+    await deleteResource(id);
+    setDeletingResourceId(null);
+  };
+
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
@@ -70,7 +86,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       {canEdit && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => {/* TODO: Add edit functionality */}}>
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource)}>
                               <Edit className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
@@ -79,18 +95,42 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                           </TooltipContent>
                         </Tooltip>
                       )}
-                      {canDelete && (
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteResource(resource.id)}>
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Delete Resource</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      )}
+                       {canDelete && (
+                         <AlertDialog>
+                           <AlertDialogTrigger asChild>
+                             <Button 
+                               variant="outline" 
+                               size="icon" 
+                               className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
+                               disabled={deletingResourceId === resource.id}
+                             >
+                               {deletingResourceId === resource.id ? (
+                                 <Loader2 className="w-3 h-3 animate-spin" />
+                               ) : (
+                                 <Trash2 className="w-3 h-3" />
+                               )}
+                             </Button>
+                           </AlertDialogTrigger>
+                           <AlertDialogContent>
+                             <AlertDialogHeader>
+                               <AlertDialogTitle>Delete Resource</AlertDialogTitle>
+                               <AlertDialogDescription>
+                                 Are you sure you want to delete this resource assignment for {resource.cadet_profile ? `${resource.cadet_profile.first_name} ${resource.cadet_profile.last_name}` : 'this cadet'}? This action cannot be undone.
+                               </AlertDialogDescription>
+                             </AlertDialogHeader>
+                             <AlertDialogFooter>
+                               <AlertDialogCancel>Cancel</AlertDialogCancel>
+                               <AlertDialogAction 
+                                 onClick={() => handleDelete(resource.id)}
+                                 disabled={deletingResourceId === resource.id}
+                               >
+                                 {deletingResourceId === resource.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                 Delete
+                               </AlertDialogAction>
+                             </AlertDialogFooter>
+                           </AlertDialogContent>
+                         </AlertDialog>
+                       )}
                     </div>
                   </TableCell>}
               </TableRow>)}
@@ -98,7 +138,19 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
         </Table>
       </div>}
 
-      <AddResourceModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onResourceAdded={createResource} />
+      <AddResourceModal 
+        open={showAddModal} 
+        onOpenChange={setShowAddModal} 
+        competitionId={competitionId} 
+        onResourceAdded={createResource} 
+      />
+      
+      <EditResourceModal
+        open={!!editingResource}
+        onOpenChange={(open) => !open && setEditingResource(null)}
+        resource={editingResource}
+        onResourceUpdated={updateResource}
+      />
     </div>
   </TooltipProvider>;
 };
