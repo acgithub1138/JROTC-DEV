@@ -141,27 +141,6 @@ export const CompetitionScheduleTab = ({
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
           </div>
-          <div className="flex items-center space-x-4">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={handlePrint}
-              className="flex items-center gap-2"
-            >
-              <Printer className="h-4 w-4" />
-              Print Schedule
-            </Button>
-            <div className="flex items-center space-x-2">
-              <Switch
-                id="show-only-my-schedule"
-                checked={showOnlyMySchedule}
-                onCheckedChange={setShowOnlyMySchedule}
-              />
-              <Label htmlFor="show-only-my-schedule" className="text-sm">
-                Show only my schedule
-              </Label>
-            </div>
-          </div>
         </div>
 
         <Card className="print:hidden">
