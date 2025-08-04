@@ -37,7 +37,6 @@ export const CompetitionScheduleTab = ({
   } = useSchoolTimezone();
   const { userProfile } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
-  const [showOnlyMySchedule, setShowOnlyMySchedule] = useState(false);
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
 
   // Fetch registered schools for this competition
@@ -48,9 +47,7 @@ export const CompetitionScheduleTab = ({
         .from('cp_comp_schools')
         .select(`
           school_id,
-          school_name,
-          color,
-          schools!inner(name)
+          school_name
         `)
         .eq('competition_id', competitionId);
 
@@ -58,8 +55,7 @@ export const CompetitionScheduleTab = ({
       
       return data.map(school => ({
         id: school.school_id,
-        name: school.school_name || school.schools.name,
-        color: school.color
+        name: school.school_name
       }));
     }
   });
@@ -93,11 +89,6 @@ export const CompetitionScheduleTab = ({
 
   const shouldShowSlot = (eventId: string, timeSlot: Date) => {
     const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
-    
-    // If "show only my schedule" is enabled, filter by user's school
-    if (showOnlyMySchedule) {
-      return assignedSchool?.id === userProfile?.school_id;
-    }
     
     // If a specific school is selected in the filter, show only that school's slots
     if (selectedSchoolFilter !== 'all') {
@@ -197,34 +188,11 @@ export const CompetitionScheduleTab = ({
                 <SelectItem value="all">All schools</SelectItem>
                 {registeredSchools?.map((school) => (
                   <SelectItem key={school.id} value={school.id}>
-                    <div className="flex items-center gap-2">
-                      <div 
-                        className="w-3 h-3 rounded-full" 
-                        style={{ backgroundColor: school.color }}
-                      />
-                      {school.name}
-                    </div>
+                    {school.name}
                   </SelectItem>
                 ))}
               </SelectContent>
             </Select>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Switch
-              id="show-only-my-schedule"
-              checked={showOnlyMySchedule}
-              onCheckedChange={(checked) => {
-                setShowOnlyMySchedule(checked);
-                // Reset school filter when toggling my schedule
-                if (checked) {
-                  setSelectedSchoolFilter('all');
-                }
-              }}
-            />
-            <Label htmlFor="show-only-my-schedule" className="text-sm">
-              Show only my schedule
-            </Label>
           </div>
         </div>
 
