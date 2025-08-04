@@ -70,7 +70,7 @@ export const CompetitionScheduleTab = ({
   };
 
   const getMyScheduleData = () => {
-    const mySchedule: Array<{ time: string; event: string }> = [];
+    const mySchedule: Array<{ time: string; event: string; location: string }> = [];
     
     allTimeSlots.forEach(timeSlot => {
       events.forEach(event => {
@@ -78,7 +78,8 @@ export const CompetitionScheduleTab = ({
         if (assignedSchool?.id === userProfile?.school_id) {
           mySchedule.push({
             time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-            event: event.event_name
+            event: event.event_name,
+            location: event.event_location || 'TBD'
           });
         }
       });
@@ -121,6 +122,7 @@ export const CompetitionScheduleTab = ({
               <tr>
                 <th className="border border-black p-2 text-left font-bold">Time</th>
                 <th className="border border-black p-2 text-left font-bold">Event</th>
+                <th className="border border-black p-2 text-left font-bold">Location</th>
               </tr>
             </thead>
             <tbody>
@@ -128,6 +130,7 @@ export const CompetitionScheduleTab = ({
                 <tr key={index}>
                   <td className="border border-black p-2">{item.time}</td>
                   <td className="border border-black p-2">{item.event}</td>
+                  <td className="border border-black p-2">{item.location}</td>
                 </tr>
               ))}
             </tbody>

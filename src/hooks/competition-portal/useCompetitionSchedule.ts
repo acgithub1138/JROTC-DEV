@@ -25,6 +25,7 @@ export interface TimeSlot {
 export interface ScheduleEvent {
   id: string;
   event_name: string;
+  event_location?: string;
   start_time: string;
   end_time: string;
   interval: number;
@@ -47,6 +48,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         .from('cp_comp_events')
         .select(`
           id,
+          location,
           event:cp_events(name),
           start_time,
           end_time,
@@ -108,6 +110,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         return {
           id: event.id,
           event_name: event.event?.name || 'Unknown Event',
+          event_location: event.location,
           start_time: event.start_time,
           end_time: event.end_time,
           interval,
