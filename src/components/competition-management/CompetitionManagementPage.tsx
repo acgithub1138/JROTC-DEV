@@ -12,7 +12,7 @@ const CompetitionManagementPage = () => {
   } = useCompetitionPermissions();
   return <div className="p-6 space-y-6">
       <div>
-        <h1 className="text-3xl font-bold">Competition Tracking</h1>
+        <h1 className="text-3xl font-bold">My Competitions</h1>
         <p className="text-muted-foreground">Track your competitions, score sheets, and performance</p>
       </div>
 
