@@ -1,23 +1,20 @@
 import React from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CompetitionScheduleTab } from '@/components/competition-portal/tabs/CompetitionScheduleTab';
-
 interface CompetitionScheduleModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
   competitionName: string;
 }
-
 export const CompetitionScheduleModal: React.FC<CompetitionScheduleModalProps> = ({
   open,
   onOpenChange,
   competitionId,
   competitionName
 }) => {
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-6xl h-[80vh] flex flex-col">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             Competition Schedule - {competitionName}
@@ -27,6 +24,5 @@ export const CompetitionScheduleModal: React.FC<CompetitionScheduleModalProps> =
           <CompetitionScheduleTab competitionId={competitionId} />
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
