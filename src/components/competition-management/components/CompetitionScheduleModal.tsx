@@ -21,7 +21,7 @@ export const CompetitionScheduleModal: React.FC<CompetitionScheduleModalProps> =
           </DialogTitle>
         </DialogHeader>
         <div className="flex-1 overflow-hidden">
-          <CompetitionScheduleTab competitionId={competitionId} />
+          <CompetitionScheduleTab competitionId={competitionId} readOnly={true} />
         </div>
       </DialogContent>
     </Dialog>;

@@ -10,9 +10,11 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { ScheduleEditModal } from '../modals/ScheduleEditModal';
 interface CompetitionScheduleTabProps {
   competitionId: string;
+  readOnly?: boolean;
 }
 export const CompetitionScheduleTab = ({
-  competitionId
+  competitionId,
+  readOnly = false
 }: CompetitionScheduleTabProps) => {
   const {
     events,
@@ -88,7 +90,7 @@ export const CompetitionScheduleTab = ({
                       <div className="font-medium text-sm truncate" title={event.event_name}>
                         {event.event_name}
                       </div>
-                      {canManageSchedule && <Tooltip>
+                      {!readOnly && canManageSchedule && <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6">
                               <Edit className="h-3 w-3" />
@@ -97,7 +99,7 @@ export const CompetitionScheduleTab = ({
                           <TooltipContent>
                             <p>Edit schedule for {event.event_name}</p>
                           </TooltipContent>
-                        </Tooltip>}                    
+                        </Tooltip>}
                     </div>)}
                 </div>
 
