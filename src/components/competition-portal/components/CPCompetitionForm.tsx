@@ -4,6 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
 
 interface CPCompetitionFormProps {
   onSubmit: (data: any) => Promise<void>;
@@ -215,12 +216,10 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
 
       <div className="space-y-2">
         <Label htmlFor="location">Location *</Label>
-        <Input
-          id="location"
+        <AddressLookupField
           value={formData.location}
-          onChange={(e) => updateFormData('location', e.target.value)}
-          placeholder="Enter competition location"
-          required
+          onValueChange={(value) => updateFormData('location', value)}
+          placeholder="Enter competition location or search address"
         />
       </div>
 
