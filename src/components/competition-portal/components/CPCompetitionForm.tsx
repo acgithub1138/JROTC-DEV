@@ -45,7 +45,26 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const updateFormData = (field: string, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData(prev => {
+      const newData = { ...prev, [field]: value };
+      
+      // When start date is set, automatically set end date and registration deadline
+      if (field === 'start_date' && value) {
+        const startDate = new Date(value);
+        
+        // Set end date to same as start date
+        newData.end_date = value;
+        
+        // Set registration deadline to 7 days before start date at 18:00
+        const registrationDeadline = new Date(startDate);
+        registrationDeadline.setDate(registrationDeadline.getDate() - 7);
+        newData.registration_deadline_date = registrationDeadline.toISOString().split('T')[0];
+        newData.registration_deadline_hour = '18';
+        newData.registration_deadline_minute = '00';
+      }
+      
+      return newData;
+    });
     onInteraction?.();
   };
 
