@@ -1,0 +1,155 @@
+import React from 'react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
+import { School, Users } from 'lucide-react';
+
+interface ViewEventSchoolsModalProps {
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  event: {
+    id: string;
+    cp_events?: { name: string } | null;
+  } | null;
+}
+
+export const ViewEventSchoolsModal: React.FC<ViewEventSchoolsModalProps> = ({
+  open,
+  onOpenChange,
+  event,
+}) => {
+  const { data: registeredSchools, isLoading } = useQuery({
+    queryKey: ['event-schools', event?.id],
+    queryFn: async () => {
+      if (!event?.id) return [];
+      
+      // First get the event registrations, then fetch school details separately
+      const { data: registrations, error } = await supabase
+        .from('cp_event_registrations')
+        .select('id, status, notes, created_at, school_id')
+        .eq('event_id', event.id)
+        .order('created_at', { ascending: true });
+
+      if (error) throw error;
+      
+      if (!registrations || registrations.length === 0) {
+        return [];
+      }
+
+      // Get school details for each registration
+      const schoolIds = registrations.map(reg => reg.school_id);
+      const { data: schools, error: schoolsError } = await supabase
+        .from('cp_comp_schools')
+        .select('id, school_name, school_id, status')
+        .in('school_id', schoolIds);
+
+      if (schoolsError) throw schoolsError;
+
+      // Combine the data
+      const enrichedRegistrations = registrations.map(registration => {
+        const school = schools?.find(s => s.school_id === registration.school_id);
+        return {
+          ...registration,
+          school_details: school
+        };
+      });
+
+      return enrichedRegistrations;
+    },
+    enabled: open && !!event?.id,
+  });
+
+  const getStatusBadge = (status: string) => {
+    const statusColors = {
+      registered: 'bg-blue-100 text-blue-800',
+      confirmed: 'bg-green-100 text-green-800',
+      cancelled: 'bg-red-100 text-red-800',
+      pending: 'bg-yellow-100 text-yellow-800',
+    };
+
+    return (
+      <Badge className={statusColors[status as keyof typeof statusColors] || 'bg-gray-100 text-gray-800'}>
+        {status.charAt(0).toUpperCase() + status.slice(1)}
+      </Badge>
+    );
+  };
+
+  const getPaymentBadge = (paid: boolean) => {
+    return (
+      <Badge className={paid ? 'bg-green-100 text-green-800' : 'bg-yellow-100 text-yellow-800'}>
+        {paid ? 'Paid' : 'Unpaid'}
+      </Badge>
+    );
+  };
+
+  return (
+    <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[700px] max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <div className="flex items-center gap-2">
+            <School className="w-5 h-5" />
+            <DialogTitle>Registered Schools</DialogTitle>
+          </div>
+          <DialogDescription>
+            Schools registered for: {event?.cp_events?.name || 'Unknown Event'}
+          </DialogDescription>
+        </DialogHeader>
+        
+        {isLoading ? (
+          <div className="p-4 text-center">Loading registered schools...</div>
+        ) : !registeredSchools || registeredSchools.length === 0 ? (
+          <div className="p-8 text-center text-muted-foreground">
+            <Users className="w-12 h-12 mx-auto mb-4 text-muted-foreground/50" />
+            <p className="text-lg font-medium">No Schools Registered</p>
+            <p className="text-sm">No schools have registered for this event yet.</p>
+          </div>
+        ) : (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              {registeredSchools.length} school{registeredSchools.length !== 1 ? 's' : ''} registered
+            </div>
+            
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>School Name</TableHead>
+                  <TableHead>Registration Status</TableHead>
+                  <TableHead>Event Status</TableHead>
+                  <TableHead>Notes</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {registeredSchools.map((registration) => (
+                  <TableRow key={registration.id}>
+                    <TableCell className="font-medium">
+                      {registration.school_details?.school_name || 'Unknown School'}
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(registration.school_details?.status || 'registered')}
+                    </TableCell>
+                    <TableCell>
+                      {getStatusBadge(registration.status)}
+                    </TableCell>
+                    <TableCell className="max-w-xs">
+                      <div className="truncate" title={registration.notes || ''}>
+                        {registration.notes || '-'}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  );
+};
