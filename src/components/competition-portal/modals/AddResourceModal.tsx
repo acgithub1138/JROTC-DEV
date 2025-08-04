@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
@@ -51,6 +52,34 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
       assignment_details: ''
     }
   });
+
+  useEffect(() => {
+    if (open) {
+      fetchCompetitionDate();
+    }
+  }, [open]);
+
+  const fetchCompetitionDate = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('cp_competitions')
+        .select('start_date, end_date')
+        .eq('id', competitionId)
+        .single();
+
+      if (error) throw error;
+
+      if (data?.start_date) {
+        const startDate = new Date(data.start_date).toISOString().split('T')[0];
+        const endDate = data?.end_date ? new Date(data.end_date).toISOString().split('T')[0] : startDate;
+        
+        form.setValue('start_date', startDate);
+        form.setValue('end_date', endDate);
+      }
+    } catch (error) {
+      console.error('Error fetching competition date:', error);
+    }
+  };
   const onSubmit = async (data: FormData) => {
     try {
       let startTime = null;
