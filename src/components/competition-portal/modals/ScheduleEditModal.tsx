@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
+import { ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -14,6 +14,9 @@ interface ScheduleEditModalProps {
   competitionId: string;
   isOpen: boolean;
   onClose: () => void;
+  updateScheduleSlot: (eventId: string, timeSlot: Date, schoolId: string | null) => Promise<void>;
+  getAvailableSchools: (eventId: string) => Promise<AvailableSchool[]>;
+  refetch: () => Promise<void>;
 }
 interface AvailableSchool {
   id: string;
@@ -23,13 +26,11 @@ export const ScheduleEditModal = ({
   event,
   competitionId,
   isOpen,
-  onClose
+  onClose,
+  updateScheduleSlot,
+  getAvailableSchools,
+  refetch
 }: ScheduleEditModalProps) => {
-  const {
-    updateScheduleSlot,
-    getAvailableSchools,
-    refetch
-  } = useCompetitionSchedule(competitionId);
   const {
     timezone
   } = useSchoolTimezone();
@@ -115,7 +116,6 @@ export const ScheduleEditModal = ({
       }
       
       await loadAvailableSchools(); // Refresh available schools
-      await refetch(); // Refresh main schedule data
       resetChanges();
       onClose();
     } catch (error) {

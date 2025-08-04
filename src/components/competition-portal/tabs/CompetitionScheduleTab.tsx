@@ -13,7 +13,7 @@ interface CompetitionScheduleTabProps {
 }
 
 export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTabProps) => {
-  const { events, isLoading } = useCompetitionSchedule(competitionId);
+  const { events, isLoading, updateScheduleSlot, getAvailableSchools, refetch } = useCompetitionSchedule(competitionId);
   const { canManageSchedule } = useCompetitionSchedulePermissions();
   const { timezone } = useSchoolTimezone();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
@@ -147,6 +147,9 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
           competitionId={competitionId}
           isOpen={!!selectedEvent}
           onClose={() => setSelectedEvent(null)}
+          updateScheduleSlot={updateScheduleSlot}
+          getAvailableSchools={getAvailableSchools}
+          refetch={refetch}
         />
       )}
     </div>
