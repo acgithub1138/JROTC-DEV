@@ -91,10 +91,10 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
                     </div>
                     {canManageSchedule && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        size="icon"
                         onClick={() => handleEditEvent(event)}
-                        className="ml-2 h-6 w-6 p-0"
+                        className="h-6 w-6"
                       >
                         <Edit className="h-3 w-3" />
                       </Button>
