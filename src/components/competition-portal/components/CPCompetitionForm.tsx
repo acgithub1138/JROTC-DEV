@@ -73,6 +73,50 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     try {
       setIsSubmitting(true);
       
+      // Parse location to extract address components if not already filled
+      let addressData = {
+        address: formData.address,
+        city: formData.city,
+        state: formData.state,
+        zip: formData.zip
+      };
+
+      // If address fields are empty but location is provided, try to parse location
+      if (!formData.address && !formData.city && !formData.state && !formData.zip && formData.location) {
+        const locationParts = formData.location.split(',').map(part => part.trim());
+        
+        if (locationParts.length >= 2) {
+          // Try to extract components from location string
+          // Example: "123 Main St, Springfield, IL 62701" or "Springfield, IL"
+          if (locationParts.length >= 3) {
+            // Full address format
+            addressData.address = locationParts[0];
+            addressData.city = locationParts[1];
+            
+            const lastPart = locationParts[locationParts.length - 1];
+            const stateZipMatch = lastPart.match(/^([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$/);
+            
+            if (stateZipMatch) {
+              addressData.state = stateZipMatch[1];
+              addressData.zip = stateZipMatch[2];
+            } else {
+              addressData.state = lastPart;
+            }
+          } else if (locationParts.length === 2) {
+            // City, State format
+            addressData.city = locationParts[0];
+            const stateZipMatch = locationParts[1].match(/^([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$/);
+            
+            if (stateZipMatch) {
+              addressData.state = stateZipMatch[1];
+              addressData.zip = stateZipMatch[2];
+            } else {
+              addressData.state = locationParts[1];
+            }
+          }
+        }
+      }
+      
       // Combine date and time fields into datetime strings
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
       const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
@@ -89,10 +133,10 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         end_date: endDateTime.toISOString(),
         program: formData.program,
         fee: formData.fee ? parseFloat(formData.fee) : null,
-        address: formData.address,
-        city: formData.city,
-        state: formData.state,
-        zip: formData.zip,
+        address: addressData.address,
+        city: addressData.city,
+        state: addressData.state,
+        zip: addressData.zip,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         registration_deadline: registrationDeadline ? registrationDeadline.toISOString() : null,
         hosting_school: formData.hosting_school,
