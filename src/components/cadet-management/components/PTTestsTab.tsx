@@ -6,7 +6,8 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Search, ArrowUpDown, Edit2, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
+import { CalendarIcon, Plus, Search, ArrowUpDown, Edit2, Trash2, Loader2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -18,6 +19,7 @@ import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { PTTestEditModal } from './PTTestEditModal';
+import { usePTTestEdit } from '../hooks/usePTTestEdit';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
@@ -56,6 +58,7 @@ export const PTTestsTab = ({
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [editingPTTest, setEditingPTTest] = useState<PTTest | null>(null);
+  const { deletePTTest, isDeleting } = usePTTestEdit();
   const {
     data: ptTests = [],
     isLoading,
@@ -110,6 +113,14 @@ export const PTTestsTab = ({
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  const handleDelete = (ptTest: PTTest) => {
+    deletePTTest(ptTest.id, {
+      onSuccess: () => {
+        refetch();
+      }
+    });
   };
 
   // Use sortable table hook with filtered data
@@ -283,16 +294,39 @@ export const PTTestsTab = ({
                               <Edit2 className="w-3 h-3" />
                             </Button>
                           )}
-                          {canDelete && (
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => {/* TODO: Handle delete */}}
-                              className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                            >
-                              <Trash2 className="h-3 w-3" />
-                            </Button>
-                          )}
+                           {canDelete && (
+                             <AlertDialog>
+                               <AlertDialogTrigger asChild>
+                                 <Button
+                                   variant="outline"
+                                   size="icon"
+                                   className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
+                                   disabled={isDeleting}
+                                 >
+                                   {isDeleting ? (
+                                     <Loader2 className="h-3 w-3 animate-spin" />
+                                   ) : (
+                                     <Trash2 className="h-3 w-3" />
+                                   )}
+                                 </Button>
+                               </AlertDialogTrigger>
+                               <AlertDialogContent>
+                                 <AlertDialogHeader>
+                                   <AlertDialogTitle>Delete PT Test</AlertDialogTitle>
+                                   <AlertDialogDescription>
+                                     Are you sure you want to delete this PT test for {test.profiles.first_name} {test.profiles.last_name}? This action cannot be undone.
+                                   </AlertDialogDescription>
+                                 </AlertDialogHeader>
+                                 <AlertDialogFooter>
+                                   <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                   <AlertDialogAction onClick={() => handleDelete(test)} disabled={isDeleting}>
+                                     {isDeleting && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                     Delete
+                                   </AlertDialogAction>
+                                 </AlertDialogFooter>
+                               </AlertDialogContent>
+                             </AlertDialog>
+                           )}
                         </div>
                       </TableCell>
                     )}
