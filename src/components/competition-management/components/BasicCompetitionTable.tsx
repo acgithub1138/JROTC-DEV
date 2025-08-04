@@ -192,7 +192,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                           <p>View Score Sheets</p>
                         </TooltipContent>
                        </Tooltip>}
-                    {onEdit && <Tooltip>
+                     {onEdit && competition.source_type !== 'portal' && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(competition)}>
                             <Edit className="w-3 h-3" />
@@ -202,7 +202,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                           <p>Edit Competition</p>
                         </TooltipContent>
                       </Tooltip>}
-                    {onDelete && <Tooltip>
+                     {onDelete && competition.source_type !== 'portal' && <Tooltip>
                         <TooltipTrigger asChild>
                           <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
                             <Trash2 className="w-3 h-3" />

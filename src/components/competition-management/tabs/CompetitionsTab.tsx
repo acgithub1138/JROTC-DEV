@@ -157,8 +157,17 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       <BasicCompetitionTable 
         competitions={sortedData} 
         isLoading={isLoading} 
-        onEdit={readOnly || !canUpdate ? undefined : setEditingCompetition} 
-        onDelete={readOnly || !canDelete ? undefined : deleteCompetition} 
+        onEdit={readOnly || !canUpdate ? undefined : (competition) => {
+          // Don't allow editing portal events
+          if (competition.source_type === 'portal') return;
+          setEditingCompetition(competition);
+        }} 
+        onDelete={readOnly || !canDelete ? undefined : (id) => {
+          // Don't allow deleting portal events
+          const competition = sortedData.find(c => c.id === id);
+          if (competition?.source_type === 'portal') return;
+          deleteCompetition(id);
+        }} 
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
         onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         onView={canViewDetails ? setViewingCompetition : undefined}
