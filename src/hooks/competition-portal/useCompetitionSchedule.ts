@@ -139,11 +139,10 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         if (error) throw error;
       }
 
-      await fetchScheduleData(); // Refresh data
-      toast.success(schoolId ? 'Schedule updated' : 'Assignment removed');
+      // No internal data refresh or toast - let parent handle this
     } catch (error) {
       console.error('Error updating schedule:', error);
-      toast.error('Failed to update schedule');
+      throw error; // Re-throw so modal can handle error
     }
   };
 

@@ -113,7 +113,6 @@ export const ScheduleEditModal = ({
         });
       }
       
-      await loadAvailableSchools(); // Refresh available schools
       resetChanges();
       onClose(); // This will trigger refetch in parent
     } catch (error) {
