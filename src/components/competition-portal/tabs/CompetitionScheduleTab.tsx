@@ -141,7 +141,10 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
                         return (
                           <div key={event.id} className="text-sm min-w-0">
                             {assignedSchool ? (
-                              <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs truncate">
+                              <div 
+                                className="px-2 py-1 rounded text-xs truncate text-white font-medium"
+                                style={{ backgroundColor: assignedSchool.color || 'hsl(var(--primary))' }}
+                              >
                                 {assignedSchool.name}
                               </div>
                             ) : (

@@ -18,6 +18,7 @@ export interface TimeSlot {
   assignedSchool?: {
     id: string;
     name: string;
+    color?: string;
   };
 }
 
@@ -63,6 +64,15 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schedulesError) throw schedulesError;
 
+      // Fetch school colors for this competition
+      const { data: schoolsData, error: schoolsError } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, color')
+        .eq('competition_id', competitionId);
+
+      if (schoolsError) throw schoolsError;
+
+
       // Process events and generate time slots
       const processedEvents: ScheduleEvent[] = eventsData?.map(event => {
         const startTime = new Date(event.start_time);
@@ -78,12 +88,17 @@ export const useCompetitionSchedule = (competitionId?: string) => {
                  new Date(s.scheduled_time).getTime() === current.getTime()
           );
 
+          const schoolColor = scheduleForSlot ? 
+            schoolsData?.find(school => school.school_id === scheduleForSlot.school_id)?.color : 
+            undefined;
+
           timeSlots.push({
             time: new Date(current),
             duration: interval,
             assignedSchool: scheduleForSlot ? {
               id: scheduleForSlot.school_id,
-              name: scheduleForSlot.school_name || 'Unknown School'
+              name: scheduleForSlot.school_name || 'Unknown School',
+              color: schoolColor
             } : undefined
           });
 
