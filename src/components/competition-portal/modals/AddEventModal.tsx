@@ -11,6 +11,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 interface AddEventModalProps {
   open: boolean;
@@ -54,6 +56,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     users: schoolUsers,
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
+  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
 
   useEffect(() => {
     if (open) {
@@ -73,9 +76,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
       if (error) throw error;
 
-      if (data?.start_date) {
-        const startDate = new Date(data.start_date).toISOString().split('T')[0];
-        const endDate = data?.end_date ? new Date(data.end_date).toISOString().split('T')[0] : startDate;
+      if (data?.start_date && !timezoneLoading) {
+        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
+        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
         
         setFormData(prev => ({
           ...prev,

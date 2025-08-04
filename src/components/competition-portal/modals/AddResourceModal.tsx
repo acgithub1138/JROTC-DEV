@@ -9,6 +9,8 @@ import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
 import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
@@ -38,6 +40,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
     users,
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
+  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -69,9 +72,9 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
 
       if (error) throw error;
 
-      if (data?.start_date) {
-        const startDate = new Date(data.start_date).toISOString().split('T')[0];
-        const endDate = data?.end_date ? new Date(data.end_date).toISOString().split('T')[0] : startDate;
+      if (data?.start_date && !timezoneLoading) {
+        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
+        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
         
         form.setValue('start_date', startDate);
         form.setValue('end_date', endDate);
