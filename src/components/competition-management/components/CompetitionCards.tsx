@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus, Eye, Calendar } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, Calendar, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
 
@@ -15,6 +15,7 @@ interface CompetitionCardsProps {
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
+  onViewSchedule?: (competition: any) => void;
   canViewDetails?: boolean;
 }
 
@@ -69,6 +70,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
   onAddEvent,
   onViewScoreSheets,
   onView,
+  onViewSchedule,
   canViewDetails = false
 }) => {
   if (isLoading) {
@@ -125,44 +127,56 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                     {formatCompetitionDateFull(competition.competition_date)}
                   </div>
                 </div>
-                <div className="flex gap-2 ml-4">
-                  {onAddEvent && (
-                    <Tooltip>
-                      <TooltipTrigger asChild>
-                        <Button variant="default" size="sm" onClick={() => onAddEvent(competition)}>
-                          <Plus className="w-4 h-4" />
-                        </Button>
-                      </TooltipTrigger>
-                      <TooltipContent>
-                        <p>Add Event Score Sheet</p>
-                      </TooltipContent>
-                    </Tooltip>
-                  )}
-                   {onEdit && competition.source_type !== 'portal' && (
+                 <div className="flex gap-2 ml-4">
+                   {onAddEvent && (
                      <Tooltip>
                        <TooltipTrigger asChild>
-                         <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
-                           <Edit className="w-4 h-4" />
+                         <Button variant="default" size="sm" onClick={() => onAddEvent(competition)}>
+                           <Plus className="w-4 h-4" />
                          </Button>
                        </TooltipTrigger>
                        <TooltipContent>
-                         <p>Edit Competition</p>
+                         <p>Add Event Score Sheet</p>
                        </TooltipContent>
                      </Tooltip>
                    )}
-                   {onDelete && competition.source_type !== 'portal' && (
+                   {onViewSchedule && competition.source_type === 'portal' && (
                      <Tooltip>
                        <TooltipTrigger asChild>
-                         <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
-                           <Trash2 className="w-4 h-4" />
+                         <Button variant="outline" size="sm" onClick={() => onViewSchedule(competition)}>
+                           <CalendarDays className="w-4 h-4" />
                          </Button>
                        </TooltipTrigger>
                        <TooltipContent>
-                         <p>Delete Competition</p>
+                         <p>View Schedule</p>
                        </TooltipContent>
                      </Tooltip>
                    )}
-                </div>
+                    {onEdit && competition.source_type !== 'portal' && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
+                            <Edit className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Edit Competition</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                    {onDelete && competition.source_type !== 'portal' && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => onDelete(competition.id)}>
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>Delete Competition</p>
+                        </TooltipContent>
+                      </Tooltip>
+                    )}
+                 </div>
               </div>
             </CardHeader>
             <CardContent className="space-y-4">

@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, CalendarDays } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
@@ -17,6 +17,7 @@ interface BasicCompetitionTableProps {
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
+  onViewSchedule?: (competition: any) => void;
   visibleColumns?: string[];
   canViewDetails?: boolean;
 }
@@ -83,6 +84,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onAddEvent,
   onViewScoreSheets,
   onView,
+  onViewSchedule,
   visibleColumns = [],
   canViewDetails = false
 }) => {
@@ -98,7 +100,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
-    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} onView={onView} canViewDetails={canViewDetails} />;
+    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} onView={onView} onViewSchedule={onViewSchedule} canViewDetails={canViewDetails} />;
   }
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
@@ -170,50 +172,60 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 {isColumnVisible('unarmed_exhibition') && <TableCell><PlacementCell placement={competition.unarmed_exhibition} /></TableCell>}
                 {isColumnVisible('unarmed_color_guard') && <TableCell><PlacementCell placement={competition.unarmed_color_guard} /></TableCell>}
                 {isColumnVisible('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-center gap-2">
-                    {onAddEvent && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="default" size="icon" className="h-6 w-6" onClick={() => onAddEvent(competition)}>
-                            <Plus className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Add Event Score Sheet</p>
-                        </TooltipContent>
+                 <TableCell className="text-right">
+                   <div className="flex items-center justify-center gap-2">
+                     {onAddEvent && <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button variant="default" size="icon" className="h-6 w-6" onClick={() => onAddEvent(competition)}>
+                             <Plus className="w-3 h-3" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Add Event Score Sheet</p>
+                         </TooltipContent>
+                        </Tooltip>}
+                     {onViewScoreSheets && canViewDetails && <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
+                             <Eye className="w-3 h-3" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>View Score Sheets</p>
+                         </TooltipContent>
+                        </Tooltip>}
+                     {onViewSchedule && competition.source_type === 'portal' && <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewSchedule(competition)}>
+                             <CalendarDays className="w-3 h-3" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>View Schedule</p>
+                         </TooltipContent>
+                        </Tooltip>}
+                      {onEdit && competition.source_type !== 'portal' && <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(competition)}>
+                             <Edit className="w-3 h-3" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Edit Competition</p>
+                         </TooltipContent>
                        </Tooltip>}
-                    {onViewScoreSheets && canViewDetails && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewScoreSheets(competition)}>
-                            <Eye className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Score Sheets</p>
-                        </TooltipContent>
+                      {onDelete && competition.source_type !== 'portal' && <Tooltip>
+                         <TooltipTrigger asChild>
+                           <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
+                             <Trash2 className="w-3 h-3" />
+                           </Button>
+                         </TooltipTrigger>
+                         <TooltipContent>
+                           <p>Delete Competition</p>
+                         </TooltipContent>
                        </Tooltip>}
-                     {onEdit && competition.source_type !== 'portal' && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(competition)}>
-                            <Edit className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Edit Competition</p>
-                        </TooltipContent>
-                      </Tooltip>}
-                     {onDelete && competition.source_type !== 'portal' && <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(competition.id)}>
-                            <Trash2 className="w-3 h-3" />
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>Delete Competition</p>
-                        </TooltipContent>
-                      </Tooltip>}
-                  </div>
-                </TableCell>
+                   </div>
+                 </TableCell>
               </TableRow>)}
           </TableBody>
           </Table>
