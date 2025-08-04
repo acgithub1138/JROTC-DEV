@@ -7,6 +7,7 @@ import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
 interface ScheduleEditModalProps {
   event: ScheduleEvent;
@@ -32,6 +33,7 @@ export const ScheduleEditModal = ({
   const {
     timezone
   } = useSchoolTimezone();
+  const { toast } = useToast();
   const [availableSchools, setAvailableSchools] = useState<AvailableSchool[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
@@ -78,10 +80,38 @@ export const ScheduleEditModal = ({
   const handleUpdateSchedule = async () => {
     setIsSaving(true);
     try {
-      // Process all changes
+      // Find only the changed slots
+      const changedSlots = [];
       for (const [timeSlotISO, schoolId] of Object.entries(localSchedule)) {
+        if (initialSchedule[timeSlotISO] !== schoolId) {
+          changedSlots.push({ timeSlotISO, schoolId });
+        }
+      }
+
+      // Process only changed slots
+      for (const { timeSlotISO, schoolId } of changedSlots) {
         const timeSlot = new Date(timeSlotISO);
         await updateScheduleSlot(event.id, timeSlot, schoolId);
+      }
+      
+      // Show summary notification
+      if (changedSlots.length > 0) {
+        const addedCount = changedSlots.filter(slot => slot.schoolId !== null).length;
+        const removedCount = changedSlots.filter(slot => slot.schoolId === null).length;
+        
+        let message = '';
+        if (addedCount > 0 && removedCount > 0) {
+          message = `Schedule updated: ${addedCount} assignment(s) added, ${removedCount} removed`;
+        } else if (addedCount > 0) {
+          message = `Schedule updated: ${addedCount} school(s) assigned`;
+        } else if (removedCount > 0) {
+          message = `Schedule updated: ${removedCount} assignment(s) removed`;
+        }
+        
+        toast({
+          title: "Success",
+          description: message,
+        });
       }
       
       await loadAvailableSchools(); // Refresh available schools
@@ -90,6 +120,11 @@ export const ScheduleEditModal = ({
       onClose();
     } catch (error) {
       console.error('Error updating schedule:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update schedule. Please try again.",
+        variant: "destructive",
+      });
     } finally {
       setIsSaving(false);
     }
