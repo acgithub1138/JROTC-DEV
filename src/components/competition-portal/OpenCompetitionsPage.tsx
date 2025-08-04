@@ -228,7 +228,7 @@ export const OpenCompetitionsPage = () => {
                   </div>
                 </div>
                 
-                <div className="flex gap-2">
+                <div className="flex items-center justify-center gap-2">
                   <Button 
                     variant="outline" 
                     className="flex-1" 
