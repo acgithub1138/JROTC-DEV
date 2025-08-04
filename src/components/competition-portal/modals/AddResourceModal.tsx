@@ -12,8 +12,12 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
-  start_time: z.string().optional(),
-  end_time: z.string().optional(),
+  start_date: z.string().optional(),
+  start_time_hour: z.string().optional(),
+  start_time_minute: z.string().optional(),
+  end_date: z.string().optional(),
+  end_time_hour: z.string().optional(),
+  end_time_minute: z.string().optional(),
   assignment_details: z.string().optional()
 });
 type FormData = z.infer<typeof formSchema>;
@@ -38,18 +42,39 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
     defaultValues: {
       resource: '',
       location: '',
-      start_time: '',
-      end_time: '',
+      start_date: '',
+      start_time_hour: '09',
+      start_time_minute: '00',
+      end_date: '',
+      end_time_hour: '10',
+      end_time_minute: '00',
       assignment_details: ''
     }
   });
   const onSubmit = async (data: FormData) => {
     try {
+      let startTime = null;
+      let endTime = null;
+
+      // Build start time if date and time are provided
+      if (data.start_date && data.start_time_hour && data.start_time_minute) {
+        const startDateTime = new Date(`${data.start_date}T${data.start_time_hour}:${data.start_time_minute}:00`);
+        startTime = startDateTime.toISOString();
+      }
+
+      // Build end time if date and time are provided
+      if (data.end_date && data.end_time_hour && data.end_time_minute) {
+        const endDateTime = new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`);
+        endTime = endDateTime.toISOString();
+      }
+
       await onResourceAdded({
-        ...data,
+        resource: data.resource,
+        location: data.location,
+        assignment_details: data.assignment_details,
         competition_id: competitionId,
-        start_time: data.start_time ? new Date(data.start_time).toISOString() : null,
-        end_time: data.end_time ? new Date(data.end_time).toISOString() : null
+        start_time: startTime,
+        end_time: endTime
       });
       form.reset();
       onOpenChange(false);
@@ -94,33 +119,176 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
                   </FormControl>
                   <FormMessage />
                 </FormItem>} />
-            <FormField control={form.control} name="start_time" render={({
-            field
-          }) => <FormItem>
-                  <FormLabel>Start Time</FormLabel>
-                  <FormControl>
-                    <Input type="datetime-local" {...field} onChange={e => {
-                field.onChange(e);
-                // Auto-set end time to 1 hour after start time
-                if (e.target.value) {
-                  const startDate = new Date(e.target.value);
-                  const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
-                  const endDateString = endDate.toISOString().slice(0, 16); // Format for datetime-local
-                  form.setValue('end_time', endDateString);
-                }
-              }} />
-                  </FormControl>
+            <div>
+              <FormField control={form.control} name="start_date" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Start Date & Time</FormLabel>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="col-span-2">
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                          onChange={(e) => {
+                            field.onChange(e);
+                            // Auto-set end date when start date changes
+                            if (e.target.value && !form.getValues('end_date')) {
+                              form.setValue('end_date', e.target.value);
+                            }
+                          }}
+                        />
+                      </FormControl>
+                    </div>
+                    <div>
+                      <FormField control={form.control} name="start_time_hour" render={({ field: hourField }) => (
+                        <FormControl>
+                          <Select value={hourField.value} onValueChange={(value) => {
+                            hourField.onChange(value);
+                            // Auto-update end time when start time changes (add 1 hour)
+                            const startHour = parseInt(value);
+                            const startMinute = parseInt(form.getValues('start_time_minute') || '0');
+                            let endHour = startHour + 1;
+                            let endMinute = startMinute;
+                            
+                            if (endHour >= 24) {
+                              endHour = 0;
+                              // If we overflow to the next day, update the end date too
+                              const startDate = form.getValues('start_date');
+                              if (startDate) {
+                                const nextDay = new Date(startDate);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                form.setValue('end_date', nextDay.toISOString().split('T')[0]);
+                              }
+                            } else {
+                              // Make sure end date matches start date
+                              const startDate = form.getValues('start_date');
+                              if (startDate) {
+                                form.setValue('end_date', startDate);
+                              }
+                            }
+                            
+                            form.setValue('end_time_hour', endHour.toString().padStart(2, '0'));
+                            form.setValue('end_time_minute', endMinute.toString().padStart(2, '0'));
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Hour" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      )} />
+                    </div>
+                    <div>
+                      <FormField control={form.control} name="start_time_minute" render={({ field: minuteField }) => (
+                        <FormControl>
+                          <Select value={minuteField.value} onValueChange={(value) => {
+                            minuteField.onChange(value);
+                            // Auto-update end time when start time changes (add 1 hour)
+                            const startHour = parseInt(form.getValues('start_time_hour') || '0');
+                            const startMinute = parseInt(value);
+                            let endHour = startHour + 1;
+                            let endMinute = startMinute;
+                            
+                            if (endHour >= 24) {
+                              endHour = 0;
+                              // If we overflow to the next day, update the end date too
+                              const startDate = form.getValues('start_date');
+                              if (startDate) {
+                                const nextDay = new Date(startDate);
+                                nextDay.setDate(nextDay.getDate() + 1);
+                                form.setValue('end_date', nextDay.toISOString().split('T')[0]);
+                              }
+                            } else {
+                              // Make sure end date matches start date
+                              const startDate = form.getValues('start_date');
+                              if (startDate) {
+                                form.setValue('end_date', startDate);
+                              }
+                            }
+                            
+                            form.setValue('end_time_hour', endHour.toString().padStart(2, '0'));
+                            form.setValue('end_time_minute', endMinute.toString().padStart(2, '0'));
+                          }}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Min" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                                <SelectItem key={minute} value={minute}>
+                                  {minute}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      )} />
+                    </div>
+                  </div>
                   <FormMessage />
-                </FormItem>} />
-            <FormField control={form.control} name="end_time" render={({
-            field
-          }) => <FormItem>
-                  <FormLabel>End Time</FormLabel>
-                  <FormControl>
-                    <Input type="datetime-local" {...field} />
-                  </FormControl>
+                </FormItem>
+              )} />
+            </div>
+
+            <div>
+              <FormField control={form.control} name="end_date" render={({ field }) => (
+                <FormItem>
+                  <FormLabel>End Date & Time</FormLabel>
+                  <div className="grid grid-cols-4 gap-2">
+                    <div className="col-span-2">
+                      <FormControl>
+                        <Input
+                          type="date"
+                          {...field}
+                        />
+                      </FormControl>
+                    </div>
+                    <div>
+                      <FormField control={form.control} name="end_time_hour" render={({ field: hourField }) => (
+                        <FormControl>
+                          <Select value={hourField.value} onValueChange={hourField.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Hour" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {Array.from({ length: 24 }, (_, i) => (
+                                <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                                  {i.toString().padStart(2, '0')}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      )} />
+                    </div>
+                    <div>
+                      <FormField control={form.control} name="end_time_minute" render={({ field: minuteField }) => (
+                        <FormControl>
+                          <Select value={minuteField.value} onValueChange={minuteField.onChange}>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Min" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                                <SelectItem key={minute} value={minute}>
+                                  {minute}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </FormControl>
+                      )} />
+                    </div>
+                  </div>
                   <FormMessage />
-                </FormItem>} />
+                </FormItem>
+              )} />
+            </div>
             <FormField control={form.control} name="assignment_details" render={({
             field
           }) => <FormItem>
