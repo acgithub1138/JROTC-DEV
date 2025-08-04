@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SortableTableHead } from '@/components/ui/sortable-table';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
@@ -46,6 +47,9 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [showSchoolsModal, setShowSchoolsModal] = useState(false);
   const [selectedEventForView, setSelectedEventForView] = useState<typeof events[0] | null>(null);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [eventToDelete, setEventToDelete] = useState<typeof events[0] | null>(null);
+  const [isDeleting, setIsDeleting] = useState(false);
   const handleEditEvent = (event: typeof events[0]) => {
     setSelectedEvent(event);
     setShowEditModal(true);
@@ -62,6 +66,26 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const handleViewSchools = (event: typeof events[0]) => {
     setSelectedEventForView(event);
     setShowSchoolsModal(true);
+  };
+
+  const handleDeleteClick = (event: typeof events[0]) => {
+    setEventToDelete(event);
+    setShowDeleteDialog(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!eventToDelete) return;
+    
+    setIsDeleting(true);
+    try {
+      await deleteEvent(eventToDelete.id);
+      setShowDeleteDialog(false);
+      setEventToDelete(null);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+    } finally {
+      setIsDeleting(false);
+    }
   };
   if (isLoading) {
     return <div className="space-y-4">
@@ -175,16 +199,16 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                                  <p>Edit Event</p>
                                </TooltipContent>
                              </Tooltip>}
-                           {canDelete && <Tooltip>
-                               <TooltipTrigger asChild>
-                                 <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteEvent(event.id)}>
-                                   <Trash2 className="w-3 h-3" />
-                                 </Button>
-                               </TooltipTrigger>
-                               <TooltipContent>
-                                 <p>Delete Event</p>
-                               </TooltipContent>
-                             </Tooltip>}
+                            {canDelete && <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(event)}>
+                                    <Trash2 className="w-3 h-3" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Delete Event</p>
+                                </TooltipContent>
+                              </Tooltip>}
                          </div>
                        </TableCell>}
                  </TableRow>)}
@@ -197,6 +221,28 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
       <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} event={selectedEventForView} />
       <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} event={selectedEventForView} />
       <ViewEventSchoolsModal open={showSchoolsModal} onOpenChange={setShowSchoolsModal} event={selectedEventForView} />
+
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the event "{eventToDelete?.cp_events?.name || 'this event'}"? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   </TooltipProvider>;
 };
