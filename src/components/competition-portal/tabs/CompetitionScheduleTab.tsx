@@ -106,7 +106,7 @@ export const CompetitionScheduleTab = ({
                   {allTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
                   gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
                 }}>
-                      <div className="text-sm">
+                      <div className="text-sm font-medium ">
                         {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                       </div>
                       {events.map(event => {
