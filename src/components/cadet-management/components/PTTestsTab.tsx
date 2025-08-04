@@ -46,7 +46,9 @@ export const PTTestsTab = ({
   const {
     canCreate
   } = useCadetPermissions();
-  const { timezone } = useSchoolTimezone();
+  const {
+    timezone
+  } = useSchoolTimezone();
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
@@ -173,10 +175,7 @@ export const PTTestsTab = ({
         {/* Bulk Entry Button */}
         <div className="flex gap-2">
           {canCreate && <>
-              <Button onClick={onOpenBulkDialog}>
-                <Plus className="w-4 h-4 mr-2" />
-                Bulk PT Test
-              </Button>
+              
               <Button variant="outline" onClick={onOpenBulkDialog}>
                 <Plus className="w-4 h-4 mr-2" />
                 Add PT Tests
