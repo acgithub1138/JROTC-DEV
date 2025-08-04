@@ -104,7 +104,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   const menuItems = hasCompetitionPortal ? competitionMenuItems : limitedMenuItems;
   const handleReturnToCCC = () => {
     setPortal('ccc');
-    navigate('/app/dashboard');
+    navigate('/app');
   };
   const handleMenuItemClick = (item: typeof competitionMenuItems[0]) => {
     onModuleChange(item.id);
