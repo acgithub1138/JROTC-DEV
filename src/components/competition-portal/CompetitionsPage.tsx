@@ -10,7 +10,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { CompetitionDialog } from '@/components/competition-management/components/CompetitionDialog';
+import { CPCompetitionDialog } from './components/CPCompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
@@ -395,7 +395,7 @@ const CompetitionsPage = () => {
       </Tabs>
 
       {/* Create Competition Dialog */}
-      <CompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
+      <CPCompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
       {/* View Competition Modal */}
       <ViewCompetitionModal 
