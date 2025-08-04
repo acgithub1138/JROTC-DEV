@@ -89,8 +89,8 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                   <SortableTableHead sortKey="end_time" currentSort={sortConfig} onSort={handleSort}>
                     End
                   </SortableTableHead>
-                  <SortableTableHead sortKey="max_participants" currentSort={sortConfig} onSort={handleSort}>
-                    Max
+                  <SortableTableHead sortKey="registration_count" currentSort={sortConfig} onSort={handleSort}>
+                    Registered
                   </SortableTableHead>
                   <TableHead className="text-center">Judges</TableHead>
                   <TableHead className="text-center">Resources</TableHead>
@@ -107,7 +107,12 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                     <TableCell>
                       {formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_24H, timezone)}
                     </TableCell>
-                    <TableCell>{event.max_participants || 'N/A'}</TableCell>
+                    <TableCell>
+                      {event.registration_count !== undefined 
+                        ? `${event.registration_count}${event.max_participants ? `/${event.max_participants}` : ''}`
+                        : 'N/A'
+                      }
+                    </TableCell>
                     <TableCell>
                       <div className="flex items-center justify-center">
                         <Tooltip>

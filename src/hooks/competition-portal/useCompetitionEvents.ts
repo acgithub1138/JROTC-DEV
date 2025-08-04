@@ -6,6 +6,7 @@ import type { Database } from '@/integrations/supabase/types';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   cp_events?: { name: string } | null;
+  registration_count?: number;
 };
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
@@ -30,7 +31,25 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .order('start_time', { ascending: true });
 
       if (error) throw error;
-      setEvents(data || []);
+
+      // Fetch registration counts for each event
+      const eventsWithCounts = await Promise.all(
+        (data || []).map(async (event) => {
+          const { count } = await supabase
+            .from('cp_event_registrations')
+            .select('*', { count: 'exact' })
+            .eq('event_id', event.id)
+            .eq('competition_id', competitionId)
+            .neq('status', 'cancelled');
+
+          return {
+            ...event,
+            registration_count: count || 0
+          };
+        })
+      );
+
+      setEvents(eventsWithCounts);
     } catch (error) {
       console.error('Error fetching competition events:', error);
       toast.error('Failed to load events');
@@ -58,9 +77,12 @@ export const useCompetitionEvents = (competitionId?: string) => {
 
       if (error) throw error;
 
-      setEvents(prev => [...prev, data].sort((a, b) => 
-        new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-      ));
+      setEvents(prev => {
+        const newEvent = { ...data, registration_count: 0 };
+        return [...prev, newEvent].sort((a, b) => 
+          new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
+        );
+      });
       toast.success('Event added successfully');
       return data;
     } catch (error) {
@@ -88,10 +110,11 @@ export const useCompetitionEvents = (competitionId?: string) => {
       if (error) throw error;
 
       setEvents(prev => 
-        prev.map(event => event.id === id ? data : event)
-          .sort((a, b) => 
-            new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
-          )
+        prev.map(event => 
+          event.id === id ? { ...data, registration_count: event.registration_count } : event
+        ).sort((a, b) => 
+          new Date(a.start_time || '').getTime() - new Date(b.start_time || '').getTime()
+        )
       );
       toast.success('Event updated successfully');
       return data;
