@@ -690,6 +690,7 @@ export type Database = {
       }
       cp_comp_schools: {
         Row: {
+          color: string | null
           competition_id: string
           created_at: string
           created_by: string | null
@@ -704,6 +705,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          color?: string | null
           competition_id: string
           created_at?: string
           created_by?: string | null
@@ -718,6 +720,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          color?: string | null
           competition_id?: string
           created_at?: string
           created_by?: string | null

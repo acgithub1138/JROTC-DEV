@@ -9,11 +9,13 @@ import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetition
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
+import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
 
-// Extend the type to include the paid field
+// Extend the type to include the paid and color fields
 type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row'] & {
   paid: boolean;
+  color: string;
 };
 interface CompetitionSchoolsTabProps {
   competitionId: string;
@@ -41,6 +43,14 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
     } catch (error) {
       console.error('Error updating payment status:', error);
       console.error('Full error details:', JSON.stringify(error, null, 2));
+    }
+  };
+
+  const handleColorChange = async (schoolId: string, newColor: string) => {
+    try {
+      await updateSchoolRegistration(schoolId, { color: newColor });
+    } catch (error) {
+      console.error('Error updating school color:', error);
     }
   };
   if (isLoading) {
@@ -72,6 +82,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <TableHeader>
                   <TableRow>
                     <TableHead>School Name</TableHead>
+                    <TableHead>Color</TableHead>
                     <TableHead>Events</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Paid</TableHead>
@@ -83,6 +94,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                     <TableRow key={school.id}>
                       <TableCell className="font-medium">
                         {school.school_name || 'Unknown School'}
+                      </TableCell>
+                      <TableCell>
+                        <ColorPicker
+                          value={school.color || '#3B82F6'}
+                          onChange={(color) => handleColorChange(school.id, color)}
+                          disabled={!canEdit}
+                        />
                       </TableCell>
                       <TableCell>
                         <Tooltip>
