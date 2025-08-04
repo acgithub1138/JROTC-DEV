@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
 import { CreateEventModal } from './CreateEventModal';
@@ -20,6 +21,7 @@ export const EventsPage = () => {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  const [deleteConfirmEvent, setDeleteConfirmEvent] = useState<typeof events[0] | null>(null);
   const [sortConfig, setSortConfig] = useState<{
     key: string;
     direction: 'asc' | 'desc';
@@ -94,9 +96,14 @@ export const EventsPage = () => {
     setIsEditModalOpen(true);
   };
 
-  const handleDelete = async (eventId: string) => {
-    if (window.confirm('Are you sure you want to archive this event? It will be hidden from the list.')) {
-      await deleteEvent(eventId);
+  const handleDeleteClick = (event: typeof events[0]) => {
+    setDeleteConfirmEvent(event);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteConfirmEvent) {
+      await deleteEvent(deleteConfirmEvent.id);
+      setDeleteConfirmEvent(null);
     }
   };
   if (isLoading) {
@@ -160,7 +167,7 @@ export const EventsPage = () => {
                           </Tooltip>
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDelete(event.id)}>
+                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDeleteClick(event)}>
                                 <Trash2 className="w-3 h-3 text-red-600 hover:text-red-700 hover:border-red-300" />
                               </Button>
                             </TooltipTrigger>
@@ -178,6 +185,23 @@ export const EventsPage = () => {
 
         <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} onSuccess={refetch} />
         <EditEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} onSuccess={refetch} />
+        
+        <AlertDialog open={!!deleteConfirmEvent} onOpenChange={(open) => !open && setDeleteConfirmEvent(null)}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Delete Event</AlertDialogTitle>
+              <AlertDialogDescription>
+                Are you sure you want to delete the event "{deleteConfirmEvent?.name}"? This action cannot be undone and will remove the event permanently.
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel>Cancel</AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive hover:bg-destructive/90">
+                Delete Event
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </div>
     </TooltipProvider>;
 };
