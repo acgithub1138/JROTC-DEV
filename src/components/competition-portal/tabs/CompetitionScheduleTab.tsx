@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Printer } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -11,6 +12,8 @@ import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useAuth } from '@/contexts/AuthContext';
 import { ScheduleEditModal } from '../modals/ScheduleEditModal';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
 interface CompetitionScheduleTabProps {
   competitionId: string;
   readOnly?: boolean;
@@ -35,6 +38,31 @@ export const CompetitionScheduleTab = ({
   const { userProfile } = useAuth();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [showOnlyMySchedule, setShowOnlyMySchedule] = useState(false);
+  const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
+
+  // Fetch registered schools for this competition
+  const { data: registeredSchools, isLoading: isLoadingSchools } = useQuery({
+    queryKey: ['competition-registered-schools', competitionId],
+    queryFn: async () => {
+      const { data, error } = await supabase
+        .from('cp_comp_schools')
+        .select(`
+          school_id,
+          school_name,
+          color,
+          schools!inner(name)
+        `)
+        .eq('competition_id', competitionId);
+
+      if (error) throw error;
+      
+      return data.map(school => ({
+        id: school.school_id,
+        name: school.school_name || school.schools.name,
+        color: school.color
+      }));
+    }
+  });
 
   // Generate unified time slots from all events
   const getAllTimeSlots = () => {
@@ -64,9 +92,20 @@ export const CompetitionScheduleTab = ({
   };
 
   const shouldShowSlot = (eventId: string, timeSlot: Date) => {
-    if (!showOnlyMySchedule) return true;
     const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
-    return assignedSchool?.id === userProfile?.school_id;
+    
+    // If "show only my schedule" is enabled, filter by user's school
+    if (showOnlyMySchedule) {
+      return assignedSchool?.id === userProfile?.school_id;
+    }
+    
+    // If a specific school is selected in the filter, show only that school's slots
+    if (selectedSchoolFilter !== 'all') {
+      return assignedSchool?.id === selectedSchoolFilter;
+    }
+    
+    // Otherwise show all slots
+    return true;
   };
 
   const getMyScheduleData = () => {
@@ -105,11 +144,9 @@ export const CompetitionScheduleTab = ({
       </div>;
   }
   const allTimeSlots = getAllTimeSlots();
-  const filteredTimeSlots = showOnlyMySchedule 
-    ? allTimeSlots.filter(timeSlot => 
-        events.some(event => shouldShowSlot(event.id, timeSlot))
-      )
-    : allTimeSlots;
+  const filteredTimeSlots = allTimeSlots.filter(timeSlot => 
+    events.some(event => shouldShowSlot(event.id, timeSlot))
+  );
   const myScheduleData = getMyScheduleData();
 
   return <TooltipProvider>
@@ -140,6 +177,54 @@ export const CompetitionScheduleTab = ({
         <div className="flex items-center justify-between print:hidden">
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
+          </div>
+        </div>
+
+        {/* Filters */}
+        <div className="flex items-center gap-4 print:hidden">
+          <div className="flex items-center space-x-2">
+            <Label htmlFor="school-filter" className="text-sm">
+              Filter by school:
+            </Label>
+            <Select
+              value={selectedSchoolFilter}
+              onValueChange={setSelectedSchoolFilter}
+            >
+              <SelectTrigger className="w-48">
+                <SelectValue placeholder="All schools" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="all">All schools</SelectItem>
+                {registeredSchools?.map((school) => (
+                  <SelectItem key={school.id} value={school.id}>
+                    <div className="flex items-center gap-2">
+                      <div 
+                        className="w-3 h-3 rounded-full" 
+                        style={{ backgroundColor: school.color }}
+                      />
+                      {school.name}
+                    </div>
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Switch
+              id="show-only-my-schedule"
+              checked={showOnlyMySchedule}
+              onCheckedChange={(checked) => {
+                setShowOnlyMySchedule(checked);
+                // Reset school filter when toggling my schedule
+                if (checked) {
+                  setSelectedSchoolFilter('all');
+                }
+              }}
+            />
+            <Label htmlFor="show-only-my-schedule" className="text-sm">
+              Show only my schedule
+            </Label>
           </div>
         </div>
 
@@ -178,17 +263,20 @@ export const CompetitionScheduleTab = ({
                         {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                       </div>
                       {events.map(event => {
-                    const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                    const showSlot = shouldShowSlot(event.id, timeSlot);
-                    
-                    return <div key={event.id} className="text-sm min-w-0">
-                            {assignedSchool && (!showOnlyMySchedule || showSlot) ? <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
-                        backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
-                      }}>
-                                {assignedSchool.name}
-                              </div> : <div className="text-muted-foreground text-xs">-</div>}
-                          </div>;
-                  })}
+                        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                        const showSlot = shouldShowSlot(event.id, timeSlot);
+                        
+                        return <div key={event.id} className="text-sm min-w-0">
+                          {assignedSchool && showSlot ? 
+                            <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
+                              backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
+                            }}>
+                              {assignedSchool.name}
+                            </div> : 
+                            <div className="text-muted-foreground text-xs">-</div>
+                          }
+                        </div>;
+                      })}
                     </div>)}
                 </div>
               </div>
