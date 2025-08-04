@@ -99,23 +99,45 @@ export const CompetitionScheduleTab = ({
     return true;
   };
 
-  const getMyScheduleData = () => {
-    const mySchedule: Array<{ time: string; event: string; location: string }> = [];
-    
-    allTimeSlots.forEach(timeSlot => {
-      events.forEach(event => {
-        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-        if (assignedSchool?.id === userProfile?.school_id) {
-          mySchedule.push({
-            time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-            event: event.event_name,
-            location: event.event_location || 'TBD'
-          });
-        }
+  const getPrintScheduleData = () => {
+    if (selectedSchoolFilter === 'all') {
+      // Show all schools in a simple table format
+      const allScheduleData: Array<{ time: string; event: string; school: string; location: string }> = [];
+      
+      allTimeSlots.forEach(timeSlot => {
+        events.forEach(event => {
+          const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+          if (assignedSchool) {
+            allScheduleData.push({
+              time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+              event: event.event_name,
+              school: assignedSchool.name,
+              location: event.event_location || 'TBD'
+            });
+          }
+        });
       });
-    });
-    
-    return mySchedule.sort((a, b) => a.time.localeCompare(b.time));
+      
+      return allScheduleData.sort((a, b) => a.time.localeCompare(b.time));
+    } else {
+      // Show specific school's schedule
+      const schoolSchedule: Array<{ time: string; event: string; location: string }> = [];
+      
+      allTimeSlots.forEach(timeSlot => {
+        events.forEach(event => {
+          const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+          if (assignedSchool?.id === selectedSchoolFilter) {
+            schoolSchedule.push({
+              time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+              event: event.event_name,
+              location: event.event_location || 'TBD'
+            });
+          }
+        });
+      });
+      
+      return schoolSchedule.sort((a, b) => a.time.localeCompare(b.time));
+    }
   };
 
   const handlePrint = () => {
@@ -138,26 +160,33 @@ export const CompetitionScheduleTab = ({
   const filteredTimeSlots = allTimeSlots.filter(timeSlot => 
     events.some(event => shouldShowSlot(event.id, timeSlot))
   );
-  const myScheduleData = getMyScheduleData();
+  const printScheduleData = getPrintScheduleData();
 
   return <TooltipProvider>
       <div className="space-y-4 print:space-y-2 schedule-print-container">
-        {/* Print-only table for my schedule */}
+        {/* Print-only table for schedule */}
         <div className="hidden print:block">
-          <h2 className="text-lg font-bold mb-4 text-center">My Competition Schedule</h2>
+          <h2 className="text-lg font-bold mb-4 text-center">
+            {selectedSchoolFilter === 'all' 
+              ? 'Competition Schedule - All Schools' 
+              : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
+            }
+          </h2>
           <table className="w-full border-collapse border border-black">
             <thead>
               <tr>
                 <th className="border border-black p-2 text-left font-bold">Time</th>
                 <th className="border border-black p-2 text-left font-bold">Event</th>
+                {selectedSchoolFilter === 'all' && <th className="border border-black p-2 text-left font-bold">School</th>}
                 <th className="border border-black p-2 text-left font-bold">Location</th>
               </tr>
             </thead>
             <tbody>
-              {myScheduleData.map((item, index) => (
+              {printScheduleData.map((item, index) => (
                 <tr key={index}>
                   <td className="border border-black p-2">{item.time}</td>
                   <td className="border border-black p-2">{item.event}</td>
+                  {selectedSchoolFilter === 'all' && <td className="border border-black p-2">{('school' in item ? item.school : '') as string}</td>}
                   <td className="border border-black p-2">{item.location}</td>
                 </tr>
               ))}
@@ -169,6 +198,10 @@ export const CompetitionScheduleTab = ({
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
           </div>
+          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print Schedule
+          </Button>
         </div>
 
         {/* Filters */}
