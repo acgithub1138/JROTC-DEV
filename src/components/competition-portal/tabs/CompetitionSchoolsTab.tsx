@@ -155,7 +155,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         open={!!selectedSchoolForEvents}
         onOpenChange={() => setSelectedSchoolForEvents(null)}
         competitionId={competitionId}
-        schoolId={selectedSchoolForEvents || ''}
+        schoolId={schools.find(s => s.id === selectedSchoolForEvents)?.school_id || ''}
       />
     </div>
   );
