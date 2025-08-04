@@ -3,19 +3,23 @@ import { Plus, Edit, Trash2, Eye } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useSortableTable } from '@/hooks/useSortableTable';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
 import { EditEventModal } from '@/components/competition-portal/modals/EditEventModal';
 import { ViewJudgesModal } from '@/components/competition-portal/modals/ViewJudgesModal';
 import { ViewResourcesModal } from '@/components/competition-portal/modals/ViewResourcesModal';
-import { format } from 'date-fns';
 interface CompetitionEventsTabProps {
   competitionId: string;
 }
 export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   competitionId
 }) => {
+  const { timezone } = useSchoolTimezone();
   const {
     events,
     isLoading,
@@ -28,6 +32,12 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     canEdit,
     canDelete
   } = useTablePermissions('cp_comp_events');
+  
+  // Add sorting functionality
+  const { sortedData: sortedEvents, sortConfig, handleSort } = useSortableTable({
+    data: events,
+    defaultSort: { key: 'start_time', direction: 'asc' }
+  });
   const [showAddModal, setShowAddModal] = useState(false);
   const [showEditModal, setShowEditModal] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
@@ -61,31 +71,41 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           </Button>}
       </div>
 
-      {events.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {sortedEvents.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No events configured for this competition</p>
         </div> : <div className="border rounded-lg">
           <Table>
             <TableHeader>
                <TableRow>
-                  <TableHead>Event</TableHead>
-                  <TableHead>Location</TableHead>
-                  <TableHead>Start</TableHead>
-                  <TableHead>End</TableHead>
-                  <TableHead>Max</TableHead>
+                  <SortableTableHead sortKey="cp_events.name" currentSort={sortConfig} onSort={handleSort}>
+                    Event
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="location" currentSort={sortConfig} onSort={handleSort}>
+                    Location
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="start_time" currentSort={sortConfig} onSort={handleSort}>
+                    Start
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="end_time" currentSort={sortConfig} onSort={handleSort}>
+                    End
+                  </SortableTableHead>
+                  <SortableTableHead sortKey="max_participants" currentSort={sortConfig} onSort={handleSort}>
+                    Max
+                  </SortableTableHead>
                   <TableHead className="text-center">Judges</TableHead>
                   <TableHead className="text-center">Resources</TableHead>
                   <TableHead className="text-center">Actions</TableHead>
                </TableRow>
             </TableHeader>
             <TableBody>
-               {events.map(event => <TableRow key={event.id}>
+               {sortedEvents.map(event => <TableRow key={event.id}>
                    <TableCell className="font-medium py-[8px]">{event.cp_events?.name || 'N/A'}</TableCell>
                    <TableCell>{event.location || 'N/A'}</TableCell>
                     <TableCell>
-                      {event.start_time ? format(new Date(event.start_time), 'MMM, d yyyy HH:mm') : 'N/A'}
+                      {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}
                     </TableCell>
                     <TableCell>
-                      {event.end_time ? format(new Date(event.end_time), 'MMM, d yyyy HH:mm') : 'N/A'}
+                      {formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_24H, timezone)}
                     </TableCell>
                     <TableCell>{event.max_participants || 'N/A'}</TableCell>
                     <TableCell>
