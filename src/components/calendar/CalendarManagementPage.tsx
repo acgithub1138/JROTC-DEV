@@ -6,6 +6,7 @@ import { EventDialog } from './components/EventDialog';
 import { EventDetailsDialog } from './components/EventDetailsDialog';
 import { EventFilters } from './components/EventFilters';
 import { RecurringDeleteDialog } from './components/RecurringDeleteDialog';
+import { DeleteEventDialog } from './components/DeleteEventDialog';
 import { useEvents } from './hooks/useEvents';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCalendarPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -31,6 +32,7 @@ const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);
   const [showEventDetailsDialog, setShowEventDetailsDialog] = useState(false);
   const [showRecurringDeleteDialog, setShowRecurringDeleteDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [editingEvent, setEditingEvent] = useState<Event | null>(null);
   const [viewingEvent, setViewingEvent] = useState<Event | null>(null);
   const [deletingEvent, setDeletingEvent] = useState<Event | null>(null);
@@ -83,6 +85,7 @@ const CalendarManagementPage = () => {
     setShowEventDialog(false);
     setShowEventDetailsDialog(false);
     setShowRecurringDeleteDialog(false);
+    setShowDeleteDialog(false);
     setEditingEvent(null);
     setViewingEvent(null);
     setDeletingEvent(null);
@@ -108,8 +111,9 @@ const CalendarManagementPage = () => {
       setDeletingEvent(event);
       setShowRecurringDeleteDialog(true);
     } else {
-      // Regular single event - delete directly
-      deleteEvent(event.id);
+      // Regular single event - show confirmation dialog
+      setDeletingEvent(event);
+      setShowDeleteDialog(true);
     }
   };
 
@@ -125,6 +129,13 @@ const CalendarManagementPage = () => {
   };
 
   const handleDeleteThisEvent = async () => {
+    if (deletingEvent) {
+      await deleteEvent(deletingEvent.id);
+      handleCloseDialog();
+    }
+  };
+
+  const handleConfirmSingleDelete = async () => {
     if (deletingEvent) {
       await deleteEvent(deletingEvent.id);
       handleCloseDialog();
@@ -179,6 +190,14 @@ const CalendarManagementPage = () => {
         isRecurringParent={deletingEvent?.is_recurring || false}
         onDeleteThis={handleDeleteThisEvent}
         onDeleteSeries={handleDeleteSeries}
+      />
+
+      <DeleteEventDialog 
+        open={showDeleteDialog} 
+        onOpenChange={() => setShowDeleteDialog(false)} 
+        event={deletingEvent} 
+        onConfirm={handleConfirmSingleDelete} 
+        loading={false}
       />
     </div>;
 };
