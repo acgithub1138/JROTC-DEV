@@ -27,7 +27,7 @@ export const ColorPicker: React.FC<ColorPickerProps> = ({
         onChange={(e) => onChange(e.target.value)}
         disabled={disabled}
         placeholder="#3B82F6"
-        className="w-16 h-8"
+        className="w-24 h-8"
       />
     </div>
   );
