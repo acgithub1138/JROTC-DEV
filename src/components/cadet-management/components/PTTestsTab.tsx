@@ -6,7 +6,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, Search, ArrowUpDown, Edit, Trash2 } from 'lucide-react';
+import { CalendarIcon, Plus, Search, ArrowUpDown, Edit2, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -17,6 +17,7 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { PTTestEditModal } from './PTTestEditModal';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
   searchTerm?: string;
@@ -54,6 +55,7 @@ export const PTTestsTab = ({
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [editingPTTest, setEditingPTTest] = useState<PTTest | null>(null);
   const {
     data: ptTests = [],
     isLoading,
@@ -275,10 +277,10 @@ export const PTTestsTab = ({
                             <Button
                               variant="outline"
                               size="icon"
-                              onClick={() => {/* TODO: Handle edit */}}
+                              onClick={() => setEditingPTTest(test)}
                               className="h-6 w-6"
                             >
-                              <Edit className="w-3 h-3" />
+                              <Edit2 className="w-3 h-3" />
                             </Button>
                           )}
                           {canDelete && (
@@ -299,5 +301,15 @@ export const PTTestsTab = ({
             </Table>
           </CardContent>
         </Card>}
+      
+      <PTTestEditModal
+        open={!!editingPTTest}
+        onOpenChange={(open) => !open && setEditingPTTest(null)}
+        ptTest={editingPTTest}
+        onSuccess={() => {
+          refetch();
+          setEditingPTTest(null);
+        }}
+      />
     </div>;
 };
