@@ -48,14 +48,14 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
 
   // Populate form when ptTest changes
   useEffect(() => {
-    if (ptTest) {
+    if (ptTest && open) {
       setPushUps(ptTest.push_ups?.toString() || '');
       setSitUps(ptTest.sit_ups?.toString() || '');
       setPlankTime(formatSecondsToTime(ptTest.plank_time));
       setMileTime(formatSecondsToTime(ptTest.mile_time));
       setHasChanges(false);
     }
-  }, [ptTest, formatSecondsToTime]);
+  }, [ptTest?.id, open]); // Only depend on ptTest ID and open state
 
   // Track changes
   useEffect(() => {
@@ -72,7 +72,7 @@ export const PTTestEditModal = ({ open, onOpenChange, ptTest, onSuccess }: PTTes
                    mileTime !== originalMileTime;
     
     setHasChanges(changed);
-  }, [pushUps, sitUps, plankTime, mileTime, ptTest, formatSecondsToTime]);
+  }, [pushUps, sitUps, plankTime, mileTime, ptTest?.push_ups, ptTest?.sit_ups, ptTest?.plank_time, ptTest?.mile_time]); // Don't include formatSecondsToTime
 
   const handleSave = async () => {
     if (!ptTest) return;
