@@ -3,11 +3,13 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { DollarSign, Clock, MapPin, Users, Trophy } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 
 interface CompetitionEvent {
   id: string;
@@ -50,16 +52,29 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
+  const [initialSelectedEvents, setInitialSelectedEvents] = useState<Set<string>>(new Set());
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const isEditing = currentRegistrations.length > 0;
+
+  // Convert sets to arrays for comparison
+  const currentEventIds = Array.from(selectedEvents).sort();
+  const initialEventIds = Array.from(initialSelectedEvents).sort();
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: { events: initialEventIds },
+    currentData: { events: currentEventIds }
+  });
 
   // Initialize selected events with current registrations
   useEffect(() => {
     if (isOpen && currentRegistrations.length > 0) {
       const registeredEventIds = new Set(currentRegistrations.map(reg => reg.event_id));
       setSelectedEvents(registeredEventIds);
+      setInitialSelectedEvents(registeredEventIds);
     } else if (isOpen) {
       setSelectedEvents(new Set());
+      setInitialSelectedEvents(new Set());
     }
   }, [isOpen, currentRegistrations]);
 
@@ -163,13 +178,36 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     }
   };
 
-  const handleCancel = () => {
-    setSelectedEvents(new Set());
+  const handleClose = (open: boolean) => {
+    if (!open && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setSelectedEvents(initialSelectedEvents);
+    setShowUnsavedDialog(false);
     onClose();
   };
 
+  const handleCancelDiscard = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  const handleCancel = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      setSelectedEvents(new Set());
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <>
+      <Dialog open={isOpen} onOpenChange={handleClose}>
       <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
@@ -310,5 +348,13 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         </DialogFooter>
       </DialogContent>
     </Dialog>
+
+    <UnsavedChangesDialog
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleCancelDiscard}
+    />
+    </>
   );
 };
