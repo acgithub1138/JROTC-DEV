@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -76,87 +77,96 @@ export const CompetitionScheduleTab = ({ competitionId }: CompetitionScheduleTab
   const allTimeSlots = getAllTimeSlots();
 
   return (
-    <div className="space-y-4">
-      <div className="text-sm text-muted-foreground">
-        Competition Schedule - View and manage time slot assignments for each event
-      </div>
+    <TooltipProvider>
+      <div className="space-y-4">
+        <div className="text-sm text-muted-foreground">
+          Competition Schedule - View and manage time slot assignments for each event
+        </div>
 
-      <Card>
-        <CardContent className="p-0">
-          <div className="overflow-x-auto">
-            <div className="min-w-full">
-              {/* Header */}
-              <div className="grid gap-2 p-4 border-b bg-muted/30" style={{
-                gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
-              }}>
-                <div className="font-medium text-sm">Time Slots</div>
-                {events.map(event => (
-                  <div key={event.id} className="flex items-center justify-center gap-2">
-                    <div className="font-medium text-sm truncate" title={event.event_name}>
-                      {event.event_name}
+        <Card>
+          <CardContent className="p-0">
+            <div className="overflow-x-auto">
+              <div className="min-w-full">
+                {/* Header */}
+                <div className="grid gap-2 p-4 border-b bg-muted/30" style={{
+                  gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
+                }}>
+                  <div className="font-medium text-sm">Time Slots</div>
+                  {events.map(event => (
+                    <div key={event.id} className="flex items-center justify-center gap-2">
+                      <div className="font-medium text-sm truncate" title={event.event_name}>
+                        {event.event_name}
+                      </div>
+                      {canManageSchedule && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button
+                              variant="outline"
+                              size="icon"
+                              onClick={() => handleEditEvent(event)}
+                              className="h-6 w-6"
+                            >
+                              <Edit className="h-3 w-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Edit schedule for {event.event_name}</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}                    
                     </div>
-                    {canManageSchedule && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleEditEvent(event)}
-                        className="h-6 w-6"
-                      >
-                        <Edit className="h-3 w-3" />
-                      </Button>
-                    )}                    
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
 
-              {/* Time Slots Grid */}
-              <div className="max-h-96 overflow-y-auto">
-                {allTimeSlots.map((timeSlot, index) => (
-                  <div 
-                    key={timeSlot.toISOString()}
-                    className={`grid gap-2 p-2 border-b ${
-                      index % 2 === 0 ? 'bg-background' : 'bg-muted/20'
-                    }`}
-                    style={{
-                      gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
-                    }}
-                  >
-                    <div className="text-sm font-mono">
-                      {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                {/* Time Slots Grid */}
+                <div className="max-h-96 overflow-y-auto">
+                  {allTimeSlots.map((timeSlot, index) => (
+                    <div 
+                      key={timeSlot.toISOString()}
+                      className={`grid gap-2 p-2 border-b ${
+                        index % 2 === 0 ? 'bg-background' : 'bg-muted/20'
+                      }`}
+                      style={{
+                        gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
+                      }}
+                    >
+                      <div className="text-sm font-mono">
+                        {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                      </div>
+                      {events.map(event => {
+                        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                        
+                        return (
+                          <div key={event.id} className="text-sm min-w-0">
+                            {assignedSchool ? (
+                              <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs truncate">
+                                {assignedSchool.name}
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground text-xs">-</div>
+                            )}
+                          </div>
+                        );
+                      })}
                     </div>
-                    {events.map(event => {
-                      const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                      
-                      return (
-                        <div key={event.id} className="text-sm min-w-0">
-                          {assignedSchool ? (
-                            <div className="bg-primary/10 text-primary px-2 py-1 rounded text-xs truncate">
-                              {assignedSchool.name}
-                            </div>
-                          ) : (
-                            <div className="text-muted-foreground text-xs">-</div>
-                          )}
-                        </div>
-                      );
-                    })}
-                  </div>
-                ))}
+                  ))}
+                </div>
               </div>
             </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {selectedEvent && (
-        <ScheduleEditModal
-          event={selectedEvent}
-          competitionId={competitionId}
-          isOpen={!!selectedEvent}
-          onClose={handleModalClose}
-          updateScheduleSlot={updateScheduleSlot}
-          getAvailableSchools={getAvailableSchools}
-        />
-      )}
-    </div>
+        {selectedEvent && (
+          <ScheduleEditModal
+            event={selectedEvent}
+            competitionId={competitionId}
+            isOpen={!!selectedEvent}
+            onClose={handleModalClose}
+            updateScheduleSlot={updateScheduleSlot}
+            getAvailableSchools={getAvailableSchools}
+          />
+        )}
+      </div>
+    </TooltipProvider>
   );
 };
