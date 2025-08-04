@@ -10,7 +10,6 @@ import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
-import { PortalSchedulePage } from './pages/PortalSchedulePage';
 import { useAuth } from '@/contexts/AuthContext';
 
 const CompetitionPortalLayout = () => {
@@ -89,8 +88,6 @@ const CompetitionPortalLayout = () => {
       return <CompetitionSettingsPage />;
     } else if (path === '/app/competition-portal/open-competitions') {
       return <OpenCompetitionsPage />;
-    } else if (path.startsWith('/app/competition-portal/schedule/')) {
-      return <PortalSchedulePage />;
     }
     
     // Default to dashboard

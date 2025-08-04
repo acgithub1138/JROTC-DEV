@@ -122,10 +122,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const handleViewScoreSheets = (competition: ExtendedCompetition) => {
     navigate(`/app/competitions/score-sheets/${competition.id}?source=${competition.source_type}&sourceId=${competition.source_competition_id}`);
   };
-
-  const handleViewSchedule = (competition: ExtendedCompetition) => {
-    navigate(`/app/competition-portal/schedule/${competition.source_competition_id}`);
-  };
   return <div className="space-y-6">
       <div>
         
@@ -175,7 +171,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
         onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         onView={canViewDetails ? setViewingCompetition : undefined}
-        onViewSchedule={handleViewSchedule}
         visibleColumns={visibleColumns}
         canViewDetails={canViewDetails}
       />
