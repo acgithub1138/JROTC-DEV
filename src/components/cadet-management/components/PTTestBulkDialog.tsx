@@ -11,29 +11,32 @@ import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useCadetsByFlight } from '../hooks/useCadetsByFlight';
 import { usePTTestBulk } from '../hooks/usePTTestBulk';
-
 interface PTTestBulkDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
-
 const FLIGHTS = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
-
-export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDialogProps) => {
+export const PTTestBulkDialog = ({
+  open,
+  onOpenChange,
+  onSuccess
+}: PTTestBulkDialogProps) => {
   const [date, setDate] = useState<Date>();
   const [selectedFlight, setSelectedFlight] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-  
-  const { cadets, isLoading: cadetsLoading } = useCadetsByFlight(selectedFlight);
+  const {
+    cadets,
+    isLoading: cadetsLoading
+  } = useCadetsByFlight(selectedFlight);
   const {
     loading: saving,
     updateCadetScore,
     getCadetScores,
     cadetDataWithPushUps,
     savePTTests,
-    resetData,
+    resetData
   } = usePTTestBulk();
 
   // Check for unsaved changes
@@ -56,7 +59,6 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
     if (!date) {
       return;
     }
-
     const success = await savePTTests(date, cadetDataWithPushUps);
     if (success) {
       setHasUnsavedChanges(false);
@@ -64,7 +66,6 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
       onSuccess?.();
     }
   };
-
   const handleClose = () => {
     if (hasUnsavedChanges) {
       setShowConfirmDialog(true);
@@ -72,22 +73,18 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
       onOpenChange(false);
     }
   };
-
   const confirmClose = () => {
     setShowConfirmDialog(false);
     setHasUnsavedChanges(false);
     onOpenChange(false);
   };
-
   const saveAndClose = async () => {
     setShowConfirmDialog(false);
     await handleSave();
   };
-
   const stayOnForm = () => {
     setShowConfirmDialog(false);
   };
-
   const formatTimeDisplay = (seconds: string) => {
     if (!seconds) return '';
     // If it's already in MM:SS format, return as is
@@ -99,14 +96,11 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
     const secs = num % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   const isFormValid = date && selectedFlight;
-
-  return (
-    <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
+  return <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
       <DialogContent className="max-w-6xl max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Bulk PT Test Entry</DialogTitle>
+          <DialogTitle>PT Test Entry</DialogTitle>
         </DialogHeader>
 
         <div className="space-y-6">
@@ -114,20 +108,14 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="test-date">Test Date</Label>
-              <Input
-                id="test-date"
-                type="date"
-                value={date ? format(date, 'yyyy-MM-dd') : ''}
-                onChange={(e) => {
-                  const dateValue = e.target.value;
-                  if (dateValue) {
-                    setDate(new Date(dateValue + 'T00:00:00'));
-                  } else {
-                    setDate(undefined);
-                  }
-                }}
-                className="w-full"
-              />
+              <Input id="test-date" type="date" value={date ? format(date, 'yyyy-MM-dd') : ''} onChange={e => {
+              const dateValue = e.target.value;
+              if (dateValue) {
+                setDate(new Date(dateValue + 'T00:00:00'));
+              } else {
+                setDate(undefined);
+              }
+            }} className="w-full" />
             </div>
 
             <div className="space-y-2">
@@ -137,19 +125,16 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
                   <SelectValue placeholder="Select a flight" />
                 </SelectTrigger>
                 <SelectContent>
-                  {FLIGHTS.map((flight) => (
-                    <SelectItem key={flight} value={flight}>
+                  {FLIGHTS.map(flight => <SelectItem key={flight} value={flight}>
                       {flight}
-                    </SelectItem>
-                  ))}
+                    </SelectItem>)}
                 </SelectContent>
               </Select>
             </div>
           </div>
 
           {/* Cadets Grid */}
-          {selectedFlight && (
-            <div className="space-y-4">
+          {selectedFlight && <div className="space-y-4">
               <div className="flex items-center justify-between">
                 <h3 className="text-lg font-medium">
                   {cadets.length} Cadet{cadets.length !== 1 ? 's' : ''} in {selectedFlight} Flight
@@ -157,8 +142,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
                 {cadetsLoading && <Loader2 className="h-4 w-4 animate-spin" />}
               </div>
 
-              {cadets.length > 0 && (
-                <div className="border rounded-lg overflow-hidden">
+              {cadets.length > 0 && <div className="border rounded-lg overflow-hidden">
                   {/* Header */}
                   <div className="grid grid-cols-6 gap-2 p-3 bg-muted font-medium text-sm">
                     <div className="col-span-2">Cadet</div>
@@ -170,10 +154,9 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
 
                   {/* Cadet Rows */}
                   <div className="divide-y">
-                    {cadets.map((cadet) => {
-                      const scores = getCadetScores(cadet.id);
-                      return (
-                        <div key={cadet.id} className="grid grid-cols-6 gap-2 p-3 items-center">
+                    {cadets.map(cadet => {
+                const scores = getCadetScores(cadet.id);
+                return <div key={cadet.id} className="grid grid-cols-6 gap-2 p-3 items-center">
                           <div className="col-span-2">
                             <div className="font-medium">
                               {cadet.last_name}, {cadet.first_name}
@@ -184,67 +167,36 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
                           </div>
 
                           <div>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              min="0"
-                              value={scores.pushUps}
-                              onChange={(e) => updateCadetScore(cadet.id, 'pushUps', e.target.value)}
-                              className="w-full"
-                            />
+                            <Input type="number" placeholder="0" min="0" value={scores.pushUps} onChange={e => updateCadetScore(cadet.id, 'pushUps', e.target.value)} className="w-full" />
                           </div>
 
                           <div>
-                            <Input
-                              type="number"
-                              placeholder="0"
-                              min="0"
-                              value={scores.sitUps}
-                              onChange={(e) => updateCadetScore(cadet.id, 'sitUps', e.target.value)}
-                              className="w-full"
-                            />
+                            <Input type="number" placeholder="0" min="0" value={scores.sitUps} onChange={e => updateCadetScore(cadet.id, 'sitUps', e.target.value)} className="w-full" />
                           </div>
 
                           <div>
-                            <Input
-                              placeholder="MM:SS or seconds"
-                              value={scores.plankTime}
-                              onChange={(e) => updateCadetScore(cadet.id, 'plankTime', e.target.value)}
-                              className="w-full"
-                            />
+                            <Input placeholder="MM:SS or seconds" value={scores.plankTime} onChange={e => updateCadetScore(cadet.id, 'plankTime', e.target.value)} className="w-full" />
                           </div>
 
                           <div>
-                            <Input
-                              placeholder="MM:SS or seconds"
-                              value={scores.mileTime}
-                              onChange={(e) => updateCadetScore(cadet.id, 'mileTime', e.target.value)}
-                              className="w-full"
-                            />
+                            <Input placeholder="MM:SS or seconds" value={scores.mileTime} onChange={e => updateCadetScore(cadet.id, 'mileTime', e.target.value)} className="w-full" />
                           </div>
-                        </div>
-                      );
-                    })}
+                        </div>;
+              })}
                   </div>
-                </div>
-              )}
+                </div>}
 
-              {selectedFlight && !cadetsLoading && cadets.length === 0 && (
-                <div className="text-center py-8 text-muted-foreground">
+              {selectedFlight && !cadetsLoading && cadets.length === 0 && <div className="text-center py-8 text-muted-foreground">
                   No cadets found in {selectedFlight} flight
-                </div>
-              )}
-            </div>
-          )}
+                </div>}
+            </div>}
 
           {/* Summary */}
-          {cadetDataWithPushUps.length > 0 && (
-            <div className="bg-muted/50 p-3 rounded-lg">
+          {cadetDataWithPushUps.length > 0 && <div className="bg-muted/50 p-3 rounded-lg">
               <p className="text-sm text-muted-foreground">
                 Ready to save PT test results for {cadetDataWithPushUps.length} cadet{cadetDataWithPushUps.length !== 1 ? 's' : ''} with Push-Ups data
               </p>
-            </div>
-          )}
+            </div>}
         </div>
 
         {/* Footer */}
@@ -252,10 +204,7 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           <Button variant="outline" onClick={handleClose} disabled={saving}>
             Cancel
           </Button>
-          <Button 
-            onClick={handleSave} 
-            disabled={!isFormValid || saving}
-          >
+          <Button onClick={handleSave} disabled={!isFormValid || saving}>
             {saving && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
             Save PT Tests
           </Button>
@@ -283,6 +232,5 @@ export const PTTestBulkDialog = ({ open, onOpenChange, onSuccess }: PTTestBulkDi
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </Dialog>
-  );
+    </Dialog>;
 };
