@@ -16,13 +16,19 @@ import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions'
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import type { Database } from '@/integrations/supabase/types';
 import { formatCompetitionDateFull } from '@/utils/dateUtils';
+
 type Competition = Database['public']['Tables']['competitions']['Row'];
+type ExtendedCompetition = Competition & {
+  source_type: 'internal' | 'portal';
+  source_competition_id: string;
+};
 interface CompetitionsTabProps {
   readOnly?: boolean;
 }
 
 const defaultColumns = [
   { key: 'name', label: 'Name', enabled: true },
+  { key: 'source_type', label: 'Source', enabled: true },
   { key: 'date', label: 'Date', enabled: true },
   { key: 'overall_placement', label: 'Overall Placement', enabled: true },
   { key: 'overall_armed_placement', label: 'Overall Armed', enabled: true },
@@ -42,9 +48,9 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const { canCreate, canUpdate, canDelete } = useCompetitionPermissions();
   const { canViewDetails } = useTablePermissions('competitions');
   const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingCompetition, setEditingCompetition] = useState<Competition | null>(null);
-  const [viewingCompetition, setViewingCompetition] = useState<Competition | null>(null);
-  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [editingCompetition, setEditingCompetition] = useState<ExtendedCompetition | null>(null);
+  const [viewingCompetition, setViewingCompetition] = useState<ExtendedCompetition | null>(null);
+  const [selectedCompetition, setSelectedCompetition] = useState<ExtendedCompetition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [searchTerm, setSearchTerm] = useState('');
   const {
@@ -56,7 +62,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   } = useCompetitions();
   const {
     createEvent
-  } = useCompetitionEvents(selectedCompetition?.id);
+  } = useCompetitionEvents(selectedCompetition?.source_competition_id, selectedCompetition?.source_type);
   
   const {
     columns,
@@ -98,7 +104,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
       setShowAddDialog(false);
     }
   };
-  const handleAddEvent = (competition: Competition) => {
+  const handleAddEvent = (competition: ExtendedCompetition) => {
     setSelectedCompetition(competition);
     setShowAddEventDialog(true);
   };
@@ -113,8 +119,8 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     }
   };
 
-  const handleViewScoreSheets = (competition: any) => {
-    navigate(`/app/competitions/score-sheets/${competition.id}`);
+  const handleViewScoreSheets = (competition: ExtendedCompetition) => {
+    navigate(`/app/competitions/score-sheets/${competition.id}?source=${competition.source_type}&sourceId=${competition.source_competition_id}`);
   };
   return <div className="space-y-6">
       <div>

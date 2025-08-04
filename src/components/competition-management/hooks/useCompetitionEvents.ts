@@ -8,7 +8,7 @@ type CompetitionEvent = Database['public']['Tables']['competition_events']['Row'
 type CompetitionEventInsert = Database['public']['Tables']['competition_events']['Insert'];
 type CompetitionEventUpdate = Database['public']['Tables']['competition_events']['Update'];
 
-export const useCompetitionEvents = (competitionId?: string) => {
+export const useCompetitionEvents = (competitionId?: string, sourceType?: 'internal' | 'portal') => {
   const { userProfile } = useAuth();
   const [events, setEvents] = useState<CompetitionEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -21,7 +21,8 @@ export const useCompetitionEvents = (competitionId?: string) => {
       const { data, error } = await supabase
         .from('competition_events')
         .select('*')
-        .eq('competition_id', competitionId)
+        .eq('source_competition_id', competitionId)
+        .eq('source_type', sourceType || 'internal')
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: false });
 
@@ -36,7 +37,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
   };
 
   const createEvent = async (eventData: CompetitionEventInsert) => {
-    if (!userProfile?.school_id) return;
+    if (!userProfile?.school_id || !competitionId) return;
 
     try {
       const { data, error } = await supabase
@@ -44,7 +45,10 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .insert({
           ...eventData,
           school_id: userProfile.school_id,
-          competition_id: competitionId!
+          source_competition_id: competitionId,
+          source_type: sourceType || 'internal',
+          // Keep competition_id for backward compatibility with internal competitions
+          competition_id: sourceType === 'internal' ? competitionId : null
         })
         .select('*')
         .single();

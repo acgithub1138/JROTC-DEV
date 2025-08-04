@@ -113,6 +113,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
           <TableHeader>
             <TableRow>
               {isColumnVisible('name') && <TableHead>Name</TableHead>}
+              {isColumnVisible('source_type') && <TableHead>Source</TableHead>}
               {isColumnVisible('date') && <TableHead>Date</TableHead>}
               {isColumnVisible('overall_placement') && <TableHead>Overall Placement</TableHead>}
               {isColumnVisible('overall_armed_placement') && <TableHead>Overall Armed</TableHead>}
@@ -142,6 +143,17 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                     ) : (
                       competition.name
                     )}
+                  </TableCell>
+                )}
+                {isColumnVisible('source_type') && (
+                  <TableCell>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${
+                      competition.source_type === 'internal' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : 'bg-green-100 text-green-800'
+                    }`}>
+                      {competition.source_type === 'internal' ? 'My School' : 'Portal Event'}
+                    </span>
                   </TableCell>
                 )}
                 {isColumnVisible('date') && <TableCell>

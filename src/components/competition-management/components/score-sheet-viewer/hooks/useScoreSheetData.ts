@@ -10,7 +10,7 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchEvents = async () => {
-    if (!userProfile?.school_id || !competition?.id) return;
+    if (!userProfile?.school_id || !competition?.source_competition_id) return;
 
     try {
       setIsLoading(true);
@@ -25,7 +25,8 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
           team_name,
           created_at
         `)
-        .eq('competition_id', competition.id)
+        .eq('source_competition_id', competition.source_competition_id)
+        .eq('source_type', competition.source_type || 'internal')
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: true });
 

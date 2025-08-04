@@ -130,36 +130,48 @@ export type Database = {
       competition_events: {
         Row: {
           cadet_ids: string[]
-          competition_id: string
+          competition_id: string | null
           created_at: string
           event: Database["public"]["Enums"]["comp_event_type"]
           id: string
           school_id: string
           score_sheet: Json
+          source_competition_id: string | null
+          source_type:
+            | Database["public"]["Enums"]["competition_source_type"]
+            | null
           team_name: string | null
           total_points: number | null
           updated_at: string
         }
         Insert: {
           cadet_ids?: string[]
-          competition_id: string
+          competition_id?: string | null
           created_at?: string
           event: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           school_id: string
           score_sheet?: Json
+          source_competition_id?: string | null
+          source_type?:
+            | Database["public"]["Enums"]["competition_source_type"]
+            | null
           team_name?: string | null
           total_points?: number | null
           updated_at?: string
         }
         Update: {
           cadet_ids?: string[]
-          competition_id?: string
+          competition_id?: string | null
           created_at?: string
           event?: Database["public"]["Enums"]["comp_event_type"]
           id?: string
           school_id?: string
           score_sheet?: Json
+          source_competition_id?: string | null
+          source_type?:
+            | Database["public"]["Enums"]["competition_source_type"]
+            | null
           team_name?: string | null
           total_points?: number | null
           updated_at?: string
@@ -3424,6 +3436,7 @@ export type Database = {
         | "8th"
         | "9th"
         | "10th"
+      competition_source_type: "internal" | "portal"
       contact_status: "active" | "semi_active" | "not_active"
       contact_type: "parent" | "relative" | "friend"
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
@@ -3666,6 +3679,7 @@ export const Constants = {
         "9th",
         "10th",
       ],
+      competition_source_type: ["internal", "portal"],
       contact_status: ["active", "semi_active", "not_active"],
       contact_type: ["parent", "relative", "friend"],
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],

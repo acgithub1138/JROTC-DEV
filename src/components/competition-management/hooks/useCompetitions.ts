@@ -8,9 +8,14 @@ type Competition = Database['public']['Tables']['competitions']['Row'];
 type CompetitionInsert = Database['public']['Tables']['competitions']['Insert'];
 type CompetitionUpdate = Database['public']['Tables']['competitions']['Update'];
 
+type ExtendedCompetition = Competition & {
+  source_type: 'internal' | 'portal';
+  source_competition_id: string;
+};
+
 export const useCompetitions = () => {
   const { userProfile } = useAuth();
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const [competitions, setCompetitions] = useState<ExtendedCompetition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
   const fetchCompetitions = async () => {
@@ -18,14 +23,73 @@ export const useCompetitions = () => {
 
     try {
       setIsLoading(true);
-      const { data, error } = await supabase
+      
+      // Fetch internal competitions (ones created by the school)
+      const { data: internalComps, error: internalError } = await supabase
         .from('competitions')
         .select('*')
         .eq('school_id', userProfile.school_id)
         .order('competition_date', { ascending: false });
 
-      if (error) throw error;
-      setCompetitions(data || []);
+      if (internalError) throw internalError;
+
+      // Fetch portal competitions (ones the school is registered for)
+      const { data: portalComps, error: portalError } = await supabase
+        .from('cp_competitions')
+        .select(`
+          *,
+          cp_comp_schools!inner(
+            school_id,
+            status
+          )
+        `)
+        .eq('cp_comp_schools.school_id', userProfile.school_id)
+        .eq('cp_comp_schools.status', 'registered')
+        .order('start_date', { ascending: false });
+
+      if (portalError) throw portalError;
+
+      // Transform and combine competitions
+      const transformedInternal: ExtendedCompetition[] = (internalComps || []).map(comp => ({
+        ...comp,
+        source_type: 'internal' as const,
+        source_competition_id: comp.id
+      }));
+
+      const transformedPortal: ExtendedCompetition[] = (portalComps || []).map(comp => ({
+        id: comp.id,
+        name: comp.name,
+        description: comp.description,
+        location: comp.location,
+        competition_date: comp.start_date.split('T')[0], // Convert timestamp to date
+        registration_deadline: comp.registration_deadline ? comp.registration_deadline.split('T')[0] : null,
+        school_id: userProfile.school_id, // Use current school for consistency
+        created_at: comp.created_at,
+        updated_at: comp.updated_at,
+        source_type: 'portal' as const,
+        source_competition_id: comp.id,
+        // Set other fields to null/default for portal competitions
+        comp_type: null,
+        unarmed_exhibition: null,
+        unarmed_regulation: null,
+        armed_inspection: null,
+        armed_color_guard: null,
+        armed_exhibition: null,
+        armed_regulation: null,
+        cadets: null,
+        teams: null,
+        overall_unarmed_placement: null,
+        overall_armed_placement: null,
+        overall_placement: null,
+        unarmed_inspection: null,
+        unarmed_color_guard: null
+      }));
+
+      // Combine and sort by date
+      const allCompetitions = [...transformedInternal, ...transformedPortal]
+        .sort((a, b) => new Date(b.competition_date).getTime() - new Date(a.competition_date).getTime());
+
+      setCompetitions(allCompetitions);
     } catch (error) {
       console.error('Error fetching competitions:', error);
       toast.error('Failed to load competitions');
@@ -49,7 +113,12 @@ export const useCompetitions = () => {
 
       if (error) throw error;
 
-      setCompetitions(prev => [data, ...prev]);
+      const extendedData: ExtendedCompetition = {
+        ...data,
+        source_type: 'internal' as const,
+        source_competition_id: data.id
+      };
+      setCompetitions(prev => [extendedData, ...prev]);
       toast.success('Competition created successfully');
       return data;
     } catch (error) {
@@ -71,7 +140,11 @@ export const useCompetitions = () => {
       if (error) throw error;
 
       setCompetitions(prev => 
-        prev.map(comp => comp.id === id ? data : comp)
+        prev.map(comp => comp.id === id ? {
+          ...data,
+          source_type: comp.source_type,
+          source_competition_id: comp.source_competition_id
+        } : comp)
       );
       toast.success('Competition updated successfully');
       return data;
