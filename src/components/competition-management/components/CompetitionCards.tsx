@@ -15,6 +15,7 @@ interface CompetitionCardsProps {
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
+  onViewSchedule?: (competition: any) => void;
   canViewDetails?: boolean;
 }
 
@@ -69,6 +70,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
   onAddEvent,
   onViewScoreSheets,
   onView,
+  onViewSchedule,
   canViewDetails = false
 }) => {
   if (isLoading) {
@@ -136,8 +138,20 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
                       <TooltipContent>
                         <p>Add Event Score Sheet</p>
                       </TooltipContent>
-                    </Tooltip>
-                  )}
+                     </Tooltip>
+                   )}
+                   {onViewSchedule && competition.source_type === 'portal' && (
+                     <Tooltip>
+                       <TooltipTrigger asChild>
+                         <Button variant="outline" size="sm" onClick={() => onViewSchedule(competition)}>
+                           <Calendar className="w-4 h-4" />
+                         </Button>
+                       </TooltipTrigger>
+                       <TooltipContent>
+                         <p>View Schedule</p>
+                       </TooltipContent>
+                     </Tooltip>
+                   )}
                    {onEdit && competition.source_type !== 'portal' && (
                      <Tooltip>
                        <TooltipTrigger asChild>

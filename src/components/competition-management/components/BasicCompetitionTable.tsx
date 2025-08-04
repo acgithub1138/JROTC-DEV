@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
-import { Edit, Trash2, Plus, Eye } from 'lucide-react';
+import { Edit, Trash2, Plus, Eye, Calendar } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
@@ -17,6 +17,7 @@ interface BasicCompetitionTableProps {
   onAddEvent?: (competition: any) => void;
   onViewScoreSheets?: (competition: any) => void;
   onView?: (competition: any) => void;
+  onViewSchedule?: (competition: any) => void;
   visibleColumns?: string[];
   canViewDetails?: boolean;
 }
@@ -83,6 +84,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   onAddEvent,
   onViewScoreSheets,
   onView,
+  onViewSchedule,
   visibleColumns = [],
   canViewDetails = false
 }) => {
@@ -98,7 +100,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
 
   // Show cards on mobile, table on desktop
   if (isMobile) {
-    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} onView={onView} canViewDetails={canViewDetails} />;
+    return <CompetitionCards competitions={competitions} isLoading={isLoading} onEdit={onEdit} onDelete={onDelete} onAddEvent={onAddEvent} onViewScoreSheets={onViewScoreSheets} onView={onView} onViewSchedule={onViewSchedule} canViewDetails={canViewDetails} />;
   }
   if (isLoading) {
     return <div className="p-4">Loading competitions...</div>;
@@ -190,6 +192,16 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                         </TooltipTrigger>
                         <TooltipContent>
                           <p>View Score Sheets</p>
+                        </TooltipContent>
+                       </Tooltip>}
+                     {onViewSchedule && competition.source_type === 'portal' && <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onViewSchedule(competition)}>
+                            <Calendar className="w-3 h-3" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Schedule</p>
                         </TooltipContent>
                        </Tooltip>}
                      {onEdit && competition.source_type !== 'portal' && <Tooltip>
