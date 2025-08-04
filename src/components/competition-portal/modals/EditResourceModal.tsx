@@ -10,7 +10,6 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { format } from 'date-fns';
-
 const formSchema = z.object({
   resource: z.string().min(1, 'Resource is required'),
   location: z.string().optional(),
@@ -22,9 +21,7 @@ const formSchema = z.object({
   end_time_minute: z.string().optional(),
   assignment_details: z.string().optional()
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 interface Resource {
   id: string;
   resource: string;
@@ -37,22 +34,22 @@ interface Resource {
     last_name: string;
   };
 }
-
 interface EditResourceModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   resource: Resource | null;
   onResourceUpdated: (id: string, resourceData: any) => Promise<any>;
 }
-
 export const EditResourceModal: React.FC<EditResourceModalProps> = ({
   open,
   onOpenChange,
   resource,
   onResourceUpdated
 }) => {
-  const { users, isLoading: usersLoading } = useSchoolUsers(true);
-
+  const {
+    users,
+    isLoading: usersLoading
+  } = useSchoolUsers(true);
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -74,11 +71,9 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
       const startDate = resource.start_time ? format(new Date(resource.start_time), 'yyyy-MM-dd') : '';
       const startHour = resource.start_time ? format(new Date(resource.start_time), 'HH') : '09';
       const startMinute = resource.start_time ? format(new Date(resource.start_time), 'mm') : '00';
-      
       const endDate = resource.end_time ? format(new Date(resource.end_time), 'yyyy-MM-dd') : '';
       const endHour = resource.end_time ? format(new Date(resource.end_time), 'HH') : '10';
       const endMinute = resource.end_time ? format(new Date(resource.end_time), 'mm') : '00';
-
       form.reset({
         resource: resource.resource || '',
         location: resource.location || '',
@@ -92,10 +87,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
       });
     }
   }, [resource, open, form]);
-
   const onSubmit = async (data: FormData) => {
     if (!resource) return;
-
     try {
       let startTime = null;
       let endTime = null;
@@ -111,7 +104,6 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         const endDateTime = new Date(`${data.end_date}T${data.end_time_hour}:${data.end_time_minute}:00`);
         endTime = endDateTime.toISOString();
       }
-
       await onResourceUpdated(resource.id, {
         resource: data.resource,
         location: data.location,
@@ -119,13 +111,11 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         start_time: startTime,
         end_time: endTime
       });
-      
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating resource:', error);
     }
   };
-
   const generateTimeOptions = () => {
     const hours = [];
     for (let i = 0; i < 24; i++) {
@@ -133,7 +123,6 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
     }
     return hours;
   };
-
   const generateMinuteOptions = () => {
     const minutes = [];
     for (let i = 0; i < 60; i += 15) {
@@ -141,11 +130,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
     }
     return minutes;
   };
-
   if (!resource) return null;
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit Resource</DialogTitle>
@@ -155,11 +141,9 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="resource"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="resource" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Cadet</FormLabel>
                   <Select onValueChange={field.onChange} value={field.value}>
                     <FormControl>
@@ -168,56 +152,38 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {usersLoading ? (
-                        <SelectItem value="loading" disabled>Loading cadets...</SelectItem>
-                      ) : (
-                        users.map((user) => (
-                          <SelectItem key={user.id} value={user.id}>
+                      {usersLoading ? <SelectItem value="loading" disabled>Loading cadets...</SelectItem> : users.map(user => <SelectItem key={user.id} value={user.id}>
                             {user.last_name}, {user.first_name}
-                          </SelectItem>
-                        ))
-                      )}
+                          </SelectItem>)}
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
-            <FormField
-              control={form.control}
-              name="location"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="location" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Location</FormLabel>
                   <FormControl>
                     <Input placeholder="Location" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
             {/* Start Date & Time */}
             <div className="space-y-2">
               <FormLabel>Start Date & Time</FormLabel>
               <div className="flex gap-2">
-                <FormField
-                  control={form.control}
-                  name="start_date"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
+                <FormField control={form.control} name="start_date" render={({
+                field
+              }) => <FormItem className="flex-1">
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="start_time_hour"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="start_time_hour" render={({
+                field
+              }) => <FormItem>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-20">
@@ -225,21 +191,15 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {generateTimeOptions().map((hour) => (
-                            <SelectItem key={hour} value={hour}>
+                          {generateTimeOptions().map(hour => <SelectItem key={hour} value={hour}>
                               {hour}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="start_time_minute"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="start_time_minute" render={({
+                field
+              }) => <FormItem>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-20">
@@ -247,16 +207,12 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {generateMinuteOptions().map((minute) => (
-                            <SelectItem key={minute} value={minute}>
+                          {generateMinuteOptions().map(minute => <SelectItem key={minute} value={minute}>
                               {minute}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
             </div>
 
@@ -264,22 +220,16 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
             <div className="space-y-2">
               <FormLabel>End Date & Time</FormLabel>
               <div className="flex gap-2">
-                <FormField
-                  control={form.control}
-                  name="end_date"
-                  render={({ field }) => (
-                    <FormItem className="flex-1">
+                <FormField control={form.control} name="end_date" render={({
+                field
+              }) => <FormItem className="flex-1">
                       <FormControl>
                         <Input type="date" {...field} />
                       </FormControl>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="end_time_hour"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="end_time_hour" render={({
+                field
+              }) => <FormItem>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-20">
@@ -287,21 +237,15 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {generateTimeOptions().map((hour) => (
-                            <SelectItem key={hour} value={hour}>
+                          {generateTimeOptions().map(hour => <SelectItem key={hour} value={hour}>
                               {hour}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="end_time_minute"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="end_time_minute" render={({
+                field
+              }) => <FormItem>
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger className="w-20">
@@ -309,36 +253,24 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          {generateMinuteOptions().map((minute) => (
-                            <SelectItem key={minute} value={minute}>
+                          {generateMinuteOptions().map(minute => <SelectItem key={minute} value={minute}>
                               {minute}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
             </div>
 
-            <FormField
-              control={form.control}
-              name="assignment_details"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="assignment_details" render={({
+            field
+          }) => <FormItem>
                   <FormLabel>Assignment Details</FormLabel>
                   <FormControl>
-                    <Textarea 
-                      placeholder="Additional details about the assignment..."
-                      className="resize-none"
-                      {...field}
-                    />
+                    <Textarea placeholder="Additional details about the assignment..." className="resize-none" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
 
             <DialogFooter>
               <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
@@ -349,6 +281,5 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
           </form>
         </Form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
