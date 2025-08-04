@@ -69,6 +69,24 @@ export const CompetitionScheduleTab = ({
     return assignedSchool?.id === userProfile?.school_id;
   };
 
+  const getMyScheduleData = () => {
+    const mySchedule: Array<{ time: string; event: string }> = [];
+    
+    allTimeSlots.forEach(timeSlot => {
+      events.forEach(event => {
+        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+        if (assignedSchool?.id === userProfile?.school_id) {
+          mySchedule.push({
+            time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+            event: event.event_name
+          });
+        }
+      });
+    });
+    
+    return mySchedule.sort((a, b) => a.time.localeCompare(b.time));
+  };
+
   const handlePrint = () => {
     window.print();
   };
@@ -91,8 +109,31 @@ export const CompetitionScheduleTab = ({
         events.some(event => shouldShowSlot(event.id, timeSlot))
       )
     : allTimeSlots;
+  const myScheduleData = getMyScheduleData();
+
   return <TooltipProvider>
       <div className="space-y-4 print:space-y-2 schedule-print-container">
+        {/* Print-only table for my schedule */}
+        <div className="hidden print:block">
+          <h2 className="text-lg font-bold mb-4 text-center">My Competition Schedule</h2>
+          <table className="w-full border-collapse border border-black">
+            <thead>
+              <tr>
+                <th className="border border-black p-2 text-left font-bold">Time</th>
+                <th className="border border-black p-2 text-left font-bold">Event</th>
+              </tr>
+            </thead>
+            <tbody>
+              {myScheduleData.map((item, index) => (
+                <tr key={index}>
+                  <td className="border border-black p-2">{item.time}</td>
+                  <td className="border border-black p-2">{item.event}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+
         <div className="flex items-center justify-between print:hidden">
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
@@ -120,7 +161,7 @@ export const CompetitionScheduleTab = ({
           </div>
         </div>
 
-        <Card>
+        <Card className="print:hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <div className="min-w-full">
