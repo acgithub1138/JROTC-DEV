@@ -3,6 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Search, Upload, ChevronDown } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
 import { JudgeDialog } from './components/JudgeDialog';
@@ -26,13 +27,22 @@ export const JudgesPage: React.FC = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [showBulkImportDialog, setShowBulkImportDialog] = useState(false);
   const [editingJudge, setEditingJudge] = useState<any>(null);
+  const [deleteConfirmJudge, setDeleteConfirmJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
   const handleEdit = (judge: any) => {
     setEditingJudge(judge);
   };
-  const handleDelete = async (id: string) => {
-    await deleteJudge(id);
+
+  const handleDeleteClick = (judge: any) => {
+    setDeleteConfirmJudge(judge);
+  };
+
+  const handleConfirmDelete = async () => {
+    if (deleteConfirmJudge) {
+      await deleteJudge(deleteConfirmJudge.id);
+      setDeleteConfirmJudge(null);
+    }
   };
   const handleSubmit = async (data: any) => {
     if (editingJudge) {
@@ -154,7 +164,7 @@ export const JudgesPage: React.FC = () => {
               judges={filteredJudges} 
               isLoading={isLoading} 
               onEdit={handleEdit} 
-              onDelete={handleDelete}
+              onDelete={handleDeleteClick}
               selectedJudges={selectedJudges}
               onSelectJudge={handleSelectJudge}
               onSelectAll={handleSelectAll}
@@ -168,5 +178,22 @@ export const JudgesPage: React.FC = () => {
         onOpenChange={setShowBulkImportDialog} 
         onBulkImport={bulkImportJudges}
       />
+
+      <AlertDialog open={!!deleteConfirmJudge} onOpenChange={(open) => !open && setDeleteConfirmJudge(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Judge</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the judge "{deleteConfirmJudge?.name}"? This action cannot be undone and will permanently remove the judge from your competition portal.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction onClick={handleConfirmDelete} className="bg-destructive hover:bg-destructive/90">
+              Delete Judge
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>;
 };

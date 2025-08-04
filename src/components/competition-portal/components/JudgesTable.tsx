@@ -17,7 +17,7 @@ interface JudgesTableProps {
   judges: Judge[];
   isLoading: boolean;
   onEdit: (judge: Judge) => void;
-  onDelete: (id: string) => void;
+  onDelete: (judge: Judge) => void;
   selectedJudges: string[];
   onSelectJudge: (judgeId: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
@@ -91,7 +91,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                   {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onEdit(judge)}>
                       <Edit className="w-3 h-3" />
                     </Button>}
-                  {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(judge.id)}>
+                  {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => onDelete(judge)}>
                       <Trash2 className="w-3 h-3" />
                     </Button>}
                 </div>
