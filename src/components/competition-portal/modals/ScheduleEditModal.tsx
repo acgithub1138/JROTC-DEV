@@ -5,6 +5,8 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { X } from 'lucide-react';
 interface ScheduleEditModalProps {
   event: ScheduleEvent;
@@ -32,9 +34,27 @@ export const ScheduleEditModal = ({
   } = useSchoolTimezone();
   const [availableSchools, setAvailableSchools] = useState<AvailableSchool[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+  const [isSaving, setIsSaving] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  
+  // Local state for tracking schedule changes
+  const [localSchedule, setLocalSchedule] = useState<Record<string, string | null>>({});
+  
+  // Initialize local schedule from event data
+  const initialSchedule = event.timeSlots.reduce((acc, slot) => {
+    acc[slot.time.toISOString()] = slot.assignedSchool?.id || null;
+    return acc;
+  }, {} as Record<string, string | null>);
+  
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: initialSchedule,
+    currentData: localSchedule,
+    enabled: isOpen
+  });
   useEffect(() => {
     if (isOpen && event) {
       loadAvailableSchools();
+      setLocalSchedule(initialSchedule);
     }
   }, [isOpen, event.id]);
   const loadAvailableSchools = async () => {
@@ -48,69 +68,150 @@ export const ScheduleEditModal = ({
       setIsLoading(false);
     }
   };
-  const handleAssignSchool = async (timeSlot: Date, schoolId: string | null) => {
-    await updateScheduleSlot(event.id, timeSlot, schoolId);
-    await loadAvailableSchools(); // Refresh available schools
-    await refetch(); // Refresh main schedule data
+  const handleLocalScheduleChange = (timeSlot: Date, schoolId: string | null) => {
+    setLocalSchedule(prev => ({
+      ...prev,
+      [timeSlot.toISOString()]: schoolId
+    }));
   };
-  const handleRemoveAssignment = async (timeSlot: Date) => {
-    await updateScheduleSlot(event.id, timeSlot, null);
-    await loadAvailableSchools(); // Refresh available schools
-    await refetch(); // Refresh main schedule data
+
+  const handleUpdateSchedule = async () => {
+    setIsSaving(true);
+    try {
+      // Process all changes
+      for (const [timeSlotISO, schoolId] of Object.entries(localSchedule)) {
+        const timeSlot = new Date(timeSlotISO);
+        await updateScheduleSlot(event.id, timeSlot, schoolId);
+      }
+      
+      await loadAvailableSchools(); // Refresh available schools
+      await refetch(); // Refresh main schedule data
+      resetChanges();
+      onClose();
+    } catch (error) {
+      console.error('Error updating schedule:', error);
+    } finally {
+      setIsSaving(false);
+    }
   };
-  return <Dialog open={isOpen} onOpenChange={onClose}>
-      <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            Schedule for {event.event_name}
-            <div className="text-sm font-normal text-muted-foreground mt-1">
-              {event.interval}-minute slots from {' '}
-              {formatTimeForDisplay(event.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} to {' '}
-              {formatTimeForDisplay(event.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+
+  const handleCloseModal = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setLocalSchedule(initialSchedule);
+    resetChanges();
+    setShowUnsavedDialog(false);
+    onClose();
+  };
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={handleCloseModal}>
+        <DialogContent className="sm:max-w-[500px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              Schedule for {event.event_name}
+              <div className="text-sm font-normal text-muted-foreground mt-1">
+                {event.interval}-minute slots from {' '}
+                {formatTimeForDisplay(event.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)} to {' '}
+                {formatTimeForDisplay(event.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+              </div>
+            </DialogTitle>
+          </DialogHeader>
+
+          <div className="space-y-4">
+            {isLoading ? (
+              <div className="text-center py-4">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
+                <p className="mt-2 text-sm text-muted-foreground">Loading schools...</p>
+              </div>
+            ) : (
+              <div className="space-y-2">
+                {event.timeSlots.map((slot, index) => {
+                  const currentAssignment = localSchedule[slot.time.toISOString()];
+                  const assignedSchool = currentAssignment ? 
+                    availableSchools.find(s => s.id === currentAssignment) || 
+                    slot.assignedSchool : null;
+
+                  return (
+                    <div key={slot.time.toISOString()} className={`flex items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                      <div className="font-mono text-sm min-w-[80px]">
+                        {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                      </div>
+
+                      <div className="flex-1">
+                        {assignedSchool ? (
+                          <div className="flex items-center gap-2">
+                            <div className="bg-primary/10 text-primary px-3 py-1 rounded-md text-sm">
+                              {assignedSchool.name}
+                            </div>
+                            <Button 
+                              variant="ghost" 
+                              size="sm" 
+                              onClick={() => handleLocalScheduleChange(slot.time, null)} 
+                              className="h-6 w-6 p-0"
+                            >
+                              <X className="h-3 w-3" />
+                            </Button>
+                          </div>
+                        ) : (
+                          <Select 
+                            value={currentAssignment || ""} 
+                            onValueChange={schoolId => handleLocalScheduleChange(slot.time, schoolId)}
+                          >
+                            <SelectTrigger className="w-full">
+                              <SelectValue placeholder="Select school..." />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {availableSchools.length === 0 ? (
+                                <SelectItem value="no-schools" disabled>
+                                  No schools available
+                                </SelectItem>
+                              ) : (
+                                availableSchools.map(school => (
+                                  <SelectItem key={school.id} value={school.id}>
+                                    {school.name}
+                                  </SelectItem>
+                                ))
+                              )}
+                            </SelectContent>
+                          </Select>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            )}
+
+            <div className="flex justify-between gap-3 pt-4 border-t">
+              <Button variant="outline" onClick={handleCloseModal}>
+                Cancel
+              </Button>
+              <Button 
+                onClick={handleUpdateSchedule} 
+                disabled={!hasUnsavedChanges || isSaving}
+              >
+                {isSaving ? 'Updating...' : 'Update Schedule'}
+              </Button>
             </div>
-          </DialogTitle>
-        </DialogHeader>
-
-        <div className="space-y-4">
-          {isLoading ? <div className="text-center py-4">
-              <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
-              <p className="mt-2 text-sm text-muted-foreground">Loading schools...</p>
-            </div> : <div className="space-y-2">
-              {event.timeSlots.map((slot, index) => <div key={slot.time.toISOString()} className={`flex items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                  <div className="font-mono text-sm min-w-[80px]">
-                    {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
-                  </div>
-
-                  <div className="flex-1">
-                    {slot.assignedSchool ? <div className="flex items-center gap-2">
-                        <div className="bg-primary/10 text-primary px-3 py-1 rounded-md text-sm">
-                          {slot.assignedSchool.name}
-                        </div>
-                        <Button variant="ghost" size="sm" onClick={() => handleRemoveAssignment(slot.time)} className="h-6 w-6 p-0">
-                          <X className="h-3 w-3" />
-                        </Button>
-                      </div> : <Select onValueChange={schoolId => handleAssignSchool(slot.time, schoolId)}>
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Select school..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {availableSchools.length === 0 ? <SelectItem value="no-schools" disabled>
-                              No schools available
-                            </SelectItem> : availableSchools.map(school => <SelectItem key={school.id} value={school.id}>
-                                {school.name}
-                              </SelectItem>)}
-                        </SelectContent>
-                      </Select>}
-                  </div>
-                </div>)}
-            </div>}
-
-          <div className="flex justify-end pt-4 border-t">
-            <Button variant="outline" onClick={onClose}>
-              Close
-            </Button>
           </div>
-        </div>
-      </DialogContent>
-    </Dialog>;
+        </DialogContent>
+      </Dialog>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={() => setShowUnsavedDialog(false)}
+        title="Unsaved Schedule Changes"
+        description="You have unsaved changes to the schedule. Are you sure you want to discard them?"
+      />
+    </>
+  );
 };
