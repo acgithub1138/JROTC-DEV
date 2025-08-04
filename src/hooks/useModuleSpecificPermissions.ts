@@ -156,3 +156,13 @@ export const useEmailPermissions = () => {
     canProcessQueue: hasPermission('email', 'process_queue'),
   };
 };
+
+export const useCompetitionSchedulePermissions = () => {
+  const permissions = useModulePermissions('cp_schedules');
+
+  return {
+    canView: permissions.canAccess,
+    canManageSchedule: permissions.canUpdate && permissions.canCreate && permissions.canDelete,
+    ...permissions
+  };
+};

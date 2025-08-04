@@ -58,6 +58,9 @@ export const modulePermissionMappings = {
   ],
   'cp_comp_resources': [
     'sidebar', 'read', 'create', 'view', 'update', 'delete'
+  ],
+  'cp_schedules': [
+    'sidebar', 'read', 'create', 'view', 'update', 'delete'
   ]
 };
 

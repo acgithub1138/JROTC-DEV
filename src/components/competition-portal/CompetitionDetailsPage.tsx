@@ -7,6 +7,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
+import { CompetitionScheduleTab } from './tabs/CompetitionScheduleTab';
 export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const params = useParams();
@@ -35,10 +36,11 @@ export const CompetitionDetailsPage = () => {
       </div>
 
       <Tabs defaultValue="events" className="w-full">
-        <TabsList className="grid w-full grid-cols-3">
+        <TabsList className="grid w-full grid-cols-4">
           <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="resources">Resources</TabsTrigger>
           <TabsTrigger value="schools">Schools</TabsTrigger>
+          <TabsTrigger value="schedule">Schedule</TabsTrigger>
         </TabsList>
         
         <TabsContent value="events">
@@ -64,6 +66,15 @@ export const CompetitionDetailsPage = () => {
             
             <CardContent>
               <CompetitionSchoolsTab competitionId={competitionId} />
+            </CardContent>
+          </Card>
+        </TabsContent>
+        
+        <TabsContent value="schedule">
+          <Card>
+            
+            <CardContent>
+              <CompetitionScheduleTab competitionId={competitionId} />
             </CardContent>
           </Card>
         </TabsContent>

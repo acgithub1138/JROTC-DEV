@@ -539,6 +539,7 @@ export type Database = {
           event: string | null
           fee: number | null
           id: string
+          interval: number | null
           judges: string[] | null
           location: string | null
           max_participants: number | null
@@ -560,6 +561,7 @@ export type Database = {
           event?: string | null
           fee?: number | null
           id?: string
+          interval?: number | null
           judges?: string[] | null
           location?: string | null
           max_participants?: number | null
@@ -581,6 +583,7 @@ export type Database = {
           event?: string | null
           fee?: number | null
           id?: string
+          interval?: number | null
           judges?: string[] | null
           location?: string | null
           max_participants?: number | null
@@ -692,6 +695,7 @@ export type Database = {
           created_by: string | null
           id: string
           notes: string | null
+          paid: boolean
           resource: string | null
           school_id: string
           school_name: string | null
@@ -705,6 +709,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          paid?: boolean
           resource?: string | null
           school_id: string
           school_name?: string | null
@@ -718,6 +723,7 @@ export type Database = {
           created_by?: string | null
           id?: string
           notes?: string | null
+          paid?: boolean
           resource?: string | null
           school_id?: string
           school_name?: string | null
@@ -892,6 +898,64 @@ export type Database = {
             columns: ["updated_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      cp_event_schedules: {
+        Row: {
+          competition_id: string
+          created_at: string
+          created_by: string | null
+          duration: number
+          event_id: string
+          id: string
+          scheduled_time: string
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          competition_id: string
+          created_at?: string
+          created_by?: string | null
+          duration?: number
+          event_id: string
+          id?: string
+          scheduled_time: string
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          competition_id?: string
+          created_at?: string
+          created_by?: string | null
+          duration?: number
+          event_id?: string
+          id?: string
+          scheduled_time?: string
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "fk_cp_event_schedules_competition"
+            columns: ["competition_id"]
+            isOneToOne: false
+            referencedRelation: "cp_competitions"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cp_event_schedules_event"
+            columns: ["event_id"]
+            isOneToOne: false
+            referencedRelation: "cp_comp_events"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "fk_cp_event_schedules_school"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
             referencedColumns: ["id"]
           },
         ]
