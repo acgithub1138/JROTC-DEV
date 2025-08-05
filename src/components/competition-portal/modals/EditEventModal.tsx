@@ -216,6 +216,10 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       } as any;
 
       await onEventUpdated(event.id, updates);
+      
+      // Reset initial form data to current form data to clear unsaved changes
+      setInitialFormData(formData);
+      
       handleClose();
     } catch (error) {
       console.error('Error updating event:', error);
