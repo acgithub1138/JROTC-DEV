@@ -7,14 +7,16 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
-import { CreateEventModal } from './CreateEventModal';
-import { EditEventModal } from './EditEventModal';
+import { CreateEventModal } from './modals/CreateEventModal';
+import { EditCpEventModal } from './modals/EditCpEventModal';
 import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
 import { format } from 'date-fns';
 export const EventsPage = () => {
   const {
     events,
     isLoading,
+    createEvent,
+    updateEvent,
     deleteEvent,
     refetch
   } = useCompetitionEvents();
@@ -183,8 +185,8 @@ export const EventsPage = () => {
           </CardContent>
         </Card>
 
-        <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} onSuccess={refetch} />
-        <EditEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} onSuccess={refetch} />
+        <CreateEventModal open={isCreateModalOpen} onOpenChange={setIsCreateModalOpen} onSuccess={refetch} onEventCreate={createEvent} />
+        <EditCpEventModal open={isEditModalOpen} onOpenChange={setIsEditModalOpen} event={selectedEvent} onEventUpdate={updateEvent} onSuccess={refetch} />
         
         <AlertDialog open={!!deleteConfirmEvent} onOpenChange={(open) => !open && setDeleteConfirmEvent(null)}>
           <AlertDialogContent>
