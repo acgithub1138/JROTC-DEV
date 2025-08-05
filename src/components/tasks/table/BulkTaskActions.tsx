@@ -64,17 +64,11 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
       // Try to update each item, handling both tasks and subtasks
       const updatePromises = selectedTasks.map(async (id) => {
         try {
-          // Try as a subtask first (since subtasks have async mutation)
+          // Try as a subtask first
           await updateSubtask({ id, ...updateData });
         } catch (subtaskError) {
           // If subtask update fails, try as a task
-          // Convert to Promise since updateTask uses .mutate
-          return new Promise((resolve, reject) => {
-            updateTask({ id, ...updateData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
+          await updateTask({ id, ...updateData });
         }
       });
       
@@ -117,17 +111,11 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
         };
         
         try {
-          // Try as a subtask first (since subtasks have async mutation)
+          // Try as a subtask first
           await updateSubtask({ id, ...updateData });
         } catch (subtaskError) {
           // If subtask update fails, try as a task
-          // Convert to Promise since updateTask uses .mutate
-          return new Promise((resolve, reject) => {
-            updateTask({ id, ...updateData }, {
-              onSuccess: resolve,
-              onError: reject
-            });
-          });
+          await updateTask({ id, ...updateData });
         }
       });
       

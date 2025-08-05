@@ -12,7 +12,7 @@ export const useTaskMutations = () => {
 
   return {
     createTask: createTaskMutation.mutate,
-    updateTask: updateTaskMutation.mutate,
+    updateTask: updateTaskMutation.mutateAsync,
     deleteTask: deleteTaskMutation.mutate,
     duplicateTask: duplicateTaskMutation.mutate,
     isCreating: createTaskMutation.isPending,
