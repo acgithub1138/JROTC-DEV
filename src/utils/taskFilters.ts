@@ -54,15 +54,10 @@ export const getAllSchoolTasksAndSubtasks = (
   subtasks: Subtask[]
 ): (Task | Subtask)[] => {
   const activeTasks = getAllSchoolTasks(tasks);
-  const activeTaskIds = new Set(activeTasks.map(task => task.id));
-  
-  // Only include subtasks whose parent tasks are NOT active (completed/closed)
-  const orphanedSubtasks = subtasks.filter(subtask => 
-    !subtask.completed_at && !activeTaskIds.has(subtask.parent_task_id)
-  );
+  const activeSubtasks = subtasks.filter(subtask => !subtask.completed_at);
   
   // Combine and sort by created_at (newest first)
-  return [...activeTasks, ...orphanedSubtasks].sort((a, b) => 
+  return [...activeTasks, ...activeSubtasks].sort((a, b) => 
     new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
   );
 };
