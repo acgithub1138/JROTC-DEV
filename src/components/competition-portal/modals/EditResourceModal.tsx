@@ -70,7 +70,7 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
     defaultValues: initialFormData
   });
 
-  const { hasUnsavedChanges } = useUnsavedChanges({
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: form.watch(),
     enabled: open
@@ -126,7 +126,8 @@ export const EditResourceModal: React.FC<EditResourceModalProps> = ({
         start_time: startTime,
         end_time: endTime
       });
-      handleClose();
+      resetChanges();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error updating resource:', error);
     }

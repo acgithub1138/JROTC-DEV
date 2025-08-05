@@ -62,7 +62,7 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
     defaultValues: initialFormData
   });
 
-  const { hasUnsavedChanges } = useUnsavedChanges({
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: form.watch(),
     enabled: open
@@ -121,7 +121,8 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
         end_time: endTime
       });
       form.reset();
-      handleClose();
+      resetChanges();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error adding resource:', error);
     }

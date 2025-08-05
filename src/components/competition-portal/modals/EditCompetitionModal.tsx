@@ -75,7 +75,7 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
   // Track initial data for unsaved changes
   const [initialFormData, setInitialFormData] = useState(formData);
-  const { hasUnsavedChanges } = useUnsavedChanges({
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
     enabled: open
@@ -188,6 +188,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         fee: formData.fee ? parseFloat(formData.fee) : null
       };
       await onSubmit(submitData);
+      resetChanges();
+      onOpenChange(false);
     } finally {
       setIsSubmitting(false);
     }

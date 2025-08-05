@@ -82,7 +82,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     resources: [] as string[]
   };
   
-  const { hasUnsavedChanges } = useUnsavedChanges({
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
     enabled: open
@@ -215,7 +215,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         resources: formData.resources
       };
       await onEventAdded(eventData);
-      handleClose();
+      resetChanges();
+      onOpenChange(false);
       setFormData({
         event: '',
         location: '',
