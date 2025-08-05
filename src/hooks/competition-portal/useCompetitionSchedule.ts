@@ -15,6 +15,7 @@ export interface ScheduleSlot {
 export interface TimeSlot {
   time: Date;
   duration: number;
+  isLunchBreak?: boolean;
   assignedSchool?: {
     id: string;
     name: string;
@@ -87,12 +88,20 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         const current = new Date(startTime);
 
         while (current < endTime) {
-          // Skip lunch time slots if lunch period is defined
+          // Check if this is lunch time
           const isLunchTime = event.lunch_start_time && event.lunch_end_time && 
             current >= new Date(event.lunch_start_time) && 
             current < new Date(event.lunch_end_time);
 
-          if (!isLunchTime) {
+          if (isLunchTime) {
+            // Add lunch break slot
+            timeSlots.push({
+              time: new Date(current),
+              duration: interval,
+              isLunchBreak: true
+            });
+          } else {
+            // Add regular time slot
             const scheduleForSlot = schedulesData?.find(
               s => s.event_id === event.id && 
                    new Date(s.scheduled_time).getTime() === current.getTime()
@@ -105,6 +114,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             timeSlots.push({
               time: new Date(current),
               duration: interval,
+              isLunchBreak: false,
               assignedSchool: scheduleForSlot ? {
                 id: scheduleForSlot.school_id,
                 name: scheduleForSlot.school_name || 'Unknown School',

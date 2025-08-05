@@ -177,7 +177,11 @@ export const ScheduleEditModal = ({
                       </div>
 
                       <div className="flex-1">
-                        {assignedSchool ? (
+                        {slot.isLunchBreak ? (
+                          <div className="px-3 py-1 rounded-md text-sm bg-orange-100 text-orange-800 font-medium text-center">
+                            Lunch Break
+                          </div>
+                        ) : assignedSchool ? (
                           <div className="flex items-center gap-2">
                             <div className="bg-primary/10 text-primary px-3 py-1 rounded-md text-sm">
                               {assignedSchool.name}

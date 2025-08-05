@@ -267,8 +267,18 @@ export const CompetitionScheduleTab = ({
                         const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
                         const showSlot = shouldShowSlot(event.id, timeSlot);
                         
+                        // Check if this time slot is a lunch break for this event
+                        const eventDetails = events.find(e => e.id === event.id);
+                        const isLunchSlot = eventDetails?.timeSlots.find(
+                          slot => slot.time.getTime() === timeSlot.getTime()
+                        )?.isLunchBreak;
+                        
                         return <div key={event.id} className="text-sm min-w-0">
-                          {assignedSchool && showSlot ? 
+                          {isLunchSlot ? (
+                            <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium text-center">
+                              Lunch Break
+                            </div>
+                          ) : assignedSchool && showSlot ? 
                             <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
                               backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
                             }}>
