@@ -10,7 +10,6 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-
 interface CompetitionEvent {
   id: string;
   fee: number | null;
@@ -23,7 +22,6 @@ interface CompetitionEvent {
     description: string | null;
   } | null;
 }
-
 interface Competition {
   id: string;
   name: string;
@@ -31,16 +29,16 @@ interface Competition {
   start_date: string;
   end_date: string;
 }
-
 interface CompetitionRegistrationModalProps {
   isOpen: boolean;
   onClose: () => void;
   competition: Competition | null;
   events: CompetitionEvent[];
   isLoading: boolean;
-  currentRegistrations: { event_id: string }[];
+  currentRegistrations: {
+    event_id: string;
+  }[];
 }
-
 export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModalProps> = ({
   isOpen,
   onClose,
@@ -49,8 +47,12 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   isLoading,
   currentRegistrations
 }) => {
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [initialSelectedEvents, setInitialSelectedEvents] = useState<Set<string>>(new Set());
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -60,10 +62,15 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   // Convert sets to arrays for comparison
   const currentEventIds = Array.from(selectedEvents).sort();
   const initialEventIds = Array.from(initialSelectedEvents).sort();
-
-  const { hasUnsavedChanges } = useUnsavedChanges({
-    initialData: { events: initialEventIds },
-    currentData: { events: currentEventIds }
+  const {
+    hasUnsavedChanges
+  } = useUnsavedChanges({
+    initialData: {
+      events: initialEventIds
+    },
+    currentData: {
+      events: currentEventIds
+    }
   });
 
   // Initialize selected events with current registrations
@@ -77,7 +84,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       setInitialSelectedEvents(new Set());
     }
   }, [isOpen, currentRegistrations]);
-
   const totalCost = useMemo(() => {
     const competitionFee = competition?.fee || 0;
     const eventsFee = Array.from(selectedEvents).reduce((sum, eventId) => {
@@ -86,7 +92,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     }, 0);
     return competitionFee + eventsFee;
   }, [competition?.fee, selectedEvents, events]);
-
   const handleEventSelection = (eventId: string, checked: boolean) => {
     const newSelectedEvents = new Set(selectedEvents);
     if (checked) {
@@ -96,7 +101,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     }
     setSelectedEvents(newSelectedEvents);
   };
-
   const handleRegister = async () => {
     if (!competition || !userProfile?.school_id) {
       toast({
@@ -106,7 +110,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       });
       return;
     }
-
     if (selectedEvents.size === 0) {
       toast({
         title: "No Events Selected",
@@ -115,42 +118,35 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       });
       return;
     }
-
     setIsRegistering(true);
-
     try {
       if (isEditing) {
         // For editing, first delete existing registrations, then insert new ones
-        const { error: deleteError } = await supabase
-          .from('cp_event_registrations')
-          .delete()
-          .eq('competition_id', competition.id)
-          .eq('school_id', userProfile.school_id);
-
+        const {
+          error: deleteError
+        } = await supabase.from('cp_event_registrations').delete().eq('competition_id', competition.id).eq('school_id', userProfile.school_id);
         if (deleteError) throw deleteError;
       } else {
         // Register for the competition (only for new registrations)
-        const { error: compError } = await supabase
-          .from('cp_comp_schools')
-          .insert({
-            competition_id: competition.id,
-            school_id: userProfile.school_id,
-            status: 'registered',
-            created_by: userProfile.id,
-            total_fee: totalCost
-          } as any);
-
+        const {
+          error: compError
+        } = await supabase.from('cp_comp_schools').insert({
+          competition_id: competition.id,
+          school_id: userProfile.school_id,
+          status: 'registered',
+          created_by: userProfile.id,
+          total_fee: totalCost
+        } as any);
         if (compError) throw compError;
       }
 
       // Update the total_fee for existing registrations (if editing)
       if (isEditing) {
-        const { error: updateError } = await supabase
-          .from('cp_comp_schools')
-          .update({ total_fee: totalCost } as any)
-          .eq('competition_id', competition.id)
-          .eq('school_id', userProfile.school_id);
-
+        const {
+          error: updateError
+        } = await supabase.from('cp_comp_schools').update({
+          total_fee: totalCost
+        } as any).eq('competition_id', competition.id).eq('school_id', userProfile.school_id);
         if (updateError) throw updateError;
       }
 
@@ -162,20 +158,16 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         status: 'registered',
         created_by: userProfile.id
       }));
-
       if (eventRegistrations.length > 0) {
-        const { error: eventRegError } = await supabase
-          .from('cp_event_registrations')
-          .insert(eventRegistrations);
-
+        const {
+          error: eventRegError
+        } = await supabase.from('cp_event_registrations').insert(eventRegistrations);
         if (eventRegError) throw eventRegError;
       }
-
       toast({
         title: isEditing ? "Registration Updated!" : "Registration Successful!",
-        description: `Successfully ${isEditing ? 'updated' : 'registered for'} ${competition.name} and ${selectedEvents.size} event(s). Total cost: $${totalCost.toFixed(2)}`,
+        description: `Successfully ${isEditing ? 'updated' : 'registered for'} ${competition.name} and ${selectedEvents.size} event(s). Total cost: $${totalCost.toFixed(2)}`
       });
-
       onClose();
       setSelectedEvents(new Set());
     } catch (error: any) {
@@ -189,7 +181,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       setIsRegistering(false);
     }
   };
-
   const handleClose = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -197,17 +188,14 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       onClose();
     }
   };
-
   const handleDiscardChanges = () => {
     setSelectedEvents(initialSelectedEvents);
     setShowUnsavedDialog(false);
     onClose();
   };
-
   const handleCancelDiscard = () => {
     setShowUnsavedDialog(false);
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -216,126 +204,84 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       onClose();
     }
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="max-w-4xl max-h-[80vh] overflow-hidden flex flex-col">
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle className="flex items-center gap-2">
             <Trophy className="w-5 h-5" />
             {isEditing ? 'Edit Registration' : 'Register for Competition'}
-            {competition && (
-              <span className="text-sm font-normal text-muted-foreground">
+            {competition && <span className="text-sm font-normal text-muted-foreground">
                 - {competition.name}
-              </span>
-            )}
+              </span>}
           </DialogTitle>
         </DialogHeader>
 
         <div className="flex-1 overflow-y-auto space-y-4">
           {/* Competition Info */}
-          {competition && (
-            <div className="p-4 bg-muted/50 rounded-lg">
+          {competition && <div className="p-4 bg-muted/50 rounded-lg">
               <div className="flex items-center justify-between mb-2">
                 <h3 className="font-semibold">Competition Entry</h3>
-                {competition.fee && (
-                  <Badge variant="secondary">
+                {competition.fee && <Badge variant="secondary">
                     <DollarSign className="w-3 h-3 mr-1" />
                     ${competition.fee.toFixed(2)}
-                  </Badge>
-                )}
+                  </Badge>}
               </div>
               <p className="text-sm text-muted-foreground">
                 {format(new Date(competition.start_date), 'MMM d, yyyy')}
-                {competition.end_date && 
-                  format(new Date(competition.end_date), 'MMM d, yyyy') !== format(new Date(competition.start_date), 'MMM d, yyyy') && 
-                  ` - ${format(new Date(competition.end_date), 'MMM d, yyyy')}`
-                }
+                {competition.end_date && format(new Date(competition.end_date), 'MMM d, yyyy') !== format(new Date(competition.start_date), 'MMM d, yyyy') && ` - ${format(new Date(competition.end_date), 'MMM d, yyyy')}`}
               </p>
-            </div>
-          )}
+            </div>}
 
           {/* Events Selection */}
           <div>
             <h3 className="font-semibold mb-3">Select Events to Register For:</h3>
             
-            {isLoading ? (
-              <div className="space-y-4">
-                {[...Array(3)].map((_, i) => (
-                  <div key={i} className="animate-pulse p-4 border rounded-lg">
+            {isLoading ? <div className="space-y-4">
+                {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse p-4 border rounded-lg">
                     <div className="h-4 bg-gray-200 rounded mb-2"></div>
                     <div className="h-16 bg-gray-200 rounded"></div>
-                  </div>
-                ))}
-              </div>
-            ) : events.length > 0 ? (
-              <div className="space-y-2">
-                {events.map((event) => (
-                  <div
-                    key={event.id}
-                    className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors"
-                  >
-                    <Checkbox
-                      id={event.id}
-                      checked={selectedEvents.has(event.id)}
-                      onCheckedChange={(checked) => handleEventSelection(event.id, checked as boolean)}
-                      className="mt-1"
-                    />
+                  </div>)}
+              </div> : events.length > 0 ? <div className="space-y-2">
+                {events.map(event => <div key={event.id} className="flex items-start space-x-3 p-4 border rounded-lg hover:bg-muted/50 transition-colors">
+                    <Checkbox id={event.id} checked={selectedEvents.has(event.id)} onCheckedChange={checked => handleEventSelection(event.id, checked as boolean)} className="mt-1" />
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between mb-2">
-                        <label
-                          htmlFor={event.id}
-                          className="text-sm font-medium cursor-pointer"
-                        >
+                        <label htmlFor={event.id} className="text-sm font-medium cursor-pointer">
                           {event.event?.name || 'Event Name Not Available'}
                         </label>
-                        {event.fee && (
-                          <Badge variant="outline">
+                        {event.fee && <Badge variant="outline">
                             <DollarSign className="w-3 h-3 mr-1" />
                             ${event.fee.toFixed(2)}
-                          </Badge>
-                        )}
+                          </Badge>}
                       </div>
                       
-                      {event.event?.description && (
-                        <p className="text-xs text-muted-foreground mb-2">
+                      {event.event?.description && <p className="text-xs text-muted-foreground mb-2">
                           {event.event.description}
-                        </p>
-                      )}
+                        </p>}
 
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground">
-                        {event.start_time && (
-                          <div className="flex items-center gap-1">
+                        {event.start_time && <div className="flex items-center gap-1">
                             <Clock className="w-3 h-3" />
                             <span>{format(new Date(event.start_time), 'MMM d, h:mm a')}</span>
-                          </div>
-                        )}
+                          </div>}
                         
-                        {event.location && (
-                          <div className="flex items-center gap-1">
+                        {event.location && <div className="flex items-center gap-1">
                             <MapPin className="w-3 h-3" />
                             <span>{event.location}</span>
-                          </div>
-                        )}
+                          </div>}
                         
-                        {event.max_participants && (
-                          <div className="flex items-center gap-1">
+                        {event.max_participants && <div className="flex items-center gap-1">
                             <Users className="w-3 h-3" />
                             <span>Max {event.max_participants}</span>
-                          </div>
-                        )}
+                          </div>}
                       </div>
                     </div>
-                  </div>
-                ))}
-              </div>
-            ) : (
-              <div className="text-center py-8 text-muted-foreground">
+                  </div>)}
+              </div> : <div className="text-center py-8 text-muted-foreground">
                 <Trophy className="w-12 h-12 mx-auto mb-4 opacity-50" />
                 <p>No events available for this competition.</p>
-              </div>
-            )}
+              </div>}
           </div>
         </div>
 
@@ -353,7 +299,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                 Cancel
               </Button>
               <Button onClick={handleRegister} disabled={isRegistering || selectedEvents.size === 0}>
-                {isRegistering ? (isEditing ? 'Updating...' : 'Registering...') : (isEditing ? 'Update Registration' : 'Register')}
+                {isRegistering ? isEditing ? 'Updating...' : 'Registering...' : isEditing ? 'Update Registration' : 'Register'}
               </Button>
             </div>
           </div>
@@ -361,12 +307,6 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleCancelDiscard}
-    />
-    </>
-  );
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleCancelDiscard} />
+    </>;
 };
