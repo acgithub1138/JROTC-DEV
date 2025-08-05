@@ -22,7 +22,7 @@ import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
 import { SubtaskCompletionModal } from '../dialogs/SubtaskCompletionModal';
 import { EditableCell } from './EditableCell';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
-import { isTaskDone, getDefaultCompletionStatus, isCompletionStatus } from '@/utils/taskStatusUtils';
+import { isTaskDone, getDefaultCompletionStatus, isCompletionStatus, isCancelStatus } from '@/utils/taskStatusUtils';
 
 interface TaskTableRowProps {
   task: Task | Subtask;
@@ -108,8 +108,9 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         addComment(comment);
       }
       
-      // For canceled status, also set completed_at
-      if (pendingStatusChange === 'canceled') {
+      // Check if this is a cancellation status
+      if (isCancelStatus(pendingStatusChange, statusOptions)) {
+        // For canceled status, also set completed_at
         const now = new Date().toISOString();
         await updateTask({
           id: task.id,
@@ -142,7 +143,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           : 'Task completed';
         handleSystemComment(task.id, commentText);
       } else {
-        // Then save the status change (which will trigger email with the fresh comment)
+        // For other statuses that require comments (like need_information)
         await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
       }
       
