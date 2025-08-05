@@ -373,30 +373,96 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           </div>
           <div>
             <Label>Judge Lunch Break</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-3">
               <div>
-                <Label htmlFor="lunch_start_time" className="text-xs">Start Time</Label>
-                <Input 
-                  id="lunch_start_time" 
-                  type="time" 
-                  value={formData.lunch_start_time} 
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_time: e.target.value
-                  }))} 
-                />
+                <Label className="text-xs">Start Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Select 
+                      value={formData.lunch_start_time.split(':')[0] || ''} 
+                      onValueChange={(value) => {
+                        const currentMinute = formData.lunch_start_time.split(':')[1] || '00';
+                        setFormData(prev => ({ ...prev, lunch_start_time: `${value}:${currentMinute}` }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select 
+                      value={formData.lunch_start_time.split(':')[1] || ''} 
+                      onValueChange={(value) => {
+                        const currentHour = formData.lunch_start_time.split(':')[0] || '12';
+                        setFormData(prev => ({ ...prev, lunch_start_time: `${currentHour}:${value}` }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                          <SelectItem key={minute} value={minute}>
+                            {minute}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
               <div>
-                <Label htmlFor="lunch_end_time" className="text-xs">End Time</Label>
-                <Input 
-                  id="lunch_end_time" 
-                  type="time" 
-                  value={formData.lunch_end_time} 
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_time: e.target.value
-                  }))} 
-                />
+                <Label className="text-xs">End Time</Label>
+                <div className="grid grid-cols-2 gap-2">
+                  <div>
+                    <Select 
+                      value={formData.lunch_end_time.split(':')[0] || ''} 
+                      onValueChange={(value) => {
+                        const currentMinute = formData.lunch_end_time.split(':')[1] || '00';
+                        setFormData(prev => ({ ...prev, lunch_end_time: `${value}:${currentMinute}` }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Hour" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {Array.from({ length: 24 }, (_, i) => (
+                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            {i.toString().padStart(2, '0')}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                  <div>
+                    <Select 
+                      value={formData.lunch_end_time.split(':')[1] || ''} 
+                      onValueChange={(value) => {
+                        const currentHour = formData.lunch_end_time.split(':')[0] || '13';
+                        setFormData(prev => ({ ...prev, lunch_end_time: `${currentHour}:${value}` }));
+                      }}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Min" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                          <SelectItem key={minute} value={minute}>
+                            {minute}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
