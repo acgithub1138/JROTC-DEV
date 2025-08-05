@@ -48,6 +48,20 @@ export const getAllSchoolTasks = (tasks: Task[]): Task[] => {
   return tasks.filter(task => !task.completed_at); // Only show tasks that are not completed
 };
 
+// Get all active tasks and subtasks from school (both tasks and subtasks without user filtering)
+export const getAllSchoolTasksAndSubtasks = (
+  tasks: Task[], 
+  subtasks: Subtask[]
+): (Task | Subtask)[] => {
+  const activeTasks = getAllSchoolTasks(tasks);
+  const activeSubtasks = subtasks.filter(subtask => !subtask.completed_at);
+  
+  // Combine and sort by created_at (newest first)
+  return [...activeTasks, ...activeSubtasks].sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+};
+
 // Get completed tasks (tasks with completed_at set)
 export const getCompletedTasks = (tasks: Task[]): Task[] => {
   return tasks.filter(task => !!task.completed_at);

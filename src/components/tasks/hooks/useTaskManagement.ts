@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getCompletedTasks } from '@/utils/taskFilters';
+import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getAllSchoolTasksAndSubtasks, getCompletedTasks } from '@/utils/taskFilters';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
@@ -27,12 +27,12 @@ export const useTaskManagement = () => {
   // Memoize expensive filtering operations
   const filteredTasks = useMemo(() => {
     const myActiveTasksAndSubtasks = getMyActiveTasksAndSubtasks(tasks, mySubtasks, userProfile?.id);
-    const allSchoolTasks = getAllSchoolTasks(tasks);
+    const allSchoolTasksAndSubtasks = getAllSchoolTasksAndSubtasks(tasks, mySubtasks);
     const completedTasks = getCompletedTasks(tasks);
 
     return {
       myActive: filterTasks(myActiveTasksAndSubtasks, debouncedSearchTerm) as (Task | Subtask)[],
-      allSchool: filterTasks(allSchoolTasks, debouncedSearchTerm),
+      allSchool: filterTasks(allSchoolTasksAndSubtasks, debouncedSearchTerm) as (Task | Subtask)[],
       completed: filterTasks(completedTasks, debouncedSearchTerm)
     };
   }, [tasks, mySubtasks, userProfile?.id, debouncedSearchTerm]);
@@ -92,7 +92,7 @@ export const useTaskManagement = () => {
     overdueFilter,
     setOverdueFilter,
     myActiveTasks: paginationData.myTasks as (Task | Subtask)[],
-    allSchoolTasks: paginationData.allTasks,
+    allSchoolTasks: paginationData.allTasks as (Task | Subtask)[],
     completedTasks: paginationData.completedTasks,
     currentPageMyTasks,
     currentPageAllTasks,
