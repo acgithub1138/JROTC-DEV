@@ -6,7 +6,8 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { CompetitionRegistrationModal } from './CompetitionRegistrationModal';
@@ -19,6 +20,8 @@ export const OpenCompetitionsPage = () => {
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
+  const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
+  const [competitionToCancel, setCompetitionToCancel] = useState<string | null>(null);
 
   const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['open-competitions'],
@@ -36,15 +39,16 @@ export const OpenCompetitionsPage = () => {
   });
 
   // Query to check which competitions the user's school is registered for
-  const { data: registrations } = useQuery({
+  const { data: registrations, refetch: refetchRegistrations } = useQuery({
     queryKey: ['school-registrations', userProfile?.school_id],
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
       
       const { data, error } = await supabase
         .from('cp_event_registrations')
-        .select('competition_id, event_id')
-        .eq('school_id', userProfile.school_id);
+        .select('competition_id, event_id, status')
+        .eq('school_id', userProfile.school_id)
+        .neq('status', 'cancelled');
 
       if (error) throw error;
       return data;
@@ -102,6 +106,52 @@ export const OpenCompetitionsPage = () => {
 
   const isRegistered = (competitionId: string) => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
+  };
+
+  const handleCancelRegistration = (competitionId: string) => {
+    setCompetitionToCancel(competitionId);
+    setIsCancelDialogOpen(true);
+  };
+
+  const confirmCancelRegistration = async () => {
+    if (!competitionToCancel || !userProfile?.school_id) return;
+
+    try {
+      // Update cp_comp_schools status to cancelled
+      const { error: schoolError } = await supabase
+        .from('cp_comp_schools')
+        .update({ status: 'cancelled' })
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id);
+
+      if (schoolError) throw schoolError;
+
+      // Update cp_event_registrations status to cancelled
+      const { error: eventError } = await supabase
+        .from('cp_event_registrations')
+        .update({ status: 'cancelled' })
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id);
+
+      if (eventError) throw eventError;
+
+      toast({
+        title: "Registration Cancelled",
+        description: "Your registration has been successfully cancelled.",
+      });
+
+      refetchRegistrations();
+    } catch (error) {
+      console.error('Error cancelling registration:', error);
+      toast({
+        title: "Error",
+        description: "Failed to cancel registration. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsCancelDialogOpen(false);
+      setCompetitionToCancel(null);
+    }
   };
 
   if (error) {
@@ -237,12 +287,32 @@ export const OpenCompetitionsPage = () => {
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </Button>
-                  <Button 
-                    className="flex-1" 
-                    onClick={() => handleRegisterInterest(competition.id)}
-                  >
-                    {isRegistered(competition.id) ? 'Edit Registration' : 'Register'}
-                  </Button>
+                  {isRegistered(competition.id) ? (
+                    <>
+                      <Button 
+                        variant="outline"
+                        className="flex-1" 
+                        onClick={() => handleRegisterInterest(competition.id)}
+                      >
+                        Edit Registration
+                      </Button>
+                      <Button 
+                        variant="destructive"
+                        className="flex-1" 
+                        onClick={() => handleCancelRegistration(competition.id)}
+                      >
+                        <X className="w-4 h-4 mr-2" />
+                        Cancel
+                      </Button>
+                    </>
+                  ) : (
+                    <Button 
+                      className="flex-1" 
+                      onClick={() => handleRegisterInterest(competition.id)}
+                    >
+                      Register
+                    </Button>
+                  )}
                 </div>
               </CardContent>
             </Card>
@@ -374,6 +444,24 @@ export const OpenCompetitionsPage = () => {
         isLoading={isEventsLoading}
         currentRegistrations={currentRegistrations || []}
       />
+
+      <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Cancel Registration</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to cancel your registration for this competition? 
+              This will cancel your registration for all events in this competition and cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Keep Registration</AlertDialogCancel>
+            <AlertDialogAction onClick={confirmCancelRegistration} className="bg-destructive hover:bg-destructive/90">
+              Cancel Registration
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
