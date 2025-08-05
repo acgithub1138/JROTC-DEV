@@ -106,14 +106,29 @@ export const CompetitionScheduleTab = ({
       
       allTimeSlots.forEach(timeSlot => {
         events.forEach(event => {
-          const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-          if (assignedSchool) {
+          // Check if this time slot is a lunch break for this event
+          const eventDetails = events.find(e => e.id === event.id);
+          const isLunchSlot = eventDetails?.timeSlots.find(
+            slot => slot.time.getTime() === timeSlot.getTime()
+          )?.isLunchBreak;
+          
+          if (isLunchSlot) {
             allScheduleData.push({
               time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
               event: event.event_name,
-              school: assignedSchool.name,
+              school: 'Lunch Break',
               location: event.event_location || 'TBD'
             });
+          } else {
+            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+            if (assignedSchool) {
+              allScheduleData.push({
+                time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+                event: event.event_name,
+                school: assignedSchool.name,
+                location: event.event_location || 'TBD'
+              });
+            }
           }
         });
       });
@@ -125,13 +140,27 @@ export const CompetitionScheduleTab = ({
       
       allTimeSlots.forEach(timeSlot => {
         events.forEach(event => {
-          const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-          if (assignedSchool?.id === selectedSchoolFilter) {
+          // Check if this time slot is a lunch break for this event
+          const eventDetails = events.find(e => e.id === event.id);
+          const isLunchSlot = eventDetails?.timeSlots.find(
+            slot => slot.time.getTime() === timeSlot.getTime()
+          )?.isLunchBreak;
+          
+          if (isLunchSlot) {
             schoolSchedule.push({
               time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
               event: event.event_name,
-              location: event.event_location || 'TBD'
+              location: 'Lunch Break'
             });
+          } else {
+            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+            if (assignedSchool?.id === selectedSchoolFilter) {
+              schoolSchedule.push({
+                time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+                event: event.event_name,
+                location: event.event_location || 'TBD'
+              });
+            }
           }
         });
       });

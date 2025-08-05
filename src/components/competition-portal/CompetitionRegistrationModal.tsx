@@ -23,6 +23,8 @@ interface CompetitionEvent {
   location: string | null;
   start_time: string | null;
   end_time: string | null;
+  lunch_start_time?: string | null;
+  lunch_end_time?: string | null;
   max_participants: number | null;
   interval: number | null;
   event: {
@@ -110,13 +112,27 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     while (current < end) {
       const slotTime = new Date(current);
       const timeString = slotTime.toISOString();
-      const available = !eventOccupiedSlots.has(timeString);
       
-      slots.push({
-        time: slotTime,
-        label: format(slotTime, 'h:mm a'),
-        available
-      });
+      // Check if this slot is during lunch break
+      const fullEvent = events.find(e => e.id === event.id);
+      const isLunchBreak = fullEvent && 
+        'lunch_start_time' in fullEvent && 
+        'lunch_end_time' in fullEvent && 
+        fullEvent.lunch_start_time && 
+        fullEvent.lunch_end_time &&
+        current >= new Date(fullEvent.lunch_start_time) && 
+        current < new Date(fullEvent.lunch_end_time);
+      
+      // Skip lunch break slots - don't add them to available time slots
+      if (!isLunchBreak) {
+        const available = !eventOccupiedSlots.has(timeString);
+        
+        slots.push({
+          time: slotTime,
+          label: format(slotTime, 'h:mm a'),
+          available
+        });
+      }
       
       current = addMinutes(current, interval);
     }
