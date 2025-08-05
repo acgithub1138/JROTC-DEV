@@ -278,17 +278,17 @@ export const OpenCompetitionsPage = () => {
                   </div>
                 </div>
                 
-                <div className="flex items-center justify-center gap-2">
+                <div className="space-y-2">
                   <Button 
                     variant="outline" 
-                    className="flex-1" 
+                    className="w-full" 
                     onClick={() => handleViewDetails(competition.id)}
                   >
                     <Eye className="w-4 h-4 mr-2" />
                     View Details
                   </Button>
                   {isRegistered(competition.id) ? (
-                    <>
+                    <div className="flex gap-2">
                       <Button 
                         variant="outline"
                         className="flex-1" 
@@ -301,13 +301,13 @@ export const OpenCompetitionsPage = () => {
                         className="flex-1" 
                         onClick={() => handleCancelRegistration(competition.id)}
                       >
-                        <X className="w-4 h-4 mr-2" />
+                        <X className="w-4 h-4 mr-1" />
                         Cancel
                       </Button>
-                    </>
+                    </div>
                   ) : (
                     <Button 
-                      className="flex-1" 
+                      className="w-full" 
                       onClick={() => handleRegisterInterest(competition.id)}
                     >
                       Register
