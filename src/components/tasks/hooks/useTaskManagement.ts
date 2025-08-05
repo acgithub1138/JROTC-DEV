@@ -29,12 +29,17 @@ export const useTaskManagement = () => {
   // Memoize expensive filtering operations
   const filteredTasks = useMemo(() => {
     const myActiveTasksAndSubtasks = getMyActiveTasksAndSubtasks(tasks, mySubtasks, userProfile?.id);
-    const allSchoolTasksAndSubtasks = getAllSchoolTasksAndSubtasks(tasks, allSchoolSubtasks);
+    
+    // When searching, include both tasks and subtasks; when not searching, use tasks only for hierarchical display
+    const allSchoolData = debouncedSearchTerm 
+      ? getAllSchoolTasksAndSubtasks(tasks, allSchoolSubtasks)
+      : getAllSchoolTasks(tasks);
+    
     const completedTasks = getCompletedTasks(tasks);
 
     return {
       myActive: filterTasks(myActiveTasksAndSubtasks, debouncedSearchTerm) as (Task | Subtask)[],
-      allSchool: filterTasks(allSchoolTasksAndSubtasks, debouncedSearchTerm) as (Task | Subtask)[],
+      allSchool: filterTasks(allSchoolData, debouncedSearchTerm) as (Task | Subtask)[],
       completed: filterTasks(completedTasks, debouncedSearchTerm)
     };
   }, [tasks, mySubtasks, allSchoolSubtasks, userProfile?.id, debouncedSearchTerm]);
