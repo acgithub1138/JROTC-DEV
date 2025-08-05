@@ -3,7 +3,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useTaskStatusOptions } from '@/hooks/useTaskOptions';
-import { isTaskDone, getDefaultCancelStatus } from '@/utils/taskStatusUtils';
+import { isCompletionStatus, getDefaultCancelStatus } from '@/utils/taskStatusUtils';
 import { Task } from '../types';
 
 export const useUpdateTask = () => {
@@ -27,8 +27,8 @@ export const useUpdateTask = () => {
       if (taskData.team_id !== undefined) updateData.team_id = taskData.team_id;
       if (taskData.completed_at !== undefined) updateData.completed_at = taskData.completed_at;
 
-      // Auto-set completed_at when status changes to done/canceled status
-      if (taskData.status && isTaskDone(taskData.status, statusOptions)) {
+      // Auto-set completed_at ONLY when status changes to completion (not cancellation)
+      if (taskData.status && isCompletionStatus(taskData.status, statusOptions)) {
         if (!taskData.completed_at) {
           updateData.completed_at = new Date().toISOString();
         }
@@ -55,8 +55,8 @@ export const useUpdateTask = () => {
         const { error: subtaskError } = await supabase
           .from('subtasks')
           .update({ 
-            status: cancelStatus,
-            completed_at: new Date().toISOString()
+            status: cancelStatus
+            // Don't set completed_at for canceled subtasks
           })
           .eq('parent_task_id', id)
           .neq('status', cancelStatus); // Only update subtasks that aren't already canceled
