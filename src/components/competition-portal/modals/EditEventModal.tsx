@@ -380,7 +380,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                   value={formData.lunch_start_time.split(':')[0] || ''} 
                   onValueChange={(value) => {
                     const currentMinute = formData.lunch_start_time.split(':')[1] || '00';
-                    setFormData(prev => ({ ...prev, lunch_start_time: `${value}:${currentMinute}` }));
+                    const endHour = (parseInt(value) + 1) % 24;
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      lunch_start_time: `${value}:${currentMinute}`,
+                      lunch_end_time: `${endHour.toString().padStart(2, '0')}:${currentMinute}`
+                    }));
                   }}
                 >
                   <SelectTrigger>
@@ -401,7 +406,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                   value={formData.lunch_start_time.split(':')[1] || ''} 
                   onValueChange={(value) => {
                     const currentHour = formData.lunch_start_time.split(':')[0] || '12';
-                    setFormData(prev => ({ ...prev, lunch_start_time: `${currentHour}:${value}` }));
+                    const endHour = (parseInt(currentHour) + 1) % 24;
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      lunch_start_time: `${currentHour}:${value}`,
+                      lunch_end_time: `${endHour.toString().padStart(2, '0')}:${value}`
+                    }));
                   }}
                 >
                   <SelectTrigger>
