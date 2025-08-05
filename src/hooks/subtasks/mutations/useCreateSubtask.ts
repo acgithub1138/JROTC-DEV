@@ -9,7 +9,7 @@ export const useCreateSubtask = () => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
-  const { queueEmail } = useEmailService();
+  const { processEmailRules } = useEmailService();
 
   return useMutation({
     mutationFn: async (subtaskData: CreateSubtaskData) => {
@@ -37,12 +37,11 @@ export const useCreateSubtask = () => {
       
       // Trigger subtask_created email if assigned_to is set
       if (data?.assigned_to && userProfile?.school_id) {
-        queueEmail({
-          templateId: '', // Backend will resolve based on rule
-          recipientEmail: '', // Backend will resolve from assigned_to
+        processEmailRules({
           sourceTable: 'subtasks',
           recordId: data.id,
           schoolId: userProfile.school_id,
+          operationType: 'subtask_created',
         });
       }
     },

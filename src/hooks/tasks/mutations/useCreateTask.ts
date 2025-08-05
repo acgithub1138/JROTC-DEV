@@ -10,7 +10,7 @@ export const useCreateTask = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { queueEmail } = useEmailService();
+  const { processEmailRules } = useEmailService();
 
   return useMutation({
     mutationFn: async (taskData: CreateTaskData) => {
@@ -59,12 +59,11 @@ export const useCreateTask = () => {
       
       // Trigger task_created email if assigned_to is set
       if (data?.assigned_to && userProfile?.school_id) {
-        queueEmail({
-          templateId: '', // Backend will resolve based on rule
-          recipientEmail: '', // Backend will resolve from assigned_to
+        processEmailRules({
           sourceTable: 'tasks',
           recordId: data.id,
           schoolId: userProfile.school_id,
+          operationType: 'task_created',
         });
       }
     },

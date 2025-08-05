@@ -13,7 +13,7 @@ export const useUpdateTask = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { statusOptions } = useTaskStatusOptions();
-  const { queueEmail } = useEmailService();
+  const { processEmailRules } = useEmailService();
   const { userProfile } = useAuth();
 
   return useMutation({
@@ -92,12 +92,11 @@ export const useUpdateTask = () => {
       const emailRuleType = shouldTriggerStatusChangeEmail(originalTask?.status, taskData.status);
       if (emailRuleType && originalTask?.assigned_to && userProfile?.school_id) {
         try {
-          await queueEmail({
-            templateId: '', // Backend will resolve based on rule
-            recipientEmail: '', // Backend will resolve from assigned_to
+          processEmailRules({
             sourceTable: 'tasks',
             recordId: id,
             schoolId: userProfile.school_id,
+            operationType: `task_${emailRuleType}`,
           });
         } catch (error) {
           console.error(`Failed to trigger email for task_${emailRuleType}:`, error);

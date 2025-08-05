@@ -8,7 +8,7 @@ import { shouldTriggerStatusChangeEmail } from '@/utils/emailRuleHelper';
 export const useUpdateSubtask = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { queueEmail } = useEmailService();
+  const { processEmailRules } = useEmailService();
   const { userProfile } = useAuth();
 
   return useMutation({
@@ -45,12 +45,11 @@ export const useUpdateSubtask = () => {
       const emailRuleType = shouldTriggerStatusChangeEmail(originalSubtask?.status, updates.status);
       if (emailRuleType && originalSubtask?.assigned_to && userProfile?.school_id) {
         try {
-          await queueEmail({
-            templateId: '', // Backend will resolve based on rule
-            recipientEmail: '', // Backend will resolve from assigned_to
+          processEmailRules({
             sourceTable: 'subtasks',
             recordId: id,
             schoolId: userProfile.school_id,
+            operationType: `subtask_${emailRuleType}`,
           });
         } catch (error) {
           console.error(`Failed to trigger email for subtask_${emailRuleType}:`, error);

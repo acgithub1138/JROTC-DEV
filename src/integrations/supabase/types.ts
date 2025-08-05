@@ -3410,6 +3410,15 @@ export type Database = {
           details: Json
         }[]
       }
+      process_email_rules_manual: {
+        Args: {
+          source_table_param: string
+          record_id_param: string
+          school_id_param: string
+          operation_type_param: string
+        }
+        Returns: Json
+      }
       process_email_template: {
         Args: { template_content: string; record_data: Json }
         Returns: string
