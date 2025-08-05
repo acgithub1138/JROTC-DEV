@@ -124,7 +124,18 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         const lunchStartTime = format(new Date(fullEvent.lunch_start_time), 'HH:mm');
         const lunchEndTime = format(new Date(fullEvent.lunch_end_time), 'HH:mm');
         
+        console.log('Lunch break check:', {
+          currentTime,
+          lunchStartTime,
+          lunchEndTime,
+          eventId: fullEvent.id
+        });
+        
         isLunchBreak = currentTime >= lunchStartTime && currentTime < lunchEndTime;
+        
+        if (isLunchBreak) {
+          console.log('Skipping lunch break slot:', currentTime);
+        }
       }
       
       // Skip lunch break slots - don't add them to available time slots
