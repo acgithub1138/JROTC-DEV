@@ -19,8 +19,10 @@ import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
+import { SubtaskCompletionModal } from '../dialogs/SubtaskCompletionModal';
 import { EditableCell } from './EditableCell';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
+import { isTaskDone, getDefaultCompletionStatus, isCompletionStatus } from '@/utils/taskStatusUtils';
 
 interface TaskTableRowProps {
   task: Task | Subtask;
@@ -54,7 +56,9 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
   const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
   const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
+  const [isSubtaskCompletionModalOpen, setIsSubtaskCompletionModalOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
+  const [completeSubtasks, setCompleteSubtasks] = useState(false);
   
   const { editState, setEditState, cancelEdit, saveEdit, canEditTask } = useTaskTableLogic();
   
@@ -62,7 +66,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const isSubtask = 'parent_task_id' in task;
   
   // Only fetch subtasks if this is a task, not a subtask
-  const { subtasks } = useSubtasks(isSubtask ? undefined : task.id);
+  const { subtasks, updateSubtask } = useSubtasks(isSubtask ? undefined : task.id);
   
   const isExpanded = expandedTasks.has(task.id);
   const hasSubtasks = !isSubtask && subtasks.length > 0;
@@ -80,6 +84,16 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const handleStatusChange = async (newStatus: string) => {
     if (newStatus === 'need_information' || newStatus === 'completed' || newStatus === 'canceled') {
       setPendingStatusChange(newStatus);
+      
+      // Check if completing and has incomplete subtasks
+      if (isCompletionStatus(newStatus, statusOptions) && !isSubtask) {
+        const incompleteSubtasks = subtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
+        if (incompleteSubtasks.length > 0) {
+          setIsSubtaskCompletionModalOpen(true);
+          return;
+        }
+      }
+      
       setIsStatusCommentModalOpen(true);
     } else {
       // Direct status change for other statuses
@@ -102,6 +116,31 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           status: pendingStatusChange,
           completed_at: now
         });
+      } else if (isCompletionStatus(pendingStatusChange, statusOptions)) {
+        // For completion status, update main task and subtasks if requested
+        await updateTask({
+          id: task.id,
+          status: pendingStatusChange,
+          completed_at: new Date().toISOString()
+        });
+
+        // Update subtasks if requested
+        if (completeSubtasks && subtasks) {
+          const incompleteSubtasks = subtasks.filter(subtask => !isTaskDone(subtask.status, statusOptions));
+          for (const subtask of incompleteSubtasks) {
+            await updateSubtask({
+              id: subtask.id,
+              status: getDefaultCompletionStatus(statusOptions),
+              completed_at: new Date().toISOString()
+            });
+          }
+        }
+
+        // Add system comment about completion
+        const commentText = completeSubtasks && subtasks?.some(s => !isTaskDone(s.status, statusOptions)) 
+          ? 'Task and all subtasks completed' 
+          : 'Task completed';
+        handleSystemComment(task.id, commentText);
       } else {
         // Then save the status change (which will trigger email with the fresh comment)
         await saveEdit(task, 'status', pendingStatusChange, handleSystemComment);
@@ -110,13 +149,28 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
       // Reset modal state
       setIsStatusCommentModalOpen(false);
       setPendingStatusChange(null);
+      setCompleteSubtasks(false);
     }
   };
 
   const handleCancelStatusChange = () => {
     setIsStatusCommentModalOpen(false);
+    setIsSubtaskCompletionModalOpen(false);
     setPendingStatusChange(null);
+    setCompleteSubtasks(false);
     cancelEdit();
+  };
+
+  const handleSubtaskCompletionConfirm = () => {
+    setCompleteSubtasks(true);
+    setIsSubtaskCompletionModalOpen(false);
+    setIsStatusCommentModalOpen(true);
+  };
+
+  const handleSubtaskCompletionCancel = () => {
+    setCompleteSubtasks(false);
+    setIsSubtaskCompletionModalOpen(false);
+    setIsStatusCommentModalOpen(true);
   };
 
   return (
@@ -272,6 +326,13 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         onConfirm={handleStatusChangeWithComment}
         newStatus={pendingStatusChange || ''}
         taskTitle={task.title}
+      />
+
+      <SubtaskCompletionModal
+        open={isSubtaskCompletionModalOpen}
+        onOpenChange={setIsSubtaskCompletionModalOpen}
+        onConfirm={handleSubtaskCompletionConfirm}
+        onCancel={handleSubtaskCompletionCancel}
       />
     </>
   );
