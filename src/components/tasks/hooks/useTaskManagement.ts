@@ -5,6 +5,7 @@ import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getAllSchoolTasksAndSub
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
+import { useAllSchoolSubtasksQuery } from '@/hooks/subtasks/useAllSchoolSubtasksQuery';
 import { Subtask } from '@/hooks/tasks/types';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDebouncedValue } from '@/hooks/useDebounce';
@@ -12,6 +13,7 @@ import { useDebouncedValue } from '@/hooks/useDebounce';
 export const useTaskManagement = () => {
   const { tasks, refetch: refetchTasks } = useTasks();
   const { data: mySubtasks = [], refetch: refetchSubtasks } = useMySubtasksQuery();
+  const { data: allSchoolSubtasks = [], refetch: refetchAllSchoolSubtasks } = useAllSchoolSubtasksQuery();
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
   
@@ -27,7 +29,7 @@ export const useTaskManagement = () => {
   // Memoize expensive filtering operations
   const filteredTasks = useMemo(() => {
     const myActiveTasksAndSubtasks = getMyActiveTasksAndSubtasks(tasks, mySubtasks, userProfile?.id);
-    const allSchoolTasksAndSubtasks = getAllSchoolTasksAndSubtasks(tasks, mySubtasks);
+    const allSchoolTasksAndSubtasks = getAllSchoolTasksAndSubtasks(tasks, allSchoolSubtasks);
     const completedTasks = getCompletedTasks(tasks);
 
     return {
@@ -35,7 +37,7 @@ export const useTaskManagement = () => {
       allSchool: filterTasks(allSchoolTasksAndSubtasks, debouncedSearchTerm) as (Task | Subtask)[],
       completed: filterTasks(completedTasks, debouncedSearchTerm)
     };
-  }, [tasks, mySubtasks, userProfile?.id, debouncedSearchTerm]);
+  }, [tasks, mySubtasks, allSchoolSubtasks, userProfile?.id, debouncedSearchTerm]);
 
   // Memoize overdue filtering
   const overdueFilteredTasks = useMemo(() => {
@@ -81,10 +83,11 @@ export const useTaskManagement = () => {
     await Promise.all([
       refetchTasks(),
       refetchSubtasks(),
+      refetchAllSchoolSubtasks(),
       queryClient.invalidateQueries({ queryKey: ['tasks'] }),
       queryClient.invalidateQueries({ queryKey: ['subtasks'] })
     ]);
-  }, [refetchTasks, refetchSubtasks, queryClient]);
+  }, [refetchTasks, refetchSubtasks, refetchAllSchoolSubtasks, queryClient]);
 
   return {
     searchTerm,
