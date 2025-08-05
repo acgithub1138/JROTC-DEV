@@ -112,14 +112,7 @@ export const CompetitionScheduleTab = ({
             slot => slot.time.getTime() === timeSlot.getTime()
           )?.isLunchBreak;
           
-          if (isLunchSlot) {
-            allScheduleData.push({
-              time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-              event: event.event_name,
-              school: 'Lunch Break',
-              location: event.event_location || 'TBD'
-            });
-          } else {
+          if (!isLunchSlot) {
             const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
             if (assignedSchool) {
               allScheduleData.push({
@@ -146,13 +139,7 @@ export const CompetitionScheduleTab = ({
             slot => slot.time.getTime() === timeSlot.getTime()
           )?.isLunchBreak;
           
-          if (isLunchSlot) {
-            schoolSchedule.push({
-              time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-              event: event.event_name,
-              location: 'Lunch Break'
-            });
-          } else {
+          if (!isLunchSlot) {
             const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
             if (assignedSchool?.id === selectedSchoolFilter) {
               schoolSchedule.push({
