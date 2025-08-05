@@ -12,6 +12,7 @@ import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Check, Save, X, Calendar as CalendarIcon, Flag, User, MessageSquare, Copy } from 'lucide-react';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { format } from 'date-fns';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useTasks } from '@/hooks/useTasks';
@@ -26,6 +27,7 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
+import { EmailHistoryTab } from './components/EmailHistoryTab';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
@@ -652,7 +654,27 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
 
           <Separator />
 
-          <TaskCommentsSection comments={comments} isAddingComment={isAddingComment} onAddComment={addComment} newComment={newComment} onNewCommentChange={setNewComment} />
+          {/* Comments and Email History Tabs */}
+          <Tabs defaultValue="comments" className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="comments">Comments</TabsTrigger>
+              <TabsTrigger value="emails">Email History</TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="comments" className="space-y-4">
+              <TaskCommentsSection 
+                comments={comments} 
+                isAddingComment={isAddingComment} 
+                onAddComment={addComment} 
+                newComment={newComment} 
+                onNewCommentChange={setNewComment} 
+              />
+            </TabsContent>
+            
+            <TabsContent value="emails" className="space-y-4">
+              <EmailHistoryTab taskId={task.id} />
+            </TabsContent>
+          </Tabs>
         </div>
       </DialogContent>
     </Dialog>
