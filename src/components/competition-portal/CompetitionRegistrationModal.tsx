@@ -161,7 +161,9 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
           if (!occupied.has(schedule.event_id)) {
             occupied.set(schedule.event_id, new Set());
           }
-          occupied.get(schedule.event_id)?.add(schedule.scheduled_time);
+          // Convert to ISO string format to match generateTimeSlots
+          const scheduledTime = new Date(schedule.scheduled_time).toISOString();
+          occupied.get(schedule.event_id)?.add(scheduledTime);
         });
         
         setOccupiedSlots(occupied);
