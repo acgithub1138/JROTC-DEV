@@ -74,6 +74,24 @@ export const OpenCompetitionsPage = () => {
     enabled: !!selectedCompetitionId && !!userProfile?.school_id && isRegistrationModalOpen,
   });
 
+  // Query to get current schedules for the selected competition
+  const { data: currentSchedules } = useQuery({
+    queryKey: ['current-schedules', selectedCompetitionId, userProfile?.school_id],
+    queryFn: async () => {
+      if (!selectedCompetitionId || !userProfile?.school_id) return [];
+      
+      const { data, error } = await supabase
+        .from('cp_event_schedules')
+        .select('event_id, scheduled_time')
+        .eq('competition_id', selectedCompetitionId)
+        .eq('school_id', userProfile.school_id);
+
+      if (error) throw error;
+      return data;
+    },
+    enabled: !!selectedCompetitionId && !!userProfile?.school_id && isRegistrationModalOpen,
+  });
+
   const { data: competitionEvents, isLoading: isEventsLoading } = useQuery({
     queryKey: ['competition-events', selectedCompetitionId],
     queryFn: async () => {
@@ -455,6 +473,7 @@ export const OpenCompetitionsPage = () => {
         events={competitionEvents || []}
         isLoading={isEventsLoading}
         currentRegistrations={currentRegistrations || []}
+        currentSchedules={currentSchedules || []}
       />
 
       <AlertDialog open={isCancelDialogOpen} onOpenChange={setIsCancelDialogOpen}>

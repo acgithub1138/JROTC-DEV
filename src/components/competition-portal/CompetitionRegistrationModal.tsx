@@ -3,13 +3,20 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Badge } from '@/components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { DollarSign, Clock, MapPin, Users, Trophy } from 'lucide-react';
-import { format } from 'date-fns';
+import { format, addMinutes } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+interface TimeSlot {
+  time: Date;
+  label: string;
+  available: boolean;
+}
+
 interface CompetitionEvent {
   id: string;
   fee: number | null;
@@ -17,10 +24,12 @@ interface CompetitionEvent {
   start_time: string | null;
   end_time: string | null;
   max_participants: number | null;
+  interval: number | null;
   event: {
     name: string;
     description: string | null;
   } | null;
+  timeSlots?: TimeSlot[];
 }
 interface Competition {
   id: string;
@@ -38,6 +47,10 @@ interface CompetitionRegistrationModalProps {
   currentRegistrations: {
     event_id: string;
   }[];
+  currentSchedules?: {
+    event_id: string;
+    scheduled_time: string;
+  }[];
 }
 export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModalProps> = ({
   isOpen,
@@ -45,7 +58,8 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   competition,
   events,
   isLoading,
-  currentRegistrations
+  currentRegistrations,
+  currentSchedules
 }) => {
   const {
     toast
@@ -55,35 +69,115 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   } = useAuth();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [initialSelectedEvents, setInitialSelectedEvents] = useState<Set<string>>(new Set());
+  const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, string>>(new Map());
+  const [initialSelectedTimeSlots, setInitialSelectedTimeSlots] = useState<Map<string, string>>(new Map());
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
+  const [occupiedSlots, setOccupiedSlots] = useState<Map<string, Set<string>>>(new Map());
   const isEditing = currentRegistrations.length > 0;
 
-  // Convert sets to arrays for comparison
+  // Convert sets and maps to arrays for comparison
   const currentEventIds = Array.from(selectedEvents).sort();
   const initialEventIds = Array.from(initialSelectedEvents).sort();
+  const currentTimeSlotEntries = Array.from(selectedTimeSlots.entries()).sort();
+  const initialTimeSlotEntries = Array.from(initialSelectedTimeSlots.entries()).sort();
+  
   const {
     hasUnsavedChanges
   } = useUnsavedChanges({
     initialData: {
-      events: initialEventIds
+      events: initialEventIds,
+      timeSlots: initialTimeSlotEntries
     },
     currentData: {
-      events: currentEventIds
+      events: currentEventIds,
+      timeSlots: currentTimeSlotEntries
     }
   });
 
-  // Initialize selected events with current registrations
+  // Generate time slots for an event
+  const generateTimeSlots = (event: CompetitionEvent): TimeSlot[] => {
+    if (!event.start_time || !event.end_time) return [];
+    
+    const start = new Date(event.start_time);
+    const end = new Date(event.end_time);
+    const interval = event.interval || 15; // Default 15 minutes
+    const slots: TimeSlot[] = [];
+    
+    let current = new Date(start);
+    const eventOccupiedSlots = occupiedSlots.get(event.id) || new Set();
+    
+    while (current < end) {
+      const slotTime = new Date(current);
+      const timeString = slotTime.toISOString();
+      const available = !eventOccupiedSlots.has(timeString);
+      
+      slots.push({
+        time: slotTime,
+        label: format(slotTime, 'h:mm a'),
+        available
+      });
+      
+      current = addMinutes(current, interval);
+    }
+    
+    return slots;
+  };
+
+  // Fetch occupied slots when modal opens
+  useEffect(() => {
+    const fetchOccupiedSlots = async () => {
+      if (!isOpen || !competition?.id) return;
+      
+      try {
+        const { data: schedules, error } = await supabase
+          .from('cp_event_schedules')
+          .select('event_id, scheduled_time, school_id')
+          .eq('competition_id', competition.id);
+
+        if (error) throw error;
+
+        const occupied = new Map<string, Set<string>>();
+        schedules?.forEach(schedule => {
+          // Skip slots occupied by current school if editing
+          if (isEditing && schedule.school_id === userProfile?.school_id) return;
+          
+          if (!occupied.has(schedule.event_id)) {
+            occupied.set(schedule.event_id, new Set());
+          }
+          occupied.get(schedule.event_id)?.add(schedule.scheduled_time);
+        });
+        
+        setOccupiedSlots(occupied);
+      } catch (error) {
+        console.error('Error fetching occupied slots:', error);
+      }
+    };
+
+    fetchOccupiedSlots();
+  }, [isOpen, competition?.id, isEditing, userProfile?.school_id]);
+
+  // Initialize selected events and time slots with current registrations
   useEffect(() => {
     if (isOpen && currentRegistrations.length > 0) {
       const registeredEventIds = new Set(currentRegistrations.map(reg => reg.event_id));
       setSelectedEvents(registeredEventIds);
       setInitialSelectedEvents(registeredEventIds);
+      
+      // Initialize time slots from current schedules
+      const timeSlotMap = new Map<string, string>();
+      currentSchedules?.forEach(schedule => {
+        timeSlotMap.set(schedule.event_id, schedule.scheduled_time);
+      });
+      setSelectedTimeSlots(timeSlotMap);
+      setInitialSelectedTimeSlots(new Map(timeSlotMap));
     } else if (isOpen) {
       setSelectedEvents(new Set());
       setInitialSelectedEvents(new Set());
+      setSelectedTimeSlots(new Map());
+      setInitialSelectedTimeSlots(new Map());
     }
-  }, [isOpen, currentRegistrations]);
+  }, [isOpen, currentRegistrations, currentSchedules]);
   const totalCost = useMemo(() => {
     const competitionFee = competition?.fee || 0;
     const eventsFee = Array.from(selectedEvents).reduce((sum, eventId) => {
@@ -94,12 +188,23 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   }, [competition?.fee, selectedEvents, events]);
   const handleEventSelection = (eventId: string, checked: boolean) => {
     const newSelectedEvents = new Set(selectedEvents);
+    const newSelectedTimeSlots = new Map(selectedTimeSlots);
+    
     if (checked) {
       newSelectedEvents.add(eventId);
     } else {
       newSelectedEvents.delete(eventId);
+      newSelectedTimeSlots.delete(eventId); // Remove time slot when deselecting event
     }
+    
     setSelectedEvents(newSelectedEvents);
+    setSelectedTimeSlots(newSelectedTimeSlots);
+  };
+
+  const handleTimeSlotSelection = (eventId: string, timeSlot: string) => {
+    const newSelectedTimeSlots = new Map(selectedTimeSlots);
+    newSelectedTimeSlots.set(eventId, timeSlot);
+    setSelectedTimeSlots(newSelectedTimeSlots);
   };
   const handleRegister = async () => {
     if (!competition || !userProfile?.school_id) {
@@ -118,14 +223,38 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       });
       return;
     }
+
+    // Check that all selected events have time slots selected
+    const eventsWithoutTimeSlots = Array.from(selectedEvents).filter(eventId => {
+      const event = events.find(e => e.id === eventId);
+      return event?.start_time && event?.end_time && !selectedTimeSlots.has(eventId);
+    });
+
+    if (eventsWithoutTimeSlots.length > 0) {
+      toast({
+        title: "Time Slots Required",
+        description: "Please select time slots for all selected events.",
+        variant: "destructive"
+      });
+      return;
+    }
     setIsRegistering(true);
     try {
       if (isEditing) {
-        // For editing, first delete existing registrations, then insert new ones
-        const {
-          error: deleteError
-        } = await supabase.from('cp_event_registrations').delete().eq('competition_id', competition.id).eq('school_id', userProfile.school_id);
-        if (deleteError) throw deleteError;
+        // For editing, first delete existing registrations and schedules, then insert new ones
+        const { error: deleteRegError } = await supabase
+          .from('cp_event_registrations')
+          .delete()
+          .eq('competition_id', competition.id)
+          .eq('school_id', userProfile.school_id);
+        if (deleteRegError) throw deleteRegError;
+
+        const { error: deleteScheduleError } = await supabase
+          .from('cp_event_schedules')
+          .delete()
+          .eq('competition_id', competition.id)
+          .eq('school_id', userProfile.school_id);
+        if (deleteScheduleError) throw deleteScheduleError;
       } else {
         // Register for the competition (only for new registrations)
         const {
@@ -150,7 +279,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         if (updateError) throw updateError;
       }
 
-      // Register for selected events using the new cp_event_registrations table
+      // Register for selected events using the cp_event_registrations table
       const eventRegistrations = Array.from(selectedEvents).map(eventId => ({
         competition_id: competition.id,
         event_id: eventId,
@@ -159,10 +288,28 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         created_by: userProfile.id
       }));
       if (eventRegistrations.length > 0) {
-        const {
-          error: eventRegError
-        } = await supabase.from('cp_event_registrations').insert(eventRegistrations);
+        const { error: eventRegError } = await supabase
+          .from('cp_event_registrations')
+          .insert(eventRegistrations);
         if (eventRegError) throw eventRegError;
+      }
+
+      // Insert schedule records for selected time slots
+      const scheduleInserts = Array.from(selectedEvents)
+        .filter(eventId => selectedTimeSlots.has(eventId))
+        .map(eventId => ({
+          competition_id: competition.id,
+          event_id: eventId,
+          school_id: userProfile.school_id,
+          scheduled_time: selectedTimeSlots.get(eventId),
+          created_by: userProfile.id
+        }));
+
+      if (scheduleInserts.length > 0) {
+        const { error: scheduleError } = await supabase
+          .from('cp_event_schedules')
+          .insert(scheduleInserts);
+        if (scheduleError) throw scheduleError;
       }
       toast({
         title: isEditing ? "Registration Updated!" : "Registration Successful!",
@@ -190,6 +337,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   };
   const handleDiscardChanges = () => {
     setSelectedEvents(initialSelectedEvents);
+    setSelectedTimeSlots(initialSelectedTimeSlots);
     setShowUnsavedDialog(false);
     onClose();
   };
@@ -260,22 +408,51 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                           {event.event.description}
                         </p>}
 
-                      <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground">
-                        {event.start_time && <div className="flex items-center gap-1">
-                            <Clock className="w-3 h-3" />
-                            <span>{format(new Date(event.start_time), 'MMM d, h:mm a')}</span>
-                          </div>}
-                        
-                        {event.location && <div className="flex items-center gap-1">
-                            <MapPin className="w-3 h-3" />
-                            <span>{event.location}</span>
-                          </div>}
-                        
-                        {event.max_participants && <div className="flex items-center gap-1">
-                            <Users className="w-3 h-3" />
-                            <span>Max {event.max_participants}</span>
-                          </div>}
-                      </div>
+                       <div className="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs text-muted-foreground">
+                         {event.start_time && <div className="flex items-center gap-1">
+                             <Clock className="w-3 h-3" />
+                             <span>{format(new Date(event.start_time), 'MMM d, h:mm a')}</span>
+                           </div>}
+                         
+                         {event.location && <div className="flex items-center gap-1">
+                             <MapPin className="w-3 h-3" />
+                             <span>{event.location}</span>
+                           </div>}
+                         
+                         {event.max_participants && <div className="flex items-center gap-1">
+                             <Users className="w-3 h-3" />
+                             <span>Max {event.max_participants}</span>
+                           </div>}
+                       </div>
+
+                       {/* Time Slot Selection */}
+                       {selectedEvents.has(event.id) && event.start_time && event.end_time && (
+                         <div className="mt-3">
+                           <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                             Select Time Slot:
+                           </label>
+                           <Select
+                             value={selectedTimeSlots.get(event.id) || ''}
+                             onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
+                           >
+                             <SelectTrigger className="h-8 text-xs">
+                               <SelectValue placeholder="Choose a time slot" />
+                             </SelectTrigger>
+                             <SelectContent>
+                               {generateTimeSlots(event).map((slot) => (
+                                 <SelectItem
+                                   key={slot.time.toISOString()}
+                                   value={slot.time.toISOString()}
+                                   disabled={!slot.available}
+                                   className={!slot.available ? 'opacity-50' : ''}
+                                 >
+                                   {slot.label} {!slot.available && '(Occupied)'}
+                                 </SelectItem>
+                               ))}
+                             </SelectContent>
+                           </Select>
+                         </div>
+                       )}
                     </div>
                   </div>)}
               </div> : <div className="text-center py-8 text-muted-foreground">
