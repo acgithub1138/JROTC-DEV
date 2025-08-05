@@ -48,7 +48,7 @@ export const OpenCompetitionsPage = () => {
         .from('cp_event_registrations')
         .select('competition_id, event_id, status')
         .eq('school_id', userProfile.school_id)
-        .neq('status', 'cancelled');
+        .neq('status', 'canceled');
 
       if (error) throw error;
       return data;
@@ -117,19 +117,19 @@ export const OpenCompetitionsPage = () => {
     if (!competitionToCancel || !userProfile?.school_id) return;
 
     try {
-      // Update cp_comp_schools status to cancelled
+      // Update cp_comp_schools status to canceled (note: single 'l' to match DB constraint)
       const { error: schoolError } = await supabase
         .from('cp_comp_schools')
-        .update({ status: 'cancelled' })
+        .update({ status: 'canceled' })
         .eq('competition_id', competitionToCancel)
         .eq('school_id', userProfile.school_id);
 
       if (schoolError) throw schoolError;
 
-      // Update cp_event_registrations status to cancelled
+      // Update cp_event_registrations status to canceled (note: single 'l' to match DB constraint)
       const { error: eventError } = await supabase
         .from('cp_event_registrations')
-        .update({ status: 'cancelled' })
+        .update({ status: 'canceled' })
         .eq('competition_id', competitionToCancel)
         .eq('school_id', userProfile.school_id);
 
