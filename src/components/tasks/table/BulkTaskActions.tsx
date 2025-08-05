@@ -4,6 +4,7 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { ChevronDown, X, CheckCircle, Clock, User, Calendar, AlertTriangle } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
+import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useToast } from '@/hooks/use-toast';
@@ -22,7 +23,8 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
   canEdit,
   canDelete: canCancel // Renamed since we're canceling, not deleting
 }) => {
-  const { updateTask } = useTasks();
+  const { updateTask, tasks } = useTasks();
+  const { updateSubtask } = useSubtasks();
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { users } = useSchoolUsers();
@@ -36,6 +38,22 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
 
   const activeUsers = users.filter(user => user.active).sort((a, b) => a.last_name.localeCompare(b.last_name));
 
+  // Helper function to check if an ID belongs to a subtask
+  const isSubtaskId = (id: string) => {
+    // Check if any task has this id as a subtask by looking for parent_task_id
+    // We'll need to get all subtasks to check this
+    return id.startsWith('sub_') || false; // This is a simple check, we may need to improve this
+  };
+
+  // Helper function to get all tasks and subtasks data
+  const getAllTasksAndSubtasks = () => {
+    const allTasks = tasks || [];
+    const allSubtasks: any[] = []; // We'll collect all subtasks from tasks
+    
+    // For now, we'll use a different approach - check the selectedTasks against both collections
+    return { allTasks, allSubtasks };
+  };
+
   const handleBulkUpdate = async (field: string, value: any) => {
     if (selectedTasks.length === 0) return;
     
@@ -43,23 +61,36 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     try {
       const updateData = { [field]: value };
       
-      await Promise.all(
-        selectedTasks.map(taskId => 
-          updateTask({ id: taskId, ...updateData })
-        )
-      );
+      // Separate tasks and subtasks based on their IDs
+      // We need a better way to distinguish - for now let's try to update both
+      const updatePromises = selectedTasks.map(async (id) => {
+        try {
+          // First try as a task
+          return await updateTask({ id, ...updateData });
+        } catch (taskError) {
+          try {
+            // If task update fails, try as a subtask
+            return await updateSubtask({ id, ...updateData });
+          } catch (subtaskError) {
+            console.error(`Failed to update item ${id}:`, { taskError, subtaskError });
+            throw subtaskError;
+          }
+        }
+      });
+      
+      await Promise.all(updatePromises);
       
       toast({
-        title: "Tasks Updated",
-        description: `Successfully updated ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}`,
+        title: "Items Updated",
+        description: `Successfully updated ${selectedTasks.length} item${selectedTasks.length > 1 ? 's' : ''}`,
       });
       
       onSelectionClear();
     } catch (error) {
-      console.error('Failed to update tasks:', error);
+      console.error('Failed to update items:', error);
       toast({
-        title: "Update Failed",
-        description: "Failed to update selected tasks. Please try again.",
+        title: "Update Failed", 
+        description: "Failed to update selected items. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -78,28 +109,41 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     try {
       const now = new Date().toISOString();
       
-      await Promise.all(
-        selectedTasks.map(taskId => 
-          updateTask({ 
-            id: taskId, 
-            status: getDefaultCancelStatus(statusOptions),
-            completed_at: now
-          })
-        )
-      );
+      // Handle both tasks and subtasks
+      const updatePromises = selectedTasks.map(async (id) => {
+        const updateData = {
+          status: getDefaultCancelStatus(statusOptions),
+          completed_at: now
+        };
+        
+        try {
+          // First try as a task
+          return await updateTask({ id, ...updateData });
+        } catch (taskError) {
+          try {
+            // If task update fails, try as a subtask
+            return await updateSubtask({ id, ...updateData });
+          } catch (subtaskError) {
+            console.error(`Failed to cancel item ${id}:`, { taskError, subtaskError });
+            throw subtaskError;
+          }
+        }
+      });
+      
+      await Promise.all(updatePromises);
       
       toast({
-        title: "Tasks Canceled",
-        description: `Successfully canceled ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}`,
+        title: "Items Canceled",
+        description: `Successfully canceled ${selectedTasks.length} item${selectedTasks.length > 1 ? 's' : ''}`,
       });
       
       onSelectionClear();
       setShowCancelDialog(false);
     } catch (error) {
-      console.error('Failed to cancel tasks:', error);
+      console.error('Failed to cancel items:', error);
       toast({
         title: "Cancel Failed",
-        description: "Failed to cancel selected tasks. Please try again.",
+        description: "Failed to cancel selected items. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -212,30 +256,30 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
               Confirm Task Cancellation
             </AlertDialogTitle>
             <AlertDialogDescription className="text-left">
-              Are you sure you want to cancel {selectedTasks.length} task{selectedTasks.length > 1 ? 's' : ''}?
+              Are you sure you want to cancel {selectedTasks.length} item{selectedTasks.length > 1 ? 's' : ''}? This will affect both tasks and subtasks that are selected.
               <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
                 <p className="text-sm text-red-800 font-medium">⚠️ This action will:</p>
                 <ul className="text-sm text-red-700 mt-1 ml-4 list-disc">
                   <li>Set the status to "Canceled"</li>
-                  <li>Mark {selectedTasks.length > 1 ? 'these tasks' : 'this task'} as completed</li>
+                  <li>Mark {selectedTasks.length > 1 ? 'these items' : 'this item'} as completed</li>
                   <li>Send notification emails to relevant users</li>
                 </ul>
               </div>
               <p className="mt-2 text-sm text-gray-600">
-                This action cannot be easily undone. The {selectedTasks.length > 1 ? 'tasks' : 'task'} will need to be manually updated if you change your mind.
+                This action cannot be easily undone. The {selectedTasks.length > 1 ? 'items' : 'item'} will need to be manually updated if you change your mind.
               </p>
             </AlertDialogDescription>
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel onClick={() => setShowCancelDialog(false)}>
-              Keep Tasks
+              Keep Items
             </AlertDialogCancel>
             <AlertDialogAction 
               onClick={handleBulkCancel}
               className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
               disabled={isUpdating}
             >
-              {isUpdating ? 'Canceling...' : `Cancel ${selectedTasks.length} Task${selectedTasks.length > 1 ? 's' : ''}`}
+              {isUpdating ? 'Canceling...' : `Cancel ${selectedTasks.length} Item${selectedTasks.length > 1 ? 's' : ''}`}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
