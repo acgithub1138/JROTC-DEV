@@ -13,6 +13,9 @@ import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   cp_events?: { name: string } | null;
@@ -60,6 +63,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
 
+  const { timezone } = useSchoolTimezone();
+
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
@@ -75,21 +80,25 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   useEffect(() => {
     if (event && events.length > 0) {
-      // Parse start time
-      const startDate = event.start_time ? new Date(event.start_time) : null;
-      const endDate = event.end_time ? new Date(event.end_time) : null;
+      // Convert UTC times to school timezone for display
+      const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
+      const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
       
-      // Parse lunch times (extract time directly without timezone conversion)
-      const lunchStartTime = (event as any).lunch_start_time ? (event as any).lunch_start_time.substring(11, 16) : '';
-      const lunchEndTime = (event as any).lunch_end_time ? (event as any).lunch_end_time.substring(11, 16) : '';
+      // Parse lunch times using timezone utilities
+      const lunchStartTime = (event as any).lunch_start_time 
+        ? formatTimeForDisplay((event as any).lunch_start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+        : '';
+      const lunchEndTime = (event as any).lunch_end_time 
+        ? formatTimeForDisplay((event as any).lunch_end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+        : '';
 
       const newFormData = {
         event: event.event || '',
         location: event.location || '',
-        start_date: startDate ? startDate.toISOString().split('T')[0] : '',
+        start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
         start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
         start_time_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
-        end_date: endDate ? endDate.toISOString().split('T')[0] : '',
+        end_date: endDate ? formatTimeForDisplay(endDate, 'yyyy-MM-dd', timezone) : '',
         end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
         end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
         lunch_start_time: lunchStartTime,
@@ -103,7 +112,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       setFormData(newFormData);
       setInitialFormData(newFormData);
     }
-  }, [event, events]);
+  }, [event, events, timezone]);
 
   const fetchEvents = async () => {
     try {
@@ -192,13 +201,34 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
     setIsLoading(true);
     try {
-      // Combine date and time into ISO strings
+      // Convert school timezone to UTC for database storage
       const startDateTime = formData.start_date && formData.start_time_hour && formData.start_time_minute
-        ? new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`).toISOString()
+        ? convertFromSchoolTimezone(
+            new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`),
+            timezone
+          ).toISOString()
         : null;
       
       const endDateTime = formData.end_date && formData.end_time_hour && formData.end_time_minute
-        ? new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`).toISOString()
+        ? convertFromSchoolTimezone(
+            new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`),
+            timezone
+          ).toISOString()
+        : null;
+
+      // Convert lunch times from school timezone to UTC
+      const lunchStartTime = formData.lunch_start_time 
+        ? convertFromSchoolTimezone(
+            new Date(`1970-01-01T${formData.lunch_start_time}:00`),
+            timezone
+          ).toISOString()
+        : null;
+        
+      const lunchEndTime = formData.lunch_end_time 
+        ? convertFromSchoolTimezone(
+            new Date(`1970-01-01T${formData.lunch_end_time}:00`),
+            timezone
+          ).toISOString()
         : null;
 
       const updates: CompEventUpdate = {
@@ -206,8 +236,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         location: formData.location || null,
         start_time: startDateTime,
         end_time: endDateTime,
-        lunch_start_time: formData.lunch_start_time ? new Date(`1970-01-01T${formData.lunch_start_time}:00Z`).toISOString() : null,
-        lunch_end_time: formData.lunch_end_time ? new Date(`1970-01-01T${formData.lunch_end_time}:00Z`).toISOString() : null,
+        lunch_start_time: lunchStartTime,
+        lunch_end_time: lunchEndTime,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         notes: formData.notes || null,
         judges: formData.judges,
