@@ -3447,7 +3447,7 @@ export type Database = {
               source_table_param: string
               record_id_param: string
               school_id_param: string
-              rule_id_param?: string
+              rule_id_param: string
             }
         Returns: string
       }
