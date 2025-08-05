@@ -61,20 +61,20 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     try {
       const updateData = { [field]: value };
       
-      // Separate tasks and subtasks based on their IDs
-      // We need a better way to distinguish - for now let's try to update both
+      // Try to update each item, handling both tasks and subtasks
       const updatePromises = selectedTasks.map(async (id) => {
         try {
-          // First try as a task
-          return await updateTask({ id, ...updateData });
-        } catch (taskError) {
-          try {
-            // If task update fails, try as a subtask
-            return await updateSubtask({ id, ...updateData });
-          } catch (subtaskError) {
-            console.error(`Failed to update item ${id}:`, { taskError, subtaskError });
-            throw subtaskError;
-          }
+          // Try as a subtask first (since subtasks have async mutation)
+          await updateSubtask({ id, ...updateData });
+        } catch (subtaskError) {
+          // If subtask update fails, try as a task
+          // Convert to Promise since updateTask uses .mutate
+          return new Promise((resolve, reject) => {
+            updateTask({ id, ...updateData }, {
+              onSuccess: resolve,
+              onError: reject
+            });
+          });
         }
       });
       
@@ -117,16 +117,17 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
         };
         
         try {
-          // First try as a task
-          return await updateTask({ id, ...updateData });
-        } catch (taskError) {
-          try {
-            // If task update fails, try as a subtask
-            return await updateSubtask({ id, ...updateData });
-          } catch (subtaskError) {
-            console.error(`Failed to cancel item ${id}:`, { taskError, subtaskError });
-            throw subtaskError;
-          }
+          // Try as a subtask first (since subtasks have async mutation)
+          await updateSubtask({ id, ...updateData });
+        } catch (subtaskError) {
+          // If subtask update fails, try as a task
+          // Convert to Promise since updateTask uses .mutate
+          return new Promise((resolve, reject) => {
+            updateTask({ id, ...updateData }, {
+              onSuccess: resolve,
+              onError: reject
+            });
+          });
         }
       });
       
