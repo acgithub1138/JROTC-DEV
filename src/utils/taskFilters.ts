@@ -67,6 +67,22 @@ export const getAllSchoolTasksAndSubtasks = (
   );
 };
 
+// Get all active tasks and subtasks for search (includes ALL active subtasks, not just orphaned ones)
+export const getAllSchoolTasksAndSubtasksForSearch = (
+  tasks: Task[], 
+  subtasks: Subtask[]
+): (Task | Subtask)[] => {
+  const activeTasks = getAllSchoolTasks(tasks);
+  
+  // Include ALL active subtasks for search (don't filter by parent task status)
+  const activeSubtasks = subtasks.filter(subtask => !subtask.completed_at);
+  
+  // Combine and sort by created_at (newest first)
+  return [...activeTasks, ...activeSubtasks].sort((a, b) => 
+    new Date(b.created_at).getTime() - new Date(a.created_at).getTime()
+  );
+};
+
 // Get completed tasks (tasks with completed_at set)
 export const getCompletedTasks = (tasks: Task[]): Task[] => {
   return tasks.filter(task => !!task.completed_at);

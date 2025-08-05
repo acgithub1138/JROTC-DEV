@@ -1,7 +1,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import { Task, useTasks } from '@/hooks/useTasks';
 import { useAuth } from '@/contexts/AuthContext';
-import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getAllSchoolTasksAndSubtasks, getCompletedTasks } from '@/utils/taskFilters';
+import { getMyActiveTasksAndSubtasks, getAllSchoolTasks, getAllSchoolTasksAndSubtasks, getAllSchoolTasksAndSubtasksForSearch, getCompletedTasks } from '@/utils/taskFilters';
 import { getPaginatedItems, getTotalPages } from '@/utils/pagination';
 import { filterTasks } from '../components/TaskFilters';
 import { useMySubtasksQuery } from '@/hooks/subtasks/useMySubtasksQuery';
@@ -32,7 +32,7 @@ export const useTaskManagement = () => {
     
     // When searching, include both tasks and subtasks; when not searching, use tasks only for hierarchical display
     const allSchoolData = debouncedSearchTerm 
-      ? getAllSchoolTasksAndSubtasks(tasks, allSchoolSubtasks)
+      ? getAllSchoolTasksAndSubtasksForSearch(tasks, allSchoolSubtasks)
       : getAllSchoolTasks(tasks);
     
     const completedTasks = getCompletedTasks(tasks);
