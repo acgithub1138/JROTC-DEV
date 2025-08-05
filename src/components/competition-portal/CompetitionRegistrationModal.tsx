@@ -154,7 +154,8 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
 
         const occupied = new Map<string, Set<string>>();
         schedules?.forEach(schedule => {
-          // Skip slots occupied by current school if editing
+          // When editing, allow current school to re-select their own slots
+          // Always mark slots occupied by other schools as unavailable
           if (isEditing && schedule.school_id === userProfile?.school_id) return;
           
           if (!occupied.has(schedule.event_id)) {
