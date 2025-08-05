@@ -79,9 +79,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       const startDate = event.start_time ? new Date(event.start_time) : null;
       const endDate = event.end_time ? new Date(event.end_time) : null;
       
-      // Parse lunch times
-      const lunchStartTime = (event as any).lunch_start_time ? new Date((event as any).lunch_start_time) : null;
-      const lunchEndTime = (event as any).lunch_end_time ? new Date((event as any).lunch_end_time) : null;
+      // Parse lunch times (extract time directly without timezone conversion)
+      const lunchStartTime = (event as any).lunch_start_time ? (event as any).lunch_start_time.substring(11, 16) : '';
+      const lunchEndTime = (event as any).lunch_end_time ? (event as any).lunch_end_time.substring(11, 16) : '';
 
       const newFormData = {
         event: event.event || '',
@@ -92,8 +92,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         end_date: endDate ? endDate.toISOString().split('T')[0] : '',
         end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
         end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
-        lunch_start_time: lunchStartTime ? `${lunchStartTime.getHours().toString().padStart(2, '0')}:${lunchStartTime.getMinutes().toString().padStart(2, '0')}` : '',
-        lunch_end_time: lunchEndTime ? `${lunchEndTime.getHours().toString().padStart(2, '0')}:${lunchEndTime.getMinutes().toString().padStart(2, '0')}` : '',
+        lunch_start_time: lunchStartTime,
+        lunch_end_time: lunchEndTime,
         max_participants: event.max_participants?.toString() || '',
         fee: (event as any).fee?.toString() || '',
         notes: event.notes || '',
