@@ -62,24 +62,31 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     try {
       const updateData = { [field]: value };
       
-      // Try to update each item, handling both tasks and subtasks
-      const updatePromises = selectedTasks.map(async (id) => {
-        console.log(`📝 Attempting to update ID: ${id} with data:`, updateData);
-        try {
-          // Try as a subtask first
-          console.log(`🔸 Trying as subtask: ${id}`);
-          await updateSubtask({ id, ...updateData });
-          console.log(`✅ Successfully updated subtask: ${id}`);
-        } catch (subtaskError) {
-          console.log(`❌ Subtask update failed for ${id}:`, subtaskError);
-          console.log(`🔹 Trying as task: ${id}`);
-          // If subtask update fails, try as a task
-          await updateTask({ id, ...updateData });
-          console.log(`✅ Successfully updated task: ${id}`);
-        }
-      });
+      // Determine which IDs are tasks vs subtasks by checking if they exist in the tasks array
+      const taskIds = tasks.map(task => task.id);
+      
+      // Separate tasks and subtasks
+      const taskIdsToUpdate = selectedTasks.filter(id => taskIds.includes(id));
+      const subtaskIdsToUpdate = selectedTasks.filter(id => !taskIds.includes(id));
+      
+      console.log('📋 Separated IDs:', { taskIdsToUpdate, subtaskIdsToUpdate });
+      
+      const updatePromises = [];
+      
+      // Update tasks
+      for (const id of taskIdsToUpdate) {
+        console.log(`🔹 Updating task: ${id}`);
+        updatePromises.push(updateTask({ id, ...updateData }));
+      }
+      
+      // Update subtasks  
+      for (const id of subtaskIdsToUpdate) {
+        console.log(`🔸 Updating subtask: ${id}`);
+        updatePromises.push(updateSubtask({ id, ...updateData }));
+      }
       
       await Promise.all(updatePromises);
+      console.log('✅ All updates completed successfully');
       
       toast({
         title: "Items Updated",
@@ -113,29 +120,36 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
       const cancelStatus = getDefaultCancelStatus(statusOptions);
       console.log('📊 Cancel status:', cancelStatus);
       
-      // Handle both tasks and subtasks
-      const updatePromises = selectedTasks.map(async (id) => {
-        const updateData = {
-          status: cancelStatus,
-          completed_at: now
-        };
-        
-        console.log(`🚫 Attempting to cancel ID: ${id} with data:`, updateData);
-        try {
-          // Try as a subtask first
-          console.log(`🔸 Trying to cancel as subtask: ${id}`);
-          await updateSubtask({ id, ...updateData });
-          console.log(`✅ Successfully canceled subtask: ${id}`);
-        } catch (subtaskError) {
-          console.log(`❌ Subtask cancel failed for ${id}:`, subtaskError);
-          console.log(`🔹 Trying to cancel as task: ${id}`);
-          // If subtask update fails, try as a task
-          await updateTask({ id, ...updateData });
-          console.log(`✅ Successfully canceled task: ${id}`);
-        }
-      });
+      // Determine which IDs are tasks vs subtasks by checking if they exist in the tasks array
+      const taskIds = tasks.map(task => task.id);
+      
+      // Separate tasks and subtasks
+      const taskIdsToUpdate = selectedTasks.filter(id => taskIds.includes(id));
+      const subtaskIdsToUpdate = selectedTasks.filter(id => !taskIds.includes(id));
+      
+      console.log('📋 Separated IDs for cancel:', { taskIdsToUpdate, subtaskIdsToUpdate });
+      
+      const updateData = {
+        status: cancelStatus,
+        completed_at: now
+      };
+      
+      const updatePromises = [];
+      
+      // Cancel tasks
+      for (const id of taskIdsToUpdate) {
+        console.log(`🔹 Canceling task: ${id}`);
+        updatePromises.push(updateTask({ id, ...updateData }));
+      }
+      
+      // Cancel subtasks  
+      for (const id of subtaskIdsToUpdate) {
+        console.log(`🔸 Canceling subtask: ${id}`);
+        updatePromises.push(updateSubtask({ id, ...updateData }));
+      }
       
       await Promise.all(updatePromises);
+      console.log('✅ All cancellations completed successfully');
       
       toast({
         title: "Items Canceled",
