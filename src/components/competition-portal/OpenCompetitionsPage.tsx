@@ -278,35 +278,39 @@ export const OpenCompetitionsPage = () => {
                   </div>
                 </div>
                 
-                <div className="space-y-2">
+                <div className="flex gap-1">
                   <Button 
                     variant="outline" 
-                    className="w-full" 
+                    size="sm"
+                    className="flex-1" 
                     onClick={() => handleViewDetails(competition.id)}
                   >
-                    <Eye className="w-4 h-4 mr-2" />
-                    View Details
+                    <Eye className="w-3 h-3 mr-1" />
+                    View
                   </Button>
                   {isRegistered(competition.id) ? (
-                    <div className="flex gap-2">
+                    <>
                       <Button 
+                        size="sm"
                         className="flex-1" 
                         onClick={() => handleRegisterInterest(competition.id)}
                       >
-                        Edit Registration
+                        Edit
                       </Button>
                       <Button 
                         variant="destructive"
+                        size="sm"
                         className="flex-1" 
                         onClick={() => handleCancelRegistration(competition.id)}
                       >
-                        <X className="w-4 h-4 mr-1" />
+                        <X className="w-3 h-3 mr-1" />
                         Cancel
                       </Button>
-                    </div>
+                    </>
                   ) : (
                     <Button 
-                      className="w-full" 
+                      size="sm"
+                      className="flex-1" 
                       onClick={() => handleRegisterInterest(competition.id)}
                     >
                       Register
