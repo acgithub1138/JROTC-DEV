@@ -1,7 +1,8 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator, DropdownMenuSub, DropdownMenuSubContent, DropdownMenuSubTrigger } from '@/components/ui/dropdown-menu';
-import { ChevronDown, X, CheckCircle, Clock, User, Calendar } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { ChevronDown, X, CheckCircle, Clock, User, Calendar, AlertTriangle } from 'lucide-react';
 import { useTasks } from '@/hooks/useTasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
@@ -27,6 +28,7 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
   const { users } = useSchoolUsers();
   const { toast } = useToast();
   const [isUpdating, setIsUpdating] = useState(false);
+  const [showCancelDialog, setShowCancelDialog] = useState(false);
 
   if (selectedTasks.length === 0 || !canEdit) {
     return null;
@@ -65,11 +67,12 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
     }
   };
 
+  const handleBulkCancelClick = () => {
+    setShowCancelDialog(true);
+  };
+
   const handleBulkCancel = async () => {
     if (selectedTasks.length === 0) return;
-    
-    const confirmMessage = `Are you sure you want to cancel ${selectedTasks.length} task${selectedTasks.length > 1 ? 's' : ''}?`;
-    if (!confirm(confirmMessage)) return;
     
     setIsUpdating(true);
     try {
@@ -91,6 +94,7 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
       });
       
       onSelectionClear();
+      setShowCancelDialog(false);
     } catch (error) {
       console.error('Failed to cancel tasks:', error);
       toast({
@@ -191,13 +195,51 @@ export const BulkTaskActions: React.FC<BulkTaskActionsProps> = ({
         {canCancel && (
           <>
             <DropdownMenuSeparator />
-            <DropdownMenuItem onClick={handleBulkCancel} className="text-red-600">
+            <DropdownMenuItem onClick={handleBulkCancelClick} className="text-red-600">
               <X className="w-4 h-4 mr-2" />
               Cancel Selected
             </DropdownMenuItem>
           </>
         )}
       </DropdownMenuContent>
+
+      {/* Cancel Confirmation Dialog */}
+      <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle className="flex items-center gap-2">
+              <AlertTriangle className="w-5 h-5 text-red-600" />
+              Confirm Task Cancellation
+            </AlertDialogTitle>
+            <AlertDialogDescription className="text-left">
+              Are you sure you want to cancel {selectedTasks.length} task{selectedTasks.length > 1 ? 's' : ''}?
+              <div className="mt-2 p-3 bg-red-50 border border-red-200 rounded-md">
+                <p className="text-sm text-red-800 font-medium">⚠️ This action will:</p>
+                <ul className="text-sm text-red-700 mt-1 ml-4 list-disc">
+                  <li>Set the status to "Canceled"</li>
+                  <li>Mark {selectedTasks.length > 1 ? 'these tasks' : 'this task'} as completed</li>
+                  <li>Send notification emails to relevant users</li>
+                </ul>
+              </div>
+              <p className="mt-2 text-sm text-gray-600">
+                This action cannot be easily undone. The {selectedTasks.length > 1 ? 'tasks' : 'task'} will need to be manually updated if you change your mind.
+              </p>
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel onClick={() => setShowCancelDialog(false)}>
+              Keep Tasks
+            </AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleBulkCancel}
+              className="bg-red-600 hover:bg-red-700 focus:ring-red-600"
+              disabled={isUpdating}
+            >
+              {isUpdating ? 'Canceling...' : `Cancel ${selectedTasks.length} Task${selectedTasks.length > 1 ? 's' : ''}`}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </DropdownMenu>
   );
 };
