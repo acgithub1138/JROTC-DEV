@@ -136,10 +136,22 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
             competition_id: competition.id,
             school_id: userProfile.school_id,
             status: 'registered',
-            created_by: userProfile.id
-          });
+            created_by: userProfile.id,
+            total_fee: totalCost
+          } as any);
 
         if (compError) throw compError;
+      }
+
+      // Update the total_fee for existing registrations (if editing)
+      if (isEditing) {
+        const { error: updateError } = await supabase
+          .from('cp_comp_schools')
+          .update({ total_fee: totalCost } as any)
+          .eq('competition_id', competition.id)
+          .eq('school_id', userProfile.school_id);
+
+        if (updateError) throw updateError;
       }
 
       // Register for selected events using the new cp_event_registrations table
