@@ -22,10 +22,6 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
   const validPriorities = priorityOptions.map(option => option.value);
-  
-  // Debug: Log status options to see order
-  console.log('📋 Status options loaded:', statusOptions);
-  console.log('📋 Valid statuses array:', validStatuses);
 
   // Create dynamic schema
   const schema = createTaskSchema(validStatuses, validPriorities, canAssignTasks);
