@@ -60,7 +60,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
 
-  const { hasUnsavedChanges } = useUnsavedChanges({
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
     enabled: open
@@ -217,10 +217,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
       await onEventUpdated(event.id, updates);
       
-      // Reset initial form data to current form data to clear unsaved changes
-      setInitialFormData(formData);
-      
-      handleClose();
+      // Reset unsaved changes and close modal directly
+      resetChanges();
+      onOpenChange(false);
     } catch (error) {
       console.error('Error updating event:', error);
     } finally {
