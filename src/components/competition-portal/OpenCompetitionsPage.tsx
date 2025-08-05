@@ -290,7 +290,6 @@ export const OpenCompetitionsPage = () => {
                   {isRegistered(competition.id) ? (
                     <div className="flex gap-2">
                       <Button 
-                        variant="outline"
                         className="flex-1" 
                         onClick={() => handleRegisterInterest(competition.id)}
                       >
