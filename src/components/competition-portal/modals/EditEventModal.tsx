@@ -216,17 +216,17 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           ).toISOString()
         : null;
 
-      // Convert lunch times from school timezone to UTC
-      const lunchStartTime = formData.lunch_start_time 
+      // Convert lunch times from school timezone to UTC using the event's start date
+      const lunchStartTime = formData.lunch_start_time && formData.start_date
         ? convertFromSchoolTimezone(
-            new Date(`1970-01-01T${formData.lunch_start_time}:00`),
+            new Date(`${formData.start_date}T${formData.lunch_start_time}:00`),
             timezone
           ).toISOString()
         : null;
         
-      const lunchEndTime = formData.lunch_end_time 
+      const lunchEndTime = formData.lunch_end_time && formData.start_date
         ? convertFromSchoolTimezone(
-            new Date(`1970-01-01T${formData.lunch_end_time}:00`),
+            new Date(`${formData.start_date}T${formData.lunch_end_time}:00`),
             timezone
           ).toISOString()
         : null;
