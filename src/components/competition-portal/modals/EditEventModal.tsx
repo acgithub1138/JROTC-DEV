@@ -41,6 +41,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     end_date: '',
     end_time_hour: '10',
     end_time_minute: '00',
+    lunch_start_time: '',
+    lunch_end_time: '',
     max_participants: '',
     fee: '',
     notes: '',
@@ -77,6 +79,10 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       const startDate = event.start_time ? new Date(event.start_time) : null;
       const endDate = event.end_time ? new Date(event.end_time) : null;
       
+      // Parse lunch times
+      const lunchStartTime = (event as any).lunch_start_time ? new Date((event as any).lunch_start_time) : null;
+      const lunchEndTime = (event as any).lunch_end_time ? new Date((event as any).lunch_end_time) : null;
+
       const newFormData = {
         event: event.event || '',
         location: event.location || '',
@@ -86,6 +92,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         end_date: endDate ? endDate.toISOString().split('T')[0] : '',
         end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
         end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
+        lunch_start_time: lunchStartTime ? `${lunchStartTime.getHours().toString().padStart(2, '0')}:${lunchStartTime.getMinutes().toString().padStart(2, '0')}` : '',
+        lunch_end_time: lunchEndTime ? `${lunchEndTime.getHours().toString().padStart(2, '0')}:${lunchEndTime.getMinutes().toString().padStart(2, '0')}` : '',
         max_participants: event.max_participants?.toString() || '',
         fee: (event as any).fee?.toString() || '',
         notes: event.notes || '',
@@ -198,6 +206,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         location: formData.location || null,
         start_time: startDateTime,
         end_time: endDateTime,
+        lunch_start_time: formData.lunch_start_time ? new Date(`1970-01-01T${formData.lunch_start_time}:00Z`).toISOString() : null,
+        lunch_end_time: formData.lunch_end_time ? new Date(`1970-01-01T${formData.lunch_end_time}:00Z`).toISOString() : null,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         notes: formData.notes || null,
         judges: formData.judges,
@@ -361,6 +371,39 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
               </div>
             </div>
           </div>
+          <div>
+            <Label>Judge Lunch Break</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lunch_start_time" className="text-xs">Start Time</Label>
+                <Input 
+                  id="lunch_start_time" 
+                  type="time" 
+                  value={formData.lunch_start_time} 
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    lunch_start_time: e.target.value
+                  }))} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="lunch_end_time" className="text-xs">End Time</Label>
+                <Input 
+                  id="lunch_end_time" 
+                  type="time" 
+                  value={formData.lunch_end_time} 
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    lunch_end_time: e.target.value
+                  }))} 
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              This time period will be blocked from school scheduling
+            </p>
+          </div>
+
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="max_participants">Max Participants</Label>

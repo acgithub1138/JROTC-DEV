@@ -44,7 +44,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       setIsLoading(true);
 
       // Fetch events with their schedules
-      const { data: eventsData, error: eventsError } = await supabase
+        const { data: eventsData, error: eventsError } = await supabase
         .from('cp_comp_events')
         .select(`
           id,
@@ -52,7 +52,9 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           event:cp_events(name),
           start_time,
           end_time,
-          interval
+          interval,
+          lunch_start_time,
+          lunch_end_time
         `)
         .eq('competition_id', competitionId);
 
@@ -85,24 +87,31 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         const current = new Date(startTime);
 
         while (current < endTime) {
-          const scheduleForSlot = schedulesData?.find(
-            s => s.event_id === event.id && 
-                 new Date(s.scheduled_time).getTime() === current.getTime()
-          );
+          // Skip lunch time slots if lunch period is defined
+          const isLunchTime = event.lunch_start_time && event.lunch_end_time && 
+            current >= new Date(event.lunch_start_time) && 
+            current < new Date(event.lunch_end_time);
 
-          const schoolColor = scheduleForSlot ? 
-            schoolsData?.find(school => school.school_id === scheduleForSlot.school_id)?.color : 
-            undefined;
+          if (!isLunchTime) {
+            const scheduleForSlot = schedulesData?.find(
+              s => s.event_id === event.id && 
+                   new Date(s.scheduled_time).getTime() === current.getTime()
+            );
 
-          timeSlots.push({
-            time: new Date(current),
-            duration: interval,
-            assignedSchool: scheduleForSlot ? {
-              id: scheduleForSlot.school_id,
-              name: scheduleForSlot.school_name || 'Unknown School',
-              color: schoolColor
-            } : undefined
-          });
+            const schoolColor = scheduleForSlot ? 
+              schoolsData?.find(school => school.school_id === scheduleForSlot.school_id)?.color : 
+              undefined;
+
+            timeSlots.push({
+              time: new Date(current),
+              duration: interval,
+              assignedSchool: scheduleForSlot ? {
+                id: scheduleForSlot.school_id,
+                name: scheduleForSlot.school_name || 'Unknown School',
+                color: schoolColor
+              } : undefined
+            });
+          }
 
           current.setMinutes(current.getMinutes() + interval);
         }

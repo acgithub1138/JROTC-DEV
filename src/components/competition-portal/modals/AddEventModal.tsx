@@ -39,6 +39,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     end_date: '',
     end_hour: '',
     end_minute: '',
+    lunch_start_time: '',
+    lunch_end_time: '',
     max_participants: '',
     fee: '',
     notes: '',
@@ -71,6 +73,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     end_date: '',
     end_hour: '',
     end_minute: '',
+    lunch_start_time: '',
+    lunch_end_time: '',
     max_participants: '',
     fee: '',
     notes: '',
@@ -202,6 +206,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         location: formData.location || null,
         start_time: start_time || null,
         end_time: end_time || null,
+        lunch_start_time: formData.lunch_start_time ? new Date(`1970-01-01T${formData.lunch_start_time}:00Z`).toISOString() : null,
+        lunch_end_time: formData.lunch_end_time ? new Date(`1970-01-01T${formData.lunch_end_time}:00Z`).toISOString() : null,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         notes: formData.notes || null,
@@ -219,6 +225,8 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         end_date: '',
         end_hour: '',
         end_minute: '',
+        lunch_start_time: '',
+        lunch_end_time: '',
         max_participants: '',
         fee: '',
         notes: '',
@@ -397,6 +405,39 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                 </div>
               </div>
             </div>
+          </div>
+
+          <div>
+            <Label>Judge Lunch Break</Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label htmlFor="lunch_start_time" className="text-xs">Start Time</Label>
+                <Input 
+                  id="lunch_start_time" 
+                  type="time" 
+                  value={formData.lunch_start_time} 
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    lunch_start_time: e.target.value
+                  }))} 
+                />
+              </div>
+              <div>
+                <Label htmlFor="lunch_end_time" className="text-xs">End Time</Label>
+                <Input 
+                  id="lunch_end_time" 
+                  type="time" 
+                  value={formData.lunch_end_time} 
+                  onChange={e => setFormData(prev => ({
+                    ...prev,
+                    lunch_end_time: e.target.value
+                  }))} 
+                />
+              </div>
+            </div>
+            <p className="text-sm text-muted-foreground mt-1">
+              This time period will be blocked from school scheduling
+            </p>
           </div>
 
           <div className="grid grid-cols-2 gap-4">

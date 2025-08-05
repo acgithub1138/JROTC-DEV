@@ -542,6 +542,8 @@ export type Database = {
           interval: number | null
           judges: string[] | null
           location: string | null
+          lunch_end_time: string | null
+          lunch_start_time: string | null
           max_participants: number | null
           notes: string | null
           resources: string[] | null
@@ -564,6 +566,8 @@ export type Database = {
           interval?: number | null
           judges?: string[] | null
           location?: string | null
+          lunch_end_time?: string | null
+          lunch_start_time?: string | null
           max_participants?: number | null
           notes?: string | null
           resources?: string[] | null
@@ -586,6 +590,8 @@ export type Database = {
           interval?: number | null
           judges?: string[] | null
           location?: string | null
+          lunch_end_time?: string | null
+          lunch_start_time?: string | null
           max_participants?: number | null
           notes?: string | null
           resources?: string[] | null
@@ -701,6 +707,7 @@ export type Database = {
           school_id: string
           school_name: string | null
           status: string
+          total_fee: number | null
           updated_at: string
           updated_by: string | null
         }
@@ -716,6 +723,7 @@ export type Database = {
           school_id: string
           school_name?: string | null
           status?: string
+          total_fee?: number | null
           updated_at?: string
           updated_by?: string | null
         }
@@ -731,6 +739,7 @@ export type Database = {
           school_id?: string
           school_name?: string | null
           status?: string
+          total_fee?: number | null
           updated_at?: string
           updated_by?: string | null
         }
