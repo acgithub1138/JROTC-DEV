@@ -3442,6 +3442,10 @@ export type Database = {
             }
         Returns: string
       }
+      replace_template_variables: {
+        Args: { template_text: string; data_json: Json }
+        Returns: string
+      }
       resolve_user_email_with_job_priority: {
         Args: { user_id_param: string; school_id_param: string }
         Returns: {
