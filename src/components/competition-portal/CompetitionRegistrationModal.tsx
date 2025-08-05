@@ -124,14 +124,12 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         isLunchBreak = currentTime >= lunchStartTime && currentTime < lunchEndTime;
       }
       
-      // Skip lunch break slots - don't add them to available time slots
-      if (!isLunchBreak) {
-        const available = !eventOccupiedSlots.has(timeString);
-        
+      // Skip lunch break slots and occupied slots - don't add them to available time slots
+      if (!isLunchBreak && !eventOccupiedSlots.has(timeString)) {
         slots.push({
           time: slotTime,
           label: format(slotTime, 'h:mm a'),
-          available
+          available: true
         });
       }
       
@@ -502,16 +500,14 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                                 <SelectValue placeholder="Choose a time slot" />
                               </SelectTrigger>
                               <SelectContent>
-                                {generateTimeSlots(event).map((slot) => (
-                                  <SelectItem
-                                    key={slot.time.toISOString()}
-                                    value={slot.time.toISOString()}
-                                    disabled={!slot.available}
-                                    className={!slot.available ? 'opacity-50' : ''}
-                                  >
-                                    {slot.label} {!slot.available && '(Occupied)'}
-                                  </SelectItem>
-                                ))}
+                                 {generateTimeSlots(event).map((slot) => (
+                                   <SelectItem
+                                     key={slot.time.toISOString()}
+                                     value={slot.time.toISOString()}
+                                   >
+                                     {slot.label}
+                                   </SelectItem>
+                                 ))}
                               </SelectContent>
                             </Select>
                           </div>
