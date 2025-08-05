@@ -135,9 +135,18 @@ export const OpenCompetitionsPage = () => {
 
       if (eventError) throw eventError;
 
+      // Delete cp_event_schedules records for this school and competition
+      const { error: scheduleError } = await supabase
+        .from('cp_event_schedules')
+        .delete()
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id);
+
+      if (scheduleError) throw scheduleError;
+
       toast({
         title: "Registration Cancelled",
-        description: "Your registration has been successfully cancelled.",
+        description: "Your registration has been successfully cancelled and scheduled events removed.",
       });
 
       refetchRegistrations();
