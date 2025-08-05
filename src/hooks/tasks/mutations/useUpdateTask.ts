@@ -2,18 +2,30 @@
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { useEmailService } from '@/hooks/email/useEmailService';
+import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions } from '@/hooks/useTaskOptions';
 import { isCompletionStatus, getDefaultCancelStatus } from '@/utils/taskStatusUtils';
+import { shouldTriggerStatusChangeEmail } from '@/utils/emailRuleHelper';
 import { Task } from '../types';
 
 export const useUpdateTask = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { statusOptions } = useTaskStatusOptions();
+  const { queueEmail } = useEmailService();
+  const { userProfile } = useAuth();
 
   return useMutation({
     mutationFn: async ({ id, ...taskData }: Partial<Task> & { id: string }) => {
       console.log('Updating task:', { id, taskData });
+
+      // Store original status for email rule detection
+      const { data: originalTask } = await supabase
+        .from('tasks')
+        .select('status, assigned_to')
+        .eq('id', id)
+        .single();
 
       const updateData: any = {};
       
@@ -32,6 +44,11 @@ export const useUpdateTask = () => {
         if (!taskData.completed_at) {
           updateData.completed_at = new Date().toISOString();
         }
+      }
+
+      // Auto-change status to "pending_response" if status is being set to "need_information"
+      if (taskData.status === 'need_information') {
+        updateData.status = 'pending_response';
       }
 
       console.log('Final update data:', updateData);
@@ -70,7 +87,24 @@ export const useUpdateTask = () => {
       }
       
       console.log('Task updated successfully');
-      return data;
+      
+      // Trigger email notifications for status changes
+      const emailRuleType = shouldTriggerStatusChangeEmail(originalTask?.status, taskData.status);
+      if (emailRuleType && originalTask?.assigned_to && userProfile?.school_id) {
+        try {
+          await queueEmail({
+            templateId: '', // Backend will resolve based on rule
+            recipientEmail: '', // Backend will resolve from assigned_to
+            sourceTable: 'tasks',
+            recordId: id,
+            schoolId: userProfile.school_id,
+          });
+        } catch (error) {
+          console.error(`Failed to trigger email for task_${emailRuleType}:`, error);
+        }
+      }
+      
+      return { originalStatus: originalTask?.status, newStatus: taskData.status };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['tasks'] });
