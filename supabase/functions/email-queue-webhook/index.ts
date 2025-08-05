@@ -51,6 +51,9 @@ class UnifiedEmailProcessor {
 
   private async acquireLock(lockId: string): Promise<boolean> {
     try {
+      // First, clear any stale locks automatically
+      await this.clearStaleLocks();
+      
       const { data, error } = await this.supabase
         .from('email_processing_lock')
         .update({
@@ -71,6 +74,20 @@ class UnifiedEmailProcessor {
     } catch (error) {
       console.error('🔒 Lock acquisition failed:', error);
       return false;
+    }
+  }
+
+  private async clearStaleLocks(): Promise<void> {
+    try {
+      const { data, error } = await this.supabase.rpc('clear_stale_email_processing_locks');
+      
+      if (error) {
+        console.error('🧹 Error clearing stale locks:', error);
+      } else if (data > 0) {
+        console.log(`🧹 Cleared ${data} stale email processing locks`);
+      }
+    } catch (error) {
+      console.error('🧹 Failed to clear stale locks:', error);
     }
   }
 

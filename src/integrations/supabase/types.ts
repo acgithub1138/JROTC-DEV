@@ -3282,15 +3282,20 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: {
           school_id: string
-          health_status: string
           pending_count: number
           stuck_count: number
           failed_count: number
+          processing_time_avg_ms: number
+          health_status: string
         }[]
       }
       check_user_permission: {
         Args: { user_id: string; module_name: string; action_name: string }
         Returns: boolean
+      }
+      clear_stale_email_processing_locks: {
+        Args: Record<PropertyKey, never>
+        Returns: number
       }
       decrypt_smtp_password: {
         Args: { encrypted_password: string }
