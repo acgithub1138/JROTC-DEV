@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { JROTC_PROGRAM_OPTIONS } from '../../competition-management/utils/constants';
+import { useCompetitionTemplates } from '../../competition-management/hooks/useCompetitionTemplates';
 import type { Database } from '@/integrations/supabase/types';
 type CpEvent = Database['public']['Tables']['cp_events']['Row'];
 type CpEventUpdate = Database['public']['Tables']['cp_events']['Update'];
@@ -23,6 +24,7 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
   onEventUpdate,
   onSuccess
 }) => {
+  const { templates, isLoading: templatesLoading } = useCompetitionTemplates();
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -101,10 +103,21 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
 
           <div>
             <Label htmlFor="score_sheet">Score Sheet Template</Label>
-            <Input id="score_sheet" value={formData.score_sheet} onChange={e => setFormData(prev => ({
-            ...prev,
-            score_sheet: e.target.value
-          }))} placeholder="Score sheet template name" />
+            <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
+              ...prev,
+              score_sheet: value
+            }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select score sheet template" />
+              </SelectTrigger>
+              <SelectContent>
+                {templates.map(template => (
+                  <SelectItem key={template.id} value={template.template_name}>
+                    {template.template_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="flex gap-2 justify-end">
