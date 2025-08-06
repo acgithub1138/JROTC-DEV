@@ -11,12 +11,15 @@ import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
   const [activeModule, setActiveModule] = useState('competition-dashboard');
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Map routes to modules
   const routeToModuleMap: { [key: string]: string } = {
@@ -99,9 +102,17 @@ const CompetitionPortalLayout = () => {
       <CompetitionSidebar 
         activeModule={activeModule} 
         onModuleChange={handleModuleChange}
+        isMobile={isMobile}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
       />
-      <div className="ml-64">
-        <Header activeModule={activeModule} onModuleChange={handleModuleChange} />
+      <div className={isMobile ? "ml-0" : "ml-64"}>
+        <Header 
+          activeModule={activeModule} 
+          onModuleChange={handleModuleChange}
+          showSidebarToggle={isMobile}
+          onSidebarToggle={() => setSidebarOpen(!sidebarOpen)}
+        />
         <main className="min-h-[calc(100vh-4rem)]">
           {renderContent()}
         </main>

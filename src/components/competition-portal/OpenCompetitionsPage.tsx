@@ -12,11 +12,14 @@ import { format } from 'date-fns';
 import { useToast } from '@/hooks/use-toast';
 import { CompetitionRegistrationModal } from './CompetitionRegistrationModal';
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsMobile } from '@/hooks/use-mobile';
+import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 
 export const OpenCompetitionsPage = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -220,134 +223,13 @@ export const OpenCompetitionsPage = () => {
           ))}
         </div>
       ) : competitions && competitions.length > 0 ? (
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {competitions.map((competition) => (
-            <Card key={competition.id} className="hover:shadow-lg transition-shadow relative">
-              {isRegistered(competition.id) && (
-                <div className="absolute top-4 left-1/2 transform -translate-x-1/2 z-10">
-                  <Badge variant="default" className="bg-green-500 text-white">
-                    Registered
-                  </Badge>
-                </div>
-              )}
-              <CardHeader className={isRegistered(competition.id) ? "pt-12" : ""}>
-                <div className="flex items-start justify-between">
-                  <div className="flex-1">
-                    <CardTitle className="text-lg line-clamp-2">{competition.name}</CardTitle>
-                    <CardDescription className="mt-1">
-                      {competition.description || 'No description available'}
-                    </CardDescription>
-                  </div>
-                  <Badge variant="secondary" className="ml-2">
-                    <Trophy className="w-3 h-3 mr-1" />
-                    {(competition as any).program?.replace('_', ' ').toUpperCase() || 'N/A'}
-                  </Badge>
-                </div>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div className="space-y-2 text-sm text-gray-600">
-                  {(competition as any).fee && (
-                    <div className="flex items-center gap-2">
-                      <DollarSign className="w-4 h-4" />
-                      <span className="font-medium text-green-600">
-                        {((competition as any).fee as number).toFixed(2)} entry fee
-                      </span>
-                    </div>
-                  )}
-                  <div className="flex items-center gap-2">
-                    <CalendarDays className="w-4 h-4" />
-                    <span>
-                      {format(new Date(competition.start_date), 'MMM d, yyyy')}
-                      {competition.end_date && 
-                        format(new Date(competition.end_date), 'MMM d, yyyy') !== format(new Date(competition.start_date), 'MMM d, yyyy') && 
-                        ` - ${format(new Date(competition.end_date), 'MMM d, yyyy')}`
-                      }
-                    </span>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <MapPin className="w-4 h-4" />
-                    <span>
-                      <div>
-                        <a 
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-primary hover:underline cursor-pointer"
-                        >
-                          {competition.address}
-                        </a>
-                      </div>
-                      <div>
-                        <a 
-                          href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="block text-primary hover:underline cursor-pointer"
-                        >
-                          {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
-                        </a>
-                        </div>
-                    </span>
-                  </div>
-                  {competition.max_participants && (
-                    <div className="flex items-center gap-2">
-                      <Users className="w-4 h-4" />
-                      <span>Max {competition.max_participants} participants</span>
-                    </div>
-                  )}
-                  {competition.registration_deadline && (
-                    <div className="text-sm">
-                      <strong>Registration Deadline:</strong> {format(new Date(competition.registration_deadline), 'MMM d, yyyy')}
-                    </div>
-                  )}
-                  <div className="text-sm">
-                    <strong>Hosting School:</strong> {(competition as any).hosting_school || 'Not specified'}
-                  </div>
-                </div>
-                
-                <div className="flex gap-1">
-                  <Button 
-                    variant="outline" 
-                    size="sm"
-                    className="flex-1" 
-                    onClick={() => handleViewDetails(competition.id)}
-                  >
-                    <Eye className="w-3 h-3 mr-1" />
-                    View
-                  </Button>
-                  {isRegistered(competition.id) ? (
-                    <>
-                      <Button 
-                        size="sm"
-                        className="flex-1" 
-                        onClick={() => handleRegisterInterest(competition.id)}
-                      >
-                        Edit
-                      </Button>
-                      <Button 
-                        variant="destructive"
-                        size="sm"
-                        className="flex-1" 
-                        onClick={() => handleCancelRegistration(competition.id)}
-                      >
-                        <X className="w-3 h-3 mr-1" />
-                        Cancel
-                      </Button>
-                    </>
-                  ) : (
-                    <Button 
-                      size="sm"
-                      className="flex-1" 
-                      onClick={() => handleRegisterInterest(competition.id)}
-                    >
-                      Register
-                    </Button>
-                  )}
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <OpenCompetitionCards
+          competitions={competitions}
+          registrations={registrations || []}
+          onViewDetails={handleViewDetails}
+          onRegisterInterest={handleRegisterInterest}
+          onCancelRegistration={handleCancelRegistration}
+        />
       ) : (
         <div className="text-center py-12">
           <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />

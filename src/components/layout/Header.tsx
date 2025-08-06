@@ -12,12 +12,16 @@ interface HeaderProps {
   activeModule: string;
   onModuleChange?: (module: string) => void;
   isMobile?: boolean;
+  showSidebarToggle?: boolean;
+  onSidebarToggle?: () => void;
 }
 
 export const Header: React.FC<HeaderProps> = ({
   activeModule,
   onModuleChange,
-  isMobile
+  isMobile,
+  showSidebarToggle = false,
+  onSidebarToggle
 }) => {
   const {
     signOut,
@@ -70,6 +74,12 @@ export const Header: React.FC<HeaderProps> = ({
       <div className="flex items-center">
         {/* Left side - Mobile Menu Button */}
         <div className="flex items-center space-x-4 flex-shrink-0">
+          {showSidebarToggle && onSidebarToggle && (
+            <Button variant="ghost" size="icon" onClick={onSidebarToggle}>
+              <Menu className="w-5 h-5" />
+              <span className="sr-only">Toggle sidebar</span>
+            </Button>
+          )}
           {isMobile && onModuleChange && <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
