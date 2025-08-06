@@ -13,6 +13,8 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CPCompetitionDialog } from './components/CPCompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
+import { CompetitionCards } from './components/CompetitionCards';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
@@ -47,6 +49,7 @@ interface School {
 const CompetitionsPage = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -282,15 +285,30 @@ const CompetitionsPage = () => {
         </CardContent>
       </Card>
 
-      {/* Competitions Table */}
-      {filteredCompetitions.length === 0 ? <Card>
+      {/* Competitions Table/Cards */}
+      {filteredCompetitions.length === 0 ? (
+        <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
               {competitions.length === 0 ? 'No competitions found.' : 'No competitions match your search criteria.'}
             </div>
           </CardContent>
-        </Card> : <Card>
-          
+        </Card>
+      ) : isMobile ? (
+        <CompetitionCards
+          competitions={filteredCompetitions}
+          registrationCounts={registrationCounts}
+          userProfile={userProfile}
+          getStatusBadgeVariant={getStatusBadgeVariant}
+          handleViewCompetition={handleViewCompetition}
+          handleEditCompetition={handleEditCompetition}
+          handleCancelCompetitionClick={handleCancelCompetitionClick}
+          handleStatusChange={handleStatusChange}
+          updatingStatus={updatingStatus}
+          getSchoolName={getSchoolName}
+        />
+      ) : (
+        <Card>
           <CardContent>
             <div className="overflow-x-auto">
               <Table>
@@ -305,7 +323,8 @@ const CompetitionsPage = () => {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCompetitions.map(competition => <TableRow key={competition.id}>
+                  {filteredCompetitions.map(competition => (
+                    <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
                         <button onClick={() => handleViewCompetition(competition)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                           {competition.name}
@@ -396,12 +415,14 @@ const CompetitionsPage = () => {
                             )}
                           </div>
                        </TableCell>
-                    </TableRow>)}
+                    </TableRow>
+                  ))}
                 </TableBody>
               </Table>
             </div>
           </CardContent>
-        </Card>}
+        </Card>
+      )}
 
         </TabsContent>
       </Tabs>
