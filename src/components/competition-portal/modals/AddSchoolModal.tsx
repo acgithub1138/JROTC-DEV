@@ -13,8 +13,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 const formSchema = z.object({
   school_id: z.string().min(1, 'School ID is required'),
   status: z.string().default('registered'),
-  notes: z.string().optional(),
-  resource: z.string().optional()
+  notes: z.string().optional()
 });
 type FormData = z.infer<typeof formSchema>;
 interface AddSchoolModalProps {
@@ -33,8 +32,7 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   const defaultValues = {
     school_id: '',
     status: 'registered' as const,
-    notes: '',
-    resource: ''
+    notes: ''
   };
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -122,17 +120,6 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
                   </Select>
                   <FormMessage />
                 </FormItem>} />
-            <FormField control={form.control} name="resource" render={({
-              field
-            }) => (
-              <FormItem>
-                <FormLabel>Resource</FormLabel>
-                <FormControl>
-                  <Input placeholder="Enter resource" {...field} />
-                </FormControl>
-                <FormMessage />
-              </FormItem>
-            )} />
             <FormField control={form.control} name="notes" render={({
               field
             }) => <FormItem>
