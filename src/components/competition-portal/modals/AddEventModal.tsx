@@ -39,8 +39,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     end_date: '',
     end_hour: '',
     end_minute: '',
-    lunch_start_time: '',
-    lunch_end_time: '',
+    lunch_start_hour: '',
+    lunch_start_minute: '',
+    lunch_end_hour: '',
+    lunch_end_minute: '',
     max_participants: '',
     fee: '',
     notes: '',
@@ -73,8 +75,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     end_date: '',
     end_hour: '',
     end_minute: '',
-    lunch_start_time: '',
-    lunch_end_time: '',
+    lunch_start_hour: '',
+    lunch_start_minute: '',
+    lunch_end_hour: '',
+    lunch_end_minute: '',
     max_participants: '',
     fee: '',
     notes: '',
@@ -200,14 +204,24 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
+      
+      // Create lunch times using the event's start date
+      const lunch_start_time = formData.lunch_start_hour && formData.lunch_start_minute && formData.start_date
+        ? `${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`
+        : null;
+        
+      const lunch_end_time = formData.lunch_end_hour && formData.lunch_end_minute && formData.start_date
+        ? `${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`
+        : null;
+
       const eventData: any = {
         competition_id: competitionId,
         event: formData.event,
         location: formData.location || null,
         start_time: start_time || null,
         end_time: end_time || null,
-        lunch_start_time: formData.lunch_start_time ? new Date(`1970-01-01T${formData.lunch_start_time}:00Z`).toISOString() : null,
-        lunch_end_time: formData.lunch_end_time ? new Date(`1970-01-01T${formData.lunch_end_time}:00Z`).toISOString() : null,
+        lunch_start_time: lunch_start_time,
+        lunch_end_time: lunch_end_time,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         fee: formData.fee ? parseFloat(formData.fee) : null,
         notes: formData.notes || null,
@@ -226,8 +240,10 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         end_date: '',
         end_hour: '',
         end_minute: '',
-        lunch_start_time: '',
-        lunch_end_time: '',
+        lunch_start_hour: '',
+        lunch_start_minute: '',
+        lunch_end_hour: '',
+        lunch_end_minute: '',
         max_participants: '',
         fee: '',
         notes: '',
@@ -424,30 +440,95 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
           <div>
             <Label>Judge Lunch Break</Label>
-            <div className="grid grid-cols-2 gap-4">
+            <div className="grid grid-cols-4 gap-2">
               <div>
-                <Label htmlFor="lunch_start_time" className="text-xs">Start Time</Label>
-                <Input 
-                  id="lunch_start_time" 
-                  type="time" 
-                  value={formData.lunch_start_time} 
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    lunch_start_time: e.target.value
-                  }))} 
-                />
+                <Label className="text-xs">Start Hour</Label>
+                <Select 
+                  value={formData.lunch_start_hour} 
+                  onValueChange={(value) => {
+                    const endHour = (parseInt(value) + 1) % 24;
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      lunch_start_hour: value,
+                      lunch_end_hour: endHour.toString().padStart(2, '0')
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
               <div>
-                <Label htmlFor="lunch_end_time" className="text-xs">End Time</Label>
-                <Input 
-                  id="lunch_end_time" 
-                  type="time" 
-                  value={formData.lunch_end_time} 
-                  onChange={e => setFormData(prev => ({
-                    ...prev,
-                    lunch_end_time: e.target.value
-                  }))} 
-                />
+                <Label className="text-xs">Start Min</Label>
+                <Select 
+                  value={formData.lunch_start_minute} 
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ 
+                      ...prev, 
+                      lunch_start_minute: value,
+                      lunch_end_minute: value
+                    }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">End Hour</Label>
+                <Select 
+                  value={formData.lunch_end_hour} 
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, lunch_end_hour: value }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Hour" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {Array.from({ length: 24 }, (_, i) => (
+                      <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                        {i.toString().padStart(2, '0')}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <Label className="text-xs">End Min</Label>
+                <Select 
+                  value={formData.lunch_end_minute} 
+                  onValueChange={(value) => {
+                    setFormData(prev => ({ ...prev, lunch_end_minute: value }));
+                  }}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Min" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                      <SelectItem key={minute} value={minute}>
+                        {minute}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
             </div>
             <p className="text-sm text-muted-foreground mt-1">
