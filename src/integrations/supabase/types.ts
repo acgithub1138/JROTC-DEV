@@ -3365,6 +3365,19 @@ export type Database = {
         Args: { school_uuid: string }
         Returns: string
       }
+      get_stuck_emails: {
+        Args: { threshold_time?: string }
+        Returns: {
+          id: string
+          recipient_email: string
+          subject: string
+          body: string
+          created_at: string
+          last_attempt_at: string
+          retry_count: number
+          school_id: string
+        }[]
+      }
       get_table_columns: {
         Args: { table_name: string }
         Returns: {
