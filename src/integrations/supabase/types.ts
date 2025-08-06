@@ -2598,7 +2598,7 @@ export type Database = {
           address: string | null
           city: string | null
           competition_module: boolean | null
-          competition_portal: boolean
+          competition_portal: boolean | null
           contact: string | null
           created_at: string
           email: string | null
@@ -2621,7 +2621,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           competition_module?: boolean | null
-          competition_portal?: boolean
+          competition_portal?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
@@ -2644,7 +2644,7 @@ export type Database = {
           address?: string | null
           city?: string | null
           competition_module?: boolean | null
-          competition_portal?: boolean
+          competition_portal?: boolean | null
           contact?: string | null
           created_at?: string
           email?: string | null
