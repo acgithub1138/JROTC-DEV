@@ -248,37 +248,47 @@ export const CompetitionScheduleTab = ({
         <Card className="print:hidden">
           <CardContent className="p-0">
             <div className="overflow-x-auto">
-              <div className="min-w-full">
-                {/* Header */}
-                <div className="grid gap-2 p-4 border-b bg-muted/30" style={{
-                gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
-              }}>
-                  <div className="font-medium text-sm">Time Slots</div>
-                  {events.map(event => <div key={event.id} className="flex items-center justify-center gap-2">
-                      <div className="font-medium text-sm truncate" title={event.event_name}>
-                        {event.event_name}
-                      </div>
-                      {!readOnly && canManageSchedule && <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6">
-                              <Edit className="h-3 w-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>Edit schedule for {event.event_name}</p>
-                          </TooltipContent>
-                        </Tooltip>}
-                    </div>)}
-                </div>
+              <table className="w-full min-w-max">
+                {/* Table Header */}
+                <thead>
+                  <tr className="border-b bg-muted/30">
+                    <th className="text-left p-4 font-medium text-sm sticky left-0 bg-muted/30 z-10 min-w-[120px]">
+                      Time Slots
+                    </th>
+                    {events.map(event => (
+                      <th key={event.id} className="text-center p-4 min-w-[150px]">
+                        <div className="flex items-center justify-center gap-2">
+                          <div className="font-medium text-sm truncate" title={event.event_name}>
+                            {event.event_name}
+                          </div>
+                          {!readOnly && canManageSchedule && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6">
+                                  <Edit className="h-3 w-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit schedule for {event.event_name}</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </th>
+                    ))}
+                  </tr>
+                </thead>
 
-                {/* Time Slots Grid */}
-                 <div className="max-h-96 overflow-y-auto print:max-h-none print:overflow-visible">
-                   {filteredTimeSlots.map((timeSlot, index) => <div key={timeSlot.toISOString()} className={`grid gap-2 p-2 border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`} style={{
-                  gridTemplateColumns: `120px repeat(${events.length}, 1fr)`
-                }}>
-                      <div className="text-sm font-medium ">
+                {/* Table Body */}
+                <tbody>
+                  {filteredTimeSlots.map((timeSlot, index) => (
+                    <tr 
+                      key={timeSlot.toISOString()} 
+                      className={`border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
+                    >
+                      <td className="p-2 font-medium text-sm sticky left-0 bg-inherit z-10 border-r">
                         {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
-                      </div>
+                      </td>
                       {events.map(event => {
                         const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
                         const showSlot = shouldShowSlot(event.id, timeSlot);
@@ -289,24 +299,29 @@ export const CompetitionScheduleTab = ({
                           slot => slot.time.getTime() === timeSlot.getTime()
                         )?.isLunchBreak;
                         
-                        return <div key={event.id} className="text-sm min-w-0">
-                          {isLunchSlot ? (
-                            <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium text-center">
-                              Lunch Break
-                            </div>
-                          ) : assignedSchool && showSlot ? 
-                            <div className="px-2 py-1 rounded text-xs truncate text-white font-medium" style={{
-                              backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
-                            }}>
-                              {assignedSchool.name}
-                            </div> : 
-                            <div className="text-muted-foreground text-xs">-</div>
-                          }
-                        </div>;
+                        return (
+                          <td key={event.id} className="p-2 text-center">
+                            {isLunchSlot ? (
+                              <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
+                                Lunch Break
+                              </div>
+                            ) : assignedSchool && showSlot ? (
+                              <div 
+                                className="px-2 py-1 rounded text-xs text-white font-medium" 
+                                style={{ backgroundColor: assignedSchool.color || 'hsl(var(--primary))' }}
+                              >
+                                {assignedSchool.name}
+                              </div>
+                            ) : (
+                              <div className="text-muted-foreground text-xs">-</div>
+                            )}
+                          </td>
+                        );
                       })}
-                    </div>)}
-                </div>
-              </div>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </CardContent>
         </Card>
