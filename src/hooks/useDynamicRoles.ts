@@ -1,94 +1,79 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import { supabase } from "@/integrations/supabase/client";
-import { toast } from "sonner";
 
-export interface RoleOption {
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useMemo } from 'react';
+
+export interface DynamicRole {
+  id: string;
   role_name: string;
   role_label: string;
-  can_be_assigned?: boolean;
-  admin_only?: boolean;
-  is_active?: boolean;
-  sort_order?: number;
+  admin_only: boolean;
+  is_active: boolean;
+  sort_order: number;
 }
 
 export const useDynamicRoles = () => {
-  const queryClient = useQueryClient();
-
-  // Get all roles
-  const {
-    data: allRoles = [],
-    isLoading: isLoadingAllRoles,
-    error: allRolesError
-  } = useQuery({
+  // Get all roles from the user_roles table
+  const { data: allRoles, isLoading: isLoadingAllRoles, error } = useQuery({
     queryKey: ['all-roles'],
     queryFn: async () => {
-      const { data, error } = await supabase.rpc('get_all_roles');
-      if (error) throw error;
-      return data as RoleOption[];
+      console.log('Fetching all roles...');
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('*')
+        .eq('is_active', true)
+        .order('sort_order');
+      
+      if (error) {
+        console.error('Error fetching all roles:', error);
+        throw error;
+      }
+      console.log('All roles fetched successfully:', data);
+      return data as DynamicRole[];
     }
   });
 
-  // Get assignable roles for current user
-  const {
-    data: assignableRoles = [],
-    isLoading: isLoadingAssignableRoles,
-    error: assignableRolesError
-  } = useQuery({
+  // Get assignable roles using the RPC function
+  const { data: assignableRoles, isLoading: isLoadingAssignableRoles } = useQuery({
     queryKey: ['assignable-roles'],
     queryFn: async () => {
+      console.log('Fetching assignable roles...');
       const { data, error } = await supabase.rpc('get_assignable_roles');
-      if (error) throw error;
-      return data as RoleOption[];
+      if (error) {
+        console.error('Error fetching assignable roles:', error);
+        throw error;
+      }
+      console.log('Assignable roles fetched successfully:', data);
+      return data as { role_name: string; role_label: string; can_be_assigned: boolean }[];
     }
   });
 
-  // Add new role mutation
-  const addRoleMutation = useMutation({
-    mutationFn: async ({ roleName, displayLabel, isAdminOnly }: {
-      roleName: string;
-      displayLabel?: string;
-      isAdminOnly?: boolean;
-    }) => {
-      // Add the role to the user_roles table
-      const { error: addRoleError } = await supabase.rpc('add_user_role_to_table', {
-        role_name_param: roleName,
-        role_label_param: displayLabel,
-        admin_only_param: isAdminOnly || false
-      });
-      if (addRoleError) throw addRoleError;
-    },
-    onSuccess: () => {
-      // Invalidate and refetch role-related queries
-      queryClient.invalidateQueries({ queryKey: ['all-roles'] });
-      queryClient.invalidateQueries({ queryKey: ['assignable-roles'] });
-      queryClient.invalidateQueries({ queryKey: ['role-permissions'] });
-      toast.success('Role added successfully');
-    },
-    onError: (error: any) => {
-      console.error('Error adding role:', error);
-      toast.error(error.message || 'Failed to add role');
+  // Convert assignable roles to the expected format
+  const roleOptions = useMemo(() => {
+    if (!assignableRoles?.length) {
+      // Fallback to default roles if dynamic roles aren't loaded yet
+      return [
+        { value: 'cadet', label: 'Cadet' },
+        { value: 'command_staff', label: 'Command Staff' },
+        { value: 'instructor', label: 'Instructor' }
+      ];
     }
-  });
+
+    return assignableRoles
+      .filter(role => role.can_be_assigned)
+      .map(role => ({
+        value: role.role_name,
+        label: role.role_label
+      }));
+  }, [assignableRoles]);
 
   return {
-    // Data
-    allRoles,
-    assignableRoles,
-    
-    // Loading states
+    allRoles: allRoles || [],
+    assignableRoles: assignableRoles || [],
+    roleOptions,
     isLoadingAllRoles,
     isLoadingAssignableRoles,
-    isAddingRole: addRoleMutation.isPending,
-    
-    // Errors
-    allRolesError,
-    assignableRolesError,
-    
-    // Methods
-    addRole: addRoleMutation.mutate,
-    refreshRoles: () => {
-      queryClient.invalidateQueries({ queryKey: ['all-roles'] });
-      queryClient.invalidateQueries({ queryKey: ['assignable-roles'] });
-    }
+    isLoading: isLoadingAllRoles || isLoadingAssignableRoles,
+    error
   };
 };

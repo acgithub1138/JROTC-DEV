@@ -3278,6 +3278,10 @@ export type Database = {
         }
         Returns: string
       }
+      can_assign_user_role: {
+        Args: { target_role_name: string }
+        Returns: boolean
+      }
       can_manage_budget: {
         Args: Record<PropertyKey, never>
         Returns: boolean
@@ -3304,6 +3308,14 @@ export type Database = {
       }
       can_manage_tasks: {
         Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_user_role: {
+        Args: { target_role_name: string }
+        Returns: boolean
+      }
+      can_modify_user_profile: {
+        Args: { target_user_id: string }
         Returns: boolean
       }
       check_email_queue_health: {
