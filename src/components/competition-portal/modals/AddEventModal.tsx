@@ -291,67 +291,79 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
           <div className="space-y-4">
             <div>
-              <Label>Start Date & Time</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <Label htmlFor="start_date" className="text-xs">Date</Label>
-                  <Input id="start_date" type="date" value={formData.start_date} onChange={e => {
-                  setFormData(prev => ({
-                    ...prev,
-                    start_date: e.target.value
-                  }));
-                  // Auto-set end date if not set
-                  if (e.target.value && !formData.end_date) {
-                    setFormData(prev => ({
-                      ...prev,
-                      end_date: e.target.value
-                    }));
-                  }
-                }} />
+              <Label>Start Date & Time *</Label>
+              <div className="grid grid-cols-4 gap-2">
+                <div className="col-span-2">
+                  <Input 
+                    id="start_date" 
+                    type="date" 
+                    value={formData.start_date} 
+                    onChange={e => {
+                      setFormData(prev => ({
+                        ...prev,
+                        start_date: e.target.value
+                      }));
+                      // Auto-set end date if not set
+                      if (e.target.value && !formData.end_date) {
+                        setFormData(prev => ({
+                          ...prev,
+                          end_date: e.target.value
+                        }));
+                      }
+                    }} 
+                    required 
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="start_hour" className="text-xs">Hour</Label>
                   <Select value={formData.start_hour} onValueChange={value => {
-                  setFormData(prev => ({
-                    ...prev,
-                    start_hour: value
-                  }));
-                  // Auto-set end hour if not set
-                  if (value && !formData.end_hour) {
-                    const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
                     setFormData(prev => ({
                       ...prev,
-                      end_hour: nextHour > '23' ? '23' : nextHour
+                      start_hour: value
                     }));
-                  }
-                }}>
+                    // Auto-set end hour if not set
+                    if (value && !formData.end_hour) {
+                      const nextHour = (parseInt(value) + 1).toString().padStart(2, '0');
+                      setFormData(prev => ({
+                        ...prev,
+                        end_hour: nextHour > '23' ? '23' : nextHour
+                      }));
+                    }
+                  }}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Hr" />
+                      <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="start_minute" className="text-xs">Min</Label>
-                  <Select value={formData.start_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  start_minute: value
-                }))}>
+                  <Select value={formData.start_minute} onValueChange={value => {
+                    setFormData(prev => ({
+                      ...prev,
+                      start_minute: value
+                    }));
+                    // Auto-set end minute if not set
+                    if (value && !formData.end_minute) {
+                      setFormData(prev => ({
+                        ...prev,
+                        end_minute: value
+                      }));
+                    }
+                  }}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({
-                      length: 60
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
+                      {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                        <SelectItem key={minute} value={minute}>
+                          {minute}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
@@ -360,47 +372,49 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
             <div>
               <Label>End Date & Time</Label>
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <Label htmlFor="end_date" className="text-xs">Date</Label>
-                  <Input id="end_date" type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
-                  ...prev,
-                  end_date: e.target.value
-                }))} />
+              <div className="grid grid-cols-4 gap-2">
+                <div className="col-span-2">
+                  <Input 
+                    id="end_date" 
+                    type="date" 
+                    value={formData.end_date} 
+                    onChange={e => setFormData(prev => ({
+                      ...prev,
+                      end_date: e.target.value
+                    }))} 
+                  />
                 </div>
                 <div>
-                  <Label htmlFor="end_hour" className="text-xs">Hour</Label>
                   <Select value={formData.end_hour} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  end_hour: value
-                }))}>
+                    ...prev,
+                    end_hour: value
+                  }))}>
                     <SelectTrigger>
-                      <SelectValue placeholder="Hr" />
+                      <SelectValue placeholder="Hour" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({
-                      length: 24
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                      {Array.from({ length: 24 }, (_, i) => (
+                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                           {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
                 <div>
-                  <Label htmlFor="end_minute" className="text-xs">Min</Label>
                   <Select value={formData.end_minute} onValueChange={value => setFormData(prev => ({
-                  ...prev,
-                  end_minute: value
-                }))}>
+                    ...prev,
+                    end_minute: value
+                  }))}>
                     <SelectTrigger>
                       <SelectValue placeholder="Min" />
                     </SelectTrigger>
                     <SelectContent>
-                      {Array.from({
-                      length: 60
-                    }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>)}
+                      {['00', '10', '20', '30', '40', '50'].map((minute) => (
+                        <SelectItem key={minute} value={minute}>
+                          {minute}
+                        </SelectItem>
+                      ))}
                     </SelectContent>
                   </Select>
                 </div>
