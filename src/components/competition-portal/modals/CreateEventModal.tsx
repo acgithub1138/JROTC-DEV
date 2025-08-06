@@ -6,7 +6,6 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { JROTC_PROGRAM_OPTIONS } from '../../competition-management/utils/constants';
-
 interface CreateEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -18,7 +17,6 @@ interface CreateEventModalProps {
     jrotc_program?: string | null;
   }) => Promise<any>;
 }
-
 export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   open,
   onOpenChange,
@@ -32,11 +30,9 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
     jrotc_program: ''
   });
   const [isLoading, setIsLoading] = useState(false);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.name.trim()) return;
-
     setIsLoading(true);
     try {
       await onEventCreate({
@@ -45,7 +41,6 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
         score_sheet: formData.score_sheet.trim() || null,
         jrotc_program: formData.jrotc_program || null
       });
-      
       setFormData({
         name: '',
         description: '',
@@ -60,60 +55,51 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
       setIsLoading(false);
     }
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[500px]">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create New Event</DialogTitle>
         </DialogHeader>
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Event Name *</Label>
-            <Input
-              id="name"
-              value={formData.name}
-              onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-              placeholder="Enter event name"
-              required
-            />
+            <Input id="name" value={formData.name} onChange={e => setFormData(prev => ({
+            ...prev,
+            name: e.target.value
+          }))} placeholder="Enter event name" required />
           </div>
 
           <div>
             <Label htmlFor="jrotc_program">Event Type</Label>
-            <Select value={formData.jrotc_program} onValueChange={(value) => setFormData(prev => ({ ...prev, jrotc_program: value }))}>
+            <Select value={formData.jrotc_program} onValueChange={value => setFormData(prev => ({
+            ...prev,
+            jrotc_program: value
+          }))}>
               <SelectTrigger>
                 <SelectValue placeholder="Select event type" />
               </SelectTrigger>
               <SelectContent>
-                {JROTC_PROGRAM_OPTIONS.map(option => (
-                  <SelectItem key={option.value} value={option.value}>
+                {JROTC_PROGRAM_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
                     {option.label}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div>
             <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
-              placeholder="Enter event description"
-              rows={3}
-            />
+            <Textarea id="description" value={formData.description} onChange={e => setFormData(prev => ({
+            ...prev,
+            description: e.target.value
+          }))} placeholder="Enter event description" rows={3} />
           </div>
 
           <div>
             <Label htmlFor="score_sheet">Score Sheet Template</Label>
-            <Input
-              id="score_sheet"
-              value={formData.score_sheet}
-              onChange={(e) => setFormData(prev => ({ ...prev, score_sheet: e.target.value }))}
-              placeholder="Score sheet template name"
-            />
+            <Input id="score_sheet" value={formData.score_sheet} onChange={e => setFormData(prev => ({
+            ...prev,
+            score_sheet: e.target.value
+          }))} placeholder="Score sheet template name" />
           </div>
 
           <div className="flex gap-2 justify-end">
@@ -126,6 +112,5 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
