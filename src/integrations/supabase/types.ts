@@ -3384,6 +3384,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
+      is_school_admin: {
+        Args: { user_id: string; school_id_param: string }
+        Returns: boolean
+      }
       log_email_rule_usage: {
         Args: {
           p_rule_id: string
@@ -3425,12 +3429,7 @@ export type Database = {
       }
       process_overdue_task_reminders: {
         Args: Record<PropertyKey, never>
-        Returns: {
-          processed_count: number
-          school_id: string
-          reminder_type: string
-          tasks_found: number
-        }[]
+        Returns: Json
       }
       queue_email: {
         Args:
