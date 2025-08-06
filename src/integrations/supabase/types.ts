@@ -3335,6 +3335,10 @@ export type Database = {
           can_be_assigned: boolean
         }[]
       }
+      get_current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
       get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
