@@ -124,13 +124,7 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
                 </FormItem>} />
             <FormField control={form.control} name="resource" render={({
               field
-            }) => <FormItem>
-                  <FormLabel>Resource (Optional)</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter resource ID" {...field} />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>} />
+            }) => {}} />
             <FormField control={form.control} name="notes" render={({
               field
             }) => <FormItem>
