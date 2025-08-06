@@ -184,8 +184,9 @@ export const RoleManagementPage: React.FC = () => {
     );
   }
 
-  // Show permission test results if available
-  if (permissionTest && !permissionTest.success) {
+  // Check permission test results with proper type checking
+  const hasPermissionTestError = permissionTest && 'error' in permissionTest;
+  if (hasPermissionTestError) {
     console.warn('Permission system may have issues:', permissionTest.error);
   }
 
@@ -198,10 +199,10 @@ export const RoleManagementPage: React.FC = () => {
         </p>
         {permissionTest && (
           <div className="mt-2 text-sm text-gray-500">
-            System Status: {permissionTest.success ? '✅ Working' : '❌ Error'} | 
-            Current Role: {permissionTest.userRole} | 
-            Can Read Users: {permissionTest.canReadUsers ? '✅' : '❌'} | 
-            Can Create Users: {permissionTest.canCreateUsers ? '✅' : '❌'}
+            System Status: {'success' in permissionTest && permissionTest.success ? '✅ Working' : '❌ Error'} | 
+            Current Role: {'userRole' in permissionTest ? permissionTest.userRole : 'Unknown'} | 
+            Can Read Users: {'canReadUsers' in permissionTest ? (permissionTest.canReadUsers ? '✅' : '❌') : '❌'} | 
+            Can Create Users: {'canCreateUsers' in permissionTest ? (permissionTest.canCreateUsers ? '✅' : '❌') : '❌'}
           </div>
         )}
       </div>
