@@ -3278,6 +3278,34 @@ export type Database = {
         }
         Returns: string
       }
+      can_manage_budget: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_competitions: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_email: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_events: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_inventory: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_job_board: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
+      can_manage_tasks: {
+        Args: Record<PropertyKey, never>
+        Returns: boolean
+      }
       check_email_queue_health: {
         Args: Record<PropertyKey, never>
         Returns: {
@@ -3296,6 +3324,10 @@ export type Database = {
       clear_stale_email_processing_locks: {
         Args: Record<PropertyKey, never>
         Returns: number
+      }
+      current_user_has_permission: {
+        Args: { module_name: string; action_name: string }
+        Returns: boolean
       }
       decrypt_smtp_password: {
         Args: { encrypted_password: string }
