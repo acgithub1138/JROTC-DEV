@@ -12,9 +12,21 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
-  school_id: z.string().min(1, 'School ID is required'),
+  school_id: z.string().min(1, 'School is required'),
   status: z.string().default('registered'),
-  notes: z.string().optional()
+  notes: z.string().optional(),
+  new_school_name: z.string().optional(),
+  new_school_contact: z.string().optional(),
+  new_school_email: z.string().optional()
+}).refine((data) => {
+  // If "not_listed" is selected, require new_school_name
+  if (data.school_id === 'not_listed') {
+    return data.new_school_name && data.new_school_name.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "School name is required when adding a new school",
+  path: ["new_school_name"]
 });
 type FormData = z.infer<typeof formSchema>;
 interface AddSchoolModalProps {
@@ -33,10 +45,13 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   const [schools, setSchools] = useState<Array<{id: string, name: string}>>([]);
   const [isLoadingSchools, setIsLoadingSchools] = useState(true);
 
-  const defaultValues = {
+  const defaultValues: FormData = {
     school_id: '',
-    status: 'registered' as const,
-    notes: ''
+    status: 'registered',
+    notes: '',
+    new_school_name: '',
+    new_school_contact: '',
+    new_school_email: ''
   };
 
   const form = useForm<FormData>({
@@ -78,10 +93,35 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   };
   const onSubmit = async (data: FormData) => {
     try {
+      let schoolId = data.school_id;
+      
+      // If "not_listed" is selected, create a new school first
+      if (data.school_id === 'not_listed') {
+        const { data: newSchool, error: schoolError } = await supabase
+          .from('schools')
+          .insert({
+            name: data.new_school_name!,
+            contact: data.new_school_contact || null,
+            email: data.new_school_email || null
+          })
+          .select()
+          .single();
+          
+        if (schoolError) throw schoolError;
+        
+        schoolId = newSchool.id;
+        
+        // Refresh the schools list to include the new school
+        await fetchSchools();
+      }
+      
       await onSchoolAdded({
-        ...data,
+        school_id: schoolId,
+        status: data.status,
+        notes: data.notes,
         competition_id: competitionId
       });
+      
       form.reset();
       resetChanges();
       onOpenChange(false);
@@ -139,10 +179,45 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
                           {school.name}
                         </SelectItem>
                       ))}
+                      <SelectItem value="not_listed">Not listed</SelectItem>
                     </SelectContent>
                   </Select>
                   <FormMessage />
                 </FormItem>} />
+            
+            {/* Conditional fields for new school */}
+            {form.watch('school_id') === 'not_listed' && (
+              <>
+                <FormField control={form.control} name="new_school_name" render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel>School Name</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter school name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+                <FormField control={form.control} name="new_school_contact" render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel>Contact Person</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter contact person name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+                <FormField control={form.control} name="new_school_email" render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input type="email" placeholder="Enter contact email" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              </>
+            )}
+            
             <FormField control={form.control} name="status" render={({
               field
             }) => <FormItem>
