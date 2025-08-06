@@ -704,7 +704,7 @@ export type Database = {
           notes: string | null
           paid: boolean
           resource: string | null
-          school_id: string
+          school_id: string | null
           school_name: string | null
           status: string
           total_fee: number | null
@@ -720,7 +720,7 @@ export type Database = {
           notes?: string | null
           paid?: boolean
           resource?: string | null
-          school_id: string
+          school_id?: string | null
           school_name?: string | null
           status?: string
           total_fee?: number | null
@@ -736,7 +736,7 @@ export type Database = {
           notes?: string | null
           paid?: boolean
           resource?: string | null
-          school_id?: string
+          school_id?: string | null
           school_name?: string | null
           status?: string
           total_fee?: number | null
