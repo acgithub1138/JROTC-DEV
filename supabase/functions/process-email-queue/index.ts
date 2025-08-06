@@ -1,6 +1,13 @@
 
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -152,6 +159,10 @@ class QueueProcessor {
   }
 }
 
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const emailLimiter = new RateLimiter({ ...RATE_LIMITS.EMAIL_PROCESSING, keyPrefix: 'email-queue' })
+
 serve(async (req) => {
   console.log('🚀 Process Email Queue function started');
   console.log('Method:', req.method);
@@ -204,6 +215,18 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
+    // Rate limiting - Email processing specific check
+    const emailResult = emailLimiter.check(clientIP)
+    if (!emailResult.allowed) {
+      return createRateLimitResponse(emailResult, corsHeaders)
+    }
     const processor = new QueueProcessor();
 
     // Get pending emails from queue
@@ -248,12 +271,14 @@ serve(async (req) => {
 
     console.log('Email processing completed:', result);
 
-    return new Response(JSON.stringify(result), {
+    const response = new Response(JSON.stringify(result), {
       headers: {
         'Content-Type': 'application/json',
         ...corsHeaders,
       },
     });
+    
+    return addRateLimitHeaders(response, emailResult);
 
   } catch (error) {
     console.error('Error in process-email-queue function:', error);

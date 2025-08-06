@@ -1,4 +1,11 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -15,6 +22,10 @@ interface ContactFormData {
   message: string;
   type: string;
 }
+
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const publicLimiter = new RateLimiter({ ...RATE_LIMITS.PUBLIC, keyPrefix: 'contact' })
 
 serve(async (req) => {
   console.log('=== Contact Form Function Called ===');
@@ -46,6 +57,18 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
+    // Rate limiting - Function-specific check
+    const functionResult = publicLimiter.check(clientIP)
+    if (!functionResult.allowed) {
+      return createRateLimitResponse(functionResult, corsHeaders)
+    }
     console.log('=== Processing POST Request ===');
     
     // Parse the request body
@@ -62,7 +85,7 @@ serve(async (req) => {
 
     console.log('Sending success response');
 
-    return new Response(
+    const httpResponse = new Response(
       JSON.stringify(response),
       {
         status: 200,
@@ -72,6 +95,8 @@ serve(async (req) => {
         },
       }
     );
+    
+    return addRateLimitHeaders(httpResponse, functionResult)
 
   } catch (error) {
     console.error('=== Error in Contact Form ===');

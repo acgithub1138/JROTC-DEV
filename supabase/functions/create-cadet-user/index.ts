@@ -7,6 +7,13 @@ import {
   AuthenticationError, 
   AuthorizationError 
 } from '../_shared/auth-utils.ts'
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -25,6 +32,10 @@ interface CreateCadetRequest {
   school_id: string
 }
 
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const userMgmtLimiter = new RateLimiter({ ...RATE_LIMITS.USER_MANAGEMENT, keyPrefix: 'user-mgmt' })
+
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders })
@@ -33,8 +44,21 @@ serve(async (req) => {
   try {
     console.log('Function started')
     
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
     // Validate authentication and get user context
     const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
+    
+    // Rate limiting - Per user check for authenticated users
+    const userResult = userMgmtLimiter.check(actorProfile.id)
+    if (!userResult.allowed) {
+      return createRateLimitResponse(userResult, corsHeaders)
+    }
 
     console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
@@ -131,7 +155,7 @@ serve(async (req) => {
     // Wait for profile update to complete before returning
     await updateProfile()
 
-    return new Response(
+    const response = new Response(
       JSON.stringify({ 
         success: true, 
         user_id: authUser.user!.id,
@@ -143,6 +167,8 @@ serve(async (req) => {
         status: 200,
       },
     )
+    
+    return addRateLimitHeaders(response, userResult)
 
   } catch (error) {
     console.error('Function error:', error)

@@ -2,10 +2,17 @@
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
 import { 
   validateAuthentication, 
-  requireCanToggleUserStatus, 
+  requireCanToggleUserStatus,
   AuthenticationError, 
   AuthorizationError 
 } from '../_shared/auth-utils.ts'
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,6 +25,10 @@ interface ToggleUserStatusRequest {
   active: boolean
 }
 
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const userMgmtLimiter = new RateLimiter({ ...RATE_LIMITS.USER_MANAGEMENT, keyPrefix: 'user-mgmt' })
+
 serve(async (req) => {
   console.log('Toggle user status function started, method:', req.method)
   
@@ -26,8 +37,21 @@ serve(async (req) => {
   }
 
   try {
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
     // Validate authentication and get user context
     const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
+    
+    // Rate limiting - Per user check for authenticated users
+    const userResult = userMgmtLimiter.check(actorProfile.id)
+    if (!userResult.allowed) {
+      return createRateLimitResponse(userResult, corsHeaders)
+    }
 
     console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
@@ -108,8 +132,9 @@ serve(async (req) => {
     const errorCount = errors.length
     const totalCount = usersToProcess.length
 
+    let response
     if (errorCount === 0) {
-      return new Response(
+      response = new Response(
         JSON.stringify({ 
           success: true, 
           message: `${successCount} user(s) ${active ? 'activated' : 'deactivated'} successfully`,
@@ -121,7 +146,7 @@ serve(async (req) => {
         },
       )
     } else if (successCount > 0) {
-      return new Response(
+      response = new Response(
         JSON.stringify({ 
           success: true, 
           message: `${successCount} user(s) ${active ? 'activated' : 'deactivated'} successfully, ${errorCount} failed`,
@@ -136,6 +161,8 @@ serve(async (req) => {
     } else {
       throw new Error(`Failed to ${active ? 'activate' : 'deactivate'} all users`)
     }
+    
+    return addRateLimitHeaders(response, userResult)
 
   } catch (error) {
     console.error('Function error:', error)

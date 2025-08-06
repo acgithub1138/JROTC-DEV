@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from 'https://esm.sh/@supabase/supabase-js@2.45.0';
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -13,6 +20,10 @@ interface ProcessingResult {
   tasks_found: number;
 }
 
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const emailLimiter = new RateLimiter({ ...RATE_LIMITS.EMAIL_PROCESSING, keyPrefix: 'reminders' })
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -22,6 +33,18 @@ const handler = async (req: Request): Promise<Response> => {
   console.log('🚀 Processing overdue task & subtask reminders at:', new Date().toISOString());
 
   try {
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
+    // Rate limiting - Email processing specific check
+    const emailResult = emailLimiter.check(clientIP)
+    if (!emailResult.allowed) {
+      return createRateLimitResponse(emailResult, corsHeaders)
+    }
     // Initialize Supabase client with service role key for full access
     const supabaseUrl = Deno.env.get('SUPABASE_URL')!;
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!;
@@ -69,13 +92,15 @@ const handler = async (req: Request): Promise<Response> => {
         : 'No overdue task or subtask reminders to process at this time'
     };
 
-    return new Response(JSON.stringify(response), {
+    const httpResponse = new Response(JSON.stringify(response), {
       status: 200,
       headers: {
         'Content-Type': 'application/json',
         ...corsHeaders,
       },
     });
+    
+    return addRateLimitHeaders(httpResponse, emailResult);
 
   } catch (error: any) {
     console.error('❌ Error in process-overdue-reminders function:', error);

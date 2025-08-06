@@ -1,5 +1,12 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.50.0";
+import {
+  RateLimiter,
+  RATE_LIMITS,
+  getClientIP,
+  createRateLimitResponse,
+  addRateLimitHeaders
+} from '../_shared/rate-limiter.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -17,12 +24,28 @@ const supabase = createClient(
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
 );
 
+// Rate limiters
+const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
+const webhookLimiter = new RateLimiter({ ...RATE_LIMITS.WEBHOOK, keyPrefix: 'task-status' })
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
   }
 
   try {
+    // Rate limiting - Global IP check
+    const clientIP = getClientIP(req)
+    const globalResult = globalLimiter.check(clientIP)
+    if (!globalResult.allowed) {
+      return createRateLimitResponse(globalResult, corsHeaders)
+    }
+
+    // Rate limiting - Webhook specific check
+    const webhookResult = webhookLimiter.check(clientIP)
+    if (!webhookResult.allowed) {
+      return createRateLimitResponse(webhookResult, corsHeaders)
+    }
     const { taskId, sourceTable, emailRuleType }: UpdateTaskStatusRequest = await req.json();
 
     console.log('Processing status update request:', { taskId, sourceTable, emailRuleType });
@@ -69,32 +92,38 @@ const handler = async (req: Request): Promise<Response> => {
             is_system_comment: true
           });
 
-        return new Response(
+        const response = new Response(
           JSON.stringify({ success: true, message: 'Status updated successfully' }),
           {
             status: 200,
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
           }
         );
+        
+        return addRateLimitHeaders(response, webhookResult);
       } else {
         console.log(`Status not updated - current status is ${currentRecord?.status}, expected need_information`);
-        return new Response(
+        const response = new Response(
           JSON.stringify({ success: false, message: 'Status not updated - not in need_information state' }),
           {
             status: 200,
             headers: { 'Content-Type': 'application/json', ...corsHeaders },
           }
         );
+        
+        return addRateLimitHeaders(response, webhookResult);
       }
     }
 
-    return new Response(
+    const response = new Response(
       JSON.stringify({ success: false, message: 'Not applicable for this email type' }),
       {
         status: 200,
         headers: { 'Content-Type': 'application/json', ...corsHeaders },
       }
     );
+    
+    return addRateLimitHeaders(response, webhookResult);
 
   } catch (error: any) {
     console.error('Error in update-task-status-after-email:', error);
