@@ -103,7 +103,6 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
             name: data.new_school_name!,
             contact: data.new_school_contact || null,
             email: data.new_school_email || null,
-            competition_portal: false  // Enable competition portal for schools created here
           })
           .select()
           .single();
