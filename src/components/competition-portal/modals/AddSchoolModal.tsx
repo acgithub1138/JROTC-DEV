@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
@@ -10,6 +10,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { supabase } from '@/integrations/supabase/client';
 const formSchema = z.object({
   school_id: z.string().min(1, 'School ID is required'),
   status: z.string().default('registered'),
@@ -29,15 +30,20 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   onSchoolAdded
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [schools, setSchools] = useState<Array<{id: string, name: string}>>([]);
+  const [isLoadingSchools, setIsLoadingSchools] = useState(true);
+
   const defaultValues = {
     school_id: '',
     status: 'registered' as const,
     notes: ''
   };
+
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
+
   const {
     hasUnsavedChanges,
     resetChanges
@@ -46,6 +52,30 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
     currentData: form.watch(),
     enabled: open
   });
+
+  // Fetch schools when modal opens
+  useEffect(() => {
+    if (open) {
+      fetchSchools();
+    }
+  }, [open]);
+
+  const fetchSchools = async () => {
+    setIsLoadingSchools(true);
+    try {
+      const { data, error } = await supabase
+        .from('schools')
+        .select('id, name')
+        .order('name');
+      
+      if (error) throw error;
+      setSchools(data || []);
+    } catch (error) {
+      console.error('Error fetching schools:', error);
+    } finally {
+      setIsLoadingSchools(false);
+    }
+  };
   const onSubmit = async (data: FormData) => {
     try {
       await onSchoolAdded({
@@ -96,10 +126,21 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
             <FormField control={form.control} name="school_id" render={({
               field
             }) => <FormItem>
-                  <FormLabel>School ID</FormLabel>
-                  <FormControl>
-                    <Input placeholder="Enter school ID" {...field} />
-                  </FormControl>
+                  <FormLabel>School</FormLabel>
+                  <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isLoadingSchools}>
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      {schools.map((school) => (
+                        <SelectItem key={school.id} value={school.id}>
+                          {school.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                   <FormMessage />
                 </FormItem>} />
             <FormField control={form.control} name="status" render={({
