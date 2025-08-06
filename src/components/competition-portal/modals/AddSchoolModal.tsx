@@ -2,76 +2,57 @@ import React, { useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogFooter,
-  DialogHeader,
-  DialogTitle,
-} from '@/components/ui/dialog';
-import {
-  Form,
-  FormControl,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-} from '@/components/ui/form';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-
 const formSchema = z.object({
   school_id: z.string().min(1, 'School ID is required'),
   status: z.string().default('registered'),
   notes: z.string().optional(),
-  resource: z.string().optional(),
+  resource: z.string().optional()
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 interface AddSchoolModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   competitionId: string;
   onSchoolAdded: (schoolData: any) => Promise<any>;
 }
-
 export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
   open,
   onOpenChange,
   competitionId,
-  onSchoolAdded,
+  onSchoolAdded
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  
   const defaultValues = {
     school_id: '',
     status: 'registered' as const,
     notes: '',
-    resource: '',
+    resource: ''
   };
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
-    defaultValues,
+    defaultValues
   });
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: defaultValues,
     currentData: form.watch(),
     enabled: open
   });
-
   const onSubmit = async (data: FormData) => {
     try {
       await onSchoolAdded({
         ...data,
-        competition_id: competitionId,
+        competition_id: competitionId
       });
       form.reset();
       resetChanges();
@@ -80,7 +61,6 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
       console.error('Error registering school:', error);
     }
   };
-
   const handleOpenChange = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -88,7 +68,6 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
       onOpenChange(open);
     }
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -96,22 +75,18 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     form.reset();
     resetChanges();
     setShowUnsavedDialog(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Register School</DialogTitle>
           <DialogDescription>
@@ -120,24 +95,18 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
         </DialogHeader>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-            <FormField
-              control={form.control}
-              name="school_id"
-              render={({ field }) => (
-                <FormItem>
+            <FormField control={form.control} name="school_id" render={({
+              field
+            }) => <FormItem>
                   <FormLabel>School ID</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter school ID" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="status"
-              render={({ field }) => (
-                <FormItem>
+                </FormItem>} />
+            <FormField control={form.control} name="status" render={({
+              field
+            }) => <FormItem>
                   <FormLabel>Status</FormLabel>
                   <Select onValueChange={field.onChange} defaultValue={field.value}>
                     <FormControl>
@@ -152,35 +121,25 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
                     </SelectContent>
                   </Select>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="resource"
-              render={({ field }) => (
-                <FormItem>
+                </FormItem>} />
+            <FormField control={form.control} name="resource" render={({
+              field
+            }) => <FormItem>
                   <FormLabel>Resource (Optional)</FormLabel>
                   <FormControl>
                     <Input placeholder="Enter resource ID" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
-            <FormField
-              control={form.control}
-              name="notes"
-              render={({ field }) => (
-                <FormItem>
+                </FormItem>} />
+            <FormField control={form.control} name="notes" render={({
+              field
+            }) => <FormItem>
                   <FormLabel>Notes</FormLabel>
                   <FormControl>
                     <Textarea placeholder="Enter any notes" {...field} />
                   </FormControl>
                   <FormMessage />
-                </FormItem>
-              )}
-            />
+                </FormItem>} />
             <DialogFooter>
               <Button type="button" variant="outline" onClick={handleCancel}>
                 Cancel
@@ -194,12 +153,6 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
-  </>
-  );
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+  </>;
 };
