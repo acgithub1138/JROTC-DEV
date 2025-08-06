@@ -1,6 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { 
+  validateAuthentication, 
+  requireCanResetPassword, 
+  AuthenticationError, 
+  AuthorizationError 
+} from '../_shared/auth-utils.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -18,80 +23,36 @@ serve(async (req) => {
   }
 
   try {
-    // Create admin client with service role key
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Validate authentication and get user context
+    const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
 
-    // Get the current user to verify admin permissions
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('No authorization header')
-    }
-
-    // Verify the user is authenticated and get their profile
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-
-    if (authError || !user) {
-      throw new Error('Unauthorized')
-    }
-
-    // Parse request body first to get userId
+    // Parse and validate request body
     const { userId, newPassword }: ResetPasswordRequest = await req.json()
 
     if (!userId || !newPassword) {
       throw new Error('User ID and new password are required')
     }
 
-    // Check if user has permission to reset passwords
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role, school_id')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !profile) {
-      throw new Error('Unable to verify user permissions')
-    }
-
-    // Get the target user's profile to check permissions
-    const { data: targetUser, error: targetUserError } = await supabaseAdmin
-      .from('profiles')
-      .select('role, school_id')
-      .eq('id', userId)
-      .single()
-
-    if (targetUserError || !targetUser) {
-      throw new Error('Target user not found')
-    }
-
-    // Check permissions based on current user role
-    let hasPermission = false;
-
-    if (profile.role === 'admin') {
-      // Admins can reset anyone's password
-      hasPermission = true;
-    } else if (profile.role === 'instructor') {
-      // Instructors can reset passwords for cadets, command_staff, and parents in their school
-      // but not for other instructors or admins
-      hasPermission = profile.school_id === targetUser.school_id && 
-                     targetUser.role !== 'admin' && 
-                     targetUser.role !== 'instructor';
-    }
-
-    if (!hasPermission) {
-      throw new Error('Insufficient permissions to reset this user\'s password')
-    }
-
-    // Validate password length
+    // Validate password requirements
     if (newPassword.length < 6) {
       throw new Error('Password must be at least 6 characters long')
     }
 
-    console.log('User', user.id, 'resetting password for user:', userId)
+    // Get target user's profile
+    const { data: targetProfile, error: targetUserError } = await supabaseAdmin
+      .from('profiles')
+      .select('id, role, school_id, active')
+      .eq('id', userId)
+      .single()
+
+    if (targetUserError || !targetProfile) {
+      throw new Error('Target user not found')
+    }
+
+    // Validate permissions to reset password
+    requireCanResetPassword(actorProfile, targetProfile)
+
+    console.log('User', actorProfile.id, 'resetting password for user:', userId)
 
     // Reset the user's password using admin API
     const { data, error } = await supabaseAdmin.auth.admin.updateUserById(userId, {
@@ -118,13 +79,22 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error)
+    
+    // Handle different error types with appropriate status codes
+    let statusCode = 400
+    if (error instanceof AuthenticationError) {
+      statusCode = error.statusCode
+    } else if (error instanceof AuthorizationError) {
+      statusCode = error.statusCode
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An error occurred resetting the password' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: statusCode,
       },
     )
   }

@@ -1,7 +1,12 @@
 
-
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { 
+  validateAuthentication, 
+  requireCanCreateUserWithRole, 
+  requireSameSchool,
+  AuthenticationError, 
+  AuthorizationError 
+} from '../_shared/auth-utils.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -28,13 +33,10 @@ serve(async (req) => {
   try {
     console.log('Function started')
     
-    // Create admin client with service role key
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Validate authentication and get user context
+    const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
 
-    console.log('Supabase admin client created')
+    console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
     const requestBody = await req.json()
     console.log('Request body:', JSON.stringify(requestBody))
@@ -51,7 +53,18 @@ serve(async (req) => {
       school_id 
     }: CreateCadetRequest = requestBody
 
-    console.log('Creating user:', email, 'with role:', role)
+    // Validate input parameters
+    if (!email || !first_name || !last_name || !school_id) {
+      throw new Error('Required fields missing: email, first_name, last_name, school_id')
+    }
+
+    // Validate permissions to create user with specified role
+    requireCanCreateUserWithRole(actorProfile, role)
+
+    // Validate school access (non-admins can only create users in their own school)
+    requireSameSchool(actorProfile, school_id)
+
+    console.log('Creating user:', email, 'with role:', role, 'in school:', school_id)
 
     // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -133,13 +146,22 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error)
+    
+    // Handle different error types with appropriate status codes
+    let statusCode = 400
+    if (error instanceof AuthenticationError) {
+      statusCode = error.statusCode
+    } else if (error instanceof AuthorizationError) {
+      statusCode = error.statusCode
+    }
+    
     return new Response(
       JSON.stringify({ 
-        error: error.message || 'An error occurred sending the invitation' 
+        error: error.message || 'An error occurred creating the user' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: statusCode,
       },
     )
   }

@@ -1,6 +1,11 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import { 
+  validateAuthentication, 
+  requireCanToggleUserStatus, 
+  AuthenticationError, 
+  AuthorizationError 
+} from '../_shared/auth-utils.ts'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -21,37 +26,10 @@ serve(async (req) => {
   }
 
   try {
-    // Create admin client with service role key
-    const supabaseAdmin = createClient(
-      Deno.env.get('SUPABASE_URL') ?? '',
-      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
-    )
+    // Validate authentication and get user context
+    const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
 
-    // Get the current user to verify admin permissions
-    const authHeader = req.headers.get('Authorization')
-    if (!authHeader) {
-      throw new Error('No authorization header')
-    }
-
-    // Verify the user is authenticated and get their profile
-    const { data: { user }, error: authError } = await supabaseAdmin.auth.getUser(
-      authHeader.replace('Bearer ', '')
-    )
-
-    if (authError || !user) {
-      throw new Error('Unauthorized')
-    }
-
-    // Check if user is admin or instructor
-    const { data: profile, error: profileError } = await supabaseAdmin
-      .from('profiles')
-      .select('role')
-      .eq('id', user.id)
-      .single()
-
-    if (profileError || !['admin', 'instructor'].includes(profile?.role)) {
-      throw new Error('Insufficient permissions - admin or instructor role required')
-    }
+    console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
     const { userId, userIds, active }: ToggleUserStatusRequest = await req.json()
 
@@ -65,7 +43,7 @@ serve(async (req) => {
       throw new Error('Either userId or userIds is required')
     }
 
-    console.log('User', user.id, 'toggling status for users:', usersToProcess, 'to active:', active)
+    console.log('User', actorProfile.id, 'toggling status for users:', usersToProcess, 'to active:', active)
 
     // Process each user
     const results = []
@@ -73,6 +51,28 @@ serve(async (req) => {
 
     for (const targetUserId of usersToProcess) {
       try {
+        // Get target user's profile for permission validation
+        const { data: targetProfile, error: targetProfileError } = await supabaseAdmin
+          .from('profiles')
+          .select('id, role, school_id, active')
+          .eq('id', targetUserId)
+          .single()
+
+        if (targetProfileError || !targetProfile) {
+          console.error('Failed to get target user profile for', targetUserId, ':', targetProfileError)
+          errors.push({ userId: targetUserId, error: 'Target user not found' })
+          continue
+        }
+
+        // Validate permissions for this specific user
+        try {
+          requireCanToggleUserStatus(actorProfile, targetProfile)
+        } catch (permissionError) {
+          console.error('Permission denied for user', targetUserId, ':', permissionError.message)
+          errors.push({ userId: targetUserId, error: permissionError.message })
+          continue
+        }
+
         // Update the user's ban status using admin API
         const { error: authUpdateError } = await supabaseAdmin.auth.admin.updateUserById(targetUserId, {
           ban_duration: active ? "none" : "876600h", // 100 years for inactive users
@@ -139,13 +139,22 @@ serve(async (req) => {
 
   } catch (error) {
     console.error('Function error:', error)
+    
+    // Handle different error types with appropriate status codes
+    let statusCode = 400
+    if (error instanceof AuthenticationError) {
+      statusCode = error.statusCode
+    } else if (error instanceof AuthorizationError) {
+      statusCode = error.statusCode
+    }
+    
     return new Response(
       JSON.stringify({ 
         error: error.message || 'An error occurred toggling user status' 
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 400,
+        status: statusCode,
       },
     )
   }
