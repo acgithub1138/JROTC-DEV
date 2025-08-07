@@ -5,7 +5,9 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Button } from '@/components/ui/button';
 import { Label } from '@/components/ui/label';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useAvailableTables, useTableColumns, useEnhancedVariables, useGroupedReferenceFields } from '@/hooks/email/useTableColumns';
 import { TemplateBasicFields } from './components/TemplateBasicFields';
@@ -30,6 +32,7 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     createTemplate,
     updateTemplate
   } = useEmailTemplates();
+  const { userProfile } = useAuth();
   const {
     data: availableTables = []
   } = useAvailableTables();
@@ -39,7 +42,8 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     body: '',
     source_table: '',
     recipient_field: '',
-    is_active: true
+    is_active: true,
+    is_global: false
   });
   const subjectRef = useRef<HTMLInputElement>(null);
   const quillRef = useRef<ReactQuill>(null);
@@ -52,14 +56,16 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
     body: template.body,
     source_table: template.source_table,
     recipient_field: template.recipient_field || '',
-    is_active: template.is_active
+    is_active: template.is_active,
+    is_global: template.is_global || false
   } : {
     name: '',
     subject: '',
     body: '',
     source_table: '',
     recipient_field: '',
-    is_active: true
+    is_active: true,
+    is_global: false
   };
   const {
     hasUnsavedChanges,
@@ -86,7 +92,8 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         body: template.body,
         source_table: template.source_table,
         recipient_field: template.recipient_field || '',
-        is_active: template.is_active
+        is_active: template.is_active,
+        is_global: template.is_global || false
       });
     } else {
       setFormData({
@@ -95,7 +102,8 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
         body: '',
         source_table: '',
         recipient_field: '',
-        is_active: true
+        is_active: true,
+        is_global: false
       });
     }
   }, [template, mode, open]);
@@ -201,6 +209,20 @@ export const EmailTemplateDialog: React.FC<EmailTemplateDialogProps> = ({
 
           <form onSubmit={handleSubmit} className="space-y-6">
             <TemplateBasicFields formData={formData} onFormChange={handleFormChange} availableTables={availableTables} />
+
+            {/* Global Template Checkbox - Only for Admins */}
+            {userProfile?.role === 'admin' && (
+              <div className="flex items-center space-x-2">
+                <Checkbox
+                  id="is_global"
+                  checked={formData.is_global}
+                  onCheckedChange={(checked) => handleFormChange({ is_global: !!checked })}
+                />
+                <Label htmlFor="is_global" className="text-sm font-medium">
+                  Global Template (visible to all schools)
+                </Label>
+              </div>
+            )}
 
             {/* Email Recipient Field */}
             <div className="space-y-2">

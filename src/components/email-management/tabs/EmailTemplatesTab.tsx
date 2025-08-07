@@ -1,7 +1,10 @@
 
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { Plus } from 'lucide-react';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Switch } from '@/components/ui/switch';
+import { Plus, Search } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
@@ -10,7 +13,17 @@ import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 
 export const EmailTemplatesTab: React.FC = () => {
   const { canCreate } = useTablePermissions('email');
-  const { templates, isLoading } = useEmailTemplates();
+  const { 
+    templates, 
+    isLoading, 
+    showOnlyMyTemplates, 
+    searchQuery, 
+    setSearchQuery, 
+    toggleMyTemplatesFilter, 
+    copyTemplate,
+    canEditTemplate,
+    canCopyTemplate 
+  } = useEmailTemplates();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [previewingTemplate, setPreviewingTemplate] = useState<any>(null);
@@ -26,6 +39,10 @@ export const EmailTemplatesTab: React.FC = () => {
   const handleCloseDialog = () => {
     setShowCreateDialog(false);
     setEditingTemplate(null);
+  };
+
+  const handleCopy = async (templateId: string) => {
+    copyTemplate(templateId);
   };
 
   const handleClosePreviewDialog = () => {
@@ -44,11 +61,34 @@ export const EmailTemplatesTab: React.FC = () => {
         )}
       </div>
 
+      <div className="flex items-center gap-4">
+        <div className="relative flex-1">
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground w-4 h-4" />
+          <Input
+            placeholder="Search templates..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            className="pl-9"
+          />
+        </div>
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="my-templates"
+            checked={showOnlyMyTemplates}
+            onCheckedChange={toggleMyTemplatesFilter}
+          />
+          <Label htmlFor="my-templates">My Templates</Label>
+        </div>
+      </div>
+
       <EmailTemplatesTable
         templates={templates}
         isLoading={isLoading}
         onEdit={handleEdit}
         onView={handleView}
+        onCopy={handleCopy}
+        canEditTemplate={canEditTemplate}
+        canCopyTemplate={canCopyTemplate}
       />
 
       <EmailTemplateDialog

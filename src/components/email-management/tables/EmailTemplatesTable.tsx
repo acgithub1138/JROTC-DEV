@@ -12,7 +12,7 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { Edit, Trash2, Eye } from 'lucide-react';
+import { Edit, Trash2, Eye, Copy, Globe } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { format } from 'date-fns';
@@ -24,6 +24,9 @@ interface EmailTemplatesTableProps {
   isLoading: boolean;
   onEdit: (template: EmailTemplate) => void;
   onView?: (template: EmailTemplate) => void;
+  onCopy?: (templateId: string) => void;
+  canEditTemplate?: (template: EmailTemplate) => boolean;
+  canCopyTemplate?: (template: EmailTemplate) => boolean;
 }
 
 export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
@@ -31,6 +34,9 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   isLoading,
   onEdit,
   onView,
+  onCopy,
+  canEditTemplate,
+  canCopyTemplate,
 }) => {
   const { deleteTemplate } = useEmailTemplates();
   const { canUpdate, canDelete, canViewDetails } = useEmailPermissions();
@@ -87,6 +93,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
             </SortableTableHead>
             <TableHead>Subject</TableHead>
             <TableHead>Source Table</TableHead>
+            <TableHead>Type</TableHead>
             <TableHead>Status</TableHead>
             <TableHead>Created</TableHead>
             <TableHead className="text-center">Actions</TableHead>
@@ -110,6 +117,18 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
               <TableCell className="py-2">{template.subject}</TableCell>
               <TableCell className="py-2">
                 <Badge variant="outline">{template.source_table}</Badge>
+              </TableCell>
+              <TableCell className="py-2">
+                <div className="flex items-center gap-2">
+                  {template.is_global ? (
+                    <Badge variant="secondary" className="flex items-center gap-1">
+                      <Globe className="w-3 h-3" />
+                      Global
+                    </Badge>
+                  ) : (
+                    <Badge variant="outline">School</Badge>
+                  )}
+                </div>
               </TableCell>
               <TableCell className="py-2">
                 <Badge variant={template.is_active ? 'default' : 'secondary'}>
@@ -137,7 +156,23 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {canUpdate && (
+                  {onCopy && canCopyTemplate?.(template) && (
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button
+                          variant="outline"
+                          size="icon" className="h-6 w-6"
+                          onClick={() => onCopy(template.id)}
+                        >
+                          <Copy className="w-3 h-3" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Copy template</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  )}
+                  {canEditTemplate?.(template) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
@@ -153,7 +188,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                       </TooltipContent>
                     </Tooltip>
                   )}
-                  {canDelete && (
+                  {canDelete && canEditTemplate?.(template) && (
                     <Tooltip>
                       <TooltipTrigger asChild>
                         <Button
