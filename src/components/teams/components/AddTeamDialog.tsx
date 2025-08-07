@@ -102,7 +102,7 @@ export const AddTeamDialog = ({
       <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">Add New Team</DialogTitle>
+          <DialogTitle className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto py-[4px]">Add New Team</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
