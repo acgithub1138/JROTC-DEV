@@ -133,7 +133,7 @@ export const EditTeamDialog = ({
   if (!team) return null;
   return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+      <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
           <DialogTitle className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">Edit Team</DialogTitle>
         </DialogHeader>
