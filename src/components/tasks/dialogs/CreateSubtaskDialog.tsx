@@ -37,7 +37,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
   const [formData, setFormData] = useState({
     title: '',
     description: '',
-    status: 'open',
+    status: 'not_started',
     priority: 'medium',
     assigned_to: '',
     due_date: null as Date | null
@@ -58,7 +58,7 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
     setFormData({
       title: '',
       description: '',
-      status: 'open',
+      status: 'not_started',
       priority: 'medium',
       assigned_to: '',
       due_date: null
