@@ -209,7 +209,15 @@ export const useCadetManagement = () => {
     }
   };
 
-  const handleSaveProfile = async (editingProfile: Profile) => {
+  const handleSaveProfile = async (profileToSave?: Profile) => {
+    // Use the passed profile or fall back to editingProfile for backward compatibility
+    const editingProfile = profileToSave;
+    
+    if (!editingProfile) {
+      console.error('🔧 EditCadet - No profile provided to save');
+      return;
+    }
+
     const updatePayload = {
       grade: editingProfile.grade || null,
       rank: editingProfile.rank || null,

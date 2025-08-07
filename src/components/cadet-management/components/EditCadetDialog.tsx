@@ -118,14 +118,24 @@ export const EditCadetDialog = ({
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    // Update editingProfile with form data before submitting
+    console.log('🔧 EditCadet - Form submitted with formData:', formData);
+    
+    // Create the updated profile data directly and pass it to the parent
     if (editingProfile) {
-      setEditingProfile({
+      const updatedProfile = {
         ...editingProfile,
         ...formData
-      });
+      };
+      
+      console.log('🔧 EditCadet - Updated profile to be saved:', updatedProfile);
+      console.log('🔧 EditCadet - cadet_year in updated profile:', updatedProfile.cadet_year, 'type:', typeof updatedProfile.cadet_year);
+      
+      // Update the state for UI consistency
+      setEditingProfile(updatedProfile);
+      
+      // Call onSubmit which should handle the saving
+      onSubmit(e);
     }
-    onSubmit(e);
     resetChanges();
   };
   if (!editingProfile) return null;
