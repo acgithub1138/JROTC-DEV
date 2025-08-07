@@ -46,6 +46,35 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
   
   const { editState, setEditState, cancelEdit, saveEdit, canEditTask } = useTaskTableLogic();
 
+  // Helper function to handle field changes with system comments
+  const handleFieldChange = async (field: string, newValue: any, oldValue: any) => {
+    const updateData = { id: subtask.id, [field]: newValue };
+    
+    try {
+      await updateSubtask(updateData);
+      
+      // Add system comment for tracked fields
+      const trackedFields = ['status', 'priority', 'assigned_to', 'due_date', 'title', 'description'];
+      if (trackedFields.includes(field)) {
+        const { formatSubtaskFieldChangeComment } = await import('@/utils/subtaskCommentUtils');
+        const commentText = formatSubtaskFieldChangeComment(
+          field,
+          oldValue,
+          newValue,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        handleSystemComment(subtask.id, commentText);
+      }
+      
+      cancelEdit();
+    } catch (error) {
+      console.error('Failed to update subtask:', error);
+      throw error;
+    }
+  };
+
   // Handle subtask cancellation
   const handleCancel = async () => {
     setPendingStatusChange('canceled');
@@ -61,17 +90,9 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
       setPendingStatusChange(newStatus);
       setIsStatusCommentModalOpen(true);
     } else {
-      try {
-        // Direct status change for other statuses - we need to use updateSubtask instead of saveEdit
-        await updateSubtask({
-          id: subtask.id,
-          status: newStatus
-        });
-        cancelEdit(); // Close the dropdown after successful update
-      } catch (error) {
-        cancelEdit(); // Also close on error to reset the UI
-        throw error;
-      }
+      // For status changes that don't require a comment, use handleFieldChange to add system comment
+      const oldStatus = subtask.status;
+      await handleFieldChange('status', newStatus, oldStatus);
     }
   };
 
@@ -83,21 +104,27 @@ export const SubtaskTableRow: React.FC<SubtaskTableRowProps> = ({
           addComment(comment);
         }
         
-        // For canceled status, also set completed_at
-        if (pendingStatusChange === 'canceled') {
-          const now = new Date().toISOString();
-          await updateSubtask({
-            id: subtask.id,
-            status: pendingStatusChange,
-            completed_at: now
-          });
-        } else {
-          // Then save the status change (which will trigger email with the fresh comment)
-          await updateSubtask({
-            id: subtask.id,
-            status: pendingStatusChange
-          });
-        }
+        // Save the status change with system comment
+        const oldStatus = subtask.status;
+        const updateData = {
+          id: subtask.id,
+          status: pendingStatusChange,
+          ...(pendingStatusChange === 'canceled' && { completed_at: new Date().toISOString() })
+        };
+        
+        await updateSubtask(updateData);
+        
+        // Add system comment for status change
+        const { formatSubtaskFieldChangeComment } = await import('@/utils/subtaskCommentUtils');
+        const commentText = formatSubtaskFieldChangeComment(
+          'status',
+          oldStatus,
+          pendingStatusChange,
+          statusOptions,
+          priorityOptions,
+          users
+        );
+        handleSystemComment(subtask.id, commentText);
         
         // Reset modal state and close dropdown
         setIsStatusCommentModalOpen(false);

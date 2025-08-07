@@ -212,16 +212,53 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       const updateData: any = {
         id: currentSubtask.id
       };
-      if (editData.title !== currentSubtask.title) updateData.title = editData.title;
-      if (editData.description !== (currentSubtask.description || '')) updateData.description = editData.description || null;
-      if (editData.status !== currentSubtask.status) updateData.status = editData.status;
-      if (editData.priority !== currentSubtask.priority) updateData.priority = editData.priority;
+      
+      // Track changes for system comments
+      const changes: Array<{field: string, oldValue: any, newValue: any}> = [];
+      
+      if (editData.title !== currentSubtask.title) {
+        updateData.title = editData.title;
+        changes.push({field: 'title', oldValue: currentSubtask.title, newValue: editData.title});
+      }
+      if (editData.description !== (currentSubtask.description || '')) {
+        updateData.description = editData.description || null;
+        changes.push({field: 'description', oldValue: currentSubtask.description, newValue: editData.description});
+      }
+      if (editData.status !== currentSubtask.status) {
+        updateData.status = editData.status;
+        changes.push({field: 'status', oldValue: currentSubtask.status, newValue: editData.status});
+      }
+      if (editData.priority !== currentSubtask.priority) {
+        updateData.priority = editData.priority;
+        changes.push({field: 'priority', oldValue: currentSubtask.priority, newValue: editData.priority});
+      }
       const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
-      if (newAssignedTo !== currentSubtask.assigned_to) updateData.assigned_to = newAssignedTo;
+      if (newAssignedTo !== currentSubtask.assigned_to) {
+        updateData.assigned_to = newAssignedTo;
+        changes.push({field: 'assigned_to', oldValue: currentSubtask.assigned_to, newValue: newAssignedTo});
+      }
       if (editData.due_date !== (currentSubtask.due_date ? new Date(currentSubtask.due_date) : null)) {
         updateData.due_date = editData.due_date ? editData.due_date.toISOString() : null;
+        changes.push({field: 'due_date', oldValue: currentSubtask.due_date, newValue: editData.due_date});
       }
+      
       await updateSubtask(updateData);
+
+      // Add system comments for all changes
+      if (changes.length > 0) {
+        const { formatSubtaskFieldChangeComment } = await import('@/utils/subtaskCommentUtils');
+        for (const change of changes) {
+          const commentText = formatSubtaskFieldChangeComment(
+            change.field,
+            change.oldValue,
+            change.newValue,
+            statusOptions,
+            priorityOptions,
+            users
+          );
+          addSystemComment(commentText);
+        }
+      }
 
       // Send notification email if requested
       if (sendNotification) {
