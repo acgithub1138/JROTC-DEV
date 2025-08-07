@@ -3,14 +3,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useEmailService } from '@/hooks/email/useEmailService';
 import { CreateTaskData } from '../types';
 
 export const useCreateTask = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const { processEmailRules } = useEmailService();
 
   return useMutation({
     mutationFn: async (taskData: CreateTaskData) => {
@@ -57,15 +55,7 @@ export const useCreateTask = () => {
         description: "The task has been created successfully.",
       });
       
-      // Trigger task_created email if assigned_to is set
-      if (data?.assigned_to && userProfile?.school_id) {
-        processEmailRules({
-          sourceTable: 'tasks',
-          recordId: data.id,
-          schoolId: userProfile.school_id,
-          operationType: 'task_created',
-        });
-      }
+      // Email notifications are handled automatically by database triggers
     },
     onError: (error: any) => {
       console.error('Create task mutation error:', error);

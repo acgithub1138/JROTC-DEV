@@ -2,14 +2,12 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { useEmailService } from '@/hooks/email/useEmailService';
 import { CreateSubtaskData } from '../../tasks/types';
 
 export const useCreateSubtask = () => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
-  const { processEmailRules } = useEmailService();
 
   return useMutation({
     mutationFn: async (subtaskData: CreateSubtaskData) => {
@@ -35,15 +33,7 @@ export const useCreateSubtask = () => {
         description: "The subtask has been created successfully.",
       });
       
-      // Trigger subtask_created email if assigned_to is set
-      if (data?.assigned_to && userProfile?.school_id) {
-        processEmailRules({
-          sourceTable: 'subtasks',
-          recordId: data.id,
-          schoolId: userProfile.school_id,
-          operationType: 'subtask_created',
-        });
-      }
+      // Email notifications are handled automatically by database triggers
     },
     onError: (error) => {
       toast({
