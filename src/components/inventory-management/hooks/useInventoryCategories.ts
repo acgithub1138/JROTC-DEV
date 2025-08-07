@@ -1,6 +1,7 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCallback } from 'react';
 
 export const useInventoryCategories = () => {
   const { userProfile } = useAuth();
@@ -51,8 +52,8 @@ export const useInventoryCategories = () => {
     enabled: !!userProfile?.school_id,
   });
 
-  // Function to get subcategories for a specific category
-  const getSubCategoriesForCategory = async (category: string) => {
+  // Memoized function to get subcategories for a specific category
+  const getSubCategoriesForCategory = useCallback(async (category: string) => {
     if (!userProfile?.school_id || !category) return [];
 
     const { data, error } = await supabase
@@ -66,7 +67,7 @@ export const useInventoryCategories = () => {
     
     const uniqueSubCategories = [...new Set(data.map(item => item.sub_category).filter(Boolean))];
     return uniqueSubCategories.sort();
-  };
+  }, [userProfile?.school_id]);
 
   return {
     categories: categories || [],
