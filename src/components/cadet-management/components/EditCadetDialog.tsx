@@ -118,24 +118,14 @@ export const EditCadetDialog = ({
   };
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log('🔧 EditCadet - Form submitted with formData:', formData);
-    
-    // Create the updated profile data directly and pass it to the parent
+    // Update editingProfile with form data before submitting
     if (editingProfile) {
-      const updatedProfile = {
+      setEditingProfile({
         ...editingProfile,
         ...formData
-      };
-      
-      console.log('🔧 EditCadet - Updated profile to be saved:', updatedProfile);
-      console.log('🔧 EditCadet - cadet_year in updated profile:', updatedProfile.cadet_year, 'type:', typeof updatedProfile.cadet_year);
-      
-      // Update the state for UI consistency
-      setEditingProfile(updatedProfile);
-      
-      // Call onSubmit which should handle the saving
-      onSubmit(e);
+      });
     }
+    onSubmit(e);
     resetChanges();
   };
   if (!editingProfile) return null;
@@ -215,7 +205,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.grade} onValueChange={value => setFormData({
                 ...formData,
                 grade: value
-              })}>
+              })} disabled={!canUpdate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
@@ -231,7 +221,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.flight} onValueChange={value => setFormData({
                 ...formData,
                 flight: value
-              })}>
+              })} disabled={!canUpdate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
@@ -247,7 +237,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.cadet_year} onValueChange={value => setFormData({
                 ...formData,
                 cadet_year: value
-              })}>
+              })} disabled={!canUpdate}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
@@ -265,7 +255,7 @@ export const EditCadetDialog = ({
               <Select value={formData.role} onValueChange={value => setFormData({
               ...formData,
               role: value
-            })}>
+            })} disabled={!canUpdate}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -282,7 +272,7 @@ export const EditCadetDialog = ({
               <Select value={formData.rank} onValueChange={value => setFormData({
               ...formData,
               rank: value === "none" ? "" : value
-            })}>
+            })} disabled={!canUpdate}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select rank" />
                 </SelectTrigger>
