@@ -18,6 +18,16 @@ import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { format } from 'date-fns';
 import { useState, useMemo } from 'react';
 import { SortConfig } from '@/components/ui/sortable-table';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '@/components/ui/alert-dialog';
 
 interface EmailTemplatesTableProps {
   templates: EmailTemplate[];
@@ -41,6 +51,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   const { deleteTemplate } = useEmailTemplates();
   const { canUpdate, canDelete, canViewDetails } = useEmailPermissions();
   const [sortConfig, setSortConfig] = useState<SortConfig | null>({ key: 'name', direction: 'asc' });
+  const [templateToDelete, setTemplateToDelete] = useState<EmailTemplate | null>(null);
 
   const sortedTemplates = useMemo(() => {
     if (!sortConfig) return templates;
@@ -68,9 +79,14 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
     });
   };
 
-  const handleDelete = (id: string) => {
-    if (window.confirm('Are you sure you want to delete this template?')) {
-      deleteTemplate(id);
+  const handleDeleteClick = (template: EmailTemplate) => {
+    setTemplateToDelete(template);
+  };
+
+  const handleConfirmDelete = () => {
+    if (templateToDelete) {
+      deleteTemplate(templateToDelete.id);
+      setTemplateToDelete(null);
     }
   };
 
@@ -194,7 +210,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                         <Button
                           variant="outline"
                           size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                          onClick={() => handleDelete(template.id)}
+                          onClick={() => handleDeleteClick(template)}
                         >
                           <Trash2 className="w-3 h-3" />
                         </Button>
@@ -211,6 +227,28 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
         </TableBody>
       </Table>
     </div>
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!templateToDelete} onOpenChange={() => setTemplateToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Email Template</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete the email template "{templateToDelete?.name}"? 
+              This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleConfirmDelete}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Delete Template
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </TooltipProvider>
   );
 };
