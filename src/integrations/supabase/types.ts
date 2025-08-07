@@ -1443,9 +1443,10 @@ export type Database = {
           created_by: string | null
           id: string
           is_active: boolean
+          is_global: boolean | null
           name: string
           recipient_field: string | null
-          school_id: string
+          school_id: string | null
           source_table: string
           subject: string
           updated_at: string
@@ -1457,9 +1458,10 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_global?: boolean | null
           name: string
           recipient_field?: string | null
-          school_id: string
+          school_id?: string | null
           source_table: string
           subject: string
           updated_at?: string
@@ -1471,9 +1473,10 @@ export type Database = {
           created_by?: string | null
           id?: string
           is_active?: boolean
+          is_global?: boolean | null
           name?: string
           recipient_field?: string | null
-          school_id?: string
+          school_id?: string | null
           source_table?: string
           subject?: string
           updated_at?: string
@@ -3278,44 +3281,16 @@ export type Database = {
         }
         Returns: string
       }
-      can_assign_user_role: {
-        Args: { target_role_name: string }
-        Returns: boolean
-      }
-      can_manage_budget: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_competitions: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_email: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_events: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_inventory: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_job_board: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
-      can_manage_tasks: {
-        Args: Record<PropertyKey, never>
-        Returns: boolean
-      }
       can_manage_user_role: {
         Args: { target_role_name: string }
         Returns: boolean
       }
-      can_modify_user_profile: {
-        Args: { target_user_id: string }
+      can_user_access: {
+        Args: { module_name: string; action_name: string }
+        Returns: boolean
+      }
+      can_user_global: {
+        Args: { module_name: string; action_name: string }
         Returns: boolean
       }
       check_email_queue_health: {
@@ -3383,11 +3358,7 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: string
       }
-      get_current_user_role: {
-        Args: Record<PropertyKey, never>
-        Returns: string
-      }
-      get_current_user_school_id: {
+      get_current_user_school_id_safe: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -3441,12 +3412,12 @@ export type Database = {
         Args: { mapping_id: string }
         Returns: undefined
       }
-      is_current_user_admin: {
+      is_current_user_admin_role: {
         Args: Record<PropertyKey, never>
         Returns: boolean
       }
-      is_school_admin: {
-        Args: { user_id: string; school_id_param: string }
+      is_user_in_school: {
+        Args: { target_school_id: string }
         Returns: boolean
       }
       log_email_rule_usage: {
