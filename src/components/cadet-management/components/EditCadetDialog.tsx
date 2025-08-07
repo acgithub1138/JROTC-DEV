@@ -215,7 +215,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.grade} onValueChange={value => setFormData({
                 ...formData,
                 grade: value
-              })} disabled={!canUpdate}>
+              })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
@@ -231,7 +231,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.flight} onValueChange={value => setFormData({
                 ...formData,
                 flight: value
-              })} disabled={!canUpdate}>
+              })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
@@ -247,7 +247,7 @@ export const EditCadetDialog = ({
                 <Select value={formData.cadet_year} onValueChange={value => setFormData({
                 ...formData,
                 cadet_year: value
-              })} disabled={!canUpdate}>
+              })}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
@@ -265,7 +265,7 @@ export const EditCadetDialog = ({
               <Select value={formData.role} onValueChange={value => setFormData({
               ...formData,
               role: value
-            })} disabled={!canUpdate}>
+            })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
@@ -282,7 +282,7 @@ export const EditCadetDialog = ({
               <Select value={formData.rank} onValueChange={value => setFormData({
               ...formData,
               rank: value === "none" ? "" : value
-            })} disabled={!canUpdate}>
+            })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select rank" />
                 </SelectTrigger>
