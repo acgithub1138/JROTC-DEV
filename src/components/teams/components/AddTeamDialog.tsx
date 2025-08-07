@@ -99,7 +99,9 @@ export const AddTeamDialog = ({
     return users.filter(user => newTeam.member_ids.includes(user.id));
   };
   const getAvailableUsers = () => {
-    return users.filter(user => !newTeam.member_ids.includes(user.id) && user.id !== newTeam.team_lead_id);
+    return users
+      .filter(user => !newTeam.member_ids.includes(user.id) && user.id !== newTeam.team_lead_id)
+      .sort((a, b) => a.last_name.localeCompare(b.last_name));
   };
   return (
     <>
@@ -137,8 +139,11 @@ export const AddTeamDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No team lead</SelectItem>
-                {users.filter(user => !newTeam.member_ids.includes(user.id)).map(user => <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.role})
+                {users
+                  .filter(user => !newTeam.member_ids.includes(user.id))
+                  .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                  .map(user => <SelectItem key={user.id} value={user.id}>
+                      {user.last_name}, {user.first_name} ({user.role})
                     </SelectItem>)}
               </SelectContent>
             </Select>
@@ -153,7 +158,7 @@ export const AddTeamDialog = ({
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableUsers().map(user => <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.role})
+                      {user.last_name}, {user.first_name} ({user.role})
                     </SelectItem>)}
                 </SelectContent>
               </Select>
