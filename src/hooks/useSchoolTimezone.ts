@@ -5,6 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 export const useSchoolTimezone = () => {
   const [timezone, setTimezone] = useState<string>('America/New_York'); // Default fallback
   const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const { userProfile } = useAuth();
 
   useEffect(() => {
@@ -15,6 +16,7 @@ export const useSchoolTimezone = () => {
       }
 
       try {
+        setError(null);
         const { data, error } = await supabase
           .from('schools')
           .select('timezone')
@@ -22,19 +24,26 @@ export const useSchoolTimezone = () => {
           .single();
 
         if (error) {
-          console.error('Error fetching school timezone:', error);
+          setError('Failed to fetch school timezone');
+          // Don't log repeatedly to avoid console spam
         } else if (data?.timezone) {
           setTimezone(data.timezone);
         }
       } catch (error) {
-        console.error('Error fetching school timezone:', error);
+        setError('Network error fetching school timezone');
+        // Don't log repeatedly to avoid console spam
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchSchoolTimezone();
-  }, [userProfile?.school_id]);
+    // Only fetch if we haven't already tried and failed
+    if (!error) {
+      fetchSchoolTimezone();
+    } else {
+      setIsLoading(false);
+    }
+  }, [userProfile?.school_id, error]);
 
   return { timezone, isLoading };
 };
