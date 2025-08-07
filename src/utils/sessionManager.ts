@@ -95,7 +95,11 @@ export class SessionManager {
         });
       }
       
-      const { data: role, error } = await supabase.rpc('get_current_user_role');
+      const { data: profile, error } = await supabase
+        .from('profiles')
+        .select('role')
+        .eq('id', validSession.user?.id)
+        .single();
       
       if (error) {
         console.error('Auth context validation failed:', error);
@@ -103,16 +107,21 @@ export class SessionManager {
         // If still failing, try one more time with manual session set
         if (validSession?.access_token) {
           console.log('Retrying with manual session attachment...');
-          const retryResult = await supabase.rpc('get_current_user_role');
-          if (retryResult.data) {
-            console.log('Manual session attachment successful. User role:', retryResult.data);
-            return { role: retryResult.data, isValid: true };
+          const retryResult = await supabase
+            .from('profiles')
+            .select('role')
+            .eq('id', validSession.user?.id)
+            .single();
+          if (retryResult.data?.role) {
+            console.log('Manual session attachment successful. User role:', retryResult.data.role);
+            return { role: retryResult.data.role, isValid: true };
           }
         }
         
         return { role: null, isValid: false };
       }
 
+      const role = profile?.role || null;
       console.log('Auth context validated. User role:', role);
       return { role, isValid: true };
     } catch (error) {
