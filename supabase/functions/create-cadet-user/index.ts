@@ -43,7 +43,7 @@ serve(async (req) => {
   }
 
   try {
-    console.log('Function started')
+    console.log('Function started - create-cadet-user v2.0')
     
     // Rate limiting - Global IP check
     const clientIP = getClientIP(req)
@@ -64,7 +64,7 @@ serve(async (req) => {
     console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
     const requestBody = await req.json()
-    console.log('Request body:', JSON.stringify(requestBody))
+    console.log('📋 Request body received:', JSON.stringify(requestBody))
 
     const { 
       email, 
@@ -78,6 +78,9 @@ serve(async (req) => {
       cadet_year,
       school_id 
     }: CreateCadetRequest = requestBody
+
+    console.log('📝 Extracted cadet_year:', cadet_year, 'type:', typeof cadet_year)
+    console.log('📝 All extracted values:', { email, first_name, last_name, role, grade, rank, flight, cadet_year, school_id })
 
     // Validate input parameters
     if (!email || !first_name || !last_name || !school_id) {
@@ -131,20 +134,26 @@ serve(async (req) => {
         // Wait for profile to be created by trigger
         await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
         
+        const profileUpdateData = {
+          role,
+          grade: grade || null,
+          rank: rank || null,
+          flight: flight || null,
+          cadet_year: cadet_year || null,
+          password_change_required: password ? false : true, // Only require password change if using default password
+        };
+
+        console.log('🔄 Profile update attempt', i + 1, 'for user:', authUser.user!.id);
+        console.log('🔄 Profile update data:', profileUpdateData);
+        console.log('🔄 cadet_year being set:', cadet_year, 'type:', typeof cadet_year);
+        
         const { error: profileError } = await supabaseAdmin
           .from('profiles')
-          .update({
-            role,
-            grade: grade || null,
-            rank: rank || null,
-            flight: flight || null,
-            cadet_year: cadet_year || null,
-            password_change_required: password ? false : true, // Only require password change if using default password
-          })
+          .update(profileUpdateData)
           .eq('id', authUser.user!.id)
 
         if (!profileError) {
-          console.log('Profile updated successfully with role:', role, 'password_change_required: true')
+          console.log('✅ Profile updated successfully with role:', role, 'cadet_year:', cadet_year, 'password_change_required:', password ? false : true)
           return
         }
         

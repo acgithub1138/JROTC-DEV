@@ -92,19 +92,24 @@ export const useCadetManagement = () => {
       return;
     }
 
+    const requestPayload = {
+      email: newCadet.email,
+      first_name: newCadet.first_name,
+      last_name: newCadet.last_name,
+      role: newCadet.role,
+      grade: newCadet.grade || null,
+      rank: newCadet.rank || null,
+      flight: newCadet.flight || null,
+      cadet_year: newCadet.cadet_year || null,
+      school_id: userProfile?.school_id!
+    };
+
+    console.log('🚀 AddCadet - Sending payload to create-cadet-user:', requestPayload);
+    console.log('🚀 AddCadet - cadet_year value:', newCadet.cadet_year, 'type:', typeof newCadet.cadet_year);
+
     try {
       const { error } = await supabase.functions.invoke('create-cadet-user', {
-        body: {
-          email: newCadet.email,
-          first_name: newCadet.first_name,
-          last_name: newCadet.last_name,
-          role: newCadet.role,
-          grade: newCadet.grade || null,
-          rank: newCadet.rank || null,
-          flight: newCadet.flight || null,
-          cadet_year: newCadet.cadet_year || null,
-          school_id: userProfile?.school_id!
-        }
+        body: requestPayload
       });
 
       if (error) throw error;
@@ -205,17 +210,23 @@ export const useCadetManagement = () => {
   };
 
   const handleSaveProfile = async (editingProfile: Profile) => {
+    const updatePayload = {
+      grade: editingProfile.grade || null,
+      rank: editingProfile.rank || null,
+      flight: editingProfile.flight || null,
+      cadet_year: editingProfile.cadet_year ? editingProfile.cadet_year as '1st' | '2nd' | '3rd' | '4th' : null,
+      role: editingProfile.role as any,
+      updated_at: new Date().toISOString()
+    };
+
+    console.log('🔧 EditCadet - Updating profile ID:', editingProfile.id);
+    console.log('🔧 EditCadet - Update payload:', updatePayload);
+    console.log('🔧 EditCadet - cadet_year value:', editingProfile.cadet_year, 'type:', typeof editingProfile.cadet_year);
+
     try {
       const { error } = await supabase
         .from('profiles')
-        .update({
-          grade: editingProfile.grade || null,
-          rank: editingProfile.rank || null,
-          flight: editingProfile.flight || null,
-          cadet_year: editingProfile.cadet_year ? editingProfile.cadet_year as '1st' | '2nd' | '3rd' | '4th' : null,
-          role: editingProfile.role as any,
-          updated_at: new Date().toISOString()
-        })
+        .update(updatePayload)
         .eq('id', editingProfile.id);
 
       if (error) throw error;
