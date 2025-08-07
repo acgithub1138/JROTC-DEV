@@ -25,6 +25,7 @@ import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface SubtaskDetailDialogProps {
   subtask: Subtask;
   open: boolean;
@@ -292,15 +293,11 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       onOpenChange(false);
     }
   };
-  const confirmClose = () => {
+  const handleDiscardChanges = () => {
     setShowConfirmDialog(false);
     onOpenChange(false);
   };
-  const saveAndClose = async () => {
-    setShowConfirmDialog(false);
-    await handleSave();
-  };
-  const stayOnForm = () => {
+  const handleContinueEditing = () => {
     setShowConfirmDialog(false);
   };
   const handleAddComment = async () => {
@@ -550,26 +547,12 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
       </DialogContent>
     </Dialog>
 
-    {/* Confirmation Dialog for Unsaved Changes */}
-    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. What would you like to do?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={stayOnForm}>Stay on Form</AlertDialogCancel>
-          <Button onClick={confirmClose} variant="outline">
-            Close Without Saving
-          </Button>
-          <AlertDialogAction onClick={saveAndClose}>
-            Save Changes
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <UnsavedChangesDialog
+      open={showConfirmDialog}
+      onOpenChange={setShowConfirmDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
 
     <UnsavedCommentModal open={showUnsavedCommentModal} onAddComment={handleAddComment} onDiscard={handleDiscardComment} />
   </>;

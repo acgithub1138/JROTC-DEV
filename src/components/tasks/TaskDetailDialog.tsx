@@ -29,6 +29,7 @@ import { resolveUserEmail } from '@/hooks/useEmailResolution';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { EmailHistoryTab } from './components/EmailHistoryTab';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
@@ -362,14 +363,13 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
       onOpenChange(false);
     }
   };
-  const confirmClose = () => {
+  const handleDiscardChanges = () => {
     setIsEditing(false);
     setShowConfirmDialog(false);
     onOpenChange(false);
   };
-  const saveAndClose = async () => {
+  const handleContinueEditing = () => {
     setShowConfirmDialog(false);
-    await handleSave();
   };
   const handleAddComment = async () => {
     console.log('🔍 handleAddComment called with newComment:', newComment);
@@ -679,26 +679,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
       </DialogContent>
     </Dialog>
 
-    {/* Confirmation Dialog for Unsaved Changes */}
-    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. What would you like to do?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter>
-          <AlertDialogCancel onClick={stayOnForm}>Stay on Form</AlertDialogCancel>
-          <Button onClick={confirmClose} variant="outline">
-            Close Without Saving
-          </Button>
-          <AlertDialogAction onClick={saveAndClose}>
-            Save Changes
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <UnsavedChangesDialog
+      open={showConfirmDialog}
+      onOpenChange={setShowConfirmDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
 
     {/* Confirmation Dialog for Completing Task with Incomplete Subtasks */}
     <AlertDialog open={showCompleteConfirmDialog} onOpenChange={setShowCompleteConfirmDialog}>
