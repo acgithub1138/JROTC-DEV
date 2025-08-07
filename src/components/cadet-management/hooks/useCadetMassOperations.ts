@@ -139,10 +139,20 @@ export const useCadetMassOperations = () => {
 
     setMassOperationLoading(true);
     try {
+      // Get the role_name from user_roles table
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role_name')
+        .eq('id', roleId)
+        .single();
+
+      if (roleError) throw roleError;
+
       const { error } = await supabase
         .from('profiles')
         .update({ 
           role_id: roleId || null,
+          role: roleData?.role_name as any, // Update role field with role_name
           updated_at: new Date().toISOString()
         })
         .in('id', selectedCadets);

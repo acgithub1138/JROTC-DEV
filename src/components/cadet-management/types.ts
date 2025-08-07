@@ -5,6 +5,7 @@ export interface Profile {
   last_name: string;
   email: string;
   role_id: string;
+  role?: string; // Keep role field for backward compatibility and role_name sync
   grade?: string;
   rank?: string;
   flight?: string;
@@ -19,6 +20,7 @@ export interface NewCadet {
   last_name: string;
   email: string;
   role_id: string;
+  role?: string; // Keep role field for backward compatibility
   grade?: string;
   rank?: string;
   flight?: string;

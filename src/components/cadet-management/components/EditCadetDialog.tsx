@@ -117,6 +117,10 @@ export const EditCadetDialog = ({
     if (!editingProfile) return;
 
     try {
+      // Find the selected role to get the role_name
+      const selectedRole = roleOptions.find(r => r.value === formData.role_id);
+      const roleName = selectedRole ? selectedRole.role_name : null;
+
       const { error } = await supabase
         .from('profiles')
         .update({ 
@@ -124,6 +128,7 @@ export const EditCadetDialog = ({
           flight: formData.flight || null,
           cadet_year: (formData.cadet_year || null) as any,
           role_id: formData.role_id || null,
+          role: roleName as any, // Update role field with role_name
           rank: formData.rank || null,
           updated_at: new Date().toISOString()
         })
@@ -139,7 +144,8 @@ export const EditCadetDialog = ({
       // Update editingProfile with form data
       setEditingProfile({
         ...editingProfile,
-        ...formData
+        ...formData,
+        role: roleName || editingProfile.role
       });
       
       resetChanges();

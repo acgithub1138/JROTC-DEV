@@ -22,7 +22,7 @@ export const getFilteredProfiles = (
     const matchesSearch = 
       profile.first_name.toLowerCase().includes(searchLower) ||
       profile.last_name.toLowerCase().includes(searchLower) ||
-      profile.role_id.toLowerCase().includes(searchLower) ||
+      (profile.role?.toLowerCase() || '').includes(searchLower) ||
       (profile.grade?.toLowerCase() || '').includes(searchLower) ||
       (profile.rank?.toLowerCase() || '').includes(searchLower) ||
       (profile.flight?.toLowerCase() || '').includes(searchLower);

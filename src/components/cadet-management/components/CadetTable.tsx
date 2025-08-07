@@ -95,7 +95,7 @@ export const CadetTable = ({
                 </Button> : <span>{profile.last_name}, {profile.first_name}</span>}
             </TableCell>
             
-            <TableCell className="capitalize py-2">{profile.role_id}</TableCell>
+            <TableCell className="capitalize py-2">{profile.role || 'No Role'}</TableCell>
             <TableCell className="py-2">
               {profile.grade ? <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
                   {profile.grade}

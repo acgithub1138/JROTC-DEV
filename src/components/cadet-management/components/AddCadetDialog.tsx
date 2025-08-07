@@ -48,7 +48,7 @@ export const AddCadetDialog = ({
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData,
-    currentData: newCadet,
+    currentData: newCadet as any,
     enabled: open
   });
 

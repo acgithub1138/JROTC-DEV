@@ -6,6 +6,7 @@ import { useMemo } from 'react';
 export interface CadetRoleOption {
   value: string;
   label: string;
+  role_name: string;
 }
 
 export const useCadetRoles = () => {
@@ -41,7 +42,8 @@ export const useCadetRoles = () => {
       .filter(role => !role.admin_only) // Filter out admin-only roles for cadets
       .map(role => ({
         value: role.id, // Use role ID as the value
-        label: role.role_label
+        label: role.role_label,
+        role_name: role.role_name // Include role_name for reference
       }));
 
     console.log('Role options for cadet management:', options);
