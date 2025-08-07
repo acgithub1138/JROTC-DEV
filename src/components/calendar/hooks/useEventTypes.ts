@@ -7,6 +7,7 @@ export interface EventType {
   id: string;
   value: string;
   label: string;
+  color?: string;
   school_id: string | null; // Now nullable for global defaults
   is_default: boolean;
 }
@@ -47,7 +48,7 @@ export const useEventTypes = () => {
     fetchEventTypes();
   }, [userProfile?.school_id]);
 
-  const createEventType = async (label: string) => {
+  const createEventType = async (label: string, color?: string) => {
     if (!userProfile?.school_id) return;
 
     // Generate value from label (lowercase, replace spaces with underscores)
@@ -59,6 +60,7 @@ export const useEventTypes = () => {
         .insert({
           value,
           label,
+          color,
           school_id: userProfile.school_id,
           is_default: false,
         })
@@ -136,10 +138,64 @@ export const useEventTypes = () => {
     }
   };
 
+  const updateEventType = async (id: string, updates: { label?: string; color?: string }) => {
+    // Find the event type to check if it's a default (global) type
+    const eventType = eventTypes.find(type => type.id === id);
+    if (eventType?.is_default) {
+      toast({
+        title: 'Error',
+        description: 'Cannot modify global default event types',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    try {
+      const updateData: any = { ...updates };
+      if (updates.label) {
+        updateData.value = updates.label.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+      }
+
+      const { data, error } = await supabase
+        .from('event_types')
+        .update(updateData)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setEventTypes(prev => prev.map(type => 
+        type.id === id ? data : type
+      ).sort((a, b) => {
+        if (a.is_default !== b.is_default) {
+          return b.is_default ? 1 : -1;
+        }
+        return a.label.localeCompare(b.label);
+      }));
+      
+      toast({
+        title: 'Success',
+        description: 'Event type updated successfully',
+      });
+
+      return data;
+    } catch (error) {
+      console.error('Error updating event type:', error);
+      toast({
+        title: 'Error',
+        description: 'Failed to update event type',
+        variant: 'destructive',
+      });
+      return null;
+    }
+  };
+
   return {
     eventTypes,
     isLoading,
     createEventType,
+    updateEventType,
     deleteEventType,
     refetch: fetchEventTypes,
   };
