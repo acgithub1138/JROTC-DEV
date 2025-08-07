@@ -3312,6 +3312,10 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: number
       }
+      create_email_rules_for_school: {
+        Args: { school_uuid: string }
+        Returns: undefined
+      }
       current_user_has_permission: {
         Args: { module_name: string; action_name: string }
         Returns: boolean
