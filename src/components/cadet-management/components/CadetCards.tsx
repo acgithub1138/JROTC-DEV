@@ -57,7 +57,7 @@ export const CadetCards: React.FC<CadetCardsProps> = ({
                     {profile.last_name}, {profile.first_name}
                   </CardTitle>
                   <p className="text-sm text-muted-foreground capitalize">
-                    {profile.role.replace('_', ' ')}
+                    {profile.role_id}
                   </p>
                 </div>
               </div>

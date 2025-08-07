@@ -86,7 +86,7 @@ export const ViewCadetDialog = ({
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Role</p>
-                  <p className="text-sm capitalize">{profile.role.replace('_', ' ')}</p>
+                  <p className="text-sm capitalize">{profile.role_id}</p>
                 </div>
                 <div>
                   <p className="text-sm font-medium text-muted-foreground">Grade</p>

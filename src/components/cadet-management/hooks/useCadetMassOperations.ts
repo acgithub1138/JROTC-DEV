@@ -134,7 +134,7 @@ export const useCadetMassOperations = () => {
     }
   };
 
-  const handleBulkUpdateRole = async (role: string) => {
+  const handleBulkUpdateRole = async (roleId: string) => {
     if (selectedCadets.length === 0) return;
 
     setMassOperationLoading(true);
@@ -142,7 +142,7 @@ export const useCadetMassOperations = () => {
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          role: role as any,
+          role_id: roleId || null,
           updated_at: new Date().toISOString()
         })
         .in('id', selectedCadets);

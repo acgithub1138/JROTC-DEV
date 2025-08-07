@@ -62,7 +62,7 @@ export const BulkImportDialog = ({
           first_name: row['First Name'] || '',
           last_name: row['Last Name'] || '',
           email: row['Email'] || '',
-          role: row['Role']?.toLowerCase() || 'cadet',
+          role_id: row['Role ID'] || row['Role']?.toLowerCase() || '',
           grade: row['Grade'] || '',
           rank: row['Rank'] || '',
           flight: row['Flight'] || ''
@@ -230,7 +230,7 @@ export const BulkImportDialog = ({
                         {editingRow === cadet.id ? <Input value={cadet.email} onChange={e => updateCadet(cadet.id, 'email', e.target.value)} className="h-8" /> : cadet.email}
                       </TableCell>
                       <TableCell>
-                        {editingRow === cadet.id ? <Select value={cadet.role} onValueChange={value => updateCadet(cadet.id, 'role', value)}>
+                        {editingRow === cadet.id ? <Select value={cadet.role_id} onValueChange={value => updateCadet(cadet.id, 'role_id', value)}>
                             <SelectTrigger className="h-8">
                               <SelectValue />
                             </SelectTrigger>
@@ -239,7 +239,7 @@ export const BulkImportDialog = ({
                                   {role.label}
                                 </SelectItem>)}
                             </SelectContent>
-                          </Select> : roleOptions.find(r => r.value === cadet.role)?.label || cadet.role}
+                          </Select> : roleOptions.find(r => r.value === cadet.role_id)?.label || cadet.role_id}
                       </TableCell>
                       <TableCell>
                         {editingRow === cadet.id ? <Select value={cadet.grade || ''} onValueChange={value => updateCadet(cadet.id, 'grade', value)}>

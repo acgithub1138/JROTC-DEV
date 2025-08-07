@@ -4,7 +4,7 @@ export interface Profile {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role_id: string;
   grade?: string;
   rank?: string;
   flight?: string;
@@ -18,7 +18,7 @@ export interface NewCadet {
   first_name: string;
   last_name: string;
   email: string;
-  role: string;
+  role_id: string;
   grade?: string;
   rank?: string;
   flight?: string;

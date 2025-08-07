@@ -50,14 +50,14 @@ export const EditCadetDialog = ({
     grade: '',
     flight: '',
     cadet_year: '',
-    role: '',
+    role_id: '',
     rank: ''
   });
   const [initialFormData, setInitialFormData] = useState({
     grade: '',
     flight: '',
     cadet_year: '',
-    role: '',
+    role_id: '',
     rank: ''
   });
 
@@ -68,7 +68,7 @@ export const EditCadetDialog = ({
         grade: editingProfile.grade || '',
         flight: editingProfile.flight || '',
         cadet_year: editingProfile.cadet_year || '',
-        role: editingProfile.role || '',
+        role_id: editingProfile.role_id || '',
         rank: editingProfile.rank || ''
       };
       setFormData(data);
@@ -123,7 +123,7 @@ export const EditCadetDialog = ({
           grade: formData.grade || null,
           flight: formData.flight || null,
           cadet_year: (formData.cadet_year || null) as any,
-          role: formData.role as any || null,
+          role_id: formData.role_id || null,
           rank: formData.rank || null,
           updated_at: new Date().toISOString()
         })
@@ -292,10 +292,10 @@ export const EditCadetDialog = ({
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="role">Role</Label>
+              <Label htmlFor="role_id">Role</Label>
               <Select 
-                value={formData.role} 
-                onValueChange={(value) => setFormData({ ...formData, role: value })}
+                value={formData.role_id} 
+                onValueChange={(value) => setFormData({ ...formData, role_id: value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>

@@ -39,7 +39,7 @@ export const AddCadetDialog = ({
     first_name: '',
     last_name: '',
     email: '',
-    role: '',
+    role_id: '',
     grade: '',
     flight: '',
     cadet_year: '',
@@ -120,10 +120,10 @@ export const AddCadetDialog = ({
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="role">Role *</Label>
-            <Select value={newCadet.role} onValueChange={(value: string) => setNewCadet({
+            <Label htmlFor="role_id">Role *</Label>
+            <Select value={newCadet.role_id} onValueChange={(value: string) => setNewCadet({
             ...newCadet,
-            role: value
+            role_id: value
           })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />

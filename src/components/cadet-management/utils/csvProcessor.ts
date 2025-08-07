@@ -44,7 +44,7 @@ export function validateCadetData(cadet: NewCadet): string[] {
   }
 
   // Role validation
-  if (!cadet.role || cadet.role.trim() === '') {
+  if (!cadet.role_id || cadet.role_id.trim() === '') {
     errors.push('Role is required');
   }
 

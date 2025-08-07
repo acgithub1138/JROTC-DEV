@@ -9,18 +9,23 @@ export interface CadetRoleOption {
 }
 
 export const useCadetRoles = () => {
-  // Get assignable roles from the new user_roles table
+  // Get assignable roles from the user_roles table
   const { data: assignableRoles, isLoading: isLoadingAssignableRoles } = useQuery({
     queryKey: ['assignable-roles'],
     queryFn: async () => {
       console.log('Fetching assignable roles for cadet management...');
-      const { data, error } = await supabase.rpc('get_assignable_roles');
+      const { data, error } = await supabase
+        .from('user_roles')
+        .select('id, role_name, role_label, admin_only, is_active')
+        .eq('is_active', true)
+        .order('sort_order');
+      
       if (error) {
         console.error('Error fetching assignable roles:', error);
         throw error;
       }
       console.log('Assignable roles for cadets fetched successfully:', data);
-      return data as { role_name: string; role_label: string; can_be_assigned: boolean }[];
+      return data as { id: string; role_name: string; role_label: string; admin_only: boolean; is_active: boolean }[];
     }
   });
 
@@ -29,16 +34,13 @@ export const useCadetRoles = () => {
     if (!assignableRoles?.length) {
       // Fallback to default roles if dynamic roles aren't loaded yet
       console.log('Using fallback roles for cadet management');
-      return [
-        { value: 'cadet', label: 'Cadet' },
-        { value: 'command_staff', label: 'Command Staff' }
-      ];
+      return [];
     }
 
     const options = assignableRoles
-      .filter(role => role.can_be_assigned)
+      .filter(role => !role.admin_only) // Filter out admin-only roles for cadets
       .map(role => ({
-        value: role.role_name,
+        value: role.id, // Use role ID as the value
         label: role.role_label
       }));
 
