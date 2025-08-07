@@ -195,7 +195,7 @@ export const EditTeamDialog = ({
               
               {getSelectedMembers().length > 0 && <div className="flex flex-wrap gap-2 mt-2">
                   {getSelectedMembers().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                      {user.first_name} {user.last_name}
+                      {user.last_name}, {user.first_name}
                       {!isReadOnly && <X className="h-3 w-3 cursor-pointer" onClick={() => removeMember(user.id)} />}
                     </Badge>)}
                 </div>}
