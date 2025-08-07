@@ -24,7 +24,7 @@ interface CadetDialogsProps {
   setEditDialogOpen: (open: boolean) => void;
   editingProfile: Profile | null;
   setEditingProfile: (profile: Profile | null) => void;
-  onSaveProfile: (e: React.FormEvent) => void;
+  onRefresh?: () => void;
   
   // Status Dialog
   statusDialogOpen: boolean;
@@ -83,7 +83,7 @@ export const CadetDialogs = (props: CadetDialogsProps) => {
         onOpenChange={props.setEditDialogOpen}
         editingProfile={props.editingProfile}
         setEditingProfile={props.setEditingProfile}
-        onSubmit={props.onSaveProfile}
+        onRefresh={props.onRefresh}
       />
 
 

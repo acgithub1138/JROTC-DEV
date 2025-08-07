@@ -22,7 +22,7 @@ interface EditCadetDialogProps {
   onOpenChange: (open: boolean) => void;
   editingProfile: Profile | null;
   setEditingProfile: (profile: Profile | null) => void;
-  onSubmit: (e: React.FormEvent) => void;
+  onRefresh?: () => void;
 }
 
 export const EditCadetDialog = ({
@@ -30,7 +30,7 @@ export const EditCadetDialog = ({
   onOpenChange,
   editingProfile,
   setEditingProfile,
-  onSubmit
+  onRefresh
 }: EditCadetDialogProps) => {
   const { userProfile } = useAuth();
   const { canResetPassword, canUpdate } = useCadetPermissions();
@@ -112,17 +112,49 @@ export const EditCadetDialog = ({
     setPendingClose(false);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (editingProfile) {
-      // Update editingProfile with form data before submitting
+    if (!editingProfile) return;
+
+    try {
+      const { error } = await supabase
+        .from('profiles')
+        .update({ 
+          grade: formData.grade || null,
+          flight: formData.flight || null,
+          cadet_year: (formData.cadet_year || null) as any,
+          role: formData.role as any || null,
+          rank: formData.rank || null,
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', editingProfile.id);
+
+      if (error) throw error;
+
+      toast({
+        title: "Success",
+        description: `Updated ${editingProfile.first_name} ${editingProfile.last_name}'s information`
+      });
+
+      // Update editingProfile with form data
       setEditingProfile({
         ...editingProfile,
         ...formData
       });
+      
+      resetChanges();
+      onOpenChange(false);
+      onRefresh?.();
+      
+      
+    } catch (error) {
+      console.error('Error updating cadet:', error);
+      toast({
+        title: "Error",
+        description: "Failed to update cadet information",
+        variant: "destructive"
+      });
     }
-    onSubmit(e);
-    resetChanges();
   };
 
   const handleResetPassword = async () => {
