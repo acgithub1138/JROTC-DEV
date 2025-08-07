@@ -39,15 +39,21 @@ export const EditTeamDialog = ({
     canEdit: canUpdate
   } = useTablePermissions('teams');
   const isReadOnly = !canUpdate;
-
   const initialData = team ? {
     name: team.name || '',
     description: team.description || '',
     team_lead_id: team.team_lead_id || '',
     member_ids: team.team_members?.map(member => member.cadet_id) || []
-  } : { name: '', description: '', team_lead_id: '', member_ids: [] };
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  } : {
+    name: '',
+    description: '',
+    team_lead_id: '',
+    member_ids: []
+  };
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData,
     currentData: formData,
     enabled: open && !isReadOnly
@@ -74,7 +80,6 @@ export const EditTeamDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleOpenChange = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -82,7 +87,6 @@ export const EditTeamDialog = ({
       onOpenChange(open);
     }
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -90,7 +94,6 @@ export const EditTeamDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     if (team) {
       setFormData({
@@ -104,7 +107,6 @@ export const EditTeamDialog = ({
     setShowUnsavedDialog(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
@@ -126,34 +128,31 @@ export const EditTeamDialog = ({
     return users.filter(user => formData.member_ids.includes(user.id));
   };
   const getAvailableUsers = () => {
-    return users
-      .filter(user => !formData.member_ids.includes(user.id) && user.id !== formData.team_lead_id)
-      .sort((a, b) => a.last_name.localeCompare(b.last_name));
+    return users.filter(user => !formData.member_ids.includes(user.id) && user.id !== formData.team_lead_id);
   };
   if (!team) return null;
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Edit Team</DialogTitle>
+          <DialogTitle className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">Edit Team</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Team Name *</Label>
             {isReadOnly ? <div className="p-2 border rounded-md bg-muted">{formData.name}</div> : <Input id="name" value={formData.name} onChange={e => setFormData({
-            ...formData,
-            name: e.target.value
-          })} required />}
+              ...formData,
+              name: e.target.value
+            })} required />}
           </div>
 
           <div>
             <Label htmlFor="description">Description</Label>
             {isReadOnly ? <div className="p-2 border rounded-md bg-muted min-h-[72px]">{formData.description || 'No description'}</div> : <Textarea id="description" value={formData.description} onChange={e => setFormData({
-            ...formData,
-            description: e.target.value
-          })} rows={3} />}
+              ...formData,
+              description: e.target.value
+            })} rows={3} />}
           </div>
 
           <div>
@@ -161,19 +160,16 @@ export const EditTeamDialog = ({
             {isReadOnly ? <div className="p-2 border rounded-md bg-muted">
                 {formData.team_lead_id ? users.find(u => u.id === formData.team_lead_id)?.first_name + ' ' + users.find(u => u.id === formData.team_lead_id)?.last_name || 'Unknown' : 'No team lead'}
               </div> : <Select value={formData.team_lead_id || "none"} onValueChange={value => setFormData({
-            ...formData,
-            team_lead_id: value === "none" ? "" : value
-          })}>
+              ...formData,
+              team_lead_id: value === "none" ? "" : value
+            })}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select team lead (optional)" />
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="none">No team lead</SelectItem>
-                  {users
-                    .filter(user => !formData.member_ids.includes(user.id))
-                    .sort((a, b) => a.last_name.localeCompare(b.last_name))
-                    .map(user => <SelectItem key={user.id} value={user.id}>
-                        {user.last_name}, {user.first_name} ({user.role})
+                  {users.filter(user => !formData.member_ids.includes(user.id)).map(user => <SelectItem key={user.id} value={user.id}>
+                        {user.first_name} {user.last_name} ({user.role})
                       </SelectItem>)}
                 </SelectContent>
               </Select>}
@@ -188,14 +184,14 @@ export const EditTeamDialog = ({
                   </SelectTrigger>
                   <SelectContent>
                     {getAvailableUsers().map(user => <SelectItem key={user.id} value={user.id}>
-                        {user.last_name}, {user.first_name} ({user.role})
+                        {user.first_name} {user.last_name} ({user.role})
                       </SelectItem>)}
                   </SelectContent>
                 </Select>}
               
               {getSelectedMembers().length > 0 && <div className="flex flex-wrap gap-2 mt-2">
                   {getSelectedMembers().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                      {user.last_name}, {user.first_name}
+                      {user.first_name} {user.last_name}
                       {!isReadOnly && <X className="h-3 w-3 cursor-pointer" onClick={() => removeMember(user.id)} />}
                     </Badge>)}
                 </div>}
@@ -216,12 +212,6 @@ export const EditTeamDialog = ({
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
-  </>
-  );
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+  </>;
 };
