@@ -88,16 +88,22 @@ export const useTeamMutations = () => {
 
         if (deleteError) throw deleteError;
 
-        // Then add new members
+        // Then add new members (only if we have members to add)
         if (teamData.member_ids.length > 0) {
-          const memberInserts = teamData.member_ids.map(cadetId => ({
+          // Remove any duplicates from the member_ids array first
+          const uniqueMemberIds = [...new Set(teamData.member_ids)];
+          
+          const memberInserts = uniqueMemberIds.map(cadetId => ({
             team_id: teamId,
             cadet_id: cadetId
           }));
 
+          // Use upsert to handle potential race conditions
           const { error: membersError } = await supabase
             .from('team_members')
-            .insert(memberInserts);
+            .upsert(memberInserts, {
+              onConflict: 'team_id,cadet_id'
+            });
 
           if (membersError) throw membersError;
         }
