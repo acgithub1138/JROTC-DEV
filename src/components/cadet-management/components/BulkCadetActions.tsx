@@ -113,6 +113,57 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
     }
   };
 
+  const handleRoleUpdate = async (roleId: string) => {
+    if (selectedCadets.length === 0) return;
+
+    setIsUpdating(true);
+    try {
+      // Get the role_name from user_roles table
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('role_name')
+        .eq('id', roleId)
+        .single();
+
+      if (roleError) throw roleError;
+
+      const { data, error } = await supabase
+        .from('profiles')
+        .update({ 
+          role_id: roleId || null,
+          role: roleData?.role_name as any, // Update role field with role_name
+          updated_at: new Date().toISOString()
+        })
+        .in('id', selectedCadets)
+        .select('id, first_name, last_name, role_id, role');
+
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+
+      console.log('Role update successful, affected rows:', data);
+
+      toast({
+        title: "Cadets Updated",
+        description: `Successfully updated role for ${selectedCadets.length} cadet${selectedCadets.length > 1 ? 's' : ''}`,
+      });
+
+      onSelectionClear();
+      if (onRefresh) onRefresh();
+    } catch (error) {
+      console.error('Failed to update cadet roles:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
+      toast({
+        title: "Role Update Failed",
+        description: `Failed to update selected cadets: ${errorMessage}`,
+        variant: "destructive",
+      });
+    } finally {
+      setIsUpdating(false);
+    }
+  };
+
   const handleBulkDeactivate = async () => {
     if (selectedCadets.length === 0) return;
     
@@ -245,7 +296,7 @@ export const BulkCadetActions: React.FC<BulkCadetActionsProps> = ({
               {roleOptions.map((role) => (
                 <DropdownMenuItem 
                   key={role.value}
-                  onClick={() => handleBulkUpdate('role', role.value)}
+                  onClick={() => handleRoleUpdate(role.value)}
                 >
                   {role.label}
                 </DropdownMenuItem>
