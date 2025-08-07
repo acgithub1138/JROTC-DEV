@@ -334,10 +334,10 @@ export const EmailQueueTab: React.FC = () => {
                                </Popover>
                              </div> : item.recipient_email}
                          </TableCell>
-                       <TableCell className="max-w-xs truncate py-2">
+                       <TableCell className="max-w-xs truncate py-[4px]">
                          {item.subject}
                        </TableCell>
-                       <TableCell className="py-2">
+                       <TableCell className="py-[4px]">
                          <Badge className={getStatusColor(item.status)}>
                            {item.status}
                          </Badge>
@@ -346,16 +346,16 @@ export const EmailQueueTab: React.FC = () => {
                              <span className="truncate max-w-xs">{item.error_message}</span>
                            </div>}
                        </TableCell>
-                       <TableCell className="text-sm text-muted-foreground py-2">
+                       <TableCell className="text-sm text-muted-foreground py-[4px]">
                          {format(new Date(item.scheduled_at), 'MMM dd, yyyy HH:mm')}
                          {item.sent_at && <div className="text-green-600">
                              Sent: {format(new Date(item.sent_at), 'MMM dd, yyyy HH:mm')}
                            </div>}
                        </TableCell>
-                       <TableCell className="text-sm py-2">
+                       <TableCell className="text-sm py-[4px]">
                          {item.email_templates?.name || 'Manual'}
                        </TableCell>
-                       <TableCell className="py-2">
+                       <TableCell className="py-[4px]">
                          <Button variant="ghost" size="sm" onClick={() => setViewingEmail(item)} className="h-8 w-8 p-0">
                            <Eye className="w-4 h-4" />
                          </Button>
