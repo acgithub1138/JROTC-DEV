@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity, Users, Eye } from 'lucide-react';
+import { Clock, Mail, AlertCircle, RefreshCw, Play, Activity, Users, Eye, ChevronLeft, ChevronRight } from 'lucide-react';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -37,6 +37,8 @@ export const EmailQueueTab: React.FC = () => {
   const [isProcessing, setIsProcessing] = React.useState(false);
   const [isMonitoring, setIsMonitoring] = React.useState(false);
   const [viewingEmail, setViewingEmail] = React.useState(null);
+  const [currentPage, setCurrentPage] = React.useState(1);
+  const itemsPerPage = 25;
   const handleRefresh = () => {
     queryClient.invalidateQueries({
       queryKey: ['email-queue']
@@ -241,6 +243,25 @@ export const EmailQueueTab: React.FC = () => {
       </Card>;
   }
   const pendingCount = queueItems.filter(item => item.status === 'pending').length;
+  
+  // Pagination calculations
+  const totalItems = queueItems.length;
+  const totalPages = Math.ceil(totalItems / itemsPerPage);
+  const startIndex = (currentPage - 1) * itemsPerPage;
+  const endIndex = startIndex + itemsPerPage;
+  const paginatedItems = queueItems.slice(startIndex, endIndex);
+  
+  const handlePageChange = (page: number) => {
+    setCurrentPage(page);
+  };
+  
+  const handlePrevious = () => {
+    setCurrentPage(prev => Math.max(1, prev - 1));
+  };
+  
+  const handleNext = () => {
+    setCurrentPage(prev => Math.min(totalPages, prev + 1));
+  };
   return <>
       <Card>
         <CardHeader>
@@ -289,84 +310,139 @@ export const EmailQueueTab: React.FC = () => {
                     <TableHead>Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody>
-                  {queueItems.map(item => {
-                    const recipients = item.recipient_email.split(',').map(email => email.trim());
-                    const hasMultiple = recipients.length > 1;
-                    
-                    return (
-                      <TableRow key={item.id}>
-                        <TableCell className="font-medium py-2">
-                          {hasMultiple ? (
-                            <div className="flex items-center gap-2">
-                              <Popover>
-                                <PopoverTrigger asChild>
-                                  <Button 
-                                    variant="outline" 
-                                    size="sm" 
-                                    className="h-6 px-2 text-xs"
-                                  >
-                                    <Users className="w-3 h-3 mr-1" />
-                                    Multiple ({recipients.length})
-                                  </Button>
-                                </PopoverTrigger>
-                                <PopoverContent className="w-80">
-                                  <div className="space-y-2">
-                                    <h4 className="font-medium text-sm">Recipients ({recipients.length})</h4>
-                                    <div className="max-h-48 overflow-y-auto space-y-1">
-                                      {recipients.map((email, index) => (
-                                        <div 
-                                          key={index} 
-                                          className="text-xs p-2 bg-muted rounded border"
-                                        >
-                                          {email}
-                                        </div>
-                                      ))}
-                                    </div>
-                                  </div>
-                                </PopoverContent>
-                              </Popover>
-                            </div>
-                          ) : (
-                            item.recipient_email
-                          )}
-                        </TableCell>
-                      <TableCell className="max-w-xs truncate py-2">
-                        {item.subject}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <Badge className={getStatusColor(item.status)}>
-                          {item.status}
-                        </Badge>
-                        {item.error_message && <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
-                            <AlertCircle className="w-3 h-3" />
-                            <span className="truncate max-w-xs">{item.error_message}</span>
-                          </div>}
-                      </TableCell>
-                      <TableCell className="text-sm text-muted-foreground py-2">
-                        {format(new Date(item.scheduled_at), 'MMM dd, yyyy HH:mm')}
-                        {item.sent_at && <div className="text-green-600">
-                            Sent: {format(new Date(item.sent_at), 'MMM dd, yyyy HH:mm')}
-                          </div>}
-                      </TableCell>
-                      <TableCell className="text-sm py-2">
-                        {item.email_templates?.name || 'Manual'}
-                      </TableCell>
-                      <TableCell className="py-2">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setViewingEmail(item)}
-                          className="h-8 w-8 p-0"
-                        >
-                          <Eye className="w-4 h-4" />
-                        </Button>
-                      </TableCell>
-                    </TableRow>
-                    );
-                  })}
-                </TableBody>
-              </Table>
+                 <TableBody>
+                   {paginatedItems.map(item => {
+                     const recipients = item.recipient_email.split(',').map(email => email.trim());
+                     const hasMultiple = recipients.length > 1;
+                     
+                     return (
+                       <TableRow key={item.id}>
+                         <TableCell className="font-medium py-2">
+                           {hasMultiple ? (
+                             <div className="flex items-center gap-2">
+                               <Popover>
+                                 <PopoverTrigger asChild>
+                                   <Button 
+                                     variant="outline" 
+                                     size="sm" 
+                                     className="h-6 px-2 text-xs"
+                                   >
+                                     <Users className="w-3 h-3 mr-1" />
+                                     Multiple ({recipients.length})
+                                   </Button>
+                                 </PopoverTrigger>
+                                 <PopoverContent className="w-80">
+                                   <div className="space-y-2">
+                                     <h4 className="font-medium text-sm">Recipients ({recipients.length})</h4>
+                                     <div className="max-h-48 overflow-y-auto space-y-1">
+                                       {recipients.map((email, index) => (
+                                         <div 
+                                           key={index} 
+                                           className="text-xs p-2 bg-muted rounded border"
+                                         >
+                                           {email}
+                                         </div>
+                                       ))}
+                                     </div>
+                                   </div>
+                                 </PopoverContent>
+                               </Popover>
+                             </div>
+                           ) : (
+                             item.recipient_email
+                           )}
+                         </TableCell>
+                       <TableCell className="max-w-xs truncate py-2">
+                         {item.subject}
+                       </TableCell>
+                       <TableCell className="py-2">
+                         <Badge className={getStatusColor(item.status)}>
+                           {item.status}
+                         </Badge>
+                         {item.error_message && <div className="flex items-center gap-1 mt-1 text-xs text-red-600">
+                             <AlertCircle className="w-3 h-3" />
+                             <span className="truncate max-w-xs">{item.error_message}</span>
+                           </div>}
+                       </TableCell>
+                       <TableCell className="text-sm text-muted-foreground py-2">
+                         {format(new Date(item.scheduled_at), 'MMM dd, yyyy HH:mm')}
+                         {item.sent_at && <div className="text-green-600">
+                             Sent: {format(new Date(item.sent_at), 'MMM dd, yyyy HH:mm')}
+                           </div>}
+                       </TableCell>
+                       <TableCell className="text-sm py-2">
+                         {item.email_templates?.name || 'Manual'}
+                       </TableCell>
+                       <TableCell className="py-2">
+                         <Button
+                           variant="ghost"
+                           size="sm"
+                           onClick={() => setViewingEmail(item)}
+                           className="h-8 w-8 p-0"
+                         >
+                           <Eye className="w-4 h-4" />
+                         </Button>
+                       </TableCell>
+                     </TableRow>
+                     );
+                   })}
+                 </TableBody>
+               </Table>
+               
+               {/* Pagination Controls */}
+               {totalPages > 1 && (
+                 <div className="flex items-center justify-between px-2 py-4">
+                   <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                     Showing {startIndex + 1} to {Math.min(endIndex, totalItems)} of {totalItems} emails
+                   </div>
+                   <div className="flex items-center gap-2">
+                     <Button
+                       variant="outline"
+                       size="sm"
+                       onClick={handlePrevious}
+                       disabled={currentPage === 1}
+                       className="h-8 w-8 p-0"
+                     >
+                       <ChevronLeft className="w-4 h-4" />
+                     </Button>
+                     <div className="flex items-center gap-1">
+                       {Array.from({ length: Math.min(5, totalPages) }, (_, i) => {
+                         let pageNum;
+                         if (totalPages <= 5) {
+                           pageNum = i + 1;
+                         } else if (currentPage <= 3) {
+                           pageNum = i + 1;
+                         } else if (currentPage >= totalPages - 2) {
+                           pageNum = totalPages - 4 + i;
+                         } else {
+                           pageNum = currentPage - 2 + i;
+                         }
+                         
+                         return (
+                           <Button
+                             key={pageNum}
+                             variant={currentPage === pageNum ? "default" : "outline"}
+                             size="sm"
+                             onClick={() => handlePageChange(pageNum)}
+                             className="h-8 w-8 p-0"
+                           >
+                             {pageNum}
+                           </Button>
+                         );
+                       })}
+                     </div>
+                     <Button
+                       variant="outline"
+                       size="sm"
+                       onClick={handleNext}
+                       disabled={currentPage === totalPages}
+                       className="h-8 w-8 p-0"
+                     >
+                       <ChevronRight className="w-4 h-4" />
+                     </Button>
+                   </div>
+                 </div>
+               )}
             </div>}
         </CardContent>
       </Card>
