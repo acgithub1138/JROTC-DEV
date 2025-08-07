@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { format } from 'date-fns';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
@@ -42,6 +43,22 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
     assigned_to: '',
     due_date: null as Date | null
   });
+
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  // Track form changes for unsaved warning
+  useEffect(() => {
+    const hasChanges = !!(
+      formData.title ||
+      formData.description ||
+      formData.assigned_to ||
+      formData.due_date ||
+      formData.status !== 'not_started' ||
+      formData.priority !== 'medium'
+    );
+    setHasUnsavedChanges(hasChanges);
+  }, [formData]);
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     createSubtask({
@@ -53,8 +70,11 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
       assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to || null,
       due_date: formData.due_date?.toISOString() || null
     });
+    resetForm();
+    onClose();
+  };
 
-    // Reset form and close dialog
+  const resetForm = () => {
     setFormData({
       title: '',
       description: '',
@@ -63,9 +83,29 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
       assigned_to: '',
       due_date: null
     });
+    setHasUnsavedChanges(false);
+  };
+
+  const handleClose = () => {
+    if (hasUnsavedChanges) {
+      setShowConfirmDialog(true);
+    } else {
+      onClose();
+    }
+  };
+
+  const confirmClose = () => {
+    setShowConfirmDialog(false);
+    resetForm();
     onClose();
   };
-  return <Dialog open={isOpen} onOpenChange={onClose}>
+
+  const cancelClose = () => {
+    setShowConfirmDialog(false);
+  };
+  return (
+    <>
+      <Dialog open={isOpen} onOpenChange={hasUnsavedChanges ? handleClose : onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Create Subtask for: {parentTaskTitle}</DialogTitle>
@@ -174,12 +214,30 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={onClose}>
+            <Button type="button" variant="outline" onClick={hasUnsavedChanges ? handleClose : onClose}>
               Cancel
             </Button>
             <Button type="submit">Create Subtask</Button>
           </div>
         </form>
       </DialogContent>
-    </Dialog>;
+    </Dialog>
+
+    {/* Unsaved Changes Confirmation Dialog */}
+    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+          <AlertDialogDescription>
+            You have unsaved changes. Are you sure you want to close without saving?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={cancelClose}>Stay</AlertDialogCancel>
+          <AlertDialogAction onClick={confirmClose}>Discard Changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+  </>
+  );
 };
