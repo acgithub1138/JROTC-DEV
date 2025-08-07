@@ -1,7 +1,6 @@
 
 import React from 'react';
 import { AddCadetDialog } from './AddCadetDialog';
-import { EditCadetDialog } from './EditCadetDialog';
 import { StatusConfirmationDialog } from './StatusConfirmationDialog';
 import { MassUpdateGradeDialog } from './MassUpdateGradeDialog';
 import { MassUpdateRankDialog } from './MassUpdateRankDialog';
@@ -78,13 +77,6 @@ export const CadetDialogs = (props: CadetDialogsProps) => {
         onSubmit={props.onAddCadet}
       />
 
-      <EditCadetDialog
-        open={props.editDialogOpen}
-        onOpenChange={props.setEditDialogOpen}
-        editingProfile={props.editingProfile}
-        setEditingProfile={props.setEditingProfile}
-        onSubmit={props.onSaveProfile}
-      />
 
       <MassUpdateGradeDialog
         open={props.gradeDialogOpen}
