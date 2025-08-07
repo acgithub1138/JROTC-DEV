@@ -37,13 +37,14 @@ export const AddTeamDialog = ({
     team_lead_id: '',
     member_ids: []
   };
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData,
     currentData: newTeam,
     enabled: open
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -54,7 +55,6 @@ export const AddTeamDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleOpenChange = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -62,7 +62,6 @@ export const AddTeamDialog = ({
       onOpenChange(open);
     }
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -70,14 +69,12 @@ export const AddTeamDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     setNewTeam(initialData);
     resetChanges();
     setShowUnsavedDialog(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
@@ -99,51 +96,45 @@ export const AddTeamDialog = ({
     return users.filter(user => newTeam.member_ids.includes(user.id));
   };
   const getAvailableUsers = () => {
-    return users
-      .filter(user => !newTeam.member_ids.includes(user.id) && user.id !== newTeam.team_lead_id)
-      .sort((a, b) => a.last_name.localeCompare(b.last_name));
+    return users.filter(user => !newTeam.member_ids.includes(user.id) && user.id !== newTeam.team_lead_id);
   };
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Add New Team</DialogTitle>
+          <DialogTitle className="sm:max-w-[400px] max-h-[90vh] overflow-y-auto">Add New Team</DialogTitle>
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
             <Label htmlFor="name">Team Name *</Label>
             <Input id="name" value={newTeam.name} onChange={e => setNewTeam({
-            ...newTeam,
-            name: e.target.value
-          })} required />
+              ...newTeam,
+              name: e.target.value
+            })} required />
           </div>
 
           <div>
             <Label htmlFor="description">Description</Label>
             <Textarea id="description" value={newTeam.description} onChange={e => setNewTeam({
-            ...newTeam,
-            description: e.target.value
-          })} rows={3} />
+              ...newTeam,
+              description: e.target.value
+            })} rows={3} />
           </div>
 
           <div>
             <Label htmlFor="team_lead">Team Lead</Label>
             <Select value={newTeam.team_lead_id || "none"} onValueChange={value => setNewTeam({
-            ...newTeam,
-            team_lead_id: value === "none" ? "" : value
-          })}>
+              ...newTeam,
+              team_lead_id: value === "none" ? "" : value
+            })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select team lead (optional)" />
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No team lead</SelectItem>
-                {users
-                  .filter(user => !newTeam.member_ids.includes(user.id))
-                  .sort((a, b) => a.last_name.localeCompare(b.last_name))
-                  .map(user => <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name} ({user.role})
+                {users.filter(user => !newTeam.member_ids.includes(user.id)).map(user => <SelectItem key={user.id} value={user.id}>
+                      {user.first_name} {user.last_name} ({user.role})
                     </SelectItem>)}
               </SelectContent>
             </Select>
@@ -158,14 +149,14 @@ export const AddTeamDialog = ({
                 </SelectTrigger>
                 <SelectContent>
                   {getAvailableUsers().map(user => <SelectItem key={user.id} value={user.id}>
-                      {user.last_name}, {user.first_name} ({user.role})
+                      {user.first_name} {user.last_name} ({user.role})
                     </SelectItem>)}
                 </SelectContent>
               </Select>
               
               {getSelectedMembers().length > 0 && <div className="flex flex-wrap gap-2 mt-2">
                   {getSelectedMembers().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                      {user.last_name}, {user.first_name}
+                      {user.first_name} {user.last_name}
                       <X className="h-3 w-3 cursor-pointer" onClick={() => removeMember(user.id)} />
                     </Badge>)}
                 </div>}
@@ -184,12 +175,6 @@ export const AddTeamDialog = ({
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
-  </>
-  );
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+  </>;
 };
