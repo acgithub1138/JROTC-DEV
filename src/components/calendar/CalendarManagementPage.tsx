@@ -18,7 +18,7 @@ export interface Event {
   start_date: string;
   end_date?: string;
   location?: string;
-  event_type: 'training' | 'competition' | 'ceremony' | 'meeting' | 'drill' | 'other';
+  event_type: string; // References event_types table ID
   is_all_day: boolean;
   created_by?: string;
   created_at: string;

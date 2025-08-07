@@ -84,7 +84,7 @@ export const useEvents = (filters: EventFilters) => {
           ...eventData,
           school_id: userProfile.school_id,
           created_by: userProfile.id,
-        })
+        } as any) // Cast to any due to schema migration
         .select()
         .single();
 
@@ -101,12 +101,12 @@ export const useEvents = (filters: EventFilters) => {
             // Convert instances to match database schema
             const eventsToInsert = recurringInstances.map(instance => ({
               ...instance,
-              event_type: instance.event_type as 'training' | 'competition' | 'ceremony' | 'meeting' | 'drill' | 'other'
+              event_type: instance.event_type // Reference to event_types table
             }));
 
             const { error: instancesError } = await supabase
               .from('events')
-              .insert(eventsToInsert);
+              .insert(eventsToInsert as any); // Cast to any due to schema migration
 
             if (instancesError) {
               console.error('Error creating recurring instances:', instancesError);
@@ -152,7 +152,7 @@ export const useEvents = (filters: EventFilters) => {
     try {
       const { data, error } = await supabase
         .from('events')
-        .update(eventData)
+        .update(eventData as any) // Cast to any due to schema migration
         .eq('id', id)
         .select()
         .single();

@@ -49,7 +49,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     end_time_hour: '10',
     end_time_minute: '00',
     location: '',
-    event_type: 'other',
+    event_type: '',
     is_all_day: false,
   });
   const [isRecurring, setIsRecurring] = useState(false);
@@ -72,7 +72,7 @@ export const EventForm: React.FC<EventFormProps> = ({
     end_time_hour: '10',
     end_time_minute: '00',
     location: '',
-    event_type: 'other',
+        event_type: '',
     is_all_day: false,
   });
 
@@ -106,7 +106,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         end_time_hour: endDate ? format(endDate, 'HH') : '10',
         end_time_minute: endDate ? format(endDate, 'mm') : '00',
         location: event.location || '',
-        event_type: event.event_type,
+        event_type: event.event_type || '',
         is_all_day: event.is_all_day,
       };
 
@@ -132,7 +132,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         end_time_hour: '10',
         end_time_minute: '00',
         location: '',
-        event_type: 'other',
+        event_type: '',
         is_all_day: false,
       };
       setFormData(newFormData);
@@ -184,7 +184,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        event_type: formData.event_type || 'other', // Ensure we have a valid enum value
+        event_type: formData.event_type, // Reference to event_types table
         is_all_day: formData.is_all_day,
         start_date: startDateUTC.toISOString(),
         end_date: endDateUTC ? endDateUTC.toISOString() : null,
@@ -208,7 +208,7 @@ export const EventForm: React.FC<EventFormProps> = ({
 
     const newEventType = await createEventType(newEventTypeName.trim());
     if (newEventType) {
-      setFormData(prev => ({ ...prev, event_type: newEventType.value }));
+      setFormData(prev => ({ ...prev, event_type: newEventType.id }));
       setNewEventTypeName('');
       setShowAddEventTypeDialog(false);
     }
@@ -301,7 +301,7 @@ export const EventForm: React.FC<EventFormProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {eventTypes.map(type => (
-                  <SelectItem key={type.id} value={type.value}>
+                  <SelectItem key={type.id} value={type.id}>
                     {type.label}
                   </SelectItem>
                 ))}
