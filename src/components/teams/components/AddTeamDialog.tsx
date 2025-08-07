@@ -133,8 +133,11 @@ export const AddTeamDialog = ({
               </SelectTrigger>
               <SelectContent>
                 <SelectItem value="none">No team lead</SelectItem>
-                {users.filter(user => !newTeam.member_ids.includes(user.id)).map(user => <SelectItem key={user.id} value={user.id}>
-                      {user.first_name} {user.last_name} ({user.role})
+                {users
+                  .filter(user => !newTeam.member_ids.includes(user.id))
+                  .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                  .map(user => <SelectItem key={user.id} value={user.id}>
+                      {user.last_name}, {user.first_name} ({user.role})
                     </SelectItem>)}
               </SelectContent>
             </Select>
