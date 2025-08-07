@@ -28,7 +28,14 @@ export const useEvents = (filters: EventFilters) => {
     try {
       let query = supabase
         .from('events')
-        .select('*')
+        .select(`
+          *,
+          event_types!inner(
+            id,
+            label,
+            color
+          )
+        `)
         .eq('school_id', userProfile.school_id)
         .order('start_date', { ascending: true });
 
@@ -44,7 +51,7 @@ export const useEvents = (filters: EventFilters) => {
       }
       
       console.log('Events fetched successfully:', data);
-      setEvents(data || []);
+      setEvents((data as any) || []);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({

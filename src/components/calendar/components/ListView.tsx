@@ -24,15 +24,19 @@ export const ListView: React.FC<ListViewProps> = ({
     .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
     .slice(0, 25);
 
-  const getEventTypeColor = (type: string) => {
-    switch (type) {
-      case 'meeting': return 'bg-blue-100 text-blue-800';
-      case 'class': return 'bg-green-100 text-green-800';
-      case 'event': return 'bg-purple-100 text-purple-800';
-      case 'deadline': return 'bg-red-100 text-red-800';
-      case 'holiday': return 'bg-orange-100 text-orange-800';
-      default: return 'bg-gray-100 text-gray-800';
-    }
+  const getEventTypeColor = (event: Event) => {
+    const color = event.event_types?.color || '#6b7280'; // Default to gray
+    // Convert hex to RGB and create light background
+    const hex = color.replace('#', '');
+    const r = parseInt(hex.substr(0, 2), 16);
+    const g = parseInt(hex.substr(2, 2), 16);
+    const b = parseInt(hex.substr(4, 2), 16);
+    
+    return {
+      backgroundColor: `rgba(${r}, ${g}, ${b}, 0.1)`,
+      color: color,
+      borderColor: `rgba(${r}, ${g}, ${b}, 0.2)`
+    };
   };
 
   const formatDateTime = (date: string) => {
@@ -115,8 +119,11 @@ export const ListView: React.FC<ListViewProps> = ({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge className={getEventTypeColor(event.event_type)}>
-                    {event.event_type}
+                  <Badge 
+                    className="border"
+                    style={getEventTypeColor(event)}
+                  >
+                    {event.event_types?.label || 'Unknown'}
                   </Badge>
                 </TableCell>
                 <TableCell>

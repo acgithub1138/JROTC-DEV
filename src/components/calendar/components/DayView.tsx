@@ -12,15 +12,13 @@ interface DayViewProps {
   onTimeSlotClick: (date: Date, hour: number) => void;
 }
 
-const getEventTypeColor = (type: string) => {
-  switch (type) {
-    case 'training': return 'bg-blue-500 border-blue-600';
-    case 'competition': return 'bg-red-500 border-red-600';
-    case 'ceremony': return 'bg-purple-500 border-purple-600';
-    case 'meeting': return 'bg-green-500 border-green-600';
-    case 'drill': return 'bg-orange-500 border-orange-600';
-    default: return 'bg-gray-500 border-gray-600';
-  }
+const getEventTypeColor = (event: Event) => {
+  const color = event.event_types?.color || '#6b7280'; // Default to gray
+  return {
+    backgroundColor: color,
+    borderColor: color,
+    borderLeftColor: color
+  };
 };
 
 export const DayView: React.FC<DayViewProps> = ({
@@ -97,9 +95,9 @@ export const DayView: React.FC<DayViewProps> = ({
                 key={event.id}
                 className={cn(
                   "px-3 py-2 rounded text-white",
-                  getEventTypeColor(event.event_type).split(' ')[0],
                   onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
                 )}
+                style={getEventTypeColor(event)}
                 onClick={onEventClick ? () => onEventClick(event) : undefined}
                 title={event.title}
               >
@@ -154,10 +152,12 @@ export const DayView: React.FC<DayViewProps> = ({
                     key={event.id}
                     className={cn(
                       "absolute left-2 right-2 rounded border-l-4 p-3 text-white transition-opacity z-10",
-                      getEventTypeColor(event.event_type),
                       onEventClick ? "cursor-pointer hover:opacity-90" : "cursor-default"
                     )}
-                    style={position}
+                    style={{
+                      ...position,
+                      ...getEventTypeColor(event)
+                    }}
                     onClick={onEventClick ? () => onEventClick(event) : undefined}
                     title={event.title}
                   >

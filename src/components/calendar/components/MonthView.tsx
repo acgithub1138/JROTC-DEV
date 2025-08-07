@@ -16,15 +16,12 @@ interface MonthViewProps {
   onDateDoubleClick?: (date: Date) => void;
 }
 
-const getEventTypeColor = (type: string) => {
-  switch (type) {
-    case 'training': return 'bg-blue-500';
-    case 'competition': return 'bg-red-500';
-    case 'ceremony': return 'bg-purple-500';
-    case 'meeting': return 'bg-green-500';
-    case 'drill': return 'bg-orange-500';
-    default: return 'bg-gray-500';
-  }
+const getEventTypeColor = (event: Event) => {
+  const color = event.event_types?.color || '#6b7280'; // Default to gray
+  return {
+    backgroundColor: color,
+    borderColor: color
+  };
 };
 
 export const MonthView: React.FC<MonthViewProps> = ({
@@ -98,9 +95,9 @@ export const MonthView: React.FC<MonthViewProps> = ({
                      key={event.id}
                      className={cn(
                        "text-xs px-2 py-1 rounded text-white truncate flex items-center gap-1",
-                       getEventTypeColor(event.event_type),
                        onEventClick ? "cursor-pointer hover:opacity-80" : "cursor-default"
                      )}
+                     style={getEventTypeColor(event)}
                      onClick={onEventClick ? (e) => {
                        e.stopPropagation();
                        onEventClick(event);

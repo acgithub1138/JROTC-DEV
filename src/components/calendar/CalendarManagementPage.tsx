@@ -19,6 +19,11 @@ export interface Event {
   end_date?: string;
   location?: string;
   event_type: string; // References event_types table ID
+  event_types?: {
+    id: string;
+    label: string;
+    color: string;
+  };
   is_all_day: boolean;
   created_by?: string;
   created_at: string;
