@@ -29,6 +29,9 @@ export const useUpdateSubtask = () => {
         }
       }
 
+      // Store original status for email rule detection (before any conversions)
+      const userSelectedStatus = updates.status;
+      
       // Auto-change status to "pending_response" if status is being set to "need_information"
       if (updates.status === 'need_information') {
         updates.status = 'pending_response';
@@ -41,8 +44,8 @@ export const useUpdateSubtask = () => {
 
       if (error) throw error;
       
-      // Trigger email notifications for status changes
-      const emailRuleType = shouldTriggerStatusChangeEmail(originalSubtask?.status, updates.status);
+      // Trigger email notifications for status changes using original user selection
+      const emailRuleType = shouldTriggerStatusChangeEmail(originalSubtask?.status, userSelectedStatus);
       if (emailRuleType && originalSubtask?.assigned_to && userProfile?.school_id) {
         try {
           processEmailRules({
