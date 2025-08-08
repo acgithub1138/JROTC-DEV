@@ -91,19 +91,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         {school.school_name || 'Unknown School'}
                       </TableCell>
                       <TableCell>
-                        <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                          {school.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={school.paid ? 'default' : 'secondary'}>
-                          {school.paid ? 'Paid' : 'Unpaid'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
@@ -114,7 +101,21 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                             <p>View registered events</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TableCell>                    
+                      </TableCell>                        
+                      <TableCell>
+                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                          {school.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={school.paid ? 'default' : 'secondary'}>
+                          {school.paid ? 'Paid' : 'Unpaid'}
+                        </Badge>
+                      </TableCell>
+                
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           {canEdit && <Tooltip>
