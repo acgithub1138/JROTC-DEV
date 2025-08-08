@@ -31,32 +31,36 @@ export class QueueProcessor {
   }
 
   async getGlobalSmtpSettings(): Promise<SmtpSettings | null> {
-    const { data: globalSmtpSettings, error: smtpError } = await this.supabaseClient
-      .from('smtp_settings')
-      .select('*')
-      .eq('is_global', true)
-      .eq('is_active', true)
-      .single();
+    // Prefer environment-based SMTP settings (Supabase Secrets)
+    const host = Deno.env.get('SMTP_HOST');
+    const portStr = Deno.env.get('SMTP_PORT');
+    const user = Deno.env.get('SMTP_USERNAME');
+    const pass = Deno.env.get('SMTP_PASSWORD');
+    const fromEmail = Deno.env.get('SMTP_FROM_EMAIL');
+    const fromName = Deno.env.get('SMTP_FROM_NAME') ?? 'No-Reply';
+    const useTlsEnv = Deno.env.get('SMTP_USE_TLS');
 
-    if (smtpError && smtpError.code !== 'PGRST116') {
-      throw smtpError;
+    if (!host || !user || !pass || !fromEmail) {
+      console.warn('SMTP secrets missing. Required: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL');
+      return null;
     }
 
-    if (globalSmtpSettings) {
-      // Decrypt the password using the PostgreSQL function
-      const { data: decryptedPassword, error: decryptError } = await this.supabaseClient
-        .rpc('decrypt_smtp_password', { encrypted_password: globalSmtpSettings.smtp_password });
+    const port = Number.parseInt(portStr ?? '587');
+    const use_tls = useTlsEnv ? ['1', 'true', 'yes'].includes(useTlsEnv.toLowerCase()) : true;
 
-      if (decryptError) {
-        console.error('Error decrypting SMTP password:', decryptError);
-        throw decryptError;
-      }
+    const settings: SmtpSettings = {
+      smtp_host: host,
+      smtp_port: Number.isNaN(port) ? 587 : port,
+      smtp_username: user,
+      smtp_password: pass,
+      from_email: fromEmail,
+      from_name: fromName,
+      use_tls,
+      is_active: true,
+      is_global: true,
+    };
 
-      // Replace encrypted password with decrypted one
-      globalSmtpSettings.smtp_password = decryptedPassword;
-    }
-
-    return globalSmtpSettings;
+    return settings;
   }
 
   async markEmailAsSent(itemId: string): Promise<void> {
