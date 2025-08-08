@@ -156,7 +156,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         schedules?.forEach(schedule => {
           // When editing, allow current school to re-select their own slots
           // Always mark slots occupied by other schools as unavailable
-          if (isEditing && schedule.school_id === userProfile?.school_id) return;
+          if (schedule.school_id === userProfile?.school_id) return;
           
           if (!occupied.has(schedule.event_id)) {
             occupied.set(schedule.event_id, new Set());
@@ -175,25 +175,88 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     fetchOccupiedSlots();
   }, [isOpen, competition?.id, isEditing, userProfile?.school_id]);
 
-  // Initialize selected events and time slots with current registrations
+  // Prefill selected events and time slots from existing schedules for this school
   useEffect(() => {
-    if (isOpen && currentRegistrations.length > 0) {
+    const preloadSchoolSchedules = async () => {
+      if (!isOpen || !competition?.id || !userProfile?.school_id) return;
+      try {
+        const { data, error } = await supabase
+          .from('cp_event_schedules')
+          .select('event_id, scheduled_time')
+          .eq('competition_id', competition.id)
+          .eq('school_id', userProfile.school_id);
+        if (error) throw error;
+        if (!data || data.length === 0) return;
+
+        const scheduleMap = new Map<string, string>();
+        const scheduleEventIds = new Set<string>();
+        data.forEach((row: any) => {
+          scheduleMap.set(row.event_id, new Date(row.scheduled_time).toISOString());
+          scheduleEventIds.add(row.event_id);
+        });
+
+        // Merge into current selections
+        setSelectedTimeSlots(prev => {
+          const next = new Map(prev);
+          scheduleMap.forEach((v, k) => next.set(k, v));
+          return next;
+        });
+        setSelectedEvents(prev => {
+          const next = new Set(prev);
+          scheduleEventIds.forEach(id => next.add(id));
+          return next;
+        });
+
+        // Initialize "initial" state only if not set yet
+        if (initialSelectedEvents.size === 0 && initialSelectedTimeSlots.size === 0) {
+          setInitialSelectedEvents(new Set(scheduleEventIds));
+          setInitialSelectedTimeSlots(new Map(scheduleMap));
+        }
+      } catch (e) {
+        console.error('Error preloading school schedules:', e);
+      }
+    };
+
+    preloadSchoolSchedules();
+  }, [isOpen, competition?.id, userProfile?.school_id]);
+
+  // Initialize selected events and time slots with current registrations (merge-friendly)
+  useEffect(() => {
+    if (!isOpen) return;
+
+    if (currentRegistrations.length > 0) {
       const registeredEventIds = new Set(currentRegistrations.map(reg => reg.event_id));
-      setSelectedEvents(registeredEventIds);
-      setInitialSelectedEvents(registeredEventIds);
-      
-      // Initialize time slots from current schedules
-      const timeSlotMap = new Map<string, string>();
-      currentSchedules?.forEach(schedule => {
-        timeSlotMap.set(schedule.event_id, schedule.scheduled_time);
+
+      // Merge with any preloaded selections
+      setSelectedEvents(prev => {
+        const next = new Set(prev);
+        registeredEventIds.forEach(id => next.add(id));
+        return next;
       });
-      setSelectedTimeSlots(timeSlotMap);
-      setInitialSelectedTimeSlots(new Map(timeSlotMap));
-    } else if (isOpen) {
-      setSelectedEvents(new Set());
-      setInitialSelectedEvents(new Set());
-      setSelectedTimeSlots(new Map());
-      setInitialSelectedTimeSlots(new Map());
+      setInitialSelectedEvents(prev => (prev.size === 0 ? new Set(registeredEventIds) : prev));
+
+      // Initialize/merge time slots from current schedules if provided
+      if (currentSchedules && currentSchedules.length > 0) {
+        const timeSlotMap = new Map<string, string>();
+        currentSchedules.forEach(schedule => {
+          timeSlotMap.set(schedule.event_id, schedule.scheduled_time);
+        });
+
+        setSelectedTimeSlots(prev => {
+          const next = new Map(prev);
+          timeSlotMap.forEach((v, k) => next.set(k, v));
+          return next;
+        });
+        setInitialSelectedTimeSlots(prev => (prev.size === 0 ? new Map(timeSlotMap) : prev));
+      }
+    } else {
+      // When new and open, don't reset if prefill already occurred
+      if (selectedEvents.size === 0 && selectedTimeSlots.size === 0) {
+        setSelectedEvents(new Set());
+        setInitialSelectedEvents(new Set());
+        setSelectedTimeSlots(new Map());
+        setInitialSelectedTimeSlots(new Map());
+      }
     }
   }, [isOpen, currentRegistrations, currentSchedules]);
 
