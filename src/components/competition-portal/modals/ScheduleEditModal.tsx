@@ -155,8 +155,10 @@ export const ScheduleEditModal = ({
     );
     
     return availableSchools.filter(school => {
-      // Include if: not assigned to another slot OR currently assigned to this slot
-      return !assignedSchoolIds.has(school.id) || school.id === currentAssignment;
+      // Include if: not assigned to another slot
+      // OR currently assigned to this slot (so it can be deselected)
+      return !assignedSchoolIds.has(school.id) || 
+             (currentAssignment !== null && school.id === currentAssignment);
     });
   };
   return (
