@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X } from 'lucide-react';
@@ -158,6 +159,14 @@ export const OpenCompetitionsPage = () => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
   };
 
+  const openCompetitionsList = React.useMemo(() => {
+    return (filteredCompetitions || []).filter((c: any) => !isRegistered(c.id));
+  }, [filteredCompetitions, registrations]);
+
+  const registeredCompetitionsList = React.useMemo(() => {
+    return (filteredCompetitions || []).filter((c: any) => isRegistered(c.id));
+  }, [filteredCompetitions, registrations]);
+
   const handleCancelRegistration = (competitionId: string) => {
     setCompetitionToCancel(competitionId);
     setIsCancelDialogOpen(true);
@@ -262,23 +271,54 @@ export const OpenCompetitionsPage = () => {
             </Card>
           ))}
         </div>
-      ) : competitions && (filteredCompetitions?.length ?? 0) > 0 ? (
-        <OpenCompetitionCards
-          competitions={filteredCompetitions}
-          registrations={registrations || []}
-          onViewDetails={handleViewDetails}
-          onRegisterInterest={handleRegisterInterest}
-          onCancelRegistration={handleCancelRegistration}
-        />
       ) : (
-        <div className="text-center py-12">
-          <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-          <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
-          <p className="text-gray-600">
-            There are currently no open competitions available for registration.
-            Check back later for new opportunities!
-          </p>
-        </div>
+        <Tabs defaultValue="open">
+          <TabsList className="mb-4">
+            <TabsTrigger value="open">Open</TabsTrigger>
+            <TabsTrigger value="registered">Registered</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="open">
+            {openCompetitionsList && openCompetitionsList.length > 0 ? (
+              <OpenCompetitionCards
+                competitions={openCompetitionsList}
+                registrations={registrations || []}
+                onViewDetails={handleViewDetails}
+                onRegisterInterest={handleRegisterInterest}
+                onCancelRegistration={handleCancelRegistration}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
+                <p className="text-gray-600">
+                  There are currently no open competitions available for registration.
+                  Check back later for new opportunities!
+                </p>
+              </div>
+            )}
+          </TabsContent>
+
+          <TabsContent value="registered">
+            {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? (
+              <OpenCompetitionCards
+                competitions={registeredCompetitionsList}
+                registrations={registrations || []}
+                onViewDetails={handleViewDetails}
+                onRegisterInterest={handleRegisterInterest}
+                onCancelRegistration={handleCancelRegistration}
+              />
+            ) : (
+              <div className="text-center py-12">
+                <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Competitions</h3>
+                <p className="text-gray-600">
+                  You have not registered for any competitions yet.
+                </p>
+              </div>
+            )}
+          </TabsContent>
+        </Tabs>
       )}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
@@ -390,7 +430,7 @@ export const OpenCompetitionsPage = () => {
 
       <CompetitionRegistrationModal
         isOpen={isRegistrationModalOpen}
-        onClose={() => setIsRegistrationModalOpen(false)}
+        onClose={() => { setIsRegistrationModalOpen(false); refetchRegistrations(); }}
         competition={selectedCompetitionId && competitions ? competitions.find(c => c.id === selectedCompetitionId) || null : null}
         events={competitionEvents || []}
         isLoading={isEventsLoading}
