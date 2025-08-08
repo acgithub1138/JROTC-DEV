@@ -1539,6 +1539,7 @@ export type Database = {
       }
       event_types: {
         Row: {
+          color: string | null
           created_at: string
           id: string
           is_default: boolean
@@ -1548,6 +1549,7 @@ export type Database = {
           value: string
         }
         Insert: {
+          color?: string | null
           created_at?: string
           id?: string
           is_default?: boolean
@@ -1557,6 +1559,7 @@ export type Database = {
           value: string
         }
         Update: {
+          color?: string | null
           created_at?: string
           id?: string
           is_default?: boolean
@@ -1581,7 +1584,7 @@ export type Database = {
           created_by: string | null
           description: string | null
           end_date: string | null
-          event_type: Database["public"]["Enums"]["event_type"]
+          event_type: string | null
           id: string
           is_all_day: boolean
           is_recurring: boolean | null
@@ -1599,7 +1602,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
-          event_type?: Database["public"]["Enums"]["event_type"]
+          event_type?: string | null
           id?: string
           is_all_day?: boolean
           is_recurring?: boolean | null
@@ -1617,7 +1620,7 @@ export type Database = {
           created_by?: string | null
           description?: string | null
           end_date?: string | null
-          event_type?: Database["public"]["Enums"]["event_type"]
+          event_type?: string | null
           id?: string
           is_all_day?: boolean
           is_recurring?: boolean | null
@@ -1636,6 +1639,13 @@ export type Database = {
             columns: ["created_by"]
             isOneToOne: false
             referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "events_event_type_id_fkey"
+            columns: ["event_type"]
+            isOneToOne: false
+            referencedRelation: "event_types"
             referencedColumns: ["id"]
           },
           {
@@ -3285,6 +3295,14 @@ export type Database = {
         Args: { target_role_name: string }
         Returns: boolean
       }
+      can_update_profile_role: {
+        Args: {
+          target_profile_id: string
+          new_role_id: string
+          new_role: Database["public"]["Enums"]["user_role"]
+        }
+        Returns: boolean
+      }
       can_user_access: {
         Args: { module_name: string; action_name: string }
         Returns: boolean
@@ -3359,6 +3377,10 @@ export type Database = {
         }[]
       }
       get_current_user_id: {
+        Args: Record<PropertyKey, never>
+        Returns: string
+      }
+      get_current_user_role: {
         Args: Record<PropertyKey, never>
         Returns: string
       }
@@ -3577,6 +3599,7 @@ export type Database = {
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
       email_queue_status:
         | "pending"
+        | "processing"
         | "sent"
         | "failed"
         | "cancelled"
@@ -3820,6 +3843,7 @@ export const Constants = {
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
       email_queue_status: [
         "pending",
+        "processing",
         "sent",
         "failed",
         "cancelled",
