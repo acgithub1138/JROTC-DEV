@@ -291,12 +291,21 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
             </div>
             <div className="flex items-center space-x-2">
               <Label htmlFor="color">Color:</Label>
-              <input 
-                type="color" 
-                value={color} 
-                onChange={(e) => setColor(e.target.value)} 
-                className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
-              />
+              <div className="flex items-center space-x-1">
+                <input 
+                  type="color" 
+                  value={color} 
+                  onChange={(e) => setColor(e.target.value)} 
+                  className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
+                />
+                <input 
+                  type="text" 
+                  value={color} 
+                  onChange={(e) => setColor(e.target.value)} 
+                  placeholder="#3B82F6" 
+                  className="w-24 h-6 text-sm px-2 border rounded"
+                />
+              </div>
             </div>
           </div>
 
