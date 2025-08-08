@@ -284,7 +284,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
           </div>
 
           {/* Payment Status and Color */}
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-center gap-2">
             <div className="flex items-center space-x-2">
               <Switch id="paid" checked={paid} onCheckedChange={setPaid} />
               <Label htmlFor="paid">Payment Received</Label>
