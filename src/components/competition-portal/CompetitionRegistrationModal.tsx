@@ -78,6 +78,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [occupiedSlots, setOccupiedSlots] = useState<Map<string, Set<string>>>(new Map());
+  const [occupiedLabels, setOccupiedLabels] = useState<Map<string, Map<string, string>>>(new Map());
   const [conflictEventIds, setConflictEventIds] = useState<Set<string>>(new Set());
   
   const isEditing = currentRegistrations.length > 0;
@@ -149,23 +150,43 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     try {
       const { data: schedules, error } = await supabase
         .from('cp_event_schedules')
-        .select('event_id, scheduled_time, school_id')
+        .select('event_id, scheduled_time, school_id, school_name')
         .eq('competition_id', competition.id);
 
       if (error) throw error;
 
+      const { data: compSchools, error: compErr } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competition.id);
+      if (compErr) throw compErr;
+
+      const nameBySchool = new Map<string, string>();
+      compSchools?.forEach((row: any) => {
+        if (row.school_id) {
+          nameBySchool.set(row.school_id, row.school_name || '');
+        }
+      });
+
       const occupied = new Map<string, Set<string>>();
+      const labels = new Map<string, Map<string, string>>();
       schedules?.forEach((schedule: any) => {
         // Always mark slots occupied by other schools as unavailable
         if (schedule.school_id === userProfile?.school_id) return;
         if (!occupied.has(schedule.event_id)) {
           occupied.set(schedule.event_id, new Set());
         }
+        if (!labels.has(schedule.event_id)) {
+          labels.set(schedule.event_id, new Map());
+        }
         const scheduledTime = new Date(schedule.scheduled_time).toISOString();
         occupied.get(schedule.event_id)!.add(scheduledTime);
+        const labelName = nameBySchool.get(schedule.school_id) || schedule.school_name || 'Occupied';
+        labels.get(schedule.event_id)!.set(scheduledTime, labelName);
       });
 
       setOccupiedSlots(occupied);
+      setOccupiedLabels(labels);
     } catch (error) {
       console.error('Error fetching occupied slots:', error);
     }
@@ -656,7 +677,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                                       {slot.label}
                                       {currentVal && slot.time.toISOString() === currentVal
                                         ? ' (Current)'
-                                        : (!slot.available ? ' (Filled)' : '')}
+                                        : (!slot.available ? ` (${occupiedLabels.get(event.id)?.get(slot.time.toISOString()) || 'Filled'})` : '')}
                                     </SelectItem>
                                   ));
                                 })()}
