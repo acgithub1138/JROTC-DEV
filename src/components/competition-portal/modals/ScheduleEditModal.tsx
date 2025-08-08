@@ -33,8 +33,8 @@ export const ScheduleEditModal = ({
     timezone
   } = useSchoolTimezone();
   const { toast } = useToast();
-  const [allRegisteredSchools, setAllRegisteredSchools] = useState<AvailableSchool[]>([]);
-  const [currentlyAvailableSchools, setCurrentlyAvailableSchools] = useState<AvailableSchool[]>([]);
+  const [registeredSchools, setRegisteredSchools] = useState<AvailableSchool[]>([]);
+  const [filteredSchools, setFilteredSchools] = useState<AvailableSchool[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -60,33 +60,38 @@ export const ScheduleEditModal = ({
     }
   }, [isOpen, event.id]);
 
-  // Update currently available schools when localSchedule changes
+  // Update filtered schools when localSchedule changes
   useEffect(() => {
-    if (allRegisteredSchools.length > 0) {
-      updateCurrentlyAvailableSchools();
+    if (registeredSchools.length > 0) {
+      updateFilteredSchools();
     }
-  }, [localSchedule, allRegisteredSchools]);
+  }, [localSchedule, registeredSchools]);
 
-  const updateCurrentlyAvailableSchools = () => {
-    // Get all currently assigned school IDs
+  const updateFilteredSchools = () => {
+    // Get all currently assigned school IDs from localSchedule
     const assignedSchoolIds = new Set(
       Object.values(localSchedule).filter(schoolId => schoolId !== null)
     );
     
     // Filter out assigned schools from all registered schools
-    const available = allRegisteredSchools.filter(school => 
+    const available = registeredSchools.filter(school => 
       !assignedSchoolIds.has(school.id)
     );
     
-    setCurrentlyAvailableSchools(available);
+    setFilteredSchools(available);
   };
   const loadAvailableSchools = async () => {
     setIsLoading(true);
     try {
       const schools = await getAvailableSchools(event.id);
-      setAllRegisteredSchools(schools);
-      // Start with all schools - updateCurrentlyAvailableSchools will filter them
-      setCurrentlyAvailableSchools(schools);
+      setRegisteredSchools(schools);
+      
+      // Calculate filtered schools by removing schools already assigned in initialSchedule
+      const assignedSchoolIds = new Set(
+        Object.values(initialSchedule).filter(schoolId => schoolId !== null)
+      );
+      const available = schools.filter(school => !assignedSchoolIds.has(school.id));
+      setFilteredSchools(available);
     } catch (error) {
       console.error('Error loading available schools:', error);
     } finally {
@@ -171,12 +176,12 @@ export const ScheduleEditModal = ({
     const timeSlotISO = timeSlot.toISOString();
     const currentAssignment = localSchedule[timeSlotISO];
     
-    // Start with currently available schools (unassigned)
-    const schoolsForSlot = [...currentlyAvailableSchools];
+    // Start with filtered schools (schools not assigned to any slot)
+    const schoolsForSlot = [...filteredSchools];
     
     // Add the currently assigned school for this slot (if any) so it can be deselected
     if (currentAssignment) {
-      const assignedSchool = allRegisteredSchools.find(school => school.id === currentAssignment);
+      const assignedSchool = registeredSchools.find(school => school.id === currentAssignment);
       if (assignedSchool && !schoolsForSlot.find(s => s.id === assignedSchool.id)) {
         schoolsForSlot.push(assignedSchool);
       }
@@ -210,7 +215,7 @@ export const ScheduleEditModal = ({
                 {event.timeSlots.map((slot, index) => {
                   const currentAssignment = localSchedule[slot.time.toISOString()];
                   const assignedSchool = currentAssignment ? 
-                    allRegisteredSchools.find(s => s.id === currentAssignment) || 
+                    registeredSchools.find(s => s.id === currentAssignment) || 
                     slot.assignedSchool : null;
 
                   return (
