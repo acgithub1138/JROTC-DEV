@@ -88,7 +88,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 </TableHeader>
                 <TableBody>
                   {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
-                      <TableCell className="font-medium">
+                      <TableCell className="font-medium py-[8px]">
                         {school.school_name || 'Unknown School'}
                       </TableCell>
                       <TableCell>
