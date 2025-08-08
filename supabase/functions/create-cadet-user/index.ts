@@ -92,6 +92,20 @@ serve(async (req) => {
 
     console.log('Creating user:', email, 'with role:', role, 'in school:', school_id)
 
+    // Look up the role_id from user_roles table
+    const { data: roleData, error: roleError } = await supabaseAdmin
+      .from('user_roles')
+      .select('id')
+      .eq('role_name', role)
+      .single()
+
+    if (roleError || !roleData) {
+      console.error('Role lookup error:', roleError)
+      throw new Error(`Invalid role: ${role}`)
+    }
+
+    console.log('Found role_id:', roleData.id, 'for role:', role)
+
     // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
       email,
@@ -101,6 +115,7 @@ serve(async (req) => {
         first_name,
         last_name,
         role,
+        role_id: roleData.id,
         school_id
       }
     })
@@ -135,6 +150,7 @@ serve(async (req) => {
           .from('profiles')
           .update({
             role,
+            role_id: roleData.id, // Set the role_id from the lookup
             grade: grade || null,
             rank: rank || null,
             flight: flight || null,

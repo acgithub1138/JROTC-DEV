@@ -39,6 +39,18 @@ export const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) 
     setIsLoading(true);
 
     try {
+      // Look up the role_id from user_roles table
+      const { data: roleData, error: roleError } = await supabase
+        .from('user_roles')
+        .select('id')
+        .eq('role_name', newUser.role)
+        .single();
+
+      if (roleError || !roleData) {
+        toast.error('Invalid role selected');
+        return;
+      }
+
       // Create auth user first
       const { data: authData, error: authError } = await supabase.auth.admin.createUser({
         email: newUser.email,
@@ -48,6 +60,7 @@ export const CreateUserDialog = ({ open, onOpenChange }: CreateUserDialogProps) 
           first_name: newUser.first_name,
           last_name: newUser.last_name,
           role: newUser.role,
+          role_id: roleData.id,
           school_id: newUser.school_id
         }
       });
