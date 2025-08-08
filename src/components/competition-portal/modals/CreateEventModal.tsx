@@ -107,7 +107,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {templates.map(template => (
-                  <SelectItem key={template.id} value={template.template_name}>
+                  <SelectItem key={template.id} value={template.id}>
                     {template.template_name}
                   </SelectItem>
                 ))}
