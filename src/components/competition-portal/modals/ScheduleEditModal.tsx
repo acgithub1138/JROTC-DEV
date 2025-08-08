@@ -170,23 +170,6 @@ export const ScheduleEditModal = ({
                     availableSchools.find(s => s.id === currentAssignment) || 
                     slot.assignedSchool : null;
 
-                  // Compute available schools for this slot including any removed schools
-                  const slotAvailableSchools = [...availableSchools];
-                  
-                  // If a school was removed from any slot, add it back to available options
-                  Object.entries(localSchedule).forEach(([timeSlotISO, schoolId]) => {
-                    const originalSchoolId = initialSchedule[timeSlotISO];
-                    // If this slot originally had a school but now it's null (removed)
-                    if (originalSchoolId && schoolId === null) {
-                      const removedSchool = event.timeSlots
-                        .find(s => s.time.toISOString() === timeSlotISO)
-                        ?.assignedSchool;
-                      if (removedSchool && !slotAvailableSchools.find(s => s.id === removedSchool.id)) {
-                        slotAvailableSchools.push({ id: removedSchool.id, name: removedSchool.name });
-                      }
-                    }
-                  });
-
                   return (
                     <div key={slot.time.toISOString()} className={`flex items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <div className="font-mono text-sm min-w-[80px]">
@@ -221,17 +204,17 @@ export const ScheduleEditModal = ({
                               <SelectValue placeholder="Select school..." />
                             </SelectTrigger>
                             <SelectContent>
-                               {slotAvailableSchools.length === 0 ? (
-                                 <SelectItem value="no-schools" disabled>
-                                   No schools available
-                                 </SelectItem>
-                               ) : (
-                                 slotAvailableSchools.map(school => (
-                                   <SelectItem key={school.id} value={school.id}>
-                                     {school.name}
-                                   </SelectItem>
-                                 ))
-                               )}
+                              {availableSchools.length === 0 ? (
+                                <SelectItem value="no-schools" disabled>
+                                  No schools available
+                                </SelectItem>
+                              ) : (
+                                availableSchools.map(school => (
+                                  <SelectItem key={school.id} value={school.id}>
+                                    {school.name}
+                                  </SelectItem>
+                                ))
+                              )}
                             </SelectContent>
                           </Select>
                         )}
