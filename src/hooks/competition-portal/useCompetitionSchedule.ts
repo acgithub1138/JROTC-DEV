@@ -187,6 +187,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
     if (!competitionId) return [];
 
     try {
+      console.log('ACTEST getAvailableSchools - START:', { eventId, competitionId });
+
       // Get schools registered for this event
       const { data: registeredSchools, error: regError } = await supabase
         .from('cp_event_registrations')
@@ -199,6 +201,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (regError) throw regError;
 
+      console.log('ACTEST getAvailableSchools - registeredSchools:', registeredSchools);
+
       // Get schools already scheduled for this event
       const { data: scheduledSchools, error: schedError } = await supabase
         .from('cp_event_schedules')
@@ -208,11 +212,19 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schedError) throw schedError;
 
+      console.log('ACTEST getAvailableSchools - scheduledSchools:', scheduledSchools);
+
       const scheduledSchoolIds = new Set(scheduledSchools?.map(s => s.school_id) || []);
 
       // Get school names for registered schools
-      if (!registeredSchools?.length) return [];
+      if (!registeredSchools?.length) {
+        console.log('ACTEST getAvailableSchools - NO registered schools, returning empty array');
+        return [];
+      }
 
+      console.log('ACTEST getAvailableSchools - fetching school names for:', registeredSchools.map(r => r.school_id));
+
+      // Try to get school names from cp_comp_schools first
       const { data: schoolNames, error: schoolError } = await supabase
         .from('cp_comp_schools')
         .select(`
@@ -223,20 +235,47 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         .eq('competition_id', competitionId)
         .in('school_id', registeredSchools.map(r => r.school_id));
 
-      if (schoolError) throw schoolError;
+      console.log('ACTEST getAvailableSchools - cp_comp_schools result:', { schoolNames, schoolError });
+
+      // If no school names found in cp_comp_schools, get them directly from schools table
+      let finalSchoolNames = schoolNames;
+      if (!schoolNames?.length) {
+        console.log('ACTEST getAvailableSchools - no schools in cp_comp_schools, trying schools table directly');
+        const { data: directSchoolNames, error: directSchoolError } = await supabase
+          .from('schools')
+          .select('id, name')
+          .in('id', registeredSchools.map(r => r.school_id));
+        
+        console.log('ACTEST getAvailableSchools - direct schools result:', { directSchoolNames, directSchoolError });
+        
+        if (!directSchoolError && directSchoolNames) {
+          finalSchoolNames = directSchoolNames.map(school => ({
+            school_id: school.id,
+            school_name: school.name,
+            schools: { name: school.name }
+          }));
+        }
+      }
+
+      if (schoolError && !finalSchoolNames?.length) throw schoolError;
+
+      console.log('ACTEST getAvailableSchools - finalSchoolNames:', finalSchoolNames);
 
       // Return available schools (registered but not yet scheduled)
-      return registeredSchools?.filter(
+      const result = registeredSchools?.filter(
         school => !scheduledSchoolIds.has(school.school_id)
       ).map(school => {
-        const schoolInfo = schoolNames?.find(s => s.school_id === school.school_id);
+        const schoolInfo = finalSchoolNames?.find(s => s.school_id === school.school_id);
         return {
           id: school.school_id,
           name: schoolInfo?.schools?.name || schoolInfo?.school_name || 'Unknown School'
         };
       }) || [];
+
+      console.log('ACTEST getAvailableSchools - FINAL RESULT:', result);
+      return result;
     } catch (error) {
-      console.error('Error fetching available schools:', error);
+      console.error('ACTEST getAvailableSchools - ERROR:', error);
       return [];
     }
   };
