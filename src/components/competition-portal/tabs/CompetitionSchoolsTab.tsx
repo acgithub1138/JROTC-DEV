@@ -108,14 +108,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
-                      </TableCell>
-                      <TableCell>
                         <Badge variant={school.paid ? 'default' : 'secondary'}>
                           {school.paid ? 'Paid' : 'Unpaid'}
                         </Badge>
                       </TableCell>
-                
+                      <TableCell>
+                        <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
+                      </TableCell>                
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           {canEdit && <Tooltip>
