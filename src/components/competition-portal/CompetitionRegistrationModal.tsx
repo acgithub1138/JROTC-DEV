@@ -655,7 +655,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                                     >
                                       {slot.label}
                                       {currentVal && slot.time.toISOString() === currentVal
-                                        ? ' (current)'
+                                        ? ' (Current)'
                                         : (!slot.available ? ' (Filled)' : '')}
                                     </SelectItem>
                                   ));
