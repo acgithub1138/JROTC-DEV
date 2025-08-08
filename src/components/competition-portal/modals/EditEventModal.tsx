@@ -194,6 +194,38 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     return schoolUsers.filter(user => !formData.resources.includes(user.id));
   };
 
+  // Calculate max participants when interval is set
+  useEffect(() => {
+    if (formData.interval && !formData.max_participants && 
+        formData.start_date && formData.start_time_hour && formData.start_time_minute &&
+        formData.end_time_hour && formData.end_time_minute) {
+      
+      const startTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
+      const endTime = new Date(`${formData.start_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      
+      let totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+      
+      // Subtract lunch break if defined
+      if (formData.lunch_start_time && formData.lunch_end_time) {
+        const lunchStart = new Date(`${formData.start_date}T${formData.lunch_start_time}:00`);
+        const lunchEnd = new Date(`${formData.start_date}T${formData.lunch_end_time}:00`);
+        const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
+        totalMinutes -= lunchMinutes;
+      }
+      
+      const interval = parseInt(formData.interval);
+      if (interval > 0 && totalMinutes > 0) {
+        const maxParticipants = Math.floor(totalMinutes / interval);
+        setFormData(prev => ({
+          ...prev,
+          max_participants: maxParticipants.toString()
+        }));
+      }
+    }
+  }, [formData.interval, formData.start_date, formData.start_time_hour, formData.start_time_minute, 
+      formData.end_time_hour, formData.end_time_minute, formData.lunch_start_time, 
+      formData.lunch_end_time, formData.max_participants]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.event || !event) {

@@ -211,6 +211,39 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     if (!date || !hour || !minute) return null;
     return `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
   };
+
+  // Calculate max participants when interval is set
+  useEffect(() => {
+    if (formData.interval && !formData.max_participants && 
+        formData.start_date && formData.start_hour && formData.start_minute &&
+        formData.end_hour && formData.end_minute) {
+      
+      const startTime = new Date(`${formData.start_date}T${formData.start_hour}:${formData.start_minute}:00`);
+      const endTime = new Date(`${formData.start_date}T${formData.end_hour}:${formData.end_minute}:00`);
+      
+      let totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
+      
+      // Subtract lunch break if defined
+      if (formData.lunch_start_hour && formData.lunch_start_minute && 
+          formData.lunch_end_hour && formData.lunch_end_minute) {
+        const lunchStart = new Date(`${formData.start_date}T${formData.lunch_start_hour}:${formData.lunch_start_minute}:00`);
+        const lunchEnd = new Date(`${formData.start_date}T${formData.lunch_end_hour}:${formData.lunch_end_minute}:00`);
+        const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
+        totalMinutes -= lunchMinutes;
+      }
+      
+      const interval = parseInt(formData.interval);
+      if (interval > 0 && totalMinutes > 0) {
+        const maxParticipants = Math.floor(totalMinutes / interval);
+        setFormData(prev => ({
+          ...prev,
+          max_participants: maxParticipants.toString()
+        }));
+      }
+    }
+  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, 
+      formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute,
+      formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.event) {
