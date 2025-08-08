@@ -153,12 +153,24 @@
   }
   
   .schedule-print-container,
-  .schedule-print-container * {
+  .schedule-print-container *,
+  .schedule-print-wrapper .schedule-print-container,
+  .schedule-print-wrapper .schedule-print-container * {
     visibility: visible !important;
     width: 100% !important;
     max-width: none !important;
     overflow: visible !important;
     background: white !important;
+  }
+  
+  /* Ensure proper centering for print content */
+  .schedule-print-container {
+    position: absolute !important;
+    left: 50% !important;
+    top: 0 !important;
+    transform: translateX(-50%) !important;
+    margin: 0 auto !important;
+    display: block !important;
   }
   
   .schedule-print-container table {

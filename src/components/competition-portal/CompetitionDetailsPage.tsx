@@ -71,7 +71,7 @@ export const CompetitionDetailsPage = () => {
         </TabsContent>
         
         <TabsContent value="schedule">
-          <Card>
+          <Card className="schedule-print-wrapper">
             
             <CardContent>
               <CompetitionScheduleTab competitionId={competitionId} />
