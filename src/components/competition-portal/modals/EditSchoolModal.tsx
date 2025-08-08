@@ -136,11 +136,14 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
 
       // Insert new event registrations
       if (eventIds.length > 0) {
+        const { data: { user } } = await supabase.auth.getUser();
+        
         const eventRegistrations = eventIds.map(eventId => ({
           competition_id: competitionId,
           school_id: schoolRegistration.school_id,
           event_id: eventId,
-          status: 'registered'
+          status: 'registered',
+          created_by: user?.id
         }));
 
         const { error: insertError } = await supabase
