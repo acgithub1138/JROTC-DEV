@@ -1,14 +1,16 @@
-import React, { useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
 import { CompetitionRegistrationModal } from './CompetitionRegistrationModal';
 import { useAuth } from '@/contexts/AuthContext';
@@ -25,6 +27,8 @@ export const OpenCompetitionsPage = () => {
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
+  const debouncedSearch = useDebouncedValue(searchTerm, 300);
 
   const { data: competitions, isLoading, error } = useQuery({
     queryKey: ['open-competitions'],
@@ -40,6 +44,31 @@ export const OpenCompetitionsPage = () => {
       return data;
     },
   });
+
+  const filteredCompetitions = React.useMemo(() => {
+    const list = competitions || [];
+    const q = (debouncedSearch || '').trim().toLowerCase();
+    if (!q) return list;
+    return list.filter((c: any) => {
+      const programRaw = c.program ? String(c.program) : '';
+      const programFormatted = programRaw.replace(/_/g, ' ');
+      const haystack = [
+        c.name,
+        c.address,
+        c.city,
+        c.state,
+        c.zip,
+        c.program,
+        programFormatted,
+        c.hosting_school,
+        c.description
+      ]
+        .filter(Boolean)
+        .join(' ')
+        .toLowerCase();
+      return haystack.includes(q);
+    });
+  }, [competitions, debouncedSearch]);
 
   // Query to check which competitions the user's school is registered for
   const { data: registrations, refetch: refetchRegistrations } = useQuery({
@@ -204,6 +233,16 @@ export const OpenCompetitionsPage = () => {
         </p>
       </div>
 
+      <div className="max-w-xl">
+        <label htmlFor="competition-search" className="text-sm font-medium mb-2 block">Search competitions</label>
+        <Input
+          id="competition-search"
+          placeholder="Search by name, address, city, state, zip, program, hosting school"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+        />
+      </div>
+
       {isLoading ? (
         <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {[...Array(6)].map((_, i) => (
@@ -222,9 +261,9 @@ export const OpenCompetitionsPage = () => {
             </Card>
           ))}
         </div>
-      ) : competitions && competitions.length > 0 ? (
+      ) : competitions && (filteredCompetitions?.length ?? 0) > 0 ? (
         <OpenCompetitionCards
-          competitions={competitions}
+          competitions={filteredCompetitions}
           registrations={registrations || []}
           onViewDetails={handleViewDetails}
           onRegisterInterest={handleRegisterInterest}
