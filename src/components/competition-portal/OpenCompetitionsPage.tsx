@@ -167,24 +167,6 @@ export const OpenCompetitionsPage = () => {
     if (!competitionToCancel || !userProfile?.school_id) return;
 
     try {
-      // Update cp_comp_schools status to canceled (note: single 'l' to match DB constraint)
-      const { error: schoolError } = await supabase
-        .from('cp_comp_schools')
-        .update({ status: 'canceled' })
-        .eq('competition_id', competitionToCancel)
-        .eq('school_id', userProfile.school_id);
-
-      if (schoolError) throw schoolError;
-
-      // Update cp_event_registrations status to canceled (note: single 'l' to match DB constraint)
-      const { error: eventError } = await supabase
-        .from('cp_event_registrations')
-        .update({ status: 'canceled' })
-        .eq('competition_id', competitionToCancel)
-        .eq('school_id', userProfile.school_id);
-
-      if (eventError) throw eventError;
-
       // Delete cp_event_schedules records for this school and competition
       const { error: scheduleError } = await supabase
         .from('cp_event_schedules')
@@ -193,6 +175,25 @@ export const OpenCompetitionsPage = () => {
         .eq('school_id', userProfile.school_id);
 
       if (scheduleError) throw scheduleError;
+
+      // Delete cp_event_registrations for this school and competition
+      const { error: regError } = await supabase
+        .from('cp_event_registrations')
+        .delete()
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id);
+
+      if (regError) throw regError;
+
+      // Delete cp_comp_schools entry for this school and competition
+      const { error: schoolError } = await supabase
+        .from('cp_comp_schools')
+        .delete()
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id);
+
+      if (schoolError) throw schoolError;
+
 
       toast({
         title: "Registration Cancelled",
