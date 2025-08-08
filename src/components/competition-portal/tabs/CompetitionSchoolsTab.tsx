@@ -89,7 +89,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <TableBody>
                   {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
                       <TableCell className="font-medium">
-                        {school.school_name - school.fee || 'Unknown School'}
+                        {school.school_name || 'Unknown School'}
                       </TableCell>
                       <TableCell>
                         <Tooltip>
@@ -114,7 +114,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         </Badge>
                       </TableCell>
                       <TableCell>
-                        ${school.fee}
+                        $ {school.total_fee)
                       </TableCell>
                       <TableCell>
                         <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
