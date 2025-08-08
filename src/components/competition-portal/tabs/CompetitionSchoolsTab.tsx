@@ -78,10 +78,10 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <TableHeader>
                   <TableRow>
                     <TableHead>School Name</TableHead>
-                    <TableHead>Color</TableHead>
                     <TableHead>Events</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Paid</TableHead>
+                    <TableHead>Color</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
@@ -94,6 +94,16 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
                       </TableCell>
                       <TableCell>
+                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                          {school.status}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={school.paid ? 'default' : 'secondary'}>
+                          {school.paid ? 'Paid' : 'Unpaid'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
@@ -104,17 +114,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                             <p>View registered events</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                          {school.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={school.paid ? 'default' : 'secondary'}>
-                          {school.paid ? 'Paid' : 'Unpaid'}
-                        </Badge>
-                      </TableCell>
+                      </TableCell>                    
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
                           {canEdit && <Tooltip>
