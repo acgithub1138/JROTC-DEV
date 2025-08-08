@@ -126,12 +126,27 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   };
   const fetchEvents = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_events').select('id, name').eq('active', true);
-      if (error) throw error;
-      setEvents(data || []);
+      // First get all active events
+      const { data: allEvents, error: eventsError } = await supabase
+        .from('cp_events')
+        .select('id, name')
+        .eq('active', true);
+      
+      if (eventsError) throw eventsError;
+
+      // Then get events already used in this competition
+      const { data: usedEvents, error: usedError } = await supabase
+        .from('cp_comp_events')
+        .select('event')
+        .eq('competition_id', competitionId);
+      
+      if (usedError) throw usedError;
+
+      // Filter out already used events
+      const usedEventIds = new Set(usedEvents?.map(ue => ue.event) || []);
+      const availableEvents = (allEvents || []).filter(event => !usedEventIds.has(event.id));
+      
+      setEvents(availableEvents);
     } catch (error) {
       console.error('Error fetching events:', error);
       toast.error('Failed to load events');
