@@ -206,7 +206,9 @@ export const EventForm: React.FC<EventFormProps> = ({
   const handleAddEventType = async () => {
     if (!newEventTypeName.trim()) return;
 
-    const newEventType = await createEventType(newEventTypeName.trim());
+    // Generate value from label (lowercase, replace spaces with underscores)
+    const value = newEventTypeName.trim().toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
+    const newEventType = await createEventType(value, newEventTypeName.trim());
     if (newEventType) {
       setFormData(prev => ({ ...prev, event_type: newEventType.id }));
       setNewEventTypeName('');

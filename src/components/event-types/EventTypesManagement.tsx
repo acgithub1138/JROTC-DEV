@@ -28,6 +28,7 @@ import {
 } from '@/components/ui/alert-dialog';
 
 interface EventTypeFormData {
+  value: string;
   label: string;
   color: string;
 }
@@ -43,6 +44,7 @@ const EventTypesManagement: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   
   const [formData, setFormData] = useState<EventTypeFormData>({
+    value: '',
     label: '',
     color: '#3B82F6',
   });
@@ -65,12 +67,14 @@ const EventTypesManagement: React.FC = () => {
     if (eventType) {
       setEditingEventType(eventType);
       setFormData({
+        value: eventType.value,
         label: eventType.label,
         color: eventType.color || '#3B82F6',
       });
     } else {
       setEditingEventType(null);
       setFormData({
+        value: '',
         label: '',
         color: '#3B82F6',
       });
@@ -81,15 +85,15 @@ const EventTypesManagement: React.FC = () => {
   const handleCloseDialog = () => {
     setShowDialog(false);
     setEditingEventType(null);
-    setFormData({ label: '', color: '#3B82F6' });
+    setFormData({ value: '', label: '', color: '#3B82F6' });
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.label.trim()) {
+    if (!formData.value.trim() || !formData.label.trim()) {
       toast({
         title: 'Error',
-        description: 'Event type name is required',
+        description: 'Event type value and name are required',
         variant: 'destructive',
       });
       return;
@@ -99,11 +103,12 @@ const EventTypesManagement: React.FC = () => {
     try {
       if (editingEventType) {
         await updateEventType(editingEventType.id, {
+          value: formData.value.trim(),
           label: formData.label.trim(),
           color: formData.color,
         });
       } else {
-        await createEventType(formData.label.trim(), formData.color);
+        await createEventType(formData.value.trim(), formData.label.trim(), formData.color);
       }
       handleCloseDialog();
     } catch (error) {
@@ -242,6 +247,16 @@ const EventTypesManagement: React.FC = () => {
           </DialogHeader>
           <form onSubmit={handleSubmit}>
             <div className="grid gap-4 py-4">
+              <div className="grid gap-2">
+                <Label htmlFor="value">Event Type Value</Label>
+                <Input
+                  id="value"
+                  value={formData.value}
+                  onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
+                  placeholder="e.g., training, competition, meeting"
+                  required
+                />
+              </div>
               <div className="grid gap-2">
                 <Label htmlFor="label">Event Type Name</Label>
                 <Input

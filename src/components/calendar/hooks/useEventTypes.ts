@@ -48,11 +48,8 @@ export const useEventTypes = () => {
     fetchEventTypes();
   }, [userProfile?.school_id]);
 
-  const createEventType = async (label: string, color?: string) => {
+  const createEventType = async (value: string, label: string, color?: string) => {
     if (!userProfile?.school_id) return;
-
-    // Generate value from label (lowercase, replace spaces with underscores)
-    const value = label.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
 
     try {
       const { data, error } = await supabase
@@ -138,7 +135,7 @@ export const useEventTypes = () => {
     }
   };
 
-  const updateEventType = async (id: string, updates: { label?: string; color?: string }) => {
+  const updateEventType = async (id: string, updates: { value?: string; label?: string; color?: string }) => {
     // Find the event type to check if it's a default (global) type
     const eventType = eventTypes.find(type => type.id === id);
     if (eventType?.is_default) {
@@ -152,9 +149,6 @@ export const useEventTypes = () => {
 
     try {
       const updateData: any = { ...updates };
-      if (updates.label) {
-        updateData.value = updates.label.toLowerCase().replace(/\s+/g, '_').replace(/[^a-z0-9_]/g, '');
-      }
 
       const { data, error } = await supabase
         .from('event_types')
