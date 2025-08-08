@@ -400,7 +400,7 @@ const ThemeManagement: React.FC = () => {
                 Add Theme
               </Button>
             </DialogTrigger>
-            <DialogContent className="max-w-md">
+            <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
               <DialogHeader>
                 <DialogTitle>
                   {editingTheme ? 'Edit Theme' : 'Add New Theme'}
