@@ -180,6 +180,15 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       
       if (deleteError) throw deleteError;
 
+      // Delete existing event schedules for this school
+      const { error: deleteScheduleError } = await supabase
+        .from('cp_event_schedules')
+        .delete()
+        .eq('competition_id', competitionId)
+        .eq('school_id', schoolRegistration.school_id);
+      
+      if (deleteScheduleError) throw deleteScheduleError;
+
       // Insert new event registrations
       if (eventIds.length > 0) {
         const { data: { user } } = await supabase.auth.getUser();
