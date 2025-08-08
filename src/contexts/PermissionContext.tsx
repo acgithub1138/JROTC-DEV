@@ -26,26 +26,39 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
   // Fetch all permission data in a single query
   const { data: permissionData, isLoading } = useQuery({
-    queryKey: ['all-permissions', userProfile?.role, userProfile?.id],
+    queryKey: ['all-permissions', userProfile?.role, (userProfile as any)?.role_id, userProfile?.id],
     queryFn: async () => {
       if (!userProfile?.role) {
         console.log('Permission query: No user role available');
         return null;
       }
 
-      console.log('Fetching permissions for role:', userProfile.role);
+      const roleId = (userProfile as any)?.role_id;
+      console.log('Fetching permissions for role:', userProfile.role, 'role_id:', roleId);
       
-      const { data, error } = await supabase
+      let query = supabase
         .from('role_permissions')
         .select(`
           enabled,
           module:permission_modules(name),
           action:permission_actions(name),
           role_id:user_roles!inner(role_name)
-        `)
-        .eq('role_id.role_name', userProfile.role);
+        `);
+
+      // Handle both migrated users (with role_id) and unmigrated users (with only role enum)
+      if (roleId) {
+        // User has been migrated to new role system - query by role_id directly
+        console.log('Using role_id for query:', roleId);
+        query = query.eq('role_id', roleId);
+      } else {
+        // User still using old role enum system - query by role name
+        console.log('Using role name for query:', userProfile.role);
+        query = query.eq('role_id.role_name', userProfile.role);
+      }
       
-      console.log('Permission query result:', { data, error, userRole: userProfile.role });
+      const { data, error } = await query;
+      
+      console.log('Permission query result:', { data, error, userRole: userProfile.role, roleId });
       
       if (error) {
         console.error('Permission query error:', error);
