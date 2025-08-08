@@ -181,7 +181,15 @@ export const ScheduleEditModal = ({
       }
 
       // Process only changed slots
-      for (const { timeSlotISO, schoolId } of changedSlots) {
+      // Apply removals first to avoid unique constraint conflicts, then additions/moves
+      const removals = changedSlots.filter(slot => slot.schoolId === null);
+      const additions = changedSlots.filter(slot => slot.schoolId !== null);
+
+      for (const { timeSlotISO } of removals) {
+        const timeSlot = new Date(timeSlotISO);
+        await updateScheduleSlot(event.id, timeSlot, null);
+      }
+      for (const { timeSlotISO, schoolId } of additions) {
         const timeSlot = new Date(timeSlotISO);
         await updateScheduleSlot(event.id, timeSlot, schoolId);
       }

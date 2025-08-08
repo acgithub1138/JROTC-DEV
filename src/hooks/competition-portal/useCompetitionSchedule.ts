@@ -152,27 +152,46 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
     try {
       if (schoolId) {
-        // Add/update assignment
-        const { error } = await supabase
+        // If this school already has a record for this event, update its time; otherwise create it
+        const { data: existing, error: existingErr } = await supabase
           .from('cp_event_schedules')
-          .upsert({
-            competition_id: competitionId,
-            event_id: eventId,
-            school_id: schoolId,
-            scheduled_time: timeSlot.toISOString(),
-            duration: events.find(e => e.id === eventId)?.interval || 15
-          });
+          .select('id')
+          .eq('competition_id', competitionId)
+          .eq('event_id', eventId)
+          .eq('school_id', schoolId)
+          .maybeSingle();
 
-        if (error) throw error;
+        if (existingErr) throw existingErr;
+
+        if (existing?.id) {
+          const { error: updErr } = await supabase
+            .from('cp_event_schedules')
+            .update({
+              scheduled_time: timeSlot.toISOString(),
+              duration: events.find(e => e.id === eventId)?.interval || 15,
+            })
+            .eq('id', existing.id);
+          if (updErr) throw updErr;
+        } else {
+          const { error: insErr } = await supabase
+            .from('cp_event_schedules')
+            .insert({
+              competition_id: competitionId,
+              event_id: eventId,
+              school_id: schoolId,
+              scheduled_time: timeSlot.toISOString(),
+              duration: events.find(e => e.id === eventId)?.interval || 15,
+            });
+          if (insErr) throw insErr;
+        }
       } else {
-        // Remove assignment
+        // Remove assignment by old time slot for this event
         const { error } = await supabase
           .from('cp_event_schedules')
           .delete()
           .eq('competition_id', competitionId)
           .eq('event_id', eventId)
           .eq('scheduled_time', timeSlot.toISOString());
-
         if (error) throw error;
       }
 
