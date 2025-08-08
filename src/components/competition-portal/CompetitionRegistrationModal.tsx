@@ -11,7 +11,8 @@ import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 interface TimeSlot {
   time: Date;
   label: string;
@@ -69,6 +70,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
 }) => {
   const { toast } = useToast();
   const { userProfile } = useAuth();
+  const { timezone } = useSchoolTimezone();
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [initialSelectedEvents, setInitialSelectedEvents] = useState<Set<string>>(new Set());
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, string>>(new Map());
@@ -128,7 +130,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
       if (!isLunchBreak && !eventOccupiedSlots.has(timeString)) {
         slots.push({
           time: slotTime,
-          label: format(slotTime, 'h:mm a'),
+          label: formatTimeForDisplay(slotTime, TIME_FORMATS.TIME_ONLY_24H, timezone),
           available: true
         });
       }
@@ -533,7 +535,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                           {event.start_time && (
                             <div className="flex items-center gap-1">
                               <Clock className="w-3 h-3" />
-                              <span>{format(new Date(event.start_time), 'MMM d, h:mm a')}</span>
+                              <span>{`${format(new Date(event.start_time), 'MMM d')}, ${formatTimeForDisplay(new Date(event.start_time), TIME_FORMATS.TIME_ONLY_24H, timezone)}`}</span>
                             </div>
                           )}
                           
