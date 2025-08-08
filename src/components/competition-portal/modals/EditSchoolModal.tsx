@@ -291,7 +291,12 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
             </div>
             <div className="flex items-center space-x-2">
               <Label htmlFor="color">Color:</Label>
-              <ColorPicker value={color} onChange={setColor} />
+              <input 
+                type="color" 
+                value={color} 
+                onChange={(e) => setColor(e.target.value)} 
+                className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
+              />
             </div>
           </div>
 
