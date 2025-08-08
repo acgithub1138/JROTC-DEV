@@ -138,6 +138,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
 
       <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
       
-      <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={schools.find(s => s.id === selectedSchoolForEvents)?.school_id || ''} />
+      <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
     </div>;
 };
