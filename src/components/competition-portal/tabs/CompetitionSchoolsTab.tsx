@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Eye, DollarSign, Edit } from 'lucide-react';
+import { Plus, Eye, DollarSign } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
@@ -9,7 +9,6 @@ import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetition
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
-import { EditSchoolModal } from '@/components/competition-portal/modals/EditSchoolModal';
 import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
 
@@ -36,7 +35,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   } = useTablePermissions('cp_comp_schools');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
-  const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
   const handleTogglePaid = async (schoolId: string, currentPaid: boolean) => {
     try {
       console.log('Updating payment status for school:', schoolId, 'from', currentPaid, 'to', !currentPaid);
@@ -90,7 +88,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <TableBody>
                   {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
                       <TableCell className="font-medium">
-                        {school.school_name || 'Unknown School'}
+                        {school.school_name - school.fee || 'Unknown School'}
                       </TableCell>
                       <TableCell>
                         <Tooltip>
@@ -119,30 +117,16 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                       </TableCell>                
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {canEdit && (
-                            <>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => setSelectedSchoolForEdit(school.id)}>
-                                    <Edit className="w-4 h-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit school registration</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleTogglePaid(school.id, school.paid)}>
-                                    <DollarSign className="w-4 h-4" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{school.paid ? 'Mark as unpaid' : 'Mark as paid'}</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </>
-                          )}
+                          {canEdit && <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleTogglePaid(school.id, school.paid)}>
+                                  <DollarSign className="w-4 h-4" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>{school.paid ? 'Mark as unpaid' : 'Mark as paid'}</p>
+                              </TooltipContent>
+                            </Tooltip>}
                         </div>
                       </TableCell>
                     </TableRow>)}
@@ -155,16 +139,5 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
       
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
-      
-      <EditSchoolModal 
-        open={!!selectedSchoolForEdit} 
-        onOpenChange={() => setSelectedSchoolForEdit(null)} 
-        competitionId={competitionId} 
-        schoolId={selectedSchoolForEdit || ''} 
-        onSchoolUpdated={() => {
-          // This will trigger a refetch of the schools data
-          window.location.reload();
-        }}
-      />
     </div>;
 };
