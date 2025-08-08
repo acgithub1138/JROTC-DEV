@@ -544,6 +544,16 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
           <div className="grid grid-cols-3 gap-4">
             <div>
+              <Label htmlFor="interval">Interval (minutes)</Label>
+              <Input
+                id="interval"
+                type="number"
+                min="0"
+                value={formData.interval}
+                onChange={(e) => setFormData(prev => ({ ...prev, interval: e.target.value }))}
+                placeholder="0"
+              />
+            </div>            <div>
               <Label htmlFor="max_participants">Max Participants</Label>
               <Input
                 id="max_participants"
@@ -564,17 +574,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 value={formData.fee}
                 onChange={(e) => setFormData(prev => ({ ...prev, fee: e.target.value }))}
                 placeholder="0.00"
-              />
-            </div>
-            <div>
-              <Label htmlFor="interval">Interval (minutes)</Label>
-              <Input
-                id="interval"
-                type="number"
-                min="0"
-                value={formData.interval}
-                onChange={(e) => setFormData(prev => ({ ...prev, interval: e.target.value }))}
-                placeholder="0"
               />
             </div>
           </div>
