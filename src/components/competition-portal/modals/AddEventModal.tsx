@@ -557,6 +557,13 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
           <div className="grid grid-cols-3 gap-4">
             <div>
+              <Label htmlFor="interval">Interval (minutes)</Label>
+              <Input id="interval" type="number" min="0" value={formData.interval} onChange={e => setFormData(prev => ({
+              ...prev,
+              interval: e.target.value
+            }))} placeholder="0" />
+            </div>
+            <div>
               <Label htmlFor="max_participants">Max Participants</Label>
               <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
               ...prev,
@@ -569,13 +576,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               ...prev,
               fee: e.target.value
             }))} placeholder="0.00" />
-            </div>
-            <div>
-              <Label htmlFor="interval">Interval (minutes)</Label>
-              <Input id="interval" type="number" min="0" value={formData.interval} onChange={e => setFormData(prev => ({
-              ...prev,
-              interval: e.target.value
-            }))} placeholder="0" />
             </div>
           </div>
 
