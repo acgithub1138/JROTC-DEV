@@ -176,26 +176,41 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
         throw schoolUpdateError;
       }
 
-      // Delete existing event registrations
-      const {
-        error: deleteError
-      } = await supabase.from('cp_event_registrations').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
-      if (deleteError) throw deleteError;
+      // Get current event registrations to determine what to remove
+      const currentEventIds = currentEventRegistrations || [];
+      const eventsToRemove = currentEventIds.filter(eventId => !eventIds.includes(eventId));
+      const eventsToAdd = eventIds.filter(eventId => !currentEventIds.includes(eventId));
 
-      // Delete existing event schedules for this school
-      const {
-        error: deleteScheduleError
-      } = await supabase.from('cp_event_schedules').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
-      if (deleteScheduleError) throw deleteScheduleError;
+      // Delete event schedules for removed events first
+      if (eventsToRemove.length > 0) {
+        const {
+          error: deleteScheduleError
+        } = await supabase.from('cp_event_schedules')
+          .delete()
+          .eq('competition_id', competitionId)
+          .eq('school_id', schoolRegistration.school_id)
+          .in('event_id', eventsToRemove);
+        if (deleteScheduleError) throw deleteScheduleError;
 
-      // Insert new event registrations
-      if (eventIds.length > 0) {
+        // Then delete event registrations for removed events
+        const {
+          error: deleteError
+        } = await supabase.from('cp_event_registrations')
+          .delete()
+          .eq('competition_id', competitionId)
+          .eq('school_id', schoolRegistration.school_id)
+          .in('event_id', eventsToRemove);
+        if (deleteError) throw deleteError;
+      }
+
+      // Insert new event registrations for newly added events
+      if (eventsToAdd.length > 0) {
         const {
           data: {
             user
           }
         } = await supabase.auth.getUser();
-        const eventRegistrations = eventIds.map(eventId => ({
+        const eventRegistrations = eventsToAdd.map(eventId => ({
           competition_id: competitionId,
           school_id: schoolRegistration.school_id,
           event_id: eventId,
