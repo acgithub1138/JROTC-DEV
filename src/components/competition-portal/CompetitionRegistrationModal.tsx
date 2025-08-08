@@ -1,4 +1,4 @@
-import React, { useState, useMemo, useEffect } from 'react';
+import React, { useState, useMemo, useEffect, useCallback } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -142,41 +142,58 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     return slots;
   };
 
-  // Fetch occupied slots when modal opens
+  // Fetch occupied slots, reusable
+  const fetchOccupiedSlots = useCallback(async () => {
+    if (!isOpen || !competition?.id) return;
+    try {
+      const { data: schedules, error } = await supabase
+        .from('cp_event_schedules')
+        .select('event_id, scheduled_time, school_id')
+        .eq('competition_id', competition.id);
+
+      if (error) throw error;
+
+      const occupied = new Map<string, Set<string>>();
+      schedules?.forEach((schedule: any) => {
+        // Always mark slots occupied by other schools as unavailable
+        if (schedule.school_id === userProfile?.school_id) return;
+        if (!occupied.has(schedule.event_id)) {
+          occupied.set(schedule.event_id, new Set());
+        }
+        const scheduledTime = new Date(schedule.scheduled_time).toISOString();
+        occupied.get(schedule.event_id)!.add(scheduledTime);
+      });
+
+      setOccupiedSlots(occupied);
+    } catch (error) {
+      console.error('Error fetching occupied slots:', error);
+    }
+  }, [isOpen, competition?.id, userProfile?.school_id]);
+
+  // Initial load and when dependencies change
   useEffect(() => {
-    const fetchOccupiedSlots = async () => {
-      if (!isOpen || !competition?.id) return;
-      
-      try {
-        const { data: schedules, error } = await supabase
-          .from('cp_event_schedules')
-          .select('event_id, scheduled_time, school_id')
-          .eq('competition_id', competition.id);
-
-        if (error) throw error;
-
-        const occupied = new Map<string, Set<string>>();
-        schedules?.forEach(schedule => {
-          // When editing, allow current school to re-select their own slots
-          // Always mark slots occupied by other schools as unavailable
-          if (schedule.school_id === userProfile?.school_id) return;
-          
-          if (!occupied.has(schedule.event_id)) {
-            occupied.set(schedule.event_id, new Set());
-          }
-          // Convert to ISO string format to match generateTimeSlots
-          const scheduledTime = new Date(schedule.scheduled_time).toISOString();
-          occupied.get(schedule.event_id)?.add(scheduledTime);
-        });
-        
-        setOccupiedSlots(occupied);
-      } catch (error) {
-        console.error('Error fetching occupied slots:', error);
-      }
-    };
-
     fetchOccupiedSlots();
-  }, [isOpen, competition?.id, isEditing, userProfile?.school_id]);
+  }, [fetchOccupiedSlots]);
+
+  // Realtime refresh whenever schedules change for this competition
+  useEffect(() => {
+    if (!isOpen || !competition?.id) return;
+    const channel = supabase
+      .channel(`cp_event_schedules:${competition.id}`)
+      .on('postgres_changes', {
+        event: '*',
+        schema: 'public',
+        table: 'cp_event_schedules',
+        filter: `competition_id=eq.${competition.id}`,
+      }, () => {
+        fetchOccupiedSlots();
+      })
+      .subscribe();
+
+    return () => {
+      supabase.removeChannel(channel);
+    };
+  }, [isOpen, competition?.id, fetchOccupiedSlots]);
 
   // Prefill selected events and time slots from existing schedules for this school
   useEffect(() => {
@@ -371,6 +388,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
               description: 'one of more of the time slots selected are no longer available',
               variant: 'destructive',
             });
+            await fetchOccupiedSlots();
             setIsRegistering(false);
             return;
           }
