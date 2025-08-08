@@ -166,7 +166,10 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
         })
         .eq('id', schoolId);
       
-      if (schoolUpdateError) throw schoolUpdateError;
+      if (schoolUpdateError) {
+        console.error('Error updating school total_fee:', schoolUpdateError);
+        throw schoolUpdateError;
+      }
 
       // Delete existing event registrations
       const { error: deleteError } = await supabase
@@ -197,9 +200,10 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       }
     },
     onSuccess: () => {
-      toast.success('School registration updated successfully');
+      toast.success('School registration and total fee updated successfully');
       queryClient.invalidateQueries({ queryKey: ['competition-schools'] });
       queryClient.invalidateQueries({ queryKey: ['school-event-registrations'] });
+      queryClient.invalidateQueries({ queryKey: ['school-registration'] });
       onSchoolUpdated?.();
       onOpenChange(false);
     },
@@ -210,11 +214,20 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   });
 
   const handleSave = () => {
+    // Recalculate total fee to ensure accuracy
     const calculatedTotalFee = calculateTotalFee(
       Array.from(selectedEvents), 
       availableEvents || [], 
       competition?.fee || 0
     );
+    
+    // Log fee calculation for debugging
+    console.log('Fee Calculation:', {
+      baseFee: competition?.fee || 0,
+      selectedEvents: Array.from(selectedEvents),
+      eventFees: availableEvents?.filter(e => selectedEvents.has(e.id)).map(e => ({ name: e.name, fee: e.fee })) || [],
+      totalFee: calculatedTotalFee
+    });
     
     updateSchoolMutation.mutate({
       eventIds: Array.from(selectedEvents),
