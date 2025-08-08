@@ -128,146 +128,145 @@ const MainApplication = () => {
         )}
         <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
           <Routes>
-            <Route path="/" element={
+            <Route index element={
               <ProtectedRoute>
                 <DashboardOverview />
               </ProtectedRoute>
             } />
-            <Route path="/tasks" element={
+            <Route path="tasks" element={
               <ProtectedRoute module="tasks">
                 <TaskManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/incidents" element={
+            <Route path="incidents" element={
               <ProtectedRoute module="incident_management">
                 <IncidentManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/school" element={
+            <Route path="school" element={
               <ProtectedRoute requireAdminRole={true}>
                 <SchoolManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/users" element={
+            <Route path="users" element={
               <ProtectedRoute requireAdminRole={true}>
                 <UserAdminPage />
               </ProtectedRoute>
             } />
-            <Route path="/email" element={
+            <Route path="email" element={
               <ProtectedRoute module="email">
                 <EmailManagementPage />
               </ProtectedRoute>
             } />
             
-            <Route path="/settings" element={
+            <Route path="settings" element={
               <ProtectedRoute requireAdminRole={true}>
                 <SettingsPage />
               </ProtectedRoute>
             } />
-            <Route path="/cadets" element={
+            <Route path="cadets" element={
               <ProtectedRoute module="cadets">
                 <CadetManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/job-board" element={
+            <Route path="job-board" element={
               <ProtectedRoute module="job_board">
                 <JobBoardPage />
               </ProtectedRoute>
             } />
-            <Route path="/teams" element={
+            <Route path="teams" element={
               <ProtectedRoute module="teams">
                 <TeamsManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/inventory" element={
+            <Route path="inventory" element={
               <ProtectedRoute module="inventory">
                 <InventoryManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/budget" element={
+            <Route path="budget" element={
               <ProtectedRoute module="budget">
                 <BudgetManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/contacts" element={
+            <Route path="contacts" element={
               <ProtectedRoute module="contacts">
                 <ContactManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/calendar" element={
+            <Route path="calendar" element={
               <ProtectedRoute module="calendar">
                 <CalendarManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/competitions" element={
+            <Route path="competitions" element={
               <ProtectedRoute module="competitions">
                 <CompetitionManagementPage />
               </ProtectedRoute>
             } />
-            <Route path="/competitions/score-sheets/:competitionId" element={
+            <Route path="competitions/score-sheets/:competitionId" element={
               <ProtectedRoute module="competitions">
                 <ScoreSheetPage />
               </ProtectedRoute>
             } />
-            
-            <Route path="/roles" element={
+            <Route path="roles" element={
               <ProtectedRoute requireAdminRole={true}>
                 <RoleManagementPage />
               </ProtectedRoute>
             } />
             
             {/* Competition Portal Routes */}
-            <Route path="/competition-portal" element={
+            <Route path="competition-portal" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/" element={
+            <Route path="competition-portal/" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/dashboard" element={
+            <Route path="competition-portal/dashboard" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/competitions" element={
+            <Route path="competition-portal/competitions" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/events" element={
+            <Route path="competition-portal/events" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/teams" element={
+            <Route path="competition-portal/teams" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/score-sheets" element={
+            <Route path="competition-portal/score-sheets" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/judges" element={
+            <Route path="competition-portal/judges" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/analytics" element={
+            <Route path="competition-portal/analytics" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/settings" element={
+            <Route path="competition-portal/settings" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
             } />
-            <Route path="/competition-portal/open-competitions" element={
+            <Route path="competition-portal/open-competitions" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>
