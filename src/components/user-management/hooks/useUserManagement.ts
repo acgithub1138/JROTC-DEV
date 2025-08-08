@@ -154,15 +154,34 @@ export const useUserManagement = () => {
 
   const updateUser = async (userId: string, updates: Partial<User>) => {
     try {
+      // Prepare update data
+      const updateData: any = {
+        first_name: updates.first_name,
+        last_name: updates.last_name,
+        email: updates.email,
+        school_id: updates.school_id,
+      };
+
+      // If role is being updated, look up the corresponding role_id
+      if (updates.role) {
+        const { data: roleData, error: roleError } = await supabase
+          .from('user_roles')
+          .select('id')
+          .eq('role_name', updates.role)
+          .single();
+
+        if (roleError) {
+          console.error('Role lookup error:', roleError);
+          throw new Error(`Invalid role: ${updates.role}`);
+        }
+
+        updateData.role = updates.role;
+        updateData.role_id = roleData.id;
+      }
+
       const { error } = await supabase
         .from('profiles')
-        .update({
-          first_name: updates.first_name,
-          last_name: updates.last_name,
-          email: updates.email,
-          role: updates.role,
-          school_id: updates.school_id,
-        })
+        .update(updateData)
         .eq('id', userId);
 
       if (error) throw error;
@@ -177,7 +196,7 @@ export const useUserManagement = () => {
       console.error('Error updating user:', error);
       toast({
         title: "Error",
-        description: "Failed to update user profile",
+        description: error instanceof Error ? error.message : "Failed to update user profile",
         variant: "destructive",
       });
     }
