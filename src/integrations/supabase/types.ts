@@ -3338,14 +3338,6 @@ export type Database = {
         Args: { module_name: string; action_name: string }
         Returns: boolean
       }
-      decrypt_smtp_password: {
-        Args: { encrypted_password: string }
-        Returns: string
-      }
-      encrypt_smtp_password: {
-        Args: { password_text: string }
-        Returns: string
-      }
       find_similar_criteria: {
         Args: { criteria_text: string; event_type_param: string }
         Returns: {

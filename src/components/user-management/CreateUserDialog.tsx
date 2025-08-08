@@ -84,14 +84,23 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     
     setLoading(true);
     
-    const { error } = await createUser(formData.email, formData.password, {
-      first_name: formData.firstName,
-      last_name: formData.lastName,
-      role: formData.role,
-      school_id: formData.schoolId,
+    // Use the edge function instead of direct createUser call to ensure proper role_id setup
+    const { data, error } = await supabase.functions.invoke('create-cadet-user', {
+      body: {
+        email: formData.email,
+        password: formData.password,
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        role: formData.role,
+        school_id: formData.schoolId,
+      },
     });
-    
-    if (!error) {
+
+    if (error) {
+      console.error('User creation error:', error);
+    } else if (data?.error) {
+      console.error('User creation failed:', data.error);
+    } else {
       setFormData(initialFormData);
       resetChanges();
       setOpen(false);
