@@ -82,40 +82,65 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
       };
 
       // If address fields are empty but location is provided, try to parse location
-      if (!formData.address && !formData.city && !formData.state && !formData.zip && formData.location) {
-        const locationParts = formData.location.split(',').map(part => part.trim());
-        
-        if (locationParts.length >= 2) {
-          // Try to extract components from location string
-          // Example: "123 Main St, Springfield, IL 62701" or "Springfield, IL"
-          if (locationParts.length >= 3) {
-            // Full address format
-            addressData.address = locationParts[0];
-            addressData.city = locationParts[1];
-            
-            const lastPart = locationParts[locationParts.length - 1];
-            const stateZipMatch = lastPart.match(/^([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$/);
-            
-            if (stateZipMatch) {
-              addressData.state = stateZipMatch[1];
-              addressData.zip = stateZipMatch[2];
-            } else {
-              addressData.state = lastPart;
+        if (!formData.address && !formData.city && !formData.state && !formData.zip && formData.location) {
+          const rawParts = formData.location.split(',').map((p) => p.trim()).filter(Boolean);
+
+          // Remove trailing country if present (e.g., USA, United States)
+          const countryPattern = /^(usa|us|united states|united states of america)$/i;
+          const parts = [...rawParts];
+          if (parts.length > 0 && countryPattern.test(parts[parts.length - 1])) {
+            parts.pop();
+          }
+
+          if (parts.length >= 2) {
+            // Detect street part (often the first part with digits). If first part has no digits
+            // and second does, it's likely a place name followed by the street.
+            let streetIdx = 0;
+            if (parts.length >= 3 && !/\d/.test(parts[0]) && /\d/.test(parts[1])) {
+              streetIdx = 1;
             }
-          } else if (locationParts.length === 2) {
-            // City, State format
-            addressData.city = locationParts[0];
-            const stateZipMatch = locationParts[1].match(/^([A-Z]{2})\s*(\d{5}(?:-\d{4})?)$/);
-            
-            if (stateZipMatch) {
-              addressData.state = stateZipMatch[1];
-              addressData.zip = stateZipMatch[2];
-            } else {
-              addressData.state = locationParts[1];
+
+            // Assign address and city when possible
+            addressData.address = parts[streetIdx] || '';
+            addressData.city = parts[streetIdx + 1] || '';
+
+            // State and ZIP typically live in the next segment
+            const stateZipPart = parts[streetIdx + 2] || '';
+            if (stateZipPart) {
+              // Match: "TX 75098" or "Texas 75098" or just "TX" / "Texas"
+              const m = stateZipPart.match(/^([A-Za-z]{2}|[A-Za-z][A-Za-z\s]+)\s*(\d{5}(?:-\d{4})?)?$/);
+              if (m) {
+                addressData.state = (m[1] || '').trim();
+                if (m[2]) addressData.zip = m[2];
+              } else {
+                // Sometimes ZIP may be a separate trailing part (rare)
+                const last = parts[streetIdx + 3];
+                const zipOnly = last && last.match(/^(\d{5}(?:-\d{4})?)$/);
+                if (zipOnly) {
+                  addressData.state = stateZipPart;
+                  addressData.zip = zipOnly[1];
+                } else {
+                  addressData.state = stateZipPart;
+                }
+              }
+            }
+
+            // If after parsing, we still don't have a street but we do have at least 3 parts,
+            // fall back to the simpler mapping: [0]=street, [1]=city, [last]=state/zip
+            if (!addressData.address && parts.length >= 3) {
+              addressData.address = parts[0];
+              addressData.city = parts[1] || '';
+              const lastPart = parts[parts.length - 1];
+              const m2 = lastPart.match(/^([A-Za-z]{2}|[A-Za-z][A-Za-z\s]+)\s*(\d{5}(?:-\d{4})?)?$/);
+              if (m2) {
+                addressData.state = (m2[1] || '').trim();
+                if (m2[2]) addressData.zip = m2[2];
+              } else {
+                addressData.state = lastPart;
+              }
             }
           }
         }
-      }
       
       // Combine date and time fields into datetime strings
       const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
