@@ -21,6 +21,7 @@ interface EventOption {
   id: string;
   name: string;
   location?: string;
+  fee?: number;
 }
 
 export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
@@ -34,6 +35,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<string>('registered');
   const [paid, setPaid] = useState<boolean>(false);
+  const [totalFee, setTotalFee] = useState<number>(0);
 
   // Get school registration details
   const { data: schoolRegistration } = useQuery({
@@ -51,6 +53,22 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
     enabled: open && !!schoolId
   });
 
+  // Get competition details including base fee
+  const { data: competition } = useQuery({
+    queryKey: ['competition', competitionId],
+    queryFn: async () => {
+      if (!competitionId) return null;
+      const { data, error } = await supabase
+        .from('cp_competitions')
+        .select('id, name, fee')
+        .eq('id', competitionId)
+        .single();
+      if (error) throw error;
+      return data;
+    },
+    enabled: open && !!competitionId
+  });
+
   // Get available events for this competition
   const { data: availableEvents } = useQuery({
     queryKey: ['competition-events', competitionId],
@@ -61,6 +79,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
         .select(`
           id,
           location,
+          fee,
           cp_events:event (
             id,
             name
@@ -72,7 +91,8 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       return data.map(event => ({
         id: event.id,
         name: event.cp_events?.name || 'Unknown Event',
-        location: event.location
+        location: event.location,
+        fee: event.fee || 0
       }));
     },
     enabled: open && !!competitionId
@@ -105,20 +125,43 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
     }
   }, [schoolRegistration, currentEventRegistrations]);
 
+  // Function to calculate total fee
+  const calculateTotalFee = (eventIds: string[], events: EventOption[], baseFee: number = 0) => {
+    const eventFees = eventIds.reduce((total, eventId) => {
+      const event = events?.find(e => e.id === eventId);
+      return total + (event?.fee || 0);
+    }, 0);
+    return baseFee + eventFees;
+  };
+
+  // Update total fee whenever selected events change
+  useEffect(() => {
+    if (availableEvents && competition) {
+      const newTotalFee = calculateTotalFee(
+        Array.from(selectedEvents), 
+        availableEvents, 
+        competition.fee || 0
+      );
+      setTotalFee(newTotalFee);
+    }
+  }, [selectedEvents, availableEvents, competition]);
+
   const updateSchoolMutation = useMutation({
-    mutationFn: async ({ eventIds, schoolStatus, schoolPaid }: { 
+    mutationFn: async ({ eventIds, schoolStatus, schoolPaid, calculatedTotalFee }: { 
       eventIds: string[]; 
       schoolStatus: string; 
-      schoolPaid: boolean; 
+      schoolPaid: boolean;
+      calculatedTotalFee: number;
     }) => {
       if (!schoolRegistration) throw new Error('School registration not found');
 
-      // Update school status and paid status
+      // Update school status, paid status, and total fee
       const { error: schoolUpdateError } = await supabase
         .from('cp_comp_schools')
         .update({ 
           status: schoolStatus, 
           paid: schoolPaid,
+          total_fee: calculatedTotalFee,
           updated_at: new Date().toISOString()
         })
         .eq('id', schoolId);
@@ -167,10 +210,17 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   });
 
   const handleSave = () => {
+    const calculatedTotalFee = calculateTotalFee(
+      Array.from(selectedEvents), 
+      availableEvents || [], 
+      competition?.fee || 0
+    );
+    
     updateSchoolMutation.mutate({
       eventIds: Array.from(selectedEvents),
       schoolStatus: status,
-      schoolPaid: paid
+      schoolPaid: paid,
+      calculatedTotalFee
     });
   };
 
@@ -231,14 +281,23 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
                     checked={selectedEvents.has(event.id)}
                     onCheckedChange={(checked) => handleEventToggle(event.id, checked as boolean)}
                   />
-                  <Label htmlFor={event.id} className="flex-1 cursor-pointer">
-                    {event.name}
-                    {event.location && (
-                      <span className="text-sm text-muted-foreground ml-2">
-                        @ {event.location}
-                      </span>
-                    )}
-                  </Label>
+                   <Label htmlFor={event.id} className="flex-1 cursor-pointer">
+                     <div className="flex justify-between items-center">
+                       <span>
+                         {event.name}
+                         {event.location && (
+                           <span className="text-sm text-muted-foreground ml-2">
+                             @ {event.location}
+                           </span>
+                         )}
+                       </span>
+                       {event.fee && event.fee > 0 && (
+                         <span className="text-sm font-medium text-primary">
+                           ${event.fee}
+                         </span>
+                       )}
+                     </div>
+                   </Label>
                 </div>
               ))}
               {!availableEvents || availableEvents.length === 0 && (
@@ -246,6 +305,33 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
                   No events available for this competition
                 </div>
               )}
+            </div>
+          </div>
+
+          {/* Total Fee Display */}
+          <div className="space-y-2 p-4 bg-muted/30 rounded-lg">
+            <div className="flex justify-between items-center">
+              <Label className="text-base font-medium">Competition Fee Breakdown:</Label>
+            </div>
+            <div className="space-y-1 text-sm">
+              <div className="flex justify-between">
+                <span>Base Competition Fee:</span>
+                <span>${competition?.fee || 0}</span>
+              </div>
+              {selectedEvents.size > 0 && (
+                <div className="flex justify-between">
+                  <span>Event Fees ({selectedEvents.size} events):</span>
+                  <span>
+                    ${availableEvents
+                      ?.filter(event => selectedEvents.has(event.id))
+                      .reduce((total, event) => total + (event.fee || 0), 0) || 0}
+                  </span>
+                </div>
+              )}
+              <div className="flex justify-between font-semibold text-base pt-2 border-t">
+                <span>Total Fee:</span>
+                <span className="text-primary">${totalFee}</span>
+              </div>
             </div>
           </div>
 
