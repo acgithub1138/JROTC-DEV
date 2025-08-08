@@ -64,7 +64,7 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
                 </TableHeader>
                 <TableBody>
                   {judges.map(judge => <TableRow key={judge.id}>
-                      <TableCell>{judge.name || '-'}</TableCell>
+                      <TableCell className="py-[4px]">{judge.name || '-'}</TableCell>
                       <TableCell>{judge.email || '-'}</TableCell>
                       <TableCell>{judge.phone || '-'}</TableCell>
                       <TableCell>{judge.available ? 'Yes' : 'No'}</TableCell>
