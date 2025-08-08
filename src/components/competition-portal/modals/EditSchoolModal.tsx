@@ -7,6 +7,7 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
+import { ColorPicker } from '@/components/ui/color-picker';
 import { toast } from 'sonner';
 interface EditSchoolModalProps {
   open: boolean;
@@ -32,6 +33,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [status, setStatus] = useState<string>('registered');
   const [paid, setPaid] = useState<boolean>(false);
+  const [color, setColor] = useState<string>('#3B82F6');
   const [totalFee, setTotalFee] = useState<number>(0);
 
   // Get school registration details
@@ -44,7 +46,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       const {
         data,
         error
-      } = await supabase.from('cp_comp_schools').select('id, school_id, school_name, status, paid').eq('id', schoolId).single();
+      } = await supabase.from('cp_comp_schools').select('id, school_id, school_name, status, paid, color').eq('id', schoolId).single();
       if (error) throw error;
       return data;
     },
@@ -120,6 +122,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
     if (schoolRegistration) {
       setStatus(schoolRegistration.status || 'registered');
       setPaid(schoolRegistration.paid || false);
+      setColor((schoolRegistration as any).color || '#3B82F6');
     }
     if (currentEventRegistrations) {
       setSelectedEvents(new Set(currentEventRegistrations));
@@ -147,21 +150,24 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       eventIds,
       schoolStatus,
       schoolPaid,
+      schoolColor,
       calculatedTotalFee
     }: {
       eventIds: string[];
       schoolStatus: string;
       schoolPaid: boolean;
+      schoolColor: string;
       calculatedTotalFee: number;
     }) => {
       if (!schoolRegistration) throw new Error('School registration not found');
 
-      // Update school status, paid status, and total fee
+      // Update school status, paid status, color, and total fee
       const {
         error: schoolUpdateError
       } = await supabase.from('cp_comp_schools').update({
         status: schoolStatus,
         paid: schoolPaid,
+        color: schoolColor,
         total_fee: calculatedTotalFee,
         updated_at: new Date().toISOString()
       }).eq('id', schoolId);
@@ -239,6 +245,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       eventIds: Array.from(selectedEvents),
       schoolStatus: status,
       schoolPaid: paid,
+      schoolColor: color,
       calculatedTotalFee
     });
   };
@@ -276,10 +283,16 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
             </Select>
           </div>
 
-          {/* Payment Status */}
-          <div className="flex items-center space-x-2">
-            <Switch id="paid" checked={paid} onCheckedChange={setPaid} />
-            <Label htmlFor="paid">Payment Received</Label>
+          {/* Payment Status and Color */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-2">
+              <Switch id="paid" checked={paid} onCheckedChange={setPaid} />
+              <Label htmlFor="paid">Payment Received</Label>
+            </div>
+            <div className="flex items-center space-x-2">
+              <Label htmlFor="color">Color:</Label>
+              <ColorPicker value={color} onChange={setColor} />
+            </div>
           </div>
 
           {/* Event Selection */}

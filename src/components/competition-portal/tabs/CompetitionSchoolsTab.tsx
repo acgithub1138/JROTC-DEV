@@ -24,11 +24,12 @@ interface CompetitionSchoolsTabProps {
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
-  const {
+const {
     schools,
     isLoading,
     createSchoolRegistration,
-    updateSchoolRegistration
+    updateSchoolRegistration,
+    refetch
   } = useCompetitionSchools(competitionId);
   const {
     canCreate,
@@ -160,6 +161,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
       
-      <EditSchoolModal open={!!selectedSchoolForEdit} onOpenChange={() => setSelectedSchoolForEdit(null)} competitionId={competitionId} schoolId={selectedSchoolForEdit || ''} />
+      <EditSchoolModal open={!!selectedSchoolForEdit} onOpenChange={() => setSelectedSchoolForEdit(null)} competitionId={competitionId} schoolId={selectedSchoolForEdit || ''} onSchoolUpdated={refetch} />
     </div>;
 };
