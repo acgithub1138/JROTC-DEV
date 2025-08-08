@@ -34,7 +34,7 @@ export const useCadetRoles = () => {
   const roleOptions = useMemo(() => {
     if (!assignableRoles?.length) {
       // Fallback to default roles if dynamic roles aren't loaded yet
-      console.log('Using fallback roles for cadet management');
+      
       return [];
     }
 
