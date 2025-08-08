@@ -48,6 +48,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     lunch_end_time: '',
     max_participants: '',
     fee: '',
+    interval: '',
     notes: '',
     judges: [] as string[],
     resources: [] as string[]
@@ -105,6 +106,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         lunch_end_time: lunchEndTime,
         max_participants: event.max_participants?.toString() || '',
         fee: (event as any).fee?.toString() || '',
+        interval: (event as any).interval?.toString() || '',
         notes: event.notes || '',
         judges: event.judges || [],
         resources: event.resources || []
@@ -242,7 +244,8 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         notes: formData.notes || null,
         judges: formData.judges,
         resources: formData.resources,
-        fee: formData.fee ? parseFloat(formData.fee) : null
+        fee: formData.fee ? parseFloat(formData.fee) : null,
+        interval: formData.interval ? parseInt(formData.interval) : null
       } as any;
 
       await onEventUpdated(event.id, updates);
@@ -507,7 +510,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="max_participants">Max Participants</Label>
               <Input
@@ -529,6 +532,17 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 value={formData.fee}
                 onChange={(e) => setFormData(prev => ({ ...prev, fee: e.target.value }))}
                 placeholder="0.00"
+              />
+            </div>
+            <div>
+              <Label htmlFor="interval">Interval (minutes)</Label>
+              <Input
+                id="interval"
+                type="number"
+                min="0"
+                value={formData.interval}
+                onChange={(e) => setFormData(prev => ({ ...prev, interval: e.target.value }))}
+                placeholder="0"
               />
             </div>
           </div>

@@ -45,6 +45,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     lunch_end_minute: '',
     max_participants: '',
     fee: '',
+    interval: '',
     notes: '',
     judges: [] as string[],
     resources: [] as string[]
@@ -81,6 +82,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     lunch_end_minute: '',
     max_participants: '',
     fee: '',
+    interval: '',
     notes: '',
     judges: [] as string[],
     resources: [] as string[]
@@ -239,6 +241,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         lunch_end_time: lunch_end_time,
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         fee: formData.fee ? parseFloat(formData.fee) : null,
+        interval: formData.interval ? parseInt(formData.interval) : null,
         notes: formData.notes || null,
         judges: formData.judges,
         resources: formData.resources
@@ -261,6 +264,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         lunch_end_minute: '',
         max_participants: '',
         fee: '',
+        interval: '',
         notes: '',
         judges: [],
         resources: []
@@ -551,7 +555,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </p>
           </div>
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="max_participants">Max Participants</Label>
               <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
@@ -565,6 +569,13 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
               ...prev,
               fee: e.target.value
             }))} placeholder="0.00" />
+            </div>
+            <div>
+              <Label htmlFor="interval">Interval (minutes)</Label>
+              <Input id="interval" type="number" min="0" value={formData.interval} onChange={e => setFormData(prev => ({
+              ...prev,
+              interval: e.target.value
+            }))} placeholder="0" />
             </div>
           </div>
 
