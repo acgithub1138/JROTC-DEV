@@ -626,7 +626,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                               Select Time Slot:
                             </label>
                             <Select
-                              key={`${event.id}-${isOpen}-${(occupiedSlots.get(event.id)?.size || 0)}`}
+                              key={`${event.id}-${isOpen}-${(occupiedSlots.get(event.id)?.size || 0)}-${selectedTimeSlots.get(event.id) || ''}`}
                               value={selectedTimeSlots.get(event.id) || ''}
                               onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
                             >
@@ -634,14 +634,27 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                                 <SelectValue placeholder="Choose a time slot" />
                               </SelectTrigger>
                               <SelectContent>
-                                 {generateTimeSlots(event).map((slot) => (
-                                   <SelectItem
-                                     key={slot.time.toISOString()}
-                                     value={slot.time.toISOString()}
-                                   >
-                                     {slot.label}
-                                   </SelectItem>
-                                 ))}
+                                {(() => {
+                                  const baseSlots = generateTimeSlots(event);
+                                  const currentVal = selectedTimeSlots.get(event.id) || null;
+                                  const slots = [...baseSlots];
+                                  if (currentVal && !baseSlots.some(s => s.time.toISOString() === currentVal)) {
+                                    const d = new Date(currentVal);
+                                    slots.unshift({
+                                      time: d,
+                                      label: formatTimeForDisplay(d, TIME_FORMATS.TIME_ONLY_24H, timezone),
+                                      available: true,
+                                    });
+                                  }
+                                  return slots.map((slot) => (
+                                    <SelectItem
+                                      key={slot.time.toISOString()}
+                                      value={slot.time.toISOString()}
+                                    >
+                                      {slot.label}{currentVal && slot.time.toISOString() === currentVal ? ' (current)' : ''}
+                                    </SelectItem>
+                                  ));
+                                })()}
                               </SelectContent>
                             </Select>
                           </div>
