@@ -201,10 +201,8 @@ const EventTypesManagement: React.FC = () => {
                     </div>
                   </div>
                   <div className="flex items-center gap-2">
-                    {!eventType.is_default && (
-                      <>
                         <Button
-                          variant="outline"
+                          variant="icon"
                           size="sm"
                           onClick={() => handleOpenDialog(eventType)}
                           className="h-8 w-8 p-0"
@@ -213,7 +211,7 @@ const EventTypesManagement: React.FC = () => {
                           <Edit2 className="w-4 h-4" />
                         </Button>
                         <Button
-                          variant="outline"
+                          variant="icon"
                           size="sm"
                           onClick={() => handleDelete(eventType)}
                           className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
@@ -222,7 +220,6 @@ const EventTypesManagement: React.FC = () => {
                           <Trash2 className="w-4 h-4" />
                         </Button>
                       </>
-                    )}
                     {eventType.is_default && (
                       <Badge variant="outline">Protected</Badge>
                     )}
