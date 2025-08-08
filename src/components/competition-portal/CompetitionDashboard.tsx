@@ -1,49 +1,123 @@
 import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Trophy, Calendar, Users, Target, TrendingUp, Award } from 'lucide-react';
+import { useQuery } from '@tanstack/react-query';
+import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 const CompetitionDashboard = () => {
-  // Mock data - replace with real data from your hooks/API
+  const { userProfile } = useAuth();
+
+  const { data: stats } = useQuery({
+    queryKey: ['competition-dashboard-stats', userProfile?.school_id],
+    enabled: !!userProfile?.school_id,
+    queryFn: async () => {
+      const schoolId = userProfile!.school_id as string;
+      const nowISO = new Date().toISOString();
+      const thirtyDaysISO = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000).toISOString();
+
+      const [compsRes, eventsRes] = await Promise.all([
+        supabase.from('cp_competitions').select('id,status').eq('school_id', schoolId),
+        supabase
+          .from('cp_comp_events')
+          .select('id,start_time')
+          .eq('school_id', schoolId)
+          .gte('start_time', nowISO)
+          .lte('start_time', thirtyDaysISO)
+      ]);
+
+      if (compsRes.error) throw compsRes.error;
+      if (eventsRes.error) throw eventsRes.error;
+
+      const competitions = compsRes.data || [];
+      const compIds = competitions.map((c: any) => c.id);
+      const activeCompetitions = competitions.filter((c: any) => c.status === 'open').length;
+      const upcomingEvents = (eventsRes.data || []).length;
+
+      let participatingTeams = 0;
+      let entries = 0;
+
+      if (compIds.length > 0) {
+        const [teamsRes, regsRes] = await Promise.all([
+          supabase.from('cp_comp_schools').select('id').in('competition_id', compIds),
+          supabase.from('cp_event_registrations').select('id').in('competition_id', compIds)
+        ]);
+
+        if (teamsRes.error) throw teamsRes.error;
+        if (regsRes.error) throw regsRes.error;
+
+        participatingTeams = teamsRes.data?.length || 0;
+        entries = regsRes.data?.length || 0;
+      }
+
+      let avgScore = 0;
+      let awards = 0;
+      const resultsRes = await supabase
+        .from('competition_results')
+        .select('score, placement, school_id')
+        .eq('school_id', schoolId);
+
+      if (!resultsRes.error && resultsRes.data) {
+        const scores = resultsRes.data
+          .map((r: any) => Number(r.score))
+          .filter((n: number) => !isNaN(n));
+        if (scores.length) avgScore = scores.reduce((a: number, b: number) => a + b, 0) / scores.length;
+        awards = resultsRes.data.filter((r: any) => r.placement !== null).length;
+      }
+
+      return {
+        activeCompetitions,
+        upcomingEvents,
+        participatingTeams,
+        totalParticipants: entries,
+        averageScore: avgScore,
+        awardsGiven: awards
+      };
+    },
+    refetchOnWindowFocus: true,
+    refetchInterval: 15000
+  });
+
   const dashboardStats = [
     {
       title: 'Active Competitions',
-      value: '12',
-      description: '+2 from last month',
+      value: String(stats?.activeCompetitions ?? 0),
+      description: 'Open for registration',
       icon: Trophy,
       color: 'text-yellow-500'
     },
     {
       title: 'Upcoming Events',
-      value: '8',
+      value: String(stats?.upcomingEvents ?? 0),
       description: 'Next 30 days',
       icon: Calendar,
       color: 'text-blue-500'
     },
     {
       title: 'Participating Teams',
-      value: '45',
-      description: 'Across all competitions',
+      value: String(stats?.participatingTeams ?? 0),
+      description: 'Across hosted competitions',
       icon: Users,
       color: 'text-green-500'
     },
     {
       title: 'Total Participants',
-      value: '324',
-      description: '+18 new registrations',
+      value: String(stats?.totalParticipants ?? 0),
+      description: 'Event registrations',
       icon: Target,
       color: 'text-purple-500'
     },
     {
       title: 'Average Score',
-      value: '87.3',
-      description: '+2.1% from last period',
+      value: (stats?.averageScore ?? 0).toFixed(1),
+      description: 'All results',
       icon: TrendingUp,
       color: 'text-emerald-500'
     },
     {
       title: 'Awards Given',
-      value: '156',
-      description: 'Total this season',
+      value: String(stats?.awardsGiven ?? 0),
+      description: 'Total placements',
       icon: Award,
       color: 'text-orange-500'
     },
