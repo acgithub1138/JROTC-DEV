@@ -28,6 +28,8 @@ const MODULE_MAPPING: Record<string, string> = {
 };
 
 const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
+  console.log('getMenuItemsFromPermissions called with role:', role, 'userProfile:', userProfile);
+  
   const baseItems = [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
@@ -51,38 +53,49 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
   ];
 
   const allowedItems = potentialItems.filter(item => {
+    console.log(`Checking permissions for item: ${item.id}`);
+    
     // Admin-only items
     if (item.adminOnly && role !== 'admin') {
+      console.log(`  - Skipped ${item.id}: admin-only and role is ${role}`);
       return false;
     }
 
     // Special cases for admin items
     if (item.adminOnly && role === 'admin') {
+      console.log(`  - Allowed ${item.id}: admin-only and role is admin`);
       return true;
     }
 
     // Settings is only available to admins
     if (item.id === 'settings') {
-      return role === 'admin';
+      const allowed = role === 'admin';
+      console.log(`  - Settings: allowed=${allowed} (role=${role})`);
+      return allowed;
     }
 
     // Special case for competitions - requires permission and competition module
     if (item.id === 'competitions') {
       const moduleKey = MODULE_MAPPING[item.id];
       const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
-      const hasCompetitionModule = userProfile?.schools?.competition_module === true;    
+      const hasCompetitionModule = userProfile?.schools?.competition_module === true;
+      console.log(`  - Competitions: moduleKey=${moduleKey}, hasModulePermission=${hasModulePermission}, hasCompetitionModule=${hasCompetitionModule}`);
       return hasModulePermission && hasCompetitionModule;
     }
 
     // Check permissions for regular items
     const moduleKey = MODULE_MAPPING[item.id];
     if (moduleKey) {
-      return hasPermission(moduleKey, 'sidebar');
+      const allowed = hasPermission(moduleKey, 'sidebar');
+      console.log(`  - ${item.id}: moduleKey=${moduleKey}, allowed=${allowed}`);
+      return allowed;
     }
 
+    console.log(`  - ${item.id}: no module mapping, skipped`);
     return false;
   });
 
+  console.log('Final allowed items:', allowedItems.map(item => item.id));
   return [...baseItems, ...allowedItems];
 };
 
@@ -165,7 +178,11 @@ export const useSidebarPreferences = () => {
   // Debounced load function to prevent rapid successive calls
   const loadPreferences = useCallback(async () => {
     if (!userId) {
-      console.log('No user profile found, skipping sidebar preferences load');
+      console.log('No user ID found, using default fallback items for role:', userRole);
+      // Still provide default items even without userId
+      const fallbackItems = getDefaultMenuItemsForRole(userRole, userProfile);
+      setMenuItems(fallbackItems);
+      setIsLoading(false);
       return;
     }
 
@@ -178,6 +195,7 @@ export const useSidebarPreferences = () => {
     loadingTimeoutRef.current = setTimeout(async () => {
       console.log('Loading sidebar preferences for user:', userId, 'role:', userRole);
       console.log('Permission system loaded:', permissionsLoaded);
+      console.log('User profile:', userProfile);
       setIsLoading(true);
       
       try {
@@ -197,6 +215,7 @@ export const useSidebarPreferences = () => {
           : getDefaultMenuItemsForRole(userRole, userProfile);
         
         console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
+        console.log('Generated menu items:', defaultItems);
         
         if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
           console.log('Found saved preferences, filtering menu items');
