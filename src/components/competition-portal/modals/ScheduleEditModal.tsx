@@ -85,13 +85,8 @@ export const ScheduleEditModal = ({
     try {
       const schools = await getAvailableSchools(event.id);
       setAllRegisteredSchools(schools);
-      
-      // Calculate initially available schools (all registered minus already assigned)
-      const assignedSchoolIds = new Set(
-        Object.values(initialSchedule).filter(schoolId => schoolId !== null)
-      );
-      const available = schools.filter(school => !assignedSchoolIds.has(school.id));
-      setCurrentlyAvailableSchools(available);
+      // Start with all schools - updateCurrentlyAvailableSchools will filter them
+      setCurrentlyAvailableSchools(schools);
     } catch (error) {
       console.error('Error loading available schools:', error);
     } finally {
