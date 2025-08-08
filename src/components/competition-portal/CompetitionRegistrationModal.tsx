@@ -78,6 +78,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isRegistering, setIsRegistering] = useState(false);
   const [occupiedSlots, setOccupiedSlots] = useState<Map<string, Set<string>>>(new Map());
+  const [conflictEventIds, setConflictEventIds] = useState<Set<string>>(new Set());
   
   const isEditing = currentRegistrations.length > 0;
 
@@ -280,6 +281,12 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     } else {
       newSelectedEvents.delete(eventId);
       newSelectedTimeSlots.delete(eventId); // Remove time slot when deselecting event
+      // Clear any conflict highlight for this event when deselected
+      setConflictEventIds(prev => {
+        const next = new Set(prev);
+        next.delete(eventId);
+        return next;
+      });
     }
     
     setSelectedEvents(newSelectedEvents);
@@ -290,8 +297,13 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     const newSelectedTimeSlots = new Map(selectedTimeSlots);
     newSelectedTimeSlots.set(eventId, timeSlot);
     setSelectedTimeSlots(newSelectedTimeSlots);
+    // Clear conflict highlight for this event when a new time is chosen
+    setConflictEventIds(prev => {
+      const next = new Set(prev);
+      next.delete(eventId);
+      return next;
+    });
   };
-
   const handleRegister = async () => {
     if (!competition || !userProfile?.school_id) {
       toast({
@@ -328,8 +340,43 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
     
     setIsRegistering(true);
     
-    try {
-      if (isEditing) {
+      try {
+        // Final availability check to prevent double-booking
+        const selectedEventIds = Array.from(selectedEvents);
+        const selectedPairs = selectedEventIds
+          .filter((id) => selectedTimeSlots.has(id))
+          .map((id) => ({ event_id: id, scheduled_time: selectedTimeSlots.get(id)! }));
+
+        if (selectedPairs.length > 0) {
+          const { data: existing, error: existingError } = await supabase
+            .from('cp_event_schedules')
+            .select('event_id, scheduled_time, school_id')
+            .eq('competition_id', competition.id)
+            .in('event_id', selectedEventIds);
+          if (existingError) throw existingError;
+
+          const pairSet = new Set(selectedPairs.map(p => `${p.event_id}|${new Date(p.scheduled_time).toISOString()}`));
+          const conflicts = new Set<string>();
+          existing?.forEach((row: any) => {
+            const key = `${row.event_id}|${new Date(row.scheduled_time).toISOString()}`;
+            if (pairSet.has(key) && row.school_id !== userProfile.school_id) {
+              conflicts.add(row.event_id);
+            }
+          });
+
+          if (conflicts.size > 0) {
+            setConflictEventIds(conflicts);
+            toast({
+              title: 'Time Slot Unavailable',
+              description: 'one of more of the time slots selected are no longer available',
+              variant: 'destructive',
+            });
+            setIsRegistering(false);
+            return;
+          }
+        }
+
+        if (isEditing) {
         // For editing, first delete existing registrations and schedules, then insert new ones
         const { error: deleteRegError } = await supabase
           .from('cp_event_registrations')
@@ -557,7 +604,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                         {/* Time Slot Selection */}
                         {selectedEvents.has(event.id) && event.start_time && event.end_time && (
                           <div className="mt-3">
-                            <label className="text-xs font-medium text-muted-foreground mb-1 block">
+                            <label className={`text-xs font-medium mb-1 block ${conflictEventIds.has(event.id) ? 'text-destructive' : 'text-muted-foreground'}`}>
                               Select Time Slot:
                             </label>
                             <Select
