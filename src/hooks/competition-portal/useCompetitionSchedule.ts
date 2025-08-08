@@ -218,7 +218,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       const scheduledSchoolIds = new Set(scheduledSchools?.map(s => s.school_id) || []);
       
       // Apply local schedule overrides if provided
-      if (localScheduleOverrides && Object.keys(localScheduleOverrides).length > 0) {
+      if (localScheduleOverrides !== undefined) {
         console.log('ACTEST getAvailableSchools - applying local overrides:', localScheduleOverrides);
         // Clear database scheduled schools and use only local schedule
         scheduledSchoolIds.clear();
@@ -227,6 +227,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             scheduledSchoolIds.add(schoolId);
           }
         });
+        console.log('ACTEST getAvailableSchools - final scheduledSchoolIds after overrides:', Array.from(scheduledSchoolIds));
       }
 
       // Get school names for registered schools

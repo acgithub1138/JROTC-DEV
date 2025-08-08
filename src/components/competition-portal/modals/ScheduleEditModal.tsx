@@ -58,7 +58,7 @@ export const ScheduleEditModal = ({
       loadAvailableSchools();
       setLocalSchedule(initialSchedule);
     }
-  }, [isOpen, event.id]);
+  }, [isOpen, event.id, localSchedule]);
 
   // Update filtered schools when localSchedule changes
   useEffect(() => {
@@ -97,9 +97,8 @@ export const ScheduleEditModal = ({
   const loadAvailableSchools = async () => {
     setIsLoading(true);
     try {
-      // Get ALL registered schools without any filtering from the hook
-      // We'll handle filtering locally in the modal
-      const schools = await getAvailableSchools(event.id, {});
+      // Pass current localSchedule to get properly filtered schools
+      const schools = await getAvailableSchools(event.id, localSchedule);
       console.log('ACTEST loadAvailableSchools - schools from API:', {
         timestamp: new Date().toISOString(),
         eventId: event.id,
