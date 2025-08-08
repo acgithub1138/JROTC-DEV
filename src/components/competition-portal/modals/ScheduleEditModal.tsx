@@ -141,6 +141,24 @@ export const ScheduleEditModal = ({
     setShowUnsavedDialog(false);
     onClose();
   };
+
+  // Get available schools for a specific time slot
+  const getAvailableSchoolsForSlot = (timeSlot: Date) => {
+    const timeSlotISO = timeSlot.toISOString();
+    const currentAssignment = localSchedule[timeSlotISO];
+    
+    // Get all schools that are currently assigned to OTHER time slots
+    const assignedSchoolIds = new Set(
+      Object.entries(localSchedule)
+        .filter(([slot, schoolId]) => slot !== timeSlotISO && schoolId !== null)
+        .map(([, schoolId]) => schoolId)
+    );
+    
+    return availableSchools.filter(school => {
+      // Include if: not assigned to another slot OR currently assigned to this slot
+      return !assignedSchoolIds.has(school.id) || school.id === currentAssignment;
+    });
+  };
   return (
     <>
       <Dialog open={isOpen} onOpenChange={handleCloseModal}>
@@ -204,17 +222,20 @@ export const ScheduleEditModal = ({
                               <SelectValue placeholder="Select school..." />
                             </SelectTrigger>
                             <SelectContent>
-                              {availableSchools.length === 0 ? (
-                                <SelectItem value="no-schools" disabled>
-                                  No schools available
-                                </SelectItem>
-                              ) : (
-                                availableSchools.map(school => (
-                                  <SelectItem key={school.id} value={school.id}>
-                                    {school.name}
+                              {(() => {
+                                const slotsAvailableSchools = getAvailableSchoolsForSlot(slot.time);
+                                return slotsAvailableSchools.length === 0 ? (
+                                  <SelectItem value="no-schools" disabled>
+                                    No schools available
                                   </SelectItem>
-                                ))
-                              )}
+                                ) : (
+                                  slotsAvailableSchools.map(school => (
+                                    <SelectItem key={school.id} value={school.id}>
+                                      {school.name}
+                                    </SelectItem>
+                                  ))
+                                );
+                              })()}
                             </SelectContent>
                           </Select>
                         )}
