@@ -123,8 +123,8 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         <div className="flex items-center justify-center gap-2">
                           {canEdit && <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleTogglePaid(school.id, school.paid)}>
-                                  <DollarSign className="w-4 h-4" />
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleTogglePaid(school.id, school.paid)}>
+                                  <DollarSign className="w-3 h-3" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
