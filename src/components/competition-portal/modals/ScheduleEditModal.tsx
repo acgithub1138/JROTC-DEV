@@ -9,6 +9,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { X } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 interface ScheduleEditModalProps {
   event: ScheduleEvent;
   competitionId: string;
@@ -27,7 +28,7 @@ export const ScheduleEditModal = ({
   isOpen,
   onClose,
   updateScheduleSlot,
-  getAvailableSchools
+  getAvailableSchools: _getAvailableSchools
 }: ScheduleEditModalProps) => {
   const {
     timezone
@@ -58,7 +59,7 @@ export const ScheduleEditModal = ({
       loadAvailableSchools();
       setLocalSchedule(initialSchedule);
     }
-  }, [isOpen, event.id, localSchedule]);
+  }, [isOpen, event.id]);
 
   // Update filtered schools when localSchedule changes
   useEffect(() => {
@@ -97,17 +98,53 @@ export const ScheduleEditModal = ({
   const loadAvailableSchools = async () => {
     setIsLoading(true);
     try {
-      // Pass current localSchedule to get properly filtered schools
-      const schools = await getAvailableSchools(event.id, localSchedule);
-      console.log('ACTEST loadAvailableSchools - schools from API:', {
-        timestamp: new Date().toISOString(),
-        eventId: event.id,
-        schoolsCount: schools.length,
-        schools: schools.map(s => ({ id: s.id, name: s.name }))
-      });
-      
+      console.log('ACTEST loadAvailableSchools - fetching registrations for event:', event.id);
+      const { data: registrations, error: regError } = await supabase
+        .from('cp_event_registrations')
+        .select('school_id, status')
+        .eq('event_id', event.id);
+
+      if (regError) throw regError;
+
+      const schoolIds = Array.from(new Set((registrations || [])
+        .filter((r: any) => r.status === 'registered')
+        .map((r: any) => r.school_id)
+        .filter((id: string | null) => !!id))) as string[];
+
+      console.log('ACTEST loadAvailableSchools - registered school IDs:', schoolIds);
+
+      if (schoolIds.length === 0) {
+        setRegisteredSchools([]);
+        setFilteredSchools([]);
+        return;
+      }
+
+      const { data: compSchools, error: csError } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competitionId)
+        .in('school_id', schoolIds);
+
+      if (csError) throw csError;
+
+      const schools: AvailableSchool[] = (compSchools || []).map((s: any) => ({
+        id: s.school_id,
+        name: s.school_name || 'School'
+      }));
+
+      // Fill missing names for any ids not in cp_comp_schools
+      const foundIds = new Set(schools.map(s => s.id));
+      for (const id of schoolIds) {
+        if (!foundIds.has(id)) {
+          schools.push({ id, name: 'School' });
+        }
+      }
+
+      // Sort A-Z
+      schools.sort((a, b) => a.name.localeCompare(b.name));
+
       setRegisteredSchools(schools);
-      // The filtering will be handled by updateFilteredSchools useEffect
+      // Filtering handled by updateFilteredSchools useEffect
     } catch (error) {
       console.error('Error loading available schools:', error);
     } finally {
