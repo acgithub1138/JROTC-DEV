@@ -183,11 +183,11 @@ export const useCompetitionSchedule = (competitionId?: string) => {
     }
   };
 
-  const getAvailableSchools = async (eventId: string) => {
+  const getAvailableSchools = async (eventId: string, localScheduleOverrides?: Record<string, string | null>) => {
     if (!competitionId) return [];
 
     try {
-      console.log('ACTEST getAvailableSchools - START:', { eventId, competitionId });
+      console.log('ACTEST getAvailableSchools - START:', { eventId, competitionId, localScheduleOverrides });
 
       // Get schools registered for this event
       const { data: registeredSchools, error: regError } = await supabase
@@ -214,7 +214,20 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       console.log('ACTEST getAvailableSchools - scheduledSchools:', scheduledSchools);
 
+      // Start with database scheduled schools
       const scheduledSchoolIds = new Set(scheduledSchools?.map(s => s.school_id) || []);
+      
+      // Apply local schedule overrides if provided
+      if (localScheduleOverrides && Object.keys(localScheduleOverrides).length > 0) {
+        console.log('ACTEST getAvailableSchools - applying local overrides:', localScheduleOverrides);
+        // Clear database scheduled schools and use only local schedule
+        scheduledSchoolIds.clear();
+        Object.values(localScheduleOverrides).forEach(schoolId => {
+          if (schoolId) {
+            scheduledSchoolIds.add(schoolId);
+          }
+        });
+      }
 
       // Get school names for registered schools
       if (!registeredSchools?.length) {

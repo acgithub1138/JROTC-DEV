@@ -15,7 +15,7 @@ interface ScheduleEditModalProps {
   isOpen: boolean;
   onClose: () => void;
   updateScheduleSlot: (eventId: string, timeSlot: Date, schoolId: string | null) => Promise<void>;
-  getAvailableSchools: (eventId: string) => Promise<AvailableSchool[]>;
+  getAvailableSchools: (eventId: string, localScheduleOverrides?: Record<string, string | null>) => Promise<AvailableSchool[]>;
 }
 interface AvailableSchool {
   id: string;
@@ -97,7 +97,9 @@ export const ScheduleEditModal = ({
   const loadAvailableSchools = async () => {
     setIsLoading(true);
     try {
-      const schools = await getAvailableSchools(event.id);
+      // Get ALL registered schools without any filtering from the hook
+      // We'll handle filtering locally in the modal
+      const schools = await getAvailableSchools(event.id, {});
       console.log('ACTEST loadAvailableSchools - schools from API:', {
         timestamp: new Date().toISOString(),
         eventId: event.id,
@@ -106,27 +108,7 @@ export const ScheduleEditModal = ({
       });
       
       setRegisteredSchools(schools);
-      
-      // Calculate filtered schools by removing schools already assigned in initialSchedule
-      const assignedSchoolIds = new Set(
-        Object.values(initialSchedule).filter(schoolId => schoolId !== null)
-      );
-      
-      console.log('ACTEST loadAvailableSchools - initialSchedule filtering:', {
-        timestamp: new Date().toISOString(),
-        initialSchedule,
-        assignedSchoolIds: Array.from(assignedSchoolIds)
-      });
-      
-      const available = schools.filter(school => !assignedSchoolIds.has(school.id));
-      
-      console.log('ACTEST loadAvailableSchools - initial filtered result:', {
-        timestamp: new Date().toISOString(),
-        availableCount: available.length,
-        available: available.map(s => ({ id: s.id, name: s.name }))
-      });
-      
-      setFilteredSchools(available);
+      // The filtering will be handled by updateFilteredSchools useEffect
     } catch (error) {
       console.error('Error loading available schools:', error);
     } finally {
