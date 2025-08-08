@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { toast } from 'sonner';
-
 interface EditSchoolModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -16,14 +15,12 @@ interface EditSchoolModalProps {
   schoolId: string; // This is the cp_comp_schools.id
   onSchoolUpdated?: () => void;
 }
-
 interface EventOption {
   id: string;
   name: string;
   location?: string;
   fee?: number;
 }
-
 export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   open,
   onOpenChange,
@@ -38,15 +35,16 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   const [totalFee, setTotalFee] = useState<number>(0);
 
   // Get school registration details
-  const { data: schoolRegistration } = useQuery({
+  const {
+    data: schoolRegistration
+  } = useQuery({
     queryKey: ['school-registration', schoolId],
     queryFn: async () => {
       if (!schoolId) return null;
-      const { data, error } = await supabase
-        .from('cp_comp_schools')
-        .select('id, school_id, school_name, status, paid')
-        .eq('id', schoolId)
-        .single();
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_schools').select('id, school_id, school_name, status, paid').eq('id', schoolId).single();
       if (error) throw error;
       return data;
     },
@@ -54,15 +52,16 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   });
 
   // Get competition details including base fee
-  const { data: competition } = useQuery({
+  const {
+    data: competition
+  } = useQuery({
     queryKey: ['competition', competitionId],
     queryFn: async () => {
       if (!competitionId) return null;
-      const { data, error } = await supabase
-        .from('cp_competitions')
-        .select('id, name, fee')
-        .eq('id', competitionId)
-        .single();
+      const {
+        data,
+        error
+      } = await supabase.from('cp_competitions').select('id, name, fee').eq('id', competitionId).single();
       if (error) throw error;
       return data;
     },
@@ -70,13 +69,16 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   });
 
   // Get available events for this competition
-  const { data: availableEvents } = useQuery({
+  const {
+    data: availableEvents
+  } = useQuery({
     queryKey: ['competition-events', competitionId],
     queryFn: async () => {
       if (!competitionId) return [];
-      const { data, error } = await supabase
-        .from('cp_comp_events')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('cp_comp_events').select(`
           id,
           location,
           fee,
@@ -84,10 +86,8 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
             id,
             name
           )
-        `)
-        .eq('competition_id', competitionId);
+        `).eq('competition_id', competitionId);
       if (error) throw error;
-      
       return data.map(event => ({
         id: event.id,
         name: event.cp_events?.name || 'Unknown Event',
@@ -99,15 +99,16 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   });
 
   // Get currently registered events
-  const { data: currentEventRegistrations } = useQuery({
+  const {
+    data: currentEventRegistrations
+  } = useQuery({
     queryKey: ['school-event-registrations', competitionId, schoolRegistration?.school_id],
     queryFn: async () => {
       if (!schoolRegistration?.school_id || !competitionId) return [];
-      const { data, error } = await supabase
-        .from('cp_event_registrations')
-        .select('event_id')
-        .eq('competition_id', competitionId)
-        .eq('school_id', schoolRegistration.school_id);
+      const {
+        data,
+        error
+      } = await supabase.from('cp_event_registrations').select('event_id').eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
       if (error) throw error;
       return data.map(reg => reg.event_id);
     },
@@ -137,62 +138,57 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
   // Update total fee whenever selected events change
   useEffect(() => {
     if (availableEvents && competition) {
-      const newTotalFee = calculateTotalFee(
-        Array.from(selectedEvents), 
-        availableEvents, 
-        competition.fee || 0
-      );
+      const newTotalFee = calculateTotalFee(Array.from(selectedEvents), availableEvents, competition.fee || 0);
       setTotalFee(newTotalFee);
     }
   }, [selectedEvents, availableEvents, competition]);
-
   const updateSchoolMutation = useMutation({
-    mutationFn: async ({ eventIds, schoolStatus, schoolPaid, calculatedTotalFee }: { 
-      eventIds: string[]; 
-      schoolStatus: string; 
+    mutationFn: async ({
+      eventIds,
+      schoolStatus,
+      schoolPaid,
+      calculatedTotalFee
+    }: {
+      eventIds: string[];
+      schoolStatus: string;
       schoolPaid: boolean;
       calculatedTotalFee: number;
     }) => {
       if (!schoolRegistration) throw new Error('School registration not found');
 
       // Update school status, paid status, and total fee
-      const { error: schoolUpdateError } = await supabase
-        .from('cp_comp_schools')
-        .update({ 
-          status: schoolStatus, 
-          paid: schoolPaid,
-          total_fee: calculatedTotalFee,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', schoolId);
-      
+      const {
+        error: schoolUpdateError
+      } = await supabase.from('cp_comp_schools').update({
+        status: schoolStatus,
+        paid: schoolPaid,
+        total_fee: calculatedTotalFee,
+        updated_at: new Date().toISOString()
+      }).eq('id', schoolId);
       if (schoolUpdateError) {
         console.error('Error updating school total_fee:', schoolUpdateError);
         throw schoolUpdateError;
       }
 
       // Delete existing event registrations
-      const { error: deleteError } = await supabase
-        .from('cp_event_registrations')
-        .delete()
-        .eq('competition_id', competitionId)
-        .eq('school_id', schoolRegistration.school_id);
-      
+      const {
+        error: deleteError
+      } = await supabase.from('cp_event_registrations').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
       if (deleteError) throw deleteError;
 
       // Delete existing event schedules for this school
-      const { error: deleteScheduleError } = await supabase
-        .from('cp_event_schedules')
-        .delete()
-        .eq('competition_id', competitionId)
-        .eq('school_id', schoolRegistration.school_id);
-      
+      const {
+        error: deleteScheduleError
+      } = await supabase.from('cp_event_schedules').delete().eq('competition_id', competitionId).eq('school_id', schoolRegistration.school_id);
       if (deleteScheduleError) throw deleteScheduleError;
 
       // Insert new event registrations
       if (eventIds.length > 0) {
-        const { data: { user } } = await supabase.auth.getUser();
-        
+        const {
+          data: {
+            user
+          }
+        } = await supabase.auth.getUser();
         const eventRegistrations = eventIds.map(eventId => ({
           competition_id: competitionId,
           school_id: schoolRegistration.school_id,
@@ -200,44 +196,45 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
           status: 'registered',
           created_by: user?.id
         }));
-
-        const { error: insertError } = await supabase
-          .from('cp_event_registrations')
-          .insert(eventRegistrations);
-        
+        const {
+          error: insertError
+        } = await supabase.from('cp_event_registrations').insert(eventRegistrations);
         if (insertError) throw insertError;
       }
     },
     onSuccess: () => {
       toast.success('School registration and total fee updated successfully');
-      queryClient.invalidateQueries({ queryKey: ['competition-schools'] });
-      queryClient.invalidateQueries({ queryKey: ['school-event-registrations'] });
-      queryClient.invalidateQueries({ queryKey: ['school-registration'] });
+      queryClient.invalidateQueries({
+        queryKey: ['competition-schools']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['school-event-registrations']
+      });
+      queryClient.invalidateQueries({
+        queryKey: ['school-registration']
+      });
       onSchoolUpdated?.();
       onOpenChange(false);
     },
-    onError: (error) => {
+    onError: error => {
       console.error('Error updating school registration:', error);
       toast.error('Failed to update school registration');
     }
   });
-
   const handleSave = () => {
     // Recalculate total fee to ensure accuracy
-    const calculatedTotalFee = calculateTotalFee(
-      Array.from(selectedEvents), 
-      availableEvents || [], 
-      competition?.fee || 0
-    );
-    
+    const calculatedTotalFee = calculateTotalFee(Array.from(selectedEvents), availableEvents || [], competition?.fee || 0);
+
     // Log fee calculation for debugging
     console.log('Fee Calculation:', {
       baseFee: competition?.fee || 0,
       selectedEvents: Array.from(selectedEvents),
-      eventFees: availableEvents?.filter(e => selectedEvents.has(e.id)).map(e => ({ name: e.name, fee: e.fee })) || [],
+      eventFees: availableEvents?.filter(e => selectedEvents.has(e.id)).map(e => ({
+        name: e.name,
+        fee: e.fee
+      })) || [],
       totalFee: calculatedTotalFee
     });
-    
     updateSchoolMutation.mutate({
       eventIds: Array.from(selectedEvents),
       schoolStatus: status,
@@ -245,7 +242,6 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       calculatedTotalFee
     });
   };
-
   const handleEventToggle = (eventId: string, checked: boolean) => {
     const newSelectedEvents = new Set(selectedEvents);
     if (checked) {
@@ -255,10 +251,8 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
     }
     setSelectedEvents(newSelectedEvents);
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px]">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>Edit School Registration</DialogTitle>
           <DialogDescription>
@@ -284,11 +278,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
 
           {/* Payment Status */}
           <div className="flex items-center space-x-2">
-            <Switch
-              id="paid"
-              checked={paid}
-              onCheckedChange={setPaid}
-            />
+            <Switch id="paid" checked={paid} onCheckedChange={setPaid} />
             <Label htmlFor="paid">Payment Received</Label>
           </div>
 
@@ -296,37 +286,25 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
           <div className="space-y-3">
             <Label>Registered Events</Label>
             <div className="max-h-[300px] overflow-y-auto space-y-2 border rounded-md p-3">
-              {availableEvents?.map((event) => (
-                <div key={event.id} className="flex items-center space-x-2">
-                  <Checkbox
-                    id={event.id}
-                    checked={selectedEvents.has(event.id)}
-                    onCheckedChange={(checked) => handleEventToggle(event.id, checked as boolean)}
-                  />
+              {availableEvents?.map(event => <div key={event.id} className="flex items-center space-x-2">
+                  <Checkbox id={event.id} checked={selectedEvents.has(event.id)} onCheckedChange={checked => handleEventToggle(event.id, checked as boolean)} />
                    <Label htmlFor={event.id} className="flex-1 cursor-pointer">
                      <div className="flex justify-between items-center">
                        <span>
                          {event.name}
-                         {event.location && (
-                           <span className="text-sm text-muted-foreground ml-2">
+                         {event.location && <span className="text-sm text-muted-foreground ml-2">
                              @ {event.location}
-                           </span>
-                         )}
+                           </span>}
                        </span>
-                       {event.fee && event.fee > 0 && (
-                         <span className="text-sm font-medium text-primary">
+                       {event.fee && event.fee > 0 && <span className="text-sm font-medium text-primary">
                            ${event.fee}
-                         </span>
-                       )}
+                         </span>}
                      </div>
                    </Label>
-                </div>
-              ))}
-              {!availableEvents || availableEvents.length === 0 && (
-                <div className="text-center text-muted-foreground py-4">
+                </div>)}
+              {!availableEvents || availableEvents.length === 0 && <div className="text-center text-muted-foreground py-4">
                   No events available for this competition
-                </div>
-              )}
+                </div>}
             </div>
           </div>
 
@@ -340,16 +318,12 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
                 <span>Base Competition Fee:</span>
                 <span>${competition?.fee || 0}</span>
               </div>
-              {selectedEvents.size > 0 && (
-                <div className="flex justify-between">
+              {selectedEvents.size > 0 && <div className="flex justify-between">
                   <span>Event Fees ({selectedEvents.size} events):</span>
                   <span>
-                    ${availableEvents
-                      ?.filter(event => selectedEvents.has(event.id))
-                      .reduce((total, event) => total + (event.fee || 0), 0) || 0}
+                    ${availableEvents?.filter(event => selectedEvents.has(event.id)).reduce((total, event) => total + (event.fee || 0), 0) || 0}
                   </span>
-                </div>
-              )}
+                </div>}
               <div className="flex justify-between font-semibold text-base pt-2 border-t">
                 <span>Total Fee:</span>
                 <span className="text-primary">${totalFee}</span>
@@ -362,15 +336,11 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
             <Button variant="outline" onClick={() => onOpenChange(false)}>
               Cancel
             </Button>
-            <Button 
-              onClick={handleSave} 
-              disabled={updateSchoolMutation.isPending}
-            >
+            <Button onClick={handleSave} disabled={updateSchoolMutation.isPending}>
               {updateSchoolMutation.isPending ? 'Saving...' : 'Save Changes'}
             </Button>
           </div>
         </div>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
