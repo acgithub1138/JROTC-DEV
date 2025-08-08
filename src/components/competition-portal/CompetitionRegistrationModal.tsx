@@ -127,12 +127,13 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
         isLunchBreak = currentTime >= lunchStartTime && currentTime < lunchEndTime;
       }
       
-      // Skip lunch break slots and occupied slots - don't add them to available time slots
-      if (!isLunchBreak && !eventOccupiedSlots.has(timeString)) {
+      // Skip lunch break slots, but include occupied ones and mark as filled
+      if (!isLunchBreak) {
+        const isAvailable = !eventOccupiedSlots.has(timeString);
         slots.push({
           time: slotTime,
           label: formatTimeForDisplay(slotTime, TIME_FORMATS.TIME_ONLY_24H, timezone),
-          available: true
+          available: isAvailable,
         });
       }
       
@@ -650,8 +651,12 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                                     <SelectItem
                                       key={slot.time.toISOString()}
                                       value={slot.time.toISOString()}
+                                      disabled={!slot.available && (!currentVal || slot.time.toISOString() !== currentVal)}
                                     >
-                                      {slot.label}{currentVal && slot.time.toISOString() === currentVal ? ' (current)' : ''}
+                                      {slot.label}
+                                      {currentVal && slot.time.toISOString() === currentVal
+                                        ? ' (current)'
+                                        : (!slot.available ? ' (Filled)' : '')}
                                     </SelectItem>
                                   ));
                                 })()}
