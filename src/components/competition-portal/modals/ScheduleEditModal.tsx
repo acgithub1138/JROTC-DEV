@@ -73,10 +73,24 @@ export const ScheduleEditModal = ({
       Object.values(localSchedule).filter(schoolId => schoolId !== null)
     );
     
+    console.log('ACTEST updateFilteredSchools:', {
+      timestamp: new Date().toISOString(),
+      localSchedule,
+      assignedSchoolIds: Array.from(assignedSchoolIds),
+      registeredSchoolsCount: registeredSchools.length,
+      registeredSchools: registeredSchools.map(s => ({ id: s.id, name: s.name }))
+    });
+    
     // Filter out assigned schools from all registered schools
     const available = registeredSchools.filter(school => 
       !assignedSchoolIds.has(school.id)
     );
+    
+    console.log('ACTEST updateFilteredSchools result:', {
+      timestamp: new Date().toISOString(),
+      filteredSchoolsCount: available.length,
+      filteredSchools: available.map(s => ({ id: s.id, name: s.name }))
+    });
     
     setFilteredSchools(available);
   };
@@ -84,13 +98,34 @@ export const ScheduleEditModal = ({
     setIsLoading(true);
     try {
       const schools = await getAvailableSchools(event.id);
+      console.log('ACTEST loadAvailableSchools - schools from API:', {
+        timestamp: new Date().toISOString(),
+        eventId: event.id,
+        schoolsCount: schools.length,
+        schools: schools.map(s => ({ id: s.id, name: s.name }))
+      });
+      
       setRegisteredSchools(schools);
       
       // Calculate filtered schools by removing schools already assigned in initialSchedule
       const assignedSchoolIds = new Set(
         Object.values(initialSchedule).filter(schoolId => schoolId !== null)
       );
+      
+      console.log('ACTEST loadAvailableSchools - initialSchedule filtering:', {
+        timestamp: new Date().toISOString(),
+        initialSchedule,
+        assignedSchoolIds: Array.from(assignedSchoolIds)
+      });
+      
       const available = schools.filter(school => !assignedSchoolIds.has(school.id));
+      
+      console.log('ACTEST loadAvailableSchools - initial filtered result:', {
+        timestamp: new Date().toISOString(),
+        availableCount: available.length,
+        available: available.map(s => ({ id: s.id, name: s.name }))
+      });
+      
       setFilteredSchools(available);
     } catch (error) {
       console.error('Error loading available schools:', error);
@@ -99,9 +134,20 @@ export const ScheduleEditModal = ({
     }
   };
   const handleLocalScheduleChange = (timeSlot: Date, schoolId: string | null) => {
+    const timeSlotISO = timeSlot.toISOString();
+    const oldAssignment = localSchedule[timeSlotISO];
+    
+    console.log('ACTEST handleLocalScheduleChange:', {
+      timestamp: new Date().toISOString(),
+      timeSlot: timeSlotISO,
+      oldSchoolId: oldAssignment,
+      newSchoolId: schoolId,
+      schoolName: schoolId ? registeredSchools.find(s => s.id === schoolId)?.name : 'REMOVED'
+    });
+    
     setLocalSchedule(prev => ({
       ...prev,
-      [timeSlot.toISOString()]: schoolId
+      [timeSlotISO]: schoolId
     }));
   };
 
@@ -186,6 +232,15 @@ export const ScheduleEditModal = ({
         schoolsForSlot.push(assignedSchool);
       }
     }
+    
+    console.log('ACTEST getAvailableSchoolsForSlot:', {
+      timestamp: new Date().toISOString(),
+      timeSlot: timeSlotISO,
+      currentAssignment,
+      filteredSchoolsCount: filteredSchools.length,
+      schoolsForSlotCount: schoolsForSlot.length,
+      schoolsForSlot: schoolsForSlot.map(s => ({ id: s.id, name: s.name }))
+    });
     
     return schoolsForSlot;
   };
