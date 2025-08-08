@@ -146,6 +146,7 @@ export const ScheduleEditModal = ({
   const getAvailableSchoolsForSlot = (timeSlot: Date) => {
     const timeSlotISO = timeSlot.toISOString();
     const currentAssignment = localSchedule[timeSlotISO];
+    const originalAssignment = initialSchedule[timeSlotISO];
     
     // Get all schools that are currently assigned to OTHER time slots
     const assignedSchoolIds = new Set(
@@ -156,9 +157,11 @@ export const ScheduleEditModal = ({
     
     return availableSchools.filter(school => {
       // Include if: not assigned to another slot
-      // OR currently assigned to this slot (so it can be deselected)
+      // OR currently assigned to this slot
+      // OR originally assigned to this slot (so it can be reassigned)
       return !assignedSchoolIds.has(school.id) || 
-             (currentAssignment !== null && school.id === currentAssignment);
+             school.id === currentAssignment ||
+             school.id === originalAssignment;
     });
   };
   return (
