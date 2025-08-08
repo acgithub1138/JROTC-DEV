@@ -561,6 +561,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
                               Select Time Slot:
                             </label>
                             <Select
+                              key={`${event.id}-${isOpen}-${(occupiedSlots.get(event.id)?.size || 0)}`}
                               value={selectedTimeSlots.get(event.id) || ''}
                               onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
                             >
