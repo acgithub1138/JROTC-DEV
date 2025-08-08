@@ -6,7 +6,7 @@ interface EmailHistoryItem {
   recipient_email: string;
   subject: string;
   body: string;
-  status: 'pending' | 'sent' | 'failed' | 'cancelled' | 'rate_limited';
+  status: 'pending' | 'processing' | 'sent' | 'failed' | 'cancelled' | 'rate_limited';
   scheduled_at: string;
   sent_at: string | null;
   error_message: string | null;

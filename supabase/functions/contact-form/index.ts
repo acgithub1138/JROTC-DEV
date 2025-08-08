@@ -28,24 +28,22 @@ const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'gl
 const publicLimiter = new RateLimiter({ ...RATE_LIMITS.PUBLIC, keyPrefix: 'contact' })
 
 serve(async (req) => {
-  console.log('=== Contact Form Function Called ===');
-  console.log('Method:', req.method);
-  console.log('URL:', req.url);
-  console.log('Headers:', Object.fromEntries(req.headers.entries()));
+  const requestId = crypto.randomUUID();
+  const path = (() => { try { return new URL(req.url).pathname } catch { return '' } })();
+  console.log(`[contact-form] ${requestId} start ${req.method} ${path}`);
+  // Privacy: do not log headers or body
   
-  // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
-    console.log('Handling CORS preflight request');
-    return new Response('ok', { 
+    return new Response('ok', {
       status: 200,
-      headers: corsHeaders 
+      headers: corsHeaders
     });
   }
 
   if (req.method !== 'POST') {
-    console.log('Method not allowed:', req.method);
+    console.log(`[contact-form] ${requestId} method_not_allowed ${req.method}`);
     return new Response(
-      JSON.stringify({ error: 'Method not allowed' }),
+      JSON.stringify({ error: 'Method not allowed', requestId }),
       {
         status: 405,
         headers: {
@@ -69,21 +67,20 @@ serve(async (req) => {
     if (!functionResult.allowed) {
       return createRateLimitResponse(functionResult, corsHeaders)
     }
-    console.log('=== Processing POST Request ===');
+    console.log(`[contact-form] ${requestId} processing`);
     
-    // Parse the request body
+    // Parse the request body (do not log sensitive content)
     const formData: ContactFormData = await req.json();
-    console.log('Form data received:', formData);
 
     // Simple success response
     const response = {
       success: true,
       message: 'Contact form submitted successfully',
       timestamp: new Date().toISOString(),
-      data: formData
+      requestId,
     };
 
-    console.log('Sending success response');
+    console.log(`[contact-form] ${requestId} success`);
 
     const httpResponse = new Response(
       JSON.stringify(response),
@@ -99,14 +96,14 @@ serve(async (req) => {
     return addRateLimitHeaders(httpResponse, functionResult)
 
   } catch (error) {
-    console.error('=== Error in Contact Form ===');
-    console.error('Error details:', error);
+    console.error(`[contact-form] ${requestId} error:`, (error as any)?.message || String(error));
     
     return new Response(
       JSON.stringify({ 
         success: false, 
-        error: error.message || 'Failed to submit contact form',
-        timestamp: new Date().toISOString()
+        error: (error as any)?.message || 'Failed to submit contact form',
+        timestamp: new Date().toISOString(),
+        requestId,
       }),
       {
         status: 500,
