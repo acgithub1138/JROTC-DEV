@@ -3,6 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'];
 type Judge = Database['public']['Tables']['cp_judges']['Row'];
@@ -67,18 +68,27 @@ export const ViewJudgesModal: React.FC<ViewJudgesModalProps> = ({
               No judges assigned to this event
             </p>
           ) : (
-            <div className="space-y-2">
-              {judges.map(judge => (
-                <div key={judge.id} className="p-3 border rounded-lg">
-                  <h4 className="font-medium">{judge.name}</h4>
-                  {judge.email && (
-                    <p className="text-sm text-muted-foreground">{judge.email}</p>
-                  )}
-                  {judge.phone && (
-                    <p className="text-sm text-muted-foreground">{judge.phone}</p>
-                  )}
-                </div>
-              ))}
+            <div className="overflow-x-auto">
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Name</TableHead>
+                    <TableHead>Email</TableHead>
+                    <TableHead>Phone</TableHead>
+                    <TableHead>Available</TableHead>
+                  </TableRow>
+                </TableHeader>
+                <TableBody>
+                  {judges.map((judge) => (
+                    <TableRow key={judge.id}>
+                      <TableCell>{judge.name || '-'}</TableCell>
+                      <TableCell>{judge.email || '-'}</TableCell>
+                      <TableCell>{judge.phone || '-'}</TableCell>
+                      <TableCell>{judge.available ? 'Yes' : 'No'}</TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+              </Table>
             </div>
           )}
         </div>
