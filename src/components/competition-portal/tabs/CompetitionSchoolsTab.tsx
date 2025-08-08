@@ -78,7 +78,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <TableHeader>
                   <TableRow>
                     <TableHead>School Name</TableHead>
-                    <TableHead className="w-30">Color</TableHead>
+                    <TableHead className="w-1">Color</TableHead>
                     <TableHead>Events</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Paid</TableHead>
