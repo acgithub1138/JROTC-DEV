@@ -35,20 +35,22 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   } = useTablePermissions('cp_comp_schools');
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
-
   const handleTogglePaid = async (schoolId: string, currentPaid: boolean) => {
     try {
       console.log('Updating payment status for school:', schoolId, 'from', currentPaid, 'to', !currentPaid);
-      await updateSchoolRegistration(schoolId, { paid: !currentPaid });
+      await updateSchoolRegistration(schoolId, {
+        paid: !currentPaid
+      });
     } catch (error) {
       console.error('Error updating payment status:', error);
       console.error('Full error details:', JSON.stringify(error, null, 2));
     }
   };
-
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
-      await updateSchoolRegistration(schoolId, { color: newColor });
+      await updateSchoolRegistration(schoolId, {
+        color: newColor
+      });
     } catch (error) {
       console.error('Error updating school color:', error);
     }
@@ -58,31 +60,25 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
       </div>;
   }
-  return (
-    <div className="space-y-4">
+  return <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
-        {canCreate && (
-          <Button onClick={() => setShowAddModal(true)}>
+        {canCreate && <Button onClick={() => setShowAddModal(true)}>
             <Plus className="w-4 h-4 mr-2" />
             Register School
-          </Button>
-        )}
+          </Button>}
       </div>
 
-      {schools.length === 0 ? (
-        <div className="text-center py-8 text-muted-foreground">
+      {schools.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No schools registered for this competition</p>
-        </div>
-      ) : (
-        <TooltipProvider>
+        </div> : <TooltipProvider>
           <Card>
             <CardContent className="p-0">
               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>School Name</TableHead>
-                    <TableHead className="w-50">Color</TableHead>
+                    <TableHead className="w-30">Color</TableHead>
                     <TableHead>Events</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Paid</TableHead>
@@ -90,27 +86,17 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {schools.map((school: CompSchoolWithPaid) => (
-                    <TableRow key={school.id}>
+                  {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
                       <TableCell className="font-medium">
                         {school.school_name || 'Unknown School'}
                       </TableCell>
                       <TableCell>
-                        <ColorPicker
-                          value={school.color || '#3B82F6'}
-                          onChange={(color) => handleColorChange(school.id, color)}
-                          disabled={!canEdit}
-                        />
+                        <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
                       </TableCell>
                       <TableCell>
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              className="h-6 w-6"
-                              onClick={() => setSelectedSchoolForEvents(school.id)}
-                            >
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
                               <Eye className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
@@ -120,12 +106,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         </Tooltip>
                       </TableCell>
                       <TableCell>
-                        <Badge 
-                          variant={
-                            school.status === 'confirmed' ? 'default' :
-                            school.status === 'cancelled' ? 'destructive' : 'secondary'
-                          }
-                        >
+                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
                           {school.status}
                         </Badge>
                       </TableCell>
@@ -136,47 +117,27 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                       </TableCell>
                       <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {canEdit && (
-                            <Tooltip>
+                          {canEdit && <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8"
-                                  onClick={() => handleTogglePaid(school.id, school.paid)}
-                                >
+                                <Button variant="ghost" size="icon" className="h-8 w-8" onClick={() => handleTogglePaid(school.id, school.paid)}>
                                   <DollarSign className="w-4 h-4" />
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
                                 <p>{school.paid ? 'Mark as unpaid' : 'Mark as paid'}</p>
                               </TooltipContent>
-                            </Tooltip>
-                          )}
+                            </Tooltip>}
                         </div>
                       </TableCell>
-                    </TableRow>
-                  ))}
+                    </TableRow>)}
                 </TableBody>
               </Table>
             </CardContent>
           </Card>
-        </TooltipProvider>
-      )}
+        </TooltipProvider>}
 
-      <AddSchoolModal 
-        open={showAddModal} 
-        onOpenChange={setShowAddModal} 
-        competitionId={competitionId} 
-        onSchoolAdded={createSchoolRegistration} 
-      />
+      <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
       
-      <ViewSchoolEventsModal
-        open={!!selectedSchoolForEvents}
-        onOpenChange={() => setSelectedSchoolForEvents(null)}
-        competitionId={competitionId}
-        schoolId={schools.find(s => s.id === selectedSchoolForEvents)?.school_id || ''}
-      />
-    </div>
-  );
+      <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={schools.find(s => s.id === selectedSchoolForEvents)?.school_id || ''} />
+    </div>;
 };
