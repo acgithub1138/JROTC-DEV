@@ -112,7 +112,7 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
               </SelectTrigger>
               <SelectContent>
                 {templates.map(template => (
-                  <SelectItem key={template.id} value={template.template_name}>
+                  <SelectItem key={template.id} value={template.id}>
                     {template.template_name}
                   </SelectItem>
                 ))}
