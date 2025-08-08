@@ -214,7 +214,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
   // Calculate max participants when interval is set
   useEffect(() => {
-    if (formData.interval && !formData.max_participants && 
+    if (formData.interval && 
         formData.start_date && formData.start_hour && formData.start_minute &&
         formData.end_hour && formData.end_minute) {
       
@@ -243,7 +243,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     }
   }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, 
       formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute,
-      formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
+      formData.lunch_end_hour, formData.lunch_end_minute]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.event) {
