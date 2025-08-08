@@ -207,6 +207,8 @@ const EventTypesManagement: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleOpenDialog(eventType)}
+                          className="h-8 w-8 p-0"
+                          title="Edit event type"
                         >
                           <Edit2 className="w-4 h-4" />
                         </Button>
@@ -214,7 +216,8 @@ const EventTypesManagement: React.FC = () => {
                           variant="outline"
                           size="sm"
                           onClick={() => handleDelete(eventType)}
-                          className="text-red-600 hover:text-red-700"
+                          className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                          title="Delete event type"
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
