@@ -81,6 +81,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                     <TableHead>Events</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Paid</TableHead>
+                    <TableHead>Fee</TableHead>
                     <TableHead>Color</TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
@@ -111,6 +112,9 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         <Badge variant={school.paid ? 'default' : 'secondary'}>
                           {school.paid ? 'Paid' : 'Unpaid'}
                         </Badge>
+                      </TableCell>
+                      <TableCell>
+                        ${school.fee}
                       </TableCell>
                       <TableCell>
                         <ColorPicker value={school.color || '#3B82F6'} onChange={color => handleColorChange(school.id, color)} disabled={!canEdit} />
