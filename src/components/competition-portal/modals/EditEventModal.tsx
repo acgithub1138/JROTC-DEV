@@ -200,17 +200,23 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         formData.start_date && formData.start_time_hour && formData.start_time_minute &&
         formData.end_time_hour && formData.end_time_minute) {
       
-      const startTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
-      const endTime = new Date(`${formData.start_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      const startTime = new Date(`${formData.start_date}T${formData.start_time_hour.padStart(2, '0')}:${formData.start_time_minute.padStart(2, '0')}:00`);
+      const endTime = new Date(`${formData.start_date}T${formData.end_time_hour.padStart(2, '0')}:${formData.end_time_minute.padStart(2, '0')}:00`);
       
       let totalMinutes = (endTime.getTime() - startTime.getTime()) / (1000 * 60);
       
       // Subtract lunch break if defined
       if (formData.lunch_start_time && formData.lunch_end_time) {
-        const lunchStart = new Date(`${formData.start_date}T${formData.lunch_start_time}:00`);
-        const lunchEnd = new Date(`${formData.start_date}T${formData.lunch_end_time}:00`);
-        const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
-        totalMinutes -= lunchMinutes;
+        // Parse HH:MM format lunch times
+        const lunchStartParts = formData.lunch_start_time.split(':');
+        const lunchEndParts = formData.lunch_end_time.split(':');
+        
+        if (lunchStartParts.length === 2 && lunchEndParts.length === 2) {
+          const lunchStart = new Date(`${formData.start_date}T${lunchStartParts[0].padStart(2, '0')}:${lunchStartParts[1].padStart(2, '0')}:00`);
+          const lunchEnd = new Date(`${formData.start_date}T${lunchEndParts[0].padStart(2, '0')}:${lunchEndParts[1].padStart(2, '0')}:00`);
+          const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
+          totalMinutes -= lunchMinutes;
+        }
       }
       
       const interval = parseInt(formData.interval);
