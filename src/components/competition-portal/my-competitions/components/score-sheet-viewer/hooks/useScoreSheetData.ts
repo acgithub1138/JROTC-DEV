@@ -10,10 +10,16 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
   const [isLoading, setIsLoading] = useState(false);
 
   const fetchEvents = async () => {
-    if (!userProfile?.school_id || !competition?.source_competition_id) return;
+    if (!userProfile?.school_id || !competition?.id) return;
 
     try {
       setIsLoading(true);
+      
+      // Determine which field to query based on competition type
+      const isPortalCompetition = competition.source_competition_id;
+      const competitionIdField = isPortalCompetition ? 'source_competition_id' : 'competition_id';
+      const competitionIdValue = isPortalCompetition ? competition.source_competition_id : competition.id;
+      
       const { data, error } = await supabase
         .from('competition_events')
         .select(`
@@ -26,7 +32,7 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
           created_at,
           updated_at
         `)
-        .eq('source_competition_id', competition.source_competition_id)
+        .eq(competitionIdField, competitionIdValue)
         .eq('source_type', competition.source_type || 'internal')
         .eq('school_id', userProfile.school_id)
         .order('created_at', { ascending: true });
