@@ -27,6 +27,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/': 'competition-dashboard',
     '/app/competition-portal/dashboard': 'competition-dashboard',
     '/app/competition-portal/competitions': 'competitions',
+    '/app/competition-portal/my-competitions': 'my-competitions',
     '/app/competition-portal/events': 'events',
     '/app/competition-portal/score-sheets': 'score-sheets',
     '/app/competition-portal/judges': 'judges',
@@ -39,6 +40,7 @@ const CompetitionPortalLayout = () => {
   const moduleToRouteMap: { [key: string]: string } = {
     'competition-dashboard': '/app/competition-portal/dashboard',
     'competitions': '/app/competition-portal/competitions',
+    'my-competitions': '/app/competition-portal/my-competitions',
     'events': '/app/competition-portal/events',
     'score-sheets': '/app/competition-portal/score-sheets',
     'judges': '/app/competition-portal/judges',
