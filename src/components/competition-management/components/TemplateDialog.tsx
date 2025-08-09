@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
-import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { Button } from '@/components/ui/button';
 import { TemplateForm } from './TemplateForm';
 import { CompetitionTemplate } from '../types';
@@ -34,21 +34,14 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
       }
     }
   };
-  const confirmClose = () => {
+  const handleDiscardChanges = () => {
     setShowConfirmDialog(false);
     setHasUnsavedChanges(false);
     onOpenChange(false);
   };
-  const saveAndClose = async () => {
+
+  const handleContinueEditing = () => {
     setShowConfirmDialog(false);
-    // The form will handle saving and closing via handleSubmit
-    const form = document.querySelector('form');
-    if (form) {
-      form.dispatchEvent(new Event('submit', {
-        cancelable: true,
-        bubbles: true
-      }));
-    }
   };
   return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
@@ -65,24 +58,13 @@ export const TemplateDialog: React.FC<TemplateDialogProps> = ({
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes that will be lost if you close this form. Are you sure you want to continue?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Stay on Form</AlertDialogCancel>
-            <Button variant="outline" onClick={saveAndClose}>
-              Save and Close
-            </Button>
-            <AlertDialogAction onClick={confirmClose}>
-              Discard Changes
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <UnsavedChangesDialog 
+        open={showConfirmDialog} 
+        onOpenChange={setShowConfirmDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+        title="Unsaved Changes"
+        description="You have unsaved changes that will be lost if you close this form. Are you sure you want to continue?"
+      />
     </>;
 };
