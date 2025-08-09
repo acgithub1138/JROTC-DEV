@@ -64,8 +64,12 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
       // Convert database format to component format
       const formattedMappings: CriteriaMapping[] = data.map(mapping => ({
         id: mapping.id,
-        displayName: mapping.display_name,
-        originalCriteria: mapping.original_criteria as string[]
+        display_name: mapping.display_name,
+        original_criteria: mapping.original_criteria as string[],
+        event_type: mapping.event_type,
+        school_id: mapping.school_id,
+        is_global: mapping.is_global,
+        usage_count: mapping.usage_count
       }));
 
       setMappings(formattedMappings);
@@ -93,8 +97,8 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
       if (trulyNewMappings.length > 0) {
         const mappingsToInsert = trulyNewMappings.map(mapping => ({
           event_type: selectedEvent,
-          display_name: mapping.displayName,
-          original_criteria: mapping.originalCriteria,
+          display_name: mapping.display_name,
+          original_criteria: mapping.original_criteria,
           school_id: userProfile.school_id,
           created_by: userProfile.id,
           is_global: false
@@ -152,8 +156,8 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
 
     // Add mapped criteria display names
     mappings.forEach(mapping => {
-      mappedCriteria.add(mapping.displayName);
-      mapping.originalCriteria.forEach(original => {
+      mappedCriteria.add(mapping.display_name);
+      mapping.original_criteria.forEach(original => {
         mappedOriginals.add(original);
       });
     });
@@ -179,8 +183,8 @@ export const useCriteriaMapping = ({ selectedEvent, originalCriteria }: UseCrite
     // Create reverse mapping from original criteria to display names
     const originalToDisplay = new Map<string, string>();
     mappings.forEach(mapping => {
-      mapping.originalCriteria.forEach(original => {
-        originalToDisplay.set(original, mapping.displayName);
+      mapping.original_criteria.forEach(original => {
+        originalToDisplay.set(original, mapping.display_name);
       });
     });
 

@@ -94,8 +94,10 @@ export const ReportsTab = () => {
         
         <CompetitionSelector 
           availableCompetitions={availableCompetitions} 
-          selectedCompetitions={selectedCompetitions} 
+          selectedCompetitions={selectedCompetitions || []} 
           onCompetitionSelect={setSelectedCompetitions} 
+          onSelectAll={() => setSelectedCompetitions(availableCompetitions.map(c => c.id))}
+          onUnselectAll={() => setSelectedCompetitions([])}
           isLoading={isLoadingCompetitions} 
         />
       </div>

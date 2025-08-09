@@ -118,15 +118,18 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
 
       <TemplatesTable 
         templates={paginatedTemplates as any} 
-        isLoading={isLoading} 
         sortConfig={sortConfig} 
         onSort={handleSort} 
         onEdit={!readOnly && canUpdate ? (t: any) => setEditingTemplate(t) : undefined} 
-        onDelete={!readOnly && canDelete ? deleteTemplate : undefined} 
-        onCopy={canCreate ? handleCopy : undefined} 
+        onDelete={!readOnly && canDelete ? (template: any) => deleteTemplate(template.id) : undefined} 
+        onCopy={canCreate ? (template: any) => handleCopy(template.id) : undefined}
         onPreview={canViewDetails ? (t: any) => setPreviewTemplate(t) : undefined} 
-        canEditTemplate={(t: any) => canEditTemplate(t)} 
-        canCopyTemplate={(t: any) => canCreate && canCopyTemplate(t)} 
+        permissions={{
+          canUpdate,
+          canDelete,
+          canViewDetails
+        }}
+        readOnly={readOnly}
       />
 
       {/* Pagination */}

@@ -1,13 +1,7 @@
 export interface CompetitionEvent {
   id: string;
   event: string;
-  score_sheet: {
-    scores: Record<string, any>;
-    judge_number?: string;
-    template_id?: string;
-    template_name?: string;
-    calculated_at?: string;
-  };
+  score_sheet: any;
   total_points: number;
   cadet_ids: string[];
   team_name?: string;

@@ -259,8 +259,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       // Create reverse mapping from original criteria to display names
       const originalToDisplay = new Map<string, string>();
       criteriaMapping.forEach(mapping => {
-        mapping.originalCriteria.forEach(original => {
-          originalToDisplay.set(original, mapping.displayName);
+        mapping.original_criteria.forEach(original => {
+          originalToDisplay.set(original, mapping.display_name);
         });
       });
 
