@@ -41,7 +41,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
-  description: z.string().optional(),
+  description: z.string().min(1, "Description is required"),
   priority: z.string().min(1, "Priority is required"),
   category: z.string().min(1, "Category is required"),
   due_date: z.date().optional().refine((date) => {
@@ -110,7 +110,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               name="title"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Title</FormLabel>
+                  <FormLabel>Title <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Input placeholder="Enter incident title" {...field} />
                   </FormControl>
@@ -124,7 +124,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
               name="description"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Description</FormLabel>
+                  <FormLabel>Description <span className="text-destructive">*</span></FormLabel>
                   <FormControl>
                     <Textarea
                       placeholder="Enter incident description"
