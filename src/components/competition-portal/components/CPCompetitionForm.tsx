@@ -5,6 +5,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AddressLookupField } from '@/components/calendar/components/AddressLookupField';
+import { useAuth } from '@/contexts/AuthContext';
 
 interface CPCompetitionFormProps {
   onSubmit: (data: any) => Promise<void>;
@@ -19,6 +20,8 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
   onInteraction,
   competition
 }) => {
+  const { userProfile } = useAuth();
+  
   const [formData, setFormData] = useState({
     name: competition?.name || '',
     description: competition?.description || '',
@@ -39,7 +42,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     registration_deadline_date: competition?.registration_deadline ? new Date(competition.registration_deadline).toISOString().split('T')[0] : '',
     registration_deadline_hour: competition?.registration_deadline ? new Date(competition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
     registration_deadline_minute: competition?.registration_deadline ? new Date(competition.registration_deadline).getMinutes().toString().padStart(2, '0') : '59',
-    hosting_school: competition?.hosting_school || '',
+    hosting_school: competition?.hosting_school || userProfile?.schools?.name || '',
   });
 
   const [isSubmitting, setIsSubmitting] = useState(false);
