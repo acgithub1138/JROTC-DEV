@@ -41,6 +41,11 @@ const competitionMenuItems = [{
   icon: Award,
   path: '/app/competition-portal/competitions'
 }, {
+  id: 'my-competitions',
+  label: 'My Competitions',
+  icon: Target,
+  path: '/app/competition-portal/my-competitions'
+}, {
   id: 'open-competitions',
   label: 'Open Competitions',
   icon: Search,

@@ -4,12 +4,14 @@ import { Header } from '@/components/layout/Header';
 import { CompetitionSidebar } from './CompetitionSidebar';
 import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
+import MyCompetitionsPage from './my-competitions/MyCompetitionsPage';
 import { EventsPage } from './EventsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
+import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -79,6 +81,10 @@ const CompetitionPortalLayout = () => {
       return <CompetitionDashboard />;
     } else if (path === '/app/competition-portal/competitions') {
       return <CompetitionsPage />;
+    } else if (path === '/app/competition-portal/my-competitions') {
+      return <MyCompetitionsPage />;
+    } else if (path.startsWith('/app/competition-portal/my-competitions/score-sheets/')) {
+      return <ScoreSheetPage />;
     } else if (path.startsWith('/app/competition-portal/competition-details/')) {
       return <CompetitionDetailsPage />;
     } else if (path === '/app/competition-portal/events') {
