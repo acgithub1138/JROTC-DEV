@@ -27,13 +27,29 @@ export const JudgeDialog: React.FC<JudgeDialogProps> = ({
 }) => {
   const [showUnsavedDialog, setShowUnsavedDialog] = React.useState(false);
   
+  // Phone number formatting function
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    // Format as (xxx) xxx-xxxx
+    if (phoneNumber.length <= 3) {
+      return phoneNumber;
+    } else if (phoneNumber.length <= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    } else {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    }
+  };
+
   const {
     register,
     handleSubmit,
     reset,
     watch,
     setValue,
-    getValues
+    getValues,
+    formState: { errors }
   } = useForm<JudgeFormData>({
     defaultValues: {
       name: judge?.name || '',
@@ -120,12 +136,33 @@ export const JudgeDialog: React.FC<JudgeDialogProps> = ({
 
           <div className="space-y-2">
             <Label htmlFor="phone">Phone</Label>
-            <Input id="phone" {...register('phone')} placeholder="Enter phone number" />
+            <Input 
+              id="phone" 
+              {...register('phone')} 
+              placeholder="(123) 456-7890"
+              onChange={(e) => {
+                const formatted = formatPhoneNumber(e.target.value);
+                setValue('phone', formatted);
+              }}
+            />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="email">Email</Label>
-            <Input id="email" type="email" {...register('email')} placeholder="Enter email address" />
+            <Input 
+              id="email" 
+              type="email" 
+              {...register('email', {
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i,
+                  message: "Please enter a valid email address"
+                }
+              })} 
+              placeholder="Enter email address" 
+            />
+            {errors.email && (
+              <p className="text-sm text-destructive">{errors.email.message}</p>
+            )}
           </div>
 
           <div className="flex items-center space-x-2">

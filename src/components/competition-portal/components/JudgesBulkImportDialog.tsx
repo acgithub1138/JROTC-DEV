@@ -33,6 +33,27 @@ export const JudgesBulkImportDialog = ({ open, onOpenChange, onBulkImport }: Jud
   const [importResults, setImportResults] = useState<{ success: number; failed: number; errors: string[] } | null>(null);
   const [isImporting, setIsImporting] = useState(false);
 
+  // Phone number formatting function
+  const formatPhoneNumber = (value: string) => {
+    // Remove all non-digits
+    const phoneNumber = value.replace(/\D/g, '');
+    
+    // Format as (xxx) xxx-xxxx
+    if (phoneNumber.length <= 3) {
+      return phoneNumber;
+    } else if (phoneNumber.length <= 6) {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3)}`;
+    } else {
+      return `(${phoneNumber.slice(0, 3)}) ${phoneNumber.slice(3, 6)}-${phoneNumber.slice(6, 10)}`;
+    }
+  };
+
+  // Email validation function
+  const isValidEmail = (email: string) => {
+    const emailRegex = /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,}$/i;
+    return emailRegex.test(email);
+  };
+
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     try {
       const csvText = await uploadedFile.text();
@@ -232,24 +253,34 @@ export const JudgesBulkImportDialog = ({ open, onOpenChange, onBulkImport }: Jud
                           />
                         ) : judge.name}
                       </TableCell>
-                      <TableCell>
-                        {editingRow === judge.id ? (
-                          <Input 
-                            value={judge.email || ''}
-                            onChange={(e) => updateJudge(judge.id, 'email', e.target.value)}
-                            className="h-8"
-                          />
-                        ) : judge.email || '-'}
-                      </TableCell>
-                      <TableCell>
-                        {editingRow === judge.id ? (
-                          <Input 
-                            value={judge.phone || ''}
-                            onChange={(e) => updateJudge(judge.id, 'phone', e.target.value)}
-                            className="h-8"
-                          />
-                        ) : judge.phone || '-'}
-                      </TableCell>
+                       <TableCell>
+                         {editingRow === judge.id ? (
+                           <div>
+                             <Input 
+                               value={judge.email || ''}
+                               onChange={(e) => updateJudge(judge.id, 'email', e.target.value)}
+                               className={`h-8 ${judge.email && !isValidEmail(judge.email) ? 'border-red-500' : ''}`}
+                               placeholder="email@example.com"
+                             />
+                             {judge.email && !isValidEmail(judge.email) && (
+                               <p className="text-xs text-red-600 mt-1">Invalid email format</p>
+                             )}
+                           </div>
+                         ) : judge.email || '-'}
+                       </TableCell>
+                       <TableCell>
+                         {editingRow === judge.id ? (
+                           <Input 
+                             value={judge.phone || ''}
+                             onChange={(e) => {
+                               const formatted = formatPhoneNumber(e.target.value);
+                               updateJudge(judge.id, 'phone', formatted);
+                             }}
+                             className="h-8"
+                             placeholder="(123) 456-7890"
+                           />
+                         ) : judge.phone || '-'}
+                       </TableCell>
                       <TableCell>
                         {editingRow === judge.id ? (
                           <Select 
