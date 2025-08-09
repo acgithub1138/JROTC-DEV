@@ -2,7 +2,7 @@ import React from 'react';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Button } from '@/components/ui/button';
-import { formatTimeForDisplay } from '@/utils/timeDisplayUtils';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
 interface Competition {
   id: string;
@@ -68,7 +68,7 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
             >
               <div className="font-medium">{competition.name}</div>
               <div className="text-muted-foreground">
-                {formatTimeForDisplay(competition.competition_date, 'DATE_ONLY', 'UTC')}
+                {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
               </div>
             </label>
           </div>

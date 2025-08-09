@@ -3,7 +3,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Eye, Edit, Copy, Trash2 } from 'lucide-react';
-import { formatTimeForDisplay } from '@/utils/timeDisplayUtils';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import type { CompetitionTemplate } from '../types';
 
 interface TemplatesTableProps {
@@ -101,7 +101,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   )}
                 </TableCell>
                 <TableCell>
-                  {formatTimeForDisplay(template.created_at, 'DATE_ONLY', 'UTC')}
+                  {formatTimeForDisplay(template.created_at, TIME_FORMATS.DATE_ONLY, 'UTC')}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-2">
