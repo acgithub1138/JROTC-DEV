@@ -311,45 +311,6 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         />
       </div>
 
-      <div className="space-y-2">
-        <Label htmlFor="address">Address</Label>
-        <Input
-          id="address"
-          value={formData.address}
-          onChange={(e) => updateFormData('address', e.target.value)}
-          placeholder="Street address"
-        />
-      </div>
-
-      <div className="grid grid-cols-3 gap-4">
-        <div className="space-y-2">
-          <Label htmlFor="city">City</Label>
-          <Input
-            id="city"
-            value={formData.city}
-            onChange={(e) => updateFormData('city', e.target.value)}
-            placeholder="City"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="state">State</Label>
-          <Input
-            id="state"
-            value={formData.state}
-            onChange={(e) => updateFormData('state', e.target.value)}
-            placeholder="State"
-          />
-        </div>
-        <div className="space-y-2">
-          <Label htmlFor="zip">ZIP Code</Label>
-          <Input
-            id="zip"
-            value={formData.zip}
-            onChange={(e) => updateFormData('zip', e.target.value)}
-            placeholder="ZIP"
-          />
-        </div>
-      </div>
 
       <div className="space-y-2">
         <Label htmlFor="hosting_school">Hosting School</Label>
