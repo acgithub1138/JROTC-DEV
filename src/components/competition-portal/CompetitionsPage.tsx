@@ -13,9 +13,10 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CPCompetitionDialog } from './components/CPCompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
+import { EditCompetitionModal } from './modals/EditCompetitionModal';
 import { CompetitionCards } from './components/CompetitionCards';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, X, GitCompareArrows } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 
@@ -57,9 +58,10 @@ const CompetitionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [showViewModal, setShowViewModal] = useState(false);
-  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+const [showCreateDialog, setShowCreateDialog] = useState(false);
+const [showViewModal, setShowViewModal] = useState(false);
+const [showEditModal, setShowEditModal] = useState(false);
+const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<Competition | null>(null);
@@ -171,13 +173,35 @@ const CompetitionsPage = () => {
       toast.error('Failed to create competition');
     }
   };
-  const handleViewCompetition = (competition: Competition) => {
-    setSelectedCompetition(competition);
-    setShowViewModal(true);
-  };
-  const handleEditCompetition = (competition: Competition) => {
-    navigate(`/app/competition-portal/competition-details/${competition.id}`);
-  };
+const handleViewCompetition = (competition: Competition) => {
+  setSelectedCompetition(competition);
+  setShowViewModal(true);
+};
+const handleEditCompetition = (competition: Competition) => {
+  navigate(`/app/competition-portal/competition-details/${competition.id}`);
+};
+
+// Open edit modal directly
+const handleOpenEdit = (competition: Competition) => {
+  setSelectedCompetition(competition);
+  setShowEditModal(true);
+};
+
+const handleEditSubmit = async (data: any) => {
+  try {
+    const { error } = await supabase
+      .from('cp_competitions')
+      .update(data)
+      .eq('id', selectedCompetition?.id);
+    if (error) throw error;
+    toast.success('Competition updated successfully');
+    setShowEditModal(false);
+    fetchCompetitions();
+  } catch (error) {
+    console.error('Error updating competition:', error);
+    toast.error('Failed to update competition');
+  }
+};
 
   const handleCancelCompetitionClick = (competition: Competition) => {
     setCompetitionToCancel(competition);
@@ -326,9 +350,9 @@ const CompetitionsPage = () => {
                   {filteredCompetitions.map(competition => (
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
-                        <button onClick={() => handleViewCompetition(competition)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
-                          {competition.name}
-                        </button>
+<button onClick={() => navigate('/app/competition-portal/competition-details')} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+  {competition.name}
+</button>
                       </TableCell>
                       <TableCell>
                         <div className="max-w-xs">
@@ -379,20 +403,45 @@ const CompetitionsPage = () => {
                            {competition.max_participants && ` / ${competition.max_participants}`}
                          </div>
                        </TableCell>
-                       <TableCell>
-                          <div className="flex items-center justify-center gap-2">
-                            {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
-                              <>
-                                <Tooltip>
-                                  <TooltipTrigger asChild>
-                                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
-                                      <GitCompareArrows className="w-3 h-3" />
-                                    </Button>
-                                  </TooltipTrigger>
-                                  <TooltipContent>
-                                    <p>Manage Competition</p>
-                                  </TooltipContent>
-                                </Tooltip>
+<TableCell>
+  <div className="flex items-center justify-center gap-2">
+    {/* View Competition */}
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewCompetition(competition)}>
+          <Eye className="w-3 h-3" />
+        </Button>
+      </TooltipTrigger>
+      <TooltipContent>
+        <p>View</p>
+      </TooltipContent>
+    </Tooltip>
+
+    {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
+      <>
+        {/* Edit Competition */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
+              <Edit className="w-3 h-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Edit</p>
+          </TooltipContent>
+        </Tooltip>
+
+        {/* Manage Competition */}
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
+              <GitCompareArrows className="w-3 h-3" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>
+            <p>Manage Competition</p>
+          </TooltipContent>
+        </Tooltip>
                                 
                                 {['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
                                   <Tooltip>
@@ -427,17 +476,25 @@ const CompetitionsPage = () => {
         </TabsContent>
       </Tabs>
 
-      {/* Create Competition Dialog */}
-      <CPCompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
+{/* Create Competition Dialog */}
+<CPCompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
 
-      {/* View Competition Modal */}
-       <ViewCompetitionModal 
-        competition={selectedCompetition} 
-        open={showViewModal} 
-        onOpenChange={setShowViewModal} 
-        hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
-        onCompetitionUpdated={fetchCompetitions}
-      />
+{/* View Competition Modal */}
+ <ViewCompetitionModal 
+  competition={selectedCompetition} 
+  open={showViewModal} 
+  onOpenChange={setShowViewModal} 
+  hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
+  onCompetitionUpdated={fetchCompetitions}
+/>
+
+{/* Edit Competition Modal */}
+<EditCompetitionModal 
+  open={showEditModal}
+  onOpenChange={setShowEditModal}
+  competition={selectedCompetition}
+  onSubmit={handleEditSubmit}
+/>
 
       {/* Cancel Competition Confirmation Dialog */}
       <AlertDialog open={showCancelDialog} onOpenChange={setShowCancelDialog}>
