@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Eye, DollarSign, Edit } from 'lucide-react';
+import { Plus, Eye, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent } from '@/components/ui/card';
@@ -38,17 +38,6 @@ const {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
   const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
-  const handleTogglePaid = async (schoolId: string, currentPaid: boolean) => {
-    try {
-      console.log('Updating payment status for school:', schoolId, 'from', currentPaid, 'to', !currentPaid);
-      await updateSchoolRegistration(schoolId, {
-        paid: !currentPaid
-      });
-    } catch (error) {
-      console.error('Error updating payment status:', error);
-      console.error('Full error details:', JSON.stringify(error, null, 2));
-    }
-  };
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
       await updateSchoolRegistration(schoolId, {
@@ -137,16 +126,6 @@ const {
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>Edit school registration</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleTogglePaid(school.id, school.paid)}>
-                                    <DollarSign className="w-3 h-3" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>{school.paid ? 'Mark as unpaid' : 'Mark as paid'}</p>
                                 </TooltipContent>
                               </Tooltip>
                             </>
