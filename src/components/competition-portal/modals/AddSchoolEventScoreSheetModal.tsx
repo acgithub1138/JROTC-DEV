@@ -7,7 +7,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { CadetSelector } from '@/components/competition-management/components/add-event/CadetSelector';
+
 import { ScoreSheetSection } from '@/components/competition-management/components/add-event/ScoreSheetSection';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
@@ -19,8 +19,6 @@ interface AddSchoolEventScoreSheetModalProps {
   schoolRegistrationId: string; // cp_comp_schools.id
 }
 
-// Judge list consistent with existing implementation
-const judgeOptions = ['Judge 1','Judge 2','Judge 3','Judge 4','Judge 5','Judge 6','Judge 7','Judge 8','Judge 9','Judge 10'];
 
 export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetModalProps> = ({
   open,
@@ -34,8 +32,6 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
   const [selectedCompEventId, setSelectedCompEventId] = useState<string>('');
   const [judgeNumber, setJudgeNumber] = useState('');
   const [teamName, setTeamName] = useState('');
-  const [selectedCadetIds, setSelectedCadetIds] = useState<string[]>([]);
-  const [isCadetsOpen, setIsCadetsOpen] = useState(false);
   const [scores, setScores] = useState<Record<string, any>>({});
   const [totalPoints, setTotalPoints] = useState(0);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -44,6 +40,25 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
   const [schoolInfo, setSchoolInfo] = useState<{ school_id: string; school_name: string } | null>(null);
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<any | null>(null);
+
+  // Compute judge options based on template's configured judge count
+  const maxJudges = useMemo(() => {
+    const tpl = selectedTemplate || {};
+    return (
+      tpl.numberOfJudges ||
+      tpl.maxJudges ||
+      (Array.isArray(tpl.judges) ? tpl.judges.length : undefined) ||
+      tpl.judge_count ||
+      tpl?.scores?.maxJudges ||
+      tpl?.scores?.judge_count ||
+      1
+    );
+  }, [selectedTemplate]);
+
+  const judgeOptions = useMemo(
+    () => Array.from({ length: Math.max(1, Math.min(Number(maxJudges) || 1, 10)) }, (_, i) => `Judge ${i + 1}`),
+    [maxJudges]
+  );
 
   // Load school info (resolve cp_comp_schools -> school_id)
   useEffect(() => {
@@ -124,17 +139,16 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
     loadTemplate();
   }, [selectedCompEventId, registrations]);
 
-  const isFormValid = !!selectedTemplate && !!judgeNumber && (judgeNumber !== 'Judge 1' || selectedCadetIds.length > 0);
+  const isFormValid = !!selectedTemplate && !!judgeNumber;
 
   // Unsaved changes handling
   const initialData = useMemo(() => ({
     selectedCompEventId: '',
     judgeNumber: '',
     teamName: '',
-    selectedCadetIds: [],
     scores: {}
   }), []);
-  const currentData = { selectedCompEventId, judgeNumber, teamName, selectedCadetIds, scores };
+  const currentData = { selectedCompEventId, judgeNumber, teamName, scores };
   const { hasUnsavedChanges } = useUnsavedChanges({ initialData, currentData, enabled: open });
 
   const handleOpenChange = (newOpen: boolean) => {
@@ -150,7 +164,6 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
     setSelectedCompEventId('');
     setJudgeNumber('');
     setTeamName('');
-    setSelectedCadetIds([]);
     setScores({});
     setTotalPoints(0);
     setSelectedTemplate(null);
@@ -170,7 +183,7 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
     setIsSubmitting(true);
     try {
       const eventData = {
-        cadet_ids: selectedCadetIds,
+        
         team_name: teamName || null,
         event: selectedTemplate.event, // enum from template
         score_sheet: {
@@ -225,39 +238,34 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
             </Select>
           </div>
 
-          {/* Judge Number */}
-          <div className="space-y-1">
-            <Label>Judge Number <span className="text-destructive">*</span></Label>
-            <Select value={judgeNumber} onValueChange={setJudgeNumber}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select judge..." />
-              </SelectTrigger>
-              <SelectContent>
-                {judgeOptions.map(j => (
-                  <SelectItem key={j} value={j}>{j}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
+          {selectedTemplate && (
+            <>
+              <div className="space-y-1">
+                <Label>Judge Number <span className="text-destructive">*</span></Label>
+                <Select value={judgeNumber} onValueChange={setJudgeNumber}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select judge..." />
+                  </SelectTrigger>
+                  <SelectContent className="bg-background z-50">
+                    {judgeOptions.map(j => (
+                      <SelectItem key={j} value={j}>{j}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+                <p className="text-xs text-muted-foreground">Total judges in template: {Math.max(1, Number(maxJudges) || 1)}</p>
+              </div>
 
-          {/* Team Name */}
-          <div className="space-y-1">
-            <Label>Team Name (Optional)</Label>
-            {teamName.length >= 2500 ? (
-              <Textarea value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="Enter team name..." className="min-h-[120px] resize-y" />
-            ) : (
-              <Input value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="Enter team name..." />
-            )}
-          </div>
+              <div className="space-y-1">
+                <Label>Team Name (Optional)</Label>
+                {teamName.length >= 2500 ? (
+                  <Textarea value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="Enter team name..." className="min-h-[120px] resize-y" />
+                ) : (
+                  <Input value={teamName} onChange={e => setTeamName(e.target.value)} placeholder="Enter team name..." />
+                )}
+              </div>
+            </>
+          )}
 
-          {/* Cadets */}
-          <CadetSelector 
-            selectedCadetIds={selectedCadetIds}
-            judgeNumber={judgeNumber}
-            isCadetsOpen={isCadetsOpen}
-            onSelectedCadetsChange={setSelectedCadetIds}
-            onToggleOpen={setIsCadetsOpen}
-          />
 
           {/* Score Sheet */}
           <ScoreSheetSection 
