@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { AddEventForm } from './add-event/AddEventForm';
-import { CadetSelector } from './add-event/CadetSelector';
-import { ScoreSheetSection } from './add-event/ScoreSheetSection';
-import { useAddEventLogic } from './add-event/useAddEventLogic';
+import { AddEventForm } from '@/components/competition-management/components/add-event/AddEventForm';
+import { CadetSelector } from '@/components/competition-management/components/add-event/CadetSelector';
+import { ScoreSheetSection } from '@/components/competition-management/components/add-event/ScoreSheetSection';
+import { useAddEventLogic } from '@/components/competition-management/components/add-event/useAddEventLogic';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 
