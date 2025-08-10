@@ -35,7 +35,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     jrotc_program: template?.jrotc_program || 'air_force',
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
     is_active: template?.is_active ?? true,
-    is_global: (template as any)?.is_global ?? false
+    is_global: (template as any)?.is_global ?? false,
+    judges: Number((template as any)?.judges) || 4
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [initialFormData] = useState(formData);
@@ -187,9 +188,26 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         </div>
       </div>
 
-      <div className="space-y-1">
-        <Label htmlFor="template_name">Template Name *</Label>
-        <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+        <div className="space-y-1">
+          <Label htmlFor="template_name">Template Name *</Label>
+          <Input id="template_name" value={formData.template_name} onChange={e => updateFormData('template_name', e.target.value)} required />
+        </div>
+        <div className="space-y-1">
+          <Label htmlFor="judges">Judges</Label>
+          <Select value={String(formData.judges)} onValueChange={(value) => updateFormData('judges', parseInt(value, 10))}>
+            <SelectTrigger>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Array.from({ length: 10 }, (_, i) => i + 1).map((n) => (
+                <SelectItem key={n} value={String(n)}>
+                  {n}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       <div className="space-y-1">
