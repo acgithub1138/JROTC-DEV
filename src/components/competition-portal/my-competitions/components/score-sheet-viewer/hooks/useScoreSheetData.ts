@@ -16,11 +16,8 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
     try {
       setIsLoading(true);
       
-      // Determine which field to query based on competition type
-      const isPortalCompetition = competition.source_competition_id;
-      const competitionIdField = isPortalCompetition ? 'source_competition_id' : 'competition_id';
-      const competitionIdValue = isPortalCompetition ? competition.source_competition_id : competition.id;
-      
+      // Build a permissive query: match either competition_id or source_competition_id for this competition
+      const compId = competition.source_competition_id || competition.id;
       const { data, error } = await supabase
         .from('competition_events')
         .select(`
@@ -37,11 +34,12 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
           created_at,
           updated_at
         `)
-        .eq(competitionIdField, competitionIdValue)
-        .eq('source_type', competition.source_type || 'internal')
+        .or(`competition_id.eq.${compId},source_competition_id.eq.${compId}`)
         .order('created_at', { ascending: true });
 
       if (error) throw error;
+
+      console.log('Fetched competition events:', data?.length || 0, 'for competition:', compId);
 
       // Get cadet profiles and school names separately to avoid foreign key issues
       if (data && data.length > 0) {
