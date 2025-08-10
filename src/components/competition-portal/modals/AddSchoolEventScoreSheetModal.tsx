@@ -44,7 +44,13 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
   // Compute judge options based on template's configured judge count
   const maxJudges = useMemo(() => {
     const tpl = selectedTemplate || {};
+    // Prefer numeric 'judges' from competition_templates, else fallbacks
+    const numericJudges = typeof tpl.judges === 'number'
+      ? tpl.judges
+      : (typeof tpl.judges === 'string' ? parseInt(tpl.judges, 10) : undefined);
+
     return (
+      numericJudges ||
       tpl.numberOfJudges ||
       tpl.maxJudges ||
       (Array.isArray(tpl.judges) ? tpl.judges.length : undefined) ||
