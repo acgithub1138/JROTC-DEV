@@ -202,7 +202,8 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
         total_points: totalPoints,
         school_id: schoolInfo.school_id,
         source_competition_id: competitionId,
-        // keep competition_id null for portal usage; source_type defaults to 'internal' but fine
+        source_type: 'portal' as const,
+        // keep competition_id null for portal usage
       } as any;
 
       const { error } = await supabase
