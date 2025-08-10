@@ -12,6 +12,7 @@ import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/Vi
 import { EditSchoolModal } from '@/components/competition-portal/modals/EditSchoolModal';
 import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
+import { AddSchoolEventScoreSheetModal } from '@/components/competition-portal/modals/AddSchoolEventScoreSheetModal';
 
 // Extend the type to include the paid and color fields
 type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row'] & {
@@ -38,6 +39,7 @@ const {
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
   const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
+  const [selectedSchoolForAddEvent, setSelectedSchoolForAddEvent] = useState<string | null>(null);
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
       await updateSchoolRegistration(schoolId, {
@@ -120,6 +122,21 @@ const {
                             <>
                               <Tooltip>
                                 <TooltipTrigger asChild>
+                                  <Button
+                                    variant="outline"
+                                    size="icon"
+                                    className="h-6 w-6"
+                                    onClick={() => setSelectedSchoolForAddEvent(school.id)}
+                                  >
+                                    <Plus className="w-3 h-3" />
+                                  </Button>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>Add event score sheet</p>
+                                </TooltipContent>
+                              </Tooltip>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
                                   <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEdit(school.id)}>
                                     <Edit className="w-3 h-3" />
                                   </Button>
@@ -144,5 +161,12 @@ const {
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
       
       <EditSchoolModal open={!!selectedSchoolForEdit} onOpenChange={() => setSelectedSchoolForEdit(null)} competitionId={competitionId} schoolId={selectedSchoolForEdit || ''} onSchoolUpdated={refetch} />
+
+      <AddSchoolEventScoreSheetModal
+        open={!!selectedSchoolForAddEvent}
+        onOpenChange={(o) => { if (!o) setSelectedSchoolForAddEvent(null); }}
+        competitionId={competitionId}
+        schoolRegistrationId={selectedSchoolForAddEvent || ''}
+      />
     </div>;
 };
