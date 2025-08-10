@@ -19,9 +19,11 @@ interface AddEventFormProps {
   onTemplateChange: (templateId: string) => void;
   onJudgeNumberChange: (judge: string) => void;
   onTeamNameChange: (name: string) => void;
+  showDetails?: boolean;
+  maxJudges?: number;
 }
 
-const judgeOptions = ['Judge 1', 'Judge 2', 'Judge 3', 'Judge 4', 'Judge 5', 'Judge 6', 'Judge 7', 'Judge 8', 'Judge 9', 'Judge 10'];
+// judgeOptions computed per template
 
 export const AddEventForm: React.FC<AddEventFormProps> = ({
   selectedProgram,
@@ -37,8 +39,11 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({
   onEventChange,
   onTemplateChange,
   onJudgeNumberChange,
-  onTeamNameChange
+  onTeamNameChange,
+  showDetails = true,
+  maxJudges
 }) => {
+  const judgeOptions = Array.from({ length: Math.max(1, Math.min(maxJudges ?? 10, 10)) }, (_, i) => `Judge ${i + 1}`);
   return (
     <div className="space-y-3">
       {/* Program, Event, and Template Selection - Responsive Layout */}
@@ -113,40 +118,44 @@ export const AddEventForm: React.FC<AddEventFormProps> = ({
       </div>
 
       {/* Judge Number */}
-      <div className="space-y-1">
-        <Label>Judge Number <span className="text-destructive">*</span></Label>
-        <Select value={judgeNumber} onValueChange={onJudgeNumberChange}>
-          <SelectTrigger>
-            <SelectValue placeholder="Select judge..." />
-          </SelectTrigger>
-          <SelectContent>
-            {judgeOptions.map(judge => (
-              <SelectItem key={judge} value={judge}>
-                {judge}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
+      {showDetails && (
+        <div className="space-y-1">
+          <Label>Judge Number <span className="text-destructive">*</span></Label>
+          <Select value={judgeNumber} onValueChange={onJudgeNumberChange}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select judge..." />
+            </SelectTrigger>
+            <SelectContent>
+              {judgeOptions.map(judge => (
+                <SelectItem key={judge} value={judge}>
+                  {judge}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
+      )}
 
       {/* Team Name */}
-      <div className="space-y-1">
-        <Label>Team Name (Optional)</Label>
-        {teamName.length >= 2500 ? (
-          <Textarea 
-            value={teamName} 
-            onChange={e => onTeamNameChange(e.target.value)} 
-            placeholder="Enter team name..." 
-            className="min-h-[120px] resize-y"
-          />
-        ) : (
-          <Input 
-            value={teamName} 
-            onChange={e => onTeamNameChange(e.target.value)} 
-            placeholder="Enter team name..." 
-          />
-        )}
-      </div>
+      {showDetails && (
+        <div className="space-y-1">
+          <Label>Team Name (Optional)</Label>
+          {teamName.length >= 2500 ? (
+            <Textarea 
+              value={teamName} 
+              onChange={e => onTeamNameChange(e.target.value)} 
+              placeholder="Enter team name..." 
+              className="min-h-[120px] resize-y"
+            />
+          ) : (
+            <Input 
+              value={teamName} 
+              onChange={e => onTeamNameChange(e.target.value)} 
+              placeholder="Enter team name..." 
+            />
+          )}
+        </div>
+      )}
     </div>
   );
 };

@@ -151,15 +151,19 @@ export const AddEventDialog: React.FC<AddEventDialogProps> = ({
               onTemplateChange={handleTemplateChange} 
               onJudgeNumberChange={setJudgeNumber} 
               onTeamNameChange={setTeamName} 
+              showDetails={Boolean(selectedTemplate)}
+              maxJudges={(selectedTemplate as any)?.judges}
             />
 
-            <CadetSelector 
-              selectedCadetIds={selectedCadetIds} 
-              judgeNumber={judgeNumber} 
-              isCadetsOpen={isCadetsOpen} 
-              onSelectedCadetsChange={setSelectedCadetIds} 
-              onToggleOpen={setIsCadetsOpen} 
-            />
+            {selectedTemplate && (
+              <CadetSelector 
+                selectedCadetIds={selectedCadetIds} 
+                judgeNumber={judgeNumber} 
+                isCadetsOpen={isCadetsOpen} 
+                onSelectedCadetsChange={setSelectedCadetIds} 
+                onToggleOpen={setIsCadetsOpen} 
+              />
+            )}
 
             <ScoreSheetSection 
               selectedTemplate={selectedTemplate} 
