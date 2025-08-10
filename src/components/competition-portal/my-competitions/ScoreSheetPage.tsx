@@ -3,6 +3,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Plus } from 'lucide-react';
 import { EventSelector } from './components/score-sheet-viewer/EventSelector';
+import { SchoolSelector } from './components/score-sheet-viewer/SchoolSelector';
 import { ScoreSheetTable } from './components/score-sheet-viewer/ScoreSheetTable';
 import { useScoreSheetData } from './components/score-sheet-viewer/hooks/useScoreSheetData';
 import { useCompetitions } from './hooks/useCompetitions';
@@ -13,6 +14,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 export const ScoreSheetPage = () => {
   const { competitionId } = useParams<{ competitionId: string }>();
   const navigate = useNavigate();
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
@@ -22,20 +24,43 @@ export const ScoreSheetPage = () => {
   const competition = competitions.find(comp => comp.id === competitionId);
   const { canCreate } = useTablePermissions('competitions');
 
-  const { events, isLoading, refetch } = useScoreSheetData(competition, true);
+  const { events, schoolMap, isLoading, refetch } = useScoreSheetData(competition, true);
   const { createEvent } = useCompetitionEvents(competitionId);
 
-  // Get unique event types from the events
-  const uniqueEventTypes = [...new Set(events.map(event => event.event))];
+  // Build school options from events
+  const schoolOptions = Array.from(new Set(events.map((e: any) => e.school_id)))
+    .filter(Boolean)
+    .map((id: string) => ({ id, name: schoolMap?.[id] || 'Unknown School' }));
+
+  // Events available for the selected school
+  const eventsForSelectedSchool = selectedSchoolId
+    ? (events as any[]).filter(e => e.school_id === selectedSchoolId)
+    : [];
+
+  // Get unique event types for the selected school
+  const uniqueEventTypes = [...new Set(eventsForSelectedSchool.map(event => event.event))];
 
   useEffect(() => {
-    if (selectedEvent) {
-      const filtered = events.filter(event => event.event === selectedEvent);
+    // Default to first school when options load
+    if (!selectedSchoolId && schoolOptions.length > 0) {
+      setSelectedSchoolId(schoolOptions[0].id);
+    }
+  }, [schoolOptions, selectedSchoolId]);
+
+  useEffect(() => {
+    // Reset selected event when school changes
+    setSelectedEvent('');
+    setFilteredEvents([]);
+  }, [selectedSchoolId]);
+
+  useEffect(() => {
+    if (selectedSchoolId && selectedEvent) {
+      const filtered = (events as any[]).filter(event => event.school_id === selectedSchoolId && event.event === selectedEvent);
       setFilteredEvents(filtered);
     } else {
       setFilteredEvents([]);
     }
-  }, [selectedEvent, events]);
+  }, [selectedSchoolId, selectedEvent, events]);
 
   const handleBack = () => {
     navigate('/app/competition-portal/my-competitions');
@@ -90,12 +115,19 @@ export const ScoreSheetPage = () => {
         </div>
 
         <div className="space-y-6">
-          <div className="flex items-center justify-between">
-            <EventSelector
-              events={events}
-              selectedEvent={selectedEvent}
-              onEventChange={setSelectedEvent}
-            />
+          <div className="flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-6 flex-wrap">
+              <SchoolSelector
+                schools={schoolOptions}
+                selectedSchoolId={selectedSchoolId}
+                onSchoolChange={setSelectedSchoolId}
+              />
+              <EventSelector
+                events={eventsForSelectedSchool}
+                selectedEvent={selectedEvent}
+                onEventChange={setSelectedEvent}
+              />
+            </div>
             <Button
               variant="outline"
               size="sm"

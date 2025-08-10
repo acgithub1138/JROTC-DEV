@@ -5,6 +5,10 @@ export interface CompetitionEvent {
   total_points: number;
   cadet_ids: string[];
   team_name?: string;
+  school_id: string; // School that submitted the score sheet
+  competition_id?: string; // Internal competition id when applicable
+  source_competition_id?: string; // Portal/source competition id when applicable
+  source_type?: string;
   created_at: string;
   updated_at: string;
   profiles?: Array<{
