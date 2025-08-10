@@ -40,6 +40,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const [viewEvent, setViewEvent] = useState<string | null>(null);
   const [eventSheets, setEventSheets] = useState<any[]>([]);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
+  const [viewSchoolId, setViewSchoolId] = useState<string | null>(null);
 
   useEffect(() => {
     let active = true;
@@ -84,7 +85,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   }, [competitionId]);
 
   useEffect(() => {
-    if (!viewEvent) return;
+    if (!viewEvent || !viewSchoolId) return;
     let active = true;
     setIsDialogLoading(true);
     supabase
@@ -93,6 +94,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       .eq('source_type', 'portal')
       .eq('source_competition_id', competitionId)
       .eq('event', viewEvent as any)
+      .eq('school_id', viewSchoolId as any)
       .then(({ data, error }) => {
         if (!active) return;
         setEventSheets(error ? [] : (data || []));
@@ -101,7 +103,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return () => {
       active = false;
     };
-  }, [viewEvent, competitionId]);
+  }, [viewEvent, viewSchoolId, competitionId]);
 
   const grouped = useMemo(() => {
     type JudgeScore = { judgeNumber?: number; score: number };
@@ -181,18 +183,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       {Array.from(grouped.values()).map((group) => (
         <Card key={group.event}>
           <CardHeader>
-            <div className="flex items-center justify-between">
-              <CardTitle>{formatEventName(group.event)} - Results</CardTitle>
-              <Button
-                variant="ghost"
-                size="icon"
-                aria-label="View score sheets"
-                onClick={() => setViewEvent(group.event)}
-              >
-                <Eye className="h-4 w-4" />
-              </Button>
-            </div>
+            <CardTitle>{formatEventName(group.event)} - Results</CardTitle>
           </CardHeader>
+
           <CardContent>
             <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -204,8 +197,10 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                       <th key={n} className="px-3 py-2">Judge {n}</th>
                     ))}
                     <th className="px-3 py-2">Total</th>
+                    <th className="px-3 py-2">Actions</th>
                   </tr>
                 </thead>
+
                 <tbody>
                   {group.schools.map((s, idx) => (
                     <tr key={s.schoolId} className="border-t">
@@ -218,25 +213,38 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                         );
                       })}
                       <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
+                      <td className="px-3 py-2">
+                        <Button
+                          variant="ghost"
+                          size="icon"
+                          aria-label={`View score sheets for ${s.schoolName}`}
+                          onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                        >
+                          <Eye className="h-4 w-4" />
+                        </Button>
+                      </td>
                     </tr>
                   ))}
+
                 </tbody>
               </table>
             </div>
           </CardContent>
         </Card>
       ))}
-      <Dialog open={!!viewEvent} onOpenChange={(open) => setViewEvent(open ? viewEvent : null)}>
+      <Dialog open={!!viewEvent && !!viewSchoolId} onOpenChange={(open) => {
+        if (!open) { setViewEvent(null); setViewSchoolId(null); }
+      }}>
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {viewEvent ? `${formatEventName(viewEvent)} - Score Sheets` : 'Score Sheets'}
+              {viewEvent ? `${formatEventName(viewEvent)} - ${viewSchoolId ? (schoolMap[viewSchoolId] || 'School') : ''} Score Sheets` : 'Score Sheets'}
             </DialogTitle>
           </DialogHeader>
           {isDialogLoading ? (
             <div className="p-4 text-sm text-muted-foreground">Loading score sheets...</div>
           ) : eventSheets.length === 0 ? (
-            <div className="p-8 text-center text-muted-foreground">No score sheets found for this event.</div>
+            <div className="p-8 text-center text-muted-foreground">No score sheets found for this school.</div>
           ) : (
             <PortalScoreSheetTable events={eventSheets as any} />
           )}
