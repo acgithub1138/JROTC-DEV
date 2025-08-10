@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, RefreshCw, Plus } from 'lucide-react';
 import { EventSelector } from './components/score-sheet-viewer/EventSelector';
@@ -12,15 +12,19 @@ import { AddEventDialog } from './components/AddEventDialog';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const ScoreSheetPage = () => {
-  const { competitionId } = useParams<{ competitionId: string }>();
+  const location = useLocation();
   const navigate = useNavigate();
+  const competitionId = React.useMemo(() => {
+    const match = location.pathname.match(/my-competitions\/score-sheets\/([^/?]+)/);
+    return match?.[1] || '';
+  }, [location.pathname]);
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [selectedEvent, setSelectedEvent] = useState<string>('');
   const [filteredEvents, setFilteredEvents] = useState<any[]>([]);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
 
   // Get competition data
-  const { competitions } = useCompetitions();
+  const { competitions, isLoading: compsLoading } = useCompetitions();
   const competition = competitions.find(comp => comp.id === competitionId);
   const { canCreate } = useTablePermissions('competitions');
 
@@ -76,6 +80,14 @@ export const ScoreSheetPage = () => {
       // Keep dialog open on error so user can retry
     }
   };
+
+  if (compsLoading) {
+    return (
+      <div className="p-6">
+        <div className="max-w-7xl mx-auto text-muted-foreground">Loading competition...</div>
+      </div>
+    );
+  }
 
   if (!competition) {
     return (
