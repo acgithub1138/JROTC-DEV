@@ -1,6 +1,10 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Eye } from 'lucide-react';
+import { ScoreSheetTable as PortalScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
 
 interface CompetitionResultsTabProps {
   competitionId: string;
@@ -33,6 +37,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [viewEvent, setViewEvent] = useState<string | null>(null);
+  const [eventSheets, setEventSheets] = useState<any[]>([]);
+  const [isDialogLoading, setIsDialogLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -75,6 +82,26 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       active = false;
     };
   }, [competitionId]);
+
+  useEffect(() => {
+    if (!viewEvent) return;
+    let active = true;
+    setIsDialogLoading(true);
+    supabase
+      .from('competition_events')
+      .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
+      .eq('source_type', 'portal')
+      .eq('source_competition_id', competitionId)
+      .eq('event', viewEvent as any)
+      .then(({ data, error }) => {
+        if (!active) return;
+        setEventSheets(error ? [] : (data || []));
+        setIsDialogLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [viewEvent, competitionId]);
 
   const grouped = useMemo(() => {
     type JudgeScore = { judgeNumber?: number; score: number };
@@ -154,7 +181,17 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       {Array.from(grouped.values()).map((group) => (
         <Card key={group.event}>
           <CardHeader>
-            <CardTitle>{formatEventName(group.event)} - Results</CardTitle>
+            <div className="flex items-center justify-between">
+              <CardTitle>{formatEventName(group.event)} - Results</CardTitle>
+              <Button
+                variant="ghost"
+                size="icon"
+                aria-label="View score sheets"
+                onClick={() => setViewEvent(group.event)}
+              >
+                <Eye className="h-4 w-4" />
+              </Button>
+            </div>
           </CardHeader>
           <CardContent>
             <div className="overflow-x-auto">
@@ -189,6 +226,22 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           </CardContent>
         </Card>
       ))}
+      <Dialog open={!!viewEvent} onOpenChange={(open) => setViewEvent(open ? viewEvent : null)}>
+        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {viewEvent ? `${formatEventName(viewEvent)} - Score Sheets` : 'Score Sheets'}
+            </DialogTitle>
+          </DialogHeader>
+          {isDialogLoading ? (
+            <div className="p-4 text-sm text-muted-foreground">Loading score sheets...</div>
+          ) : eventSheets.length === 0 ? (
+            <div className="p-8 text-center text-muted-foreground">No score sheets found for this event.</div>
+          ) : (
+            <PortalScoreSheetTable events={eventSheets as any} />
+          )}
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
