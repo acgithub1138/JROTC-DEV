@@ -6,7 +6,7 @@ const AboutPage = () => {
   const values = [{
     icon: Shield,
     title: "Military Excellence",
-    description: "Built by educators who understand the unique needs and standards of military education programs."
+    description: "Built by instructors who understand the unique needs and standards of military education programs."
   }, {
     icon: Target,
     title: "Purpose-Driven",
@@ -23,11 +23,11 @@ const AboutPage = () => {
   const team = [{
     name: "Aaron Carey",
     title: "Founder & CEO",
-    bio: "30 years of IT & Process experience. Understands the challenges of program management from having his kids in the JROTC program."
+    bio: "30 years of IT & Process experience. Understands the challenges of program management from having his kids in the AFJROTC program."
   }, {
     name: "David Copland",
     title: "Retired Master Sergeant",
-    bio: "4 years with the Air Force Honor Guard, 16 years as a military recruiter, 12 years as an instructor for the Air Force JROTC program at Flower Mound High School."
+    bio: "4 years with the Air Force Honor Guard, 16 years as a military recruiter, 12 years as an instructor for the AFJROTC program at Flower Mound High School in Texas."
   }];
 
   useEffect(() => {
@@ -53,7 +53,12 @@ const AboutPage = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Our Story</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-              <p>It started with a simple frustration. Aaron Carey saw his kids struggling to meet deadlines and keep things organized as they moved into leadership roles in their JROTC program. He started discussing with instructors how a better system could help them and the cadets make the program better.</p>
+              <p>
+                It started with a simple frustration: Aaron Carey saw his kids, Eimly, a Senior (Deputy Group Commander),
+                and Nathan, a Junior (Operations Squadron CC), struggling with team communication, the ability to meet deadlines, 
+                and keep things organized as they moved into leadership roles in their AFJROTC program. 
+                He began discussing with instructors how a better system could help them and the cadets improve the program.
+              </p>
               <p>
                 Hours were wasted tracking cadet progress on spreadsheets, manually organizing competitions, 
                 and coordinating communications through multiple disconnected systems. There had to be a better way.
