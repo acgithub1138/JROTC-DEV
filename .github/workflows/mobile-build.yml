@@ -156,13 +156,46 @@ jobs:
           ./gradlew bundleRelease
 
       - name: Sign AAB
-        uses: r0adkll/sign-android-release@v1.0.4
-        with:
-          releaseDirectory: android/app/build/outputs/bundle/release
-          signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
-          alias: ${{ secrets.ANDROID_KEY_ALIAS }}
-          keyStorePassword: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
-          keyPassword: ${{ secrets.ANDROID_KEY_PASSWORD }}
+        run: |
+          set -euo pipefail
+          cd android/app/build/outputs/bundle/release
+
+          # Decode the base64 keystore to a file
+          echo "$ANDROID_SIGNING_KEY" | base64 -d > signingKey.bin
+
+          # Find the built AAB
+          AAB_FILE=$(ls *.aab | head -n 1)
+          echo "Found AAB: $AAB_FILE"
+
+          sign_with() {
+            local STORETYPE=$1
+            echo "Attempting signing with storetype=$STORETYPE"
+            set +e
+            jarsigner \
+              -keystore signingKey.bin \
+              -storetype "$STORETYPE" \
+              -storepass "$ANDROID_KEYSTORE_PASSWORD" \
+              -keypass "$ANDROID_KEY_PASSWORD" \
+              -sigalg SHA256withRSA -digestalg SHA-256 \
+              "$AAB_FILE" "$ANDROID_KEY_ALIAS"
+            local STATUS=$?
+            set -e
+            return $STATUS
+          }
+
+          # Try PKCS12 first, then fallback to JKS
+          if ! sign_with PKCS12; then
+            echo "PKCS12 signing failed, trying JKS..."
+            sign_with JKS
+          fi
+
+          echo "Verifying signature..."
+          jarsigner -verify -verbose -certs "$AAB_FILE"
+        env:
+          ANDROID_SIGNING_KEY: ${{ secrets.ANDROID_SIGNING_KEY }}
+          ANDROID_KEY_ALIAS: ${{ secrets.ANDROID_KEY_ALIAS }}
+          ANDROID_KEYSTORE_PASSWORD: ${{ secrets.ANDROID_KEYSTORE_PASSWORD }}
+          ANDROID_KEY_PASSWORD: ${{ secrets.ANDROID_KEY_PASSWORD }}
 
       - name: Upload Android artifacts
         uses: actions/upload-artifact@v4
