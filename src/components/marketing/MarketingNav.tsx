@@ -80,11 +80,8 @@ const MarketingNav = () => {
 
           {/* Desktop CTA Buttons */}
           <div className="hidden md:flex items-center space-x-2">
-            <Button variant="ghost" asChild>
-              <Link to="/app/auth">Sign In</Link>
-            </Button>
             <Button asChild>
-              <Link to="/contact">Get Started</Link>
+              <Link to="/app/auth">Sign In</Link>
             </Button>
           </div>
 
@@ -108,13 +105,8 @@ const MarketingNav = () => {
               </Link>
               <div className="pt-2 border-t">
                 <Link to="/login" onClick={() => setMobileMenuOpen(false)}>
-                  <Button variant="ghost" className="w-full justify-start">
+                  <Button className="w-full justify-start">
                     Sign In
-                  </Button>
-                </Link>
-                <Link to="/contact" onClick={() => setMobileMenuOpen(false)}>
-                  <Button className="w-full mt-2">
-                    Get Started
                   </Button>
                 </Link>
               </div>
