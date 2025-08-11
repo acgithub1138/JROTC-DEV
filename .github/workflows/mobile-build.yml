@@ -156,7 +156,7 @@ jobs:
           ./gradlew bundleRelease
 
       - name: Sign AAB
-        uses: r0adkll/sign-android-release@v1
+        uses: r0adkll/sign-android-release@v1.0.4
         with:
           releaseDirectory: android/app/build/outputs/bundle/release
           signingKeyBase64: ${{ secrets.ANDROID_SIGNING_KEY }}
