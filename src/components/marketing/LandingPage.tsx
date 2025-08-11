@@ -40,7 +40,7 @@ const LandingPage = () => {
     href: "/products/calendar-management",
     features: ["Event scheduling", "Deadline tracking", "Activity coordination"]
   }, {
-    icon: Contacts,
+    icon: Contact,
     title: "JROTC Contacts",
     description: "Keep parents, relatives, and supporters’ information organized and accessible.",
     href: "/products/contacts-management",
