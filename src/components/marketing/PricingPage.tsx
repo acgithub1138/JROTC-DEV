@@ -19,7 +19,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Best for JROTC programs that participate in competitions",
-    features: ["All Basic features", "My Competition Tracking", "Score Sheet Templates", "Competition Registration"],
+    features: ["All Basic features +", "My Competition Tracking", "Score Sheet Templates", "Competition Registration", "Competition Analytics"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
@@ -28,7 +28,7 @@ const PricingPage = () => {
     price: "$3,000",
     period: "per year",
     description: "Best for JORTC programs that host competitions",
-    features: ["All Basic features", "All Competition Portal - Tracking features", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Real-Time Score Tracking"],
+    features: ["All Competition Portal - Tracking features +", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Real-Time Score Tracking"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
