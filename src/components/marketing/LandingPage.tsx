@@ -12,7 +12,7 @@ const LandingPage = () => {
   }, {
     icon: ClipboardList,
     title: "Task Management",
-    description: "No more missed texts or confusing email threads!  Assign, track, and complete cadet tasks – all in one central list.",
+    description: "No more missed texts or confusing email threads.  Assign, track, and complete cadet tasks – all in one central place.",
     href: "/products/task-management",
     features: ["Assignment creation", "Progress tracking", "Deadline monitoring", "Automated reminders"]
   }, {
@@ -24,7 +24,7 @@ const LandingPage = () => {
   }, {
     icon: DollarSign,
     title: "Budget Management",
-    description: "Keep your budget under control and manage financial records with ease!",
+    description: "Keep your budget under control and manage financial records with ease.",
     href: "/products/budget-management",
     features: ["Income tracking", "Expense tracking", "Budget monitoring", "Yearly Archiving"]
   }, {
@@ -36,9 +36,9 @@ const LandingPage = () => {
   }, {
     icon: Calendar,
     title: "Calendar Management",
-    description: "Plan events, set recurring meetings, and keep everyone informed about what's going on and when!",
+    description: "Plan events, set recurring meetings, and keep everyone informed about what's going on and when.",
     href: "/products/calendar-management",
-    features: ["Event scheduling", "Deadline tracking", "Activity coordination"]
+    features: ["Event scheduling", "Meetings scheduling", "Activity coordination"]
   }, {
     icon: Contact,
     title: "JROTC Contacts",
@@ -54,13 +54,13 @@ const LandingPage = () => {
   }, {
     icon: Trophy,
     title: "Competition Portal - Tracking",
-    description: "A place to track all your competitions and review your performance over time!",
+    description: "A place to track all your competitions and review your performance over time.",
     href: "/products/competition-management",
     features: ["Register for Competitions", "Scoring system", "Performance analytics", "Achievement tracking"]
   }, {
     icon: Trophy,
     title: "Competition Portal - Hosting",
-    description: "Keep your competition events running smoothly from start to finish!",
+    description: "Keep your competition events running smoothly from start to finish.",
     href: "/products/competition-management",
     features: ["Competition Planning", "Resource Management", "Participant Management", "Judge Management", "Custom Score Sheets", "Real-Time Scoring"]
   }];
@@ -94,7 +94,7 @@ const LandingPage = () => {
               Streamline Your <span className="text-primary">JROTC Program</span> Management
             </h1>
             <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto">
-              The comprehensive platform designed specifically for JROTC instructors to manage cadets, 
+              This comprehensive platform is designed specifically for JROTC instructors to manage cadets, 
               competitions, tasks, and communications in one powerful system.
             </p>
             <div className="flex flex-col sm:flex-row gap-4 justify-center mb-12">
