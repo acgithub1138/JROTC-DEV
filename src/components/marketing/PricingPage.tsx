@@ -27,7 +27,7 @@ const PricingPage = () => {
     price: "$3,000",
     period: "per year",
     description: "Best for JORTC programs that host competitions",
-    features: ["All Basic features", "All Competition Portal - Tracking features", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Real-Time Score Tracking" ],
+    features: ["All Basic features", "All Competition Portal - Tracking features", "Competition Dashboard", "Host Competitions", "Event Management", "Resource Management", "Judge Management", "Real-Time Score Tracking"],
     notIncluded: [],
     popular: false,
     cta: "Get Started"
@@ -155,7 +155,7 @@ const PricingPage = () => {
               <Link to="/contact">Get Started</Link>
             </Button>
             <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
-              <Link to="/contact">Contact Sales</Link>
+              
             </Button>
           </div>
         </div>
