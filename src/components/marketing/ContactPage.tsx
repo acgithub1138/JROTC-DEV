@@ -6,7 +6,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Mail, Phone, MapPin } from "lucide-react";
+import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 const ContactPage = () => {
+  const { toast } = useToast();
+  const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -17,22 +21,49 @@ const ContactPage = () => {
     type: "demo"
   });
 
-  const handleEmailClick = () => {
-    const subject = `Contact Form Submission from ${formData.name} - ${formData.school}`;
-    const body = `
-Name: ${formData.name}
-Email: ${formData.email}
-Phone: ${formData.phone}
-School/Institution: ${formData.school}
-Number of Cadets: ${formData.cadets}
-Interest Type: ${formData.type}
+  const handleSubmit = async () => {
+    if (!formData.name || !formData.email || !formData.school) {
+      toast({
+        title: "Missing Information",
+        description: "Please fill in all required fields (Name, Email, School)",
+        variant: "destructive",
+      });
+      return;
+    }
 
-Message:
-${formData.message}
-    `.trim();
-    
-    const mailtoUrl = `mailto:jortc_ccc@careyunlimited.com?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
-    window.location.href = mailtoUrl;
+    setIsSubmitting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('contact-form', {
+        body: formData
+      });
+
+      if (error) throw error;
+
+      toast({
+        title: "Message Sent Successfully!",
+        description: "Thank you for contacting us. We'll get back to you soon.",
+      });
+
+      // Reset form
+      setFormData({
+        name: "",
+        email: "",
+        phone: "",
+        school: "",
+        cadets: "",
+        message: "",
+        type: "demo"
+      });
+    } catch (error) {
+      console.error('Error sending contact form:', error);
+      toast({
+        title: "Failed to Send Message",
+        description: "There was an error sending your message. Please try again or contact us directly.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
   };
 
   const handleChange = (field: string, value: string) => {
@@ -136,8 +167,13 @@ ${formData.message}
                     <Textarea id="message" placeholder="Tell us about your current challenges or specific needs..." value={formData.message} onChange={e => handleChange("message", e.target.value)} rows={4} />
                   </div>
 
-                  <Button onClick={handleEmailClick} size="lg" className="w-full">
-                    Send Message
+                  <Button 
+                    onClick={handleSubmit} 
+                    size="lg" 
+                    className="w-full"
+                    disabled={isSubmitting}
+                  >
+                    {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </div>
               </CardContent>
