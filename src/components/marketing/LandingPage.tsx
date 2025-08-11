@@ -141,11 +141,11 @@ const LandingPage = () => {
               <div className="space-y-4">
                 <h3 className="text-xl font-semibold text-primary">After JROTC CCC:</h3>
                 <ul className="space-y-2 text-muted-foreground">
-                  <li>• Automated tracking and reporting</li>
                   <li>• All information centralized in one platform</li>
+                  <li>• Competition tracking and reporting</li>
                   <li>• Streamlined competition management</li>
-                  <li>• Automated communication systems</li>
-                  <li>• More time for what matters: developing leaders</li>
+                  <li>• Automated communication systems for tasks</li>
+                  <li>• More time for what matters: developing leaders!</li>
                 </ul>
               </div>
             </div>
@@ -168,7 +168,7 @@ const LandingPage = () => {
             </h2>
             <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
               Comprehensive modules designed specifically for JROTC program management,
-              from cadet tracking to competition scoring.
+              from cadet tasks & tracking to competition scoring.
             </p>
           </div>
           
