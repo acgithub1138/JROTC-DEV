@@ -47,16 +47,16 @@ const LandingPage = () => {
     features: ["Automated emails", "Template library", "Targeted messaging", "Communication tracking"]
   }, {
     icon: Trophy,
-    title: "Competition Tracking",
-    description: "Track event scoring, performance analytics, and achievements.",
+    title: "Competition Portal - Tracking",
+    description: "Register for Competitions, Track event performance, performance analytics, and achievements.",
     href: "/products/competition-management",
-    features: ["Scoring system", "Performance analytics", "Achievement tracking"]
+    features: ["Register for Competitions", "Scoring system", "Performance analytics", "Achievement tracking"]
   }, {
     icon: Trophy,
-    title: "Competition Event Management (Coming Soon...)",
+    title: "Competition Portal - Hosting",
     description: "Manage your entire competition event with resource management, participant management, and real-time scoring!",
     href: "/products/competition-management",
-    features: ["Event Planning", "Resource Management", "Participant Management", "Real-Time Scoring"]
+    features: ["Competition Planning", "Resource Management", "Participant Management", "Real-Time Scoring"]
   }];
   const testimonials = [
     //    {
