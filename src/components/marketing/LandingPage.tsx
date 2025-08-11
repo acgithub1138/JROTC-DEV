@@ -215,7 +215,7 @@ const LandingPage = () => {
             <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link to="/contact">Get Started Today</Link>
             </Button>
-            <Button size="lg" variant="outline" className="text-lg px-8 border-primary-foreground text-primary-foreground hover:bg-primary-foreground hover:text-primary" asChild>
+            <Button size="lg" variant="secondary" className="text-lg px-8" asChild>
               <Link to="/pricing">View Pricing</Link>
             </Button>
           </div>
