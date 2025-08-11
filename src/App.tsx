@@ -15,6 +15,7 @@ import ProductPage from "@/components/marketing/ProductPage";
 import PricingPage from "@/components/marketing/PricingPage";
 import AboutPage from "@/components/marketing/AboutPage";
 import ContactPage from "@/components/marketing/ContactPage";
+import PrivacyPolicyPage from "@/components/marketing/PrivacyPolicyPage";
 import LoginPage from "@/components/marketing/LoginPage";
 import NotFound from "./pages/NotFound";
 
@@ -37,6 +38,7 @@ const App = () => (
                 <Route path="pricing" element={<PricingPage />} />
                 <Route path="about" element={<AboutPage />} />
                 <Route path="contact" element={<ContactPage />} />
+                <Route path="privacy-policy" element={<PrivacyPolicyPage />} />
                 <Route path="login" element={<LoginPage />} />
                 
                 {/* Product Module Pages */}
