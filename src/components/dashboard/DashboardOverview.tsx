@@ -1,7 +1,8 @@
 import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle, Building } from 'lucide-react';
+import { Badge } from '@/components/ui/badge';
+import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle, Building, Smartphone } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
@@ -17,12 +18,15 @@ import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
+import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCapacitor } from '@/hooks/useCapacitor';
 import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const { isNative, platform } = useCapacitor();
   const { canCreate: canCreateTasks } = useTaskPermissions();
   const { canCreate: canCreateEvents } = useEventPermissions();
   
@@ -259,7 +263,21 @@ const DashboardOverview = () => {
   };
 
   return <div className="p-6 space-y-6">
-      {/* Stats Grid */}
+      {/* Welcome Header with Mobile Status */}
+      <div className="flex justify-between items-center">
+        <div>
+          <h1 className="text-3xl font-bold">Dashboard</h1>
+          <p className="text-muted-foreground">
+            Welcome back, {userProfile?.first_name}! Here's an overview of your JROTC unit.
+          </p>
+          {isNative && (
+            <Badge variant="secondary" className="mt-2">
+              <Smartphone className="w-3 h-3 mr-1" />
+              Mobile App - {platform}
+            </Badge>
+          )}
+        </div>
+      </div>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;
@@ -292,8 +310,11 @@ const DashboardOverview = () => {
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
-        {/* Right Column: Upcoming Events */}
+        {/* Right Column: Upcoming Events and Mobile Features */}
         <div className="space-y-6">
+          {/* Mobile Features Widget */}
+          {isNative && <MobileEnhancements />}
+          
           {/* Upcoming Events - hidden for admin users */}
           {userProfile?.role !== 'admin' && (
             <Card>
