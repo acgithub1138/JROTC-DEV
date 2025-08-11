@@ -118,7 +118,7 @@ const AboutPage = () => {
           <div className="text-center mb-12">
             <h2 className="text-3xl font-bold mb-4">Meet Our Team</h2>
             <p className="text-xl text-muted-foreground">
-              Experienced military educators and technology professionals working together
+              Experienced JORTC instructors and technology professionals working together
             </p>
           </div>
           
