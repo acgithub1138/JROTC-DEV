@@ -1,5 +1,6 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Target, Users, Award } from "lucide-react";
+import { Link } from "react-router-dom";
 const AboutPage = () => {
   const values = [{
     icon: Shield,
@@ -140,9 +141,9 @@ const AboutPage = () => {
             we can help your JROTC program succeed.
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a href="mailto:hello@jrotcpro.com" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-8 py-3 text-lg font-medium hover:bg-primary-foreground/90 transition-colors">
+            <Link to="/contact" className="inline-flex items-center justify-center rounded-md bg-primary-foreground text-primary px-8 py-3 text-lg font-medium hover:bg-primary-foreground/90 transition-colors">
               Contact Us
-            </a>
+            </Link>
           </div>
         </div>
       </section>
