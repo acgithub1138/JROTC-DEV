@@ -125,7 +125,7 @@ const LandingPage = () => {
         <div className="container mx-auto px-4">
           <div className="max-w-4xl mx-auto text-center">
             <h2 className="text-3xl font-bold mb-8">
-              Stop Struggling with WINGS & Outdated <span className="text-destructive">Manual Processes</span>
+              Stop struggling with WINGS & outdated <span className="text-destructive">manual processes</span>
             </h2>
             <div className="grid md:grid-cols-2 gap-8 mb-12">
               <div className="space-y-4">
