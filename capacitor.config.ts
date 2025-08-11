@@ -19,7 +19,15 @@ const config: CapacitorConfig = {
     },
     PushNotifications: {
       presentationOptions: ['badge', 'sound', 'alert']
-    }
+    },
+    Camera: {
+      saveToGallery: false
+    },
+    Haptics: {},
+    Share: {},
+    Device: {},
+    Network: {},
+    Filesystem: {}
   }
 };
 
