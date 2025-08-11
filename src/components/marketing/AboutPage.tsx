@@ -46,11 +46,7 @@ const AboutPage = () => {
           <div className="max-w-4xl mx-auto">
             <h2 className="text-3xl font-bold text-center mb-12">Our Story</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
-              <p>
-                It started with a simple frustration. Aaron Carey saw his kids struggling to meet deadlines and keep things organized as they
-                moved into leadership roles in their program.  He started discussing with Sarge how a better system could help him and the cadets
-                make the program better.
-              </p>
+              <p>It started with a simple frustration. Aaron Carey saw his kids struggling to meet deadlines and keep things organized as they moved into leadership roles in their JROTC program. He started discussing with instructors how a better system could help them and the cadets make the program better.</p>
               <p>
                 Hours were wasted tracking cadet progress on spreadsheets, manually organizing competitions, 
                 and coordinating communications through multiple disconnected systems. There had to be a better way.
