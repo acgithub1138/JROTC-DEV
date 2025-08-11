@@ -55,14 +55,11 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
       }
 
       // Update the profile to mark password change as no longer required
-      const { error: profileError } = await supabase
-        .from('profiles')
-        .update({ password_change_required: false })
-        .eq('id', userProfile?.id);
+      const { error: profileError } = await supabase.rpc('clear_password_change_requirement');
 
       if (profileError) {
         console.error('Profile update error:', profileError);
-        // Don't throw here as the password was changed successfully
+        throw new Error(`Failed to clear password change requirement: ${profileError.message}`);
       }
 
       toast({

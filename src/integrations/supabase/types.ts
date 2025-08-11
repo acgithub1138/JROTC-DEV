@@ -129,7 +129,7 @@ export type Database = {
       }
       competition_events: {
         Row: {
-          cadet_ids: string[]
+          cadet_ids: string[] | null
           competition_id: string | null
           created_at: string
           event: Database["public"]["Enums"]["comp_event_type"]
@@ -145,7 +145,7 @@ export type Database = {
           updated_at: string
         }
         Insert: {
-          cadet_ids?: string[]
+          cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
           event: Database["public"]["Enums"]["comp_event_type"]
@@ -161,7 +161,7 @@ export type Database = {
           updated_at?: string
         }
         Update: {
-          cadet_ids?: string[]
+          cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
           event?: Database["public"]["Enums"]["comp_event_type"]
@@ -274,6 +274,7 @@ export type Database = {
           is_active: boolean
           is_global: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          judges: number
           school_id: string | null
           scores: Json
           template_name: string
@@ -288,6 +289,7 @@ export type Database = {
           is_active?: boolean
           is_global?: boolean
           jrotc_program: Database["public"]["Enums"]["jrotc_program"]
+          judges?: number
           school_id?: string | null
           scores?: Json
           template_name: string
@@ -302,6 +304,7 @@ export type Database = {
           is_active?: boolean
           is_global?: boolean
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"]
+          judges?: number
           school_id?: string | null
           scores?: Json
           template_name?: string
@@ -3325,6 +3328,10 @@ export type Database = {
       check_user_permission: {
         Args: { user_id: string; module_name: string; action_name: string }
         Returns: boolean
+      }
+      clear_password_change_requirement: {
+        Args: Record<PropertyKey, never>
+        Returns: undefined
       }
       clear_stale_email_processing_locks: {
         Args: Record<PropertyKey, never>
