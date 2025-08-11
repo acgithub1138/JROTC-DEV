@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Shield, Target, Users, Award } from "lucide-react";
 import { Link } from "react-router-dom";
@@ -28,6 +29,11 @@ const AboutPage = () => {
     title: "Retired Master Sergeant",
     bio: "4 years with the Air Force Honor Guard, 16 years as a military recruiter, 12 years as an instructor for the Air Force JROTC program at Flower Mound High School."
   }];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-12 lg:py-16">

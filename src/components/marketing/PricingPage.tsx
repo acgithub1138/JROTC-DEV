@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
@@ -45,6 +46,11 @@ const PricingPage = () => {
     question: "Is my data secure?",
     answer: "Yes. We use industry-standard encryption and security measures. Your data is backed up regularly and stored securely in the cloud."
   }];
+
+  useEffect(() => {
+    window.scrollTo(0, 0);
+  }, []);
+
   return <div className="min-h-screen">
       {/* Hero Section */}
       <section className="py-10 lg:py-16">
