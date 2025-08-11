@@ -136,7 +136,7 @@ serve(async (req) => {
     `;
 
     // Create transporter and send email
-    const transporter = nodemailer.createTransporter(transporterConfig);
+    const transporter = nodemailer.createTransport(transporterConfig);
     
     const mailOptions = {
       from: `${fromName} <${fromEmail}>`,
