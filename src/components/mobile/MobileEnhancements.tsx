@@ -6,6 +6,7 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Badge } from '@/components/ui/badge';
 import { AdvancedMobileFeatures } from './AdvancedMobileFeatures';
 import { AppInfo } from './AppInfo';
+import { UpdateManager } from './UpdateManager';
 import { Camera, Share2, Smartphone, Settings } from 'lucide-react';
 
 interface MobileEnhancementsProps {
@@ -131,6 +132,9 @@ export const MobileEnhancements: React.FC<MobileEnhancementsProps> = ({
 
       {/* Advanced Mobile Features */}
       <AdvancedMobileFeatures />
+      
+      {/* Update Manager */}
+      <UpdateManager />
       
       {/* App Information */}
       <AppInfo />
