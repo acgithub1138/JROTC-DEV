@@ -40,9 +40,12 @@ const AboutPage = () => {
         <div className="container mx-auto px-4">
           <div className="text-center max-w-4xl mx-auto">
             <h1 className="text-4xl lg:text-6xl font-bold tracking-tight mb-6">
-              Built for Military Educators
+              Built for JROTC Instructors
             </h1>
-            <p className="text-xl text-muted-foreground mb-8">JROTC CCC was created out of a collaboration between cadets & instructors who experienced the frustration of managing programs with outdated tools. We built the solution we wished we had.</p>
+            <p className="text-xl text-muted-foreground mb-8">
+              JROTC CCC was created out of a collaboration between cadets & instructors who experienced the 
+              frustration of managing programs with outdated tools. We built the solution we wished we had.
+            </p>
           </div>
         </div>
       </section>
@@ -54,23 +57,23 @@ const AboutPage = () => {
             <h2 className="text-3xl font-bold text-center mb-12">Our Story</h2>
             <div className="prose prose-lg max-w-none text-muted-foreground space-y-6">
               <p>
-                It started with a simple frustration: Aaron Carey saw his kids, Eimly, a Senior (Deputy Group Commander),
+                It started with a simple frustration: Aaron Carey saw his kids, Emily, a Senior (Deputy Group Commander),
                 and Nathan, a Junior (Operations Squadron CC), struggling with team communication, the ability to meet deadlines, 
                 and keep things organized as they moved into leadership roles in their AFJROTC program. 
                 He began discussing with instructors how a better system could help them and the cadets improve the program.
               </p>
               <p>
-                Hours were wasted tracking cadet progress on spreadsheets, manually organizing competitions, 
-                and coordinating communications through multiple disconnected systems. There had to be a better way.
+                Hours were wasted tracking cadet progress on spreadsheets, trying to communicate effectively via text and 
+                email threads, and using multiple disconnected systems. There had to be a better way.
               </p>
               <p>
                 After talking with fellow instructors across the country, it became clear this wasn't an isolated 
                 problem. Every JROTC program was struggling with the same inefficiencies, using tools that weren't 
-                designed for military education.
+                designed for JROTC.
               </p>
               <p>
                 That's when we decided to build JROTC CCC – a platform designed specifically for JROTC programs, 
-                by people who understand the unique challenges of military education. Every feature is built with 
+                by people who understand the unique challenges of JROTC. Every feature is built with 
                 real instructor input, solving real problems that we've experienced ourselves.
               </p>
             </div>
