@@ -18,7 +18,7 @@ const PricingPage = () => {
     price: "$2,500",
     period: "per year",
     description: "Best for JROTC programs that participate in competitions",
-    features: ["All Basic features", "Competition Tracking", "Score Sheet Templates", "Competition Reporting"],
+    features: ["All Basic features", "My Competition Tracking", "Score Sheet Templates", "Competition Registration"],
     notIncluded: [],
     popular: true,
     cta: "Get Started"
@@ -34,7 +34,7 @@ const PricingPage = () => {
   }];
   const faqs = [{
     question: "What's your pricing model?",
-    answer: "We offer transparent annual pricing with no hidden fees. Choose from our Basic or Competitions plans based on whether you need competition management features."
+    answer: "We offer transparent annual pricing with no hidden fees. Choose from our Basic or Competitions plans based on whether you need competition hosting features."
   }, {
     question: "Can I change plans later?",
     answer: "Absolutely. You can upgrade or downgrade your plan at any time. Changes take effect at your next billing cycle."
