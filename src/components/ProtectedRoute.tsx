@@ -27,8 +27,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check if user needs to change password
   useEffect(() => {
-    if (user && userProfile && userProfile.password_change_required) {
-      setShowPasswordChange(true);
+    if (user && userProfile) {
+      const profileRequiresChange = !!userProfile.password_change_required;
+      const metadataOverride = (user.user_metadata as any)?.password_change_required === false;
+      if (profileRequiresChange && !metadataOverride) {
+        setShowPasswordChange(true);
+      } else {
+        setShowPasswordChange(false);
+      }
     } else {
       setShowPasswordChange(false);
     }

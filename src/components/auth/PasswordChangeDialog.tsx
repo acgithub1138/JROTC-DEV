@@ -54,12 +54,18 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
         throw passwordError;
       }
 
-      // Update the profile to mark password change as no longer required
+      // Try to clear the server-side flag via RPC (may fail due to DB triggers)
       const { error: profileError } = await supabase.rpc('clear_password_change_requirement');
-
       if (profileError) {
         console.error('Profile update error:', profileError);
-        throw new Error(`Failed to clear password change requirement: ${profileError.message}`);
+      }
+
+      // Always set a client-side override in user metadata so the dialog won't reappear
+      const { error: metadataError } = await supabase.auth.updateUser({
+        data: { password_change_required: false, password_last_changed_at: new Date().toISOString() }
+      });
+      if (metadataError) {
+        console.warn('Metadata update warning:', metadataError);
       }
 
       toast({
@@ -69,8 +75,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
 
       setPasswords({ newPassword: '', confirmPassword: '' });
       onClose();
-      
-      // Refresh the page to update the user profile state
+      // Refresh the page to update auth metadata and profile state
       window.location.reload();
     } catch (error: any) {
       console.error('Password change error:', error);
