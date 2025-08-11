@@ -6,57 +6,63 @@ const LandingPage = () => {
   const modules = [{
     icon: Users,
     title: "Cadet Management",
-    description: "Track cadet profiles, progress, discipline records, and achievements in one centralized system.",
+    description: "Keep rosters up to date, make bulk changes, and track ranks and PT scores with just a few clicks.",
     href: "/products/cadet-management",
     features: ["Profile tracking", "PT tracking", "Leadership Development tracking"]
   }, {
     icon: ClipboardList,
     title: "Task Management",
-    description: "Create, assign, and monitor tasks with automated progress tracking and deadline management.",
+    description: "No more missed texts or confusing email threads!  Assign, track, and complete cadet tasks – all in one central list.",
     href: "/products/task-management",
     features: ["Assignment creation", "Progress tracking", "Deadline monitoring", "Automated reminders"]
   }, {
     icon: UserCheck,
-    title: "Chain of Command & Team Management",
-    description: "Organize units, define leadership structures, and manage team communications effectively.",
+    title: "Chain of Command",
+    description: "Keep your chain of command organized and see your structure visually.",
     href: "/products/team-management",
     features: ["Unit organization", "Leadership tracking", "Team communications", "Role assignments", "Visual Hierarchy Chart"]
   }, {
     icon: DollarSign,
     title: "Budget Management",
-    description: "Track expenses & monitor budgets",
+    description: "Keep your budget under control and manage financial records with ease!",
     href: "/products/budget-management",
-    features: ["Expense tracking", "Budget monitoring", "Resource allocation"]
+    features: ["Income tracking", "Expense tracking", "Budget monitoring", "Yearly Archiving"]
   }, {
     icon: Package,
     title: "Inventory Management",
-    description: "Manage equipment and ensure resource availability.",
+    description: "Stay on top of your equipment and supplies with powerful tracking tools.",
     href: "/products/inventory-management",
     features: ["Equipment tracking", "Resource monitoring"]
   }, {
     icon: Calendar,
     title: "Calendar Management",
-    description: "Schedule events, track deadlines, coordinate activities with integrated calendar system.",
+    description: "Plan events, set recurring meetings, and keep everyone informed about what's going on and when!",
     href: "/products/calendar-management",
     features: ["Event scheduling", "Deadline tracking", "Activity coordination"]
   }, {
+    icon: Contacts,
+    title: "JROTC Contacts",
+    description: "Keep parents, relatives, and supporters’ information organized and accessible.",
+    href: "/products/contacts-management",
+    features: ["Contact management"]
+  },{
     icon: Mail,
     title: "Email Management",
-    description: "Automated communications, template management, and targeted messaging for all stakeholders.",
+    description: "Set up email notifications for the cadet tasks to keep them informed on what needs to be done.",
     href: "/products/email-management",
     features: ["Automated emails", "Template library", "Targeted messaging", "Communication tracking"]
   }, {
     icon: Trophy,
     title: "Competition Portal - Tracking",
-    description: "Register for Competitions, Track event performance, performance analytics, and achievements.",
+    description: "A place to track all your competitions and review your performance over time!",
     href: "/products/competition-management",
     features: ["Register for Competitions", "Scoring system", "Performance analytics", "Achievement tracking"]
   }, {
     icon: Trophy,
     title: "Competition Portal - Hosting",
-    description: "Manage your entire competition event with resource management, participant management, and real-time scoring!",
+    description: "Keep your competition events running smoothly from start to finish!",
     href: "/products/competition-management",
-    features: ["Competition Planning", "Resource Management", "Participant Management", "Real-Time Scoring"]
+    features: ["Competition Planning", "Resource Management", "Participant Management", "Judge Management", "Custom Score Sheets", "Real-Time Scoring"]
   }];
   const testimonials = [
     //    {
