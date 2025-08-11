@@ -24,8 +24,8 @@ const AboutPage = () => {
     bio: "30 years of IT & Process experience. Understands the challenges of program management from having his kids in the JROTC program."
   }, {
     name: "David Copland",
-    title: "Consultant",
-    bio: "Air Force JROTC instructor at Flower Mound High School."
+    title: "Retired Master Sergeant",
+    bio: "4 years with the Air Force Honor Guard, 16 years as a military recruiter, 12 years as an instructor for the Air Force JROTC program at Flower Mound High School."
   }];
   return <div className="min-h-screen">
       {/* Hero Section */}
