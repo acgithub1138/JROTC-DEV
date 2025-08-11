@@ -1,7 +1,7 @@
 import { CapacitorConfig } from '@capacitor/cli';
 
 const config: CapacitorConfig = {
-  appId: 'app.lovable.6f3314e6736547a3bcb5db91da6e1b16',
+  appId: 'com.lovable.jrotccommandcenter',
   appName: 'jrotc-command-and-control-center',
   webDir: 'dist',
   server: {
