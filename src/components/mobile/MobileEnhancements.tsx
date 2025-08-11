@@ -4,6 +4,7 @@ import { useNativeFeatures } from '@/hooks/useNativeFeatures';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { AdvancedMobileFeatures } from './AdvancedMobileFeatures';
 import { Camera, Share2, Smartphone, Settings } from 'lucide-react';
 
 interface MobileEnhancementsProps {
@@ -76,54 +77,59 @@ export const MobileEnhancements: React.FC<MobileEnhancementsProps> = ({
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Smartphone className="w-5 h-5" />
-          Mobile Features
-        </CardTitle>
-        <CardDescription>
-          Native mobile capabilities for enhanced user experience
-        </CardDescription>
-        <Badge variant="secondary">{platform} Platform</Badge>
-      </CardHeader>
-      <CardContent className="space-y-3">
-        <Button 
-          onClick={handleCameraCapture}
-          className="w-full"
-          variant="outline"
-        >
-          <Camera className="w-4 h-4 mr-2" />
-          Open Camera
-        </Button>
-        
-        <Button 
-          onClick={handleShare}
-          className="w-full"
-          variant="outline"
-        >
-          <Share2 className="w-4 h-4 mr-2" />
-          Share App
-        </Button>
-        
-        <Button 
-          onClick={handleGetDeviceInfo}
-          className="w-full"
-          variant="outline"
-        >
-          <Smartphone className="w-4 h-4 mr-2" />
-          Device Info
-        </Button>
-        
-        <Button 
-          onClick={openAppSettings}
-          className="w-full"
-          variant="outline"
-        >
-          <Settings className="w-4 h-4 mr-2" />
-          App Settings
-        </Button>
-      </CardContent>
-    </Card>
+    <div className="space-y-4">
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Smartphone className="w-5 h-5" />
+            Mobile Features
+          </CardTitle>
+          <CardDescription>
+            Native mobile capabilities for enhanced user experience
+          </CardDescription>
+          <Badge variant="secondary">{platform} Platform</Badge>
+        </CardHeader>
+        <CardContent className="space-y-3">
+          <Button 
+            onClick={handleCameraCapture}
+            className="w-full"
+            variant="outline"
+          >
+            <Camera className="w-4 h-4 mr-2" />
+            Open Camera
+          </Button>
+          
+          <Button 
+            onClick={handleShare}
+            className="w-full"
+            variant="outline"
+          >
+            <Share2 className="w-4 h-4 mr-2" />
+            Share App
+          </Button>
+          
+          <Button 
+            onClick={handleGetDeviceInfo}
+            className="w-full"
+            variant="outline"
+          >
+            <Smartphone className="w-4 h-4 mr-2" />
+            Device Info
+          </Button>
+          
+          <Button 
+            onClick={openAppSettings}
+            className="w-full"
+            variant="outline"
+          >
+            <Settings className="w-4 h-4 mr-2" />
+            App Settings
+          </Button>
+        </CardContent>
+      </Card>
+
+      {/* Advanced Mobile Features */}
+      <AdvancedMobileFeatures />
+    </div>
   );
 };

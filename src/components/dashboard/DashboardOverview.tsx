@@ -19,6 +19,7 @@ import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
+import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCapacitor } from '@/hooks/useCapacitor';
 import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -310,9 +311,12 @@ const DashboardOverview = () => {
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
 
-        {/* Right Column: Upcoming Events and Mobile Features */}
+        {/* Right Column: Mobile Features and Events */}
         <div className="space-y-6">
-          {/* Mobile Features Widget */}
+          {/* Mobile Notification Center - Only show on native platforms */}
+          {isNative && <MobileNotificationCenter />}
+          
+          {/* Mobile Features Widget - Show for all mobile-relevant features */}
           {isNative && <MobileEnhancements />}
           
           {/* Upcoming Events - hidden for admin users */}
