@@ -124,7 +124,7 @@ export const MobileTaskList: React.FC = () => {
       {/* Filter Bar */}
       <div className="p-4 border-b border-border bg-card">
         <div className="flex gap-2 overflow-x-auto">
-          {['all', 'mine', 'today', 'overdue'].map((filterType) => (
+          {['mine', 'all', 'today', 'overdue'].map((filterType) => (
             <Button
               key={filterType}
               variant={filter === filterType ? 'default' : 'outline'}
@@ -132,7 +132,7 @@ export const MobileTaskList: React.FC = () => {
               className="flex-shrink-0 capitalize"
               onClick={() => setFilter(filterType as any)}
             >
-              {filterType === 'all' ? 'All Tasks' : filterType}
+              {filterType === 'mine' ? 'My Tasks' : filterType === 'all' ? 'All' : filterType}
             </Button>
           ))}
         </div>
