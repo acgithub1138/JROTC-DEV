@@ -36,7 +36,9 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     canAccessCompetitionPortal,
     userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'SSR',
     isCapacitor: typeof window !== 'undefined' && window.location.protocol === 'capacitor:',
-    fullSchoolData: userProfile?.schools
+    fullSchoolData: userProfile?.schools,
+    viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR',
+    isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : 'SSR'
   });
 
   // Get stored portal preference
