@@ -2,6 +2,7 @@ import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useThemes } from '@/hooks/useThemes';
@@ -126,95 +127,58 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 
   if (isMobile) {
     return (
-      <>
-        {sidebarOpen && (
-          <div
-            className="fixed inset-0 bg-black bg-opacity-50 z-40"
-            onClick={() => setSidebarOpen?.(false)}
-          />
-        )}
-        <div 
-          className={cn(
-            'fixed left-0 top-0 h-full w-64 text-white flex flex-col z-50 transform transition-transform duration-300 ease-in-out',
-            sidebarOpen ? 'translate-x-0' : '-translate-x-full',
-            className
-          )}
-          style={{ backgroundColor: currentTheme.primary_color }}
-        >
-          <div className="p-6">
-            <div className="flex items-center space-x-2">
+      <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
+        <SheetContent side="top" className="w-2/3 ml-0" style={{ backgroundColor: currentTheme.primary_color }}>
+          <SheetHeader>
+            <SheetTitle className="flex items-center space-x-2" style={{ color: currentTheme.link_selected_text }}>
               {activeTheme?.theme_image_url ? (
-                <img src={activeTheme.theme_image_url} alt="JROTC Program Logo" className="w-8 h-8 object-contain" />
+                <img src={activeTheme.theme_image_url} alt="JROTC Program Logo" className="w-6 h-6 object-contain" />
               ) : (
-                <Trophy className="w-8 h-8 text-blue-400" />
+                <Trophy className="w-6 h-6 text-blue-400" />
               )}
-              <div>
-                <h1 className="text-xl font-bold">Competition Portal</h1>
-              </div>
-            </div>
-          </div>
-
-          <ScrollArea className="flex-1 px-3">
-            <div className="space-y-1">
-              {menuItems.map(item => {
-                const Icon = item.icon;
-                const isActive = activeModule === item.id;
-                return (
-                  <Button
-                    key={item.id}
-                    variant="ghost"
-                    className="w-full justify-start text-left font-normal"
-                    style={{
-                      backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
-                      color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
-                    }}
-                    onMouseEnter={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-                        e.currentTarget.style.color = '#ffffff';
-                      }
-                    }}
-                    onMouseLeave={e => {
-                      if (!isActive) {
-                        e.currentTarget.style.backgroundColor = 'transparent';
-                        e.currentTarget.style.color = currentTheme.link_text;
-                      }
-                    }}
-                    onClick={() => handleMenuItemClick(item)}
-                  >
-                    <Icon className="w-4 h-4 mr-3" />
-                    {item.label}
-                  </Button>
-                );
-              })}
-            </div>
-          </ScrollArea>
-
-          <div className="p-3 border-t border-gray-700">
+              <span>Competition Portal</span>
+            </SheetTitle>
+          </SheetHeader>
+          <div className="mt-6 space-y-2">
+            {menuItems.map(item => {
+              const Icon = item.icon;
+              const isActive = activeModule === item.id;
+              return (
+                <Button
+                  key={item.id}
+                  variant={isActive ? 'secondary' : 'ghost'}
+                  className="w-full justify-start"
+                  style={{
+                    backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
+                    color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
+                  }}
+                  onClick={() => handleMenuItemClick(item)}
+                >
+                  <Icon className="w-4 h-4 mr-2" />
+                  {item.label}
+                </Button>
+              );
+            })}
+            
             <Button
               variant="outline"
-              className="w-full justify-start text-left font-normal"
+              className="w-full justify-start"
               style={{
                 borderColor: currentTheme.link_text,
                 color: currentTheme.link_text,
                 backgroundColor: 'transparent'
               }}
-              onMouseEnter={e => {
-                e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-                e.currentTarget.style.color = '#ffffff';
+              onClick={() => {
+                handleReturnToCCC();
+                setSidebarOpen?.(false);
               }}
-              onMouseLeave={e => {
-                e.currentTarget.style.backgroundColor = 'transparent';
-                e.currentTarget.style.color = currentTheme.link_text;
-              }}
-              onClick={handleReturnToCCC}
             >
-              <ArrowLeft className="w-4 h-4 mr-3" />
+              <ArrowLeft className="w-4 h-4 mr-2" />
               Return to CCC
             </Button>
           </div>
-        </div>
-      </>
+        </SheetContent>
+      </Sheet>
     );
   }
 
