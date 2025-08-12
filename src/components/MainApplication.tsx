@@ -38,7 +38,6 @@ const MainApplication = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { currentPortal } = usePortal();
-  const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
@@ -119,37 +118,14 @@ const MainApplication = () => {
         activeModule={activeModule} 
         onModuleChange={handleModuleChange}
         isMobile={isMobile}
-        showSidebarToggle={isMobile}
-        onSidebarToggle={() => setIsMobileSidebarOpen(!isMobileSidebarOpen)}
       />
       <div className="flex">
-        {/* Desktop sidebar */}
         {!isMobile && (
           <Sidebar 
             activeModule={activeModule} 
             onModuleChange={handleModuleChange}
           />
         )}
-        
-        {/* Mobile sidebar overlay */}
-        {isMobile && isMobileSidebarOpen && (
-          <>
-            <div 
-              className="fixed inset-0 bg-black/50 z-40"
-              onClick={() => setIsMobileSidebarOpen(false)}
-            />
-            <div className="fixed left-0 top-0 h-full w-64 bg-background z-50 pt-16">
-              <Sidebar 
-                activeModule={activeModule} 
-                onModuleChange={(module) => {
-                  handleModuleChange(module);
-                  setIsMobileSidebarOpen(false);
-                }}
-              />
-            </div>
-          </>
-        )}
-        
         <main className={`flex-1 ${!isMobile ? 'ml-64' : ''}`}>
           <Routes>
             <Route index element={
