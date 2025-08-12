@@ -8,6 +8,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Mail, Phone, MapPin } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
+
+// Validation functions
+const isValidEmail = (email: string): boolean => {
+  const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+  return emailRegex.test(email);
+};
+
+const formatPhoneNumber = (phone: string): string => {
+  const digits = phone.replace(/\D/g, '');
+  if (digits.length <= 3) return digits;
+  if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
+  return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
+};
+
+const isValidPhoneNumber = (phone: string): boolean => {
+  const digits = phone.replace(/\D/g, '');
+  return digits.length === 0 || digits.length === 10;
+};
 const ContactPage = () => {
   const { toast } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -21,15 +39,45 @@ const ContactPage = () => {
     type: "demo"
   });
 
+  const [errors, setErrors] = useState({
+    email: "",
+    phone: ""
+  });
+
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
 
   const handleSubmit = async () => {
+    // Validation
+    const newErrors = { email: "", phone: "" };
+    let hasErrors = false;
+
     if (!formData.name || !formData.email || !formData.school) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields (Name, Email, School)",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!isValidEmail(formData.email)) {
+      newErrors.email = "Please enter a valid email address";
+      hasErrors = true;
+    }
+
+    if (formData.phone && !isValidPhoneNumber(formData.phone)) {
+      newErrors.phone = "Please enter a valid 10-digit phone number";
+      hasErrors = true;
+    }
+
+    setErrors(newErrors);
+
+    if (hasErrors) {
+      toast({
+        title: "Validation Errors",
+        description: "Please correct the errors below",
         variant: "destructive",
       });
       return;
@@ -58,6 +106,7 @@ const ContactPage = () => {
         message: "",
         type: "demo"
       });
+      setErrors({ email: "", phone: "" });
     } catch (error) {
       console.error('Error sending contact form:', error);
       toast({
@@ -71,10 +120,25 @@ const ContactPage = () => {
   };
 
   const handleChange = (field: string, value: string) => {
+    let processedValue = value;
+    
+    // Format phone number as user types
+    if (field === "phone") {
+      processedValue = formatPhoneNumber(value);
+    }
+    
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: processedValue
     }));
+
+    // Clear errors when user starts typing
+    if (field === "email" || field === "phone") {
+      setErrors(prev => ({
+        ...prev,
+        [field]: ""
+      }));
+    }
   };
   const contactInfo = [{
     icon: Mail,
@@ -119,14 +183,29 @@ const ContactPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address *</Label>
-                      <Input id="email" type="email" value={formData.email} onChange={e => handleChange("email", e.target.value)} required />
+                      <Input 
+                        id="email" 
+                        type="email" 
+                        value={formData.email} 
+                        onChange={e => handleChange("email", e.target.value)} 
+                        className={errors.email ? "border-destructive" : ""}
+                        required 
+                      />
+                      {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
                   </div>
                   
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input id="phone" value={formData.phone} onChange={e => handleChange("phone", e.target.value)} />
+                      <Input 
+                        id="phone" 
+                        value={formData.phone} 
+                        onChange={e => handleChange("phone", e.target.value)} 
+                        placeholder="(555) 123-4567"
+                        className={errors.phone ? "border-destructive" : ""}
+                      />
+                      {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="school">School/Institution *</Label>
