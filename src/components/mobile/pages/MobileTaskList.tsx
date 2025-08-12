@@ -16,6 +16,7 @@ import { useTasks } from '@/hooks/useTasks';
 import { useTaskStatusOptions } from '@/hooks/useTaskStatusOptions';
 import { useTaskPriorityOptions } from '@/hooks/useTaskPriorityOptions';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 export const MobileTaskList: React.FC = () => {
   const navigate = useNavigate();
@@ -23,6 +24,7 @@ export const MobileTaskList: React.FC = () => {
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
   const { userProfile } = useAuth();
+  const { canCreate, canViewDetails } = useTaskPermissions();
   const [filter, setFilter] = useState<'all' | 'mine' | 'today' | 'overdue'>('all');
 
   // Filter tasks based on current filter
@@ -149,8 +151,11 @@ export const MobileTaskList: React.FC = () => {
           filteredTasks.map((task) => (
             <Card 
               key={task.id} 
-              className="bg-card border-border cursor-pointer hover:bg-muted/50 transition-colors"
-              onClick={() => navigate(`/mobile/tasks/${task.id}`)}
+              className={cn(
+                "bg-card border-border transition-colors",
+                canViewDetails && "cursor-pointer hover:bg-muted/50"
+              )}
+              onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
             >
               <CardContent className="p-4">
                 <div className="flex items-start justify-between mb-2">
@@ -193,13 +198,15 @@ export const MobileTaskList: React.FC = () => {
         )}
       </div>
 
-      {/* Floating Action Button */}
-      <Button
-        className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
-        onClick={() => navigate('/mobile/tasks/create')}
-      >
-        <Plus className="h-6 w-6" />
-      </Button>
+      {/* Floating Action Button - Only show if user can create tasks */}
+      {canCreate && (
+        <Button
+          className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
+          onClick={() => navigate('/mobile/tasks/create')}
+        >
+          <Plus className="h-6 w-6" />
+        </Button>
+      )}
     </div>
   );
 };

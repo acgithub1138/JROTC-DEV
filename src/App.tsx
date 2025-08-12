@@ -59,11 +59,31 @@ const App = () => (
               {/* Mobile Application Routes */}
               <Route path="/mobile" element={<MobileRouteDetector />}>
                 <Route path="" element={<MobileLayout />}>
-                  <Route index element={<MobileDashboard />} />
-                  <Route path="dashboard" element={<MobileDashboard />} />
-                  <Route path="tasks" element={<MobileTaskList />} />
-                  <Route path="cadets" element={<MobileCadetDirectory />} />
-                  <Route path="incidents" element={<MobileIncidentReporting />} />
+                  <Route index element={
+                    <ProtectedRoute module="dashboard" requirePermission="sidebar">
+                      <MobileDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="dashboard" element={
+                    <ProtectedRoute module="dashboard" requirePermission="sidebar">
+                      <MobileDashboard />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="tasks" element={
+                    <ProtectedRoute module="tasks" requirePermission="sidebar">
+                      <MobileTaskList />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="cadets" element={
+                    <ProtectedRoute module="cadets" requirePermission="sidebar">
+                      <MobileCadetDirectory />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="incidents" element={
+                    <ProtectedRoute module="incident_management" requirePermission="sidebar">
+                      <MobileIncidentReporting />
+                    </ProtectedRoute>
+                  } />
                   <Route path="more" element={<MobileMore />} />
                 </Route>
               </Route>

@@ -8,42 +8,55 @@ import {
   Settings 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 
 const navigationItems = [
   {
     name: 'Dashboard',
     path: '/mobile/dashboard',
     icon: Home,
+    module: 'dashboard',
   },
   {
     name: 'Tasks',
     path: '/mobile/tasks',
     icon: CheckSquare,
+    module: 'tasks',
   },
   {
     name: 'Cadets',
     path: '/mobile/cadets',
     icon: Users,
+    module: 'cadets',
   },
   {
     name: 'Incidents',
     path: '/mobile/incidents',
     icon: AlertTriangle,
+    module: 'incident_management',
   },
   {
     name: 'More',
     path: '/mobile/more',
     icon: Settings,
+    module: null, // Always show More tab
   },
 ];
 
 export const MobileNavigation: React.FC = () => {
   const location = useLocation();
+  const { hasPermission } = usePermissionContext();
+
+  // Filter navigation items based on permissions
+  const visibleItems = navigationItems.filter(item => {
+    if (!item.module) return true; // Always show items without module (like More)
+    return hasPermission(item.module, 'sidebar');
+  });
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 bg-card border-t border-border">
       <div className="flex justify-around">
-        {navigationItems.map((item) => {
+        {visibleItems.map((item) => {
           const isActive = location.pathname.startsWith(item.path);
           const Icon = item.icon;
           
