@@ -214,6 +214,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                     e.currentTarget.style.color = currentTheme.link_text;
                   }}
                   onClick={() => {
+                    console.log('Competition Portal button clicked - navigating to portal');
                     setPortal('competition');
                     navigate('/app/competition-portal/dashboard');
                   }}
@@ -221,6 +222,15 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                   <Trophy className="w-4 h-4 mr-3" />
                   Competition Portal
                 </Button>
+              </div>
+            )}
+            
+            {/* Debug info for mobile troubleshooting */}
+            {process.env.NODE_ENV === 'development' && (
+              <div className="pt-4 text-xs text-gray-500">
+                <div>Portal Access: {canAccessCompetitionPortal ? 'Yes' : 'No'}</div>
+                <div>User Agent: {navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</div>
+                <div>Protocol: {window.location.protocol}</div>
               </div>
             )}
           </div>

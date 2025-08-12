@@ -25,6 +25,17 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
 
   // Check if user can access competition portal
   const canAccessCompetitionPortal = userProfile?.schools?.competition_module === true;
+  
+  console.log('PortalContext - Competition Portal Access Check:', {
+    userId: userProfile?.id,
+    schoolId: userProfile?.school_id,
+    competitionModule: userProfile?.schools?.competition_module,
+    competitionPortal: userProfile?.schools?.competition_portal,
+    canAccessCompetitionPortal,
+    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'SSR',
+    isCapacitor: typeof window !== 'undefined' && window.location.protocol === 'capacitor:',
+    fullSchoolData: userProfile?.schools
+  });
 
   // Get stored portal preference
   useEffect(() => {
