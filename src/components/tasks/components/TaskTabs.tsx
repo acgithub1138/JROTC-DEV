@@ -1,6 +1,7 @@
 import React from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCapacitor } from '@/hooks/useCapacitor';
 import { TaskList } from '../TaskList';
 import { TaskTable } from '../TaskTable';
 import { TaskCards } from './TaskCards';
@@ -48,9 +49,10 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onRefresh
 }) => {
   const isMobile = useIsMobile();
+  const { isNative } = useCapacitor();
 
   const renderTaskContent = (tasks: (Task | Subtask)[], isAllTasksTab = false) => {
-    if (isMobile) {
+    if (isNative || isMobile) {
       return (
         <TaskCards 
           tasks={tasks}
