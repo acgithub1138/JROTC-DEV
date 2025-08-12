@@ -1,48 +1,172 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import { 
   CheckSquare, 
   Users, 
   AlertTriangle, 
   Calendar,
-  TrendingUp,
-  Clock
+  DollarSign,
+  Package,
+  Building,
+  Smartphone
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import { useNavigate } from 'react-router-dom';
-
-const quickStats = [
-  { label: 'Tasks Due Today', value: '8', icon: CheckSquare, color: 'text-primary' },
-  { label: 'Active Cadets', value: '127', icon: Users, color: 'text-green-600' },
-  { label: 'Open Incidents', value: '3', icon: AlertTriangle, color: 'text-destructive' },
-  { label: 'Events This Week', value: '12', icon: Calendar, color: 'text-blue-600' },
-];
-
-const recentActivities = [
-  { id: 1, type: 'task', title: 'Equipment Inventory', time: '2h ago', urgent: true },
-  { id: 2, type: 'incident', title: 'Equipment Malfunction', time: '4h ago', urgent: false },
-  { id: 3, type: 'cadet', title: 'New Cadet Registration', time: '6h ago', urgent: false },
-  { id: 4, type: 'task', title: 'Drill Practice Setup', time: '1d ago', urgent: false },
-];
+import { Badge } from '@/components/ui/badge';
+import { useAuth } from '@/contexts/AuthContext';
+import { useCapacitor } from '@/hooks/useCapacitor';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
+import { useEvents } from '@/components/calendar/hooks/useEvents';
+import { MyTasksWidget } from '@/components/dashboard/widgets/MyTasksWidget';
+import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
+import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
 
 export const MobileDashboard: React.FC = () => {
-  const navigate = useNavigate();
+  const { userProfile } = useAuth();
+  const { isNative, platform } = useCapacitor();
+  const {
+    data: stats,
+    isLoading: statsLoading
+  } = useDashboardStats();
+
+  // Memoize filters to prevent infinite re-renders
+  const eventFilters = useMemo(() => ({
+    eventType: '',
+    assignedTo: ''
+  }), []);
+
+  const {
+    events,
+    isLoading: eventsLoading
+  } = useEvents(eventFilters);
+
+  // Filter and sort upcoming events
+  const upcomingEvents = useMemo(() => {
+    if (!events || events.length === 0) {
+      return [];
+    }
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    const filtered = events.filter(event => {
+      const eventDate = new Date(event.start_date);
+      return eventDate >= today;
+    }).sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime()).slice(0, 5);
+    return filtered;
+  }, [events, eventsLoading]);
+
+  // Derived permissions for UI logic
+  const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const isCadet = userProfile?.role === 'cadet';
+
+  // Configure stats based on user role - same logic as web dashboard
+  const getStatsConfig = () => {
+    const baseStats = [];
+
+    // Admin-specific dashboard
+    if (userProfile?.role === 'admin') {
+      baseStats.push({
+        title: 'Total Schools',
+        value: statsLoading ? '...' : stats?.schools.total.toString() || '0',
+        change: statsLoading ? '...' : 'Registered schools',
+        icon: Building,
+        color: 'text-blue-600'
+      });
+      baseStats.push({
+        title: 'Active Incidents',
+        value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.incidents.urgentCritical || 0} urgent/critical`,
+        icon: AlertTriangle,
+        color: 'text-red-600'
+      });
+      return baseStats;
+    }
+
+    // For instructors, show Overdue Tasks instead of Total Cadets
+    if (userProfile?.role === 'instructor') {
+      baseStats.push({
+        title: 'Overdue Tasks',
+        value: statsLoading ? '...' : stats?.tasks.overdue.toString() || '0',
+        change: statsLoading ? '...' : 'Past due date',
+        icon: CheckSquare,
+        color: 'text-red-600'
+      });
+    } else if (!isCadet) {
+      // Only show Total Cadets widget for non-cadet, non-instructor roles
+      baseStats.push({
+        title: 'Total Cadets',
+        value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
+        change: statsLoading ? '...' : stats?.cadets.change || 'No data',
+        icon: Users,
+        color: 'text-blue-600'
+      });
+    }
+
+    // Show additional stats only for command staff and above
+    if (isCommandStaffOrAbove) {
+      baseStats.push({
+        title: 'Active Tasks',
+        value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
+        icon: CheckSquare,
+        color: 'text-green-600'
+      });
+
+      // Show equipment only for non-command staff (instructors)
+      if (userProfile?.role === 'instructor') {
+        baseStats.push({
+          title: 'Equipment',
+          value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
+          change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
+          icon: Package,
+          color: 'text-purple-600'
+        });
+      }
+    }
+
+    // Budget is only for instructors
+    if (userProfile?.role === 'instructor') {
+      baseStats.push({
+        title: 'Net Budget',
+        value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
+        change: statsLoading ? '...' : `${(stats?.budget.totalIncome || 0).toLocaleString()} income, ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
+        icon: DollarSign,
+        color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600'
+      });
+    }
+
+    return baseStats;
+  };
+
+  const statsConfig = getStatsConfig();
 
   return (
     <div className="p-4 space-y-6">
-      {/* Quick Stats Grid */}
+      {/* Welcome Header with Mobile Status */}
+      <div className="mb-4">
+        <h1 className="text-2xl font-bold text-foreground mb-1">Dashboard</h1>
+        <p className="text-sm text-muted-foreground mb-2">
+          Welcome back, {userProfile?.first_name}!
+        </p>
+        {isNative && (
+          <Badge variant="secondary" className="text-xs">
+            <Smartphone className="w-3 h-3 mr-1" />
+            Mobile App - {platform}
+          </Badge>
+        )}
+      </div>
+
+      {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        {quickStats.map((stat) => {
+        {statsConfig.map((stat) => {
           const Icon = stat.icon;
           return (
-            <Card key={stat.label} className="bg-card border-border">
+            <Card key={stat.title} className="bg-card border-border">
               <CardContent className="p-4">
                 <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-2xl font-bold text-foreground">{stat.value}</p>
-                    <p className="text-sm text-muted-foreground mt-1">{stat.label}</p>
+                  <div className="min-w-0 flex-1">
+                    <p className="text-xs font-medium text-muted-foreground truncate">{stat.title}</p>
+                    <p className="text-xl font-bold text-foreground">{stat.value}</p>
+                    <p className="text-xs text-muted-foreground mt-1 line-clamp-2">{stat.change}</p>
                   </div>
-                  <Icon className={`h-8 w-8 ${stat.color}`} />
+                  <Icon className={`h-6 w-6 ${stat.color} flex-shrink-0 ml-2`} />
                 </div>
               </CardContent>
             </Card>
@@ -50,95 +174,65 @@ export const MobileDashboard: React.FC = () => {
         })}
       </div>
 
-      {/* Quick Actions */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent className="space-y-2">
-          <Button 
-            className="w-full justify-start" 
-            variant="ghost"
-            onClick={() => navigate('/mobile/tasks/create')}
-          >
-            <CheckSquare className="mr-3 h-4 w-4" />
-            Create New Task
-          </Button>
-          <Button 
-            className="w-full justify-start" 
-            variant="ghost"
-            onClick={() => navigate('/mobile/incidents/report')}
-          >
-            <AlertTriangle className="mr-3 h-4 w-4" />
-            Report Incident
-          </Button>
-          <Button 
-            className="w-full justify-start" 
-            variant="ghost"
-            onClick={() => navigate('/mobile/cadets/search')}
-          >
-            <Users className="mr-3 h-4 w-4" />
-            Find Cadet
-          </Button>
-        </CardContent>
-      </Card>
+      {/* Mobile Notification Center - Only show on native platforms */}
+      {isNative && <MobileNotificationCenter />}
+      
+      {/* Mobile Features Widget - Show for all mobile-relevant features */}
+      {isNative && <MobileEnhancements />}
 
-      {/* Recent Activity */}
-      <Card className="bg-card border-border">
-        <CardHeader className="flex flex-row items-center justify-between">
-          <CardTitle className="text-lg font-semibold text-foreground">Recent Activity</CardTitle>
-          <Button 
-            variant="ghost" 
-            size="sm"
-            onClick={() => navigate('/mobile/activity')}
-          >
-            View All
-          </Button>
-        </CardHeader>
-        <CardContent className="space-y-3">
-          {recentActivities.map((activity) => (
-            <div key={activity.id} className="flex items-center space-x-3 p-2 rounded-lg hover:bg-muted/50">
-              <div className={`h-2 w-2 rounded-full ${activity.urgent ? 'bg-destructive' : 'bg-muted-foreground'}`} />
-              <div className="flex-1 min-w-0">
-                <p className="text-sm font-medium text-foreground truncate">{activity.title}</p>
-                <div className="flex items-center text-xs text-muted-foreground">
-                  <Clock className="mr-1 h-3 w-3" />
-                  {activity.time}
+      {/* My Tasks Widget - Hide for admin users */}
+      {userProfile?.role !== 'admin' && <MyTasksWidget />}
+
+      {/* Upcoming Events - hidden for admin users */}
+      {userProfile?.role !== 'admin' && (
+        <Card className="bg-card border-border">
+          <CardHeader>
+            <CardTitle className="text-lg font-semibold text-foreground flex items-center">
+              <Calendar className="mr-2 h-5 w-5 text-primary" />
+              Upcoming Events
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {eventsLoading ? (
+                [...Array(3)].map((_, index) => (
+                  <div key={index} className="flex items-start space-x-3 p-2 rounded-lg">
+                    <div className="w-2 h-2 bg-muted rounded-full mt-2 flex-shrink-0 animate-pulse"></div>
+                    <div className="flex-1 min-w-0 space-y-2">
+                      <div className="h-3 bg-muted rounded animate-pulse"></div>
+                      <div className="h-2 bg-muted rounded animate-pulse w-3/4"></div>
+                    </div>
+                  </div>
+                ))
+              ) : upcomingEvents.length > 0 ? (
+                upcomingEvents.map((event) => (
+                  <div key={event.id} className="flex items-start space-x-3 p-2 hover:bg-muted/50 transition-colors rounded-lg">
+                    <div className="w-2 h-2 bg-primary rounded-full mt-2 flex-shrink-0"></div>
+                    <div className="flex-1 min-w-0">
+                      <p className="font-medium text-foreground text-sm line-clamp-2">
+                        {new Date(event.start_date).toLocaleDateString('en-US', {
+                          month: 'short',
+                          day: 'numeric',
+                          year: 'numeric',
+                          hour: event.is_all_day ? undefined : 'numeric',
+                          minute: event.is_all_day ? undefined : '2-digit'
+                        })} - {event.title}
+                      </p>
+                      <p className="text-muted-foreground capitalize text-xs line-clamp-1">
+                        {event.event_type.replace('_', ' ')} • {event.description || ''}
+                      </p>
+                    </div>
+                  </div>
+                ))
+              ) : (
+                <div className="text-center py-6 text-muted-foreground">
+                  <p className="text-sm">No upcoming events</p>
                 </div>
-              </div>
+              )}
             </div>
-          ))}
-        </CardContent>
-      </Card>
-
-      {/* Performance Summary */}
-      <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground flex items-center">
-            <TrendingUp className="mr-2 h-5 w-5" />
-            This Week's Performance
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Tasks Completed</span>
-              <span className="text-sm font-medium text-foreground">24/30</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div className="bg-primary h-2 rounded-full" style={{ width: '80%' }} />
-            </div>
-            
-            <div className="flex justify-between items-center">
-              <span className="text-sm text-muted-foreground">Cadet Attendance</span>
-              <span className="text-sm font-medium text-foreground">96%</span>
-            </div>
-            <div className="w-full bg-muted rounded-full h-2">
-              <div className="bg-green-600 h-2 rounded-full" style={{ width: '96%' }} />
-            </div>
-          </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
     </div>
   );
 };
