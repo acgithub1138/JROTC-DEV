@@ -155,3 +155,4 @@ jobs:
           packageName: com.lovable.jrotccommandcenter
           releaseFiles: android-build/*.aab
           track: internal
+          status: draft
