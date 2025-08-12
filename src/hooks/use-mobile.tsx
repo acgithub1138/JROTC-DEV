@@ -1,10 +1,11 @@
 import * as React from "react"
+import { useCapacitor } from '@/hooks/useCapacitor'
 
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
-
+  const { isNative, platform } = useCapacitor();
   React.useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     const onChange = () => {
@@ -31,7 +32,7 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  const result = !!isMobile;
-  console.log('useIsMobile hook result:', { isMobile, result });
+  const result = isNative || !!isMobile;
+  console.log('useIsMobile hook result:', { isMobile, isNative, platform, result });
   return result
 }
