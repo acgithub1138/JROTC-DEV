@@ -89,7 +89,7 @@ export const Header: React.FC<HeaderProps> = ({
                   <span className="sr-only">Open menu</span>
                 </Button>
               </SheetTrigger>
-              <SheetContent side="top" className="w-full">
+              <SheetContent side="top" className="h-auto max-h-[50vh]">
                 <SheetHeader>
                   <SheetTitle className="flex items-center space-x-2">
                     <Shield className="w-6 h-6 text-blue-400" />
