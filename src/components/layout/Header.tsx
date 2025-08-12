@@ -1,10 +1,11 @@
 
 import React, { useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { User, LogOut, Settings, Menu, Shield } from 'lucide-react';
+import { User, LogOut, Settings, Menu, Shield, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 
@@ -27,6 +28,7 @@ export const Header: React.FC<HeaderProps> = ({
     signOut,
     userProfile
   } = useAuth();
+  const { canAccessCompetitionPortal, setPortal } = usePortal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const {
     menuItems
@@ -101,6 +103,20 @@ export const Header: React.FC<HeaderProps> = ({
               }}>
                       {item.label}
                     </Button>)}
+                  
+                  {canAccessCompetitionPortal && (
+                    <Button 
+                      variant="ghost" 
+                      className="w-full justify-start text-orange-600 hover:text-orange-700 hover:bg-orange-50" 
+                      onClick={() => {
+                        setPortal('competition');
+                        setMobileMenuOpen(false);
+                      }}
+                    >
+                      <Trophy className="w-4 h-4 mr-2" />
+                      Competition Portal
+                    </Button>
+                  )}
                 </div>
               </SheetContent>
             </Sheet>}
