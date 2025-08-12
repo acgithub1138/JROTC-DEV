@@ -26,6 +26,8 @@ import { MobileCadetDirectory } from "@/components/mobile/pages/MobileCadetDirec
 import { MobileIncidentReporting } from "@/components/mobile/pages/MobileIncidentReporting";
 import { MobileMore } from "@/components/mobile/pages/MobileMore";
 import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
+import { MobileCreateTask } from "@/components/mobile/pages/MobileCreateTask";
+import { MobileTaskDetail } from "@/components/mobile/pages/MobileTaskDetail";
 
 const queryClient = new QueryClient();
 
@@ -72,6 +74,16 @@ const App = () => (
                   <Route path="tasks" element={
                     <ProtectedRoute module="tasks" requirePermission="sidebar">
                       <MobileTaskList />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="tasks/create" element={
+                    <ProtectedRoute module="tasks" requirePermission="sidebar">
+                      <MobileCreateTask />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="tasks/:id" element={
+                    <ProtectedRoute module="tasks" requirePermission="sidebar">
+                      <MobileTaskDetail />
                     </ProtectedRoute>
                   } />
                   <Route path="cadets" element={
