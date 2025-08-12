@@ -9,6 +9,8 @@ import { format } from "date-fns";
 import type { Incident } from "@/hooks/incidents/types";
 import { useIncidentPermissions } from "@/hooks/useModuleSpecificPermissions";
 import { useAuth } from "@/contexts/AuthContext";
+import { useIsMobile } from "@/hooks/use-mobile";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 
 interface IncidentTableProps {
   incidents: Incident[];
@@ -64,6 +66,7 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
   showBulkSelect = false
 }) => {
   const { userProfile } = useAuth();
+  const isMobile = useIsMobile();
   const {
     canUpdate,
     canUpdateAssigned,
@@ -78,6 +81,104 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
       </div>;
   }
 
+  // Mobile card view
+  if (isMobile) {
+    return (
+      <div className="space-y-4">
+        {incidents.map(incident => (
+          <Card key={incident.id} className="w-full">
+            <CardHeader className="pb-3">
+              <div className="flex justify-between items-start">
+                <div className="flex items-center gap-2">
+                  {showBulkSelect && (
+                    <Checkbox
+                      checked={selectedIncidents.includes(incident.id)}
+                      onCheckedChange={() => onIncidentToggle?.(incident.id)}
+                    />
+                  )}
+                  <CardTitle className="text-lg">
+                    {canView ? (
+                      <button 
+                        onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)} 
+                        className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                      >
+                        {incident.incident_number}
+                      </button>
+                    ) : (
+                      <span>{incident.incident_number}</span>
+                    )}
+                  </CardTitle>
+                </div>
+                <div className="flex gap-2">
+                  <Badge variant="secondary" className={getStatusBadgeClass(incident.status)}>
+                    {incident.status.replace('_', ' ')}
+                  </Badge>
+                  <Badge variant="secondary" className={getPriorityBadgeClass(incident.priority)}>
+                    {incident.priority}
+                  </Badge>
+                </div>
+              </div>
+            </CardHeader>
+            <CardContent className="space-y-3">
+              <div>
+                <h4 className="font-medium">{incident.title}</h4>
+              </div>
+              
+              <div className="grid grid-cols-2 gap-4 text-sm">
+                <div>
+                  <span className="text-muted-foreground">Assigned To:</span>
+                  <p className="font-medium">
+                    {incident.assigned_to_admin 
+                      ? (userProfile?.role === 'admin' 
+                          ? ((incident as any).assigned_to_admin_profile 
+                              ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
+                              : 'Admin')
+                          : 'Admin')
+                      : 'Unassigned'}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-muted-foreground">Created By:</span>
+                  <p className="font-medium">
+                    {(incident as any).created_by_profile 
+                      ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
+                      : (userProfile?.role === 'admin' ? 'Unknown' : 'User')}
+                  </p>
+                </div>
+              </div>
+              
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-muted-foreground">
+                  Created: {format(new Date(incident.created_at), "MMM d, yyyy")}
+                </span>
+                {canDelete && incident.status !== 'canceled' && (
+                  <TooltipProvider>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <Button 
+                          variant="outline" 
+                          size="icon" 
+                          className="h-8 w-8 text-destructive hover:text-destructive" 
+                          onClick={() => onIncidentDelete && onIncidentDelete(incident)}
+                        >
+                          <X className="h-4 w-4" />
+                        </Button>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        <p>Cancel Incident</p>
+                      </TooltipContent>
+                    </Tooltip>
+                  </TooltipProvider>
+                )}
+              </div>
+            </CardContent>
+          </Card>
+        ))}
+      </div>
+    );
+  }
+
+  // Desktop table view
   return <div className="rounded-md border">
       <Table>
         <TableHeader>
