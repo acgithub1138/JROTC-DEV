@@ -38,7 +38,7 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     isCapacitor: typeof window !== 'undefined' && window.location.protocol === 'capacitor:',
     fullSchoolData: userProfile?.schools,
     viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR',
-    isMobile: typeof window !== 'undefined' ? window.innerWidth < 768 : 'SSR'
+    isMobile: false // Will be handled by useIsMobile hook in components
   });
 
   // Get stored portal preference

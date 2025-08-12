@@ -26,7 +26,7 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
   isNative 
 }) => {
   // Determine if we should use mobile layout
-  const shouldUseMobileLayout = isNative || isMobile || window.innerWidth < 768;
+  const shouldUseMobileLayout = isNative || isMobile;
   
   console.log('TaskCards component rendered:', { 
     tasksLength: tasks.length, 
