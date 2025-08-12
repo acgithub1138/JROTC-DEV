@@ -55,7 +55,10 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
     isMobile, 
     isNative, 
     platform,
-    shouldShowCards: isNative || isMobile 
+    shouldShowCards: isNative || isMobile,
+    windowLocation: window.location.href,
+    userAgent: navigator.userAgent,
+    hasCapacitorGlobal: !!(window as any).Capacitor
   });
 
   const renderTaskContent = (tasks: (Task | Subtask)[], isAllTasksTab = false) => {
