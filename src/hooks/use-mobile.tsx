@@ -6,13 +6,41 @@ const MOBILE_BREAKPOINT = 768
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
   const { isNative, platform } = useCapacitor();
+  
   React.useEffect(() => {
-    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
-    const onChange = () => {
-      const newIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
-      console.log('Mobile detection onChange:', { 
+    const detectMobile = () => {
+      // Check screen width
+      const screenIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
+      
+      // Check user agent for mobile devices
+      const userAgent = navigator.userAgent.toLowerCase();
+      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
+      
+      // Check for touch support
+      const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      
+      // Final mobile detection
+      const detectedMobile = screenIsMobile || isMobileUA || (isTouchDevice && window.innerWidth <= 1024);
+      
+      console.log('Mobile detection detailed:', { 
         windowWidth: window.innerWidth, 
         breakpoint: MOBILE_BREAKPOINT, 
+        screenIsMobile,
+        isMobileUA,
+        isTouchDevice,
+        detectedMobile,
+        userAgent: navigator.userAgent,
+        location: window.location.href
+      });
+      
+      return detectedMobile;
+    };
+
+    const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
+    const onChange = () => {
+      const newIsMobile = detectMobile();
+      console.log('Mobile detection onChange:', { 
+        windowWidth: window.innerWidth, 
         isMobile: newIsMobile,
         userAgent: navigator.userAgent
       });
@@ -20,14 +48,7 @@ export function useIsMobile() {
     }
     mql.addEventListener("change", onChange)
     
-    const initialIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
-    console.log('Mobile detection initial:', { 
-      windowWidth: window.innerWidth, 
-      breakpoint: MOBILE_BREAKPOINT, 
-      isMobile: initialIsMobile,
-      userAgent: navigator.userAgent,
-      location: window.location.href
-    });
+    const initialIsMobile = detectMobile();
     setIsMobile(initialIsMobile)
     return () => mql.removeEventListener("change", onChange)
   }, [])
