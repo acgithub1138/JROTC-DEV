@@ -128,9 +128,9 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   if (isMobile) {
     return (
       <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
-        <SheetContent side="top" className="w-2/3 ml-0" style={{ backgroundColor: currentTheme.primary_color }}>
+        <SheetContent side="top" className="w-2/3 ml-0 bg-white">
           <SheetHeader>
-            <SheetTitle className="flex items-center space-x-2" style={{ color: currentTheme.link_selected_text }}>
+            <SheetTitle className="flex items-center space-x-2 text-gray-900">
               {activeTheme?.theme_image_url ? (
                 <img src={activeTheme.theme_image_url} alt="JROTC Program Logo" className="w-6 h-6 object-contain" />
               ) : (
@@ -147,11 +147,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
                 <Button
                   key={item.id}
                   variant={isActive ? 'secondary' : 'ghost'}
-                  className="w-full justify-start"
-                  style={{
-                    backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
-                    color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
-                  }}
+                  className="w-full justify-start text-gray-900 hover:bg-gray-100"
                   onClick={() => handleMenuItemClick(item)}
                 >
                   <Icon className="w-4 h-4 mr-2" />
@@ -162,12 +158,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
             
             <Button
               variant="outline"
-              className="w-full justify-start"
-              style={{
-                borderColor: currentTheme.link_text,
-                color: currentTheme.link_text,
-                backgroundColor: 'transparent'
-              }}
+              className="w-full justify-start text-gray-900 border-gray-300 hover:bg-gray-100"
               onClick={() => {
                 handleReturnToCCC();
                 setSidebarOpen?.(false);
