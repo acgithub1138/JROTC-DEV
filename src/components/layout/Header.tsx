@@ -8,6 +8,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import { User, LogOut, Settings, Menu, Shield, Trophy } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+import { useLocation } from 'react-router-dom';
 
 interface HeaderProps {
   activeModule: string;
@@ -33,6 +34,10 @@ export const Header: React.FC<HeaderProps> = ({
   const {
     menuItems
   } = useSidebarPreferences();
+  const location = useLocation();
+  
+  // Check if we're in the competition portal
+  const isInCompetitionPortal = location.pathname.startsWith('/app/competition-portal');
 
   const getModuleTitle = (module: string) => {
     const titles: {
@@ -82,7 +87,7 @@ export const Header: React.FC<HeaderProps> = ({
               <span className="sr-only">Toggle sidebar</span>
             </Button>
           )}
-          {isMobile && onModuleChange && <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
+          {isMobile && onModuleChange && !isInCompetitionPortal && <Sheet open={mobileMenuOpen} onOpenChange={setMobileMenuOpen}>
               <SheetTrigger asChild>
                 <Button variant="ghost" size="icon">
                   <Menu className="w-5 h-5" />
