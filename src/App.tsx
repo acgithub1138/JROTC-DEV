@@ -19,6 +19,13 @@ import PrivacyPolicyPage from "@/components/marketing/PrivacyPolicyPage";
 import TermsConditionsPage from "@/components/marketing/TermsConditionsPage";
 import LoginPage from "@/components/marketing/LoginPage";
 import NotFound from "./pages/NotFound";
+import { MobileLayout } from "@/components/mobile/MobileLayout";
+import { MobileDashboard } from "@/components/mobile/pages/MobileDashboard";
+import { MobileTaskList } from "@/components/mobile/pages/MobileTaskList";
+import { MobileCadetDirectory } from "@/components/mobile/pages/MobileCadetDirectory";
+import { MobileIncidentReporting } from "@/components/mobile/pages/MobileIncidentReporting";
+import { MobileMore } from "@/components/mobile/pages/MobileMore";
+import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
 
 const queryClient = new QueryClient();
 
@@ -49,6 +56,18 @@ const App = () => (
                 <Route path="products/competition-management" element={<ProductPage module="competition" />} />
               </Route>
               
+              {/* Mobile Application Routes */}
+              <Route path="/mobile" element={<MobileRouteDetector />}>
+                <Route path="" element={<MobileLayout />}>
+                  <Route index element={<MobileDashboard />} />
+                  <Route path="dashboard" element={<MobileDashboard />} />
+                  <Route path="tasks" element={<MobileTaskList />} />
+                  <Route path="cadets" element={<MobileCadetDirectory />} />
+                  <Route path="incidents" element={<MobileIncidentReporting />} />
+                  <Route path="more" element={<MobileMore />} />
+                </Route>
+              </Route>
+
               {/* Protected Application Routes */}
               <Route 
                 path="/app/*" 

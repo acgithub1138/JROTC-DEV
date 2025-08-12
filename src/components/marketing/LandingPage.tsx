@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, ClipboardList, Trophy, HelpCircle, UserCheck, DollarSign, Package, Calendar, Contact, Mail, Shield, Building, Settings, ArrowRight, CheckCircle, Star } from "lucide-react";
+import { MobileSuggestionBanner } from "@/components/mobile/MobileSuggestionBanner";
 const LandingPage = () => {
   const modules = [{
     icon: Users,
@@ -86,6 +87,7 @@ const LandingPage = () => {
   ];
   const benefits = ["Save 10+ hours per week on administrative tasks", "Improve cadet engagement and tracking by 300%", "Streamline communication with automated systems", "Reduce paperwork and manual processes by 80%", "Enhanced competition planning and scoring", "Better budget and inventory management"];
   return <div className="min-h-screen">
+      <MobileSuggestionBanner />
       {/* Hero Section */}
       <section className="relative py-10 lg:py-16 bg-gradient-to-br from-background via-muted/30 to-background">
         <div className="container mx-auto px-4">
