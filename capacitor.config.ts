@@ -4,6 +4,7 @@ const config: CapacitorConfig = {
   appId: 'com.lovable.jrotccommandcenter',
   appName: 'jrotc-command-and-control-center',
   webDir: 'dist',
+  version: '1.0.1',
   server: {
     url: 'https://6f3314e6-7365-47a3-bcb5-db91da6e1b16.lovableproject.com?forceHideBadge=true',
     cleartext: true
