@@ -43,6 +43,14 @@ const TaskManagementPage: React.FC = () => {
     completedTasksCount,
     handleRefresh
   } = useTaskManagement();
+  
+  console.log('TaskManagementPage data:', {
+    myActiveTasksLength: myActiveTasks.length,
+    allSchoolTasksLength: allSchoolTasks.length,
+    completedTasksLength: completedTasks.length,
+    myActiveTasksPreview: myActiveTasks.slice(0, 2).map(t => ({ id: t.id, title: t.title })),
+    allSchoolTasksPreview: allSchoolTasks.slice(0, 2).map(t => ({ id: t.id, title: t.title }))
+  });
 
   const handleTaskSelect = (task: Task | Subtask) => {
     // Check if user has view permissions

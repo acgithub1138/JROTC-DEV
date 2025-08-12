@@ -49,10 +49,27 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onRefresh
 }) => {
   const isMobile = useIsMobile();
-  const { isNative } = useCapacitor();
+  const { isNative, platform } = useCapacitor();
+  
+  console.log('TaskTabs mobile detection:', { 
+    isMobile, 
+    isNative, 
+    platform,
+    shouldShowCards: isNative || isMobile 
+  });
 
   const renderTaskContent = (tasks: (Task | Subtask)[], isAllTasksTab = false) => {
+    console.log('TaskTabs renderTaskContent:', { 
+      tasksLength: tasks.length, 
+      isAllTasksTab, 
+      isMobile, 
+      isNative, 
+      shouldShowCards: isNative || isMobile,
+      tasksPreview: tasks.slice(0, 2).map(t => ({ id: t.id, title: t.title }))
+    });
+    
     if (isNative || isMobile) {
+      console.log('Rendering TaskCards for mobile/native');
       return (
         <TaskCards 
           tasks={tasks}
@@ -63,6 +80,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
       );
     }
     
+    console.log('Rendering TaskTable for desktop');
     return (
       <TaskTable 
         tasks={tasks}

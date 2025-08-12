@@ -21,6 +21,18 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
   onEdit, 
   onDelete 
 }) => {
+  console.log('TaskCards component rendered:', { 
+    tasksLength: tasks.length, 
+    tasksData: tasks.slice(0, 3).map(t => ({ 
+      id: t.id, 
+      title: t.title, 
+      task_number: t.task_number 
+    })),
+    onView: typeof onView,
+    onEdit: typeof onEdit,
+    onDelete: typeof onDelete
+  });
+  
   const { statusOptions } = useTaskStatusOptions();
   const { priorityOptions } = useTaskPriorityOptions();
 
@@ -30,12 +42,15 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
   };
 
   if (tasks.length === 0) {
+    console.log('TaskCards: No tasks to display');
     return (
       <div className="text-center py-8 text-gray-500">
         No tasks found
       </div>
     );
   }
+  
+  console.log('TaskCards: About to render grid with', tasks.length, 'tasks');
 
   return (
     <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
