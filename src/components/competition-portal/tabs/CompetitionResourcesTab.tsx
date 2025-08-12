@@ -4,8 +4,10 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
 import { EditResourceModal } from '@/components/competition-portal/modals/EditResourceModal';
 import { format } from 'date-fns';
@@ -15,6 +17,7 @@ interface CompetitionResourcesTabProps {
 export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = ({
   competitionId
 }) => {
+  const isMobile = useIsMobile();
   const {
     resources,
     isLoading,
@@ -58,7 +61,89 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
 
       {resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div> : <div className="border rounded-lg">
+        </div> : isMobile ? (
+          <div className="space-y-4">
+            {resources.map(resource => (
+              <Card key={resource.id}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">
+                    {resource.cadet_profile ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}` : 'Unknown Cadet'}
+                  </CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Location:</span>
+                      <p className="text-sm">{resource.location || '-'}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Start:</span>
+                      <p className="text-sm">{resource.start_time ? format(new Date(resource.start_time), 'MMM, d yyyy HH:mm') : '-'}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">End:</span>
+                      <p className="text-sm">{resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}</p>
+                    </div>
+                    {(canEdit || canDelete) && (
+                      <div className="flex flex-wrap gap-2 pt-2">
+                        {canEdit && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => handleEdit(resource)}>
+                                <Edit className="w-4 h-4 mr-1" />
+                                Edit
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>Edit Resource</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {canDelete && (
+                          <AlertDialog>
+                            <AlertDialogTrigger asChild>
+                              <Button 
+                                variant="outline" 
+                                size="sm" 
+                                className="text-red-600 hover:text-red-700 hover:border-red-300"
+                                disabled={deletingResourceId === resource.id}
+                              >
+                                {deletingResourceId === resource.id ? (
+                                  <Loader2 className="w-4 h-4 mr-1 animate-spin" />
+                                ) : (
+                                  <Trash2 className="w-4 h-4 mr-1" />
+                                )}
+                                Delete
+                              </Button>
+                            </AlertDialogTrigger>
+                            <AlertDialogContent>
+                              <AlertDialogHeader>
+                                <AlertDialogTitle>Delete Resource</AlertDialogTitle>
+                                <AlertDialogDescription>
+                                  Are you sure you want to delete this resource assignment for {resource.cadet_profile ? `${resource.cadet_profile.first_name} ${resource.cadet_profile.last_name}` : 'this cadet'}? This action cannot be undone.
+                                </AlertDialogDescription>
+                              </AlertDialogHeader>
+                              <AlertDialogFooter>
+                                <AlertDialogCancel>Cancel</AlertDialogCancel>
+                                <AlertDialogAction 
+                                  onClick={() => handleDelete(resource.id)}
+                                  disabled={deletingResourceId === resource.id}
+                                >
+                                  {deletingResourceId === resource.id && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                                  Delete
+                                </AlertDialogAction>
+                              </AlertDialogFooter>
+                            </AlertDialogContent>
+                          </AlertDialog>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : <div className="border rounded-lg">
           <Table>
           <TableHeader>
             <TableRow>

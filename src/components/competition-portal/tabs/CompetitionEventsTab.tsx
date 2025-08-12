@@ -4,11 +4,13 @@ import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SortableTableHead } from '@/components/ui/sortable-table';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
 import { EditEventModal } from '@/components/competition-portal/modals/EditEventModal';
@@ -22,6 +24,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   competitionId
 }) => {
   const { timezone } = useSchoolTimezone();
+  const isMobile = useIsMobile();
   const {
     events,
     isLoading,
@@ -104,7 +107,103 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
 
       {sortedEvents.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No events configured for this competition</p>
-        </div> : <div className="border rounded-lg">
+        </div> : isMobile ? (
+          <div className="space-y-4">
+            {sortedEvents.map(event => (
+              <Card key={event.id}>
+                <CardHeader className="pb-3">
+                  <CardTitle className="text-lg">{event.cp_events?.name || 'N/A'}</CardTitle>
+                </CardHeader>
+                <CardContent className="pt-0">
+                  <div className="space-y-3">
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Location:</span>
+                      <p className="text-sm">{event.location || 'N/A'}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Start:</span>
+                      <p className="text-sm">{formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_24H, timezone)}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">End:</span>
+                      <p className="text-sm">{formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_24H, timezone)}</p>
+                    </div>
+                    <div>
+                      <span className="text-sm font-medium text-muted-foreground">Registered:</span>
+                      <p className="text-sm">
+                        {event.registration_count !== undefined 
+                          ? `${event.registration_count}${event.max_participants ? `/${event.max_participants}` : ''}`
+                          : 'N/A'
+                        }
+                      </p>
+                    </div>
+                    <div className="flex flex-wrap gap-2 pt-2">
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewJudges(event)}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            Judges
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Judges</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewResources(event)}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            Resources
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Resources</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button variant="outline" size="sm" onClick={() => handleViewSchools(event)}>
+                            <Eye className="w-4 h-4 mr-1" />
+                            Schools
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>View Schools</p>
+                        </TooltipContent>
+                      </Tooltip>
+                      {canEdit && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleEditEvent(event)}>
+                              <Edit className="w-4 h-4 mr-1" />
+                              Edit
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Edit Event</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canDelete && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(event)}>
+                              <Trash2 className="w-4 h-4 mr-1" />
+                              Delete
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>Delete Event</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        ) : <div className="border rounded-lg">
           <Table>
             <TableHeader>
                <TableRow>

@@ -2,11 +2,12 @@ import React, { useState } from 'react';
 import { Plus, Eye, Edit } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
 import { EditSchoolModal } from '@/components/competition-portal/modals/EditSchoolModal';
@@ -25,7 +26,8 @@ interface CompetitionSchoolsTabProps {
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
-const {
+  const isMobile = useIsMobile();
+  const {
     schools,
     isLoading,
     createSchoolRegistration,
@@ -66,94 +68,176 @@ const {
       {schools.length === 0 ? <div className="text-center py-8 text-muted-foreground">
           <p>No schools registered for this competition</p>
         </div> : <TooltipProvider>
-          <Card>
-            <CardContent className="p-0">
-              <Table>
-                <TableHeader>
-                  <TableRow>
-                    <TableHead>School Name</TableHead>
-                    <TableHead>Events</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Paid</TableHead>
-                    <TableHead>Fee</TableHead>
-                    <TableHead>Color</TableHead>
-                    <TableHead className="text-center">Actions</TableHead>
-                  </TableRow>
-                </TableHeader>
-                <TableBody>
-                  {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
-                      <TableCell className="font-medium py-[8px]">
-                        {school.school_name || 'Unknown School'}
-                      </TableCell>
-                      <TableCell>
+          {isMobile ? (
+            <div className="space-y-4">
+              {schools.map((school: CompSchoolWithPaid) => (
+                <Card key={school.id}>
+                  <CardHeader className="pb-3">
+                    <CardTitle className="text-lg">{school.school_name || 'Unknown School'}</CardTitle>
+                  </CardHeader>
+                  <CardContent className="pt-0">
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">Status:</span>
+                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                          {school.status}
+                        </Badge>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">Payment:</span>
+                        <Badge variant={school.paid ? 'default' : 'secondary'}>
+                          {school.paid ? 'Paid' : 'Unpaid'}
+                        </Badge>
+                      </div>
+                      <div>
+                        <span className="text-sm font-medium text-muted-foreground">Fee:</span>
+                        <p className="text-sm">$ {school.total_fee}</p>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm font-medium text-muted-foreground">Color:</span>
+                        <div 
+                          className="w-6 h-6 rounded border border-border" 
+                          style={{ backgroundColor: school.color || '#3B82F6' }}
+                        />
+                      </div>
+                      <div className="flex flex-wrap gap-2 pt-2">
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
-                              <Eye className="w-3 h-3" />
+                            <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEvents(school.id)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              Events
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
                             <p>View registered events</p>
                           </TooltipContent>
                         </Tooltip>
-                      </TableCell>                        
-                      <TableCell>
-                        <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
-                          {school.status}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        <Badge variant={school.paid ? 'default' : 'secondary'}>
-                          {school.paid ? 'Paid' : 'Unpaid'}
-                        </Badge>
-                      </TableCell>
-                      <TableCell>
-                        $ {school.total_fee}
-                      </TableCell>
-                       <TableCell>
-                         <div 
-                           className="w-6 h-6 rounded border border-border" 
-                           style={{ backgroundColor: school.color || '#3B82F6' }}
-                         />
-                       </TableCell>
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {canEdit && (
-                            <>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button
-                                    variant="outline"
-                                    size="icon"
-                                    className="h-6 w-6"
-                                    onClick={() => setSelectedSchoolForAddEvent(school.id)}
-                                  >
-                                    <Plus className="w-3 h-3" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Add event score sheet</p>
-                                </TooltipContent>
-                              </Tooltip>
-                              <Tooltip>
-                                <TooltipTrigger asChild>
-                                  <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEdit(school.id)}>
-                                    <Edit className="w-3 h-3" />
-                                  </Button>
-                                </TooltipTrigger>
-                                <TooltipContent>
-                                  <p>Edit school registration</p>
-                                </TooltipContent>
-                              </Tooltip>
-                            </>
-                          )}
-                        </div>
-                      </TableCell>
-                    </TableRow>)}
-                </TableBody>
-              </Table>
-            </CardContent>
-          </Card>
+                        {canEdit && (
+                          <>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button
+                                  variant="outline"
+                                  size="sm"
+                                  onClick={() => setSelectedSchoolForAddEvent(school.id)}
+                                >
+                                  <Plus className="w-4 h-4 mr-1" />
+                                  Add Score
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Add event score sheet</p>
+                              </TooltipContent>
+                            </Tooltip>
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEdit(school.id)}>
+                                  <Edit className="w-4 h-4 mr-1" />
+                                  Edit
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit school registration</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            <Card>
+              <CardContent className="p-0">
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>School Name</TableHead>
+                      <TableHead>Events</TableHead>
+                      <TableHead>Status</TableHead>
+                      <TableHead>Paid</TableHead>
+                      <TableHead>Fee</TableHead>
+                      <TableHead>Color</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
+                        <TableCell className="font-medium py-[8px]">
+                          {school.school_name || 'Unknown School'}
+                        </TableCell>
+                        <TableCell>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
+                                <Eye className="w-3 h-3" />
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View registered events</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        </TableCell>                        
+                        <TableCell>
+                          <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
+                            {school.status}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={school.paid ? 'default' : 'secondary'}>
+                            {school.paid ? 'Paid' : 'Unpaid'}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          $ {school.total_fee}
+                        </TableCell>
+                         <TableCell>
+                           <div 
+                             className="w-6 h-6 rounded border border-border" 
+                             style={{ backgroundColor: school.color || '#3B82F6' }}
+                           />
+                         </TableCell>
+                        <TableCell className="text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            {canEdit && (
+                              <>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button
+                                      variant="outline"
+                                      size="icon"
+                                      className="h-6 w-6"
+                                      onClick={() => setSelectedSchoolForAddEvent(school.id)}
+                                    >
+                                      <Plus className="w-3 h-3" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Add event score sheet</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                                <Tooltip>
+                                  <TooltipTrigger asChild>
+                                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEdit(school.id)}>
+                                      <Edit className="w-3 h-3" />
+                                    </Button>
+                                  </TooltipTrigger>
+                                  <TooltipContent>
+                                    <p>Edit school registration</p>
+                                  </TooltipContent>
+                                </Tooltip>
+                              </>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>)}
+                  </TableBody>
+                </Table>
+              </CardContent>
+            </Card>
+          )}
         </TooltipProvider>}
 
       <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
