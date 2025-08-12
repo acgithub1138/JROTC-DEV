@@ -4,6 +4,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
+import { useIsMobile } from '@/hooks/use-mobile';
 import { ScoreSheetTable as PortalScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
 
 interface CompetitionResultsTabProps {
@@ -33,6 +34,7 @@ const formatEventName = (name?: string) => {
 };
 
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
+  const isMobile = useIsMobile();
   const [rows, setRows] = useState<CompetitionEventRow[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -187,48 +189,86 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           </CardHeader>
 
           <CardContent>
-            <div className="overflow-x-auto">
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="text-left">
-                    <th className="px-3 py-2">Rank</th>
-                    <th className="px-3 py-2">School</th>
-                    {group.judgeNumbers.map((n) => (
-                      <th key={n} className="px-3 py-2">Judge {n}</th>
-                    ))}
-                    <th className="px-3 py-2">Total</th>
-                    <th className="px-3 py-2">Actions</th>
-                  </tr>
-                </thead>
-
-                <tbody>
-                  {group.schools.map((s, idx) => (
-                    <tr key={s.schoolId} className="border-t">
-                      <td className="px-3 py-2">{idx + 1}</td>
-                      <td className="px-3 py-2">{s.schoolName}</td>
-                      {group.judgeNumbers.map((n) => {
-                        const js = s.judges.find((j) => j.judgeNumber === n);
-                        return (
-                          <td key={n} className="px-3 py-2">{js ? js.score : '-'}</td>
-                        );
-                      })}
-                      <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
-                      <td className="px-3 py-2">
-                        <Button
-                          variant="ghost"
-                          size="icon"
-                          aria-label={`View score sheets for ${s.schoolName}`}
-                          onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
-                        >
-                          <Eye className="h-4 w-4" />
-                        </Button>
-                      </td>
+            {isMobile ? (
+              <div className="space-y-4">
+                {group.schools.map((s, idx) => (
+                  <Card key={s.schoolId}>
+                    <CardHeader className="pb-3">
+                      <CardTitle className="text-base flex justify-between items-center">
+                        <span>#{idx + 1} {s.schoolName}</span>
+                        <span className="text-lg font-bold">{s.total.toFixed(1)}</span>
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="pt-0">
+                      <div className="space-y-2">
+                        {group.judgeNumbers.map((n) => {
+                          const js = s.judges.find((j) => j.judgeNumber === n);
+                          return (
+                            <div key={n} className="flex justify-between items-center">
+                              <span className="text-sm font-medium text-muted-foreground">Judge {n}:</span>
+                              <span className="text-sm">{js ? js.score : '-'}</span>
+                            </div>
+                          );
+                        })}
+                        <div className="flex justify-end pt-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                          >
+                            <Eye className="h-4 w-4 mr-1" />
+                            View Details
+                          </Button>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="text-left">
+                      <th className="px-3 py-2">Rank</th>
+                      <th className="px-3 py-2">School</th>
+                      {group.judgeNumbers.map((n) => (
+                        <th key={n} className="px-3 py-2">Judge {n}</th>
+                      ))}
+                      <th className="px-3 py-2">Total</th>
+                      <th className="px-3 py-2">Actions</th>
                     </tr>
-                  ))}
+                  </thead>
 
-                </tbody>
-              </table>
-            </div>
+                  <tbody>
+                    {group.schools.map((s, idx) => (
+                      <tr key={s.schoolId} className="border-t">
+                        <td className="px-3 py-2">{idx + 1}</td>
+                        <td className="px-3 py-2">{s.schoolName}</td>
+                        {group.judgeNumbers.map((n) => {
+                          const js = s.judges.find((j) => j.judgeNumber === n);
+                          return (
+                            <td key={n} className="px-3 py-2">{js ? js.score : '-'}</td>
+                          );
+                        })}
+                        <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
+                        <td className="px-3 py-2">
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            aria-label={`View score sheets for ${s.schoolName}`}
+                            onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                          >
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                        </td>
+                      </tr>
+                    ))}
+
+                  </tbody>
+                </table>
+              </div>
+            )}
           </CardContent>
         </Card>
       ))}
