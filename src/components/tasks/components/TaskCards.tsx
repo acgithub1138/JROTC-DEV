@@ -13,16 +13,27 @@ interface TaskCardsProps {
   onView: (task: Task | Subtask) => void;
   onEdit: (task: Task | Subtask) => void;
   onDelete: (task: Task | Subtask) => void;
+  isMobile?: boolean;
+  isNative?: boolean;
 }
 
 export const TaskCards: React.FC<TaskCardsProps> = ({ 
   tasks, 
   onView, 
   onEdit, 
-  onDelete 
+  onDelete,
+  isMobile,
+  isNative 
 }) => {
+  // Determine if we should use mobile layout
+  const shouldUseMobileLayout = isNative || isMobile || window.innerWidth < 768;
+  
   console.log('TaskCards component rendered:', { 
     tasksLength: tasks.length, 
+    isMobile,
+    isNative,
+    shouldUseMobileLayout,
+    windowWidth: window.innerWidth,
     tasksData: tasks.slice(0, 3).map(t => ({ 
       id: t.id, 
       title: t.title, 
@@ -52,8 +63,13 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
   
   console.log('TaskCards: About to render grid with', tasks.length, 'tasks');
 
+  // Use conditional grid classes based on mobile detection
+  const gridClasses = shouldUseMobileLayout 
+    ? "grid gap-4 grid-cols-1" 
+    : "grid gap-4 md:grid-cols-2 lg:grid-cols-3";
+
   return (
-    <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+    <div className={gridClasses}>
       {tasks.map((task) => (
         <Card key={task.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">

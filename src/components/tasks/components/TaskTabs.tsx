@@ -76,6 +76,8 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
           onView={onTaskSelect}
           onEdit={onEditTask}
           onDelete={() => {}}
+          isMobile={isMobile}
+          isNative={isNative}
         />
       );
     }
