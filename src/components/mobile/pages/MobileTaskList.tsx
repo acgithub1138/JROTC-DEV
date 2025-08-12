@@ -33,9 +33,14 @@ export const MobileTaskList: React.FC = () => {
     today.setHours(23, 59, 59, 999);
     const dueDate = task.due_date ? new Date(task.due_date) : null;
 
+    // Helper function to check if task is active (not completed or canceled)
+    const isActiveTask = !task.completed_at && task.status !== 'completed' && task.status !== 'canceled';
+
     switch (filter) {
       case 'mine':
-        return task.assigned_to === userProfile?.id;
+        return task.assigned_to === userProfile?.id && isActiveTask;
+      case 'all':
+        return isActiveTask;
       case 'today':
         return dueDate && dueDate <= today;
       case 'overdue':
