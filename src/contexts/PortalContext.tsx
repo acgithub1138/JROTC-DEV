@@ -23,8 +23,10 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { userProfile } = useAuth();
   const [currentPortal, setCurrentPortal] = useState<PortalType>('ccc');
 
-  // Check if user can access competition portal
-  const canAccessCompetitionPortal = userProfile?.schools?.competition_module === true;
+  // Check if user can access competition portal (either competition module or competition portal enabled)
+  const canAccessCompetitionPortal = 
+    userProfile?.schools?.competition_module === true || 
+    userProfile?.schools?.competition_portal === true;
   
   console.log('PortalContext - Competition Portal Access Check:', {
     userId: userProfile?.id,
