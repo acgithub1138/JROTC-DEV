@@ -16,16 +16,29 @@ export const useCapacitor = (): CapacitorInfo => {
   useEffect(() => {
     const initCapacitor = async () => {
       try {
-        // Check if we're in a Capacitor environment
-        if (typeof window !== 'undefined' && window.location.protocol === 'capacitor:') {
+        // More comprehensive check for Capacitor environment
+        const isCapacitorEnv = typeof window !== 'undefined' && (
+          window.location.protocol === 'capacitor:' || 
+          (window as any).Capacitor || 
+          (window as any).IonicNative ||
+          document.URL.indexOf('http://') === -1 && document.URL.indexOf('https://') === -1
+        );
+        
+        if (isCapacitorEnv) {
           const { Capacitor } = await import('@capacitor/core');
           
+          const isNative = Capacitor.isNativePlatform();
+          const platform = Capacitor.getPlatform();
+          
+          console.log('Capacitor detected:', { isNative, platform });
+          
           setCapacitorInfo({
-            isNative: Capacitor.isNativePlatform(),
-            platform: Capacitor.getPlatform(),
+            isNative,
+            platform,
             isLoading: false,
           });
         } else {
+          console.log('Running on web platform');
           setCapacitorInfo({
             isNative: false,
             platform: 'web',
@@ -33,7 +46,7 @@ export const useCapacitor = (): CapacitorInfo => {
           });
         }
       } catch (error) {
-        console.log('Capacitor not available, running on web');
+        console.log('Capacitor not available, running on web', error);
         setCapacitorInfo({
           isNative: false,
           platform: 'web',
