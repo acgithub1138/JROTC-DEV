@@ -32,10 +32,7 @@ export const MobileCompetitionDashboard: React.FC = () => {
               <Users className="h-5 w-5 mr-3 flex-shrink-0" />
               <span className="font-medium">My Competitions</span>
             </button>
-            <button className="w-full p-4 bg-purple-500/10 text-purple-600 rounded-lg hover:bg-purple-500/20 transition-colors flex items-center text-left">
-              <Calendar className="h-5 w-5 mr-3 flex-shrink-0" />
-              <span className="font-medium">View Schedule</span>
-            </button>
+            
           </div>
         </CardContent>
       </Card>
