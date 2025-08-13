@@ -104,6 +104,20 @@ export const MobileTaskList: React.FC = () => {
     return date < today;
   };
 
+  const isDueSoon = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    const threeDaysFromNow = new Date();
+    
+    today.setHours(0, 0, 0, 0);
+    threeDaysFromNow.setHours(0, 0, 0, 0);
+    threeDaysFromNow.setDate(today.getDate() + 3);
+    date.setHours(0, 0, 0, 0);
+    
+    return date >= today && date <= threeDaysFromNow;
+  };
+
 const openSubtask = (subtaskId: string, parentTaskId: string) => {
   navigate(`/mobile/subtasks/${subtaskId}`, { state: { parentTaskId } });
 };
@@ -119,7 +133,8 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
           key={st.id}
           className={cn(
             "bg-card border-border/70 cursor-pointer hover:bg-muted/50 transition-colors",
-            isOverdue(st.due_date) && "border-red-500 border-2"
+            isOverdue(st.due_date) && "border-red-500 border-2",
+            !isOverdue(st.due_date) && isDueSoon(st.due_date) && "border-orange-500 border-2"
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -241,7 +256,8 @@ if (isLoading) {
                 className={cn(
                   "bg-card border-border transition-colors",
                   canViewDetails && "cursor-pointer hover:bg-muted/50",
-                  isOverdue(task.due_date) && "border-red-500 border-2"
+                  isOverdue(task.due_date) && "border-red-500 border-2",
+                  !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-orange-500 border-2"
                 )}
                 onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
               >
