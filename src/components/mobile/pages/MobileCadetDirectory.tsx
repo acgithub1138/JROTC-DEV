@@ -133,13 +133,7 @@ export const MobileCadetDirectory: React.FC = () => {
                   
                   {cadet.rank && <p className="text-xs text-muted-foreground mb-1">{cadet.rank}</p>}
                   
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center space-x-3">
-                      <Button variant="ghost" size="sm" className="p-1 h-8 w-8" onClick={e => handleEmail(cadet.email, e)}>
-                        <Mail className="h-4 w-4 text-blue-600" />
-                      </Button>
-                    </div>
-                    
+                  <div className="flex items-center justify-end">
                     {cadet.flight && <Badge variant="secondary" className="text-xs">
                         {cadet.flight}
                       </Badge>}
