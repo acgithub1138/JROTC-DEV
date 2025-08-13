@@ -1,41 +1,42 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { ArrowLeft, Calendar, Users, MapPin, Trophy, FileText } from 'lucide-react';
 
 export const MobileHostCompetitionDetails: React.FC = () => {
   const navigate = useNavigate();
+  const { competitionId } = useParams<{ competitionId: string }>();
 
   const navigationItems = [
     {
       title: 'Events',
       description: 'Manage competition events and scoring',
       icon: Trophy,
-      path: '/mobile/competition-portal/host/events',
+      path: `/mobile/competition-portal/manage/${competitionId}/events`,
     },
     {
       title: 'Resources',
       description: 'Assign judges and manage resources',
       icon: Users,
-      path: '/mobile/competition-portal/host/resources',
+      path: `/mobile/competition-portal/manage/${competitionId}/resources`,
     },
     {
       title: 'Schools',
       description: 'View registered schools and payments',
       icon: MapPin,
-      path: '/mobile/competition-portal/host/schools',
+      path: `/mobile/competition-portal/manage/${competitionId}/schools`,
     },
     {
       title: 'Schedule',
       description: 'Manage event schedules and timing',
       icon: Calendar,
-      path: '/mobile/competition-portal/host/schedule',
+      path: `/mobile/competition-portal/manage/${competitionId}/schedule`,
     },
     {
       title: 'Results',
       description: 'View competition results and scores',
       icon: FileText,
-      path: '/mobile/competition-portal/host/results',
+      path: `/mobile/competition-portal/manage/${competitionId}/results`,
     },
   ];
 
