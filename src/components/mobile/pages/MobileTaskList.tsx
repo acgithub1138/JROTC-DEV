@@ -27,7 +27,7 @@ export const MobileTaskList: React.FC = () => {
   const { priorityOptions } = useTaskPriorityOptions();
   const { userProfile } = useAuth();
   const { canCreate, canViewDetails } = useTaskPermissions();
-  const [filter, setFilter] = useState<'all' | 'mine' | 'today' | 'overdue'>('all');
+  const [filter, setFilter] = useState<'all' | 'mine' | 'soon' | 'overdue'>('all');
 
   // Filter tasks based on current filter
   const filteredTasks = tasks.filter(task => {
@@ -43,8 +43,8 @@ export const MobileTaskList: React.FC = () => {
         return task.assigned_to === userProfile?.id && isActiveTask;
       case 'all':
         return isActiveTask;
-      case 'today':
-        return dueDate && dueDate <= today;
+      case 'soon':
+        return dueDate && isDueSoon(task.due_date) && isActiveTask;
       case 'overdue':
         return dueDate && dueDate < new Date() && !task.completed_at;
       default:
@@ -196,7 +196,7 @@ if (isLoading) {
         {/* Filter Bar */}
         <div className="p-4 border-b border-border bg-card">
           <div className="flex gap-2 overflow-x-auto">
-            {['all', 'mine', 'today', 'overdue'].map((filterType) => (
+            {['all', 'mine', 'soon', 'overdue'].map((filterType) => (
               <div key={filterType} className="flex-shrink-0 h-8 bg-muted rounded animate-pulse w-20" />
             ))}
           </div>
@@ -228,7 +228,7 @@ if (isLoading) {
       {/* Filter Bar */}
       <div className="p-4 border-b border-border bg-card">
         <div className="flex gap-2 overflow-x-auto">
-          {['mine', 'all', 'today', 'overdue'].map((filterType) => (
+          {['mine', 'all', 'soon', 'overdue'].map((filterType) => (
             <Button
               key={filterType}
               variant={filter === filterType ? 'default' : 'outline'}
