@@ -316,6 +316,29 @@ export const MobileTaskDetail: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-4">
+                {/* Add Comment Form - moved to top */}
+                <div className="space-y-3 pb-4 border-b border-border">
+                  <textarea
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    placeholder="Add a comment..."
+                    className="w-full min-h-[80px] p-3 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
+                  />
+                  <Button
+                    onClick={() => {
+                      if (newComment.trim()) {
+                        handleAddComment(newComment.trim());
+                        setNewComment('');
+                      }
+                    }}
+                    disabled={!newComment.trim() || isAddingComment}
+                    className="w-full"
+                  >
+                    {isAddingComment ? 'Adding...' : 'Add Comment'}
+                  </Button>
+                </div>
+
+                {/* Comments List */}
                 {comments.map((comment) => (
                   <div key={comment.id} className={cn(
                     "p-3 rounded-lg",
@@ -338,28 +361,6 @@ export const MobileTaskDetail: React.FC = () => {
                     </div>
                   </div>
                 ))}
-                
-                {/* Add Comment Form */}
-                <div className="space-y-3">
-                  <textarea
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    placeholder="Add a comment..."
-                    className="w-full min-h-[80px] p-3 text-sm border rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-primary"
-                  />
-                  <Button
-                    onClick={() => {
-                      if (newComment.trim()) {
-                        handleAddComment(newComment.trim());
-                        setNewComment('');
-                      }
-                    }}
-                    disabled={!newComment.trim() || isAddingComment}
-                    className="w-full"
-                  >
-                    {isAddingComment ? 'Adding...' : 'Add Comment'}
-                  </Button>
-                </div>
               </div>
             </CardContent>
           </Card>
