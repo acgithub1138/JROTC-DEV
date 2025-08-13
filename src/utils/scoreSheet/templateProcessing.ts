@@ -9,15 +9,32 @@ export const extractFieldsFromTemplate = (template: Template): ProcessedScoreFie
   if (template.scores) {
     if (Array.isArray(template.scores)) {
       rawFields = template.scores;
+    } else if (typeof template.scores === 'string') {
+      // Handle JSON string case
+      try {
+        const parsed = JSON.parse(template.scores);
+        if (Array.isArray(parsed)) {
+          rawFields = parsed;
+        } else if (parsed.criteria && Array.isArray(parsed.criteria)) {
+          rawFields = parsed.criteria;
+        }
+      } catch (e) {
+        console.error('Failed to parse template.scores JSON:', e);
+      }
     } else if (typeof template.scores === 'object') {
-      // Convert object to array format
-      rawFields = Object.entries(template.scores).map(([key, value]: [string, any]) => ({
-        id: key,
-        name: value?.name || key,
-        type: value?.type || 'number',
-        max_score: value?.max_score || value?.maxScore || value?.points || 10,
-        ...value
-      }));
+      // Check for nested criteria structure (template.scores.criteria)
+      if (template.scores.criteria && Array.isArray(template.scores.criteria)) {
+        rawFields = template.scores.criteria;
+      } else {
+        // Convert object to array format
+        rawFields = Object.entries(template.scores).map(([key, value]: [string, any]) => ({
+          id: key,
+          name: value?.name || key,
+          type: value?.type || 'number',
+          max_score: value?.max_score || value?.maxScore || value?.points || 10,
+          ...value
+        }));
+      }
     }
   } else if (template.criteria && Array.isArray(template.criteria)) {
     rawFields = template.criteria;
