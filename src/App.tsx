@@ -44,6 +44,7 @@ import { MobileHostResources } from "@/components/mobile/competition-portal/page
 import { MobileHostSchools } from "@/components/mobile/competition-portal/pages/MobileHostSchools";
 import { MobileHostSchedule } from "@/components/mobile/competition-portal/pages/MobileHostSchedule";
 import { MobileHostResults } from "@/components/mobile/competition-portal/pages/MobileHostResults";
+import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -186,11 +187,41 @@ const App = () => (
                       <MobileHostSchedule />
                     </ProtectedRoute>
                   } />
-                  <Route path="competition-portal/host/results" element={
-                    <ProtectedRoute>
-                      <MobileHostResults />
-                    </ProtectedRoute>
-                  } />
+                   <Route path="competition-portal/host/results" element={
+                     <ProtectedRoute>
+                       <MobileHostResults />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId" element={
+                     <ProtectedRoute>
+                       <MobileManageCompetition />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/events" element={
+                     <ProtectedRoute>
+                       <MobileHostEvents />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/resources" element={
+                     <ProtectedRoute>
+                       <MobileHostResources />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/schools" element={
+                     <ProtectedRoute>
+                       <MobileHostSchools />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/schedule" element={
+                     <ProtectedRoute>
+                       <MobileHostSchedule />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/results" element={
+                     <ProtectedRoute>
+                       <MobileHostResults />
+                     </ProtectedRoute>
+                   } />
                 </Route>
               </Route>
 

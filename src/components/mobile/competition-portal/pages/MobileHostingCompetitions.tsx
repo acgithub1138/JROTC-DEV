@@ -111,7 +111,12 @@ export const MobileHostingCompetitions: React.FC = () => {
                       <Users size={12} className="mr-1" />
                       <span>0 registered schools</span>
                     </div>
-                    <Button variant="outline" size="sm" className="text-xs h-7">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs h-7"
+                      onClick={() => navigate(`/mobile/competition-portal/manage/${competition.id}`)}
+                    >
                       Manage
                     </Button>
                   </div>
