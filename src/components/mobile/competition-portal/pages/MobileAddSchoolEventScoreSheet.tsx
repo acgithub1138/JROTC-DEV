@@ -32,11 +32,34 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
   const [teamName, setTeamName] = useState('');
   const [notes, setNotes] = useState('');
 
-  // Fetch available events for this competition
+  // Fetch available events for this competition that the school is registered for
   const { data: events, isLoading: eventsLoading } = useQuery({
-    queryKey: ['competition-events', competitionId],
+    queryKey: ['competition-events', competitionId, schoolId],
     queryFn: async () => {
-      if (!competitionId) return [];
+      if (!competitionId || !schoolId) return [];
+      
+      // Get school's actual school_id from cp_comp_schools
+      const { data: compSchool, error: compSchoolError } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id')
+        .eq('id', schoolId)
+        .single();
+
+      if (compSchoolError) throw compSchoolError;
+      if (!compSchool?.school_id) return [];
+
+      // First get the registered event IDs
+      const { data: registrations, error: regError } = await supabase
+        .from('cp_event_registrations')
+        .select('event_id')
+        .eq('competition_id', competitionId)
+        .eq('school_id', compSchool.school_id);
+
+      if (regError) throw regError;
+      if (!registrations?.length) return [];
+
+      const registeredEventIds = registrations.map(r => r.event_id);
+
       const { data, error } = await supabase
         .from('cp_comp_events')
         .select(`
@@ -47,12 +70,13 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
           cp_events:event(name)
         `)
         .eq('competition_id', competitionId)
+        .in('id', registeredEventIds)
         .order('start_time');
 
       if (error) throw error;
       return data;
     },
-    enabled: !!competitionId
+    enabled: !!competitionId && !!schoolId
   });
 
   // Fetch school details
