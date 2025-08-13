@@ -60,7 +60,6 @@ export const MobileHostEvents: React.FC = () => {
         </div>
         <Button size="sm" className="bg-primary text-primary-foreground">
           <Plus size={16} className="mr-1" />
-          Add
         </Button>
       </div>
 
