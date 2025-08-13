@@ -97,58 +97,32 @@ export const MobileHostResults: React.FC = () => {
           const completedScores = uniqueSchools.size;
           const totalScores = registeredSchools;
 
-          // Find top score and school using Grand Total from score sheets
+          // Find top score and school using total_points (Grand Total)
           let topSchool: string | null = null;
           let topScore: number | null = null;
 
           if (eventScores.length > 0) {
-            const topResult = eventScores.reduce((prev: any, current: any) => {
-              // Calculate Grand Total from score sheet for comparison
-              const calculateGrandTotal = (scoreSheet: any): number => {
-                if (!scoreSheet || typeof scoreSheet !== 'object') return 0;
-                
-                let total = 0;
-                const calculateTotal = (obj: any): number => {
-                  let subTotal = 0;
-                  Object.values(obj).forEach(value => {
-                    if (typeof value === 'number') {
-                      subTotal += value;
-                    } else if (typeof value === 'object' && value !== null) {
-                      subTotal += calculateTotal(value);
-                    }
-                  });
-                  return subTotal;
-                };
-                return calculateTotal(scoreSheet);
-              };
+            // Group by school and sum their total_points for Grand Total
+            const schoolTotals: Record<string, { total: number, school_name: string }> = {};
+            
+            eventScores.forEach((score: any) => {
+              const schoolId = score.school_id;
+              const schoolName = schoolNamesMap[schoolId] || score.team_name || 'Unknown School';
               
-              const prevScore = calculateGrandTotal(prev.score_sheet);
-              const currentScore = calculateGrandTotal(current.score_sheet);
-              return currentScore > prevScore ? current : prev;
+              if (!schoolTotals[schoolId]) {
+                schoolTotals[schoolId] = { total: 0, school_name: schoolName };
+              }
+              
+              schoolTotals[schoolId].total += Number(score.total_points) || 0;
             });
             
-            topSchool = schoolNamesMap[topResult.school_id] || topResult.team_name || 'Unknown School';
+            // Find the school with the highest Grand Total
+            const topSchoolEntry = Object.entries(schoolTotals).reduce((prev, current) => {
+              return current[1].total > prev[1].total ? current : prev;
+            });
             
-            // Calculate Grand Total for display
-            const calculateGrandTotal = (scoreSheet: any): number => {
-              if (!scoreSheet || typeof scoreSheet !== 'object') return 0;
-              
-              let total = 0;
-              const calculateTotal = (obj: any): number => {
-                let subTotal = 0;
-                Object.values(obj).forEach(value => {
-                  if (typeof value === 'number') {
-                    subTotal += value;
-                  } else if (typeof value === 'object' && value !== null) {
-                    subTotal += calculateTotal(value);
-                  }
-                });
-                return subTotal;
-              };
-              return calculateTotal(scoreSheet);
-            };
-            
-            topScore = calculateGrandTotal(topResult.score_sheet);
+            topSchool = topSchoolEntry[1].school_name;
+            topScore = topSchoolEntry[1].total;
           }
 
           return {

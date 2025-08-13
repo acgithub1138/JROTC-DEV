@@ -57,7 +57,7 @@ export const MobileEventResultsView: React.FC = () => {
           return acc;
         }, {} as Record<string, string>);
 
-        // Aggregate results by school and calculate Grand Total from score sheets
+        // Aggregate results by school - sum the total_points from all score sheets
         const schoolResults: Record<string, SchoolResult> = {};
         
         (resultsData || []).forEach(result => {
@@ -70,26 +70,8 @@ export const MobileEventResultsView: React.FC = () => {
             };
           }
           
-          // Calculate Grand Total from score sheet
-          let grandTotal = 0;
-          if (result.score_sheet && typeof result.score_sheet === 'object') {
-            const scoreSheet = result.score_sheet as any;
-            // Sum all numeric values in the score sheet to get Grand Total
-            const calculateTotal = (obj: any): number => {
-              let total = 0;
-              Object.values(obj).forEach(value => {
-                if (typeof value === 'number') {
-                  total += value;
-                } else if (typeof value === 'object' && value !== null) {
-                  total += calculateTotal(value);
-                }
-              });
-              return total;
-            };
-            grandTotal = calculateTotal(scoreSheet);
-          }
-          
-          schoolResults[result.school_id].total_points += grandTotal;
+          // Sum the total_points from each score sheet (Grand Total)
+          schoolResults[result.school_id].total_points += Number(result.total_points) || 0;
           schoolResults[result.school_id].judge_count += 1;
         });
 
