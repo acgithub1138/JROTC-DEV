@@ -119,15 +119,16 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
               <div className="flex items-start gap-2 flex-1 min-w-0">
                 <CornerDownRight className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
                 <div className="min-w-0 flex-1">
-                  <div className="flex items-center gap-2 mb-1">
-                    <Badge variant="secondary" className="text-[10px] flex-shrink-0">Subtask</Badge>
-                  </div>
                   <h3 className="font-medium text-foreground text-sm line-clamp-2">
                     {st.title}
                   </h3>
                 </div>
               </div>
-              {getPriorityBadge(st.priority)}
+              {st.task_number && (
+                <Badge variant="outline" className="text-xs">
+                  #{st.task_number}
+                </Badge>
+              )}
             </div>
             
             {st.description && (
@@ -148,6 +149,12 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
                     ? `${st.assigned_to_profile.last_name}, ${st.assigned_to_profile.first_name}`
                     : 'Unassigned'}
                 </div>
+                <div className="flex items-center gap-2">
+                  {getPriorityBadge(st.priority)}
+                </div>
+              </div>
+              
+              <div className="flex items-center justify-end text-xs text-muted-foreground">
                 <div className="flex items-center">
                   <Calendar className="mr-1 h-3 w-3" />
                   {formatDate(st.due_date || null)}
@@ -235,7 +242,11 @@ if (isLoading) {
                     <h3 className="font-medium text-foreground text-sm line-clamp-2 flex-1 mr-2">
                       {task.title}
                     </h3>
-                    {getPriorityBadge(task.priority)}
+                    {task.task_number && (
+                      <Badge variant="outline" className="text-xs">
+                        #{task.task_number}
+                      </Badge>
+                    )}
                   </div>
                   
                   {task.description && (
@@ -247,11 +258,7 @@ if (isLoading) {
                   <div className="space-y-2">
                     <div className="flex items-center justify-between">
                       {getStatusBadge(task.status)}
-                      {task.task_number && (
-                        <Badge variant="outline" className="text-xs">
-                          #{task.task_number}
-                        </Badge>
-                      )}
+                      {getPriorityBadge(task.priority)}
                     </div>
                     
                     <div className="flex items-center justify-between text-xs text-muted-foreground">
