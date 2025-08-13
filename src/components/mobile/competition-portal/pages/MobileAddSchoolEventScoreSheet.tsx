@@ -366,19 +366,32 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
           <CardContent className="space-y-3">
             {scoreSheet.map((item) => {
               // Handle penalty fields - only show for Judge 1
-              if ((item.criteria.toLowerCase().includes('penalty') || 
-                   item.criteria.toLowerCase().includes('violation') || 
-                   item.criteria.toLowerCase().includes('deduction')) && 
-                  judgeNumber !== 'Judge 1') {
+              const isPenalty = item.type === 'penalty' || 
+                               item.criteria.toLowerCase().includes('penalty') || 
+                               item.criteria.toLowerCase().includes('violation') || 
+                               item.criteria.toLowerCase().includes('deduction') ||
+                               item.criteria.toLowerCase().includes('incorrect commands') ||
+                               item.criteria.toLowerCase().includes('uneven') ||
+                               item.criteria.toLowerCase().includes('poor cadence') ||
+                               item.criteria.toLowerCase().includes('missing cadets');
+
+              if (isPenalty && judgeNumber !== 'Judge 1') {
                 return null;
               }
 
-              const isPenalty = item.criteria.toLowerCase().includes('penalty') || 
-                               item.criteria.toLowerCase().includes('violation') || 
-                               item.criteria.toLowerCase().includes('deduction');
+              // Handle section headers
+              if (item.type === 'section_header') {
+                return (
+                  <div key={item.id} className="border-b-2 border-primary pb-2 py-2">
+                    <h3 className="text-lg font-bold text-primary">
+                      {item.criteria}
+                    </h3>
+                  </div>
+                );
+              }
 
               // Handle pause fields (labels like "Example 19a", "Penalties")
-              if (item.pauseField || item.type === 'bold_gray' || item.type === 'pause') {
+              if (item.pauseField || item.type === 'bold_gray' || item.type === 'pause' || item.type === 'label') {
                 return (
                   <div key={item.id} className="py-2">
                     <h4 className="font-semibold text-sm text-foreground border-b border-border pb-1">
