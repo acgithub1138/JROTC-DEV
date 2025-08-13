@@ -134,7 +134,7 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
           className={cn(
             "bg-card border-border/70 cursor-pointer hover:bg-muted/50 transition-colors",
             isOverdue(st.due_date) && "border-red-500 border-2",
-            !isOverdue(st.due_date) && isDueSoon(st.due_date) && "border-orange-500 border-2"
+            !isOverdue(st.due_date) && isDueSoon(st.due_date) && "border-yellow-500 border-2"
           )}
           onClick={(e) => {
             e.stopPropagation();
@@ -257,7 +257,7 @@ if (isLoading) {
                   "bg-card border-border transition-colors",
                   canViewDetails && "cursor-pointer hover:bg-muted/50",
                   isOverdue(task.due_date) && "border-red-500 border-2",
-                  !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-orange-500 border-2"
+                  !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-yellow-500 border-2"
                 )}
                 onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
               >
