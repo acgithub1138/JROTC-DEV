@@ -55,10 +55,13 @@ export const MobileHostSchools: React.FC = () => {
             <p className="text-sm text-muted-foreground">Registered schools and payments</p>
           </div>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
-          <Plus size={16} className="mr-1" />
-          Add
-        </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schools/add`)}
+            className="h-8 w-8 p-0"
+          >
+            <Plus size={16} />
+          </Button>
       </div>
 
       {/* Schools List */}
