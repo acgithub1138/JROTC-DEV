@@ -26,6 +26,7 @@ import { MobileCadetDirectory } from "@/components/mobile/pages/MobileCadetDirec
 import { MobileCadetDetail } from "@/components/mobile/pages/MobileCadetDetail";
 import { MobileIncidentReporting } from "@/components/mobile/pages/MobileIncidentReporting";
 import { MobileCalendar } from "@/components/mobile/pages/MobileCalendar";
+import { MobileEditEvent } from "@/components/mobile/competition-portal/pages/MobileEditEvent";
 import { MobileAddEvent } from "@/components/mobile/pages/MobileAddEvent";
 import { MobileMore } from "@/components/mobile/pages/MobileMore";
 import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
@@ -167,6 +168,11 @@ const App = () => (
                       <MobileHostCompetitionDetails />
                     </ProtectedRoute>
                   } />
+                   <Route path="competition-portal/manage/:competitionId/events/:eventId/edit" element={
+                     <ProtectedRoute>
+                       <MobileEditEvent />
+                     </ProtectedRoute>
+                   } />
                    <Route path="competition-portal/manage/:competitionId/events" element={
                      <ProtectedRoute>
                        <MobileHostEvents />
