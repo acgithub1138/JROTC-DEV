@@ -461,7 +461,7 @@ export const MobileAddEvent: React.FC = () => {
                   />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="fee">Event    Fee($)</Label>
+                  <Label htmlFor="fee">Event Fee ($)</Label>
                   <Input
                     id="fee"
                     type="number"
