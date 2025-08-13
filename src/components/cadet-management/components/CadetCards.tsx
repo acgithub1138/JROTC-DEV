@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -20,7 +20,7 @@ interface CadetCardsProps {
   onSelectCadet: (cadetId: string, checked: boolean) => void;
 }
 
-export const CadetCards: React.FC<CadetCardsProps> = ({ 
+export const CadetCards = ({ 
   profiles, 
   activeTab, 
   onEditProfile, 

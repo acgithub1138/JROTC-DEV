@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { format, startOfMonth, endOfMonth, eachDayOfInterval, startOfWeek, endOfWeek, isSameMonth, isSameDay, isToday } from 'date-fns';
@@ -24,13 +24,13 @@ const getEventTypeColor = (event: Event) => {
   };
 };
 
-export const MonthView: React.FC<MonthViewProps> = ({
+export const MonthView = ({
   currentDate,
   events,
   onEventClick,
   onDateClick,
   onDateDoubleClick,
-}) => {
+}: MonthViewProps) => {
   const { timezone, isLoading } = useSchoolTimezone();
   const monthStart = startOfMonth(currentDate);
   const monthEnd = endOfMonth(currentDate);

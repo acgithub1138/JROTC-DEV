@@ -1,4 +1,4 @@
-import React from 'react';
+
 import {
   Dialog,
   DialogContent,
@@ -20,7 +20,7 @@ interface ViewBudgetItemDialogProps {
   onEdit?: () => void;
 }
 
-export const ViewBudgetItemDialog: React.FC<ViewBudgetItemDialogProps> = ({
+export const ViewBudgetItemDialog = ({
   open,
   onOpenChange,
   item,

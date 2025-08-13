@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent } from '@/components/ui/card';
 
@@ -10,10 +10,10 @@ interface EventFiltersProps {
   onFiltersChange: (filters: { eventType: string; assignedTo: string }) => void;
 }
 
-export const EventFilters: React.FC<EventFiltersProps> = ({
+export const EventFilters = ({
   filters,
   onFiltersChange,
-}) => {
+}: EventFiltersProps) => {
   const handleEventTypeChange = (value: string) => {
     onFiltersChange({
       ...filters,

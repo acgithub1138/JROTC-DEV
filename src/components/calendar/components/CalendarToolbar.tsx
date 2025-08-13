@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ChevronLeft, ChevronRight, Calendar as CalendarIcon, Plus } from 'lucide-react';
@@ -18,7 +18,7 @@ interface CalendarToolbarProps {
   readOnly?: boolean;
 }
 
-export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
+export const CalendarToolbar = ({
   currentDate,
   viewType,
   onDateChange,
@@ -27,7 +27,7 @@ export const CalendarToolbar: React.FC<CalendarToolbarProps> = ({
   selectedEventType,
   onEventTypeChange,
   readOnly = false,
-}) => {
+}: CalendarToolbarProps) => {
   const { eventTypes } = useEventTypes();
   const handlePrevious = () => {
     switch (viewType) {

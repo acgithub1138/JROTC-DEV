@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { format, isSameDay, addHours } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
@@ -21,12 +21,12 @@ const getEventTypeColor = (event: Event) => {
   };
 };
 
-export const DayView: React.FC<DayViewProps> = ({
+export const DayView = ({
   currentDate,
   events,
   onEventClick,
   onTimeSlotClick,
-}) => {
+}: DayViewProps) => {
   const { timezone, isLoading } = useSchoolTimezone();
   const hours = Array.from({ length: 16 }, (_, i) => i + 6); // 6 AM to 9 PM
   const currentTime = new Date();

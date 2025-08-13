@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -16,7 +16,7 @@ interface BudgetCardsProps {
   onDelete: (transaction: BudgetTransaction) => void;
 }
 
-export const BudgetCards: React.FC<BudgetCardsProps> = ({
+export const BudgetCards = ({
   transactions,
   onEdit,
   onView,

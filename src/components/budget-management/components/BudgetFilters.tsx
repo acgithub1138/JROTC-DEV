@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -11,7 +11,7 @@ interface BudgetFiltersProps {
   onFiltersChange: (filters: BudgetFiltersType) => void;
 }
 
-export const BudgetFilters: React.FC<BudgetFiltersProps> = ({ filters, onFiltersChange }) => {
+export const BudgetFilters = ({ filters, onFiltersChange }) => {
   const { data: budgetYears = [] } = useBudgetYears();
   
   const updateFilter = (key: keyof BudgetFiltersType, value: any) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -62,7 +62,7 @@ const PlacementBadge = ({ placement, label }: { placement: string | null; label:
   return null;
 };
 
-export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
+export const CompetitionCards = ({
   competitions,
   isLoading,
   onEdit,
@@ -72,7 +72,7 @@ export const CompetitionCards: React.FC<CompetitionCardsProps> = ({
   onView,
   onViewSchedule,
   canViewDetails = false
-}) => {
+}: CompetitionCardsProps) => {
   if (isLoading) {
     return (
       <div className="grid gap-4">

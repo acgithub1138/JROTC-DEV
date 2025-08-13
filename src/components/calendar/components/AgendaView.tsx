@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent } from '@/components/ui/card';
 import { format, startOfMonth, endOfMonth, isSameDay, startOfDay, addDays } from 'date-fns';
@@ -25,11 +25,11 @@ const getEventTypeColor = (type: string) => {
   }
 };
 
-export const AgendaView: React.FC<AgendaViewProps> = ({
+export const AgendaView = ({
   currentDate,
   events,
   onEventClick,
-}) => {
+}: AgendaViewProps) => {
   const { timezone, isLoading } = useSchoolTimezone();
   
   if (isLoading) {
@@ -74,7 +74,7 @@ export const AgendaView: React.FC<AgendaViewProps> = ({
           </CardContent>
         </Card>
       ) : (
-        Object.entries(groupedEvents).map(([dateKey, dayEvents]) => {
+        Object.entries(groupedEvents).map(([dateKey, dayEvents]: [string, Event[]]) => {
           const isToday = isSameDayInSchoolTimezone(dateKey, today, timezone);
           const isPast = isDatePastInSchoolTimezone(dateKey, timezone);
           

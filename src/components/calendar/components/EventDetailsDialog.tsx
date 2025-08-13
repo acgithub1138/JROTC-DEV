@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Calendar, Clock, MapPin, User, FileText } from 'lucide-react';
@@ -12,11 +12,11 @@ interface EventDetailsDialogProps {
   event: Event | null;
 }
 
-export const EventDetailsDialog: React.FC<EventDetailsDialogProps> = ({
+export const EventDetailsDialog = ({
   open,
   onOpenChange,
   event,
-}) => {
+}: EventDetailsDialogProps) => {
   const { timezone } = useSchoolTimezone();
   
   if (!event) return null;

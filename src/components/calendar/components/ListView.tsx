@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Event } from '../CalendarManagementPage';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { format } from 'date-fns';
@@ -13,11 +13,11 @@ interface ListViewProps {
   readOnly?: boolean;
 }
 
-export const ListView: React.FC<ListViewProps> = ({
+export const ListView = ({
   events,
   onEventClick,
   readOnly = false,
-}) => {
+}: ListViewProps) => {
   // Sort events by start date and take the next 25
   const sortedEvents = events
     .filter(event => new Date(event.start_date) >= new Date())

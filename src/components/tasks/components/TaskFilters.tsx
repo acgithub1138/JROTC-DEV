@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Search } from 'lucide-react';
 import { Input } from '@/components/ui/input';
 import { Task } from '@/hooks/useTasks';
@@ -9,7 +9,7 @@ interface TaskFiltersProps {
   onSearchChange: (term: string) => void;
 }
 
-export const TaskFilters: React.FC<TaskFiltersProps> = ({
+export const TaskFilters = ({
   searchTerm,
   onSearchChange
 }) => {

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { format, startOfWeek, addDays, isSameDay, addHours, startOfDay } from 'date-fns';
 import { Event } from '../CalendarManagementPage';
 import { cn } from '@/lib/utils';
@@ -21,12 +21,12 @@ const getEventTypeColor = (event: Event) => {
   };
 };
 
-export const WeekView: React.FC<WeekViewProps> = ({
+export const WeekView = ({
   currentDate,
   events,
   onEventClick,
   onTimeSlotClick,
-}) => {
+}: WeekViewProps) => {
   const { timezone, isLoading } = useSchoolTimezone();
   const weekStart = startOfWeek(currentDate, { weekStartsOn: 0 });
   const weekDays = Array.from({ length: 7 }, (_, i) => addDays(weekStart, i));

@@ -1,4 +1,4 @@
-import React from 'react';
+
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { BudgetTransaction } from '../BudgetManagementPage';
@@ -7,7 +7,7 @@ interface BudgetSummaryCardsProps {
   transactions: BudgetTransaction[];
 }
 
-export const BudgetSummaryCards: React.FC<BudgetSummaryCardsProps> = ({ transactions }) => {
+export const BudgetSummaryCards = ({ transactions }) => {
   const totalIncome = transactions
     .filter(t => t.category === 'income' && t.active !== false)
     .reduce((sum, t) => sum + Number(t.amount), 0);
