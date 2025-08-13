@@ -216,7 +216,7 @@ export const MobileCadetDetail: React.FC = () => {
         <CardHeader>
           <CardTitle className="flex items-center">
             <Award className="h-5 w-5 mr-2" />
-            Military Information
+            Cadet Information
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
