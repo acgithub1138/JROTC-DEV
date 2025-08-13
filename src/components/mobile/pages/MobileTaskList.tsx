@@ -104,47 +104,54 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
   if (isLoading || subtasks.length === 0) return null;
 
   return (
-    <div className="space-y-2">
+    <div className="space-y-3">
       {subtasks.map((st) => (
         <Card
           key={st.id}
-          className="bg-card border-border/70 cursor-pointer"
+          className="bg-card border-border/70 cursor-pointer hover:bg-muted/50 transition-colors"
           onClick={(e) => {
             e.stopPropagation();
             openSubtask(st.id, parentTaskId);
           }}
         >
-          <CardContent className="p-3">
-            <div className="flex items-start justify-between">
-              <div className="flex items-start gap-2">
-                <CornerDownRight className="h-4 w-4 text-muted-foreground mt-0.5" />
-                <div>
-                  <div className="flex items-center gap-2">
-                    <Badge variant="secondary" className="text-[10px]">Subtask</Badge>
-                    <span className="text-sm font-medium text-foreground line-clamp-1">{st.title}</span>
+          <CardContent className="p-4">
+            <div className="flex items-start justify-between mb-2">
+              <div className="flex items-start gap-2 flex-1 min-w-0">
+                <CornerDownRight className="h-4 w-4 text-muted-foreground mt-0.5 flex-shrink-0" />
+                <div className="min-w-0 flex-1">
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge variant="secondary" className="text-[10px] flex-shrink-0">Subtask</Badge>
                   </div>
-                  {st.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
-                      {st.description}
-                    </p>
-                  )}
+                  <h3 className="font-medium text-foreground text-sm line-clamp-2">
+                    {st.title}
+                  </h3>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                {getPriorityBadge(st.priority)}
+              {getPriorityBadge(st.priority)}
+            </div>
+            
+            {st.description && (
+              <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                {st.description}
+              </p>
+            )}
+            
+            <div className="space-y-2">
+              <div className="flex items-center justify-between">
                 {getStatusBadge(st.status)}
               </div>
-            </div>
-            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
-              <div className="flex items-center">
-                <User className="mr-1 h-3 w-3" />
-                {st.assigned_to_profile
-                  ? `${st.assigned_to_profile.last_name}, ${st.assigned_to_profile.first_name}`
-                  : 'Unassigned'}
-              </div>
-              <div className="flex items-center">
-                <Calendar className="mr-1 h-3 w-3" />
-                {formatDate(st.due_date || null)}
+              
+              <div className="flex items-center justify-between text-xs text-muted-foreground">
+                <div className="flex items-center">
+                  <User className="mr-1 h-3 w-3" />
+                  {st.assigned_to_profile
+                    ? `${st.assigned_to_profile.last_name}, ${st.assigned_to_profile.first_name}`
+                    : 'Unassigned'}
+                </div>
+                <div className="flex items-center">
+                  <Calendar className="mr-1 h-3 w-3" />
+                  {formatDate(st.due_date || null)}
+                </div>
               </div>
             </div>
           </CardContent>
