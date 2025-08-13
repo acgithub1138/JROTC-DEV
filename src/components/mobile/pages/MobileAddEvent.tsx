@@ -188,10 +188,9 @@ export const MobileAddEvent: React.FC = () => {
               onClick={handleSubmit}
               disabled={isSubmitting || !formData.title.trim()}
               size="sm"
-              className="h-8"
+              className="h-8 w-8 p-0"
             >
-              <Save size={16} className="mr-1" />
-              Save
+              <Save size={16} />
             </Button>
           </div>
         </div>
