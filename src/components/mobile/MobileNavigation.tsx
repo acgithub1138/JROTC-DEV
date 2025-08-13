@@ -33,7 +33,7 @@ const navigationItems = [
     name: 'Calendar',
     path: '/mobile/calendar',
     icon: Calendar,
-    module: 'events',
+    module: 'calendar',
   },
   {
     name: 'More',
