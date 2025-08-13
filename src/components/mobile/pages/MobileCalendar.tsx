@@ -9,11 +9,16 @@ import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 
+// Stable filters object to prevent re-renders
+const STABLE_FILTERS = { eventType: '', assignedTo: '' };
+
 export const MobileCalendar: React.FC = () => {
   const navigate = useNavigate();
   const { canCreate } = useTablePermissions('calendar');
-  const { events, isLoading } = useEvents({ eventType: '', assignedTo: '' });
-  const { timezone } = useSchoolTimezone();
+  const { events, isLoading: eventsLoading } = useEvents(STABLE_FILTERS);
+  const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  
+  const isLoading = eventsLoading || timezoneLoading;
   
   // Filter to upcoming events (future or today) and sort by start date
   const upcomingEvents = React.useMemo(() => {

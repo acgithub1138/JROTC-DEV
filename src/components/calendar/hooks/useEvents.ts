@@ -66,7 +66,7 @@ export const useEvents = (filters: EventFilters) => {
 
   useEffect(() => {
     fetchEvents();
-  }, [userProfile?.school_id, filters]);
+  }, [userProfile?.school_id, filters.eventType, filters.assignedTo]);
 
   const createEvent = async (eventData: Omit<Event, 'id' | 'created_at' | 'updated_at' | 'school_id'>) => {
     if (!userProfile?.school_id) return;
