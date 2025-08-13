@@ -5,23 +5,14 @@ import { Trophy, Award, Users, Calendar, TrendingUp, Search, ArrowLeft } from 'l
 import { useNavigate } from 'react-router-dom';
 export const MobileCompetitionDashboard: React.FC = () => {
   const navigate = useNavigate();
-
   const handleBackClick = () => {
     navigate('/mobile/dashboard');
   };
-
   return <div className="p-4 space-y-6">
       {/* Welcome Header */}
       <div className="mb-4">
-        <div className="flex items-center mb-1">
-          <button onClick={handleBackClick} className="flex items-center text-muted-foreground hover:text-foreground transition-colors mr-3">
-            <ArrowLeft size={20} />
-          </button>
-          <h1 className="text-2xl font-bold text-foreground">Competition Portal</h1>
-        </div>
-        <p className="text-sm text-muted-foreground">
-          Track competitions, events, and team performance
-        </p>
+        
+        
       </div>
 
       {/* Quick Actions */}
