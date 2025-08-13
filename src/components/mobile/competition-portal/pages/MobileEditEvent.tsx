@@ -296,6 +296,30 @@ export const MobileEditEvent: React.FC = () => {
     try {
       setIsDeleting(true);
       
+      // Delete related records first to maintain data integrity
+      // Delete event schedules
+      const { error: schedulesError } = await supabase
+        .from('cp_event_schedules')
+        .delete()
+        .eq('event_id', eventId);
+
+      if (schedulesError) {
+        console.error('Error deleting event schedules:', schedulesError);
+        // Continue with deletion even if schedules deletion fails
+      }
+
+      // Delete event registrations
+      const { error: registrationsError } = await supabase
+        .from('cp_event_registrations')
+        .delete()
+        .eq('event_id', eventId);
+
+      if (registrationsError) {
+        console.error('Error deleting event registrations:', registrationsError);
+        // Continue with deletion even if registrations deletion fails
+      }
+
+      // Finally delete the main event record
       const { error } = await supabase
         .from('cp_comp_events')
         .delete()
@@ -303,7 +327,7 @@ export const MobileEditEvent: React.FC = () => {
 
       if (error) throw error;
 
-      toast.success('Event deleted successfully');
+      toast.success('Event and related data deleted successfully');
       navigate(`/mobile/competition-portal/manage/${competitionId}/events`);
     } catch (error) {
       console.error('Error deleting event:', error);
