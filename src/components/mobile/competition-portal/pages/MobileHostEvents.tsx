@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +10,9 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export const MobileHostEvents: React.FC = () => {
   const navigate = useNavigate();
+  const { competitionId } = useParams<{ competitionId: string }>();
   const { timezone } = useSchoolTimezone();
   
-  // For now, we'll use a placeholder competition ID - this should come from the selected competition
-  const competitionId = 'placeholder-competition-id';
   const { events, isLoading } = useCompetitionEvents(competitionId);
 
   if (isLoading) {
