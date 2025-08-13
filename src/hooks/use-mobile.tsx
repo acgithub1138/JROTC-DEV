@@ -22,28 +22,12 @@ export function useIsMobile() {
       // Final mobile detection - only consider screen size and user agent for accurate detection
       const detectedMobile = screenIsMobile || isMobileUA;
       
-      console.log('Mobile detection detailed:', { 
-        windowWidth: window.innerWidth, 
-        breakpoint: MOBILE_BREAKPOINT, 
-        screenIsMobile,
-        isMobileUA,
-        isTouchDevice,
-        detectedMobile,
-        userAgent: navigator.userAgent,
-        location: window.location.href
-      });
-      
       return detectedMobile;
     };
 
     const mql = window.matchMedia(`(max-width: ${MOBILE_BREAKPOINT - 1}px)`)
     const onChange = () => {
       const newIsMobile = detectMobile();
-      console.log('Mobile detection onChange:', { 
-        windowWidth: window.innerWidth, 
-        isMobile: newIsMobile,
-        userAgent: navigator.userAgent
-      });
       setIsMobile(newIsMobile)
     }
     mql.addEventListener("change", onChange)
@@ -54,6 +38,5 @@ export function useIsMobile() {
   }, [])
 
   const result = isNative || isMobile;
-  console.log('useIsMobile hook result:', { isMobile, isNative, platform, result });
   return result
 }
