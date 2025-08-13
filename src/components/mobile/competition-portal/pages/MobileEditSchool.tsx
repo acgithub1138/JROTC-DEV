@@ -3,7 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import * as z from 'zod';
-import { ArrowLeft, Trash2 } from 'lucide-react';
+import { ArrowLeft, Trash2, Save } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Input } from '@/components/ui/input';
@@ -162,14 +162,24 @@ export const MobileEditSchool: React.FC = () => {
               <p className="text-sm text-muted-foreground truncate">{school.school_name || 'Unnamed School'}</p>
             </div>
           </div>
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={() => setShowDeleteDialog(true)}
-            className="h-8 w-8 p-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
-          >
-            <Trash2 size={16} />
-          </Button>
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <Save size={16} />
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowDeleteDialog(true)}
+              className="h-8 w-8 p-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+            >
+              <Trash2 size={16} />
+            </Button>
+          </div>
         </div>
 
         {/* Form */}
@@ -290,14 +300,6 @@ export const MobileEditSchool: React.FC = () => {
                   )}
                 />
 
-                <div className="flex space-x-3 pt-4">
-                  <Button type="button" variant="outline" onClick={handleBack} className="flex-1">
-                    Cancel
-                  </Button>
-                  <Button type="submit" disabled={isSubmitting} className="flex-1">
-                    {isSubmitting ? 'Saving...' : 'Save Changes'}
-                  </Button>
-                </div>
               </form>
             </Form>
           </CardContent>
