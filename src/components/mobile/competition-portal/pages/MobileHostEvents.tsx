@@ -58,9 +58,13 @@ export const MobileHostEvents: React.FC = () => {
             <p className="text-sm text-muted-foreground">Manage competition events</p>
           </div>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
-          <Plus size={16} className="mr-1" />
-        </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate('/mobile/events/add')}
+            className="h-8 w-8 p-0"
+          >
+            <Plus size={16} />
+          </Button>
       </div>
 
       {/* Events List */}
