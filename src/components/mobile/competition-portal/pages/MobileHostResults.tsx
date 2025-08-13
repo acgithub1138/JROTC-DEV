@@ -50,7 +50,7 @@ export const MobileHostResults: React.FC = () => {
         const { data: resultsData, error: resultsError } = await supabase
           .from('competition_events')
           .select('*')
-          .eq('competition_id', competitionId);
+          .eq('source_competition_id', competitionId);
 
         if (resultsError) throw resultsError;
 
