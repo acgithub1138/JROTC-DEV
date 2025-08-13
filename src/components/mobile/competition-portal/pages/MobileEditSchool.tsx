@@ -164,14 +164,6 @@ export const MobileEditSchool: React.FC = () => {
           </div>
           <div className="flex items-center space-x-2">
             <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
-              <Save size={16} />
-            </Button>
-            <Button
               variant="outline"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
@@ -179,6 +171,15 @@ export const MobileEditSchool: React.FC = () => {
             >
               <Trash2 size={16} />
             </Button>
+            <Button
+              onClick={form.handleSubmit(onSubmit)}
+              disabled={isSubmitting}
+              size="sm"
+              className="h-8 w-8 p-0"
+            >
+              <Save size={16} />
+            </Button>
+
           </div>
         </div>
 
