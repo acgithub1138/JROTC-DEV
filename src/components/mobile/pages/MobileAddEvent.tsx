@@ -8,6 +8,7 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { TimePicker } from '@/components/ui/time-picker';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
@@ -320,26 +321,18 @@ export const MobileAddEvent: React.FC = () => {
 
               {!formData.is_all_day && (
                 <div className="grid grid-cols-2 gap-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="start_time">Start Time</Label>
-                    <Input
-                      id="start_time"
-                      type="time"
-                      step="60"
-                      value={formData.start_time}
-                      onChange={(e) => handleInputChange('start_time', e.target.value)}
-                    />
-                  </div>
-                  <div className="space-y-2">
-                    <Label htmlFor="end_time">End Time</Label>
-                    <Input
-                      id="end_time"
-                      type="time"
-                      step="60"
-                      value={formData.end_time}
-                      onChange={(e) => handleInputChange('end_time', e.target.value)}
-                    />
-                  </div>
+                  <TimePicker
+                    id="start_time"
+                    label="Start Time"
+                    value={formData.start_time}
+                    onChange={(value) => handleInputChange('start_time', value)}
+                  />
+                  <TimePicker
+                    id="end_time"
+                    label="End Time"
+                    value={formData.end_time}
+                    onChange={(value) => handleInputChange('end_time', value)}
+                  />
                 </div>
               )}
             </CardContent>
