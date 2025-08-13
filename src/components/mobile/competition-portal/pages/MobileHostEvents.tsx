@@ -60,7 +60,7 @@ export const MobileHostEvents: React.FC = () => {
         </div>
           <Button
             size="sm"
-            onClick={() => navigate('/mobile/events/add')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/events/add`)}
             className="h-8 w-8 p-0"
           >
             <Plus size={16} />
