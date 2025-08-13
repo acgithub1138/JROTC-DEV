@@ -74,7 +74,7 @@ export const MobileHostEvents: React.FC = () => {
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
                       <h3 className="font-semibold text-foreground text-sm line-clamp-2">
-                        {event.event || 'Unnamed Event'}
+                        {event.cp_events?.name || 'Unnamed Event'}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1">
                         {event.location || 'Location TBD'}
