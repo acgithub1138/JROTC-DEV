@@ -9,6 +9,7 @@ import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { TimePicker } from '@/components/ui/time-picker';
+import { useEventTypes } from '@/components/calendar/hooks/useEventTypes';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
@@ -24,6 +25,7 @@ import { cn } from '@/lib/utils';
 export const MobileAddEvent: React.FC = () => {
   const navigate = useNavigate();
   const { createEvent } = useEvents({ eventType: '', assignedTo: '' });
+  const { eventTypes, isLoading: eventTypesLoading } = useEventTypes();
   const { timezone } = useSchoolTimezone();
   const { toast } = useToast();
   
@@ -236,15 +238,19 @@ export const MobileAddEvent: React.FC = () => {
               <div className="space-y-2">
                 <Label htmlFor="event_type">Event Type</Label>
                 <Select value={formData.event_type} onValueChange={(value) => handleInputChange('event_type', value)}>
-                  <SelectTrigger>
+                  <SelectTrigger className="bg-background">
                     <SelectValue placeholder="Select event type" />
                   </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="drill">Drill Practice</SelectItem>
-                    <SelectItem value="meeting">Meeting</SelectItem>
-                    <SelectItem value="competition">Competition</SelectItem>
-                    <SelectItem value="ceremony">Ceremony</SelectItem>
-                    <SelectItem value="training">Training</SelectItem>
+                  <SelectContent className="bg-background border border-border">
+                    {eventTypesLoading ? (
+                      <SelectItem value="" disabled>Loading event types...</SelectItem>
+                    ) : (
+                      eventTypes.map((eventType) => (
+                        <SelectItem key={eventType.id} value={eventType.id} className="hover:bg-accent">
+                          {eventType.label}
+                        </SelectItem>
+                      ))
+                    )}
                   </SelectContent>
                 </Select>
               </div>
