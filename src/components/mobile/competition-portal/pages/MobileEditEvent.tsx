@@ -7,7 +7,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, X, Save, Plus, CalendarIcon } from 'lucide-react';
+import { ArrowLeft, X, Save, Plus, CalendarIcon, Trash2 } from 'lucide-react';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { TimePicker } from '@/components/ui/time-picker';
@@ -52,6 +53,8 @@ export const MobileEditEvent: React.FC = () => {
   const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
   const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [showDeleteDialog, setShowDeleteDialog] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
   const [initialFormData, setInitialFormData] = useState(formData);
   
   const {
@@ -287,6 +290,30 @@ export const MobileEditEvent: React.FC = () => {
     }
   };
 
+  const handleDelete = async () => {
+    if (!eventId) return;
+
+    try {
+      setIsDeleting(true);
+      
+      const { error } = await supabase
+        .from('cp_comp_events')
+        .delete()
+        .eq('id', eventId);
+
+      if (error) throw error;
+
+      toast.success('Event deleted successfully');
+      navigate(`/mobile/competition-portal/manage/${competitionId}/events`);
+    } catch (error) {
+      console.error('Error deleting event:', error);
+      toast.error('Failed to delete event');
+    } finally {
+      setIsDeleting(false);
+      setShowDeleteDialog(false);
+    }
+  };
+
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -327,14 +354,25 @@ export const MobileEditEvent: React.FC = () => {
             <p className="text-sm text-muted-foreground">{event.cp_events?.name || 'Event Details'}</p>
           </div>
         </div>
-        <Button 
-          onClick={handleSave} 
-          disabled={isLoading || !hasUnsavedChanges}
-          size="sm"
-          className="h-8 w-8 p-0"
-        >
-          <Save size={16} />
-        </Button>
+        <div className="flex items-center gap-2">
+          <Button 
+            onClick={() => setShowDeleteDialog(true)} 
+            disabled={isLoading || isDeleting}
+            variant="destructive"
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            <Trash2 size={16} />
+          </Button>
+          <Button 
+            onClick={handleSave} 
+            disabled={isLoading || !hasUnsavedChanges}
+            size="sm"
+            className="h-8 w-8 p-0"
+          >
+            <Save size={16} />
+          </Button>
+        </div>
       </div>
 
       {/* Form */}
@@ -589,6 +627,28 @@ export const MobileEditEvent: React.FC = () => {
           navigate(`/mobile/competition-portal/manage/${competitionId}/events`);
         }}
       />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Event</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this event? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={handleDelete}
+              disabled={isDeleting}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
