@@ -17,13 +17,13 @@ export const MobileRouteDetector: React.FC = () => {
     }
   }, [location.pathname, navigate]);
 
-  // Auto-redirect mobile users to mobile interface
+  // Suggest mobile version for mobile users coming from web routes
   useEffect(() => {
-    if ((isMobile || isNative) && !location.pathname.startsWith('/mobile') && location.pathname.startsWith('/app')) {
-      console.log('Mobile device detected, redirecting to mobile interface');
-      navigate('/mobile/dashboard', { replace: true });
+    if ((isMobile || isNative) && !location.pathname.startsWith('/mobile')) {
+      console.log('Mobile device detected, suggesting mobile interface');
+      // Could show a toast or banner suggesting mobile interface
     }
-  }, [isMobile, isNative, location.pathname, navigate]);
+  }, [isMobile, isNative, location.pathname]);
 
   return (
     <ProtectedRoute>
