@@ -65,34 +65,115 @@ export const MobileCalendar: React.FC = () => {
     return formatTimeForDisplay(date, TIME_FORMATS.SHORT_DATE, timezone);
   };
 
-  const parseLocation = (location: string) => {
+  const stateAbbreviations: Record<string, string> = {
+    'Alabama': 'AL', 'Alaska': 'AK', 'Arizona': 'AZ', 'Arkansas': 'AR', 'California': 'CA',
+    'Colorado': 'CO', 'Connecticut': 'CT', 'Delaware': 'DE', 'Florida': 'FL', 'Georgia': 'GA',
+    'Hawaii': 'HI', 'Idaho': 'ID', 'Illinois': 'IL', 'Indiana': 'IN', 'Iowa': 'IA',
+    'Kansas': 'KS', 'Kentucky': 'KY', 'Louisiana': 'LA', 'Maine': 'ME', 'Maryland': 'MD',
+    'Massachusetts': 'MA', 'Michigan': 'MI', 'Minnesota': 'MN', 'Mississippi': 'MS', 'Missouri': 'MO',
+    'Montana': 'MT', 'Nebraska': 'NE', 'Nevada': 'NV', 'New Hampshire': 'NH', 'New Jersey': 'NJ',
+    'New Mexico': 'NM', 'New York': 'NY', 'North Carolina': 'NC', 'North Dakota': 'ND', 'Ohio': 'OH',
+    'Oklahoma': 'OK', 'Oregon': 'OR', 'Pennsylvania': 'PA', 'Rhode Island': 'RI', 'South Carolina': 'SC',
+    'South Dakota': 'SD', 'Tennessee': 'TN', 'Texas': 'TX', 'Utah': 'UT', 'Vermont': 'VT',
+    'Virginia': 'VA', 'Washington': 'WA', 'West Virginia': 'WV', 'Wisconsin': 'WI', 'Wyoming': 'WY'
+  };
+
+  const parseLocationForDisplay = (location: string) => {
     if (!location) return null;
     
     // Split by comma and trim each part
-    const parts = location.split(',').map(part => part.trim());
+    const parts = location.split(',').map(part => part.trim()).filter(part => part.length > 0);
     
-    if (parts.length >= 3) {
-      // Format: Venue Name, Street Address, City State Zip
-      const venueName = parts[0];
-      const streetAddress = parts[1];
-      const cityStateZip = parts.slice(2).join(', ');
+    if (parts.length < 2) {
       return { 
-        lines: [venueName, streetAddress, cityStateZip],
-        full: location 
-      };
-    } else if (parts.length === 2) {
-      // Format: Address, City State Zip
-      const address = parts[0];
-      const cityStateZip = parts[1];
-      return { 
-        lines: [address, cityStateZip],
+        lines: [location],
         full: location 
       };
     }
+
+    // Filter out common unwanted parts
+    const filteredParts = parts.filter(part => {
+      const lower = part.toLowerCase();
+      return !lower.includes('county') && 
+             !lower.includes('united states') && 
+             !lower.includes('usa') &&
+             part.length > 1;
+    });
+
+    if (filteredParts.length < 2) {
+      return { 
+        lines: [location],
+        full: location 
+      };
+    }
+
+    // Venue name is always first
+    const venueName = filteredParts[0];
     
-    // If no comma, treat entire string as single line
+    // Find ZIP code (5 digits, optionally with dash and 4 more digits)
+    const zipPattern = /^\d{5}(-\d{4})?$/;
+    let zipIndex = -1;
+    let zipCode = '';
+    
+    for (let i = filteredParts.length - 1; i >= 0; i--) {
+      if (zipPattern.test(filteredParts[i])) {
+        zipIndex = i;
+        zipCode = filteredParts[i];
+        break;
+      }
+    }
+
+    // Find state (before ZIP)
+    let stateIndex = -1;
+    let stateAbbr = '';
+    
+    if (zipIndex > 0) {
+      const statePart = filteredParts[zipIndex - 1];
+      if (stateAbbreviations[statePart]) {
+        stateAbbr = stateAbbreviations[statePart];
+        stateIndex = zipIndex - 1;
+      } else if (statePart.length === 2) {
+        stateAbbr = statePart.toUpperCase();
+        stateIndex = zipIndex - 1;
+      }
+    }
+
+    // Find city (before state)
+    let cityIndex = -1;
+    let city = '';
+    
+    if (stateIndex > 0) {
+      city = filteredParts[stateIndex - 1];
+      cityIndex = stateIndex - 1;
+    }
+
+    // Street address is everything between venue and city
+    let streetAddress = '';
+    if (cityIndex > 1) {
+      streetAddress = filteredParts.slice(1, cityIndex).join(' ');
+    } else if (filteredParts.length > 1) {
+      // Fallback: take second part as street address
+      streetAddress = filteredParts[1];
+    }
+
+    // Build the result
+    const lines = [venueName];
+    
+    if (streetAddress) {
+      lines.push(streetAddress);
+    }
+    
+    if (city && stateAbbr && zipCode) {
+      lines.push(`${city}, ${stateAbbr} ${zipCode}`);
+    } else if (city && stateAbbr) {
+      lines.push(`${city}, ${stateAbbr}`);
+    } else if (filteredParts.length > 2) {
+      // Fallback: join remaining parts
+      lines.push(filteredParts.slice(-2).join(', '));
+    }
+
     return { 
-      lines: [location],
+      lines: lines.filter(line => line.length > 0),
       full: location 
     };
   };
@@ -211,7 +292,7 @@ export const MobileCalendar: React.FC = () => {
                             className="hover:text-foreground transition-colors"
                           >
                             {(() => {
-                              const parsed = parseLocation(event.location);
+                              const parsed = parseLocationForDisplay(event.location);
                               if (!parsed) return event.location;
                               return (
                                 <div>
