@@ -138,10 +138,8 @@ export const MobileTaskForm: React.FC<MobileTaskFormProps> = ({
                 form="task-edit-form"
                 disabled={isSubmitting}
                 size="sm"
-                className="flex items-center gap-2"
               >
                 <Save className="h-4 w-4" />
-                {isSubmitting ? 'Saving...' : 'Save'}
               </Button>
             </div>
           </div>
