@@ -13,9 +13,9 @@ export const getFieldNames = (events: CompetitionEvent[]): string[] => {
   });
   
   return Array.from(allFieldNames).sort((a, b) => {
-    // Extract number from beginning of field names for proper sorting
+    // Extract number from field_x_ pattern for proper sorting  
     const getNumber = (str: string) => {
-      const match = str.match(/^(\d+)\./);
+      const match = str.match(/^field_(\d+)/);
       return match ? parseInt(match[1]) : 999; // Non-numbered fields go to end
     };
     return getNumber(a) - getNumber(b);
