@@ -130,6 +130,14 @@ export const MobileHostSchools: React.FC = () => {
                       variant="outline" 
                       size="sm" 
                       className="text-xs h-7 w-7 p-0"
+                      onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schools/${school.id}/addschooleventscoresheet`)}
+                    >
+                      <Plus size={12} />
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs h-7 w-7 p-0"
                       onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schools/${school.id}/edit`)}
                     >
                       <Settings size={12} />
