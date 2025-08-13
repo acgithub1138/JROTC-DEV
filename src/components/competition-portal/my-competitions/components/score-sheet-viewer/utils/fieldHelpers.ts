@@ -13,7 +13,7 @@ export const getFieldNames = (events: CompetitionEvent[], templates: any[] = [])
     }
   });
   
-  // Also get field names from templates to include empty/zero fields
+  // Also get field names from templates to ensure ALL fields are included (even with 0/empty values)
   events.forEach(event => {
     if (event.score_sheet?.template_id) {
       const template = templates.find(t => t.id === event.score_sheet.template_id);
