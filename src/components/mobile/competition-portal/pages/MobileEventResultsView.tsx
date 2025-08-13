@@ -71,7 +71,9 @@ export const MobileEventResultsView: React.FC = () => {
           }
           
           // Sum the total_points from each score sheet (Grand Total)
-          schoolResults[result.school_id].total_points += Number(result.total_points) || 0;
+          const scorePoints = Number(result.total_points) || 0;
+          console.log(`School ${result.school_id}, Event: ${result.event}, Judge Score: ${scorePoints}, Team: ${result.team_name || 'N/A'}`);
+          schoolResults[result.school_id].total_points += scorePoints;
           schoolResults[result.school_id].judge_count += 1;
         });
 
