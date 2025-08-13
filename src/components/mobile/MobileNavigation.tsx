@@ -4,7 +4,7 @@ import {
   Home, 
   CheckSquare, 
   Users, 
-  AlertTriangle, 
+  Calendar, 
   Settings 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
@@ -30,10 +30,10 @@ const navigationItems = [
     module: 'cadets',
   },
   {
-    name: 'Incidents',
-    path: '/mobile/incidents',
-    icon: AlertTriangle,
-    module: 'incident_management',
+    name: 'Calendar',
+    path: '/mobile/calendar',
+    icon: Calendar,
+    module: 'events',
   },
   {
     name: 'More',
