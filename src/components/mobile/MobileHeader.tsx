@@ -8,6 +8,7 @@ const getPageTitle = (pathname: string): string => {
   if (pathname.includes('/dashboard')) return 'Dashboard';
   if (pathname.includes('/tasks')) return 'Tasks';
   if (pathname.includes('/cadets')) return 'Cadets';
+  if (pathname.includes('/budget')) return 'Budget';
   if (pathname.includes('/calendar')) return 'Calendar';
   if (pathname.includes('/incidents')) return 'Incidents';
   if (pathname.includes('/more')) return 'Settings';
