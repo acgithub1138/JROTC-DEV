@@ -150,7 +150,40 @@ export const MobileCadetDetail: React.FC = () => {
     <div className="flex flex-col h-full p-4 space-y-4 overflow-y-auto">
       {/* Profile Header */}
       <Card>
-        <CardContent className="p-6">
+        <CardContent className="p-6 relative">
+          {/* Edit/Save/Cancel buttons in top right */}
+          <div className="absolute top-4 right-4">
+            {canEdit && !isEditing && (
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={handleEdit}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+              </Button>
+            )}
+            {isEditing && (
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleSave}
+                >
+                  <Save className="h-4 w-4 mr-1" />
+                  Save
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={handleCancel}
+                >
+                  <X className="h-4 w-4 mr-1" />
+                  Cancel
+                </Button>
+              </div>
+            )}
+          </div>
+          
           <div className="flex items-center space-x-4">
             <Avatar className="h-20 w-20">
               <AvatarFallback className="bg-primary text-primary-foreground text-xl">
@@ -159,40 +192,11 @@ export const MobileCadetDetail: React.FC = () => {
             </Avatar>
             
             <div className="flex-1">
-              <div className="flex items-center justify-between mb-2">
+              <div className="mb-2">
                 <h1 className="text-xl font-bold text-foreground">
                   {cadet.last_name}, {cadet.first_name}
                   {isLeader(cadet) && <Star className="inline ml-2 h-5 w-5 text-yellow-500" />}
                 </h1>
-                {canEdit && !isEditing && (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={handleEdit}
-                  >
-                    <Edit className="h-4 w-4 mr-1" />
-                  </Button>
-                )}
-                {isEditing && (
-                  <div className="flex space-x-2">
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleSave}
-                    >
-                      <Save className="h-4 w-4 mr-1" />
-                      Save
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="sm"
-                      onClick={handleCancel}
-                    >
-                      <X className="h-4 w-4 mr-1" />
-                      Cancel
-                    </Button>
-                  </div>
-                )}
               </div>
               
               {cadet.grade && (
