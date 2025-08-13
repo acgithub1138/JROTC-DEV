@@ -95,6 +95,15 @@ export const MobileTaskList: React.FC = () => {
     return 'Unassigned';
   };
 
+  const isOverdue = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    date.setHours(0, 0, 0, 0);
+    return date < today;
+  };
+
 const openSubtask = (subtaskId: string, parentTaskId: string) => {
   navigate(`/mobile/subtasks/${subtaskId}`, { state: { parentTaskId } });
 };
@@ -108,7 +117,10 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
       {subtasks.map((st) => (
         <Card
           key={st.id}
-          className="bg-card border-border/70 cursor-pointer hover:bg-muted/50 transition-colors"
+          className={cn(
+            "bg-card border-border/70 cursor-pointer hover:bg-muted/50 transition-colors",
+            isOverdue(st.due_date) && "border-red-500 border-2"
+          )}
           onClick={(e) => {
             e.stopPropagation();
             openSubtask(st.id, parentTaskId);
@@ -228,7 +240,8 @@ if (isLoading) {
               <Card 
                 className={cn(
                   "bg-card border-border transition-colors",
-                  canViewDetails && "cursor-pointer hover:bg-muted/50"
+                  canViewDetails && "cursor-pointer hover:bg-muted/50",
+                  isOverdue(task.due_date) && "border-red-500 border-2"
                 )}
                 onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
               >
