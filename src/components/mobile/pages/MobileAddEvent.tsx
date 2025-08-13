@@ -62,14 +62,15 @@ export const MobileAddEvent: React.FC = () => {
   // Set default dates and times
   useEffect(() => {
     const today = new Date();
-    const timeStr = formatInSchoolTimezone(today, TIME_FORMATS.TIME_ONLY_24H, timezone);
+    const defaultStartTime = '08:00';
+    const defaultEndTime = '09:00';
     
     setFormData(prev => ({
       ...prev,
       start_date: today,
       end_date: today,
-      start_time: timeStr,
-      end_time: timeStr
+      start_time: defaultStartTime,
+      end_time: defaultEndTime
     }));
   }, [timezone]);
 
