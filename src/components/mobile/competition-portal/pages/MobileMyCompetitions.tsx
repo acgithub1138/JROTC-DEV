@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Target, Calendar, MapPin, Users, Trophy, Award } from 'lucide-react';
+import { Target, Calendar, MapPin, Users, Trophy, Award, ArrowLeft } from 'lucide-react';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 
 export const MobileMyCompetitions: React.FC = () => {
+  const navigate = useNavigate();
   const { competitions, isLoading } = useCompetitions();
 
   // Show all competitions (both hosted and participating)
@@ -14,9 +16,19 @@ export const MobileMyCompetitions: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-4 space-y-4">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-foreground mb-1">My Competitions</h1>
-          <p className="text-sm text-muted-foreground">Track your participation and performance</p>
+        <div className="flex items-center mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/mobile/competition-portal')}
+            className="mr-3 p-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground mb-1">My Competitions</h1>
+            <p className="text-sm text-muted-foreground">Track your participation and performance</p>
+          </div>
         </div>
         {[...Array(3)].map((_, index) => (
           <Card key={index} className="bg-card border-border">
@@ -55,9 +67,19 @@ export const MobileMyCompetitions: React.FC = () => {
   return (
     <div className="p-4 space-y-4">
       {/* Header */}
-      <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground mb-1">My Competitions</h1>
-        <p className="text-sm text-muted-foreground">Track your participation and performance</p>
+      <div className="flex items-center mb-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={() => navigate('/mobile/competition-portal')}
+          className="mr-3 p-2"
+        >
+          <ArrowLeft size={20} />
+        </Button>
+        <div>
+          <h1 className="text-2xl font-bold text-foreground mb-1">My Competitions</h1>
+          <p className="text-sm text-muted-foreground">Track your participation and performance</p>
+        </div>
       </div>
 
       {/* Stats Cards */}
