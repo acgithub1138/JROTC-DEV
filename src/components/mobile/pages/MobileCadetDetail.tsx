@@ -167,19 +167,18 @@ export const MobileCadetDetail: React.FC = () => {
             {isEditing && (
               <div className="flex space-x-2">
                 <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleSave}
-                  className="bg-blue-600 hover:bg-blue-700"
-                >
-                  <Save className="h-4 w-4" />
-                </Button>
-                <Button
                   variant="outline"
                   size="sm"
                   onClick={handleCancel}
                 >
                   <X className="h-4 w-4" />
+                </Button>
+                <Button
+                  variant="default"
+                  size="sm"
+                  onClick={handleSave}
+                >
+                  <Save className="h-4 w-4" />
                 </Button>
               </div>
             )}
