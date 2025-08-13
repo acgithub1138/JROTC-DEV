@@ -16,15 +16,17 @@ export const MobileCalendar: React.FC = () => {
   const { timezone } = useSchoolTimezone();
   
   // Filter to upcoming events (future or today) and sort by start date
-  const upcomingEvents = events
-    .filter(event => {
-      const eventDate = new Date(event.start_date);
-      const today = new Date();
-      today.setHours(0, 0, 0, 0);
-      return eventDate >= today;
-    })
-    .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-    .slice(0, 10); // Limit to next 10 events
+  const upcomingEvents = React.useMemo(() => {
+    return events
+      .filter(event => {
+        const eventDate = new Date(event.start_date);
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        return eventDate >= today;
+      })
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
+      .slice(0, 10); // Limit to next 10 events
+  }, [events]);
 
   const getEventTypeColor = (eventType: any) => {
     if (eventType?.color) {

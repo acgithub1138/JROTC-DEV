@@ -25,25 +25,18 @@ export const useSchoolTimezone = () => {
 
         if (error) {
           setError('Failed to fetch school timezone');
-          // Don't log repeatedly to avoid console spam
         } else if (data?.timezone) {
           setTimezone(data.timezone);
         }
       } catch (error) {
         setError('Network error fetching school timezone');
-        // Don't log repeatedly to avoid console spam
       } finally {
         setIsLoading(false);
       }
     };
 
-    // Only fetch if we haven't already tried and failed
-    if (!error) {
-      fetchSchoolTimezone();
-    } else {
-      setIsLoading(false);
-    }
-  }, [userProfile?.school_id, error]);
+    fetchSchoolTimezone();
+  }, [userProfile?.school_id]); // Removed error from dependencies to prevent infinite loop
 
   return { timezone, isLoading };
 };
