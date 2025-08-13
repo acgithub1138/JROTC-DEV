@@ -6,6 +6,7 @@ import { Eye } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
 import { EditScoreSheetDialog } from './EditScoreSheetDialog';
+import { DeleteScoreSheetDialog } from './DeleteScoreSheetDialog';
 import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -20,6 +21,11 @@ interface ScoreSheetTableProps {
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
   const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
   const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    event: CompetitionEvent | null;
+    isDeleting: boolean;
+  }>({ open: false, event: null, isDeleting: false });
   const [notesDialog, setNotesDialog] = useState<{
     open: boolean;
     fieldName: string;
@@ -87,14 +93,28 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
     onEventsRefresh?.();
   };
 
-  const handleDeleteEvent = async (event: CompetitionEvent) => {
-    if (window.confirm(`Are you sure you want to delete this score sheet for ${event.event}?`)) {
-      try {
-        await deleteEvent(event.id);
-        onEventsRefresh?.();
-      } catch (error) {
-        console.error('Failed to delete event:', error);
-      }
+  const handleDeleteEvent = (event: CompetitionEvent) => {
+    setDeleteDialog({
+      open: true,
+      event,
+      isDeleting: false
+    });
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.event) return;
+
+    setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
+    
+    try {
+      await deleteEvent(deleteDialog.event.id);
+      onEventsRefresh?.();
+      setDeleteDialog({ open: false, event: null, isDeleting: false });
+      toast.success('Score sheet deleted successfully');
+    } catch (error) {
+      console.error('Failed to delete event:', error);
+      toast.error('Failed to delete score sheet');
+      setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
@@ -260,6 +280,14 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
           onEventUpdated={handleEventUpdated}
         />
       )}
+
+      <DeleteScoreSheetDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => setDeleteDialog(prev => ({ ...prev, open }))}
+        event={deleteDialog.event}
+        onConfirm={handleConfirmDelete}
+        isDeleting={deleteDialog.isDeleting}
+      />
 
       <NotesViewDialog
         open={notesDialog.open}
