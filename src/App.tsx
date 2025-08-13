@@ -104,7 +104,7 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="calendar" element={
-                    <ProtectedRoute module="events" requirePermission="sidebar">
+                    <ProtectedRoute module="calendar" requirePermission="sidebar">
                       <MobileCalendar />
                     </ProtectedRoute>
                   } />
