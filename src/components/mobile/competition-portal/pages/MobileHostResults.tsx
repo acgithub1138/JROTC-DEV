@@ -83,9 +83,9 @@ export const MobileHostResults: React.FC = () => {
             .filter((reg: any) => reg.status === 'registered')
             .length;
 
-          // Find results for this specific event by matching the event UUID
+          // Find results for this specific event by matching the event name
           const eventScores = (resultsData || []).filter(
-            (result: any) => result.event === event.event
+            (result: any) => result.event === eventName
           );
 
           const completedScores = eventScores.length;
