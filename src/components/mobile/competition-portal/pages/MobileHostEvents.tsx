@@ -20,7 +20,7 @@ export const MobileHostEvents: React.FC = () => {
       <div className="p-4 space-y-4">
         <div className="flex items-center mb-4">
           <button
-            onClick={() => navigate('/mobile/competition-portal/host')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}`)}
             className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />
@@ -48,7 +48,7 @@ export const MobileHostEvents: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <button
-            onClick={() => navigate('/mobile/competition-portal/host')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}`)}
             className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />

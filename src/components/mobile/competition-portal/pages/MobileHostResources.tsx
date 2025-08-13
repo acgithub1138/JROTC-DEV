@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,10 +10,9 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 
 export const MobileHostResources: React.FC = () => {
   const navigate = useNavigate();
+  const { competitionId } = useParams<{ competitionId: string }>();
   const { timezone } = useSchoolTimezone();
   
-  // For now, we'll use a placeholder competition ID - this should come from the selected competition
-  const competitionId = 'placeholder-competition-id';
   const { resources, isLoading } = useCompetitionResources(competitionId);
 
   if (isLoading) {
@@ -21,7 +20,7 @@ export const MobileHostResources: React.FC = () => {
       <div className="p-4 space-y-4">
         <div className="flex items-center mb-4">
           <button
-            onClick={() => navigate('/mobile/competition-portal/host')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}`)}
             className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />
@@ -49,7 +48,7 @@ export const MobileHostResources: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <button
-            onClick={() => navigate('/mobile/competition-portal/host')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}`)}
             className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />

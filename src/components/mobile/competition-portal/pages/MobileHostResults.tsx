@@ -1,5 +1,5 @@
 import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -7,6 +7,7 @@ import { ArrowLeft, Trophy, Medal, Users, Eye, FileText } from 'lucide-react';
 
 export const MobileHostResults: React.FC = () => {
   const navigate = useNavigate();
+  const { competitionId } = useParams<{ competitionId: string }>();
   
   // Placeholder data - in real implementation, this would come from the competition results
   const results = [
@@ -45,7 +46,7 @@ export const MobileHostResults: React.FC = () => {
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center">
           <button
-            onClick={() => navigate('/mobile/competition-portal/host')}
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}`)}
             className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
           >
             <ArrowLeft size={20} className="text-muted-foreground" />
