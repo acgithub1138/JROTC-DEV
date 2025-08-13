@@ -15,7 +15,6 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { toast } from 'sonner';
-
 const formSchema = z.object({
   status: z.string(),
   notes: z.string().optional(),
@@ -23,14 +22,21 @@ const formSchema = z.object({
   color: z.string().optional(),
   total_fee: z.coerce.number().optional()
 });
-
 type FormData = z.infer<typeof formSchema>;
-
 export const MobileEditSchool: React.FC = () => {
   const navigate = useNavigate();
-  const { competitionId, schoolId } = useParams<{ competitionId: string; schoolId: string }>();
-  const { schools, updateSchoolRegistration, deleteSchoolRegistration } = useCompetitionSchools(competitionId);
-  
+  const {
+    competitionId,
+    schoolId
+  } = useParams<{
+    competitionId: string;
+    schoolId: string;
+  }>();
+  const {
+    schools,
+    updateSchoolRegistration,
+    deleteSchoolRegistration
+  } = useCompetitionSchools(competitionId);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -38,7 +44,6 @@ export const MobileEditSchool: React.FC = () => {
 
   // Find the school data
   const school = schools.find(s => s.id === schoolId);
-
   const defaultValues: FormData = {
     status: school?.status || 'registered',
     notes: school?.notes || '',
@@ -46,12 +51,10 @@ export const MobileEditSchool: React.FC = () => {
     color: school?.color || '#3B82F6',
     total_fee: school?.total_fee || 0
   };
-
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
     defaultValues
   });
-
   const {
     hasUnsavedChanges,
     resetChanges
@@ -75,10 +78,8 @@ export const MobileEditSchool: React.FC = () => {
       resetChanges();
     }
   }, [school, form, resetChanges]);
-
   const onSubmit = async (data: FormData) => {
     if (!schoolId) return;
-    
     try {
       setIsSubmitting(true);
       await updateSchoolRegistration(schoolId, data);
@@ -92,10 +93,8 @@ export const MobileEditSchool: React.FC = () => {
       setIsSubmitting(false);
     }
   };
-
   const handleDelete = async () => {
     if (!schoolId) return;
-    
     try {
       setIsDeleting(true);
       await deleteSchoolRegistration(schoolId);
@@ -108,7 +107,6 @@ export const MobileEditSchool: React.FC = () => {
       setIsDeleting(false);
     }
   };
-
   const handleBack = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -116,45 +114,32 @@ export const MobileEditSchool: React.FC = () => {
       navigate(`/mobile/competition-portal/manage/${competitionId}/schools`);
     }
   };
-
   const handleDiscardChanges = () => {
     form.reset(defaultValues);
     resetChanges();
     setShowUnsavedDialog(false);
     navigate(`/mobile/competition-portal/manage/${competitionId}/schools`);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
   if (!school) {
-    return (
-      <div className="p-4">
+    return <div className="p-4">
         <div className="flex items-center mb-6">
-          <button
-            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schools`)}
-            className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
-          >
+          <button onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schools`)} className="mr-3 p-1 hover:bg-muted rounded-full transition-colors">
             <ArrowLeft size={20} className="text-muted-foreground" />
           </button>
           <h1 className="text-2xl font-bold text-foreground">School Not Found</h1>
         </div>
         <p className="text-muted-foreground">The requested school registration could not be found.</p>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <>
+  return <>
       <div className="p-4 space-y-4">
         {/* Header */}
         <div className="flex items-center justify-between mb-6">
           <div className="flex items-center flex-1 min-w-0">
-            <button
-              onClick={handleBack}
-              className="mr-3 p-1 hover:bg-muted rounded-full transition-colors"
-            >
+            <button onClick={handleBack} className="mr-3 p-1 hover:bg-muted rounded-full transition-colors">
               <ArrowLeft size={20} className="text-muted-foreground" />
             </button>
             <div className="min-w-0 flex-1">
@@ -163,20 +148,8 @@ export const MobileEditSchool: React.FC = () => {
             </div>
           </div>
           <div className="flex items-center space-x-2">
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => setShowDeleteDialog(true)}
-              className="h-8 w-8 p-0"
-            >
-              <Trash2 size={16} />
-            </Button>
-            <Button
-              onClick={form.handleSubmit(onSubmit)}
-              disabled={isSubmitting}
-              size="sm"
-              className="h-8 w-8 p-0"
-            >
+            
+            <Button onClick={form.handleSubmit(onSubmit)} disabled={isSubmitting} size="sm" className="h-8 w-8 p-0">
               <Save size={16} />
             </Button>
 
@@ -191,11 +164,9 @@ export const MobileEditSchool: React.FC = () => {
           <CardContent>
             <Form {...form}>
               <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="status" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Status</FormLabel>
                       <Select onValueChange={field.onChange} defaultValue={field.value}>
                         <FormControl>
@@ -210,18 +181,14 @@ export const MobileEditSchool: React.FC = () => {
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
 
                 <div className="grid grid-cols-2 gap-4">
-                  <FormField
-                    control={form.control}
-                    name="paid"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="paid" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Payment Status</FormLabel>
-                        <Select onValueChange={(value) => field.onChange(value === 'true')} value={field.value ? 'true' : 'false'}>
+                        <Select onValueChange={value => field.onChange(value === 'true')} value={field.value ? 'true' : 'false'}>
                           <FormControl>
                             <SelectTrigger className="bg-background">
                               <SelectValue />
@@ -233,73 +200,43 @@ export const MobileEditSchool: React.FC = () => {
                           </SelectContent>
                         </Select>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
 
-                  <FormField
-                    control={form.control}
-                    name="total_fee"
-                    render={({ field }) => (
-                      <FormItem>
+                  <FormField control={form.control} name="total_fee" render={({
+                  field
+                }) => <FormItem>
                         <FormLabel>Total Fee ($)</FormLabel>
                         <FormControl>
-                          <Input 
-                            type="number" 
-                            step="0.01"
-                            placeholder="0.00" 
-                            className="bg-background" 
-                            {...field}
-                            onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                          />
+                          <Input type="number" step="0.01" placeholder="0.00" className="bg-background" {...field} onChange={e => field.onChange(parseFloat(e.target.value) || 0)} />
                         </FormControl>
                         <FormMessage />
-                      </FormItem>
-                    )}
-                  />
+                      </FormItem>} />
                 </div>
 
-                <FormField
-                  control={form.control}
-                  name="color"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="color" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>School Color</FormLabel>
                       <div className="flex items-center space-x-3">
                         <FormControl>
-                          <Input 
-                            type="color" 
-                            className="w-12 h-10 rounded border bg-background p-1" 
-                            {...field} 
-                          />
+                          <Input type="color" className="w-12 h-10 rounded border bg-background p-1" {...field} />
                         </FormControl>
                         <FormControl>
-                          <Input 
-                            type="text" 
-                            placeholder="#3B82F6" 
-                            className="bg-background flex-1" 
-                            {...field} 
-                          />
+                          <Input type="text" placeholder="#3B82F6" className="bg-background flex-1" {...field} />
                         </FormControl>
                       </div>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
 
-                <FormField
-                  control={form.control}
-                  name="notes"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="notes" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Notes</FormLabel>
                       <FormControl>
                         <Textarea placeholder="Enter any notes" className="bg-background" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
 
               </form>
             </Form>
@@ -307,12 +244,7 @@ export const MobileEditSchool: React.FC = () => {
         </Card>
       </div>
 
-      <UnsavedChangesDialog
-        open={showUnsavedDialog}
-        onOpenChange={setShowUnsavedDialog}
-        onDiscard={handleDiscardChanges}
-        onCancel={handleContinueEditing}
-      />
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
 
       <AlertDialog open={showDeleteDialog} onOpenChange={setShowDeleteDialog}>
         <AlertDialogContent>
@@ -324,16 +256,11 @@ export const MobileEditSchool: React.FC = () => {
           </AlertDialogHeader>
           <AlertDialogFooter>
             <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDelete}
-              disabled={isDeleting}
-              className="bg-destructive hover:bg-destructive/90"
-            >
+            <AlertDialogAction onClick={handleDelete} disabled={isDeleting} className="bg-destructive hover:bg-destructive/90">
               {isDeleting ? 'Deleting...' : 'Delete'}
             </AlertDialogAction>
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
-    </>
-  );
+    </>;
 };
