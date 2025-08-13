@@ -184,32 +184,22 @@ export const MobileCadetDetail: React.FC = () => {
             )}
           </div>
           
-          <div className="flex items-center space-x-4">
-            <Avatar className="h-20 w-20">
-              <AvatarFallback className="bg-primary text-primary-foreground text-xl">
-                {getInitials(cadet.first_name, cadet.last_name)}
-              </AvatarFallback>
-            </Avatar>
+          <div className="mb-2">
+            <h1 className="text-xl font-bold text-foreground">
+              {cadet.last_name}, {cadet.first_name}
+              {isLeader(cadet) && <Star className="inline ml-2 h-5 w-5 text-yellow-500" />}
+            </h1>
+          </div>
             
-            <div className="flex-1">
-              <div className="mb-2">
-                <h1 className="text-xl font-bold text-foreground">
-                  {cadet.last_name}, {cadet.first_name}
-                  {isLeader(cadet) && <Star className="inline ml-2 h-5 w-5 text-yellow-500" />}
-                </h1>
-              </div>
-              
-              {cadet.grade && (
-                <Badge className={`text-xs ${getGradeColor(cadet.grade)}`}>
-                  {cadet.grade}
-                </Badge>
-              )}
-              
-              <div className="mt-2 flex items-center text-sm text-muted-foreground">
-                <Mail className="h-4 w-4 mr-1" />
-                {cadet.email}
-              </div>
-            </div>
+          {cadet.grade && (
+            <Badge className={`text-xs ${getGradeColor(cadet.grade)}`}>
+              {cadet.grade}
+            </Badge>
+          )}
+          
+          <div className="mt-2 flex items-center text-sm text-muted-foreground">
+            <Mail className="h-4 w-4 mr-1" />
+            {cadet.email}
           </div>
         </CardContent>
       </Card>
