@@ -29,11 +29,11 @@ export const MobileBudget: React.FC = () => {
 
   // Calculate summary stats
   const totalIncome = transactions
-    .filter(t => t.type === 'income')
+    .filter(t => t.category === 'income')
     .reduce((sum, t) => sum + (t.amount || 0), 0);
     
   const totalExpenses = transactions
-    .filter(t => t.type === 'expense')
+    .filter(t => t.category === 'expense')
     .reduce((sum, t) => sum + (t.amount || 0), 0);
     
   const netBalance = totalIncome - totalExpenses;
@@ -47,12 +47,12 @@ export const MobileBudget: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    return type === 'income' ? TrendingUp : TrendingDown;
+  const getTypeIcon = (category: string) => {
+    return category === 'income' ? TrendingUp : TrendingDown;
   };
 
-  const getTypeColor = (type: string) => {
-    return type === 'income' ? 'text-green-600' : 'text-red-600';
+  const getTypeColor = (category: string) => {
+    return category === 'income' ? 'text-green-600' : 'text-red-600';
   };
 
   if (isLoading) {
@@ -152,19 +152,19 @@ export const MobileBudget: React.FC = () => {
         ) : (
           <div className="space-y-2">
             {transactions.map((transaction) => {
-              const TypeIcon = getTypeIcon(transaction.type);
+              const TypeIcon = getTypeIcon(transaction.category);
               
               return (
                 <Card key={transaction.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">
-                      <div className={`p-2 rounded-lg ${transaction.type === 'income' ? 'bg-green-100' : 'bg-red-100'}`}>
-                        <TypeIcon className={`h-4 w-4 ${getTypeColor(transaction.type)}`} />
+                      <div className={`p-2 rounded-lg ${transaction.category === 'income' ? 'bg-green-100' : 'bg-red-100'}`}>
+                        <TypeIcon className={`h-4 w-4 ${getTypeColor(transaction.category)}`} />
                       </div>
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{transaction.item}</h4>
                         <p className="text-xs text-muted-foreground">
-                          {transaction.category} • {new Date(transaction.date).toLocaleDateString()}
+                          {transaction.type} • {new Date(transaction.date).toLocaleDateString()}
                         </p>
                         {transaction.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
@@ -174,8 +174,8 @@ export const MobileBudget: React.FC = () => {
                       </div>
                     </div>
                     <div className="text-right space-y-1">
-                      <div className={`font-semibold text-sm ${getTypeColor(transaction.type)}`}>
-                        {transaction.type === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
+                      <div className={`font-semibold text-sm ${getTypeColor(transaction.category)}`}>
+                        {transaction.category === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                       </div>
                       <Badge 
                         variant="secondary" 
