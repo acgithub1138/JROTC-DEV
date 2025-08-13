@@ -277,7 +277,7 @@ export const MobileCadetDetail: React.FC = () => {
               {cadet.grade && (
                 <div className="flex items-center justify-between">
                   <span className="text-sm text-muted-foreground">Grade:</span>
-                  <span className="font-medium">{cadet.grade}th Grade</span>
+                  <span className="font-medium">{cadet.grade}</span>
                 </div>
               )}
               
