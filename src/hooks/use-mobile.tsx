@@ -9,10 +9,6 @@ export function useIsMobile() {
   
   React.useEffect(() => {
     const detectMobile = () => {
-      // Check for force mobile parameter
-      const urlParams = new URLSearchParams(window.location.search);
-      const forceMobile = urlParams.get('forceMobile') === 'true';
-      
       // Check screen width
       const screenIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
       
@@ -24,12 +20,11 @@ export function useIsMobile() {
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       
       // Final mobile detection
-      const detectedMobile = forceMobile || screenIsMobile || isMobileUA || (isTouchDevice && window.innerWidth <= 1300);
+      const detectedMobile = screenIsMobile || isMobileUA || (isTouchDevice && window.innerWidth <= 1300);
       
       console.log('Mobile detection detailed:', { 
         windowWidth: window.innerWidth, 
         breakpoint: MOBILE_BREAKPOINT, 
-        forceMobile,
         screenIsMobile,
         isMobileUA,
         isTouchDevice,

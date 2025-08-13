@@ -45,6 +45,7 @@ import { MobileHostSchools } from "@/components/mobile/competition-portal/pages/
 import { MobileHostSchedule } from "@/components/mobile/competition-portal/pages/MobileHostSchedule";
 import { MobileHostResults } from "@/components/mobile/competition-portal/pages/MobileHostResults";
 import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
+import { NativeMobileRedirect } from "@/components/mobile/NativeMobileRedirect";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -53,6 +54,7 @@ const App = () => (
       <AuthProvider>
         <PermissionProvider>
           <PortalProvider>
+            <NativeMobileRedirect />
             <Toaster />
             <Sonner />
             <BrowserRouter>
