@@ -1,4 +1,5 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -6,6 +7,7 @@ import { Trophy, Calendar, Users, MapPin, Plus } from 'lucide-react';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 
 export const MobileHostingCompetitions: React.FC = () => {
+  const navigate = useNavigate();
   const { competitions, isLoading } = useCompetitions();
 
   // Filter for competitions that are being hosted by this school (internal competitions)
@@ -47,7 +49,7 @@ export const MobileHostingCompetitions: React.FC = () => {
         <Button 
           size="sm" 
           className="bg-primary text-primary-foreground"
-          onClick={() => window.location.href = '/mobile/competition-portal/host'}
+          onClick={() => navigate('/mobile/competition-portal/host')}
         >
           <Plus size={16} className="mr-1" />
           Host
@@ -110,7 +112,7 @@ export const MobileHostingCompetitions: React.FC = () => {
               </p>
               <Button 
                 className="bg-primary text-primary-foreground"
-                onClick={() => window.location.href = '/mobile/competition-portal/host'}
+                onClick={() => navigate('/mobile/competition-portal/host')}
               >
                 <Plus size={16} className="mr-2" />
                 Host Your First Competition
