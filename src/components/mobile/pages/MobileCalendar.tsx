@@ -65,6 +65,23 @@ export const MobileCalendar: React.FC = () => {
     return formatTimeForDisplay(date, TIME_FORMATS.SHORT_DATE, timezone);
   };
 
+  const parseLocation = (location: string) => {
+    if (!location) return null;
+    
+    // Split by comma and trim each part
+    const parts = location.split(',').map(part => part.trim());
+    
+    if (parts.length >= 2) {
+      // First part is address, rest is city/state/zip
+      const address = parts[0];
+      const cityStateZip = parts.slice(1).join(', ');
+      return { address, cityStateZip, full: location };
+    }
+    
+    // If no comma, treat entire string as address
+    return { address: location, cityStateZip: '', full: location };
+  };
+
   const formatEventTime = (startDate: string, endDate: string, isAllDay: boolean) => {
     if (isAllDay) return 'All day';
     
@@ -170,9 +187,27 @@ export const MobileCalendar: React.FC = () => {
                       </div>
                       
                       {event.location && (
-                        <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                          <MapPin size={14} />
-                          <span>{event.location}</span>
+                        <div className="flex items-start gap-1 mt-1 text-sm text-muted-foreground">
+                          <MapPin size={14} className="mt-0.5 flex-shrink-0" />
+                          <a
+                            href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="hover:text-foreground transition-colors"
+                          >
+                            {(() => {
+                              const parsed = parseLocation(event.location);
+                              if (!parsed) return event.location;
+                              return (
+                                <div>
+                                  <div>{parsed.address}</div>
+                                  {parsed.cityStateZip && (
+                                    <div>{parsed.cityStateZip}</div>
+                                  )}
+                                </div>
+                              );
+                            })()}
+                          </a>
                         </div>
                       )}
                       
