@@ -12,17 +12,15 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTaskPermissions, useDashboardPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useDashboardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useCapacitor } from '@/hooks/useCapacitor';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
-import { MyTasksWidget } from '@/components/dashboard/widgets/MyTasksWidget';
 import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
 import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
 
 export const MobileDashboard: React.FC = () => {
   const { userProfile } = useAuth();
-  const { canView: canViewTasks } = useTaskPermissions();
   const { canView: canViewDashboard } = useDashboardPermissions();
   const { isNative, platform } = useCapacitor();
   const {
@@ -182,9 +180,6 @@ export const MobileDashboard: React.FC = () => {
       
       {/* Mobile Features Widget - Show for all mobile-relevant features */}
       {isNative && <MobileEnhancements />}
-
-      {/* My Tasks Widget - Hide for admin users and check task permissions */}
-      {userProfile?.role !== 'admin' && canViewTasks && <MyTasksWidget />}
 
       {/* Upcoming Events - hidden for admin users */}
       {userProfile?.role !== 'admin' && (
