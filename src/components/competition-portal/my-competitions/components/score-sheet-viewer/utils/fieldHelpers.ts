@@ -28,26 +28,6 @@ export const getFieldNames = (events: CompetitionEvent[], templates: any[] = [])
               if (field.id) {
                 allFieldNames.add(field.id);
               }
-              // Also check for penalty fields that might use different ID patterns
-              if (field.name && field.type === 'penalty') {
-                // Generate field ID from name for penalty fields
-                const penaltyFieldId = `field_${field.name.toLowerCase().replace(/\s+/g, '_').replace(/[^\w]/g, '')}_penalty`;
-                allFieldNames.add(penaltyFieldId);
-                
-                // Also add potential variations
-                if (field.name.toLowerCase().includes('boundary')) {
-                  allFieldNames.add('field_boundary_violations_penalty');
-                  allFieldNames.add('field_boundary_penalty');
-                }
-                if (field.name.toLowerCase().includes('time')) {
-                  allFieldNames.add('field_seconds_over_under_time_penalty');
-                  allFieldNames.add('field_time_penalty');
-                }
-                if (field.name.toLowerCase().includes('weapon')) {
-                  allFieldNames.add('field_dropped_weapons_penalty');
-                  allFieldNames.add('field_weapon_penalty');
-                }
-              }
             });
           }
           
