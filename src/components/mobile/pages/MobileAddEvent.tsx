@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { ArrowLeft, Save } from 'lucide-react';
+import { ArrowLeft, Save, CalendarIcon } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -8,6 +8,8 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Switch } from '@/components/ui/switch';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -15,6 +17,8 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
 import { TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useToast } from '@/hooks/use-toast';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 
 export const MobileAddEvent: React.FC = () => {
   const navigate = useNavigate();
@@ -27,9 +31,9 @@ export const MobileAddEvent: React.FC = () => {
     description: '',
     location: '',
     is_all_day: false,
-    start_date: '',
+    start_date: new Date(),
     start_time: '',
-    end_date: '',
+    end_date: new Date(),
     end_time: '',
     event_type: ''
   });
@@ -42,9 +46,9 @@ export const MobileAddEvent: React.FC = () => {
     description: '',
     location: '',
     is_all_day: false,
-    start_date: '',
+    start_date: new Date(),
     start_time: '',
-    end_date: '',
+    end_date: new Date(),
     end_time: '',
     event_type: ''
   };
@@ -54,16 +58,15 @@ export const MobileAddEvent: React.FC = () => {
     currentData: formData
   });
 
-  // Set default dates to today
+  // Set default dates and times
   useEffect(() => {
     const today = new Date();
-    const dateStr = formatInSchoolTimezone(today, TIME_FORMATS.DATE_ONLY, timezone);
     const timeStr = formatInSchoolTimezone(today, TIME_FORMATS.TIME_ONLY_24H, timezone);
     
     setFormData(prev => ({
       ...prev,
-      start_date: dateStr,
-      end_date: dateStr,
+      start_date: today,
+      end_date: today,
       start_time: timeStr,
       end_time: timeStr
     }));
@@ -97,8 +100,10 @@ export const MobileAddEvent: React.FC = () => {
     }
     
     if (!formData.is_all_day) {
-      const startDateTime = new Date(`${formData.start_date}T${formData.start_time}`);
-      const endDateTime = new Date(`${formData.end_date}T${formData.end_time}`);
+      const startDate = format(formData.start_date, 'yyyy-MM-dd');
+      const endDate = format(formData.end_date, 'yyyy-MM-dd');
+      const startDateTime = new Date(`${startDate}T${formData.start_time}`);
+      const endDateTime = new Date(`${endDate}T${formData.end_time}`);
       
       if (endDateTime <= startDateTime) {
         toast({
@@ -118,14 +123,17 @@ export const MobileAddEvent: React.FC = () => {
     
     setIsSubmitting(true);
     try {
+      const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
+      const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
+      
       const eventData = {
         ...formData,
         start_date: formData.is_all_day 
-          ? formData.start_date 
-          : new Date(`${formData.start_date}T${formData.start_time}`).toISOString(),
+          ? startDateStr 
+          : new Date(`${startDateStr}T${formData.start_time}`).toISOString(),
         end_date: formData.is_all_day
-          ? formData.end_date
-          : new Date(`${formData.end_date}T${formData.end_time}`).toISOString(),
+          ? endDateStr
+          : new Date(`${endDateStr}T${formData.end_time}`).toISOString(),
       };
       
       // Remove time fields for submission
@@ -257,22 +265,56 @@ export const MobileAddEvent: React.FC = () => {
 
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
-                  <Label htmlFor="start_date">Start Date</Label>
-                  <Input
-                    id="start_date"
-                    type="date"
-                    value={formData.start_date}
-                    onChange={(e) => handleInputChange('start_date', e.target.value)}
-                  />
+                  <Label>Start Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.start_date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.start_date ? format(formData.start_date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.start_date}
+                        onSelect={(date) => date && handleInputChange('start_date', date)}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="end_date">End Date</Label>
-                  <Input
-                    id="end_date"
-                    type="date"
-                    value={formData.end_date}
-                    onChange={(e) => handleInputChange('end_date', e.target.value)}
-                  />
+                  <Label>End Date</Label>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !formData.end_date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {formData.end_date ? format(formData.end_date, "PPP") : <span>Pick a date</span>}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={formData.end_date}
+                        onSelect={(date) => date && handleInputChange('end_date', date)}
+                        initialFocus
+                        className={cn("p-3 pointer-events-auto")}
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </div>
               </div>
 
