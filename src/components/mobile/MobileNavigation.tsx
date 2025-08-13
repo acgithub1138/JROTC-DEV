@@ -4,6 +4,7 @@ import {
   Home, 
   CheckSquare, 
   Users, 
+  DollarSign,
   Calendar, 
   Settings 
 } from 'lucide-react';
@@ -28,6 +29,12 @@ const navigationItems = [
     path: '/mobile/cadets',
     icon: Users,
     module: 'cadets',
+  },
+  {
+    name: 'Budget',
+    path: '/mobile/budget',
+    icon: DollarSign,
+    module: 'budget',
   },
   {
     name: 'Calendar',

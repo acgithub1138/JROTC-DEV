@@ -32,6 +32,7 @@ import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
 import { MobileCreateTask } from "@/components/mobile/pages/MobileCreateTask";
 import { MobileTaskDetail } from "@/components/mobile/pages/MobileTaskDetail";
 import { MobileSubtaskDetail } from "@/components/mobile/pages/MobileSubtaskDetail";
+import { MobileBudget } from "@/components/mobile/pages/MobileBudget";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -102,6 +103,11 @@ const App = () => (
                   <Route path="cadets/:cadetId" element={
                     <ProtectedRoute module="cadets" requirePermission="sidebar">
                       <MobileCadetDetail />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="budget" element={
+                    <ProtectedRoute module="budget" requirePermission="sidebar">
+                      <MobileBudget />
                     </ProtectedRoute>
                   } />
                   <Route path="calendar" element={
