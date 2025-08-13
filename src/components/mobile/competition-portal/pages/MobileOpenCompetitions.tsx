@@ -1,11 +1,13 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Search, Calendar, MapPin, Users, Trophy, ExternalLink } from 'lucide-react';
+import { Search, Calendar, MapPin, Users, Trophy, ExternalLink, ArrowLeft } from 'lucide-react';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 
 export const MobileOpenCompetitions: React.FC = () => {
+  const navigate = useNavigate();
   const { competitions, isLoading } = useCompetitions();
 
   // Filter for public competitions
@@ -14,9 +16,19 @@ export const MobileOpenCompetitions: React.FC = () => {
   if (isLoading) {
     return (
       <div className="p-4 space-y-4">
-        <div className="mb-4">
-          <h1 className="text-2xl font-bold text-foreground mb-1">Open Competitions</h1>
-          <p className="text-sm text-muted-foreground">Browse and join public competitions</p>
+        <div className="flex items-center mb-4">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/mobile/competition-portal')}
+            className="mr-3 p-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground mb-1">Open Competitions</h1>
+            <p className="text-sm text-muted-foreground">Browse and join public competitions</p>
+          </div>
         </div>
         {[...Array(3)].map((_, index) => (
           <Card key={index} className="bg-card border-border">
@@ -37,8 +49,20 @@ export const MobileOpenCompetitions: React.FC = () => {
     <div className="p-4 space-y-4">
       {/* Header with Search */}
       <div className="mb-4">
-        <h1 className="text-2xl font-bold text-foreground mb-1">Open Competitions</h1>
-        <p className="text-sm text-muted-foreground mb-3">Browse and join public competitions</p>
+        <div className="flex items-center mb-3">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/mobile/competition-portal')}
+            className="mr-3 p-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground mb-1">Open Competitions</h1>
+            <p className="text-sm text-muted-foreground">Browse and join public competitions</p>
+          </div>
+        </div>
         
         {/* Search Bar */}
         <div className="relative">
