@@ -330,10 +330,10 @@ export const MobileEditEvent: React.FC = () => {
         <Button 
           onClick={handleSave} 
           disabled={isLoading || !hasUnsavedChanges}
-          className="bg-primary text-primary-foreground"
+          size="sm"
+          className="h-8 w-8 p-0"
         >
-          <Save size={16} className="mr-1" />
-          Save
+          <Save size={16} />
         </Button>
       </div>
 
