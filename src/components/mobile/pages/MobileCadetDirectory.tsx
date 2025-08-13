@@ -140,13 +140,6 @@ export const MobileCadetDirectory: React.FC = () => {
                         <Mail className="h-4 w-4 text-blue-600" />
                       </Button>
                     </div>
-                    
-                    {canView && <Button variant="ghost" size="sm" className="text-xs" onClick={e => {
-                  e.stopPropagation();
-                  handleCadetClick(cadet);
-                }}>
-                        View Profile
-                      </Button>}
                   </div>
                 </div>
               </div>
