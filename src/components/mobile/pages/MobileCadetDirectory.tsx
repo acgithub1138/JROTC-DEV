@@ -132,6 +132,7 @@ export const MobileCadetDirectory: React.FC = () => {
                   </div>
                   
                   {cadet.rank && <p className="text-xs text-muted-foreground mb-1">{cadet.rank}</p>}
+                  {cadet.role && <p className="text-xs text-muted-foreground mb-2">{cadet.role}</p>}
                   
                   <div className="flex items-center justify-end">
                     {cadet.flight && <Badge variant="secondary" className="text-xs">
