@@ -71,15 +71,30 @@ export const MobileCalendar: React.FC = () => {
     // Split by comma and trim each part
     const parts = location.split(',').map(part => part.trim());
     
-    if (parts.length >= 2) {
-      // First part is address, rest is city/state/zip
+    if (parts.length >= 3) {
+      // Format: Venue Name, Street Address, City State Zip
+      const venueName = parts[0];
+      const streetAddress = parts[1];
+      const cityStateZip = parts.slice(2).join(', ');
+      return { 
+        lines: [venueName, streetAddress, cityStateZip],
+        full: location 
+      };
+    } else if (parts.length === 2) {
+      // Format: Address, City State Zip
       const address = parts[0];
-      const cityStateZip = parts.slice(1).join(', ');
-      return { address, cityStateZip, full: location };
+      const cityStateZip = parts[1];
+      return { 
+        lines: [address, cityStateZip],
+        full: location 
+      };
     }
     
-    // If no comma, treat entire string as address
-    return { address: location, cityStateZip: '', full: location };
+    // If no comma, treat entire string as single line
+    return { 
+      lines: [location],
+      full: location 
+    };
   };
 
   const formatEventTime = (startDate: string, endDate: string, isAllDay: boolean) => {
@@ -200,10 +215,9 @@ export const MobileCalendar: React.FC = () => {
                               if (!parsed) return event.location;
                               return (
                                 <div>
-                                  <div>{parsed.address}</div>
-                                  {parsed.cityStateZip && (
-                                    <div>{parsed.cityStateZip}</div>
-                                  )}
+                                  {parsed.lines.map((line, index) => (
+                                    <div key={index}>{line}</div>
+                                  ))}
                                 </div>
                               );
                             })()}
