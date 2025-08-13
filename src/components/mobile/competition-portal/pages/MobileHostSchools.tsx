@@ -117,7 +117,7 @@ export const MobileHostSchools: React.FC = () => {
                     </p>
                   )}
 
-                  <div className="flex items-center justify-end space-x-2">
+                  <div className="flex items-center justify-between">
                     <Button 
                       variant="outline" 
                       size="sm" 
