@@ -1,9 +1,15 @@
 import React from 'react';
-import { Calendar, Clock, MapPin } from 'lucide-react';
+import { Calendar, Clock, MapPin, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { useNavigate } from 'react-router-dom';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const MobileCalendar: React.FC = () => {
+  const navigate = useNavigate();
+  const { canCreate } = useTablePermissions('calendar');
+  
   // Mock data for now - this would typically come from your events API
   const upcomingEvents = [
     {
@@ -59,9 +65,20 @@ export const MobileCalendar: React.FC = () => {
 
   return (
     <div className="p-4 space-y-4">
-      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-        <Calendar size={16} />
-        <span>Upcoming Events</span>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <Calendar size={16} />
+          <span>Upcoming Events</span>
+        </div>
+        {canCreate && (
+          <Button
+            size="sm"
+            onClick={() => navigate('/mobile/calendar/add')}
+            className="h-8 w-8 p-0"
+          >
+            <Plus size={16} />
+          </Button>
+        )}
       </div>
 
       {upcomingEvents.length === 0 ? (

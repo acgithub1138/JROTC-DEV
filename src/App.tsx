@@ -26,6 +26,7 @@ import { MobileCadetDirectory } from "@/components/mobile/pages/MobileCadetDirec
 import { MobileCadetDetail } from "@/components/mobile/pages/MobileCadetDetail";
 import { MobileIncidentReporting } from "@/components/mobile/pages/MobileIncidentReporting";
 import { MobileCalendar } from "@/components/mobile/pages/MobileCalendar";
+import { MobileAddEvent } from "@/components/mobile/pages/MobileAddEvent";
 import { MobileMore } from "@/components/mobile/pages/MobileMore";
 import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
 import { MobileCreateTask } from "@/components/mobile/pages/MobileCreateTask";
@@ -106,6 +107,11 @@ const App = () => (
                   <Route path="calendar" element={
                     <ProtectedRoute module="calendar" requirePermission="sidebar">
                       <MobileCalendar />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="calendar/add" element={
+                    <ProtectedRoute module="calendar" requirePermission="sidebar">
+                      <MobileAddEvent />
                     </ProtectedRoute>
                   } />
                   <Route path="incidents" element={
