@@ -325,6 +325,7 @@ export const MobileAddEvent: React.FC = () => {
                     <Input
                       id="start_time"
                       type="time"
+                      step="60"
                       value={formData.start_time}
                       onChange={(e) => handleInputChange('start_time', e.target.value)}
                     />
@@ -334,6 +335,7 @@ export const MobileAddEvent: React.FC = () => {
                     <Input
                       id="end_time"
                       type="time"
+                      step="60"
                       value={formData.end_time}
                       onChange={(e) => handleInputChange('end_time', e.target.value)}
                     />
