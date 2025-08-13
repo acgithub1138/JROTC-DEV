@@ -23,11 +23,19 @@ export const MobileCadetDirectory: React.FC = () => {
   const { canView, canUpdate } = useCadetPermissions();
   const [searchTerm, setSearchTerm] = useState('');
   
-  const filteredCadets = cadets.filter(cadet =>
-    `${cadet.first_name} ${cadet.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (cadet.rank && cadet.rank.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    (cadet.flight && cadet.flight.toLowerCase().includes(searchTerm.toLowerCase()))
-  );
+  const filteredCadets = cadets.filter(cadet => {
+    if (!searchTerm) return true;
+    
+    const searchLower = searchTerm.toLowerCase();
+    return (
+      cadet.first_name.toLowerCase().includes(searchLower) ||
+      cadet.last_name.toLowerCase().includes(searchLower) ||
+      `${cadet.first_name} ${cadet.last_name}`.toLowerCase().includes(searchLower) ||
+      (cadet.rank && cadet.rank.toLowerCase().includes(searchLower)) ||
+      (cadet.flight && cadet.flight.toLowerCase().includes(searchLower)) ||
+      (cadet.grade && cadet.grade.toLowerCase().includes(searchLower))
+    );
+  });
 
   const stats = getCadetStats();
 
