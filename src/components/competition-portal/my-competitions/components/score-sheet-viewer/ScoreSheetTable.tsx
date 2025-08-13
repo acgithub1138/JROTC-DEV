@@ -36,7 +36,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const { templates } = useCompetitionTemplates();
-  const fieldNames = getFieldNames(events);
+  const fieldNames = getFieldNames(events, templates);
 
   // Function to get field name with max value if available
   const getFieldNameWithMax = (fieldName: string): string => {

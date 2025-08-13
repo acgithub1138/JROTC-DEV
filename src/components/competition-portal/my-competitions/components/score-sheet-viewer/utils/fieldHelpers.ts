@@ -1,15 +1,39 @@
 import type { CompetitionEvent } from '../types';
 
-// Get all unique field names from all events
-export const getFieldNames = (events: CompetitionEvent[]): string[] => {
+// Get all unique field names from all events and templates
+export const getFieldNames = (events: CompetitionEvent[], templates: any[] = []): string[] => {
   const allFieldNames = new Set<string>();
   
+  // Get field names from actual scores
   events.forEach(event => {
     if (event.score_sheet?.scores) {
       Object.keys(event.score_sheet.scores).forEach(fieldName => {
-        // Include all fields including penalty fields
         allFieldNames.add(fieldName);
       });
+    }
+  });
+  
+  // Also get field names from templates to include empty/zero fields
+  events.forEach(event => {
+    if (event.score_sheet?.template_id) {
+      const template = templates.find(t => t.id === event.score_sheet.template_id);
+      if (template?.scores) {
+        try {
+          const templateScores = typeof template.scores === 'string' 
+            ? JSON.parse(template.scores) 
+            : template.scores;
+          
+          if (templateScores?.criteria && Array.isArray(templateScores.criteria)) {
+            templateScores.criteria.forEach((field: any) => {
+              if (field.id) {
+                allFieldNames.add(field.id);
+              }
+            });
+          }
+        } catch (error) {
+          console.warn('Failed to parse template scores:', error);
+        }
+      }
     }
   });
   
