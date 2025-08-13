@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Trophy, Calendar, Users, MapPin, Plus } from 'lucide-react';
+import { Trophy, Calendar, Users, MapPin, Plus, ArrowLeft } from 'lucide-react';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 
 export const MobileHostingCompetitions: React.FC = () => {
@@ -42,9 +42,19 @@ export const MobileHostingCompetitions: React.FC = () => {
     <div className="p-4 space-y-4">
       {/* Header */}
       <div className="flex items-center justify-between mb-4">
-        <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Hosting Competitions</h1>
-          <p className="text-sm text-muted-foreground">Manage competitions you're hosting</p>
+        <div className="flex items-center">
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => navigate('/mobile/competition-portal')}
+            className="mr-3 p-2"
+          >
+            <ArrowLeft size={20} />
+          </Button>
+          <div>
+            <h1 className="text-2xl font-bold text-foreground mb-1">Hosting Competitions</h1>
+            <p className="text-sm text-muted-foreground">Manage competitions you're hosting</p>
+          </div>
         </div>
         <Button 
           size="sm" 
