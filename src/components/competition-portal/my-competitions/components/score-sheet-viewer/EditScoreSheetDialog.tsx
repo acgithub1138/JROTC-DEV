@@ -98,13 +98,13 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
+      <DialogContent className="sm:max-w-[600px] max-h-[90vh] flex flex-col">
+        <DialogHeader className="flex-shrink-0">
           <DialogTitle>Edit Score Sheet</DialogTitle>
         </DialogHeader>
         
-        <div className="space-y-4">
-          <div>
+        <div className="flex-1 min-h-0 space-y-4">
+          <div className="flex-shrink-0">
             <Label htmlFor="judge-number">Judge Number</Label>
             <Input
               id="judge-number"
@@ -115,31 +115,33 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
             />
           </div>
 
-          <Separator />
+          <Separator className="flex-shrink-0" />
 
-          <ScrollArea className="max-h-[400px]">
-            <div className="space-y-4 pr-4">
-              {sortedFieldNames.map((fieldName) => (
-                <div key={fieldName} className="space-y-2">
-                  <Label htmlFor={fieldName} className="text-sm font-medium">
-                    {getCleanFieldName(fieldName)}
-                  </Label>
-                  <Input
-                    id={fieldName}
-                    type="number"
-                    value={scores[fieldName] || ''}
-                    onChange={(e) => handleScoreChange(fieldName, e.target.value)}
-                    placeholder="Enter score"
-                    className="w-full"
-                  />
-                </div>
-              ))}
-            </div>
-          </ScrollArea>
+          <div className="flex-1 min-h-0">
+            <ScrollArea className="h-full max-h-[300px]">
+              <div className="space-y-4 pr-4">
+                {sortedFieldNames.map((fieldName) => (
+                  <div key={fieldName} className="space-y-2">
+                    <Label htmlFor={fieldName} className="text-sm font-medium">
+                      {getCleanFieldName(fieldName)}
+                    </Label>
+                    <Input
+                      id={fieldName}
+                      type="number"
+                      value={scores[fieldName] || ''}
+                      onChange={(e) => handleScoreChange(fieldName, e.target.value)}
+                      placeholder="Enter score"
+                      className="w-full"
+                    />
+                  </div>
+                ))}
+              </div>
+            </ScrollArea>
+          </div>
 
-          <Separator />
+          <Separator className="flex-shrink-0" />
 
-          <div className="bg-muted/30 p-3 rounded-md">
+          <div className="bg-muted/30 p-3 rounded-md flex-shrink-0">
             <div className="flex justify-between items-center">
               <span className="font-medium">Total Points:</span>
               <span className="text-lg font-bold">{calculateTotal()}</span>
@@ -147,7 +149,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter>
+        <DialogFooter className="flex-shrink-0">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
