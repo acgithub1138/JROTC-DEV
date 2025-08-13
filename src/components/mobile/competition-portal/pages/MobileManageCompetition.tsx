@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
+import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { 
@@ -15,6 +16,31 @@ import {
 export const MobileManageCompetition: React.FC = () => {
   const navigate = useNavigate();
   const { competitionId } = useParams();
+  const [competition, setCompetition] = useState<any>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchCompetition = async () => {
+      if (!competitionId) return;
+      
+      try {
+        const { data, error } = await supabase
+          .from('cp_competitions')
+          .select('*')
+          .eq('id', competitionId)
+          .single();
+          
+        if (error) throw error;
+        setCompetition(data);
+      } catch (error) {
+        console.error('Error fetching competition:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchCompetition();
+  }, [competitionId]);
 
   const navigationItems = [
     {
@@ -62,7 +88,9 @@ export const MobileManageCompetition: React.FC = () => {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-2xl font-bold text-foreground mb-1">Manage Competition</h1>
+          <h1 className="text-2xl font-bold text-foreground mb-1">
+            {isLoading ? 'Loading...' : competition?.name || 'Manage Competition'}
+          </h1>
           <p className="text-sm text-muted-foreground">Competition management dashboard</p>
         </div>
       </div>
