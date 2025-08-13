@@ -9,7 +9,8 @@ import {
   X,
   GraduationCap,
   Award,
-  Users
+  Users,
+  ArrowLeft
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -18,7 +19,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { useParams, useLocation } from 'react-router-dom';
+import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useCadet } from '@/hooks/useCadets';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
@@ -27,6 +28,7 @@ import { getGradeColor } from '@/utils/gradeColors';
 export const MobileCadetDetail: React.FC = () => {
   const { cadetId } = useParams<{ cadetId: string }>();
   const location = useLocation();
+  const navigate = useNavigate();
   const { cadet, loading } = useCadet(cadetId!);
   const { toast } = useToast();
   
@@ -184,7 +186,15 @@ export const MobileCadetDetail: React.FC = () => {
             )}
           </div>
           
-          <div className="mb-2">
+          <div className="mb-2 flex items-center">
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => navigate('/mobile/cadets')}
+              className="mr-2 p-1"
+            >
+              <ArrowLeft className="h-5 w-5" />
+            </Button>
             <h1 className="text-xl font-bold text-foreground">
               {cadet.last_name}, {cadet.first_name}
               {isLeader(cadet) && <Star className="inline ml-2 h-5 w-5 text-yellow-500" />}
