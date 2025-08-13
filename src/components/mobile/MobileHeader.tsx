@@ -11,6 +11,7 @@ const getPageTitle = (pathname: string): string => {
   if (pathname.includes('/budget')) return 'Budget';
   if (pathname.includes('/calendar')) return 'Calendar';
   if (pathname.includes('/incidents')) return 'Incidents';
+  if (pathname.includes('/competition-portal')) return 'Competition Portal';
   if (pathname.includes('/more')) return 'Settings';
   return 'JROTC Command';
 };
