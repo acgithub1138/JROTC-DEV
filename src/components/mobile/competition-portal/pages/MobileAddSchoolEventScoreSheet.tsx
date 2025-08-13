@@ -72,41 +72,68 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
   });
 
   // Fetch score sheet template when event is selected
-  const { data: scoreTemplate } = useQuery({
+  const { data: scoreTemplate, isLoading: templateLoading } = useQuery({
     queryKey: ['score-template', selectedEventId],
     queryFn: async () => {
       if (!selectedEventId) return null;
-      const { data, error } = await supabase
-        .from('cp_events')
+      
+      // First get the cp_events entry to find the score_sheet template ID
+      const { data: eventData, error: eventError } = await supabase
+        .from('cp_comp_events')
         .select(`
-          score_sheet,
-          competition_templates:score_sheet(
-            scores,
-            template_name
+          cp_events:event (
+            id,
+            name,
+            score_sheet
           )
         `)
         .eq('id', selectedEventId)
         .single();
 
-      if (error) throw error;
-      return data;
+      if (eventError) throw eventError;
+      
+      const templateId = eventData?.cp_events?.score_sheet;
+      if (!templateId) return null;
+
+      // Then fetch the actual template
+      const { data: templateData, error: templateError } = await supabase
+        .from('competition_templates')
+        .select('*')
+        .eq('id', templateId)
+        .single();
+
+      if (templateError) throw templateError;
+      return templateData;
     },
     enabled: !!selectedEventId
   });
 
   // Initialize score sheet when template is loaded
   React.useEffect(() => {
-    if (scoreTemplate?.competition_templates?.scores) {
-      const template = scoreTemplate.competition_templates.scores as any;
+    if (scoreTemplate?.scores) {
+      const template = scoreTemplate.scores as any;
+      
+      // Handle different template formats
+      let criteria = [];
       if (template.criteria && Array.isArray(template.criteria)) {
-        const initialScoreSheet = template.criteria.map((criterion: any, index: number) => ({
+        criteria = template.criteria;
+      } else if (template.scoreItems && Array.isArray(template.scoreItems)) {
+        criteria = template.scoreItems;
+      } else if (Array.isArray(template)) {
+        criteria = template;
+      }
+
+      if (criteria.length > 0) {
+        const initialScoreSheet = criteria.map((criterion: any, index: number) => ({
           id: `${index}`,
-          criteria: criterion.name || criterion,
-          max_score: criterion.max_score || 10,
+          criteria: criterion.name || criterion.criteria || criterion.title || criterion,
+          max_score: criterion.max_score || criterion.maxScore || criterion.points || 10,
           score: 0
         }));
         setScoreSheet(initialScoreSheet);
       }
+    } else {
+      setScoreSheet([]);
     }
   }, [scoreTemplate]);
 
@@ -238,6 +265,14 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       </Card>
 
       {/* Score Sheet */}
+      {templateLoading && selectedEventId && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-muted-foreground">Loading score sheet template...</p>
+          </CardContent>
+        </Card>
+      )}
+      
       {scoreSheet.length > 0 && (
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
@@ -267,6 +302,16 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
                 </div>
               </div>
             ))}
+          </CardContent>
+        </Card>
+      )}
+
+      {selectedEventId && !templateLoading && scoreSheet.length === 0 && (
+        <Card className="bg-card border-border">
+          <CardContent className="p-4 text-center">
+            <p className="text-sm text-muted-foreground">
+              No score sheet template found for this event.
+            </p>
           </CardContent>
         </Card>
       )}
