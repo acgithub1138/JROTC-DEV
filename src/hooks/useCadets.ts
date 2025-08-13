@@ -36,6 +36,7 @@ export const useCadets = () => {
         .select('*')
         .eq('school_id', userProfile.school_id)
         .neq('role', 'instructor')
+        .eq('active', true)
         .order('last_name', { ascending: true });
 
       if (error) throw error;
