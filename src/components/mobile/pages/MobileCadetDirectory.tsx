@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { useNavigate } from 'react-router-dom';
 import { useCadets } from '@/hooks/useCadets';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { getGradeColor } from '@/utils/gradeColors';
 
 
 export const MobileCadetDirectory: React.FC = () => {
@@ -163,8 +164,8 @@ export const MobileCadetDirectory: React.FC = () => {
                       {isLeader(cadet) && <Star className="inline ml-1 h-3 w-3 text-yellow-500" />}
                     </h3>
                     {cadet.grade && (
-                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                        {cadet.grade}th
+                      <Badge className={`text-xs ${getGradeColor(cadet.grade)}`}>
+                        {cadet.grade}
                       </Badge>
                     )}
                   </div>

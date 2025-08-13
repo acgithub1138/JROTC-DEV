@@ -22,6 +22,7 @@ import { useParams, useLocation } from 'react-router-dom';
 import { useCadet } from '@/hooks/useCadets';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { getGradeColor } from '@/utils/gradeColors';
 
 export const MobileCadetDetail: React.FC = () => {
   const { cadetId } = useParams<{ cadetId: string }>();
@@ -196,8 +197,8 @@ export const MobileCadetDetail: React.FC = () => {
               </div>
               
               {cadet.grade && (
-                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
-                  Grade {cadet.grade}
+                <Badge className={`text-xs ${getGradeColor(cadet.grade)}`}>
+                  {cadet.grade}
                 </Badge>
               )}
               
