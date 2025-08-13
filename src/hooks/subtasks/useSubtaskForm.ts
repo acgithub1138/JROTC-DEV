@@ -30,7 +30,7 @@ export const useSubtaskForm = ({ mode, subtask, onOpenChange, canAssignTasks, cu
     defaultValues: {
       title: subtask?.title || '',
       description: subtask?.description || '',
-      assigned_to: subtask?.assigned_to || '',
+      assigned_to: subtask?.assigned_to || 'unassigned',
       priority: subtask?.priority || (validPriorities[0] || 'medium'),
       status: subtask?.status || (validStatuses[0] || 'not_started'),
       due_date: subtask?.due_date ? new Date(subtask.due_date) : undefined,
@@ -66,7 +66,7 @@ export const useSubtaskForm = ({ mode, subtask, onOpenChange, canAssignTasks, cu
       description: data.description || null,
       status: data.status,
       priority: data.priority,
-      assigned_to: data.assigned_to || null,
+      assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to,
       due_date: data.due_date ? data.due_date.toISOString() : null,
     };
 

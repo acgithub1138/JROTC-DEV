@@ -59,7 +59,7 @@ export const MobileSubtaskForm: React.FC<MobileSubtaskFormProps> = ({
       const hasChanges = !!(
         value.title !== (subtask?.title || '') ||
         value.description !== (subtask?.description || '') ||
-        value.assigned_to !== (subtask?.assigned_to || '') ||
+        value.assigned_to !== (subtask?.assigned_to || 'unassigned') ||
         value.priority !== (subtask?.priority || 'medium') ||
         value.status !== (subtask?.status || 'not_started') ||
         (value.due_date?.getTime() || null) !== (subtask?.due_date ? new Date(subtask.due_date).getTime() : null)

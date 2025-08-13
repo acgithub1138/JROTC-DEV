@@ -41,7 +41,7 @@ export const SubtaskAssigneeField: React.FC<SubtaskAssigneeFieldProps> = ({
               </SelectTrigger>
             </FormControl>
             <SelectContent>
-              <SelectItem value="">Unassigned</SelectItem>
+              <SelectItem value="unassigned">Unassigned</SelectItem>
               {users.map((user) => (
                 <SelectItem key={user.id} value={user.id}>
                   {user.last_name}, {user.first_name}
