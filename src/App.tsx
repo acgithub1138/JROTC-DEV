@@ -46,6 +46,7 @@ import { MobileHostResources } from "@/components/mobile/competition-portal/page
 import { MobileAddResource } from "@/components/mobile/competition-portal/pages/MobileAddResource";
 import { MobileEditResource } from "@/components/mobile/competition-portal/pages/MobileEditResource";
 import { MobileHostSchools } from "@/components/mobile/competition-portal/pages/MobileHostSchools";
+import { MobileAddSchool } from "@/components/mobile/competition-portal/pages/MobileAddSchool";
 import { MobileHostSchedule } from "@/components/mobile/competition-portal/pages/MobileHostSchedule";
 import { MobileHostResults } from "@/components/mobile/competition-portal/pages/MobileHostResults";
 import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
@@ -204,6 +205,11 @@ const App = () => (
                    <Route path="competition-portal/manage/:competitionId/schools" element={
                      <ProtectedRoute>
                        <MobileHostSchools />
+                     </ProtectedRoute>
+                   } />
+                   <Route path="competition-portal/manage/:competitionId/schools/add" element={
+                     <ProtectedRoute>
+                       <MobileAddSchool />
                      </ProtectedRoute>
                    } />
                    <Route path="competition-portal/manage/:competitionId/schedule" element={
