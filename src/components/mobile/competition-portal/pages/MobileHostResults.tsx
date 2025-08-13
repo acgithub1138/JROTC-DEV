@@ -232,9 +232,13 @@ export const MobileHostResults: React.FC = () => {
                     <div className="text-xs text-muted-foreground">
                       Scores: {result.completed_scores}/{result.total_scores} submitted
                     </div>
-                    <Button variant="outline" size="sm" className="text-xs h-7">
-                      <Eye size={12} className="mr-1" />
-                      View Details
+                    <Button 
+                      variant="ghost" 
+                      size="icon"
+                      className="h-7 w-7"
+                      onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/results/${encodeURIComponent(result.event_name)}`)}
+                    >
+                      <Eye size={12} />
                     </Button>
                   </div>
                 </div>
