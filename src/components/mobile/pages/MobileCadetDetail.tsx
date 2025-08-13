@@ -195,9 +195,11 @@ export const MobileCadetDetail: React.FC = () => {
                 )}
               </div>
               
-              <Badge className={cadet.active ? 'bg-green-600 text-white' : 'bg-orange-500 text-white'}>
-                {cadet.active ? 'Active' : 'Inactive'}
-              </Badge>
+              {cadet.grade && (
+                <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                  Grade {cadet.grade}
+                </Badge>
+              )}
               
               <div className="mt-2 flex items-center text-sm text-muted-foreground">
                 <Mail className="h-4 w-4 mr-1" />

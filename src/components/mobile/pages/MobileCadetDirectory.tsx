@@ -15,11 +15,6 @@ import { useNavigate } from 'react-router-dom';
 import { useCadets } from '@/hooks/useCadets';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
 
-const statusColors = {
-  active: 'bg-green-600 text-white',
-  inactive: 'bg-orange-500 text-white',
-  graduated: 'bg-blue-600 text-white'
-};
 
 export const MobileCadetDirectory: React.FC = () => {
   const navigate = useNavigate();
@@ -167,9 +162,11 @@ export const MobileCadetDirectory: React.FC = () => {
                       {cadet.last_name}, {cadet.first_name}
                       {isLeader(cadet) && <Star className="inline ml-1 h-3 w-3 text-yellow-500" />}
                     </h3>
-                    <Badge className={statusColors[cadet.active ? 'active' : 'inactive']} variant="secondary">
-                      {cadet.active ? 'active' : 'inactive'}
-                    </Badge>
+                    {cadet.grade && (
+                      <Badge variant="secondary" className="bg-blue-100 text-blue-800">
+                        {cadet.grade}th
+                      </Badge>
+                    )}
                   </div>
                   
                   {cadet.rank && (
