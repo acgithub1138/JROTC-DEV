@@ -449,7 +449,7 @@ export const MobileAddEvent: React.FC = () => {
                 />
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div>
                 <div className="space-y-2">
                   <Label htmlFor="max_participants">Max Participants</Label>
                   <Input
