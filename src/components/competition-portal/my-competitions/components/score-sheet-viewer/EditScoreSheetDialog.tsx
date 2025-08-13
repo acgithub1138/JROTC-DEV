@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,14 +36,14 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
       [fieldName]: value
     }));
   };
-  const totalPoints = useMemo(() => {
+  const calculateTotal = () => {
     let total = 0;
     Object.values(scores).forEach(value => {
       const numValue = parseFloat(value) || 0;
       total += numValue;
     });
     return total;
-  }, [scores]);
+  };
   const handleSave = async () => {
     if (!event) return;
     setIsLoading(true);
@@ -58,7 +58,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
         error
       } = await supabase.from('competition_events').update({
         score_sheet: updatedScoreSheet,
-        total_points: totalPoints,
+        total_points: calculateTotal(),
         updated_at: new Date().toISOString()
       }).eq('id', event.id);
       if (error) {
@@ -112,7 +112,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
           <div className="bg-muted/30 p-3 rounded-md flex-shrink-0">
             <div className="flex justify-between items-center">
               <span className="font-medium">Total Points:</span>
-              <span className="text-lg font-bold">{totalPoints}</span>
+              <span className="text-lg font-bold">{calculateTotal()}</span>
             </div>
           </div>
         </div>

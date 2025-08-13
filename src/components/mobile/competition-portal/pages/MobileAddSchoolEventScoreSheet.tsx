@@ -12,15 +12,15 @@ import { Badge } from '@/components/ui/badge';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  extractFieldsFromTemplate, 
-  initializeScoresWithDefaults, 
-  calculateTotalPoints,
-  formatScoreSheetForDatabase
-} from '@/utils/scoreSheet';
-import type { ProcessedScoreField, ScoreValues } from '@/utils/scoreSheet';
 
-// Using centralized types from utils
+interface ScoreSheetItem {
+  id: string;
+  criteria: string;
+  max_score: number;
+  score?: number;
+  type?: string;
+  pauseField?: boolean;
+}
 
 export const MobileAddSchoolEventScoreSheet: React.FC = () => {
   const navigate = useNavigate();
@@ -30,8 +30,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
 
   const [selectedEventId, setSelectedEventId] = useState<string>('');
   const [judgeNumber, setJudgeNumber] = useState<string>('');
-  const [processedFields, setProcessedFields] = useState<ProcessedScoreField[]>([]);
-  const [scores, setScores] = useState<ScoreValues>({});
+  const [scoreSheet, setScoreSheet] = useState<ScoreSheetItem[]>([]);
   const [teamName, setTeamName] = useState('');
   const [notes, setNotes] = useState('');
 
@@ -138,12 +137,41 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
 
   // Initialize score sheet when template is loaded
   React.useEffect(() => {
-    if (scoreTemplate) {
-      const fields = extractFieldsFromTemplate(scoreTemplate);
-      setProcessedFields(fields);
+    if (scoreTemplate?.scores) {
+      const template = scoreTemplate.scores as any;
       
-      const initialScores = initializeScoresWithDefaults(fields);
-      setScores(initialScores);
+      // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
+      const rawFields = template?.criteria || [];
+      
+      if (rawFields.length > 0) {
+        const initialScoreSheet = rawFields.map((field: any, index: number) => {
+          const fieldItem = {
+            id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
+            criteria: field.name || field.criteria || field.title || field,
+            max_score: field.max_score || field.maxScore || field.points || 10,
+            type: field.type,
+            pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
+          };
+
+          // Initialize score based on field type - ensure all fields get default values
+          if (field.type === 'penalty' || field.type === 'penalty_checkbox') {
+            return { ...fieldItem, score: 0 };
+          } else if (field.type === 'text' || field.textType === 'notes') {
+            return { ...fieldItem, score: '' };
+          } else if (field.type === 'dropdown' || field.type === 'scoring_scale') {
+            return { ...fieldItem, score: '' };
+          } else if (field.type === 'number') {
+            return { ...fieldItem, score: 0 };
+          } else {
+            return { ...fieldItem, score: field.type === 'section_header' || field.type === 'label' || field.pauseField ? undefined : 0 };
+          }
+        });
+        setScoreSheet(initialScoreSheet);
+      } else {
+        setScoreSheet([]);
+      }
+    } else {
+      setScoreSheet([]);
     }
   }, [scoreTemplate]);
 
@@ -175,7 +203,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
   );
 
   const createScoreSheetMutation = useMutation({
-    mutationFn: async (submittedScores: any) => {
+    mutationFn: async (scoreSheetData: any) => {
       if (!userProfile?.school_id || !selectedEventId || !school?.school_id) {
         throw new Error('Missing required data');
       }
@@ -186,23 +214,29 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         throw new Error('Event not found');
       }
 
-      const totalPoints = calculateTotalPoints(processedFields, scores);
-      const formattedScoreSheet = formatScoreSheetForDatabase(
-        scoreTemplate?.id,
-        scoreTemplate?.template_name,
-        judgeNumber,
-        scores
-      );
+      // Create scores object with all fields and their values
+      const scores: Record<string, any> = {};
+      scoreSheetData.forEach((item: any) => {
+        if (item.score !== undefined) {
+          scores[item.id] = item.score;
+        }
+      });
 
       const { data, error } = await supabase
         .from('competition_events')
         .insert({
           school_id: userProfile.school_id,
           competition_id: competitionId,
-          event: eventDetails.cp_events.name as any,
+          event: eventDetails.cp_events.name as any, // Use the event name from cp_events
           team_name: teamName || school.school_name,
-          score_sheet: formattedScoreSheet,
-          total_points: totalPoints,
+          score_sheet: {
+            template_id: scoreTemplate?.id,
+            template_name: scoreTemplate?.template_name,
+            judge_number: judgeNumber,
+            scores: scores,
+            calculated_at: new Date().toISOString()
+          },
+          total_points: scoreSheetData.reduce((sum: number, item: any) => sum + (typeof item.score === 'number' ? item.score : 0), 0),
           source_type: 'portal',
           source_competition_id: competitionId
         })
@@ -223,8 +257,12 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
     }
   });
 
-  const handleScoreChange = (id: string, value: any) => {
-    setScores(prev => ({ ...prev, [id]: value }));
+  const handleScoreChange = (id: string, score: number) => {
+    setScoreSheet(prev => 
+      prev.map(item => 
+        item.id === id ? { ...item, score: Math.max(0, Math.min(score, item.max_score)) } : item
+      )
+    );
   };
 
   const handleSubmit = () => {
@@ -238,18 +276,16 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       return;
     }
 
-    if (processedFields.length === 0) {
+    if (scoreSheet.length === 0) {
       toast.error('Score sheet is empty');
       return;
     }
 
-    createScoreSheetMutation.mutate(scores);
+    createScoreSheetMutation.mutate(scoreSheet);
   };
 
-  const totalScore = calculateTotalPoints(processedFields, scores);
-  const maxPossibleScore = processedFields.reduce((sum, field) => {
-    return sum + (field.type !== 'section_header' && field.type !== 'label' && !field.pauseField ? field.max_score : 0);
-  }, 0);
+  const totalScore = scoreSheet.reduce((sum, item) => sum + (item.score || 0), 0);
+  const maxPossibleScore = scoreSheet.reduce((sum, item) => sum + item.max_score, 0);
 
   return (
     <div className="p-4 space-y-4">
@@ -271,7 +307,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         </div>
         <Button
           onClick={handleSubmit}
-          disabled={!selectedEventId || !judgeNumber || processedFields.length === 0 || createScoreSheetMutation.isPending}
+          disabled={!selectedEventId || !judgeNumber || scoreSheet.length === 0 || createScoreSheetMutation.isPending}
           className="h-8 w-8 p-0"
         >
           <Save size={16} />
@@ -345,7 +381,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         </Card>
       )}
       
-      {processedFields.length > 0 && (
+      {scoreSheet.length > 0 && (
         <Card className="bg-card border-border">
           <CardHeader className="pb-3">
             <div className="flex items-center justify-between">
@@ -356,88 +392,69 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {processedFields.map((field) => {
-              const currentScore = scores[field.id];
-              
+            {scoreSheet.map((item) => {
               // Handle penalty fields - only show for Judge 1
-              const isPenalty = field.type === 'penalty' || 
-                               field.name.toLowerCase().includes('penalty') || 
-                               field.name.toLowerCase().includes('violation') || 
-                               field.name.toLowerCase().includes('deduction') ||
-                               field.name.toLowerCase().includes('incorrect commands') ||
-                               field.name.toLowerCase().includes('uneven') ||
-                               field.name.toLowerCase().includes('poor cadence') ||
-                               field.name.toLowerCase().includes('missing cadets');
+              const isPenalty = item.type === 'penalty' || 
+                               item.criteria.toLowerCase().includes('penalty') || 
+                               item.criteria.toLowerCase().includes('violation') || 
+                               item.criteria.toLowerCase().includes('deduction') ||
+                               item.criteria.toLowerCase().includes('incorrect commands') ||
+                               item.criteria.toLowerCase().includes('uneven') ||
+                               item.criteria.toLowerCase().includes('poor cadence') ||
+                               item.criteria.toLowerCase().includes('missing cadets');
 
               if (isPenalty && judgeNumber !== 'Judge 1') {
                 return null;
               }
 
               // Handle section headers
-              if (field.type === 'section_header') {
+              if (item.type === 'section_header') {
                 return (
-                  <div key={field.id} className="border-b-2 border-primary pb-2 py-2">
+                  <div key={item.id} className="border-b-2 border-primary pb-2 py-2">
                     <h3 className="text-lg font-bold text-primary">
-                      {field.name}
+                      {item.criteria}
                     </h3>
                   </div>
                 );
               }
 
               // Handle pause fields (labels like "Example 19a", "Penalties")
-              if (field.pauseField || field.type === 'bold_gray' || field.type === 'pause' || field.type === 'label') {
+              if (item.pauseField || item.type === 'bold_gray' || item.type === 'pause' || item.type === 'label') {
                 return (
-                  <div key={field.id} className="py-2">
+                  <div key={item.id} className="py-2">
                     <h4 className="font-semibold text-sm text-foreground border-b border-border pb-1">
-                      {field.name}
+                      {item.criteria}
                     </h4>
                   </div>
                 );
               }
 
               return (
-                <div key={field.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg ${
                   isPenalty ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'
                 }`}>
                   <div className="flex-1">
                     <p className={`font-medium text-sm ${isPenalty ? 'text-destructive' : ''}`}>
-                      {field.name}
+                      {item.criteria}
                     </p>
                     <p className="text-xs text-muted-foreground">
-                      Max: {field.max_score}
+                      Max: {item.max_score}
                       {isPenalty && judgeNumber === 'Judge 1' && (
                         <span className="text-destructive"> • Penalty Field</span>
                       )}
                     </p>
                   </div>
                   <div className="w-20">
-                    {field.type === 'penalty_checkbox' ? (
-                      <input
-                        type="checkbox"
-                        checked={currentScore || false}
-                        onChange={(e) => handleScoreChange(field.id, e.target.checked)}
-                        className="w-5 h-5"
-                      />
-                    ) : field.type === 'text' || field.textType === 'notes' ? (
-                      <Input
-                        type="text"
-                        value={currentScore || ''}
-                        onChange={(e) => handleScoreChange(field.id, e.target.value)}
-                        className="text-center text-sm h-8"
-                        placeholder="Text"
-                      />
-                    ) : (
-                      <Input
-                        type="number"
-                        min="0"
-                        max={field.max_score}
-                        value={currentScore || 0}
-                        onChange={(e) => handleScoreChange(field.id, parseInt(e.target.value) || 0)}
-                        className={`text-center text-sm h-8 ${
-                          isPenalty ? 'border-destructive focus:border-destructive' : ''
-                        }`}
-                      />
-                    )}
+                    <Input
+                      type="number"
+                      min="0"
+                      max={item.max_score}
+                      value={item.score || 0}
+                      onChange={(e) => handleScoreChange(item.id, parseInt(e.target.value) || 0)}
+                      className={`text-center text-sm h-8 ${
+                        isPenalty ? 'border-destructive focus:border-destructive' : ''
+                      }`}
+                    />
                   </div>
                 </div>
               );
@@ -446,7 +463,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         </Card>
       )}
 
-      {selectedEventId && !templateLoading && processedFields.length === 0 && (
+      {selectedEventId && !templateLoading && scoreSheet.length === 0 && (
         <Card className="bg-card border-border">
           <CardContent className="p-4 text-center">
             <p className="text-sm text-muted-foreground">

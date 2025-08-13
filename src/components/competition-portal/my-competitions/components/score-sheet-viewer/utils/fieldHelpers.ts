@@ -1,5 +1,4 @@
 import type { CompetitionEvent } from '../types';
-import { getFieldNames as getFieldNamesUtil, getCleanFieldName as getCleanFieldNameUtil } from '@/utils/scoreSheet';
 
 // Get all unique field names from all events and templates
 export const getFieldNames = (events: CompetitionEvent[], templates: any[] = []): string[] => {
@@ -66,7 +65,12 @@ export const getFieldNames = (events: CompetitionEvent[], templates: any[] = [])
 
 // Clean field name for display
 export const getCleanFieldName = (fieldName: string): string => {
-  return getCleanFieldNameUtil(fieldName);
+  return fieldName
+    .replace(/^field_\d+_/, '') // Remove field_x_ prefix
+    .replace(/_/g, ' ')
+    .replace(/([A-Z])/g, ' $1')
+    .replace(/\s+/g, ' ')
+    .trim();
 };
 
 // Calculate average for a specific field
