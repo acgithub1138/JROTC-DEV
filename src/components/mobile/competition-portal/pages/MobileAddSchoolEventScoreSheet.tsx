@@ -18,6 +18,8 @@ interface ScoreSheetItem {
   criteria: string;
   max_score: number;
   score?: number;
+  type?: string;
+  pauseField?: boolean;
 }
 
 export const MobileAddSchoolEventScoreSheet: React.FC = () => {
@@ -138,24 +140,21 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
     if (scoreTemplate?.scores) {
       const template = scoreTemplate.scores as any;
       
-      // Handle different template formats
-      let criteria = [];
-      if (template.criteria && Array.isArray(template.criteria)) {
-        criteria = template.criteria;
-      } else if (template.scoreItems && Array.isArray(template.scoreItems)) {
-        criteria = template.scoreItems;
-      } else if (Array.isArray(template)) {
-        criteria = template;
-      }
-
-      if (criteria.length > 0) {
-        const initialScoreSheet = criteria.map((criterion: any, index: number) => ({
-          id: `${index}`,
-          criteria: criterion.name || criterion.criteria || criterion.title || criterion,
-          max_score: criterion.max_score || criterion.maxScore || criterion.points || 10,
-          score: 0
+      // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
+      const rawFields = template?.criteria || [];
+      
+      if (rawFields.length > 0) {
+        const initialScoreSheet = rawFields.map((field: any, index: number) => ({
+          id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
+          criteria: field.name || field.criteria || field.title || field,
+          max_score: field.max_score || field.maxScore || field.points || 10,
+          score: 0,
+          type: field.type,
+          pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
         }));
         setScoreSheet(initialScoreSheet);
+      } else {
+        setScoreSheet([]);
       }
     } else {
       setScoreSheet([]);
@@ -377,6 +376,17 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
               const isPenalty = item.criteria.toLowerCase().includes('penalty') || 
                                item.criteria.toLowerCase().includes('violation') || 
                                item.criteria.toLowerCase().includes('deduction');
+
+              // Handle pause fields (labels like "Example 19a", "Penalties")
+              if (item.pauseField || item.type === 'bold_gray' || item.type === 'pause') {
+                return (
+                  <div key={item.id} className="py-2">
+                    <h4 className="font-semibold text-sm text-foreground border-b border-border pb-1">
+                      {item.criteria}
+                    </h4>
+                  </div>
+                );
+              }
 
               return (
                 <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg ${
