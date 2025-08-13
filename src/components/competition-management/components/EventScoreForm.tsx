@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { JsonField } from '../components/json-field-builder/types';
 import { ScoreFieldRenderer } from './score-form/ScoreFieldRenderer';
 import { TotalScoreCard } from './score-form/TotalScoreCard';
@@ -17,27 +17,27 @@ export const EventScoreForm: React.FC<EventScoreFormProps> = ({
   initialScores = {},
   judgeNumber
 }) => {
-  // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
-  const rawFields = templateScores?.criteria || [];
+  // Memoize field processing to prevent console spam and unnecessary recalculations
+  const fields: JsonField[] = useMemo(() => {
+    // Parse template fields from the JSON structure - templates use 'criteria' not 'fields'
+    const rawFields = templateScores?.criteria || [];
 
-  // Convert template criteria to JsonField format and ensure each field has an ID
-  const fields: JsonField[] = rawFields.map((field: any, index: number) => {
-    console.log('Processing field:', field.name, 'type:', field.type, 'maxLength:', field.maxLength);
-    
-    const processedField = {
-      ...field,
-      id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
-      // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
-      pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField,
-      // Map dropdown options from 'options' to 'values' for ScoreFieldRenderer compatibility
-      values: field.options || field.values,
-      // Convert maxLength to textType for proper text field rendering
-      textType: field.type === 'text' ? (field.maxLength > 75 ? 'notes' : 'short') : undefined
-    };
-    
-    console.log('Processed field:', processedField.name, 'textType:', processedField.textType);
-    return processedField;
-  });
+    // Convert template criteria to JsonField format and ensure each field has an ID
+    return rawFields.map((field: any, index: number) => {
+      const processedField = {
+        ...field,
+        id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
+        // Convert bold_gray type to pauseField property (with backward compatibility for 'pause')
+        pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField,
+        // Map dropdown options from 'options' to 'values' for ScoreFieldRenderer compatibility
+        values: field.options || field.values,
+        // Convert maxLength to textType for proper text field rendering
+        textType: field.type === 'text' ? (field.maxLength > 75 ? 'notes' : 'short') : undefined
+      };
+      
+      return processedField;
+    });
+  }, [templateScores]);
 
   const { scores, totalPoints, handleFieldChange } = useScoreCalculation({
     fields,
