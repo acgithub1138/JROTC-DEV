@@ -25,6 +25,7 @@ export const getFieldNames = (events: CompetitionEvent[]): string[] => {
 // Clean field name for display
 export const getCleanFieldName = (fieldName: string): string => {
   return fieldName
+    .replace(/^field_\d+_/, '') // Remove field_x_ prefix
     .replace(/_/g, ' ')
     .replace(/([A-Z])/g, ' $1')
     .replace(/\s+/g, ' ')
