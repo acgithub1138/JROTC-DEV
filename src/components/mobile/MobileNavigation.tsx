@@ -6,10 +6,11 @@ import {
   Users, 
   DollarSign,
   Calendar, 
-  Settings 
+  Trophy 
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { usePermissionContext } from '@/contexts/PermissionContext';
+import { usePortal } from '@/contexts/PortalContext';
 
 const navigationItems = [
   {
@@ -43,20 +44,25 @@ const navigationItems = [
     module: 'calendar',
   },
   {
-    name: 'More',
-    path: '/mobile/more',
-    icon: Settings,
-    module: null, // Always show More tab
+    name: 'Competition',
+    path: '/mobile/competition-portal',
+    icon: Trophy,
+    module: null, // Will be filtered by portal access
+    requiresPortalAccess: true,
   },
 ];
 
 export const MobileNavigation: React.FC = () => {
   const location = useLocation();
   const { hasPermission } = usePermissionContext();
+  const { canAccessCompetitionPortal } = usePortal();
 
   // Filter navigation items based on permissions
   const visibleItems = navigationItems.filter(item => {
-    if (!item.module) return true; // Always show items without module (like More)
+    if (item.requiresPortalAccess) {
+      return canAccessCompetitionPortal;
+    }
+    if (!item.module) return true; // Always show items without module
     return hasPermission(item.module, 'read');
   });
 

@@ -33,6 +33,11 @@ import { MobileCreateTask } from "@/components/mobile/pages/MobileCreateTask";
 import { MobileTaskDetail } from "@/components/mobile/pages/MobileTaskDetail";
 import { MobileSubtaskDetail } from "@/components/mobile/pages/MobileSubtaskDetail";
 import { MobileBudget } from "@/components/mobile/pages/MobileBudget";
+import { MobileCompetitionPortalLayout } from "@/components/mobile/competition-portal/MobileCompetitionPortalLayout";
+import { MobileCompetitionDashboard } from "@/components/mobile/competition-portal/pages/MobileCompetitionDashboard";
+import { MobileHostingCompetitions } from "@/components/mobile/competition-portal/pages/MobileHostingCompetitions";
+import { MobileOpenCompetitions } from "@/components/mobile/competition-portal/pages/MobileOpenCompetitions";
+import { MobileMyCompetitions } from "@/components/mobile/competition-portal/pages/MobileMyCompetitions";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -126,6 +131,30 @@ const App = () => (
                     </ProtectedRoute>
                   } />
                   <Route path="more" element={<MobileMore />} />
+                  
+                  {/* Mobile Competition Portal Routes */}
+                  <Route path="competition-portal" element={<MobileCompetitionPortalLayout><MobileCompetitionDashboard /></MobileCompetitionPortalLayout>} />
+                  <Route path="competition-portal/hosting" element={
+                    <ProtectedRoute>
+                      <MobileCompetitionPortalLayout>
+                        <MobileHostingCompetitions />
+                      </MobileCompetitionPortalLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="competition-portal/open" element={
+                    <ProtectedRoute>
+                      <MobileCompetitionPortalLayout>
+                        <MobileOpenCompetitions />
+                      </MobileCompetitionPortalLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="competition-portal/my-competitions" element={
+                    <ProtectedRoute>
+                      <MobileCompetitionPortalLayout>
+                        <MobileMyCompetitions />
+                      </MobileCompetitionPortalLayout>
+                    </ProtectedRoute>
+                  } />
                 </Route>
               </Route>
 
