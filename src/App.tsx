@@ -23,6 +23,7 @@ import { MobileLayout } from "@/components/mobile/MobileLayout";
 import { MobileDashboard } from "@/components/mobile/pages/MobileDashboard";
 import { MobileTaskList } from "@/components/mobile/pages/MobileTaskList";
 import { MobileCadetDirectory } from "@/components/mobile/pages/MobileCadetDirectory";
+import { MobileCadetDetail } from "@/components/mobile/pages/MobileCadetDetail";
 import { MobileIncidentReporting } from "@/components/mobile/pages/MobileIncidentReporting";
 import { MobileMore } from "@/components/mobile/pages/MobileMore";
 import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
@@ -94,6 +95,11 @@ const App = () => (
                   <Route path="cadets" element={
                     <ProtectedRoute module="cadets" requirePermission="sidebar">
                       <MobileCadetDirectory />
+                    </ProtectedRoute>
+                  } />
+                  <Route path="cadets/:cadetId" element={
+                    <ProtectedRoute module="cadets" requirePermission="sidebar">
+                      <MobileCadetDetail />
                     </ProtectedRoute>
                   } />
                   <Route path="incidents" element={
