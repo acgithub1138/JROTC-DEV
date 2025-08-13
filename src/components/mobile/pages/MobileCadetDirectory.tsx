@@ -99,10 +99,6 @@ export const MobileCadetDirectory: React.FC = () => {
       <div className="p-4 border-b border-border bg-muted/30">
         <div className="flex justify-around text-center">
           <div>
-            <p className="text-lg font-bold text-foreground">{stats.total}</p>
-            <p className="text-xs text-muted-foreground">Total Cadets</p>
-          </div>
-          <div>
             <p className="text-lg font-bold text-green-600">{stats.active}</p>
             <p className="text-xs text-muted-foreground">Active</p>
           </div>
