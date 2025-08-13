@@ -140,6 +140,7 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
             <div className="space-y-2">
               <div className="flex items-center justify-between">
                 {getStatusBadge(st.status)}
+                {getPriorityBadge(st.priority)}
               </div>
               
               <div className="flex items-center justify-between text-xs text-muted-foreground">
@@ -149,12 +150,6 @@ const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) =
                     ? `${st.assigned_to_profile.last_name}, ${st.assigned_to_profile.first_name}`
                     : 'Unassigned'}
                 </div>
-                <div className="flex items-center gap-2">
-                  {getPriorityBadge(st.priority)}
-                </div>
-              </div>
-              
-              <div className="flex items-center justify-end text-xs text-muted-foreground">
                 <div className="flex items-center">
                   <Calendar className="mr-1 h-3 w-3" />
                   {formatDate(st.due_date || null)}
