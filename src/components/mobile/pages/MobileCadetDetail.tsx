@@ -171,7 +171,6 @@ export const MobileCadetDetail: React.FC = () => {
                     onClick={handleEdit}
                   >
                     <Edit className="h-4 w-4 mr-1" />
-                    Edit
                   </Button>
                 )}
                 {isEditing && (
