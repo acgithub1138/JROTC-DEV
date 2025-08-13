@@ -64,49 +64,91 @@ export const MobileHostSchedule: React.FC = () => {
         </Button>
       </div>
 
-      {/* Schedule List */}
-      <div className="space-y-3">
+      {/* Schedule View */}
+      <div className="space-y-4">
         {events.length > 0 ? (
           events.map((event) => (
-            <Card key={event.id} className="bg-card border-border hover:bg-muted/50 transition-colors">
+            <Card key={event.id} className="bg-card border-border">
               <CardContent className="p-4">
-                <div className="space-y-3">
+                <div className="space-y-4">
+                  {/* Event Header */}
                   <div className="flex items-start justify-between">
                     <div className="flex-1 min-w-0">
-                      <h3 className="font-semibold text-foreground text-sm line-clamp-2">
+                      <h3 className="font-semibold text-foreground text-sm">
                         {event.event_name}
                       </h3>
                       <p className="text-xs text-muted-foreground mt-1 flex items-center">
                         <MapPin size={12} className="mr-1" />
                         {event.event_location || 'Location TBD'}
                       </p>
+                      <div className="flex items-center space-x-4 text-xs text-muted-foreground mt-2">
+                        <div className="flex items-center">
+                          <Clock size={12} className="mr-1" />
+                          {formatTimeForDisplay(event.start_time, 'h:mm a', timezone)} - {formatTimeForDisplay(event.end_time, 'h:mm a', timezone)}
+                        </div>
+                        <div className="flex items-center">
+                          <Users size={12} className="mr-1" />
+                          {event.timeSlots.filter(slot => slot.assignedSchool).length} / {event.timeSlots.filter(slot => !slot.isLunchBreak).length} scheduled
+                        </div>
+                      </div>
                     </div>
                     <Badge variant="secondary" className="text-xs">
                       <Calendar size={12} className="mr-1" />
-                      Scheduled
+                      {event.interval}min slots
                     </Badge>
                   </div>
                   
-                  <div className="flex items-center space-x-4 text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                      <Clock size={12} className="mr-1" />
-                      {formatTimeForDisplay(event.start_time, TIME_FORMATS.DATETIME_12H, timezone)}
+                  {/* Time Slots Schedule */}
+                  <div className="space-y-2">
+                    <h4 className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Schedule</h4>
+                    <div className="space-y-1 max-h-60 overflow-y-auto">
+                      {event.timeSlots.map((slot, index) => (
+                        <div 
+                          key={index}
+                          className={`flex items-center justify-between p-2 rounded-md text-xs ${
+                            slot.isLunchBreak 
+                              ? 'bg-orange-100 dark:bg-orange-900/20 border border-orange-200 dark:border-orange-800' 
+                              : slot.assignedSchool 
+                                ? 'bg-green-100 dark:bg-green-900/20 border border-green-200 dark:border-green-800'
+                                : 'bg-muted border border-border'
+                          }`}
+                        >
+                          <div className="flex items-center space-x-2">
+                            <Clock size={12} className="text-muted-foreground" />
+                            <span className="font-mono">
+                              {formatTimeForDisplay(slot.time.toISOString(), 'h:mm a', timezone)}
+                            </span>
+                          </div>
+                          
+                          <div className="flex items-center space-x-2">
+                            {slot.isLunchBreak ? (
+                              <div className="flex items-center text-orange-700 dark:text-orange-300">
+                                <Badge variant="outline" className="text-xs border-orange-300 text-orange-700 dark:border-orange-700 dark:text-orange-300">
+                                  Lunch Break
+                                </Badge>
+                              </div>
+                            ) : slot.assignedSchool ? (
+                              <div className="flex items-center space-x-2">
+                                <div 
+                                  className="w-3 h-3 rounded-full border"
+                                  style={{ 
+                                    backgroundColor: slot.assignedSchool.color || '#3B82F6',
+                                    borderColor: slot.assignedSchool.color || '#3B82F6'
+                                  }}
+                                />
+                                <span className="text-foreground font-medium max-w-24 truncate">
+                                  {slot.assignedSchool.name}
+                                </span>
+                              </div>
+                            ) : (
+                              <Badge variant="outline" className="text-xs text-muted-foreground">
+                                Available
+                              </Badge>
+                            )}
+                          </div>
+                        </div>
+                      ))}
                     </div>
-                    <div className="flex items-center">
-                      <Clock size={12} className="mr-1" />
-                      to {formatTimeForDisplay(event.end_time, TIME_FORMATS.DATETIME_12H, timezone)}
-                    </div>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Users size={12} className="mr-1" />
-                      {event.timeSlots.filter(slot => slot.assignedSchool).length} / {event.timeSlots.length} slots filled
-                    </div>
-                    <Button variant="outline" size="sm" className="text-xs h-7">
-                      <Settings size={12} className="mr-1" />
-                      Edit
-                    </Button>
                   </div>
                 </div>
               </CardContent>
@@ -116,13 +158,16 @@ export const MobileHostSchedule: React.FC = () => {
           <Card className="bg-card border-border">
             <CardContent className="p-8 text-center">
               <Calendar className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
-              <h3 className="font-medium text-foreground mb-2">No Schedule Created</h3>
+              <h3 className="font-medium text-foreground mb-2">No Events Scheduled</h3>
               <p className="text-sm text-muted-foreground mb-4">
-                Create event schedules to manage competition timing.
+                Add events to this competition to create schedules.
               </p>
-              <Button className="bg-primary text-primary-foreground">
+              <Button 
+                className="bg-primary text-primary-foreground"
+                onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/events`)}
+              >
                 <Calendar size={16} className="mr-2" />
-                Create Schedule
+                Manage Events
               </Button>
             </CardContent>
           </Card>
