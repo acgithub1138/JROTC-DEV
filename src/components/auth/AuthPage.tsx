@@ -8,11 +8,12 @@ import { Label } from '@/components/ui/label';
 import { Shield } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 
 const AuthPage = () => {
   const { signIn } = useAuth();
   const navigate = useNavigate();
+  const location = useLocation();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [resetLoading, setResetLoading] = useState(false);
@@ -31,7 +32,10 @@ const AuthPage = () => {
     console.log('Sign in result:', result);
 
     if (!result?.error) {
-      navigate('/app', { replace: true });
+      // Check if user is on mobile route and redirect accordingly
+      const isMobileRoute = location.pathname.startsWith('/mobile');
+      const redirectPath = isMobileRoute ? '/mobile/dashboard' : '/app';
+      navigate(redirectPath, { replace: true });
     }
     
     setLoading(false);
