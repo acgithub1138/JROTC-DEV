@@ -5,14 +5,14 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Save, X } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { supabase } from '@/integrations/supabase/client';
-import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { MobileDateTimePicker } from '@/components/mobile/ui/MobileDateTimePicker';
 import { toast } from 'sonner';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -29,12 +29,10 @@ export const MobileAddResource: React.FC = () => {
   const initialFormData = {
     resource: '',
     location: '',
-    start_date: '',
-    start_time_hour: '09',
-    start_time_minute: '00',
-    end_date: '',
-    end_time_hour: '10',
-    end_time_minute: '00',
+    start_date: new Date(),
+    start_time: '08:00',
+    end_date: new Date(),
+    end_time: '09:00',
     assignment_details: ''
   };
 
@@ -63,8 +61,8 @@ export const MobileAddResource: React.FC = () => {
       if (error) throw error;
 
       if (data?.start_date) {
-        const startDate = formatInSchoolTimezone(data.start_date, 'yyyy-MM-dd', timezone);
-        const endDate = data?.end_date ? formatInSchoolTimezone(data.end_date, 'yyyy-MM-dd', timezone) : startDate;
+        const startDate = new Date(data.start_date);
+        const endDate = data?.end_date ? new Date(data.end_date) : startDate;
         
         setFormData(prev => ({
           ...prev,
@@ -77,38 +75,13 @@ export const MobileAddResource: React.FC = () => {
     }
   };
 
-  const updateFormData = (field: string, value: string) => {
+  const updateFormData = (field: string, value: any) => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
       
-      // Auto-update logic for time fields
-      if (field === 'start_date' && value && !prev.end_date) {
+      // Auto-set end date when start date changes and end date is not set
+      if (field === 'start_date' && value && !newData.end_date) {
         newData.end_date = value;
-      }
-      
-      if (field === 'start_time_hour' || field === 'start_time_minute') {
-        const startHour = parseInt(field === 'start_time_hour' ? value : prev.start_time_hour || '0');
-        const startMinute = parseInt(field === 'start_time_minute' ? value : prev.start_time_minute || '0');
-        let endHour = startHour + 1;
-        let endMinute = startMinute;
-        
-        if (endHour >= 24) {
-          endHour = 0;
-          // If we overflow to the next day, update the end date too
-          if (prev.start_date) {
-            const nextDay = new Date(prev.start_date);
-            nextDay.setDate(nextDay.getDate() + 1);
-            newData.end_date = nextDay.toISOString().split('T')[0];
-          }
-        } else {
-          // Make sure end date matches start date
-          if (prev.start_date) {
-            newData.end_date = prev.start_date;
-          }
-        }
-        
-        newData.end_time_hour = endHour.toString().padStart(2, '0');
-        newData.end_time_minute = endMinute.toString().padStart(2, '0');
       }
       
       return newData;
@@ -126,14 +99,16 @@ export const MobileAddResource: React.FC = () => {
       let endTime = null;
 
       // Build start time if date and time are provided
-      if (formData.start_date && formData.start_time_hour && formData.start_time_minute) {
-        const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour}:${formData.start_time_minute}:00`);
+      if (formData.start_date && formData.start_time) {
+        const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
+        const startDateTime = new Date(`${startDateStr}T${formData.start_time}:00`);
         startTime = startDateTime.toISOString();
       }
 
       // Build end time if date and time are provided
-      if (formData.end_date && formData.end_time_hour && formData.end_time_minute) {
-        const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour}:${formData.end_time_minute}:00`);
+      if (formData.end_date && formData.end_time) {
+        const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
+        const endDateTime = new Date(`${endDateStr}T${formData.end_time}:00`);
         endTime = endDateTime.toISOString();
       }
 
@@ -229,102 +204,30 @@ export const MobileAddResource: React.FC = () => {
           </div>
 
           {/* Start Date & Time */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">Start Date & Time</label>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-2">
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => updateFormData('start_date', e.target.value)}
-                  className="bg-background"
-                />
-              </div>
-              <div>
-                <Select 
-                  value={formData.start_time_hour} 
-                  onValueChange={(value) => updateFormData('start_time_hour', value)}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Hour" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border max-h-60">
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString().padStart(2, '0')} className="hover:bg-accent">
-                        {i.toString().padStart(2, '0')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Select 
-                  value={formData.start_time_minute} 
-                  onValueChange={(value) => updateFormData('start_time_minute', value)}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Min" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border">
-                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                      <SelectItem key={minute} value={minute} className="hover:bg-accent">
-                        {minute}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          <MobileDateTimePicker
+            dateValue={formData.start_date}
+            timeValue={formData.start_time}
+            onDateChange={(date) => updateFormData('start_date', date)}
+            onTimeChange={(time) => updateFormData('start_time', time)}
+            dateLabel="Start Date"
+            timeLabel="Start Time"
+            dateId="start_date"
+            timeId="start_time"
+            className="space-y-2"
+          />
 
           {/* End Date & Time */}
-          <div className="space-y-2">
-            <label className="text-sm font-medium text-foreground">End Date & Time</label>
-            <div className="grid grid-cols-4 gap-2">
-              <div className="col-span-2">
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => updateFormData('end_date', e.target.value)}
-                  className="bg-background"
-                />
-              </div>
-              <div>
-                <Select 
-                  value={formData.end_time_hour} 
-                  onValueChange={(value) => updateFormData('end_time_hour', value)}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Hour" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border max-h-60">
-                    {Array.from({ length: 24 }, (_, i) => (
-                      <SelectItem key={i} value={i.toString().padStart(2, '0')} className="hover:bg-accent">
-                        {i.toString().padStart(2, '0')}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div>
-                <Select 
-                  value={formData.end_time_minute} 
-                  onValueChange={(value) => updateFormData('end_time_minute', value)}
-                >
-                  <SelectTrigger className="bg-background">
-                    <SelectValue placeholder="Min" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-background border border-border">
-                    {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                      <SelectItem key={minute} value={minute} className="hover:bg-accent">
-                        {minute}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-          </div>
+          <MobileDateTimePicker
+            dateValue={formData.end_date}
+            timeValue={formData.end_time}
+            onDateChange={(date) => updateFormData('end_date', date)}
+            onTimeChange={(time) => updateFormData('end_time', time)}
+            dateLabel="End Date"
+            timeLabel="End Time"
+            dateId="end_date"
+            timeId="end_time"
+            className="space-y-2"
+          />
 
           {/* Assignment Details */}
           <div className="space-y-2">
