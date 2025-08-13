@@ -80,12 +80,13 @@ export const MobileAddEvent: React.FC = () => {
     }));
     
     // Auto-set end date/time when start changes
-    if (field === 'start_date' && !formData.end_date) {
+    if (field === 'start_date') {
       setFormData(prev => ({ ...prev, end_date: value }));
     }
-    if (field === 'start_time' && !formData.end_time) {
+    if (field === 'start_time') {
       const [hours, minutes] = value.split(':');
-      const endTime = `${String(parseInt(hours) + 1).padStart(2, '0')}:${minutes}`;
+      const nextHour = (parseInt(hours) + 1) % 24;
+      const endTime = `${String(nextHour).padStart(2, '0')}:${minutes}`;
       setFormData(prev => ({ ...prev, end_time: endTime }));
     }
   };
