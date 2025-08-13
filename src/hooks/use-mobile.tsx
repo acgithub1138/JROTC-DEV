@@ -4,7 +4,7 @@ import { useCapacitor } from '@/hooks/useCapacitor'
 const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
-  const [isMobile, setIsMobile] = React.useState<boolean | undefined>(undefined)
+  const [isMobile, setIsMobile] = React.useState<boolean>(false)
   const { isNative, platform } = useCapacitor();
   
   React.useEffect(() => {
@@ -53,7 +53,7 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  const result = isNative || !!isMobile;
+  const result = isNative || isMobile;
   console.log('useIsMobile hook result:', { isMobile, isNative, platform, result });
   return result
 }
