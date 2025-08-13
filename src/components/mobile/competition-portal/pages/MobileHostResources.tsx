@@ -111,9 +111,13 @@ export const MobileHostResources: React.FC = () => {
                   )}
 
                   <div className="flex items-center justify-end">
-                    <Button variant="outline" size="sm" className="text-xs h-7">
-                      <Settings size={12} className="mr-1" />
-                      Manage
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs h-7 w-7 p-0"
+                      onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/resource/${event.id}/edit`)}
+                    >
+                      <Settings size={12} />
                     </Button>
                   </div>
                 </div>
