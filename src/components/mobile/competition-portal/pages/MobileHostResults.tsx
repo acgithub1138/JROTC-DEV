@@ -97,19 +97,58 @@ export const MobileHostResults: React.FC = () => {
           const completedScores = uniqueSchools.size;
           const totalScores = registeredSchools;
 
-          // Find top score and school
+          // Find top score and school using Grand Total from score sheets
           let topSchool: string | null = null;
           let topScore: number | null = null;
 
           if (eventScores.length > 0) {
             const topResult = eventScores.reduce((prev: any, current: any) => {
-              const prevScore = Number(prev.total_points) || 0;
-              const currentScore = Number(current.total_points) || 0;
+              // Calculate Grand Total from score sheet for comparison
+              const calculateGrandTotal = (scoreSheet: any): number => {
+                if (!scoreSheet || typeof scoreSheet !== 'object') return 0;
+                
+                let total = 0;
+                const calculateTotal = (obj: any): number => {
+                  let subTotal = 0;
+                  Object.values(obj).forEach(value => {
+                    if (typeof value === 'number') {
+                      subTotal += value;
+                    } else if (typeof value === 'object' && value !== null) {
+                      subTotal += calculateTotal(value);
+                    }
+                  });
+                  return subTotal;
+                };
+                return calculateTotal(scoreSheet);
+              };
+              
+              const prevScore = calculateGrandTotal(prev.score_sheet);
+              const currentScore = calculateGrandTotal(current.score_sheet);
               return currentScore > prevScore ? current : prev;
             });
             
             topSchool = schoolNamesMap[topResult.school_id] || topResult.team_name || 'Unknown School';
-            topScore = Number(topResult.total_points) || 0;
+            
+            // Calculate Grand Total for display
+            const calculateGrandTotal = (scoreSheet: any): number => {
+              if (!scoreSheet || typeof scoreSheet !== 'object') return 0;
+              
+              let total = 0;
+              const calculateTotal = (obj: any): number => {
+                let subTotal = 0;
+                Object.values(obj).forEach(value => {
+                  if (typeof value === 'number') {
+                    subTotal += value;
+                  } else if (typeof value === 'object' && value !== null) {
+                    subTotal += calculateTotal(value);
+                  }
+                });
+                return subTotal;
+              };
+              return calculateTotal(scoreSheet);
+            };
+            
+            topScore = calculateGrandTotal(topResult.score_sheet);
           }
 
           return {
