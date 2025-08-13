@@ -154,6 +154,14 @@ export const MobileAddEvent: React.FC = () => {
       ...prev,
       [field]: value
     }));
+    
+    // Auto-set lunch end time when lunch start time changes
+    if (field === 'lunch_start_time' && value) {
+      const [hours, minutes] = value.split(':');
+      const nextHour = (parseInt(hours) + 1) % 24;
+      const lunchEndTime = `${String(nextHour).padStart(2, '0')}:${minutes}`;
+      setFormData(prev => ({ ...prev, lunch_end_time: lunchEndTime }));
+    }
   };
 
   const addJudge = (judgeId: string) => {
