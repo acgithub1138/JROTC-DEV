@@ -227,13 +227,13 @@ if (isLoading) {
     <div className="flex flex-col h-full">
       {/* Filter Bar */}
       <div className="p-4 border-b border-border bg-card">
-        <div className="flex gap-2 overflow-x-auto">
+        <div className="grid grid-cols-4 gap-2">
           {['mine', 'all', 'soon', 'overdue'].map((filterType) => (
             <Button
               key={filterType}
               variant={filter === filterType ? 'default' : 'outline'}
               size="sm"
-              className="flex-shrink-0 capitalize"
+              className="capitalize"
               onClick={() => setFilter(filterType as any)}
             >
               {filterType === 'mine' ? 'My Tasks' : filterType === 'all' ? 'All' : filterType}
