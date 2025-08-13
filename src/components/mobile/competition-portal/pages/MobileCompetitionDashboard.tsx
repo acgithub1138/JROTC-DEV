@@ -2,11 +2,8 @@ import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Trophy, Award, Users, Calendar, TrendingUp, Search } from 'lucide-react';
-
 export const MobileCompetitionDashboard: React.FC = () => {
-
-  return (
-    <div className="p-4 space-y-6">
+  return <div className="p-4 space-y-6">
       {/* Welcome Header */}
       <div className="mb-4">
         <h1 className="text-2xl font-bold text-foreground mb-1">Competition Portal</h1>
@@ -17,12 +14,10 @@ export const MobileCompetitionDashboard: React.FC = () => {
 
       {/* Quick Actions */}
       <Card className="bg-card border-border">
-        <CardHeader>
-          <CardTitle className="text-lg font-semibold text-foreground">Quick Actions</CardTitle>
-        </CardHeader>
-        <CardContent>
+        
+        <CardContent className="py-[16px]">
           <div className="space-y-3">
-            <button className="w-full p-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors flex items-center text-left">
+            <button className="w-full p-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors flex items-center text-left py-[16px]">
               <Trophy className="h-5 w-5 mr-3 flex-shrink-0" />
               <span className="font-medium">Host Competition</span>
             </button>
@@ -41,6 +36,5 @@ export const MobileCompetitionDashboard: React.FC = () => {
           </div>
         </CardContent>
       </Card>
-    </div>
-  );
+    </div>;
 };
