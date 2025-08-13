@@ -79,9 +79,50 @@ export const MobileAddResource: React.FC = () => {
     setFormData(prev => {
       const newData = { ...prev, [field]: value };
       
-      // Auto-set end date when start date changes and end date is not set
-      if (field === 'start_date' && value && !newData.end_date) {
+      // Auto-set end date and time when start date changes
+      if (field === 'start_date' && value) {
         newData.end_date = value;
+        
+        // Calculate end time as 1 hour after start time
+        if (newData.start_time) {
+          const [hours, minutes] = newData.start_time.split(':').map(Number);
+          let endHour = hours + 1;
+          let endDate = value;
+          
+          // Handle day overflow
+          if (endHour >= 24) {
+            endHour = endHour - 24;
+            const nextDay = new Date(value);
+            nextDay.setDate(nextDay.getDate() + 1);
+            endDate = nextDay;
+          }
+          
+          newData.end_time = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+          newData.end_date = endDate;
+        }
+      }
+      
+      // Auto-set end time when start time changes (add 1 hour)
+      if (field === 'start_time' && value) {
+        const [hours, minutes] = value.split(':').map(Number);
+        let endHour = hours + 1;
+        let endDate = newData.end_date;
+        
+        // Handle day overflow
+        if (endHour >= 24) {
+          endHour = endHour - 24;
+          if (newData.start_date) {
+            const nextDay = new Date(newData.start_date);
+            nextDay.setDate(nextDay.getDate() + 1);
+            endDate = nextDay;
+          }
+        } else {
+          // Keep same date if no overflow
+          endDate = newData.start_date;
+        }
+        
+        newData.end_time = `${endHour.toString().padStart(2, '0')}:${minutes.toString().padStart(2, '0')}`;
+        newData.end_date = endDate;
       }
       
       return newData;
