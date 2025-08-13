@@ -58,10 +58,13 @@ export const MobileHostResources: React.FC = () => {
             <p className="text-sm text-muted-foreground">Manage judges and resources</p>
           </div>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
-          <Plus size={16} className="mr-1" />
-          Add
-        </Button>
+          <Button
+            size="sm"
+            onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/resource/add`)}
+            className="h-8 w-8 p-0"
+          >
+            <Plus size={16} />
+          </Button>
       </div>
 
       {/* Resources List */}
