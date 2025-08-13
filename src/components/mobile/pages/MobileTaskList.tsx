@@ -27,7 +27,6 @@ export const MobileTaskList: React.FC = () => {
   const { priorityOptions } = useTaskPriorityOptions();
   const { userProfile } = useAuth();
   const { canCreate, canViewDetails } = useTaskPermissions();
-  const { subtasks: allSubtasks } = useSubtasks();
   const [filter, setFilter] = useState<'all' | 'mine' | 'soon' | 'overdue'>('all');
 
   const isDueSoon = (dateString: string | null) => {
@@ -45,6 +44,18 @@ export const MobileTaskList: React.FC = () => {
     return date >= today && date <= threeDaysFromNow;
   };
 
+  // Helper function to check if task has subtasks due soon
+  const TaskHasSubtasksDueSoon: React.FC<{ taskId: string; children: (hasDueSoon: boolean) => React.ReactNode }> = ({ taskId, children }) => {
+    const { subtasks } = useSubtasks(taskId);
+    const hasDueSoon = subtasks.some(st => 
+      isDueSoon(st.due_date) && 
+      !st.completed_at && 
+      st.status !== 'completed' && 
+      st.status !== 'canceled'
+    );
+    return <>{children(hasDueSoon)}</>;
+  };
+
   // Filter tasks based on current filter
   const filteredTasks = tasks.filter(task => {
     const today = new Date();
@@ -54,35 +65,18 @@ export const MobileTaskList: React.FC = () => {
     // Helper function to check if task is active (not completed or canceled)
     const isActiveTask = !task.completed_at && task.status !== 'completed' && task.status !== 'canceled';
 
-    const result = (() => {
-      switch (filter) {
-        case 'mine':
-          return task.assigned_to === userProfile?.id && isActiveTask;
-        case 'all':
-          return isActiveTask;
-        case 'soon':
-          // Check if task itself is due soon
-          const taskDueSoon = dueDate && isDueSoon(task.due_date) && isActiveTask;
-          
-          // Check if any subtasks are due soon
-          const taskSubtasks = allSubtasks.filter(st => st.parent_task_id === task.id);
-          const hasSubtaskDueSoon = taskSubtasks.some(st => 
-            isDueSoon(st.due_date) && 
-            !st.completed_at && 
-            st.status !== 'completed' && 
-            st.status !== 'canceled'
-          );
-          
-          const soonResult = (taskDueSoon || hasSubtaskDueSoon) && isActiveTask;
-          return soonResult;
-        case 'overdue':
-          return dueDate && dueDate < new Date() && !task.completed_at;
-        default:
-          return true;
-      }
-    })();
-
-    return result;
+    switch (filter) {
+      case 'mine':
+        return task.assigned_to === userProfile?.id && isActiveTask;
+      case 'all':
+        return isActiveTask;
+      case 'soon':
+        return isActiveTask; // Let the render logic decide if task should show based on subtasks
+      case 'overdue':
+        return dueDate && dueDate < new Date() && !task.completed_at;
+      default:
+        return true;
+    }
   });
 
   const getPriorityBadge = (priority: string) => {
@@ -271,55 +265,69 @@ if (isLoading) {
           </div>
         ) : (
           filteredTasks.map((task) => (
-            <div key={task.id} className="space-y-2">
-              <Card 
-                className={cn(
-                  "bg-card border-border transition-colors",
-                  canViewDetails && "cursor-pointer hover:bg-muted/50",
-                  isOverdue(task.due_date) && "border-red-500 border-2",
-                  !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-yellow-500 border-2"
-                )}
-                onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
-              >
-                <CardContent className="p-4">
-                  <div className="flex items-start justify-between mb-2">
-                    <h3 className="font-medium text-foreground text-sm line-clamp-2 flex-1 mr-2">
-                      {task.title}
-                    </h3>
-                    {task.task_number && (
-                      <Badge variant="outline" className="text-xs">
-                        #{task.task_number}
-                      </Badge>
-                    )}
-                  </div>
-                  
-                  {task.description && (
-                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                      {task.description}
-                    </p>
-                  )}
-                  
+            <TaskHasSubtasksDueSoon key={task.id} taskId={task.id}>
+              {(hasSubtasksDueSoon) => {
+                // For the "soon" filter, only show tasks that are themselves due soon OR have subtasks due soon
+                if (filter === 'soon') {
+                  const taskDueSoon = task.due_date && isDueSoon(task.due_date);
+                  if (!taskDueSoon && !hasSubtasksDueSoon) {
+                    return null;
+                  }
+                }
+                
+                return (
                   <div className="space-y-2">
-                    <div className="flex items-center justify-between">
-                      {getStatusBadge(task.status)}
-                      {getPriorityBadge(task.priority)}
-                    </div>
-                    
-                    <div className="flex items-center justify-between text-xs text-muted-foreground">
-                      <div className="flex items-center">
-                        <User className="mr-1 h-3 w-3" />
-                        {getAssignedToName(task)}
-                      </div>
-                      <div className="flex items-center">
-                        <Calendar className="mr-1 h-3 w-3" />
-                        {formatDate(task.due_date)}
-                      </div>
-                    </div>
+                    <Card 
+                      className={cn(
+                        "bg-card border-border transition-colors",
+                        canViewDetails && "cursor-pointer hover:bg-muted/50",
+                        isOverdue(task.due_date) && "border-red-500 border-2",
+                        !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-yellow-500 border-2"
+                      )}
+                      onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-start justify-between mb-2">
+                          <h3 className="font-medium text-foreground text-sm line-clamp-2 flex-1 mr-2">
+                            {task.title}
+                          </h3>
+                          {task.task_number && (
+                            <Badge variant="outline" className="text-xs">
+                              #{task.task_number}
+                            </Badge>
+                          )}
+                        </div>
+                        
+                        {task.description && (
+                          <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                            {task.description}
+                          </p>
+                        )}
+                        
+                        <div className="space-y-2">
+                          <div className="flex items-center justify-between">
+                            {getStatusBadge(task.status)}
+                            {getPriorityBadge(task.priority)}
+                          </div>
+                          
+                          <div className="flex items-center justify-between text-xs text-muted-foreground">
+                            <div className="flex items-center">
+                              <User className="mr-1 h-3 w-3" />
+                              {getAssignedToName(task)}
+                            </div>
+                            <div className="flex items-center">
+                              <Calendar className="mr-1 h-3 w-3" />
+                              {formatDate(task.due_date)}
+                            </div>
+                          </div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                    <SubtasksForTask parentTaskId={task.id} />
                   </div>
-                </CardContent>
-              </Card>
-              <SubtasksForTask parentTaskId={task.id} />
-            </div>
+                );
+              }}
+            </TaskHasSubtasksDueSoon>
           ))
         )}
       </div>
