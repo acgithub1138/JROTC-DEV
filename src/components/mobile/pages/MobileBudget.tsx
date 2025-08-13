@@ -10,21 +10,19 @@ import { AddIncomeDialog } from '@/components/budget-management/components/AddIn
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 
 export const MobileBudget: React.FC = () => {
-  const [filters, setFilters] = useState<BudgetFilters>({
+  const [showAddIncome, setShowAddIncome] = useState(false);
+  const [showAddExpense, setShowAddExpense] = useState(false);
+
+  // Remove filters to show all budget data
+  const { transactions, isLoading, createTransaction } = useBudgetTransactions({
     search: '',
     category: '',
     type: '',
     paymentMethod: '',
     status: '',
     showArchived: false,
-    budgetYear: new Date().getFullYear().toString(),
+    budgetYear: '',
   });
-  
-  
-  const [showAddIncome, setShowAddIncome] = useState(false);
-  const [showAddExpense, setShowAddExpense] = useState(false);
-
-  const { transactions, isLoading, createTransaction } = useBudgetTransactions(filters);
   const { data: budgetYears } = useBudgetYears();
 
   // Calculate summary stats
@@ -72,7 +70,7 @@ export const MobileBudget: React.FC = () => {
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl font-bold">Budget</h1>
-          <p className="text-muted-foreground">Financial Year {filters.budgetYear}</p>
+          <p className="text-muted-foreground">All Transactions</p>
         </div>
       </div>
 
