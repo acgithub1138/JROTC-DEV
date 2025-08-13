@@ -77,8 +77,9 @@ export const MobileEventResultsView: React.FC = () => {
           schoolResults[result.school_id].judge_count += 1;
         });
 
-        // Sort by total points descending
+        // Sort by total points descending (greatest to smallest)
         const sortedSchools = Object.values(schoolResults).sort((a, b) => b.total_points - a.total_points);
+        console.log('Schools sorted by total points:', sortedSchools.map(s => ({ name: s.school_name, total: s.total_points })));
         setSchools(sortedSchools);
       } catch (error) {
         console.error('Error fetching school results:', error);
