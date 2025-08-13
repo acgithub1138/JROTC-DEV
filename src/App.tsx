@@ -43,6 +43,7 @@ import { MobileMyCompetitions } from "@/components/mobile/competition-portal/pag
 import { MobileHostCompetitionDetails } from "@/components/mobile/competition-portal/pages/MobileHostCompetitionDetails";
 import { MobileHostEvents } from "@/components/mobile/competition-portal/pages/MobileHostEvents";
 import { MobileHostResources } from "@/components/mobile/competition-portal/pages/MobileHostResources";
+import { MobileAddResource } from "@/components/mobile/competition-portal/pages/MobileAddResource";
 import { MobileHostSchools } from "@/components/mobile/competition-portal/pages/MobileHostSchools";
 import { MobileHostSchedule } from "@/components/mobile/competition-portal/pages/MobileHostSchedule";
 import { MobileHostResults } from "@/components/mobile/competition-portal/pages/MobileHostResults";
@@ -184,11 +185,16 @@ const App = () => (
                        <MobileHostEvents />
                      </ProtectedRoute>
                    } />
-                   <Route path="competition-portal/manage/:competitionId/resources" element={
-                     <ProtectedRoute>
-                       <MobileHostResources />
-                     </ProtectedRoute>
-                   } />
+                    <Route path="competition-portal/manage/:competitionId/resources" element={
+                      <ProtectedRoute>
+                        <MobileHostResources />
+                      </ProtectedRoute>
+                    } />
+                    <Route path="competition-portal/manage/:competitionId/resource/add" element={
+                      <ProtectedRoute>
+                        <MobileAddResource />
+                      </ProtectedRoute>
+                    } />
                    <Route path="competition-portal/manage/:competitionId/schools" element={
                      <ProtectedRoute>
                        <MobileHostSchools />
