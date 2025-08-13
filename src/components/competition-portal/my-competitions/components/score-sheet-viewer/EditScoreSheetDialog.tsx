@@ -118,25 +118,23 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
           <Separator className="flex-shrink-0" />
 
           <div className="flex-1 min-h-0">
-            <ScrollArea className="h-full max-h-[300px]">
-              <div className="space-y-4 pr-4">
-                {sortedFieldNames.map((fieldName) => (
-                  <div key={fieldName} className="space-y-2">
-                    <Label htmlFor={fieldName} className="text-sm font-medium">
-                      {getCleanFieldName(fieldName)}
-                    </Label>
-                    <Input
-                      id={fieldName}
-                      type="number"
-                      value={scores[fieldName] || ''}
-                      onChange={(e) => handleScoreChange(fieldName, e.target.value)}
-                      placeholder="Enter score"
-                      className="w-full"
-                    />
-                  </div>
-                ))}
-              </div>
-            </ScrollArea>
+            <div className="h-[300px] overflow-y-auto border rounded-md p-3 space-y-4">
+              {sortedFieldNames.map((fieldName) => (
+                <div key={fieldName} className="space-y-2">
+                  <Label htmlFor={fieldName} className="text-sm font-medium">
+                    {getCleanFieldName(fieldName)}
+                  </Label>
+                  <Input
+                    id={fieldName}
+                    type="number"
+                    value={scores[fieldName] || ''}
+                    onChange={(e) => handleScoreChange(fieldName, e.target.value)}
+                    placeholder="Enter score"
+                    className="w-full"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
 
           <Separator className="flex-shrink-0" />
