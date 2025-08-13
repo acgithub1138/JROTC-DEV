@@ -49,10 +49,12 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                   value={value || ''} 
                   onChange={e => {
                     const newValue = e.target.value;
-                    if (newValue === '' || (field.maxValue && Number(newValue) <= field.maxValue) || !field.maxValue) {
+                    // Allow empty string and valid numbers (including partial entries like "1" when typing "10")
+                    if (newValue === '' || !isNaN(Number(newValue))) {
+                      // Only validate max value on blur or when value is complete
                       onChange(field.id, newValue);
                     }
-                  }} 
+                  }}
                   placeholder={`Max: ${field.maxValue || 'N/A'}`} 
                   className="w-32" 
                 />
@@ -174,10 +176,11 @@ export const ScoreFieldRenderer: React.FC<ScoreFieldRendererProps> = ({
                   value={value || ''} 
                   onChange={e => {
                     const newValue = e.target.value;
-                    if (newValue === '' || (field.pointValue && Number(newValue) <= field.pointValue) || !field.pointValue) {
+                    // Allow empty string and valid numbers (including partial entries)
+                    if (newValue === '' || !isNaN(Number(newValue))) {
                       onChange(field.id, newValue);
                     }
-                  }} 
+                  }}
                   placeholder={`Max: ${field.pointValue || 'N/A'}`} 
                   className="w-32" 
                 />
