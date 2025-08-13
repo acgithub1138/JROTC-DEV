@@ -144,14 +144,28 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       const rawFields = template?.criteria || [];
       
       if (rawFields.length > 0) {
-        const initialScoreSheet = rawFields.map((field: any, index: number) => ({
-          id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
-          criteria: field.name || field.criteria || field.title || field,
-          max_score: field.max_score || field.maxScore || field.points || 10,
-          score: 0,
-          type: field.type,
-          pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
-        }));
+        const initialScoreSheet = rawFields.map((field: any, index: number) => {
+          const fieldItem = {
+            id: field.id || `field_${index}_${field.name?.replace(/\s+/g, '_').toLowerCase()}`,
+            criteria: field.name || field.criteria || field.title || field,
+            max_score: field.max_score || field.maxScore || field.points || 10,
+            type: field.type,
+            pauseField: field.type === 'bold_gray' || field.type === 'pause' || field.pauseField
+          };
+
+          // Initialize score based on field type - ensure all fields get default values
+          if (field.type === 'penalty' || field.type === 'penalty_checkbox') {
+            return { ...fieldItem, score: 0 };
+          } else if (field.type === 'text' || field.textType === 'notes') {
+            return { ...fieldItem, score: '' };
+          } else if (field.type === 'dropdown' || field.type === 'scoring_scale') {
+            return { ...fieldItem, score: '' };
+          } else if (field.type === 'number') {
+            return { ...fieldItem, score: 0 };
+          } else {
+            return { ...fieldItem, score: field.type === 'section_header' || field.type === 'label' || field.pauseField ? undefined : 0 };
+          }
+        });
         setScoreSheet(initialScoreSheet);
       } else {
         setScoreSheet([]);
@@ -200,6 +214,14 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         throw new Error('Event not found');
       }
 
+      // Create scores object with all fields and their values
+      const scores: Record<string, any> = {};
+      scoreSheetData.forEach((item: any) => {
+        if (item.score !== undefined) {
+          scores[item.id] = item.score;
+        }
+      });
+
       const { data, error } = await supabase
         .from('competition_events')
         .insert({
@@ -207,8 +229,14 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
           competition_id: competitionId,
           event: eventDetails.cp_events.name as any, // Use the event name from cp_events
           team_name: teamName || school.school_name,
-          score_sheet: scoreSheetData,
-          total_points: scoreSheetData.reduce((sum: number, item: any) => sum + (item.score || 0), 0),
+          score_sheet: {
+            template_id: scoreTemplate?.id,
+            template_name: scoreTemplate?.template_name,
+            judge_number: judgeNumber,
+            scores: scores,
+            calculated_at: new Date().toISOString()
+          },
+          total_points: scoreSheetData.reduce((sum: number, item: any) => sum + (typeof item.score === 'number' ? item.score : 0), 0),
           source_type: 'portal',
           source_competition_id: competitionId
         })
