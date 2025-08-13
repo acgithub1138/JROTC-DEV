@@ -44,7 +44,11 @@ export const MobileHostingCompetitions: React.FC = () => {
           <h1 className="text-2xl font-bold text-foreground mb-1">Hosting Competitions</h1>
           <p className="text-sm text-muted-foreground">Manage competitions you're hosting</p>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
+        <Button 
+          size="sm" 
+          className="bg-primary text-primary-foreground"
+          onClick={() => window.location.href = '/mobile/competition-portal/host'}
+        >
           <Plus size={16} className="mr-1" />
           Host
         </Button>
@@ -104,7 +108,10 @@ export const MobileHostingCompetitions: React.FC = () => {
               <p className="text-sm text-muted-foreground mb-4">
                 Start hosting competitions to manage events and invite other schools.
               </p>
-              <Button className="bg-primary text-primary-foreground">
+              <Button 
+                className="bg-primary text-primary-foreground"
+                onClick={() => window.location.href = '/mobile/competition-portal/host'}
+              >
                 <Plus size={16} className="mr-2" />
                 Host Your First Competition
               </Button>
