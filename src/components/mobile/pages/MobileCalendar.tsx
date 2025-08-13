@@ -1,13 +1,15 @@
 import React from 'react';
-import { Calendar, Clock, MapPin, Plus } from 'lucide-react';
+import { Calendar as CalendarIcon, Clock, MapPin, Plus } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Calendar } from '@/components/ui/calendar';
 import { useNavigate } from 'react-router-dom';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { isSameDay, format } from 'date-fns';
 
 // Stable filters object to prevent re-renders
 const STABLE_FILTERS = { eventType: '', assignedTo: '' };
@@ -17,21 +19,29 @@ export const MobileCalendar: React.FC = () => {
   const { canCreate } = useTablePermissions('calendar');
   const { events, isLoading: eventsLoading } = useEvents(STABLE_FILTERS);
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const [selectedDate, setSelectedDate] = React.useState<Date>(new Date());
   
   const isLoading = eventsLoading || timezoneLoading;
   
-  // Filter to upcoming events (future or today) and sort by start date
-  const upcomingEvents = React.useMemo(() => {
-    return events
-      .filter(event => {
-        const eventDate = new Date(event.start_date);
-        const today = new Date();
-        today.setHours(0, 0, 0, 0);
-        return eventDate >= today;
-      })
-      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime())
-      .slice(0, 10); // Limit to next 10 events
+  // Group events by date for calendar indicators
+  const eventsByDate = React.useMemo(() => {
+    const grouped: Record<string, any[]> = {};
+    events.forEach(event => {
+      const dateKey = format(new Date(event.start_date), 'yyyy-MM-dd');
+      if (!grouped[dateKey]) {
+        grouped[dateKey] = [];
+      }
+      grouped[dateKey].push(event);
+    });
+    return grouped;
   }, [events]);
+
+  // Get events for selected date
+  const eventsForSelectedDate = React.useMemo(() => {
+    return events
+      .filter(event => isSameDay(new Date(event.start_date), selectedDate))
+      .sort((a, b) => new Date(a.start_date).getTime() - new Date(b.start_date).getTime());
+  }, [events, selectedDate]);
 
   const getEventTypeColor = (eventType: any) => {
     if (eventType?.color) {
@@ -68,23 +78,20 @@ export const MobileCalendar: React.FC = () => {
       <div className="p-4 space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-muted-foreground">
-            <Calendar size={16} />
-            <span>Upcoming Events</span>
+            <CalendarIcon size={16} />
+            <span>Calendar</span>
           </div>
         </div>
-        <div className="space-y-3">
-          {[1, 2, 3].map((i) => (
-            <Card key={i} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="animate-pulse">
-                  <div className="h-4 bg-muted rounded w-3/4 mb-2"></div>
-                  <div className="h-3 bg-muted rounded w-1/2 mb-1"></div>
-                  <div className="h-3 bg-muted rounded w-2/3"></div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
+        <Card className="p-4">
+          <div className="animate-pulse">
+            <div className="h-64 bg-muted rounded mb-4"></div>
+            <div className="space-y-3">
+              {[1, 2, 3].map((i) => (
+                <div key={i} className="h-16 bg-muted rounded"></div>
+              ))}
+            </div>
+          </div>
+        </Card>
       </div>
     );
   }
@@ -93,8 +100,8 @@ export const MobileCalendar: React.FC = () => {
     <div className="p-4 space-y-4">
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 text-sm text-muted-foreground">
-          <Calendar size={16} />
-          <span>Upcoming Events</span>
+          <CalendarIcon size={16} />
+          <span>Calendar</span>
         </div>
         {canCreate && (
           <Button
@@ -107,68 +114,89 @@ export const MobileCalendar: React.FC = () => {
         )}
       </div>
 
-      {upcomingEvents.length === 0 ? (
-        <Card>
-          <CardContent className="flex flex-col items-center justify-center py-8">
-            <Calendar size={48} className="text-muted-foreground mb-4" />
-            <h3 className="text-lg font-semibold text-foreground mb-2">No Events Scheduled</h3>
-            <p className="text-sm text-muted-foreground text-center">
-              Check back later for upcoming events and activities.
-            </p>
-          </CardContent>
-        </Card>
-      ) : (
-        <div className="space-y-3">
-          {upcomingEvents.map((event) => (
-            <Card key={event.id} className="overflow-hidden">
-              <CardContent className="p-4">
-                <div className="flex items-start gap-3">
-                  <div className={`w-3 h-12 rounded-full ${getEventTypeColor(event.event_types)}`} />
-                  
-                  <div className="flex-1 min-w-0">
-                    <h3 className="font-semibold text-foreground truncate">
-                      {event.title}
-                    </h3>
+      {/* Calendar with Event Indicators */}
+      <Card className="p-4">
+        <Calendar
+          mode="single"
+          selected={selectedDate}
+          onSelect={(date) => date && setSelectedDate(date)}
+          className="w-full"
+          modifiers={{
+            hasEvents: (date) => {
+              const dateKey = format(date, 'yyyy-MM-dd');
+              return !!eventsByDate[dateKey];
+            }
+          }}
+          modifiersClassNames={{
+            hasEvents: 'relative after:absolute after:bottom-1 after:left-1/2 after:-translate-x-1/2 after:w-2 after:h-2 after:bg-primary after:rounded-full'
+          }}
+        />
+      </Card>
+
+      {/* Events for Selected Date */}
+      <div className="space-y-3">
+        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+          <CalendarIcon size={14} />
+          <span>Events for {format(selectedDate, 'MMM d, yyyy')}</span>
+        </div>
+
+        {eventsForSelectedDate.length === 0 ? (
+          <Card>
+            <CardContent className="flex flex-col items-center justify-center py-6">
+              <CalendarIcon size={32} className="text-muted-foreground mb-2" />
+              <p className="text-sm text-muted-foreground text-center">
+                No events scheduled for this date.
+              </p>
+            </CardContent>
+          </Card>
+        ) : (
+          <div className="space-y-3">
+            {eventsForSelectedDate.map((event) => (
+              <Card key={event.id} className="overflow-hidden">
+                <CardContent className="p-4">
+                  <div className="flex items-start gap-3">
+                    <div className={`w-3 h-12 rounded-full ${getEventTypeColor(event.event_types)}`} />
                     
-                    <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <Calendar size={14} />
-                        <span>{formatEventDate(event.start_date, event.is_all_day)}</span>
+                    <div className="flex-1 min-w-0">
+                      <h3 className="font-semibold text-foreground truncate">
+                        {event.title}
+                      </h3>
+                      
+                      <div className="flex items-center gap-4 mt-2 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-1">
+                          <Clock size={14} />
+                          <span>{formatEventTime(event.start_date, event.end_date, event.is_all_day)}</span>
+                        </div>
                       </div>
                       
-                      <div className="flex items-center gap-1">
-                        <Clock size={14} />
-                        <span>{formatEventTime(event.start_date, event.end_date, event.is_all_day)}</span>
-                      </div>
+                      {event.location && (
+                        <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
+                          <MapPin size={14} />
+                          <span>{event.location}</span>
+                        </div>
+                      )}
+                      
+                      {event.description && (
+                        <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
+                          {event.description}
+                        </p>
+                      )}
+                      
+                      {event.event_types && (
+                        <div className="mt-3">
+                          <Badge variant="secondary" className="capitalize">
+                            {event.event_types.label}
+                          </Badge>
+                        </div>
+                      )}
                     </div>
-                    
-                    {event.location && (
-                      <div className="flex items-center gap-1 mt-1 text-sm text-muted-foreground">
-                        <MapPin size={14} />
-                        <span>{event.location}</span>
-                      </div>
-                    )}
-                    
-                    {event.description && (
-                      <p className="mt-2 text-sm text-muted-foreground line-clamp-2">
-                        {event.description}
-                      </p>
-                    )}
-                    
-                    {event.event_types && (
-                      <div className="mt-3">
-                        <Badge variant="secondary" className="capitalize">
-                          {event.event_types.label}
-                        </Badge>
-                      </div>
-                    )}
                   </div>
-                </div>
-              </CardContent>
-            </Card>
-          ))}
-        </div>
-      )}
+                </CardContent>
+              </Card>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 };
