@@ -53,6 +53,13 @@ export const MobileBudget: React.FC = () => {
     return category === 'income' ? 'text-green-600' : 'text-red-600';
   };
 
+  const formatTypeDisplay = (type: string) => {
+    if (!type) return '';
+    // Remove spaces and capitalize first letter
+    const formatted = type.replace(/\s+/g, '');
+    return formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -162,7 +169,7 @@ export const MobileBudget: React.FC = () => {
                       <div className="flex-1 min-w-0">
                         <h4 className="font-medium text-sm truncate">{transaction.item}</h4>
                         <p className="text-xs text-muted-foreground">
-                          {transaction.type} • {new Date(transaction.date).toLocaleDateString()}
+                          {formatTypeDisplay(transaction.type)} • {new Date(transaction.date).toLocaleDateString()}
                         </p>
                         {transaction.description && (
                           <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
