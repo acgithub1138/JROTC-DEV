@@ -57,7 +57,7 @@ export const MobileNavigation: React.FC = () => {
   // Filter navigation items based on permissions
   const visibleItems = navigationItems.filter(item => {
     if (!item.module) return true; // Always show items without module (like More)
-    return hasPermission(item.module, 'sidebar');
+    return hasPermission(item.module, 'read');
   });
 
   return (
