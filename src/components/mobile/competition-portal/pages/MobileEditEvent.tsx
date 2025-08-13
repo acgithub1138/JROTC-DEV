@@ -106,6 +106,39 @@ export const MobileEditEvent: React.FC = () => {
     }
   }, [event, events, timezone]);
 
+  // Calculate max participants when interval is set
+  useEffect(() => {
+    if (formData.interval && 
+        formData.start_date && formData.start_time &&
+        formData.end_time) {
+      
+      const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
+      const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
+      const startDateTime = new Date(`${startDateStr}T${formData.start_time}:00`);
+      const endDateTime = new Date(`${endDateStr}T${formData.end_time}:00`);
+      
+      let totalMinutes = (endDateTime.getTime() - startDateTime.getTime()) / (1000 * 60);
+      
+      // Subtract lunch break if defined
+      if (formData.lunch_start_time && formData.lunch_end_time) {
+        const lunchStart = new Date(`${startDateStr}T${formData.lunch_start_time}:00`);
+        const lunchEnd = new Date(`${startDateStr}T${formData.lunch_end_time}:00`);
+        const lunchMinutes = (lunchEnd.getTime() - lunchStart.getTime()) / (1000 * 60);
+        totalMinutes -= lunchMinutes;
+      }
+      
+      const interval = parseInt(formData.interval);
+      if (interval > 0 && totalMinutes > 0) {
+        const maxParticipants = Math.floor(totalMinutes / interval);
+        setFormData(prev => ({
+          ...prev,
+          max_participants: maxParticipants.toString()
+        }));
+      }
+    }
+  }, [formData.interval, formData.start_date, formData.start_time, 
+      formData.end_date, formData.end_time, formData.lunch_start_time, formData.lunch_end_time]);
+
   const fetchEvent = async () => {
     if (!eventId) return;
     
