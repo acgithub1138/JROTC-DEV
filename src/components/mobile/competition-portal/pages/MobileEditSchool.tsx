@@ -164,10 +164,10 @@ export const MobileEditSchool: React.FC = () => {
           </div>
           <div className="flex items-center space-x-2">
             <Button
-              variant="outline"
+              variant="destructive"
               size="sm"
               onClick={() => setShowDeleteDialog(true)}
-              className="h-8 w-8 p-0 border-destructive text-destructive hover:bg-destructive hover:text-destructive-foreground"
+              className="h-8 w-8 p-0"
             >
               <Trash2 size={16} />
             </Button>
