@@ -62,12 +62,12 @@ const App = () => (
               <Route path="/mobile" element={<MobileRouteDetector />}>
                 <Route path="" element={<MobileLayout />}>
                   <Route index element={
-                    <ProtectedRoute module="dashboard" requirePermission="sidebar">
+                    <ProtectedRoute>
                       <MobileDashboard />
                     </ProtectedRoute>
                   } />
                   <Route path="dashboard" element={
-                    <ProtectedRoute module="dashboard" requirePermission="sidebar">
+                    <ProtectedRoute>
                       <MobileDashboard />
                     </ProtectedRoute>
                   } />
