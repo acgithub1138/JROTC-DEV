@@ -40,6 +40,14 @@ export const MobileTaskList: React.FC = () => {
     threeDaysFromNow.setDate(today.getDate() + 3);
     date.setHours(0, 0, 0, 0);
     
+    console.log('isDueSoon check:', {
+      dateString,
+      date: date.toISOString(),
+      today: today.toISOString(),
+      threeDaysFromNow: threeDaysFromNow.toISOString(),
+      result: date >= today && date <= threeDaysFromNow
+    });
+    
     return date >= today && date <= threeDaysFromNow;
   };
 
@@ -52,18 +60,30 @@ export const MobileTaskList: React.FC = () => {
     // Helper function to check if task is active (not completed or canceled)
     const isActiveTask = !task.completed_at && task.status !== 'completed' && task.status !== 'canceled';
 
-    switch (filter) {
-      case 'mine':
-        return task.assigned_to === userProfile?.id && isActiveTask;
-      case 'all':
-        return isActiveTask;
-      case 'soon':
-        return dueDate && isDueSoon(task.due_date) && isActiveTask;
-      case 'overdue':
-        return dueDate && dueDate < new Date() && !task.completed_at;
-      default:
-        return true;
-    }
+    const result = (() => {
+      switch (filter) {
+        case 'mine':
+          return task.assigned_to === userProfile?.id && isActiveTask;
+        case 'all':
+          return isActiveTask;
+        case 'soon':
+          const soonResult = dueDate && isDueSoon(task.due_date) && isActiveTask;
+          console.log('Soon filter for task:', task.task_number, {
+            dueDate: task.due_date,
+            hasDueDate: !!dueDate,
+            isDueSoonResult: isDueSoon(task.due_date),
+            isActiveTask,
+            finalResult: soonResult
+          });
+          return soonResult;
+        case 'overdue':
+          return dueDate && dueDate < new Date() && !task.completed_at;
+        default:
+          return true;
+      }
+    })();
+
+    return result;
   });
 
   const getPriorityBadge = (priority: string) => {
