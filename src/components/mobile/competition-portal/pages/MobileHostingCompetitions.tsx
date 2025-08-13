@@ -84,7 +84,15 @@ export const MobileHostingCompetitions: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <MapPin size={12} className="mr-1" />
-                      {competition.location || 'Location TBD'}
+                      {(() => {
+                        const addressParts = [
+                          competition.address,
+                          competition.city,
+                          competition.state,
+                          competition.zip
+                        ].filter(Boolean);
+                        return addressParts.length > 0 ? addressParts.join(', ') : 'Address TBD';
+                      })()}
                     </div>
                   </div>
 
