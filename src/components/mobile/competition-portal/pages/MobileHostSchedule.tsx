@@ -81,10 +81,7 @@ export const MobileHostSchedule: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    <Badge variant="secondary" className="text-xs">
-                      <Calendar size={12} className="mr-1" />
-                      {event.interval}min slots
-                    </Badge>
+                    
                   </div>
                   
                   {/* Time Slots Schedule */}
