@@ -38,6 +38,7 @@ export const MobileHostResults: React.FC = () => {
           .select(`
             id,
             location,
+            event,
             cp_events!inner(name),
             cp_event_registrations!left(school_id, status)
           `)
@@ -45,9 +46,9 @@ export const MobileHostResults: React.FC = () => {
 
         if (eventsError) throw eventsError;
 
-        // Then get all results for this competition with school names
+        // Get all results for this competition from competition_events
         const { data: resultsData, error: resultsError } = await supabase
-          .from('competition_results')
+          .from('competition_events')
           .select('*')
           .eq('competition_id', competitionId);
 
@@ -72,6 +73,9 @@ export const MobileHostResults: React.FC = () => {
           }, {} as Record<string, string>);
         }
 
+        // We already have event names from cp_events in the eventsData query
+        // No need for separate eventNamesMap since we can get names directly
+
         // Process the data to create event results
         const eventResults: EventResult[] = (eventsData || []).map(event => {
           const eventName = event.cp_events?.name || 'Unknown Event';
@@ -79,12 +83,12 @@ export const MobileHostResults: React.FC = () => {
             .filter((reg: any) => reg.status === 'registered')
             .length;
 
-          // Since competition_results doesn't currently have event_id,
-          // we can't associate results with specific events.
-          // For now, we'll show 0 completed scores until the schema is updated
-          const eventScores: any[] = [];
+          // Find results for this specific event by matching the event UUID
+          const eventScores = (resultsData || []).filter(
+            (result: any) => result.event === event.event
+          );
 
-          const completedScores = 0; // Will be updated when event_id is added to competition_results
+          const completedScores = eventScores.length;
           const totalScores = registeredSchools;
 
           // Find top score and school
@@ -93,13 +97,13 @@ export const MobileHostResults: React.FC = () => {
 
           if (eventScores.length > 0) {
             const topResult = eventScores.reduce((prev: any, current: any) => {
-              const prevScore = Number(prev.score) || 0;
-              const currentScore = Number(current.score) || 0;
+              const prevScore = Number(prev.total_points) || 0;
+              const currentScore = Number(current.total_points) || 0;
               return currentScore > prevScore ? current : prev;
             });
             
-            topSchool = schoolNamesMap[topResult.school_id] || 'Unknown School';
-            topScore = Number(topResult.score) || 0;
+            topSchool = schoolNamesMap[topResult.school_id] || topResult.team_name || 'Unknown School';
+            topScore = Number(topResult.total_points) || 0;
           }
 
           return {
