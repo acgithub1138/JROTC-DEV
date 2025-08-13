@@ -208,7 +208,7 @@ export const MobileTaskDetail: React.FC = () => {
               </Button>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg font-semibold truncate">
-                  {task.title}
+                  {task.task_number && `${task.task_number} - `}{task.title}
                 </h1>
               </div>
             </div>

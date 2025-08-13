@@ -32,16 +32,6 @@ export const MobileHeader: React.FC = () => {
     <header className="sticky top-0 z-50 bg-card border-b border-border">
       <div className="flex items-center justify-between px-4 py-3">
         <div className="flex items-center space-x-3 min-w-0 flex-1">
-          {canGoBack && (
-            <Button
-              variant="ghost"
-              size="sm"
-              onClick={handleBack}
-              className="p-2 h-8 w-8"
-            >
-              <ArrowLeft size={18} />
-            </Button>
-          )}
           <h1 className="text-lg font-semibold text-foreground truncate">
             {title}
           </h1>
