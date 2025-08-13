@@ -27,17 +27,6 @@ export const MobileCompetitionPortalLayout: React.FC<MobileCompetitionPortalLayo
     navigate('/mobile/dashboard');
   };
   return <div className="min-h-screen bg-background pb-16">
-      {/* Header */}
-      <div className="bg-card border-b border-border sticky top-0 z-40">
-        <div className="flex items-center justify-between p-4">
-          <button onClick={handleBackClick} className="flex items-center text-muted-foreground hover:text-foreground transition-colors">
-            <ArrowLeft size={20} className="mr-2" />
-            <span className="text-sm font-medium">Back</span>
-          </button>
-          
-          <div className="w-16" /> {/* Spacer for centering */}
-        </div>
-      </div>
 
       {/* Main Content */}
       <main className="flex-1">
