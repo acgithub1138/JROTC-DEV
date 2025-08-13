@@ -5,7 +5,8 @@ import {
   Filter, 
   Clock,
   User,
-  Calendar
+  Calendar,
+  CornerDownRight
 } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -17,6 +18,7 @@ import { useTaskStatusOptions } from '@/hooks/useTaskStatusOptions';
 import { useTaskPriorityOptions } from '@/hooks/useTaskPriorityOptions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useSubtasks } from '@/hooks/useSubtasks';
 
 export const MobileTaskList: React.FC = () => {
   const navigate = useNavigate();
@@ -93,7 +95,66 @@ export const MobileTaskList: React.FC = () => {
     return 'Unassigned';
   };
 
-  if (isLoading) {
+const openSubtask = (subtaskId: string, parentTaskId: string) => {
+  navigate(`/mobile/subtasks/${subtaskId}`, { state: { parentTaskId } });
+};
+
+const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) => {
+  const { subtasks, isLoading } = useSubtasks(parentTaskId);
+  if (isLoading || subtasks.length === 0) return null;
+
+  return (
+    <div className="space-y-2">
+      {subtasks.map((st) => (
+        <Card
+          key={st.id}
+          className="bg-card border-border/70 cursor-pointer"
+          onClick={(e) => {
+            e.stopPropagation();
+            openSubtask(st.id, parentTaskId);
+          }}
+        >
+          <CardContent className="p-3">
+            <div className="flex items-start justify-between">
+              <div className="flex items-start gap-2">
+                <CornerDownRight className="h-4 w-4 text-muted-foreground mt-0.5" />
+                <div>
+                  <div className="flex items-center gap-2">
+                    <Badge variant="secondary" className="text-[10px]">Subtask</Badge>
+                    <span className="text-sm font-medium text-foreground line-clamp-1">{st.title}</span>
+                  </div>
+                  {st.description && (
+                    <p className="text-xs text-muted-foreground line-clamp-2 mt-1">
+                      {st.description}
+                    </p>
+                  )}
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                {getPriorityBadge(st.priority)}
+                {getStatusBadge(st.status)}
+              </div>
+            </div>
+            <div className="mt-2 flex items-center justify-between text-xs text-muted-foreground">
+              <div className="flex items-center">
+                <User className="mr-1 h-3 w-3" />
+                {st.assigned_to_profile
+                  ? `${st.assigned_to_profile.last_name}, ${st.assigned_to_profile.first_name}`
+                  : 'Unassigned'}
+              </div>
+              <div className="flex items-center">
+                <Calendar className="mr-1 h-3 w-3" />
+                {formatDate(st.due_date || null)}
+              </div>
+            </div>
+          </CardContent>
+        </Card>
+      ))}
+    </div>
+  );
+};
+
+if (isLoading) {
     return (
       <div className="flex flex-col h-full">
         {/* Filter Bar */}
@@ -154,51 +215,53 @@ export const MobileTaskList: React.FC = () => {
           </div>
         ) : (
           filteredTasks.map((task) => (
-            <Card 
-              key={task.id} 
-              className={cn(
-                "bg-card border-border transition-colors",
-                canViewDetails && "cursor-pointer hover:bg-muted/50"
-              )}
-              onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
-            >
-              <CardContent className="p-4">
-                <div className="flex items-start justify-between mb-2">
-                  <h3 className="font-medium text-foreground text-sm line-clamp-2 flex-1 mr-2">
-                    {task.title}
-                  </h3>
-                  {getPriorityBadge(task.priority)}
-                </div>
-                
-                {task.description && (
-                  <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
-                    {task.description}
-                  </p>
+            <div key={task.id} className="space-y-2">
+              <Card 
+                className={cn(
+                  "bg-card border-border transition-colors",
+                  canViewDetails && "cursor-pointer hover:bg-muted/50"
                 )}
-                
-                <div className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    {getStatusBadge(task.status)}
-                    {task.task_number && (
-                      <Badge variant="outline" className="text-xs">
-                        #{task.task_number}
-                      </Badge>
-                    )}
+                onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
+              >
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between mb-2">
+                    <h3 className="font-medium text-foreground text-sm line-clamp-2 flex-1 mr-2">
+                      {task.title}
+                    </h3>
+                    {getPriorityBadge(task.priority)}
                   </div>
                   
-                  <div className="flex items-center justify-between text-xs text-muted-foreground">
-                    <div className="flex items-center">
-                      <User className="mr-1 h-3 w-3" />
-                      {getAssignedToName(task)}
+                  {task.description && (
+                    <p className="text-xs text-muted-foreground mb-3 line-clamp-2">
+                      {task.description}
+                    </p>
+                  )}
+                  
+                  <div className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      {getStatusBadge(task.status)}
+                      {task.task_number && (
+                        <Badge variant="outline" className="text-xs">
+                          #{task.task_number}
+                        </Badge>
+                      )}
                     </div>
-                    <div className="flex items-center">
-                      <Calendar className="mr-1 h-3 w-3" />
-                      {formatDate(task.due_date)}
+                    
+                    <div className="flex items-center justify-between text-xs text-muted-foreground">
+                      <div className="flex items-center">
+                        <User className="mr-1 h-3 w-3" />
+                        {getAssignedToName(task)}
+                      </div>
+                      <div className="flex items-center">
+                        <Calendar className="mr-1 h-3 w-3" />
+                        {formatDate(task.due_date)}
+                      </div>
                     </div>
                   </div>
-                </div>
-              </CardContent>
-            </Card>
+                </CardContent>
+              </Card>
+              <SubtasksForTask parentTaskId={task.id} />
+            </div>
           ))
         )}
       </div>
