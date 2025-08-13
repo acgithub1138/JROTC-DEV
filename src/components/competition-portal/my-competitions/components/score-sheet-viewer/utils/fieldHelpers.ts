@@ -7,6 +7,7 @@ export const getFieldNames = (events: CompetitionEvent[]): string[] => {
   events.forEach(event => {
     if (event.score_sheet?.scores) {
       Object.keys(event.score_sheet.scores).forEach(fieldName => {
+        // Include all fields including penalty fields
         allFieldNames.add(fieldName);
       });
     }
@@ -18,7 +19,21 @@ export const getFieldNames = (events: CompetitionEvent[]): string[] => {
       const match = str.match(/^field_(\d+)/);
       return match ? parseInt(match[1]) : 999; // Non-numbered fields go to end
     };
-    return getNumber(a) - getNumber(b);
+    
+    const aNum = getNumber(a);
+    const bNum = getNumber(b);
+    
+    // If both have the same field number, sort penalty fields after regular fields
+    if (aNum === bNum) {
+      const aIsPenalty = a.includes('penalty') || a.includes('_pen_');
+      const bIsPenalty = b.includes('penalty') || b.includes('_pen_');
+      
+      if (aIsPenalty && !bIsPenalty) return 1;
+      if (!aIsPenalty && bIsPenalty) return -1;
+      return a.localeCompare(b);
+    }
+    
+    return aNum - bNum;
   });
 };
 
