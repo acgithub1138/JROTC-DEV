@@ -29,6 +29,20 @@ export const MobileTaskList: React.FC = () => {
   const { canCreate, canViewDetails } = useTaskPermissions();
   const [filter, setFilter] = useState<'all' | 'mine' | 'soon' | 'overdue'>('all');
 
+  const isDueSoon = (dateString: string | null) => {
+    if (!dateString) return false;
+    const date = new Date(dateString);
+    const today = new Date();
+    const threeDaysFromNow = new Date();
+    
+    today.setHours(0, 0, 0, 0);
+    threeDaysFromNow.setHours(0, 0, 0, 0);
+    threeDaysFromNow.setDate(today.getDate() + 3);
+    date.setHours(0, 0, 0, 0);
+    
+    return date >= today && date <= threeDaysFromNow;
+  };
+
   // Filter tasks based on current filter
   const filteredTasks = tasks.filter(task => {
     const today = new Date();
@@ -104,19 +118,6 @@ export const MobileTaskList: React.FC = () => {
     return date < today;
   };
 
-  const isDueSoon = (dateString: string | null) => {
-    if (!dateString) return false;
-    const date = new Date(dateString);
-    const today = new Date();
-    const threeDaysFromNow = new Date();
-    
-    today.setHours(0, 0, 0, 0);
-    threeDaysFromNow.setHours(0, 0, 0, 0);
-    threeDaysFromNow.setDate(today.getDate() + 3);
-    date.setHours(0, 0, 0, 0);
-    
-    return date >= today && date <= threeDaysFromNow;
-  };
 
 const openSubtask = (subtaskId: string, parentTaskId: string) => {
   navigate(`/mobile/subtasks/${subtaskId}`, { state: { parentTaskId } });
