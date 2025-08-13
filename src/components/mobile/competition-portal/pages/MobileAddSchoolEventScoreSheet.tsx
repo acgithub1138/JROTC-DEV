@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -27,6 +27,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
   const queryClient = useQueryClient();
 
   const [selectedEventId, setSelectedEventId] = useState<string>('');
+  const [judgeNumber, setJudgeNumber] = useState<string>('');
   const [scoreSheet, setScoreSheet] = useState<ScoreSheetItem[]>([]);
   const [teamName, setTeamName] = useState('');
   const [notes, setNotes] = useState('');
@@ -100,7 +101,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         .from('competition_templates')
         .select('*')
         .eq('id', templateId)
-        .single();
+        .maybeSingle();
 
       if (templateError) throw templateError;
       return templateData;
@@ -136,6 +137,33 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       setScoreSheet([]);
     }
   }, [scoreTemplate]);
+
+  // Compute judge options based on template's configured judge count
+  const maxJudges = useMemo(() => {
+    if (!scoreTemplate) return 1;
+    
+    const tpl = scoreTemplate as any;
+    // Prefer numeric 'judges' from competition_templates, else fallbacks
+    const numericJudges = typeof tpl.judges === 'number'
+      ? tpl.judges
+      : (typeof tpl.judges === 'string' ? parseInt(tpl.judges, 10) : undefined);
+
+    return (
+      numericJudges ||
+      tpl.numberOfJudges ||
+      tpl.maxJudges ||
+      (Array.isArray(tpl.judges) ? tpl.judges.length : undefined) ||
+      tpl.judge_count ||
+      (tpl?.scores as any)?.maxJudges ||
+      (tpl?.scores as any)?.judge_count ||
+      1
+    );
+  }, [scoreTemplate]);
+
+  const judgeOptions = useMemo(
+    () => Array.from({ length: Math.max(1, Math.min(Number(maxJudges) || 1, 10)) }, (_, i) => `Judge ${i + 1}`),
+    [maxJudges]
+  );
 
   const createScoreSheetMutation = useMutation({
     mutationFn: async (scoreSheetData: any) => {
@@ -192,6 +220,11 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       return;
     }
 
+    if (!judgeNumber) {
+      toast.error('Please select a judge number');
+      return;
+    }
+
     if (scoreSheet.length === 0) {
       toast.error('Score sheet is empty');
       return;
@@ -223,7 +256,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         </div>
         <Button
           onClick={handleSubmit}
-          disabled={!selectedEventId || scoreSheet.length === 0 || createScoreSheetMutation.isPending}
+          disabled={!selectedEventId || !judgeNumber || scoreSheet.length === 0 || createScoreSheetMutation.isPending}
           className="h-8 w-8 p-0"
         >
           <Save size={16} />
@@ -261,6 +294,30 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
               placeholder={school?.school_name || "Enter team name..."}
             />
           </div>
+
+          {/* Judge Number Selection */}
+          {scoreTemplate && (
+            <div className="space-y-2">
+              <Label htmlFor="judgeNumber">
+                Judge Number <span className="text-destructive">*</span>
+              </Label>
+              <Select value={judgeNumber} onValueChange={setJudgeNumber}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select judge..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {judgeOptions.map((judge) => (
+                    <SelectItem key={judge} value={judge}>
+                      {judge}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <p className="text-xs text-muted-foreground">
+                Total judges in template: {Math.max(1, Number(maxJudges) || 1)}
+              </p>
+            </div>
+          )}
         </CardContent>
       </Card>
 
