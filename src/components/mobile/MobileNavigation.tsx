@@ -44,7 +44,7 @@ const navigationItems = [
     module: 'calendar',
   },
   {
-    name: 'Competition',
+    name: 'Comps',
     path: '/mobile/competition-portal',
     icon: Trophy,
     module: null, // Will be filtered by portal access
