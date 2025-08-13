@@ -81,7 +81,12 @@ export const MobileHostSchedule: React.FC = () => {
                         </div>
                       </div>
                     </div>
-                    
+                    <button 
+                      onClick={() => navigate(`/mobile/competition-portal/manage/${competitionId}/schedule/edit/${event.id}`)} 
+                      className="p-1 hover:bg-muted rounded-full transition-colors"
+                    >
+                      <Settings size={16} className="text-muted-foreground" />
+                    </button>
                   </div>
                   
                   {/* Time Slots Schedule */}
