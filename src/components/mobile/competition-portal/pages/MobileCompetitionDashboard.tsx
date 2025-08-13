@@ -22,15 +22,15 @@ export const MobileCompetitionDashboard: React.FC = () => {
           <div className="space-y-3">
             <button className="w-full p-4 bg-primary/10 text-primary rounded-lg hover:bg-primary/20 transition-colors flex items-center text-left py-[16px]">
               <Trophy className="h-5 w-5 mr-3 flex-shrink-0" />
-              <span className="font-medium">Host Competition</span>
+              <span className="font-medium">Host Competitions</span>
             </button>
             <button className="w-full p-4 bg-blue-500/10 text-blue-600 rounded-lg hover:bg-blue-500/20 transition-colors flex items-center text-left">
               <Search className="h-5 w-5 mr-3 flex-shrink-0" />
-              <span className="font-medium">Find Competitions</span>
+              <span className="font-medium">Open Competitions</span>
             </button>
             <button className="w-full p-4 bg-green-500/10 text-green-600 rounded-lg hover:bg-green-500/20 transition-colors flex items-center text-left">
               <Users className="h-5 w-5 mr-3 flex-shrink-0" />
-              <span className="font-medium">Manage Teams</span>
+              <span className="font-medium">My Competitions</span>
             </button>
             <button className="w-full p-4 bg-purple-500/10 text-purple-600 rounded-lg hover:bg-purple-500/20 transition-colors flex items-center text-left">
               <Calendar className="h-5 w-5 mr-3 flex-shrink-0" />
