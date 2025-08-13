@@ -161,7 +161,7 @@ export const MobileCadetDetail: React.FC = () => {
                 size="sm"
                 onClick={handleEdit}
               >
-                <Edit className="h-4 w-4 mr-1" />
+                <Edit className="h-4 w-4" />
               </Button>
             )}
             {isEditing && (
@@ -171,16 +171,14 @@ export const MobileCadetDetail: React.FC = () => {
                   size="sm"
                   onClick={handleSave}
                 >
-                  <Save className="h-4 w-4 mr-1" />
-                  Save
+                  <Save className="h-4 w-4" />
                 </Button>
                 <Button
                   variant="outline"
                   size="sm"
                   onClick={handleCancel}
                 >
-                  <X className="h-4 w-4 mr-1" />
-                  Cancel
+                  <X className="h-4 w-4" />
                 </Button>
               </div>
             )}
