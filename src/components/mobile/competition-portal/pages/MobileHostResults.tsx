@@ -54,6 +54,8 @@ export const MobileHostResults: React.FC = () => {
 
         if (resultsError) throw resultsError;
 
+        console.log('Results data for competition:', competitionId, resultsData);
+
         // Get school names for results
         const schoolIds = [...new Set((resultsData || []).map(r => r.school_id))];
         let schoolNamesMap: Record<string, string> = {};
@@ -88,7 +90,11 @@ export const MobileHostResults: React.FC = () => {
             (result: any) => result.event === eventName
           );
 
-          const completedScores = eventScores.length;
+          console.log(`Event: ${eventName}, Event scores found:`, eventScores);
+
+          // Count unique schools that have submitted scores (not individual score entries)
+          const uniqueSchools = new Set(eventScores.map((score: any) => score.school_id));
+          const completedScores = uniqueSchools.size;
           const totalScores = registeredSchools;
 
           // Find top score and school
