@@ -341,24 +341,49 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
             </div>
           </CardHeader>
           <CardContent className="space-y-3">
-            {scoreSheet.map((item) => (
-              <div key={item.id} className="flex items-center justify-between p-3 bg-muted/50 rounded-lg">
-                <div className="flex-1">
-                  <p className="font-medium text-sm">{item.criteria}</p>
-                  <p className="text-xs text-muted-foreground">Max: {item.max_score}</p>
+            {scoreSheet.map((item) => {
+              // Handle penalty fields - only show for Judge 1
+              if ((item.criteria.toLowerCase().includes('penalty') || 
+                   item.criteria.toLowerCase().includes('violation') || 
+                   item.criteria.toLowerCase().includes('deduction')) && 
+                  judgeNumber !== 'Judge 1') {
+                return null;
+              }
+
+              const isPenalty = item.criteria.toLowerCase().includes('penalty') || 
+                               item.criteria.toLowerCase().includes('violation') || 
+                               item.criteria.toLowerCase().includes('deduction');
+
+              return (
+                <div key={item.id} className={`flex items-center justify-between p-3 rounded-lg ${
+                  isPenalty ? 'bg-destructive/10 border border-destructive/20' : 'bg-muted/50'
+                }`}>
+                  <div className="flex-1">
+                    <p className={`font-medium text-sm ${isPenalty ? 'text-destructive' : ''}`}>
+                      {item.criteria}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      Max: {item.max_score}
+                      {isPenalty && judgeNumber === 'Judge 1' && (
+                        <span className="text-destructive"> • Penalty Field</span>
+                      )}
+                    </p>
+                  </div>
+                  <div className="w-20">
+                    <Input
+                      type="number"
+                      min="0"
+                      max={item.max_score}
+                      value={item.score || 0}
+                      onChange={(e) => handleScoreChange(item.id, parseInt(e.target.value) || 0)}
+                      className={`text-center text-sm h-8 ${
+                        isPenalty ? 'border-destructive focus:border-destructive' : ''
+                      }`}
+                    />
+                  </div>
                 </div>
-                <div className="w-20">
-                  <Input
-                    type="number"
-                    min="0"
-                    max={item.max_score}
-                    value={item.score || 0}
-                    onChange={(e) => handleScoreChange(item.id, parseInt(e.target.value) || 0)}
-                    className="text-center text-sm h-8"
-                  />
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </CardContent>
         </Card>
       )}
