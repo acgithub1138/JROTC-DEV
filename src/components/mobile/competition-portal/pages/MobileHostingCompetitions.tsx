@@ -51,8 +51,7 @@ export const MobileHostingCompetitions: React.FC = () => {
           className="bg-primary text-primary-foreground"
           onClick={() => navigate('/mobile/competition-portal/host')}
         >
-          <Plus size={16} className="mr-1" />
-          Host
+          <Plus size={16} />
         </Button>
       </div>
 
