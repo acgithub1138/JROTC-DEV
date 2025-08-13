@@ -132,7 +132,6 @@ export const MobileCadetDirectory: React.FC = () => {
                   </div>
                   
                   {cadet.rank && <p className="text-xs text-muted-foreground mb-1">{cadet.rank}</p>}
-                  {cadet.flight && <p className="text-xs text-muted-foreground mb-2">{cadet.flight}</p>}
                   
                   <div className="flex items-center justify-between">
                     <div className="flex items-center space-x-3">
@@ -140,6 +139,10 @@ export const MobileCadetDirectory: React.FC = () => {
                         <Mail className="h-4 w-4 text-blue-600" />
                       </Button>
                     </div>
+                    
+                    {cadet.flight && <Badge variant="secondary" className="text-xs">
+                        {cadet.flight}
+                      </Badge>}
                   </div>
                 </div>
               </div>
