@@ -276,7 +276,7 @@ export const MobileAddEvent: React.FC = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.start_date ? format(formData.start_date, "PPP") : <span>Pick a date</span>}
+                        {formData.start_date ? format(formData.start_date, "MM/dd/yyyy") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
@@ -302,7 +302,7 @@ export const MobileAddEvent: React.FC = () => {
                         )}
                       >
                         <CalendarIcon className="mr-2 h-4 w-4" />
-                        {formData.end_date ? format(formData.end_date, "PPP") : <span>Pick a date</span>}
+                        {formData.end_date ? format(formData.end_date, "MM/dd/yyyy") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0" align="start">
