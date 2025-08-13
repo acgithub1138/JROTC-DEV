@@ -60,6 +60,16 @@ export const MobileBudget: React.FC = () => {
     return formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
   };
 
+  const formatStatusDisplay = (status: string) => {
+    if (!status) return '';
+    // Replace underscores with spaces and capitalize each word
+    return status
+      .replace(/_/g, ' ')
+      .split(' ')
+      .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+      .join(' ');
+  };
+
   if (isLoading) {
     return (
       <div className="flex items-center justify-center h-64">
@@ -182,12 +192,12 @@ export const MobileBudget: React.FC = () => {
                       <div className={`font-semibold text-sm ${getTypeColor(transaction.category)}`}>
                         {transaction.category === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                       </div>
-                      <Badge 
-                        variant="secondary" 
-                        className={`text-xs ${getStatusColor(transaction.status)}`}
-                      >
-                        {transaction.status}
-                      </Badge>
+                       <Badge 
+                         variant="secondary" 
+                         className={`text-xs ${getStatusColor(transaction.status)}`}
+                       >
+                         {formatStatusDisplay(transaction.status)}
+                       </Badge>
                     </div>
                   </div>
                 </Card>
