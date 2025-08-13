@@ -19,8 +19,8 @@ export function useIsMobile() {
       // Check for touch support
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       
-      // Final mobile detection
-      const detectedMobile = screenIsMobile || isMobileUA || (isTouchDevice && window.innerWidth <= 1300);
+      // Final mobile detection - only consider screen size and user agent for accurate detection
+      const detectedMobile = screenIsMobile || isMobileUA;
       
       console.log('Mobile detection detailed:', { 
         windowWidth: window.innerWidth, 
