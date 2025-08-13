@@ -7,7 +7,12 @@ import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, X, Save, Plus } from 'lucide-react';
+import { ArrowLeft, X, Save, Plus, CalendarIcon } from 'lucide-react';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { TimePicker } from '@/components/ui/time-picker';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
@@ -30,12 +35,10 @@ export const MobileEditEvent: React.FC = () => {
   const [formData, setFormData] = useState({
     event: '',
     location: '',
-    start_date: '',
-    start_time_hour: '09',
-    start_time_minute: '00',
-    end_date: '',
-    end_time_hour: '10',
-    end_time_minute: '00',
+    start_date: new Date(),
+    start_time: '09:00',
+    end_date: new Date(),
+    end_time: '10:00',
     lunch_start_time: '',
     lunch_end_time: '',
     max_participants: '',
@@ -85,12 +88,10 @@ export const MobileEditEvent: React.FC = () => {
       const newFormData = {
         event: event.event || '',
         location: event.location || '',
-        start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
-        start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
-        start_time_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
-        end_date: endDate ? formatTimeForDisplay(endDate, 'yyyy-MM-dd', timezone) : '',
-        end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
-        end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
+        start_date: startDate || new Date(),
+        start_time: startDate ? `${startDate.getHours().toString().padStart(2, '0')}:${startDate.getMinutes().toString().padStart(2, '0')}` : '09:00',
+        end_date: endDate || new Date(),
+        end_time: endDate ? `${endDate.getHours().toString().padStart(2, '0')}:${endDate.getMinutes().toString().padStart(2, '0')}` : '10:00',
         lunch_start_time: lunchStartTime,
         lunch_end_time: lunchEndTime,
         max_participants: event.max_participants?.toString() || '',
@@ -189,13 +190,16 @@ export const MobileEditEvent: React.FC = () => {
       setIsLoading(true);
 
       // Convert times from school timezone to UTC
+      const startDateStr = format(formData.start_date, 'yyyy-MM-dd');
+      const endDateStr = format(formData.end_date, 'yyyy-MM-dd');
+      
       const startDateTime = convertFromSchoolTimezone(
-        new Date(`${formData.start_date} ${formData.start_time_hour}:${formData.start_time_minute}`),
+        new Date(`${startDateStr} ${formData.start_time}`),
         timezone
       );
 
       const endDateTime = convertFromSchoolTimezone(
-        new Date(`${formData.end_date} ${formData.end_time_hour}:${formData.end_time_minute}`),
+        new Date(`${endDateStr} ${formData.end_time}`),
         timezone
       );
 
@@ -205,14 +209,14 @@ export const MobileEditEvent: React.FC = () => {
       
       if (formData.lunch_start_time && formData.start_date) {
         lunchStartTime = convertFromSchoolTimezone(
-          new Date(`${formData.start_date} ${formData.lunch_start_time}`),
+          new Date(`${startDateStr} ${formData.lunch_start_time}`),
           timezone
         );
       }
       
       if (formData.lunch_end_time && formData.start_date) {
         lunchEndTime = convertFromSchoolTimezone(
-          new Date(`${formData.start_date} ${formData.lunch_end_time}`),
+          new Date(`${startDateStr} ${formData.lunch_end_time}`),
           timezone
         );
       }
@@ -376,112 +380,86 @@ export const MobileEditEvent: React.FC = () => {
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label>Start Date</Label>
-                <Input
-                  type="date"
-                  value={formData.start_date}
-                  onChange={(e) => setFormData({ ...formData, start_date: e.target.value })}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.start_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.start_date ? format(formData.start_date, "MM/dd/yyyy") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.start_date}
+                      onSelect={(date) => date && setFormData({ ...formData, start_date: date })}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
               <div className="space-y-2">
                 <Label>End Date</Label>
-                <Input
-                  type="date"
-                  value={formData.end_date}
-                  onChange={(e) => setFormData({ ...formData, end_date: e.target.value })}
-                />
+                <Popover>
+                  <PopoverTrigger asChild>
+                    <Button
+                      variant="outline"
+                      className={cn(
+                        "w-full justify-start text-left font-normal",
+                        !formData.end_date && "text-muted-foreground"
+                      )}
+                    >
+                      <CalendarIcon className="mr-2 h-4 w-4" />
+                      {formData.end_date ? format(formData.end_date, "MM/dd/yyyy") : <span>Pick a date</span>}
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-auto p-0" align="start">
+                    <Calendar
+                      mode="single"
+                      selected={formData.end_date}
+                      onSelect={(date) => date && setFormData({ ...formData, end_date: date })}
+                      initialFocus
+                      className={cn("p-3 pointer-events-auto")}
+                    />
+                  </PopoverContent>
+                </Popover>
               </div>
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Start Time</Label>
-                <div className="flex gap-2">
-                  <Select 
-                    value={formData.start_time_hour} 
-                    onValueChange={(value) => setFormData({ ...formData, start_time_hour: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={formData.start_time_minute} 
-                    onValueChange={(value) => setFormData({ ...formData, start_time_minute: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {['00', '15', '30', '45'].map((minute) => (
-                        <SelectItem key={minute} value={minute}>
-                          {minute}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label>End Time</Label>
-                <div className="flex gap-2">
-                  <Select 
-                    value={formData.end_time_hour} 
-                    onValueChange={(value) => setFormData({ ...formData, end_time_hour: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {Array.from({ length: 24 }, (_, i) => (
-                        <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                          {i.toString().padStart(2, '0')}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                  <Select 
-                    value={formData.end_time_minute} 
-                    onValueChange={(value) => setFormData({ ...formData, end_time_minute: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {['00', '15', '30', '45'].map((minute) => (
-                        <SelectItem key={minute} value={minute}>
-                          {minute}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
+              <TimePicker
+                id="start_time"
+                label="Start Time"
+                value={formData.start_time}
+                onChange={(value) => setFormData({ ...formData, start_time: value })}
+              />
+              <TimePicker
+                id="end_time"
+                label="End Time"
+                value={formData.end_time}
+                onChange={(value) => setFormData({ ...formData, end_time: value })}
+              />
             </div>
 
             <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Lunch Start</Label>
-                <Input
-                  type="time"
-                  value={formData.lunch_start_time}
-                  onChange={(e) => setFormData({ ...formData, lunch_start_time: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Lunch End</Label>
-                <Input
-                  type="time"
-                  value={formData.lunch_end_time}
-                  onChange={(e) => setFormData({ ...formData, lunch_end_time: e.target.value })}
-                />
-              </div>
+              <TimePicker
+                id="lunch_start_time"
+                label="Lunch Start"
+                value={formData.lunch_start_time}
+                onChange={(value) => setFormData({ ...formData, lunch_start_time: value })}
+              />
+              <TimePicker
+                id="lunch_end_time"
+                label="Lunch End"
+                value={formData.lunch_end_time}
+                onChange={(value) => setFormData({ ...formData, lunch_end_time: value })}
+              />
             </div>
           </CardContent>
         </Card>
