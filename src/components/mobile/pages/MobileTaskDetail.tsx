@@ -198,9 +198,17 @@ export const MobileTaskDetail: React.FC = () => {
         <div className="sticky top-0 z-10 bg-card border-b border-border px-4 py-3">
           <div className="flex items-center justify-between">
             <div className="flex items-center flex-1 min-w-0">
+              <Button
+                variant="ghost"
+                size="sm"
+                onClick={() => navigate('/mobile/tasks')}
+                className="mr-2 p-2 flex-shrink-0"
+              >
+                <ArrowLeft className="h-5 w-5" />
+              </Button>
               <div className="min-w-0 flex-1">
                 <h1 className="text-lg font-semibold truncate">
-                  {task.task_number && `${task.task_number} - `}{task.title}
+                  {task.title}
                 </h1>
               </div>
             </div>
