@@ -44,8 +44,8 @@ export const MobileTaskList: React.FC = () => {
     return date >= today && date <= threeDaysFromNow;
   };
 
-  // Helper function to check if task has subtasks due soon
-  const TaskHasSubtasksDueSoon: React.FC<{ taskId: string; children: (hasDueSoon: boolean) => React.ReactNode }> = ({ taskId, children }) => {
+  // Helper function to check if task has subtasks due soon or overdue
+  const TaskHasSubtasksDueSoon: React.FC<{ taskId: string; children: (hasDueSoon: boolean, hasOverdue: boolean) => React.ReactNode }> = ({ taskId, children }) => {
     const { subtasks } = useSubtasks(taskId);
     const hasDueSoon = subtasks.some(st => 
       isDueSoon(st.due_date) && 
@@ -53,7 +53,13 @@ export const MobileTaskList: React.FC = () => {
       st.status !== 'completed' && 
       st.status !== 'canceled'
     );
-    return <>{children(hasDueSoon)}</>;
+    const hasOverdue = subtasks.some(st => 
+      isOverdue(st.due_date) && 
+      !st.completed_at && 
+      st.status !== 'completed' && 
+      st.status !== 'canceled'
+    );
+    return <>{children(hasDueSoon, hasOverdue)}</>;
   };
 
   // Filter tasks based on current filter
@@ -73,7 +79,7 @@ export const MobileTaskList: React.FC = () => {
       case 'soon':
         return isActiveTask; // Let the render logic decide if task should show based on subtasks
       case 'overdue':
-        return dueDate && dueDate < new Date() && !task.completed_at;
+        return isActiveTask; // Let the render logic decide if task should show based on subtasks
       default:
         return true;
     }
@@ -266,11 +272,19 @@ if (isLoading) {
         ) : (
           filteredTasks.map((task) => (
             <TaskHasSubtasksDueSoon key={task.id} taskId={task.id}>
-              {(hasSubtasksDueSoon) => {
+              {(hasSubtasksDueSoon, hasOverdueSubtasks) => {
                 // For the "soon" filter, only show tasks that are themselves due soon OR have subtasks due soon
                 if (filter === 'soon') {
                   const taskDueSoon = task.due_date && isDueSoon(task.due_date);
                   if (!taskDueSoon && !hasSubtasksDueSoon) {
+                    return null;
+                  }
+                }
+                
+                // For the "overdue" filter, only show tasks that are themselves overdue OR have overdue subtasks
+                if (filter === 'overdue') {
+                  const taskOverdue = isOverdue(task.due_date);
+                  if (!taskOverdue && !hasOverdueSubtasks) {
                     return null;
                   }
                 }
