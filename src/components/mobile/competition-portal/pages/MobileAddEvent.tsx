@@ -437,13 +437,13 @@ export const MobileAddEvent: React.FC = () => {
               <div className="grid grid-cols-2 gap-4">
                 <TimePicker
                   id="lunch_start_time"
-                  label="Lunch Start (Optional)"
+                  label="Lunch Start"
                   value={formData.lunch_start_time}
                   onChange={(value) => handleInputChange('lunch_start_time', value)}
                 />
                 <TimePicker
                   id="lunch_end_time"
-                  label="Lunch End (Optional)"
+                  label="Lunch End"
                   value={formData.lunch_end_time}
                   onChange={(value) => handleInputChange('lunch_end_time', value)}
                 />
@@ -463,7 +463,7 @@ export const MobileAddEvent: React.FC = () => {
                 <div className="space-y-2">
                   <Label htmlFor="fee">Fee ($)</Label>
                   <Input
-                    id="fee"
+                    id="Event fee"
                     type="number"
                     step="0.01"
                     value={formData.fee}
