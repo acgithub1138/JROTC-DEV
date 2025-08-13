@@ -27,6 +27,7 @@ export const MobileTaskList: React.FC = () => {
   const { priorityOptions } = useTaskPriorityOptions();
   const { userProfile } = useAuth();
   const { canCreate, canViewDetails } = useTaskPermissions();
+  const { subtasks: allSubtasks } = useSubtasks();
   const [filter, setFilter] = useState<'all' | 'mine' | 'soon' | 'overdue'>('all');
 
   const isDueSoon = (dateString: string | null) => {
@@ -40,13 +41,6 @@ export const MobileTaskList: React.FC = () => {
     threeDaysFromNow.setDate(today.getDate() + 3);
     date.setHours(0, 0, 0, 0);
     
-    console.log('isDueSoon check:', {
-      dateString,
-      date: date.toISOString(),
-      today: today.toISOString(),
-      threeDaysFromNow: threeDaysFromNow.toISOString(),
-      result: date >= today && date <= threeDaysFromNow
-    });
     
     return date >= today && date <= threeDaysFromNow;
   };
@@ -67,14 +61,19 @@ export const MobileTaskList: React.FC = () => {
         case 'all':
           return isActiveTask;
         case 'soon':
-          const soonResult = dueDate && isDueSoon(task.due_date) && isActiveTask;
-          console.log('Soon filter for task:', task.task_number, {
-            dueDate: task.due_date,
-            hasDueDate: !!dueDate,
-            isDueSoonResult: isDueSoon(task.due_date),
-            isActiveTask,
-            finalResult: soonResult
-          });
+          // Check if task itself is due soon
+          const taskDueSoon = dueDate && isDueSoon(task.due_date) && isActiveTask;
+          
+          // Check if any subtasks are due soon
+          const taskSubtasks = allSubtasks.filter(st => st.parent_task_id === task.id);
+          const hasSubtaskDueSoon = taskSubtasks.some(st => 
+            isDueSoon(st.due_date) && 
+            !st.completed_at && 
+            st.status !== 'completed' && 
+            st.status !== 'canceled'
+          );
+          
+          const soonResult = (taskDueSoon || hasSubtaskDueSoon) && isActiveTask;
           return soonResult;
         case 'overdue':
           return dueDate && dueDate < new Date() && !task.completed_at;
