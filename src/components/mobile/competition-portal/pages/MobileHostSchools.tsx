@@ -3,12 +3,17 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowLeft, School, DollarSign, Users, Plus, Settings } from 'lucide-react';
+import { ArrowLeft, School, DollarSign, Users, Plus, Settings, Eye } from 'lucide-react';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
+import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
 
 export const MobileHostSchools: React.FC = () => {
   const navigate = useNavigate();
   const { competitionId } = useParams<{ competitionId: string }>();
+  const [viewSchoolEventsModal, setViewSchoolEventsModal] = React.useState<{ open: boolean; schoolId: string | null }>({
+    open: false,
+    schoolId: null
+  });
   
   const { schools, isLoading } = useCompetitionSchools(competitionId);
 
@@ -112,7 +117,15 @@ export const MobileHostSchools: React.FC = () => {
                     </p>
                   )}
 
-                  <div className="flex items-center justify-end">
+                  <div className="flex items-center justify-end space-x-2">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs h-7 w-7 p-0"
+                      onClick={() => setViewSchoolEventsModal({ open: true, schoolId: school.id })}
+                    >
+                      <Eye size={12} />
+                    </Button>
                     <Button 
                       variant="outline" 
                       size="sm" 
@@ -142,6 +155,14 @@ export const MobileHostSchools: React.FC = () => {
           </Card>
         )}
       </div>
+
+      {/* View School Events Modal */}
+      <ViewSchoolEventsModal
+        open={viewSchoolEventsModal.open}
+        onOpenChange={(open) => setViewSchoolEventsModal({ open, schoolId: null })}
+        competitionId={competitionId || ''}
+        schoolId={viewSchoolEventsModal.schoolId || ''}
+      />
     </div>
   );
 };
