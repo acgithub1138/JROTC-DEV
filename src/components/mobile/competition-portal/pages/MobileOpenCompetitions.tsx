@@ -286,9 +286,9 @@ export const MobileOpenCompetitions: React.FC = () => {
                           variant="outline" 
                           size="sm" 
                           className="text-xs h-7"
-                          onClick={() => navigate(`/mobile/competition-portal/competitions/${competition.id}`)}
+                          onClick={() => navigate(`/mobile/competition-portal/register?competitionId=${competition.id}`)}
                         >
-                          View Details
+                          Edit
                         </Button>
                       </div>
                     </div>
