@@ -73,7 +73,8 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
       
       toast.success('Score sheet updated successfully');
       
-      // Refresh the external data without closing the modal
+      // Close the modal and refresh the external data
+      onOpenChange(false);
       onEventUpdated();
       
     } catch (error) {
