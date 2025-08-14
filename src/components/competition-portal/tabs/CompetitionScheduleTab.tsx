@@ -182,20 +182,24 @@ export const CompetitionScheduleTab = ({
           
           {selectedSchoolFilter === 'all' ? (
             // Grid format for all schools: Y-axis = time, X-axis = events
-            <table className="w-full border-collapse border border-black text-xs" style={{tableLayout: 'fixed'}}>
+            <table className="w-full border-collapse border border-black text-xs" style={{tableLayout: 'fixed', width: '100%'}}>
+              <colgroup>
+                <col style={{width: '12%'}} />
+                {(printScheduleData as any).events?.map((_: any, index: number) => {
+                  const eventCount = (printScheduleData as any).events?.length || 1;
+                  const columnWidth = `${88 / eventCount}%`; // 12% for time column, remaining 88% distributed evenly
+                  return <col key={index} style={{width: columnWidth}} />;
+                })}
+              </colgroup>
               <thead>
                 <tr>
-                  <th className="border border-black p-1 text-left font-bold" style={{width: '15%'}}>Time</th>
-                  {(printScheduleData as any).events?.map((event: any, index: number) => {
-                    const eventCount = (printScheduleData as any).events?.length || 1;
-                    const columnWidth = `${85 / eventCount}%`; // 15% for time column, remaining 85% distributed evenly
-                    return (
-                      <th key={index} className="border border-black p-1 text-center font-bold text-xs" style={{width: columnWidth}}>
-                        <div className="font-semibold">{event.name}</div>
-                        <div className="text-xs font-normal text-gray-600">({event.location})</div>
-                      </th>
-                    );
-                  })}
+                  <th className="border border-black p-1 text-left font-bold">Time</th>
+                  {(printScheduleData as any).events?.map((event: any, index: number) => (
+                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
+                      <div className="font-semibold">{event.name}</div>
+                      <div className="text-xs font-normal text-gray-600">({event.location})</div>
+                    </th>
+                  ))}
                 </tr>
               </thead>
               <tbody>
