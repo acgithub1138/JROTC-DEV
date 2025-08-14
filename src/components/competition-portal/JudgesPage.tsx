@@ -12,6 +12,7 @@ import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 export const JudgesPage: React.FC = () => {
   const {
+    canView,
     canCreate
   } = useTablePermissions('cp_judges');
   const {
