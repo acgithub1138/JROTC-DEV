@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { ArrowLeft, Clock, DollarSign, Calendar, Users } from 'lucide-react';
+import { ArrowLeft, Clock, DollarSign, Calendar, Users, MapPin, Trophy } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Checkbox } from '@/components/ui/checkbox';
@@ -609,24 +609,40 @@ export const MobileCompetitionRegistration: React.FC = () => {
             <p className="text-sm text-muted-foreground">{competition.description}</p>
           </div>
           <div className="space-y-2">
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Location:</span>
-              <a 
-                href={`https://maps.google.com/?q=${encodeURIComponent(competition.location)}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="text-sm text-primary hover:underline"
+            <div className="flex items-center">
+              <Calendar size={12} className="mr-1" />
+              <span className="text-xs text-muted-foreground">
+                {new Date(competition.start_date).toLocaleDateString()}
+                {competition.start_date !== competition.end_date && (
+                  ` - ${new Date(competition.end_date).toLocaleDateString()}`
+                )}
+              </span>
+            </div>
+            <div className="flex items-center">
+              <MapPin size={12} className="mr-1" />
+              <button
+                onClick={() => {
+                  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`;
+                  window.open(mapsUrl, '_blank');
+                }}
+                className="text-xs text-left hover:text-primary transition-colors"
               >
-                {competition.location}
-              </a>
+                <div className="font-medium">
+                  {competition.location?.split(',')[0] || competition.hosting_school || 'Location TBD'}
+                </div>
+                {competition.location?.split(',').slice(1).join(',').trim() && (
+                  <div className="text-muted-foreground">
+                    {competition.location.split(',').slice(1).join(',').trim()}
+                  </div>
+                )}
+              </button>
             </div>
-            <div className="flex items-center justify-between">
-              <span className="text-sm text-muted-foreground">Hosting School:</span>
-              <span className="text-sm">{competition.hosting_school}</span>
+            <div className="flex items-center">
+              <Trophy size={12} className="mr-1" />
+              <span className="text-xs text-muted-foreground">
+                Hosted by: {competition.hosting_school}
+              </span>
             </div>
-          </div>
-          <div className="text-sm">
-            📅 {new Date(competition.start_date).toLocaleDateString()} - {new Date(competition.end_date).toLocaleDateString()}
           </div>
           {competition.fee && (
             <Badge variant="outline">Base Fee: ${competition.fee}</Badge>
