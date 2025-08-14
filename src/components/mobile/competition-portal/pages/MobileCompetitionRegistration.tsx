@@ -696,6 +696,17 @@ export const MobileCompetitionRegistration: React.FC = () => {
                               const currentSelected = selectedTimeSlot === slot.value;
                               const schoolName = !slot.available ? occupiedLabels.get(event.id)?.get(slot.value) : null;
                               
+                              // Debug log for the selected time slot
+                              if (currentSelected) {
+                                console.log('Found selected time slot:', {
+                                  eventId: event.id,
+                                  slotValue: slot.value,
+                                  selectedTimeSlot,
+                                  available: slot.available,
+                                  schoolName
+                                });
+                              }
+                              
                               return (
                                 <SelectItem 
                                   key={slot.value} 
@@ -704,7 +715,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
                                 >
                                   {slot.label}
                                   {currentSelected 
-                                    ? ' (Current)' 
+                                    ? ' (Your School)' 
                                     : (!slot.available ? ` (${schoolName || 'Filled'})` : '')
                                   }
                                 </SelectItem>
