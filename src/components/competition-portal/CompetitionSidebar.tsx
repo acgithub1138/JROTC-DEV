@@ -73,7 +73,20 @@ const competitionMenuItems = [{
   path: '/app/competition-portal/analytics'
 }];
 
-// Limited menu items for schools without competition_portal access
+// Limited menu items for schools with competition_module but not competition_portal
+const competitionModuleMenuItems = [{
+  id: 'open-competitions',
+  label: 'Open Competitions',
+  icon: Search,
+  path: '/app/competition-portal/open-competitions'
+}, {
+  id: 'my-competitions',
+  label: 'My Competitions',
+  icon: Target,
+  path: '/app/competition-portal/my-competitions'
+}];
+
+// Very limited menu items for schools without any competition access
 const limitedMenuItems = [{
   id: 'open-competitions',
   label: 'Open Competitions',
@@ -111,9 +124,15 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover
   };
 
-  // Determine which menu items to show based on competition_portal access
+  // Determine which menu items to show based on access level
   const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
-  const menuItems = hasCompetitionPortal ? competitionMenuItems : limitedMenuItems;
+  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
+  
+  const menuItems = hasCompetitionPortal 
+    ? competitionMenuItems 
+    : hasCompetitionModule 
+      ? competitionModuleMenuItems 
+      : limitedMenuItems;
   const handleReturnToCCC = () => {
     setPortal('ccc');
     navigate('/app');
