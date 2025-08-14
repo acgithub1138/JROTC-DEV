@@ -231,7 +231,10 @@ export const MobileOpenCompetitions: React.FC = () => {
         <TabsContent value="registered">
           <div className="space-y-3">
             {registeredCompetitions.length > 0 ? (
-              registeredCompetitions.map((competition) => (
+              registeredCompetitions.map((competition) => {
+                const registration = registrations.find(reg => reg.competition_id === competition.id);
+                
+                return (
                 <Card key={competition.id} className="bg-card border-border hover:bg-muted/50 transition-colors">
                   <CardContent className="p-4">
                     <div className="space-y-3">
@@ -286,7 +289,7 @@ export const MobileOpenCompetitions: React.FC = () => {
                           variant="outline" 
                           size="sm" 
                           className="text-xs h-7"
-                          onClick={() => navigate(`/mobile/competition-portal/register?competitionId=${competition.id}`)}
+                          onClick={() => navigate(`/mobile/competition-portal/register?competitionId=${competition.id}&registrationId=${registration?.id}`)}
                         >
                           Edit
                         </Button>
@@ -294,7 +297,8 @@ export const MobileOpenCompetitions: React.FC = () => {
                     </div>
                   </CardContent>
                 </Card>
-              ))
+                );
+              })
             ) : (
               <Card className="bg-card border-border">
                 <CardContent className="p-8 text-center">
