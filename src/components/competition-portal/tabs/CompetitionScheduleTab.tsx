@@ -182,12 +182,12 @@ export const CompetitionScheduleTab = ({
           
           {selectedSchoolFilter === 'all' ? (
             // Grid format for all schools: Y-axis = time, X-axis = events
-            <table className="w-full border-collapse border border-black text-xs">
+            <table className="w-full border-collapse border border-black text-xs" style={{tableLayout: 'fixed'}}>
               <thead>
                 <tr>
-                  <th className="border border-black p-1 text-left font-bold min-w-[50px]">Time</th>
+                  <th className="border border-black p-1 text-left font-bold" style={{width: '60px'}}>Time</th>
                   {(printScheduleData as any).events?.map((event: any, index: number) => (
-                    <th key={index} className="border border-black p-1 text-center font-bold text-xs" style={{width: `${90 / (printScheduleData as any).events?.length}%`}}>
+                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
                       <div className="font-semibold">{event.name}</div>
                       <div className="text-xs font-normal text-gray-600">({event.location})</div>
                     </th>
