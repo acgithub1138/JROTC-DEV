@@ -112,10 +112,18 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
     }
   }, [open, competition]);
 
+  // Add a manual refetch that includes a small delay to ensure database updates are visible
+  const refetchWithDelay = async () => {
+    setIsLoading(true);
+    // Small delay to ensure any pending database updates are committed
+    await new Promise(resolve => setTimeout(resolve, 200));
+    await fetchEvents();
+  };
+
   return {
     events,
     schoolMap,
     isLoading,
-    refetch: fetchEvents
+    refetch: refetchWithDelay
   };
 };
