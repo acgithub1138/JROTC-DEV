@@ -96,26 +96,23 @@ export const ReportsTab = () => {
 
   return (
     <div className="space-y-6">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        <EventSelector 
-          availableEvents={availableEvents} 
-          selectedEvent={selectedEvent} 
-          onEventSelect={handleEventSelect} 
-          isLoading={isLoadingEvents} 
-        />
-        
-        <CompetitionSelector 
-          availableCompetitions={availableCompetitions} 
-          selectedCompetitions={selectedCompetitions || []} 
-          onCompetitionSelect={setSelectedCompetitions} 
-          onSelectAll={() => setSelectedCompetitions(availableCompetitions.map(c => c.id))}
-          onUnselectAll={() => setSelectedCompetitions([])}
-          isLoading={isLoadingCompetitions} 
-        />
-      </div>
+      <EventSelector 
+        availableEvents={availableEvents} 
+        selectedEvent={selectedEvent} 
+        onEventSelect={handleEventSelect} 
+        isLoading={isLoadingEvents} 
+      />
 
       {selectedEvent && (
         <div className="space-y-6">
+          <CompetitionSelector 
+            availableCompetitions={availableCompetitions} 
+            selectedCompetitions={selectedCompetitions || []} 
+            onCompetitionSelect={setSelectedCompetitions} 
+            onSelectAll={() => setSelectedCompetitions(availableCompetitions.map(c => c.id))}
+            onUnselectAll={() => setSelectedCompetitions([])}
+            isLoading={isLoadingCompetitions} 
+          />
           <div className="flex gap-4 items-start">
             {/* Performance Trends - 3/4 width */}
             <div className="w-3/4">
