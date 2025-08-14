@@ -216,6 +216,15 @@ export const MobileCompetitionRegistration: React.FC = () => {
         events: Array.from(selectedEventIds), 
         timeSlots: Array.from(timeSlotMap.entries()) 
       });
+
+      // Show warning if events exist but no schedules
+      if (selectedEventIds.size > 0 && timeSlotMap.size === 0) {
+        toast({
+          title: 'Time Slots Missing',
+          description: 'Your events were loaded but time slots need to be reselected.',
+          variant: 'default'
+        });
+      }
     } catch (error) {
       console.error('Error loading existing registration:', error);
       toast({
