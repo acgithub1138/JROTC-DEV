@@ -8,6 +8,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Printer } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useAuth } from '@/contexts/AuthContext';
@@ -32,6 +33,7 @@ export const CompetitionScheduleTab = ({
   const {
     canManageSchedule
   } = useCompetitionSchedulePermissions();
+  const { canEdit: canEditSchools } = useTablePermissions('cp_comp_schools');
   const {
     timezone
   } = useSchoolTimezone();
@@ -284,7 +286,7 @@ export const CompetitionScheduleTab = ({
                           <div className="font-medium text-sm truncate" title={event.event_name}>
                             {event.event_name}
                           </div>
-                          {!readOnly && canManageSchedule && <Tooltip>
+                          {!readOnly && canEditSchools && <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6">
                                   <Edit className="h-3 w-3" />
