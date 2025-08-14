@@ -154,6 +154,8 @@
   
   .schedule-print-container,
   .schedule-print-container *,
+  .schedule-print-wrapper,
+  .schedule-print-wrapper *,
   .schedule-print-wrapper .schedule-print-container,
   .schedule-print-wrapper .schedule-print-container * {
     visibility: visible !important;
