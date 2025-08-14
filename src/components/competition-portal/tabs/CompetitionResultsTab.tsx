@@ -117,8 +117,11 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const handleEventsRefresh = async () => {
     // Small delay to ensure database updates are committed
     await new Promise(resolve => setTimeout(resolve, 200));
-    // Only refresh the dialog data to prevent modal flashing
-    await fetchEventSheets();
+    // Refresh both main results and dialog data
+    await Promise.all([
+      fetchData(),
+      fetchEventSheets()
+    ]);
   };
 
   const grouped = useMemo(() => {
