@@ -639,6 +639,13 @@ export const MobileCompetitionRegistration: React.FC = () => {
               const isSelected = selectedEvents.has(event.id);
               const timeSlots = generateTimeSlots(event);
               const selectedTimeSlot = selectedTimeSlots.get(event.id);
+              
+              console.log('Time slot debug for event:', event.id, {
+                timeSlots: timeSlots.length,
+                selectedTimeSlot,
+                selectedTimeSlots: Array.from(selectedTimeSlots.entries()),
+                event: { start_time: event.start_time, end_time: event.end_time }
+              });
 
               return (
                 <div key={event.id} className="border border-border rounded-lg p-4 space-y-3">
