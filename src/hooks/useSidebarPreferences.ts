@@ -173,10 +173,11 @@ export const useSidebarPreferences = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Simplified cache key - don't include permissionsLoading state
+  // Cache key includes permissions state to ensure proper invalidation
   const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
   const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
-  const cacheKey = useMemo(() => `${userId}-${userRole}`, [userId, userRole]);
+  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
+  const cacheKey = useMemo(() => `${userId}-${userRole}-${permissionsLoaded}`, [userId, userRole, permissionsLoaded]);
 
   // Simplified load function with global state management
   const loadPreferences = useCallback(async () => {
@@ -212,7 +213,12 @@ export const useSidebarPreferences = () => {
       });
     }
 
-    // Only proceed if not initialized globally
+    // Reset global state if cache miss to allow reloading with new permissions
+    if (!cached) {
+      globalInitialized = false;
+    }
+
+    // Only proceed if not initialized globally or cache miss
     if (globalInitialized && cached) {
       return;
     }
