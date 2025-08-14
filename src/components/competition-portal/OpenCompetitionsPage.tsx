@@ -9,7 +9,7 @@ import { Input } from '@/components/ui/input';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, Clock, MapPin as LocationIcon, X, Calendar } from 'lucide-react';
 import { format } from 'date-fns';
 import { useDebouncedValue } from '@/hooks/useDebounce';
 import { useToast } from '@/hooks/use-toast';
@@ -17,6 +17,7 @@ import { CompetitionRegistrationModal } from './CompetitionRegistrationModal';
 import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
+import { ScheduleTab } from './components/ScheduleTab';
 export const OpenCompetitionsPage = () => {
   const {
     toast
@@ -228,9 +229,10 @@ export const OpenCompetitionsPage = () => {
               </CardContent>
             </Card>)}
         </div> : <Tabs defaultValue="open">
-          <TabsList className="grid w-full grid-cols-2">
+          <TabsList className="grid w-full grid-cols-3">
             <TabsTrigger value="open">Open</TabsTrigger>
             <TabsTrigger value="registered">Registered</TabsTrigger>
+            <TabsTrigger value="schedule">Schedule</TabsTrigger>
           </TabsList>
 
           <TabsContent value="open">
@@ -252,6 +254,10 @@ export const OpenCompetitionsPage = () => {
                   You have not registered for any competitions yet.
                 </p>
               </div>}
+          </TabsContent>
+
+          <TabsContent value="schedule">
+            <ScheduleTab registeredCompetitions={registeredCompetitionsList} />
           </TabsContent>
         </Tabs>}
 
