@@ -16,6 +16,7 @@ const formSchema = z.object({
   status: z.string().default('registered'),
   notes: z.string().optional(),
   new_school_name: z.string().optional(),
+  new_school_initials: z.string().optional(),
   new_school_contact: z.string().optional(),
   new_school_email: z.string().optional()
 }).refine((data) => {
@@ -50,6 +51,7 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
     status: 'registered',
     notes: '',
     new_school_name: '',
+    new_school_initials: '',
     new_school_contact: '',
     new_school_email: ''
   };
@@ -101,6 +103,7 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
           .from('schools')
           .insert({
             name: data.new_school_name!,
+            initials: data.new_school_initials || null,
             contact: data.new_school_contact || null,
             email: data.new_school_email || null,
           })
@@ -194,6 +197,15 @@ export const AddSchoolModal: React.FC<AddSchoolModalProps> = ({
                       <FormLabel>School Name</FormLabel>
                       <FormControl>
                         <Input placeholder="Enter school name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+                <FormField control={form.control} name="new_school_initials" render={({
+                  field
+                }) => <FormItem>
+                      <FormLabel>School Initials</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Enter school initials" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>} />
