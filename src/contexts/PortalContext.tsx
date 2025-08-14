@@ -28,19 +28,6 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     userProfile?.schools?.competition_module === true || 
     userProfile?.schools?.competition_portal === true;
   
-  console.log('PortalContext - Competition Portal Access Check:', {
-    userId: userProfile?.id,
-    schoolId: userProfile?.school_id,
-    competitionModule: userProfile?.schools?.competition_module,
-    competitionPortal: userProfile?.schools?.competition_portal,
-    canAccessCompetitionPortal,
-    userAgent: typeof window !== 'undefined' ? navigator.userAgent : 'SSR',
-    isCapacitor: typeof window !== 'undefined' && window.location.protocol === 'capacitor:',
-    fullSchoolData: userProfile?.schools,
-    viewportWidth: typeof window !== 'undefined' ? window.innerWidth : 'SSR',
-    isMobile: false // Will be handled by useIsMobile hook in components
-  });
-
   // Get stored portal preference
   useEffect(() => {
     const storedPortal = localStorage.getItem('currentPortal') as PortalType;
