@@ -150,10 +150,6 @@ export const CompetitionScheduleTab = ({
   const handlePrint = () => {
     const printScheduleData = getPrintScheduleData();
     
-    // Create clean HTML for printing
-    const printWindow = window.open("", "_blank");
-    if (!printWindow) return;
-    
     const competitionName = "Competition Schedule";
     const schoolName = selectedSchoolFilter === "all" 
       ? "All Schools" 
@@ -163,75 +159,54 @@ export const CompetitionScheduleTab = ({
     
     if (selectedSchoolFilter === "all") {
       // Grid format for all schools: Y-axis = time, X-axis = events
-      const eventCount = (printScheduleData as any).events?.length || 1;
-      const columnWidth = 85 / eventCount; // 15% for time column, remaining 85% distributed evenly
+      const events = (printScheduleData as any).events || [];
+      const timeSlotsRaw = (printScheduleData as any).timeSlotsRaw || [];
       
       tableHTML = `
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
-          <colgroup>
-            <col style="width: 15%;" />
-            ${(printScheduleData as any).events?.map(() => 
-              `<col style="width: ${columnWidth}%;" />`
-            ).join("") || ""}
-          </colgroup>
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px;">
           <thead>
             <tr>
-              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5;">Time</th>
-              ${(printScheduleData as any).events?.map((event: any) => 
+              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5; width: 15%;">Time</th>
+              ${events.map((event: any) => 
                 `<th style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; background-color: #f5f5f5;">
                   <div style="font-weight: bold;">${event.name}</div>
                   <div style="font-size: 10px; color: #666;">(${event.location})</div>
                 </th>`
-              ).join("") || ""}
+              ).join("")}
             </tr>
           </thead>
           <tbody>
-            ${(printScheduleData as any).timeSlotsRaw?.map((timeSlot: Date) => {
+            ${timeSlotsRaw.map((timeSlot: Date) => {
               const timeString = formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone);
               return `
                 <tr>
                   <td style="border: 1px solid #000; padding: 8px; font-weight: 500;">${timeString}</td>
-                  ${(printScheduleData as any).events?.map((event: any) => {
-                    // Check if this time slot is a lunch break for this event
-                    const eventDetails = events.find(e => e.id === event.id);
-                    const isLunchSlot = eventDetails?.timeSlots.find(
-                      slot => slot.time.getTime() === timeSlot.getTime()
-                    )?.isLunchBreak;
-                    
-                    if (isLunchSlot) {
-                      return `<td style="border: 1px solid #000; padding: 8px; text-align: center;">Lunch Break</td>`;
-                    }
-                    
+                  ${events.map((event: any) => {
                     const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
                     return `<td style="border: 1px solid #000; padding: 8px; text-align: center;">${assignedSchool?.initials || assignedSchool?.name || "-"}</td>`;
-                  }).join("") || ""}
+                  }).join("")}
                 </tr>
               `;
-            }).join("") || ""}
+            }).join("")}
           </tbody>
         </table>
       `;
     } else {
       // Individual school format
+      const scheduleData = printScheduleData as Array<{ time: string; event: string; location: string }>;
       tableHTML = `
-        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 20px;">
           <thead>
             <tr>
               <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5; width: 20%;">Time</th>
-              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5; width: 80%;">
-                <div>Event</div>
-                <div style="font-size: 10px; font-weight: normal;">(Location)</div>
-              </th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5;">Event (Location)</th>
             </tr>
           </thead>
           <tbody>
-            ${(printScheduleData as Array<{ time: string; event: string; location: string }>).map(item => `
+            ${scheduleData.map(item => `
               <tr>
                 <td style="border: 1px solid #000; padding: 8px; font-weight: 500;">${item.time}</td>
-                <td style="border: 1px solid #000; padding: 8px;">
-                  <div>${item.event}</div>
-                  <div style="font-size: 10px; color: #666;">(${item.location})</div>
-                </td>
+                <td style="border: 1px solid #000; padding: 8px;">${item.event} (${item.location})</td>
               </tr>
             `).join("")}
           </tbody>
@@ -239,41 +214,48 @@ export const CompetitionScheduleTab = ({
       `;
     }
 
-    printWindow.document.write(`
-      <!DOCTYPE html>
-      <html>
-        <head>
-          <title>${competitionName} - ${schoolName}</title>
-          <style>
-            body { 
-              font-family: Arial, sans-serif; 
-              margin: 20px; 
-              background: white;
-            }
-            h1 { 
-              text-align: center; 
-              margin-bottom: 20px; 
-              font-size: 18px;
-            }
-            @media print {
-              @page { 
-                margin: 0.5in; 
-                size: portrait; 
-              }
-            }
-          </style>
-        </head>
-        <body>
-          <h1>${competitionName} - ${schoolName}</h1>
-          ${tableHTML}
-        </body>
-      </html>
-    `);
+    // Create a temporary div with the print content
+    const printContent = `
+      <div style="font-family: Arial, sans-serif; margin: 20px; background: white;">
+        <h1 style="text-align: center; margin-bottom: 20px; font-size: 18px;">${competitionName} - ${schoolName}</h1>
+        ${tableHTML}
+      </div>
+    `;
     
-    printWindow.document.close();
-    printWindow.focus();
-    printWindow.print();
-    printWindow.close();
+    // Create a hidden div, add content, and print
+    const printDiv = document.createElement('div');
+    printDiv.innerHTML = printContent;
+    printDiv.style.display = 'none';
+    document.body.appendChild(printDiv);
+    
+    // Store original body content
+    const originalContent = document.body.innerHTML;
+    
+    // Replace body content with print content
+    document.body.innerHTML = printContent;
+    
+    // Add print-specific styles
+    const printStyles = document.createElement('style');
+    printStyles.innerHTML = `
+      @media print {
+        @page { 
+          margin: 0.5in; 
+          size: portrait; 
+        }
+        body { 
+          margin: 0; 
+          padding: 0; 
+        }
+      }
+    `;
+    document.head.appendChild(printStyles);
+    
+    // Print
+    window.print();
+    
+    // Restore original content
+    document.body.innerHTML = originalContent;
+    document.head.removeChild(printStyles);
   };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
