@@ -492,32 +492,33 @@ const SchoolManagementPage = () => {
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <Label htmlFor="jrotc_program">JROTC Program</Label>
-                <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
-              ...editingSchool,
-              jrotc_program: value as School['jrotc_program']
-            })}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select JROTC Program" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="air_force">Air Force JROTC</SelectItem>
-                    <SelectItem value="army">Army JROTC</SelectItem>
-                    <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
-                    <SelectItem value="navy">Navy JROTC</SelectItem>
-                    <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
-                    <SelectItem value="space_force">Space Force JROTC</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-              
-              <div className="space-y-2">
-                <Label htmlFor="contact">Contact</Label>
-                <Input id="contact" value={editingSchool.contact || ''} onChange={e => setEditingSchool({
-              ...editingSchool,
-              contact: e.target.value
-            })} />
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="contact">Contact</Label>
+                  <Input id="contact" value={editingSchool.contact || ''} onChange={e => setEditingSchool({
+                ...editingSchool,
+                contact: e.target.value
+              })} />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="jrotc_program">JROTC Program</Label>
+                  <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
+                ...editingSchool,
+                jrotc_program: value as School['jrotc_program']
+              })}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select JROTC Program" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                      <SelectItem value="army">Army JROTC</SelectItem>
+                      <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                      <SelectItem value="navy">Navy JROTC</SelectItem>
+                      <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                      <SelectItem value="space_force">Space Force JROTC</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
               
               <div className="space-y-2">
