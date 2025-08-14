@@ -8,7 +8,7 @@ import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
-import { CompetitionScheduleModal } from '../components/CompetitionScheduleModal';
+
 import { DeleteCompetitionDialog } from '../components/DeleteCompetitionDialog';
 import { useCompetitions } from '../hooks/useCompetitions';
 import { useCompetitionEvents } from '../hooks/useCompetitionEvents';
@@ -61,7 +61,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
   const [selectedCompetition, setSelectedCompetition] = useState<ExtendedCompetition | null>(null);
   const [showAddEventDialog, setShowAddEventDialog] = useState(false);
   const [deletingCompetition, setDeletingCompetition] = useState<ExtendedCompetition | null>(null);
-  const [scheduleCompetition, setScheduleCompetition] = useState<ExtendedCompetition | null>(null);
+  
   const [searchTerm, setSearchTerm] = useState('');
 
   const {
@@ -138,9 +138,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
     navigate(`/app/competition-portal/my-competitions/score-sheets/${competition.id}?source=${competition.source_type}&sourceId=${competition.source_competition_id}`);
   };
 
-  const handleViewSchedule = (competition: ExtendedCompetition) => {
-    setScheduleCompetition(competition);
-  };
 
   const handleDeleteCompetition = (competition: ExtendedCompetition) => {
     setDeletingCompetition(competition);
@@ -205,7 +202,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
         onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
         onView={canViewDetails ? setViewingCompetition : undefined}
-        onViewSchedule={handleViewSchedule}
+        
         visibleColumns={visibleColumns}
         canViewDetails={canViewDetails}
       />
@@ -247,14 +244,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         />
       )}
 
-      {scheduleCompetition && (
-        <CompetitionScheduleModal
-          open={!!scheduleCompetition}
-          onOpenChange={() => setScheduleCompetition(null)}
-          competitionId={scheduleCompetition.source_competition_id}
-          competitionName={scheduleCompetition.name}
-        />
-      )}
 
       <DeleteCompetitionDialog 
         open={!!deletingCompetition} 
