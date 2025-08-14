@@ -475,7 +475,8 @@ const SchoolManagementPage = () => {
             <DialogTitle>Edit School</DialogTitle>
           </DialogHeader>
           {editingSchool && <form onSubmit={handleSaveSchool} className="space-y-4">
-              <div className="grid grid-cols-2 gap-4">
+              
+            <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">School Name *</Label>
                   <Input id="name" value={editingSchool.name} onChange={e => setEditingSchool({
@@ -490,8 +491,9 @@ const SchoolManagementPage = () => {
                 initials: e.target.value
               })} placeholder="Enter school initials" />
                 </div>
-              </div>
+            </div>
               
+            <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
                 <Label htmlFor="jrotc_program">JROTC Program</Label>
                 <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
@@ -510,8 +512,7 @@ const SchoolManagementPage = () => {
                     <SelectItem value="space_force">Space Force JROTC</SelectItem>
                   </SelectContent>
                 </Select>
-              </div>
-              
+              </>
               <div className="space-y-2">
                 <Label htmlFor="contact">Contact</Label>
                 <Input id="contact" value={editingSchool.contact || ''} onChange={e => setEditingSchool({
@@ -519,7 +520,7 @@ const SchoolManagementPage = () => {
               contact: e.target.value
             })} />
               </div>
-              
+            </div>            
               <div className="space-y-2">
                 <Label htmlFor="address">Address</Label>
                 <Input id="address" value={editingSchool.address || ''} onChange={e => setEditingSchool({
