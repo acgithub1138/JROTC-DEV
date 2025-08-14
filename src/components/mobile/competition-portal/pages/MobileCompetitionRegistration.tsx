@@ -692,7 +692,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
                       <div className="space-y-2">
                         <label className={`text-sm font-medium flex items-center gap-2 ${conflictEventIds.has(event.id) ? 'text-destructive' : ''}`}>
                           <Clock size={14} />
-                          Select Time Slot
+                          Change Time Slot
                           {conflictEventIds.has(event.id) && (
                             <span className="text-xs text-destructive">(Time no longer available)</span>
                           )}
