@@ -21,7 +21,9 @@ interface CompetitionEvent {
 export const ProfileCompetitionsTab = ({
   profileId
 }: ProfileCompetitionsTabProps) => {
-  const { timezone } = useSchoolTimezone();
+  const {
+    timezone
+  } = useSchoolTimezone();
   const {
     data: competitions = [],
     isLoading
@@ -88,7 +90,7 @@ export const ProfileCompetitionsTab = ({
               </TableHeader>
               <TableBody>
                 {competitions.map(comp => <TableRow key={comp.id}>
-                    <TableCell>
+                    <TableCell className="py-[4px]">
                       {comp.competition.name}
                     </TableCell>
                     <TableCell>
