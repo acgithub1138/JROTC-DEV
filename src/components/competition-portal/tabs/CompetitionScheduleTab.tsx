@@ -101,7 +101,7 @@ export const CompetitionScheduleTab = ({
 
   const getPrintScheduleData = () => {
     if (selectedSchoolFilter === 'all') {
-      // Create a grid format with time as X-axis and events as Y-axis
+      // Create a grid format with time as Y-axis and events as X-axis
       const timeSlots = allTimeSlots.filter(timeSlot => 
         events.some(event => shouldShowSlot(event.id, timeSlot))
       );
@@ -110,23 +110,11 @@ export const CompetitionScheduleTab = ({
         timeSlots: timeSlots.map(timeSlot => 
           formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)
         ),
+        timeSlotsRaw: timeSlots,
         events: events.map(event => ({
           name: event.event_name,
           location: event.event_location || 'TBD',
-          assignments: timeSlots.map(timeSlot => {
-            // Check if this time slot is a lunch break for this event
-            const eventDetails = events.find(e => e.id === event.id);
-            const isLunchSlot = eventDetails?.timeSlots.find(
-              slot => slot.time.getTime() === timeSlot.getTime()
-            )?.isLunchBreak;
-            
-            if (isLunchSlot) {
-              return 'Lunch Break';
-            }
-            
-            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-            return assignedSchool?.name || '-';
-          })
+          id: event.id
         }))
       };
     } else {
@@ -183,8 +171,8 @@ export const CompetitionScheduleTab = ({
   return <TooltipProvider>
       <div className="space-y-4 print:space-y-2 schedule-print-container">
         {/* Print-only table for schedule */}
-        <div className="hidden print:block">
-          <h2 className="text-lg font-bold mb-4 text-center">
+        <div className="hidden print:block text-xs">
+          <h2 className="text-sm font-bold mb-2 text-center">
             {selectedSchoolFilter === 'all' 
               ? 'Competition Schedule - All Schools' 
               : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
@@ -192,50 +180,71 @@ export const CompetitionScheduleTab = ({
           </h2>
           
           {selectedSchoolFilter === 'all' ? (
-            // Grid format for all schools: X-axis = time, Y-axis = events
-            <table className="w-full border-collapse border border-black">
+            // Grid format for all schools: Y-axis = time, X-axis = events
+            <table className="w-full border-collapse border border-black text-xs">
               <thead>
                 <tr>
-                  <th className="border border-black p-2 text-left font-bold">Event</th>
-                  {(printScheduleData as any).timeSlots?.map((time: string, index: number) => (
-                    <th key={index} className="border border-black p-2 text-center font-bold">
-                      {time}
+                  <th className="border border-black p-1 text-left font-bold min-w-[50px]">Time</th>
+                  {(printScheduleData as any).events?.map((event: any, index: number) => (
+                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
+                      <div className="font-semibold">{event.name}</div>
+                      <div className="text-xs font-normal text-gray-600">({event.location})</div>
                     </th>
                   ))}
                 </tr>
               </thead>
               <tbody>
-                {(printScheduleData as any).events?.map((event: any, eventIndex: number) => (
-                  <tr key={eventIndex}>
-                    <td className="border border-black p-2 font-medium">
-                      <div>{event.name}</div>
-                      <div className="text-xs text-gray-600">({event.location})</div>
+                {(printScheduleData as any).timeSlotsRaw?.map((timeSlot: Date, timeIndex: number) => (
+                  <tr key={timeIndex}>
+                    <td className="border border-black p-1 font-medium text-xs">
+                      {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                     </td>
-                    {event.assignments.map((assignment: string, timeIndex: number) => (
-                      <td key={timeIndex} className="border border-black p-2 text-center text-xs">
-                        {assignment}
-                      </td>
-                    ))}
+                    {(printScheduleData as any).events?.map((event: any, eventIndex: number) => {
+                      // Check if this time slot is a lunch break for this event
+                      const eventDetails = events.find(e => e.id === event.id);
+                      const isLunchSlot = eventDetails?.timeSlots.find(
+                        slot => slot.time.getTime() === timeSlot.getTime()
+                      )?.isLunchBreak;
+                      
+                      if (isLunchSlot) {
+                        return (
+                          <td key={eventIndex} className="border border-black p-1 text-center text-xs">
+                            Lunch Break
+                          </td>
+                        );
+                      }
+                      
+                      const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                      return (
+                        <td key={eventIndex} className="border border-black p-1 text-center text-xs">
+                          {assignedSchool?.name || '-'}
+                        </td>
+                      );
+                    })}
                   </tr>
                 ))}
               </tbody>
             </table>
           ) : (
-            // Individual school format (unchanged)
-            <table className="w-full border-collapse border border-black">
+            // Individual school format with location under event
+            <table className="w-full border-collapse border border-black text-xs">
               <thead>
                 <tr>
-                  <th className="border border-black p-2 text-left font-bold">Time</th>
-                  <th className="border border-black p-2 text-left font-bold">Event</th>
-                  <th className="border border-black p-2 text-left font-bold">Location</th>
+                  <th className="border border-black p-1 text-left font-bold">Time</th>
+                  <th className="border border-black p-1 text-left font-bold">
+                    <div>Event</div>
+                    <div className="text-xs font-normal">(Location)</div>
+                  </th>
                 </tr>
               </thead>
               <tbody>
                 {(printScheduleData as Array<{ time: string; event: string; location: string }>).map((item, index) => (
                   <tr key={index}>
-                    <td className="border border-black p-2">{item.time}</td>
-                    <td className="border border-black p-2">{item.event}</td>
-                    <td className="border border-black p-2">{item.location}</td>
+                    <td className="border border-black p-1">{item.time}</td>
+                    <td className="border border-black p-1">
+                      <div className="font-medium">{item.event}</div>
+                      <div className="text-xs text-gray-600">({item.location})</div>
+                    </td>
                   </tr>
                 ))}
               </tbody>
