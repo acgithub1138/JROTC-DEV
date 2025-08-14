@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { usePortal } from '@/contexts/PortalContext';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
@@ -112,6 +113,10 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   } = useThemes();
   const navigate = useNavigate();
 
+  // Check permissions for Events and Judges modules
+  const eventsPermissions = useTablePermissions('cp_events');
+  const judgesPermissions = useTablePermissions('cp_judges');
+
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program);
 
@@ -128,11 +133,24 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
   const hasCompetitionModule = userProfile?.schools?.competition_module === true;
   
+  // Filter menu items based on module permissions
+  const getFilteredMenuItems = (items: typeof competitionMenuItems) => {
+    return items.filter(item => {
+      if (item.id === 'events') {
+        return eventsPermissions.canView;
+      }
+      if (item.id === 'judges') {
+        return judgesPermissions.canView;
+      }
+      return true;
+    });
+  };
+  
   const menuItems = hasCompetitionPortal 
-    ? competitionMenuItems 
+    ? getFilteredMenuItems(competitionMenuItems)
     : hasCompetitionModule 
-      ? competitionModuleMenuItems 
-      : limitedMenuItems;
+      ? getFilteredMenuItems(competitionModuleMenuItems)
+      : getFilteredMenuItems(limitedMenuItems);
   const handleReturnToCCC = () => {
     setPortal('ccc');
     navigate('/app');
