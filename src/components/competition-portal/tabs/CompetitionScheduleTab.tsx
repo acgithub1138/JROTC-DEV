@@ -55,7 +55,8 @@ export const CompetitionScheduleTab = ({
       
       return data.map(school => ({
         id: school.school_id,
-        name: school.school_name
+        name: school.school_name,
+        initials: school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || ''
       }));
     }
   });
@@ -186,7 +187,7 @@ export const CompetitionScheduleTab = ({
                 <tr>
                   <th className="border border-black p-1 text-left font-bold min-w-[50px]">Time</th>
                   {(printScheduleData as any).events?.map((event: any, index: number) => (
-                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
+                    <th key={index} className="border border-black p-1 text-center font-bold text-xs" style={{width: `${90 / (printScheduleData as any).events?.length}%`}}>
                       <div className="font-semibold">{event.name}</div>
                       <div className="text-xs font-normal text-gray-600">({event.location})</div>
                     </th>
@@ -217,7 +218,7 @@ export const CompetitionScheduleTab = ({
                       const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
                       return (
                         <td key={eventIndex} className="border border-black p-1 text-center text-xs">
-                          {assignedSchool?.name || '-'}
+                          {assignedSchool?.initials || assignedSchool?.name || '-'}
                         </td>
                       );
                     })}

@@ -20,6 +20,7 @@ export interface TimeSlot {
   assignedSchool?: {
     id: string;
     name: string;
+    initials?: string;
     color?: string;
   };
 }
@@ -82,14 +83,27 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schedulesError) throw schedulesError;
 
-      // Fetch school colors for this competition
+      // Fetch school data including names and generate initials
       const { data: schoolsData, error: schoolsError } = await supabase
         .from('cp_comp_schools')
-        .select('school_id, color')
+        .select('school_id, school_name, color')
         .eq('competition_id', debouncedCompetitionId)
         .abortSignal(abortController.signal);
 
       if (schoolsError) throw schoolsError;
+
+      // Create school map with generated initials
+      const schoolMap = new Map(
+        schoolsData?.map(school => [
+          school.school_id,
+          {
+            id: school.school_id,
+            name: school.school_name || 'Unknown School',
+            initials: school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || '',
+            color: school.color || '#3B82F6'
+          }
+        ]) || []
+      );
 
 
       // Process events and generate time slots
@@ -121,18 +135,17 @@ export const useCompetitionSchedule = (competitionId?: string) => {
                    new Date(s.scheduled_time).getTime() === current.getTime()
             );
 
-            const schoolColor = scheduleForSlot ? 
-              schoolsData?.find(school => school.school_id === scheduleForSlot.school_id)?.color : 
-              undefined;
+            const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
 
             timeSlots.push({
               time: new Date(current),
               duration: interval,
               isLunchBreak: false,
-              assignedSchool: scheduleForSlot ? {
+              assignedSchool: scheduleForSlot && schoolInfo ? {
                 id: scheduleForSlot.school_id,
-                name: scheduleForSlot.school_name || 'Unknown School',
-                color: schoolColor
+                name: schoolInfo.name,
+                initials: schoolInfo.initials,
+                color: schoolInfo.color
               } : undefined
             });
           }
@@ -297,9 +310,11 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         school => !scheduledSchoolIds.has(school.school_id)
       ).map(school => {
         const schoolInfo = finalSchoolNames?.find(s => s.school_id === school.school_id);
+        const schoolName = schoolInfo?.schools?.name || schoolInfo?.school_name || 'Unknown School';
         return {
           id: school.school_id,
-          name: schoolInfo?.schools?.name || schoolInfo?.school_name || 'Unknown School'
+          name: schoolName,
+          initials: schoolName.split(' ').map(word => word[0]).join('').toUpperCase()
         };
       }) || [];
 
