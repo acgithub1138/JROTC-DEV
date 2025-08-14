@@ -185,13 +185,17 @@ export const CompetitionScheduleTab = ({
             <table className="w-full border-collapse border border-black text-xs" style={{tableLayout: 'fixed'}}>
               <thead>
                 <tr>
-                  <th className="border border-black p-1 text-left font-bold" style={{width: '60px'}}>Time</th>
-                  {(printScheduleData as any).events?.map((event: any, index: number) => (
-                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
-                      <div className="font-semibold">{event.name}</div>
-                      <div className="text-xs font-normal text-gray-600">({event.location})</div>
-                    </th>
-                  ))}
+                  <th className="border border-black p-1 text-left font-bold" style={{width: '80px'}}>Time</th>
+                  {(printScheduleData as any).events?.map((event: any, index: number) => {
+                    const eventCount = (printScheduleData as any).events?.length || 1;
+                    const columnWidth = `${(100 - 8) / eventCount}%`; // 8% for time column, rest distributed evenly
+                    return (
+                      <th key={index} className="border border-black p-1 text-center font-bold text-xs" style={{width: columnWidth}}>
+                        <div className="font-semibold">{event.name}</div>
+                        <div className="text-xs font-normal text-gray-600">({event.location})</div>
+                      </th>
+                    );
+                  })}
                 </tr>
               </thead>
               <tbody>
