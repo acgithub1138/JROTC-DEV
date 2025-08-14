@@ -672,49 +672,67 @@ export const MobileCompetitionRegistration: React.FC = () => {
                   </div>
 
                   {isSelected && (
-                    <div className="ml-6 space-y-2">
-                      <label className={`text-sm font-medium flex items-center gap-2 ${conflictEventIds.has(event.id) ? 'text-destructive' : ''}`}>
-                        <Clock size={14} />
-                        Select Time Slot
-                        {conflictEventIds.has(event.id) && (
-                          <span className="text-xs text-destructive">(Time no longer available)</span>
-                        )}
-                      </label>
-                      <Select
-                        key={`${event.id}-${selectedTimeSlot || 'empty'}-${occupiedSlots.size}-${isLoading}`}
-                        value={selectedTimeSlot || ''}
-                        onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
-                      >
-                        <SelectTrigger className="w-full">
-                          <SelectValue placeholder="Choose a time slot" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {timeSlots.length === 0 ? (
-                            <SelectItem value="no-slots" disabled>
-                              No available time slots
-                            </SelectItem>
-                          ) : (
-                            timeSlots.map(slot => {
-                              const currentSelected = selectedTimeSlot === slot.value;
-                              const schoolName = !slot.available ? occupiedLabels.get(event.id)?.get(slot.value) : null;
-                              
-                              return (
-                                <SelectItem 
-                                  key={slot.value} 
-                                  value={slot.value}
-                                  disabled={!slot.available && !currentSelected}
-                                >
-                                  {slot.label}
-                                  {currentSelected 
-                                    ? ' (Your School)' 
-                                    : (!slot.available ? ` (${schoolName || 'Filled'})` : '')
-                                  }
-                                </SelectItem>
-                              );
-                            })
+                    <div className="ml-6 space-y-3">
+                      {selectedTimeSlot && (
+                        <div className="space-y-1">
+                          <label className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+                            <Clock size={14} />
+                            Current Time Slot:
+                          </label>
+                          <div className="text-sm font-medium bg-muted p-3 rounded border border-primary/20">
+                            {new Date(selectedTimeSlot).toLocaleTimeString([], { 
+                              hour: '2-digit', 
+                              minute: '2-digit',
+                              hour12: false 
+                            })} (Your School)
+                          </div>
+                        </div>
+                      )}
+                      
+                      <div className="space-y-2">
+                        <label className={`text-sm font-medium flex items-center gap-2 ${conflictEventIds.has(event.id) ? 'text-destructive' : ''}`}>
+                          <Clock size={14} />
+                          Select Time Slot
+                          {conflictEventIds.has(event.id) && (
+                            <span className="text-xs text-destructive">(Time no longer available)</span>
                           )}
-                        </SelectContent>
-                      </Select>
+                        </label>
+                        <Select
+                          key={`${event.id}-${selectedTimeSlot || 'empty'}-${occupiedSlots.size}-${isLoading}`}
+                          value={selectedTimeSlot || ''}
+                          onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
+                        >
+                          <SelectTrigger className="w-full">
+                            <SelectValue placeholder="Choose a time slot" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {timeSlots.length === 0 ? (
+                              <SelectItem value="no-slots" disabled>
+                                No available time slots
+                              </SelectItem>
+                            ) : (
+                              timeSlots.map(slot => {
+                                const currentSelected = selectedTimeSlot === slot.value;
+                                const schoolName = !slot.available ? occupiedLabels.get(event.id)?.get(slot.value) : null;
+                                
+                                return (
+                                  <SelectItem 
+                                    key={slot.value} 
+                                    value={slot.value}
+                                    disabled={!slot.available && !currentSelected}
+                                  >
+                                    {slot.label}
+                                    {currentSelected 
+                                      ? ' (Your School)' 
+                                      : (!slot.available ? ` (${schoolName || 'Filled'})` : '')
+                                    }
+                                  </SelectItem>
+                                );
+                              })
+                            )}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     </div>
                   )}
                 </div>
