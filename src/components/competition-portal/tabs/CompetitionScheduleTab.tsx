@@ -148,7 +148,13 @@ export const CompetitionScheduleTab = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    // Close any open modals before printing
+    setSelectedEvent(null);
+    
+    // Small delay to ensure modal closes before printing
+    setTimeout(() => {
+      window.print();
+    }, 100);
   };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
