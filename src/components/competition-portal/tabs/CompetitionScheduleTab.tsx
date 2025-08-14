@@ -182,12 +182,12 @@ export const CompetitionScheduleTab = ({
           
           {selectedSchoolFilter === 'all' ? (
             // Grid format for all schools: Y-axis = time, X-axis = events
-            <table className="w-full border-collapse border border-black text-xs" style={{tableLayout: 'fixed', width: '100%'}}>
+            <table className="w-full border-collapse border border-black text-xs">
               <colgroup>
-                <col style={{width: '12%'}} />
+                <col style={{width: '15%'}} />
                 {(printScheduleData as any).events?.map((_: any, index: number) => {
                   const eventCount = (printScheduleData as any).events?.length || 1;
-                  const columnWidth = `${88 / eventCount}%`; // 12% for time column, remaining 88% distributed evenly
+                  const columnWidth = `${85 / eventCount}%`; // 15% for time column, remaining 85% distributed evenly
                   return <col key={index} style={{width: columnWidth}} />;
                 })}
               </colgroup>
