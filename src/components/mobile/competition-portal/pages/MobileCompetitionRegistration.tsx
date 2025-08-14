@@ -47,6 +47,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const competitionId = searchParams.get('competitionId');
+  const registrationId = searchParams.get('registrationId');
   const { userProfile } = useAuth();
   const { toast } = useToast();
 
@@ -178,6 +179,53 @@ export const MobileCompetitionRegistration: React.FC = () => {
     }
   };
 
+  const loadExistingRegistration = useCallback(async () => {
+    if (!registrationId || !userProfile?.school_id) return;
+
+    try {
+      // Load existing event registrations
+      const { data: eventRegs, error: eventError } = await supabase
+        .from('cp_event_registrations')
+        .select('event_id')
+        .eq('competition_id', competitionId)
+        .eq('school_id', userProfile.school_id);
+
+      if (eventError) throw eventError;
+
+      // Load existing schedules
+      const { data: schedules, error: scheduleError } = await supabase
+        .from('cp_event_schedules')
+        .select('event_id, scheduled_time')
+        .eq('competition_id', competitionId)
+        .eq('school_id', userProfile.school_id);
+
+      if (scheduleError) throw scheduleError;
+
+      // Set selected events
+      const selectedEventIds = new Set(eventRegs?.map(reg => reg.event_id) || []);
+      setSelectedEvents(selectedEventIds);
+
+      // Set selected time slots
+      const timeSlotMap = new Map();
+      schedules?.forEach(schedule => {
+        timeSlotMap.set(schedule.event_id, schedule.scheduled_time);
+      });
+      setSelectedTimeSlots(timeSlotMap);
+
+      console.log('Loaded existing registration:', { 
+        events: Array.from(selectedEventIds), 
+        timeSlots: Array.from(timeSlotMap.entries()) 
+      });
+    } catch (error) {
+      console.error('Error loading existing registration:', error);
+      toast({
+        title: 'Warning',
+        description: 'Failed to load existing registration data',
+        variant: 'destructive'
+      });
+    }
+  }, [registrationId, competitionId, userProfile?.school_id, toast]);
+
   const generateTimeSlots = (event: CompetitionEvent): TimeSlot[] => {
     if (!event.start_time || !event.end_time) return [];
 
@@ -299,24 +347,26 @@ export const MobileCompetitionRegistration: React.FC = () => {
     setIsSubmitting(true);
 
     try {
-      // Check if already registered for this competition
-      const { data: existingRegistration, error: checkError } = await supabase
-        .from('cp_comp_schools')
-        .select('id, status')
-        .eq('competition_id', competitionId)
-        .eq('school_id', userProfile.school_id)
-        .maybeSingle();
+      // Only check for existing registration if we're not editing
+      if (!registrationId) {
+        const { data: existingRegistration, error: checkError } = await supabase
+          .from('cp_comp_schools')
+          .select('id, status')
+          .eq('competition_id', competitionId)
+          .eq('school_id', userProfile.school_id)
+          .maybeSingle();
 
-      if (checkError) throw checkError;
+        if (checkError) throw checkError;
 
-      if (existingRegistration) {
-        toast({
-          title: 'Already Registered',
-          description: 'Your school is already registered for this competition.',
-          variant: 'destructive'
-        });
-        setIsSubmitting(false);
-        return;
+        if (existingRegistration) {
+          toast({
+            title: 'Already Registered',
+            description: 'Your school is already registered for this competition.',
+            variant: 'destructive'
+          });
+          setIsSubmitting(false);
+          return;
+        }
       }
 
       // Final availability check to prevent double-booking
@@ -357,19 +407,51 @@ export const MobileCompetitionRegistration: React.FC = () => {
         }
       }
 
-      // Register school for competition
-      const { data: schoolRegistration, error: schoolError } = await supabase
-        .from('cp_comp_schools')
-        .insert({
-          competition_id: competitionId,
-          school_id: userProfile.school_id,
-          total_fee: calculateTotalCost(),
-          status: 'registered'
-        })
-        .select()
-        .single();
+      let schoolRegistration;
 
-      if (schoolError) throw schoolError;
+      if (registrationId) {
+        // Update existing registration
+        const { data: updatedRegistration, error: updateError } = await supabase
+          .from('cp_comp_schools')
+          .update({
+            total_fee: calculateTotalCost(),
+            status: 'registered'
+          })
+          .eq('id', registrationId)
+          .select()
+          .single();
+
+        if (updateError) throw updateError;
+        schoolRegistration = updatedRegistration;
+
+        // Delete existing event registrations and schedules for this school
+        await supabase
+          .from('cp_event_registrations')
+          .delete()
+          .eq('competition_id', competitionId)
+          .eq('school_id', userProfile.school_id);
+
+        await supabase
+          .from('cp_event_schedules')
+          .delete()
+          .eq('competition_id', competitionId)
+          .eq('school_id', userProfile.school_id);
+      } else {
+        // Create new registration
+        const { data: newRegistration, error: schoolError } = await supabase
+          .from('cp_comp_schools')
+          .insert({
+            competition_id: competitionId,
+            school_id: userProfile.school_id,
+            total_fee: calculateTotalCost(),
+            status: 'registered'
+          })
+          .select()
+          .single();
+
+        if (schoolError) throw schoolError;
+        schoolRegistration = newRegistration;
+      }
 
       // Register for events
       const eventRegistrations = Array.from(selectedEvents).map(eventId => ({
@@ -409,11 +491,11 @@ export const MobileCompetitionRegistration: React.FC = () => {
 
       toast({
         title: 'Success',
-        description: 'Successfully registered for competition',
+        description: registrationId ? 'Successfully updated registration' : 'Successfully registered for competition',
       });
 
       setHasUnsavedChanges(false);
-      navigate('/mobile/competition-portal/my-competitions');
+      navigate('/mobile/competition-portal/open');
     } catch (error) {
       console.error('Error registering for competition:', error);
       toast({
@@ -435,8 +517,14 @@ export const MobileCompetitionRegistration: React.FC = () => {
   };
 
   useEffect(() => {
-    fetchCompetitionData();
-  }, [fetchCompetitionData]);
+    const loadData = async () => {
+      await fetchCompetitionData();
+      if (registrationId) {
+        await loadExistingRegistration();
+      }
+    };
+    loadData();
+  }, [fetchCompetitionData, loadExistingRegistration, registrationId]);
 
   if (isLoading) {
     return (
@@ -489,7 +577,9 @@ export const MobileCompetitionRegistration: React.FC = () => {
           <ArrowLeft size={20} />
         </Button>
         <div>
-          <h1 className="text-xl font-bold text-foreground">Register for Competition</h1>
+          <h1 className="text-xl font-bold text-foreground">
+            {registrationId ? 'Edit Registration' : 'Register for Competition'}
+          </h1>
           <p className="text-sm text-muted-foreground">{competition.name}</p>
         </div>
       </div>
@@ -666,7 +756,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
           disabled={selectedEvents.size === 0 || isSubmitting}
           className="flex-1"
         >
-          {isSubmitting ? 'Registering...' : 'Register'}
+          {isSubmitting ? (registrationId ? 'Updating...' : 'Registering...') : (registrationId ? 'Update Registration' : 'Register')}
         </Button>
       </div>
 
