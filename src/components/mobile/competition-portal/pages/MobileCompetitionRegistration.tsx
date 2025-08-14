@@ -60,6 +60,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [conflictEventIds, setConflictEventIds] = useState<Set<string>>(new Set());
 
   const fetchCompetitionData = useCallback(async () => {
     if (!competitionId) return;
@@ -226,6 +227,12 @@ export const MobileCompetitionRegistration: React.FC = () => {
     } else {
       newSelected.delete(eventId);
       newTimeSlots.delete(eventId);
+      // Clear any conflict highlight for this event when deselected
+      setConflictEventIds(prev => {
+        const next = new Set(prev);
+        next.delete(eventId);
+        return next;
+      });
     }
 
     setSelectedEvents(newSelected);
@@ -238,6 +245,13 @@ export const MobileCompetitionRegistration: React.FC = () => {
     newTimeSlots.set(eventId, timeSlot);
     setSelectedTimeSlots(newTimeSlots);
     setHasUnsavedChanges(true);
+    
+    // Clear conflict highlight for this event when a new time is chosen
+    setConflictEventIds(prev => {
+      const next = new Set(prev);
+      next.delete(eventId);
+      return next;
+    });
   };
 
   const calculateTotalCost = () => {
@@ -285,6 +299,44 @@ export const MobileCompetitionRegistration: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Final availability check to prevent double-booking
+      const selectedEventIds = Array.from(selectedEvents);
+      const selectedPairs = selectedEventIds
+        .filter((id) => selectedTimeSlots.has(id))
+        .map((id) => ({ event_id: id, scheduled_time: selectedTimeSlots.get(id)! }));
+
+      if (selectedPairs.length > 0) {
+        const { data: existing, error: existingError } = await supabase
+          .from('cp_event_schedules')
+          .select('event_id, scheduled_time, school_id')
+          .eq('competition_id', competitionId)
+          .in('event_id', selectedEventIds);
+        
+        if (existingError) throw existingError;
+
+        const pairSet = new Set(selectedPairs.map(p => `${p.event_id}|${new Date(p.scheduled_time).toISOString()}`));
+        const conflicts = new Set<string>();
+        existing?.forEach((row: any) => {
+          const key = `${row.event_id}|${new Date(row.scheduled_time).toISOString()}`;
+          if (pairSet.has(key) && row.school_id !== userProfile.school_id) {
+            conflicts.add(row.event_id);
+          }
+        });
+
+        if (conflicts.size > 0) {
+          setConflictEventIds(conflicts);
+          toast({
+            title: 'Time Slot Unavailable',
+            description: 'One or more of the time slots selected are no longer available. Please select different time slots.',
+            variant: 'destructive',
+          });
+          // Refresh occupied slots to show updated availability
+          await fetchOccupiedSlots(events);
+          setIsSubmitting(false);
+          return;
+        }
+      }
+
       // Register school for competition
       const { data: schoolRegistration, error: schoolError } = await supabase
         .from('cp_comp_schools')
@@ -500,9 +552,12 @@ export const MobileCompetitionRegistration: React.FC = () => {
 
                   {isSelected && (
                     <div className="ml-6 space-y-2">
-                      <label className="text-sm font-medium flex items-center gap-2">
+                      <label className={`text-sm font-medium flex items-center gap-2 ${conflictEventIds.has(event.id) ? 'text-destructive' : ''}`}>
                         <Clock size={14} />
                         Select Time Slot
+                        {conflictEventIds.has(event.id) && (
+                          <span className="text-xs text-destructive">(Time no longer available)</span>
+                        )}
                       </label>
                       <Select
                         value={selectedTimeSlot || ''}
