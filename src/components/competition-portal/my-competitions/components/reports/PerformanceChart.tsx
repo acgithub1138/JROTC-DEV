@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
 
 interface PerformanceData {
   date: string;
@@ -34,12 +34,6 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
     );
   }
 
-  const formatTooltip = (value: any, name: string) => {
-    if (typeof value === 'number') {
-      return [value.toFixed(2), name];
-    }
-    return [value, name];
-  };
 
   return (
     <div className="w-full h-96">
@@ -54,15 +48,6 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             height={60}
           />
           <YAxis tick={{ fontSize: 12 }} />
-          <Tooltip 
-            formatter={formatTooltip}
-            labelStyle={{ fontWeight: 'bold' }}
-            contentStyle={{
-              backgroundColor: 'hsl(var(--background))',
-              border: '1px solid hsl(var(--border))',
-              borderRadius: '6px'
-            }}
-          />
           <Legend />
           {visibleCriteria.map((criteria) => (
             <Line
