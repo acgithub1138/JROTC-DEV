@@ -158,6 +158,15 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
 
           <div className="grid grid-cols-2 gap-4">
             <div>
+              <Label htmlFor="contact">Contact</Label>
+              <Input
+                id="contact"
+                value={newSchool.contact}
+                onChange={(e) => setNewSchool({ ...newSchool, contact: e.target.value })}
+                placeholder="Enter contact person"
+              />
+            </div>
+            <div>
               <Label htmlFor="jrotc_program">JROTC Program</Label>
               <Select
                 value={newSchool.jrotc_program}
@@ -175,15 +184,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
                   <SelectItem value="space_force">Space Force JROTC</SelectItem>
                 </SelectContent>
               </Select>
-            </div>
-            <div>
-              <Label htmlFor="contact">Contact</Label>
-              <Input
-                id="contact"
-                value={newSchool.contact}
-                onChange={(e) => setNewSchool({ ...newSchool, contact: e.target.value })}
-                placeholder="Enter contact person"
-              />
             </div>
           </div>
 
