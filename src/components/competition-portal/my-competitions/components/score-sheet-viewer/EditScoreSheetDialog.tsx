@@ -127,7 +127,7 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
           </div>
         </div>
 
-        <DialogFooter className="flex-shrink-0">
+        <DialogFooter className="flex-shrink-0 flex-row justify-end gap-2">
           <Button variant="outline" onClick={() => onOpenChange(false)}>
             Cancel
           </Button>
