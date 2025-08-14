@@ -225,14 +225,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
               </div>
             )}
             
-            {/* Debug info for mobile troubleshooting */}
-            {process.env.NODE_ENV === 'development' && (
-              <div className="pt-4 text-xs text-gray-500">
-                <div>Portal Access: {canAccessCompetitionPortal ? 'Yes' : 'No'}</div>
-                <div>User Agent: {navigator.userAgent.includes('Mobile') ? 'Mobile' : 'Desktop'}</div>
-                <div>Protocol: {window.location.protocol}</div>
-              </div>
-            )}
           </div>
         </ScrollArea>
       </div>
