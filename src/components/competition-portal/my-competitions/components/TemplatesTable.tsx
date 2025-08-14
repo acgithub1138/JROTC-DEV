@@ -105,45 +105,45 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   {formatTimeForDisplay(template.created_at, TIME_FORMATS.DATE_ONLY, 'UTC')}
                 </TableCell>
                 <TableCell className="text-right">
-                  <div className="flex justify-end gap-2">
+                  <div className="flex items-center justify-center gap-2">
                     {permissions.canViewDetails && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        size="icon"
                         onClick={() => onPreview(template)}
                       >
-                        <Eye className="w-4 h-4" />
+                        <Eye className="w-3 h-3" />
                       </Button>
                     )}
                     
                     {!readOnly && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        size="icon" lassName="h-6 w-6"
                         onClick={() => onCopy(template)}
                       >
-                        <Copy className="w-4 h-4" />
+                        <Copy className="w-3 h-3" />
                       </Button>
                     )}
                     
                     {!readOnly && permissions.canUpdate && (!template.is_global || permissions.isAdmin) && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        size="icon" lassName="h-6 w-6"
                         onClick={() => onEdit(template)}
                       >
-                        <Edit className="w-4 h-4" />
+                        <Edit className="w-3 h-3" />
                       </Button>
                     )}
                     
                     {!readOnly && permissions.canDelete && !template.is_global && (
                       <Button
-                        variant="ghost"
-                        size="sm"
+                        variant="outline"
+                        size="icon"
                         onClick={() => onDelete(template)}
-                        className="text-destructive hover:text-destructive"
+                        className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                       >
-                        <Trash2 className="w-4 h-4" />
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     )}
                   </div>
