@@ -155,13 +155,14 @@
   .schedule-print-container,
   .schedule-print-container *,
   .schedule-print-wrapper,
-  .schedule-print-wrapper * {
+  .schedule-print-wrapper *,
+  .schedule-print-wrapper .schedule-print-container,
+  .schedule-print-wrapper .schedule-print-container * {
     visibility: visible !important;
     width: 100% !important;
     max-width: none !important;
     overflow: visible !important;
     background: white !important;
-    position: static !important;
   }
   
   /* Ensure proper centering for print content */
