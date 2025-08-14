@@ -127,7 +127,8 @@ export const TemplatesTab = ({ readOnly = false }: TemplatesTabProps) => {
         permissions={{
           canUpdate,
           canDelete,
-          canViewDetails
+          canViewDetails,
+          isAdmin: userProfile?.role === 'admin'
         }}
         readOnly={readOnly}
       />

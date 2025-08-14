@@ -18,6 +18,7 @@ interface TemplatesTableProps {
     canUpdate: boolean;
     canDelete: boolean;
     canViewDetails: boolean;
+    isAdmin: boolean;
   };
   readOnly?: boolean;
 }
@@ -125,7 +126,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                       </Button>
                     )}
                     
-                    {!readOnly && permissions.canUpdate && (
+                    {!readOnly && permissions.canUpdate && (!template.is_global || permissions.isAdmin) && (
                       <Button
                         variant="ghost"
                         size="sm"
