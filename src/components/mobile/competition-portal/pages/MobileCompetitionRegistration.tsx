@@ -608,9 +608,22 @@ export const MobileCompetitionRegistration: React.FC = () => {
             <h3 className="font-medium">{competition.name}</h3>
             <p className="text-sm text-muted-foreground">{competition.description}</p>
           </div>
-          <div className="flex items-center gap-4 text-sm">
-            <span>📍 {competition.location}</span>
-            <span>🏫 {competition.hosting_school}</span>
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Location:</span>
+              <a 
+                href={`https://maps.google.com/?q=${encodeURIComponent(competition.location)}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-sm text-primary hover:underline"
+              >
+                {competition.location}
+              </a>
+            </div>
+            <div className="flex items-center justify-between">
+              <span className="text-sm text-muted-foreground">Hosting School:</span>
+              <span className="text-sm">{competition.hosting_school}</span>
+            </div>
           </div>
           <div className="text-sm">
             📅 {new Date(competition.start_date).toLocaleDateString()} - {new Date(competition.end_date).toLocaleDateString()}
