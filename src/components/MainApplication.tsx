@@ -32,7 +32,6 @@ import CompetitionManagementPage from '@/components/competition-management/Compe
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
-import PrintSchedulePage from '@/pages/PrintSchedulePage';
 
 const MainApplication = () => {
   const location = useLocation();
@@ -280,11 +279,6 @@ const MainApplication = () => {
             <Route path="competition-portal/my-competitions/*" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
-              </ProtectedRoute>
-            } />
-            <Route path="print-schedule" element={
-              <ProtectedRoute>
-                <PrintSchedulePage />
               </ProtectedRoute>
             } />
             
