@@ -147,63 +147,31 @@
     background: white !important;
   }
   
-  /* Hide everything including modals and dialogs */
-  body *,
+  /* Hide modals and dialogs specifically */
   [role="dialog"],
   .fixed,
-  .absolute {
-    visibility: hidden !important;
+  [data-state="open"][role="dialog"] {
     display: none !important;
   }
   
-  /* Show only the print container and its contents */
-  .schedule-print-container,
-  .schedule-print-container *,
-  .schedule-print-container table,
-  .schedule-print-container table *,
-  .schedule-print-container h2,
-  .schedule-print-container th,
-  .schedule-print-container td,
-  .schedule-print-container thead,
-  .schedule-print-container tbody,
-  .schedule-print-container tr {
-    visibility: visible !important;
-    display: block !important;
+  /* Hide main UI, show only print content */
+  .print\\:hidden {
+    display: none !important;
   }
   
-  .schedule-print-container table,
-  .schedule-print-container thead,
-  .schedule-print-container tbody,
-  .schedule-print-container tr {
-    display: table !important;
-  }
-  
-  .schedule-print-container thead {
-    display: table-header-group !important;
-  }
-  
-  .schedule-print-container tbody {
-    display: table-row-group !important;
-  }
-  
-  .schedule-print-container tr {
-    display: table-row !important;
-  }
-  
-  .schedule-print-container th,
-  .schedule-print-container td {
-    display: table-cell !important;
-  }
-  
-  /* Position print content properly */
   .schedule-print-container {
+    display: block !important;
+    visibility: visible !important;
     position: static !important;
     margin: 0 !important;
     padding: 0 !important;
     width: 100% !important;
     transform: none !important;
     background: white !important;
-    page-break-inside: avoid;
+  }
+  
+  .schedule-print-container * {
+    visibility: visible !important;
   }
   
   .schedule-print-container table {
