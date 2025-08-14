@@ -104,7 +104,15 @@ export const MobileOpenCompetitions: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <MapPin size={12} className="mr-1" />
-                      {competition.location || 'Location TBD'}
+                      <div className="text-xs">
+                        <div className="font-medium">{competition.hosting_school || 'Location TBD'}</div>
+                        {competition.address && <div>{competition.address}</div>}
+                        {(competition.city || competition.state || competition.zip) && (
+                          <div>
+                            {[competition.city, competition.state].filter(Boolean).join(', ')} {competition.zip}
+                          </div>
+                        )}
+                      </div>
                     </div>
                   </div>
 
