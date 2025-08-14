@@ -51,13 +51,23 @@ const CompetitionPortalLayout = () => {
     'open-competitions': '/app/competition-portal/open-competitions',
   };
 
-  // Sync activeModule with current route
   useEffect(() => {
     const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
+    const hasCompetitionModule = userProfile?.schools?.competition_module === true;
     const currentModule = routeToModuleMap[location.pathname] || 'competition-dashboard';
     
-    // If user doesn't have competition portal access, redirect to open competitions
-    if (!hasCompetitionPortal && currentModule !== 'open-competitions') {
+    // Define which modules are accessible based on permissions
+    const portalOnlyModules = ['competition-dashboard', 'competitions', 'events', 'score-sheets', 'judges', 'analytics', 'competition-settings'];
+    const moduleAccessibleModules = ['open-competitions', 'my-competitions'];
+    
+    // If user doesn't have competition portal access but tries to access portal-only modules
+    if (!hasCompetitionPortal && portalOnlyModules.includes(currentModule)) {
+      navigate('/app/competition-portal/open-competitions');
+      return;
+    }
+    
+    // If user doesn't have any competition access (neither portal nor module)
+    if (!hasCompetitionPortal && !hasCompetitionModule && !moduleAccessibleModules.includes(currentModule)) {
       navigate('/app/competition-portal/open-competitions');
       return;
     }
