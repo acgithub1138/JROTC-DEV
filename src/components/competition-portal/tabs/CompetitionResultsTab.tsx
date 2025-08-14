@@ -43,6 +43,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const [eventSheets, setEventSheets] = useState<any[]>([]);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [viewSchoolId, setViewSchoolId] = useState<string | null>(null);
+  const [refreshKey, setRefreshKey] = useState(0);
 
   const fetchData = async () => {
     setIsLoading(true);
@@ -116,13 +117,17 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   }, [viewEvent, viewSchoolId, competitionId]);
 
   const handleEventsRefresh = async () => {
+    setIsDialogLoading(true);
     // Small delay to ensure database updates are visible
-    await new Promise(resolve => setTimeout(resolve, 200));
+    await new Promise(resolve => setTimeout(resolve, 300));
     // Refresh both the main results and the dialog data
     await Promise.all([
       fetchData(),
       fetchEventSheets()
     ]);
+    // Force re-render of the ScoreSheetTable component
+    setRefreshKey(prev => prev + 1);
+    setIsDialogLoading(false);
   };
 
   const grouped = useMemo(() => {
@@ -304,7 +309,11 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           ) : eventSheets.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">No score sheets found for this school.</div>
           ) : (
-            <PortalScoreSheetTable events={eventSheets as any} onEventsRefresh={handleEventsRefresh} />
+            <PortalScoreSheetTable 
+              key={`${viewEvent}-${viewSchoolId}-${refreshKey}`} 
+              events={eventSheets as any} 
+              onEventsRefresh={handleEventsRefresh} 
+            />
           )}
         </DialogContent>
       </Dialog>
