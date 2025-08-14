@@ -52,7 +52,7 @@ const CompetitionsPage = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
-  const { canView, canEdit, canDelete } = useTablePermissions('cp_competitions');
+  const { canView, canEdit, canDelete, canCreate } = useTablePermissions('cp_competitions');
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -154,7 +154,7 @@ const [selectedCompetition, setSelectedCompetition] = useState<Competition | nul
     
     return matchesSearch && matchesStatus && matchesTab;
   });
-  const canCreateCompetition = canEdit; // Using canEdit for creation permission
+  const canCreateCompetition = canCreate;
   const handleCreateCompetition = async (data: any) => {
     try {
       const {
