@@ -62,17 +62,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const { toast } = useToast();
 
   const fetchUserProfile = async (userId: string) => {
-    console.log('fetchUserProfile called for userId:', userId, 'isProfileLoading:', isProfileLoading);
-    
-    // Prevent multiple simultaneous calls for the same user
-    if (isProfileLoading) {
-      console.log('Profile loading already in progress, skipping...');
-      return;
-    }
-    
+    // Prevent multiple simultaneous calls
+    if (isProfileLoading) return;
     setIsProfileLoading(true);
     try {
-      console.log('Starting to fetch user profile for:', userId);
+      console.log('Fetching user profile for:', userId);
 
       const { data, error } = await supabase
         .from('profiles')
@@ -122,10 +116,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUserProfile(null);
       }
     } catch (error) {
-      console.error('Unexpected error fetching user profile:', error);
-      setUserProfile(null);
+      console.error('Error fetching user profile:', error);
     } finally {
-      console.log('Finished fetching profile, setting isProfileLoading to false');
       setIsProfileLoading(false);
     }
   };
@@ -145,19 +137,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setUser(session?.user ?? null);
         
         if (session?.user) {
-          // Reset profile loading state and fetch profile for new user
+          // Only fetch if we haven't fetched for this user yet
           if (lastFetchedUserId !== session.user.id) {
             lastFetchedUserId = session.user.id;
-            setIsProfileLoading(false); // Reset loading state before fetching
-            console.log('New user detected, fetching profile for:', session.user.id);
-            // Use setTimeout to avoid potential auth callback issues
-            setTimeout(() => {
-              fetchUserProfile(session.user.id);
-            }, 0);
+            fetchUserProfile(session.user.id);
           }
         } else {
           setUserProfile(null);
-          setIsProfileLoading(false); // Reset loading state on logout
           lastFetchedUserId = null;
         }
         setLoading(false);

@@ -157,15 +157,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
   }
 };
 
-// Global state to prevent multiple simultaneous loads
-let globalIsLoading = false;
-let globalInitialized = false;
-const globalCache = new Map<string, {
-  menuItems: MenuItem[];
-  timestamp: number;
-}>();
-const pendingCallbacks = new Set<() => void>();
-
 export const useSidebarPreferences = () => {
   const { userProfile } = useAuth();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
@@ -173,59 +164,22 @@ export const useSidebarPreferences = () => {
   const [isLoading, setIsLoading] = useState(true);
   const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Cache key includes permissions state to ensure proper invalidation
+  // Memoize permission state to prevent unnecessary re-renders
+  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
   const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
   const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
-  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
-  const cacheKey = useMemo(() => `${userId}-${userRole}-${permissionsLoaded}`, [userId, userRole, permissionsLoaded]);
 
-  // Simplified load function with global state management
+  // Debounced load function to prevent rapid successive calls
   const loadPreferences = useCallback(async () => {
     if (!userId) {
       console.log('No user ID found, using default fallback items for role:', userRole);
+      // Still provide default items even without userId
       const fallbackItems = getDefaultMenuItemsForRole(userRole, userProfile);
       setMenuItems(fallbackItems);
       setIsLoading(false);
       return;
     }
 
-    // Check global cache first
-    const cached = globalCache.get(cacheKey);
-    if (cached && Date.now() - cached.timestamp < 5000) {
-      console.log('Using cached sidebar preferences');
-      setMenuItems(cached.menuItems);
-      setIsLoading(false);
-      return;
-    }
-
-    // If already loading globally, wait for the result
-    if (globalIsLoading) {
-      console.log('Already loading globally, adding to pending callbacks');
-      return new Promise<void>((resolve) => {
-        pendingCallbacks.add(() => {
-          const latestCached = globalCache.get(cacheKey);
-          if (latestCached) {
-            setMenuItems(latestCached.menuItems);
-            setIsLoading(false);
-          }
-          resolve();
-        });
-      });
-    }
-
-    // Reset global state if cache miss to allow reloading with new permissions
-    if (!cached) {
-      globalInitialized = false;
-    }
-
-    // Only proceed if not initialized globally or cache miss
-    if (globalInitialized && cached) {
-      return;
-    }
-
-    globalIsLoading = true;
-    globalInitialized = true;
-    
     // Clear any existing timeout
     if (loadingTimeoutRef.current) {
       clearTimeout(loadingTimeoutRef.current);
@@ -234,7 +188,7 @@ export const useSidebarPreferences = () => {
     // Debounce the actual loading
     loadingTimeoutRef.current = setTimeout(async () => {
       console.log('Loading sidebar preferences for user:', userId, 'role:', userRole);
-      console.log('Permission system loaded:', !permissionsLoading);
+      console.log('Permission system loaded:', permissionsLoaded);
       console.log('User profile:', userProfile);
       setIsLoading(true);
       
@@ -250,60 +204,36 @@ export const useSidebarPreferences = () => {
         }
 
         // Use database permissions if loaded, otherwise fallback to hardcoded
-        const defaultItems = !permissionsLoading 
+        const defaultItems = permissionsLoaded 
           ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
           : getDefaultMenuItemsForRole(userRole, userProfile);
         
-        console.log('Using', !permissionsLoading ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
+        console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
+        console.log('Generated menu items:', defaultItems);
         
-        let finalItems: MenuItem[];
         if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
           console.log('Found saved preferences, filtering menu items');
+          // Filter out invalid items and ensure all valid items are included
           const savedItemIds = data.menu_items;
           const orderedItems = savedItemIds
             .map(id => defaultItems.find(item => item.id === id))
             .filter(Boolean) as MenuItem[];
           
-          finalItems = orderedItems;
+          setMenuItems(orderedItems);
         } else {
           console.log('No saved preferences, using default items');
-          finalItems = defaultItems;
+          setMenuItems(defaultItems);
         }
-
-        // Update global cache
-        globalCache.set(cacheKey, {
-          menuItems: finalItems,
-          timestamp: Date.now()
-        });
-        
-        setMenuItems(finalItems);
-        setIsLoading(false);
-        globalIsLoading = false;
-        
-        // Notify all pending callbacks
-        pendingCallbacks.forEach(callback => callback());
-        pendingCallbacks.clear();
-        
       } catch (error) {
         console.error('Error loading sidebar preferences:', error);
         const fallbackItems = getDefaultMenuItemsForRole(userRole);
-        
-        // Update global cache with fallback
-        globalCache.set(cacheKey, {
-          menuItems: fallbackItems,
-          timestamp: Date.now()
-        });
-        
         setMenuItems(fallbackItems);
+      } finally {
+        console.log('Sidebar preferences loaded, setting loading to false');
         setIsLoading(false);
-        globalIsLoading = false;
-        
-        // Notify all pending callbacks
-        pendingCallbacks.forEach(callback => callback());
-        pendingCallbacks.clear();
       }
     }, 100); // 100ms debounce
-  }, [userId, userRole, permissionsLoading, hasPermission, cacheKey]);
+  }, [userId, userRole, permissionsLoaded, hasPermission]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {
@@ -348,7 +278,7 @@ export const useSidebarPreferences = () => {
         .delete()
         .eq('user_id', userId);
 
-      const defaultItems = !permissionsLoading 
+      const defaultItems = permissionsLoaded 
         ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
         : getDefaultMenuItemsForRole(userRole, userProfile);
       setMenuItems(defaultItems);
@@ -357,7 +287,7 @@ export const useSidebarPreferences = () => {
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  }, [userId, permissionsLoading, userRole, hasPermission]);
+  }, [userId, permissionsLoaded, userRole, hasPermission]);
 
   const refreshPreferences = useCallback(async () => {
     await loadPreferences();
@@ -368,10 +298,10 @@ export const useSidebarPreferences = () => {
   }, [loadPreferences]);
 
   const getDefaultMenuItems = useCallback(() => {
-    return !permissionsLoading 
+    return permissionsLoaded 
       ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
       : getDefaultMenuItemsForRole(userRole, userProfile);
-  }, [permissionsLoading, userRole, hasPermission, userProfile]);
+  }, [permissionsLoaded, userRole, hasPermission, userProfile]);
 
   // Cleanup timeout on unmount
   useEffect(() => {
