@@ -352,9 +352,13 @@ const handleEditSubmit = async (data: any) => {
                   {filteredCompetitions.map(competition => (
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
-<button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
-  {competition.name}
-</button>
+                        {canEdit ? (
+                          <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+                            {competition.name}
+                          </button>
+                        ) : (
+                          <span className="font-medium">{competition.name}</span>
+                        )}
                       </TableCell>
                       <TableCell>
                         <div className="max-w-xs">
