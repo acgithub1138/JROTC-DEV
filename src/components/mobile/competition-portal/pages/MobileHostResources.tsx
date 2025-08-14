@@ -73,7 +73,7 @@ export const MobileHostResources: React.FC = () => {
                     </div>
                     <Badge variant="secondary" className="text-xs">
                       <Users size={12} className="mr-1" />
-                      Judge
+                      Resource
                     </Badge>
                   </div>
                   
