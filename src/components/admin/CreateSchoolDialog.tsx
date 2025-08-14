@@ -24,6 +24,7 @@ interface CreateSchoolDialogProps {
 interface NewSchool {
   name: string;
   initials: string;
+  contact: string;
   address: string;
   city: string;
   state: string;
@@ -47,6 +48,7 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
   const initialSchool: NewSchool = {
     name: '',
     initials: '',
+    contact: '',
     address: '',
     city: '',
     state: '',
@@ -154,24 +156,35 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
             </div>
           </div>
 
-          <div>
-            <Label htmlFor="jrotc_program">JROTC Program</Label>
-            <Select
-              value={newSchool.jrotc_program}
-              onValueChange={(value) => setNewSchool({ ...newSchool, jrotc_program: value as typeof newSchool.jrotc_program })}
-            >
-              <SelectTrigger>
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="air_force">Air Force JROTC</SelectItem>
-                <SelectItem value="army">Army JROTC</SelectItem>
-                <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
-                <SelectItem value="navy">Navy JROTC</SelectItem>
-                <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
-                <SelectItem value="space_force">Space Force JROTC</SelectItem>
-              </SelectContent>
-            </Select>
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="jrotc_program">JROTC Program</Label>
+              <Select
+                value={newSchool.jrotc_program}
+                onValueChange={(value) => setNewSchool({ ...newSchool, jrotc_program: value as typeof newSchool.jrotc_program })}
+              >
+                <SelectTrigger>
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                  <SelectItem value="army">Army JROTC</SelectItem>
+                  <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                  <SelectItem value="navy">Navy JROTC</SelectItem>
+                  <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                  <SelectItem value="space_force">Space Force JROTC</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="contact">Contact</Label>
+              <Input
+                id="contact"
+                value={newSchool.contact}
+                onChange={(e) => setNewSchool({ ...newSchool, contact: e.target.value })}
+                placeholder="Enter contact person"
+              />
+            </div>
           </div>
 
           <div>
