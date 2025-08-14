@@ -104,11 +104,11 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
   // Filter modules based on portal
   const filteredModules = modules.filter(module => {
     if (portal === 'ccc') {
-      // CCC Portal modules - exclude competition portal modules
-      return !module.name.startsWith('cp_');
+      // CCC Portal modules - exclude competition portal modules and My Competitions
+      return !module.name.startsWith('cp_') && module.name !== 'competitions';
     } else {
-      // Competition Portal modules - only include cp_ modules
-      return module.name.startsWith('cp_');
+      // Competition Portal modules - include cp_ modules and My Competitions
+      return module.name.startsWith('cp_') || module.name === 'competitions';
     }
   });
 
