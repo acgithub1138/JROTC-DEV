@@ -27,99 +27,108 @@ export const MobileEventResultsView: React.FC = () => {
 
   const decodedEventName = eventName ? decodeURIComponent(eventName) : '';
 
+  const fetchSchoolResults = async () => {
+    setIsLoading(true);
+    try {
+      // Get all results for this event
+      const { data: resultsData, error: resultsError } = await supabase
+        .from('competition_events')
+        .select('*')
+        .eq('source_competition_id', competitionId)
+        .eq('event', decodedEventName as any);
+
+      if (resultsError) throw resultsError;
+
+      // Get school names
+      const schoolIds = [...new Set((resultsData || []).map(r => r.school_id))];
+      const { data: schoolsData, error: schoolsError } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competitionId)
+        .in('school_id', schoolIds);
+
+      if (schoolsError) throw schoolsError;
+      
+      const schoolNamesMap = (schoolsData || []).reduce((acc, school) => {
+        acc[school.school_id] = school.school_name || 'Unknown School';
+        return acc;
+      }, {} as Record<string, string>);
+
+      // Aggregate results by school - sum the total_points from all score sheets
+      const schoolResults: Record<string, SchoolResult> = {};
+      
+      (resultsData || []).forEach(result => {
+        if (!schoolResults[result.school_id]) {
+          schoolResults[result.school_id] = {
+            school_id: result.school_id,
+            school_name: schoolNamesMap[result.school_id] || 'Unknown School',
+            total_points: 0,
+            judge_count: 0
+          };
+        }
+        
+        // Sum the total_points from each score sheet (Grand Total)
+        const scorePoints = Number(result.total_points) || 0;
+        console.log(`School ${result.school_id}, Event: ${result.event}, Judge Score: ${scorePoints}, Team: ${result.team_name || 'N/A'}`);
+        schoolResults[result.school_id].total_points += scorePoints;
+        schoolResults[result.school_id].judge_count += 1;
+      });
+
+      // Sort by total points descending (greatest to smallest)
+      const sortedSchools = Object.values(schoolResults).sort((a, b) => b.total_points - a.total_points);
+      console.log('Schools sorted by total points:', sortedSchools.map(s => ({ name: s.school_name, total: s.total_points })));
+      setSchools(sortedSchools);
+    } catch (error) {
+      console.error('Error fetching school results:', error);
+      toast({
+        title: "Error",
+        description: "Failed to load school results",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   useEffect(() => {
     if (!competitionId || !eventName) return;
-    
-    const fetchSchoolResults = async () => {
-      setIsLoading(true);
-      try {
-        // Get all results for this event
-        const { data: resultsData, error: resultsError } = await supabase
-          .from('competition_events')
-          .select('*')
-          .eq('source_competition_id', competitionId)
-          .eq('event', decodedEventName as any);
-
-        if (resultsError) throw resultsError;
-
-        // Get school names
-        const schoolIds = [...new Set((resultsData || []).map(r => r.school_id))];
-        const { data: schoolsData, error: schoolsError } = await supabase
-          .from('cp_comp_schools')
-          .select('school_id, school_name')
-          .eq('competition_id', competitionId)
-          .in('school_id', schoolIds);
-
-        if (schoolsError) throw schoolsError;
-        
-        const schoolNamesMap = (schoolsData || []).reduce((acc, school) => {
-          acc[school.school_id] = school.school_name || 'Unknown School';
-          return acc;
-        }, {} as Record<string, string>);
-
-        // Aggregate results by school - sum the total_points from all score sheets
-        const schoolResults: Record<string, SchoolResult> = {};
-        
-        (resultsData || []).forEach(result => {
-          if (!schoolResults[result.school_id]) {
-            schoolResults[result.school_id] = {
-              school_id: result.school_id,
-              school_name: schoolNamesMap[result.school_id] || 'Unknown School',
-              total_points: 0,
-              judge_count: 0
-            };
-          }
-          
-          // Sum the total_points from each score sheet (Grand Total)
-          const scorePoints = Number(result.total_points) || 0;
-          console.log(`School ${result.school_id}, Event: ${result.event}, Judge Score: ${scorePoints}, Team: ${result.team_name || 'N/A'}`);
-          schoolResults[result.school_id].total_points += scorePoints;
-          schoolResults[result.school_id].judge_count += 1;
-        });
-
-        // Sort by total points descending (greatest to smallest)
-        const sortedSchools = Object.values(schoolResults).sort((a, b) => b.total_points - a.total_points);
-        console.log('Schools sorted by total points:', sortedSchools.map(s => ({ name: s.school_name, total: s.total_points })));
-        setSchools(sortedSchools);
-      } catch (error) {
-        console.error('Error fetching school results:', error);
-        toast({
-          title: "Error",
-          description: "Failed to load school results",
-          variant: "destructive",
-        });
-      } finally {
-        setIsLoading(false);
-      }
-    };
-
     fetchSchoolResults();
   }, [competitionId, decodedEventName, toast]);
 
+  const fetchScoreSheets = async () => {
+    if (!selectedSchool) return;
+    setIsDialogLoading(true);
+    try {
+      const { data, error } = await supabase
+        .from('competition_events')
+        .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
+        .eq('source_type', 'portal')
+        .eq('source_competition_id', competitionId)
+        .eq('event', decodedEventName as any)
+        .eq('school_id', selectedSchool.school_id);
+
+      if (error) throw error;
+      setEventSheets(data || []);
+    } catch (error) {
+      console.error('Error fetching score sheets:', error);
+      setEventSheets([]);
+    } finally {
+      setIsDialogLoading(false);
+    }
+  };
+
+  const handleEventsRefresh = async () => {
+    // Small delay to ensure database updates are committed
+    await new Promise(resolve => setTimeout(resolve, 200));
+    // Refresh both main results and score sheet data
+    await Promise.all([
+      fetchSchoolResults(),
+      fetchScoreSheets()
+    ]);
+  };
+
   useEffect(() => {
     if (!selectedSchool) return;
-    
-    const fetchScoreSheets = async () => {
-      setIsDialogLoading(true);
-      try {
-        const { data, error } = await supabase
-          .from('competition_events')
-          .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
-          .eq('source_type', 'portal')
-          .eq('source_competition_id', competitionId)
-          .eq('event', decodedEventName as any)
-          .eq('school_id', selectedSchool.school_id);
-
-        if (error) throw error;
-        setEventSheets(data || []);
-      } catch (error) {
-        console.error('Error fetching score sheets:', error);
-        setEventSheets([]);
-      } finally {
-        setIsDialogLoading(false);
-      }
-    };
-
     fetchScoreSheets();
   }, [selectedSchool, competitionId, decodedEventName]);
 
@@ -176,7 +185,7 @@ export const MobileEventResultsView: React.FC = () => {
               <div className="p-8 text-center text-muted-foreground">No score sheets found for this school.</div>
             ) : (
               <div className="overflow-x-auto">
-                <PortalScoreSheetTable events={eventSheets as any} />
+                <PortalScoreSheetTable events={eventSheets as any} onEventsRefresh={handleEventsRefresh} />
               </div>
             )}
           </CardContent>
