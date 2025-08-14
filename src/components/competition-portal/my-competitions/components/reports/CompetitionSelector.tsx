@@ -116,12 +116,9 @@ export const CompetitionSelector: React.FC<CompetitionSelectorProps> = ({
                 disabled={selectedCompetitions.includes(competition.id) || selectedCompetitions.length >= 5}
                 className="cursor-pointer"
               >
-                <div className="flex flex-col">
-                  <span className="font-medium">{competition.name}</span>
-                  <span className="text-sm text-muted-foreground">
-                    {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
-                  </span>
-                </div>
+                <span className="font-medium">
+                  {competition.name} - {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
+                </span>
               </SelectItem>
             ))}
           </SelectContent>
