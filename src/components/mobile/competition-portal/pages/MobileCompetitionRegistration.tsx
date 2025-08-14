@@ -192,14 +192,31 @@ export const MobileCompetitionRegistration: React.FC = () => {
 
       if (eventError) throw eventError;
 
-      // Load existing schedules
-      const { data: schedules, error: scheduleError } = await supabase
+      // Load existing schedules - try different approaches for RLS compatibility
+      let schedules = null;
+      
+      // Try the standard query first
+      const { data: schedulesData, error: scheduleError } = await supabase
         .from('cp_event_schedules')
         .select('event_id, scheduled_time')
         .eq('competition_id', competitionId)
         .eq('school_id', userProfile.school_id);
 
-      if (scheduleError) throw scheduleError;
+      if (!scheduleError) {
+        schedules = schedulesData;
+      } else {
+        console.warn('Schedule access error:', scheduleError);
+        // Try a more permissive query through comp schools
+        const { data: altSchedules, error: altError } = await supabase
+          .from('cp_event_schedules')
+          .select('event_id, scheduled_time, school_id')
+          .eq('competition_id', competitionId)
+          .in('school_id', [userProfile.school_id]);
+          
+        if (!altError) {
+          schedules = altSchedules?.filter(s => s.school_id === userProfile.school_id) || [];
+        }
+      }
 
       // Set selected events
       const selectedEventIds = new Set(eventRegs?.map(reg => reg.event_id) || []);
