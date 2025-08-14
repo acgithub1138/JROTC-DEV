@@ -638,6 +638,8 @@ export const MobileCompetitionRegistration: React.FC = () => {
             events.map(event => {
               const isSelected = selectedEvents.has(event.id);
               const timeSlots = generateTimeSlots(event);
+              
+              // The selectedTimeSlot is already set from loadExistingRegistration
               const selectedTimeSlot = selectedTimeSlots.get(event.id);
 
               return (
@@ -695,17 +697,6 @@ export const MobileCompetitionRegistration: React.FC = () => {
                             timeSlots.map(slot => {
                               const currentSelected = selectedTimeSlot === slot.value;
                               const schoolName = !slot.available ? occupiedLabels.get(event.id)?.get(slot.value) : null;
-                              
-                              // Debug log for the selected time slot
-                              if (currentSelected) {
-                                console.log('Found selected time slot:', {
-                                  eventId: event.id,
-                                  slotValue: slot.value,
-                                  selectedTimeSlot,
-                                  available: slot.available,
-                                  schoolName
-                                });
-                              }
                               
                               return (
                                 <SelectItem 
