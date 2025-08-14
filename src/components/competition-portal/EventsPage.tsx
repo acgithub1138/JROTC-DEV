@@ -7,6 +7,7 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Plus, Edit, Trash2, ArrowUpDown } from 'lucide-react';
 import { useCompetitionEvents } from './hooks/useCompetitionEvents';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { CreateEventModal } from './modals/CreateEventModal';
 import { EditCpEventModal } from './modals/EditCpEventModal';
 import { JROTC_PROGRAM_OPTIONS } from '../competition-management/utils/constants';
@@ -20,6 +21,8 @@ export const EventsPage = () => {
     deleteEvent,
     refetch
   } = useCompetitionEvents();
+  
+  const { canCreate, canEdit, canDelete } = useTablePermissions('cp_events');
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
@@ -120,19 +123,23 @@ export const EventsPage = () => {
             <h1 className="text-3xl font-bold text-foreground">Events</h1>
             <p className="text-muted-foreground">Manage competition events</p>
           </div>
-          <Button onClick={() => setIsCreateModalOpen(true)}>
-            <Plus className="h-4 w-4 mr-2" />
-            Create Event
-          </Button>
+          {canCreate && (
+            <Button onClick={() => setIsCreateModalOpen(true)}>
+              <Plus className="h-4 w-4 mr-2" />
+              Create Event
+            </Button>
+          )}
         </div>
 
         <Card>
           <CardContent>
             {events.length === 0 ? <div className="text-center py-8">
                 <p className="text-muted-foreground">No events found</p>
-                <Button variant="outline" className="mt-4" onClick={() => setIsCreateModalOpen(true)}>
-                  Create your first event
-                </Button>
+                {canCreate && (
+                  <Button variant="outline" className="mt-4" onClick={() => setIsCreateModalOpen(true)}>
+                    Create your first event
+                  </Button>
+                )}
               </div> : <Table>
                 <TableHeader>
                   <TableRow>
@@ -157,26 +164,30 @@ export const EventsPage = () => {
                       <TableCell>{formatDate(event.created_at)}</TableCell>
                       <TableCell>
                         <div className="flex items-center justify-center gap-2">
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(event)}>
-                                <Edit className="w-3 h-3" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Edit event</p>
-                            </TooltipContent>
-                          </Tooltip>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDeleteClick(event)}>
-                                <Trash2 className="w-3 h-3 text-red-600 hover:text-red-700 hover:border-red-300" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>Archive event</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          {canEdit && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(event)}>
+                                  <Edit className="w-3 h-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Edit event</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                          {canDelete && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleDeleteClick(event)}>
+                                  <Trash2 className="w-3 h-3 text-red-600 hover:text-red-700 hover:border-red-300" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>Archive event</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                         </div>
                       </TableCell>
                     </TableRow>)}
