@@ -340,13 +340,11 @@ export const MobileCompetitionRegistration: React.FC = () => {
       // Register school for competition
       const { data: schoolRegistration, error: schoolError } = await supabase
         .from('cp_comp_schools')
-        .upsert({
+        .insert({
           competition_id: competitionId,
           school_id: userProfile.school_id,
           total_fee: calculateTotalCost(),
           status: 'registered'
-        }, {
-          onConflict: 'competition_id,school_id'
         })
         .select()
         .single();
@@ -361,13 +359,13 @@ export const MobileCompetitionRegistration: React.FC = () => {
         status: 'registered'
       }));
 
-      const { error: eventError } = await supabase
-        .from('cp_event_registrations')
-        .upsert(eventRegistrations, {
-          onConflict: 'competition_id,event_id,school_id'
-        });
+      if (eventRegistrations.length > 0) {
+        const { error: eventError } = await supabase
+          .from('cp_event_registrations')
+          .insert(eventRegistrations);
 
-      if (eventError) throw eventError;
+        if (eventError) throw eventError;
+      }
 
       // Create schedule entries
       const scheduleEntries = Array.from(selectedEvents).map(eventId => {
@@ -381,13 +379,13 @@ export const MobileCompetitionRegistration: React.FC = () => {
         };
       });
 
-      const { error: scheduleError } = await supabase
-        .from('cp_event_schedules')
-        .upsert(scheduleEntries, {
-          onConflict: 'competition_id,event_id,school_id'
-        });
+      if (scheduleEntries.length > 0) {
+        const { error: scheduleError } = await supabase
+          .from('cp_event_schedules')
+          .insert(scheduleEntries);
 
-      if (scheduleError) throw scheduleError;
+        if (scheduleError) throw scheduleError;
+      }
 
       toast({
         title: 'Success',
