@@ -118,8 +118,8 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
 
   const handleEventsRefresh = async () => {
     setIsDialogLoading(true);
-    // Small delay to ensure database updates are visible
-    await new Promise(resolve => setTimeout(resolve, 300));
+    // Small delay to ensure database updates are committed
+    await new Promise(resolve => setTimeout(resolve, 200));
     // Refresh both the main results and the dialog data
     await Promise.all([
       fetchData(),
