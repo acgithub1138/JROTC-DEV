@@ -104,7 +104,21 @@ export const MobileOpenCompetitions: React.FC = () => {
                     </div>
                     <div className="flex items-center">
                       <MapPin size={12} className="mr-1" />
-                      <div className="text-xs">
+                      <button
+                        onClick={() => {
+                          const addressParts = [
+                            competition.hosting_school,
+                            competition.address,
+                            competition.city,
+                            competition.state,
+                            competition.zip
+                          ].filter(Boolean);
+                          const fullAddress = addressParts.join(', ');
+                          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+                          window.open(mapsUrl, '_blank');
+                        }}
+                        className="text-xs text-left hover:text-primary transition-colors"
+                      >
                         <div className="font-medium">{competition.hosting_school || 'Location TBD'}</div>
                         {competition.address && <div>{competition.address}</div>}
                         {(competition.city || competition.state || competition.zip) && (
@@ -112,7 +126,7 @@ export const MobileOpenCompetitions: React.FC = () => {
                             {[competition.city, competition.state].filter(Boolean).join(', ')} {competition.zip}
                           </div>
                         )}
-                      </div>
+                      </button>
                     </div>
                   </div>
 
