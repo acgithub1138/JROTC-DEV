@@ -147,31 +147,27 @@
     background: white !important;
   }
   
-  /* Hide modals and dialogs specifically */
-  [role="dialog"],
-  .fixed,
-  [data-state="open"][role="dialog"] {
-    display: none !important;
+  /* Hide everything except print content */
+  body * {
+    visibility: hidden !important;
   }
   
-  /* Hide main UI, show only print content */
-  .print\\:hidden {
-    display: none !important;
-  }
-  
-  .schedule-print-container {
-    display: block !important;
-    visibility: visible !important;
-    position: static !important;
-    margin: 0 !important;
-    padding: 0 !important;
-    width: 100% !important;
-    transform: none !important;
-    background: white !important;
-  }
-  
+  /* Show only the print container and its contents */
+  .schedule-print-container,
   .schedule-print-container * {
     visibility: visible !important;
+  }
+  
+  /* Position print content at top-left of page */
+  .schedule-print-container {
+    position: absolute !important;
+    top: 0 !important;
+    left: 0 !important;
+    margin: 0 !important;
+    padding: 20px !important;
+    width: calc(100% - 40px) !important;
+    transform: none !important;
+    background: white !important;
   }
   
   .schedule-print-container table {
