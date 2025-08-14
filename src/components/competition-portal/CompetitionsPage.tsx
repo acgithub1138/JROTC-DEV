@@ -19,6 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -51,6 +52,7 @@ const CompetitionsPage = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
+  const { canView, canEdit, canDelete } = useTablePermissions('cp_competitions');
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -152,7 +154,7 @@ const [selectedCompetition, setSelectedCompetition] = useState<Competition | nul
     
     return matchesSearch && matchesStatus && matchesTab;
   });
-  const canCreateCompetition = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
+  const canCreateCompetition = canEdit; // Using canEdit for creation permission
   const handleCreateCompetition = async (data: any) => {
     try {
       const {
@@ -406,18 +408,20 @@ const handleEditSubmit = async (data: any) => {
 <TableCell>
   <div className="flex items-center justify-center gap-2">
     {/* View Competition */}
-    <Tooltip>
-      <TooltipTrigger asChild>
-        <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewCompetition(competition)}>
-          <Eye className="w-3 h-3" />
-        </Button>
-      </TooltipTrigger>
-      <TooltipContent>
-        <p>View</p>
-      </TooltipContent>
-    </Tooltip>
+    {canView && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewCompetition(competition)}>
+            <Eye className="w-3 h-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>View</p>
+        </TooltipContent>
+      </Tooltip>
+    )}
 
-    {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') && (
+    {canEdit && (
       <>
         {/* Edit Competition */}
         <Tooltip>
@@ -443,7 +447,7 @@ const handleEditSubmit = async (data: any) => {
           </TooltipContent>
         </Tooltip>
                                 
-                                {['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
+                                {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
                                   <Tooltip>
                                     <TooltipTrigger asChild>
                                       <Button 
