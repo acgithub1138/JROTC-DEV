@@ -196,10 +196,6 @@ export const MobileHostResults: React.FC = () => {
             <p className="text-sm text-muted-foreground">Competition scores and results</p>
           </div>
         </div>
-        <Button size="sm" className="bg-primary text-primary-foreground">
-          <FileText size={16} className="mr-1" />
-          Export
-        </Button>
       </div>
 
       {/* Results List */}
