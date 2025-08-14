@@ -109,7 +109,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                     {permissions.canViewDetails && (
                       <Button
                         variant="outline"
-                        size="icon"
+                        size="icon" className="h-6 w-6"
                         onClick={() => onPreview(template)}
                       >
                         <Eye className="w-3 h-3" />
@@ -119,7 +119,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                     {!readOnly && (
                       <Button
                         variant="outline"
-                        size="icon" lassName="h-6 w-6"
+                        size="icon" className="h-6 w-6"
                         onClick={() => onCopy(template)}
                       >
                         <Copy className="w-3 h-3" />
@@ -129,7 +129,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                     {!readOnly && permissions.canUpdate && (!template.is_global || permissions.isAdmin) && (
                       <Button
                         variant="outline"
-                        size="icon" lassName="h-6 w-6"
+                        size="icon" className="h-6 w-6"
                         onClick={() => onEdit(template)}
                       >
                         <Edit className="w-3 h-3" />
@@ -139,9 +139,8 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                     {!readOnly && permissions.canDelete && !template.is_global && (
                       <Button
                         variant="outline"
-                        size="icon"
+                        size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                         onClick={() => onDelete(template)}
-                        className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
                       >
                         <Trash2 className="w-3 h-3" />
                       </Button>
