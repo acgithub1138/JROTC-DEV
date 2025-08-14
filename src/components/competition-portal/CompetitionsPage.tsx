@@ -377,7 +377,7 @@ const handleEditSubmit = async (data: any) => {
                         </div>
                       </TableCell>
                        <TableCell>
-                         {(competition.school_id === userProfile?.school_id || userProfile?.role === 'admin') ? (
+                         {canEdit ? (
                            <Select
                              value={competition.status}
                              onValueChange={(value) => handleStatusChange(competition.id, value)}
