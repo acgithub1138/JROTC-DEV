@@ -23,6 +23,7 @@ interface CreateSchoolDialogProps {
 
 interface NewSchool {
   name: string;
+  initials: string;
   address: string;
   city: string;
   state: string;
@@ -45,6 +46,7 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
   
   const initialSchool: NewSchool = {
     name: '',
+    initials: '',
     address: '',
     city: '',
     state: '',
@@ -130,15 +132,26 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
         </DialogHeader>
 
         <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="name">School Name</Label>
-            <Input
-              id="name"
-              value={newSchool.name}
-              onChange={(e) => setNewSchool({ ...newSchool, name: e.target.value })}
-              placeholder="Enter school name"
-              required
-            />
+          <div className="grid grid-cols-2 gap-4">
+            <div>
+              <Label htmlFor="name">School Name</Label>
+              <Input
+                id="name"
+                value={newSchool.name}
+                onChange={(e) => setNewSchool({ ...newSchool, name: e.target.value })}
+                placeholder="Enter school name"
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="initials">School Initials</Label>
+              <Input
+                id="initials"
+                value={newSchool.initials}
+                onChange={(e) => setNewSchool({ ...newSchool, initials: e.target.value })}
+                placeholder="Enter school initials"
+              />
+            </div>
           </div>
 
           <div>

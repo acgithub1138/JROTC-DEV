@@ -24,6 +24,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface School {
   id: string;
   name: string;
+  initials?: string;
   jrotc_program?: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   contact?: string;
   address?: string;
@@ -71,6 +72,7 @@ const SchoolManagementPage = () => {
   const RECORDS_PER_PAGE = 25;
   const emptySchool: Omit<School, 'id' | 'created_at'> = {
     name: '',
+    initials: '',
     jrotc_program: undefined,
     contact: '',
     address: '',
@@ -125,6 +127,7 @@ const SchoolManagementPage = () => {
         error
       } = await supabase.from('schools').update({
         name: editingSchool.name,
+        initials: editingSchool.initials,
         jrotc_program: editingSchool.jrotc_program,
         contact: editingSchool.contact,
         address: editingSchool.address,
@@ -481,24 +484,32 @@ const SchoolManagementPage = () => {
               })} required />
                 </div>
                 <div className="space-y-2">
-                  <Label htmlFor="jrotc_program">JROTC Program</Label>
-                  <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
+                  <Label htmlFor="initials">School Initials</Label>
+                  <Input id="initials" value={editingSchool.initials || ''} onChange={e => setEditingSchool({
                 ...editingSchool,
-                jrotc_program: value as School['jrotc_program']
-              })}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select JROTC Program" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="air_force">Air Force JROTC</SelectItem>
-                      <SelectItem value="army">Army JROTC</SelectItem>
-                      <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
-                      <SelectItem value="navy">Navy JROTC</SelectItem>
-                      <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
-                      <SelectItem value="space_force">Space Force JROTC</SelectItem>
-                    </SelectContent>
-                  </Select>
+                initials: e.target.value
+              })} placeholder="Enter school initials" />
                 </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="jrotc_program">JROTC Program</Label>
+                <Select value={editingSchool.jrotc_program || ''} onValueChange={value => setEditingSchool({
+              ...editingSchool,
+              jrotc_program: value as School['jrotc_program']
+            })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select JROTC Program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                    <SelectItem value="army">Army JROTC</SelectItem>
+                    <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                    <SelectItem value="navy">Navy JROTC</SelectItem>
+                    <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                    <SelectItem value="space_force">Space Force JROTC</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
               
               <div className="space-y-2">
