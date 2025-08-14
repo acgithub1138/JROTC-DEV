@@ -148,7 +148,132 @@ export const CompetitionScheduleTab = ({
   };
 
   const handlePrint = () => {
-    window.print();
+    const printScheduleData = getPrintScheduleData();
+    
+    // Create clean HTML for printing
+    const printWindow = window.open("", "_blank");
+    if (!printWindow) return;
+    
+    const competitionName = "Competition Schedule";
+    const schoolName = selectedSchoolFilter === "all" 
+      ? "All Schools" 
+      : registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || "Selected School";
+    
+    let tableHTML = "";
+    
+    if (selectedSchoolFilter === "all") {
+      // Grid format for all schools: Y-axis = time, X-axis = events
+      const eventCount = (printScheduleData as any).events?.length || 1;
+      const columnWidth = 85 / eventCount; // 15% for time column, remaining 85% distributed evenly
+      
+      tableHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <colgroup>
+            <col style="width: 15%;" />
+            ${(printScheduleData as any).events?.map(() => 
+              `<col style="width: ${columnWidth}%;" />`
+            ).join("") || ""}
+          </colgroup>
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5;">Time</th>
+              ${(printScheduleData as any).events?.map((event: any) => 
+                `<th style="border: 1px solid #000; padding: 8px; text-align: center; font-weight: bold; background-color: #f5f5f5;">
+                  <div style="font-weight: bold;">${event.name}</div>
+                  <div style="font-size: 10px; color: #666;">(${event.location})</div>
+                </th>`
+              ).join("") || ""}
+            </tr>
+          </thead>
+          <tbody>
+            ${(printScheduleData as any).timeSlotsRaw?.map((timeSlot: Date) => {
+              const timeString = formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone);
+              return `
+                <tr>
+                  <td style="border: 1px solid #000; padding: 8px; font-weight: 500;">${timeString}</td>
+                  ${(printScheduleData as any).events?.map((event: any) => {
+                    // Check if this time slot is a lunch break for this event
+                    const eventDetails = events.find(e => e.id === event.id);
+                    const isLunchSlot = eventDetails?.timeSlots.find(
+                      slot => slot.time.getTime() === timeSlot.getTime()
+                    )?.isLunchBreak;
+                    
+                    if (isLunchSlot) {
+                      return `<td style="border: 1px solid #000; padding: 8px; text-align: center;">Lunch Break</td>`;
+                    }
+                    
+                    const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                    return `<td style="border: 1px solid #000; padding: 8px; text-align: center;">${assignedSchool?.initials || assignedSchool?.name || "-"}</td>`;
+                  }).join("") || ""}
+                </tr>
+              `;
+            }).join("") || ""}
+          </tbody>
+        </table>
+      `;
+    } else {
+      // Individual school format
+      tableHTML = `
+        <table style="width: 100%; border-collapse: collapse; font-size: 12px;">
+          <thead>
+            <tr>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5; width: 20%;">Time</th>
+              <th style="border: 1px solid #000; padding: 8px; text-align: left; font-weight: bold; background-color: #f5f5f5; width: 80%;">
+                <div>Event</div>
+                <div style="font-size: 10px; font-weight: normal;">(Location)</div>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            ${(printScheduleData as Array<{ time: string; event: string; location: string }>).map(item => `
+              <tr>
+                <td style="border: 1px solid #000; padding: 8px; font-weight: 500;">${item.time}</td>
+                <td style="border: 1px solid #000; padding: 8px;">
+                  <div>${item.event}</div>
+                  <div style="font-size: 10px; color: #666;">(${item.location})</div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    printWindow.document.write(`
+      <!DOCTYPE html>
+      <html>
+        <head>
+          <title>${competitionName} - ${schoolName}</title>
+          <style>
+            body { 
+              font-family: Arial, sans-serif; 
+              margin: 20px; 
+              background: white;
+            }
+            h1 { 
+              text-align: center; 
+              margin-bottom: 20px; 
+              font-size: 18px;
+            }
+            @media print {
+              @page { 
+                margin: 0.5in; 
+                size: portrait; 
+              }
+            }
+          </style>
+        </head>
+        <body>
+          <h1>${competitionName} - ${schoolName}</h1>
+          ${tableHTML}
+        </body>
+      </html>
+    `);
+    
+    printWindow.document.close();
+    printWindow.focus();
+    printWindow.print();
+    printWindow.close();
   };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
