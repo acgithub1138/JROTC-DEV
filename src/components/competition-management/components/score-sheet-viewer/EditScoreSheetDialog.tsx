@@ -61,15 +61,22 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
         .update({
           cadet_ids: selectedCadetIds,
           score_sheet: updatedScoreSheet,
-          total_points: totalPoints
+          total_points: totalPoints,
+          updated_at: new Date().toISOString()
         })
         .eq('id', event.id);
 
       if (error) throw error;
 
       toast.success('Score sheet updated successfully');
-      onEventUpdated();
+      
+      // Close dialog first, then refresh data to ensure proper state reset
       onOpenChange(false);
+      
+      // Small delay to ensure dialog is fully closed before refreshing
+      setTimeout(() => {
+        onEventUpdated();
+      }, 100);
     } catch (error) {
       console.error('Error updating score sheet:', error);
       toast.error('Failed to update score sheet');
