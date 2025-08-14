@@ -262,18 +262,12 @@ export const CompetitionScheduleTab = ({
 
       {/* Main UI - hidden during print */}
       <div className="space-y-4 print:hidden">
-        <div className="flex items-center justify-between">
-          <div className="text-sm text-muted-foreground">
-            Competition Schedule - View and manage time slot assignments for each event
-          </div>
-          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
-            <Printer className="h-4 w-4" />
-            Print Schedule
-          </Button>
+        <div className="text-sm text-muted-foreground">
+          Competition Schedule - View and manage time slot assignments for each event
         </div>
 
-        {/* Filters */}
-        <div className="flex items-center gap-4 print:hidden">
+        {/* Filters and Print Button */}
+        <div className="flex items-center justify-between print:hidden">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">
               Filter by school:
@@ -295,6 +289,11 @@ export const CompetitionScheduleTab = ({
               </SelectContent>
             </Select>
           </div>
+          
+          <Button variant="outline" onClick={handlePrint} className="flex items-center gap-2">
+            <Printer className="h-4 w-4" />
+            Print Schedule
+          </Button>
         </div>
 
         <Card className="print:hidden">
