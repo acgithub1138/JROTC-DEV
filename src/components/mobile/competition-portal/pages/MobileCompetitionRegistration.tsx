@@ -299,6 +299,26 @@ export const MobileCompetitionRegistration: React.FC = () => {
     setIsSubmitting(true);
 
     try {
+      // Check if already registered for this competition
+      const { data: existingRegistration, error: checkError } = await supabase
+        .from('cp_comp_schools')
+        .select('id, status')
+        .eq('competition_id', competitionId)
+        .eq('school_id', userProfile.school_id)
+        .maybeSingle();
+
+      if (checkError) throw checkError;
+
+      if (existingRegistration) {
+        toast({
+          title: 'Already Registered',
+          description: 'Your school is already registered for this competition.',
+          variant: 'destructive'
+        });
+        setIsSubmitting(false);
+        return;
+      }
+
       // Final availability check to prevent double-booking
       const selectedEventIds = Array.from(selectedEvents);
       const selectedPairs = selectedEventIds
