@@ -14,7 +14,7 @@ export const CompetitionScheduleModal: React.FC<CompetitionScheduleModalProps> =
   competitionName
 }) => {
   return <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-[1000px] max-h-[90vh] overflow-y-auto schedule-print-wrapper">
+      <DialogContent className="sm:max-w-[1200px] max-h-[90vh] overflow-y-auto schedule-print-wrapper">
         <DialogHeader>
           <DialogTitle>
             Competition Schedule - {competitionName}
