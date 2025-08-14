@@ -107,7 +107,7 @@ export const MobileOpenCompetitions: React.FC = () => {
                       <button
                         onClick={() => {
                           const addressParts = [
-                            competition.hosting_school,
+                            competition.location?.split(',')[0] || competition.hosting_school,
                             competition.address,
                             competition.city,
                             competition.state,
@@ -119,7 +119,9 @@ export const MobileOpenCompetitions: React.FC = () => {
                         }}
                         className="text-xs text-left hover:text-primary transition-colors"
                       >
-                        <div className="font-medium">{competition.hosting_school || 'Location TBD'}</div>
+                        <div className="font-medium">
+                          {competition.location?.split(',')[0] || competition.hosting_school || 'Location TBD'}
+                        </div>
                         {competition.address && <div>{competition.address}</div>}
                         {(competition.city || competition.state || competition.zip) && (
                           <div>
