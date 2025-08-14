@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -11,6 +11,7 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 
 interface AvailableSchool {
   id: string;
@@ -33,6 +34,9 @@ export const MobileScheduleEdit: React.FC = () => {
   const [isSaving, setIsSaving] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debouncedEventId = useDebouncedValue(eventId, 300);
+  
   // Local state for tracking schedule changes
   const [localSchedule, setLocalSchedule] = useState<Record<string, string | null>>({});
   
@@ -45,49 +49,24 @@ export const MobileScheduleEdit: React.FC = () => {
     return acc;
   }, {} as Record<string, string | null>) : {};
   
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData: initialSchedule,
-    currentData: localSchedule,
-    enabled: !!event
-  });
-
-  useEffect(() => {
-    if (event && eventId) {
-      loadAvailableSchools();
-      setLocalSchedule(initialSchedule);
-    }
-  }, [event?.id, eventId]);
-
-  // Update filtered schools when localSchedule changes
-  useEffect(() => {
-    if (registeredSchools.length > 0) {
-      updateFilteredSchools();
-    }
-  }, [localSchedule, registeredSchools]);
-
-  const updateFilteredSchools = () => {
-    // Get all currently assigned school IDs from localSchedule
-    const assignedSchoolIds = new Set(
-      Object.values(localSchedule).filter(schoolId => schoolId !== null)
-    );
+  const loadAvailableSchools = useCallback(async () => {
+    if (!debouncedEventId || !competitionId) return;
     
-    // Filter out assigned schools from all registered schools
-    const available = registeredSchools.filter(school => 
-      !assignedSchoolIds.has(school.id)
-    );
-    
-    setFilteredSchools(available);
-  };
+    // Cancel previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
 
-  const loadAvailableSchools = async () => {
-    if (!eventId || !competitionId) return;
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
     
     setIsLoading(true);
     try {
       const { data: registrations, error: regError } = await supabase
         .from('cp_event_registrations')
         .select('school_id, status')
-        .eq('event_id', eventId);
+        .eq('event_id', debouncedEventId)
+        .abortSignal(abortController.signal);
 
       if (regError) throw regError;
 
@@ -106,7 +85,8 @@ export const MobileScheduleEdit: React.FC = () => {
         .from('cp_comp_schools')
         .select('school_id, school_name')
         .eq('competition_id', competitionId)
-        .in('school_id', schoolIds);
+        .in('school_id', schoolIds)
+        .abortSignal(abortController.signal);
 
       if (csError) throw csError;
 
@@ -127,12 +107,57 @@ export const MobileScheduleEdit: React.FC = () => {
       schools.sort((a, b) => a.name.localeCompare(b.name));
 
       setRegisteredSchools(schools);
-    } catch (error) {
-      console.error('Error loading available schools:', error);
+    } catch (error: any) {
+      // Don't show errors if request was aborted
+      if (error?.code !== 'AbortError' && error?.name !== 'AbortError') {
+        console.error('Error loading available schools:', error);
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
+  }, [debouncedEventId, competitionId]);
+
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: initialSchedule,
+    currentData: localSchedule,
+    enabled: !!event
+  });
+
+  const updateFilteredSchools = () => {
+    // Get all currently assigned school IDs from localSchedule
+    const assignedSchoolIds = new Set(
+      Object.values(localSchedule).filter(schoolId => schoolId !== null)
+    );
+    
+    // Filter out assigned schools from all registered schools
+    const available = registeredSchools.filter(school => 
+      !assignedSchoolIds.has(school.id)
+    );
+    
+    setFilteredSchools(available);
   };
+
+  useEffect(() => {
+    if (event && debouncedEventId) {
+      loadAvailableSchools();
+      setLocalSchedule(initialSchedule);
+    }
+    
+    // Cleanup on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [event?.id, debouncedEventId, loadAvailableSchools]);
+
+  // Update filtered schools when localSchedule changes
+  useEffect(() => {
+    if (registeredSchools.length > 0) {
+      updateFilteredSchools();
+    }
+  }, [localSchedule, registeredSchools]);
 
   const handleLocalScheduleChange = (timeSlot: Date, schoolId: string | null) => {
     const timeSlotISO = timeSlot.toISOString();

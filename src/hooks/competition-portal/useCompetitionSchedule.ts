@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
+import { useDebouncedValue } from '@/hooks/useDebounce';
 
 export interface ScheduleSlot {
   id: string;
@@ -37,15 +38,25 @@ export const useCompetitionSchedule = (competitionId?: string) => {
   const [scheduleData, setScheduleData] = useState<ScheduleSlot[]>([]);
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const abortControllerRef = useRef<AbortController | null>(null);
+  const debouncedCompetitionId = useDebouncedValue(competitionId, 300);
 
-  const fetchScheduleData = async () => {
-    if (!competitionId) return;
+  const fetchScheduleData = useCallback(async () => {
+    if (!debouncedCompetitionId) return;
+
+    // Cancel previous request if it exists
+    if (abortControllerRef.current) {
+      abortControllerRef.current.abort();
+    }
+
+    const abortController = new AbortController();
+    abortControllerRef.current = abortController;
 
     try {
       setIsLoading(true);
 
       // Fetch events with their schedules
-        const { data: eventsData, error: eventsError } = await supabase
+      const { data: eventsData, error: eventsError } = await supabase
         .from('cp_comp_events')
         .select(`
           id,
@@ -57,7 +68,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           lunch_start_time,
           lunch_end_time
         `)
-        .eq('competition_id', competitionId);
+        .eq('competition_id', debouncedCompetitionId)
+        .abortSignal(abortController.signal);
 
       if (eventsError) throw eventsError;
 
@@ -65,7 +77,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       const { data: schedulesData, error: schedulesError } = await supabase
         .from('cp_event_schedules')
         .select('*')
-        .eq('competition_id', competitionId);
+        .eq('competition_id', debouncedCompetitionId)
+        .abortSignal(abortController.signal);
 
       if (schedulesError) throw schedulesError;
 
@@ -73,7 +86,8 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       const { data: schoolsData, error: schoolsError } = await supabase
         .from('cp_comp_schools')
         .select('school_id, color')
-        .eq('competition_id', competitionId);
+        .eq('competition_id', debouncedCompetitionId)
+        .abortSignal(abortController.signal);
 
       if (schoolsError) throw schoolsError;
 
@@ -139,16 +153,20 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       setEvents(processedEvents);
       setScheduleData(schedulesData || []);
-    } catch (error) {
-      console.error('Error fetching schedule data:', error);
-      toast.error('Failed to load schedule data');
+    } catch (error: any) {
+      // Don't show errors if request was aborted
+      if (error?.code !== 'AbortError' && error?.name !== 'AbortError') {
+        console.error('Error fetching schedule data:', error);
+        toast.error('Failed to load schedule data');
+      }
     } finally {
       setIsLoading(false);
+      abortControllerRef.current = null;
     }
-  };
+  }, [debouncedCompetitionId]);
 
   const updateScheduleSlot = async (eventId: string, timeSlot: Date, schoolId: string | null) => {
-    if (!competitionId) return;
+    if (!debouncedCompetitionId) return;
 
     try {
       if (schoolId) {
@@ -156,7 +174,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         const { data: existing, error: existingErr } = await supabase
           .from('cp_event_schedules')
           .select('id')
-          .eq('competition_id', competitionId)
+          .eq('competition_id', debouncedCompetitionId)
           .eq('event_id', eventId)
           .eq('school_id', schoolId)
           .maybeSingle();
@@ -176,7 +194,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           const { error: insErr } = await supabase
             .from('cp_event_schedules')
             .insert({
-              competition_id: competitionId,
+              competition_id: debouncedCompetitionId,
               event_id: eventId,
               school_id: schoolId,
               scheduled_time: timeSlot.toISOString(),
@@ -189,7 +207,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         const { error } = await supabase
           .from('cp_event_schedules')
           .delete()
-          .eq('competition_id', competitionId)
+          .eq('competition_id', debouncedCompetitionId)
           .eq('event_id', eventId)
           .eq('scheduled_time', timeSlot.toISOString());
         if (error) throw error;
@@ -202,43 +220,34 @@ export const useCompetitionSchedule = (competitionId?: string) => {
     }
   };
 
-  const getAvailableSchools = async (eventId: string, localScheduleOverrides?: Record<string, string | null>) => {
-    if (!competitionId) return [];
+  const getAvailableSchools = useCallback(async (eventId: string, localScheduleOverrides?: Record<string, string | null>) => {
+    if (!debouncedCompetitionId) return [];
 
     try {
-      console.log('ACTEST getAvailableSchools - START:', { eventId, competitionId, localScheduleOverrides });
-
       // Get schools registered for this event
       const { data: registeredSchools, error: regError } = await supabase
         .from('cp_event_registrations')
-        .select(`
-          school_id
-        `)
-        .eq('competition_id', competitionId)
+        .select('school_id')
+        .eq('competition_id', debouncedCompetitionId)
         .eq('event_id', eventId)
         .eq('status', 'registered');
 
       if (regError) throw regError;
 
-      console.log('ACTEST getAvailableSchools - registeredSchools:', registeredSchools);
-
       // Get schools already scheduled for this event
       const { data: scheduledSchools, error: schedError } = await supabase
         .from('cp_event_schedules')
         .select('school_id')
-        .eq('competition_id', competitionId)
+        .eq('competition_id', debouncedCompetitionId)
         .eq('event_id', eventId);
 
       if (schedError) throw schedError;
-
-      console.log('ACTEST getAvailableSchools - scheduledSchools:', scheduledSchools);
 
       // Start with database scheduled schools
       const scheduledSchoolIds = new Set(scheduledSchools?.map(s => s.school_id) || []);
       
       // Apply local schedule overrides if provided
       if (localScheduleOverrides !== undefined) {
-        console.log('ACTEST getAvailableSchools - applying local overrides:', localScheduleOverrides);
         // Clear database scheduled schools and use only local schedule
         scheduledSchoolIds.clear();
         Object.values(localScheduleOverrides).forEach(schoolId => {
@@ -246,16 +255,12 @@ export const useCompetitionSchedule = (competitionId?: string) => {
             scheduledSchoolIds.add(schoolId);
           }
         });
-        console.log('ACTEST getAvailableSchools - final scheduledSchoolIds after overrides:', Array.from(scheduledSchoolIds));
       }
 
       // Get school names for registered schools
       if (!registeredSchools?.length) {
-        console.log('ACTEST getAvailableSchools - NO registered schools, returning empty array');
         return [];
       }
-
-      console.log('ACTEST getAvailableSchools - fetching school names for:', registeredSchools.map(r => r.school_id));
 
       // Try to get school names from cp_comp_schools first
       const { data: schoolNames, error: schoolError } = await supabase
@@ -265,21 +270,16 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           school_name,
           schools(name)
         `)
-        .eq('competition_id', competitionId)
+        .eq('competition_id', debouncedCompetitionId)
         .in('school_id', registeredSchools.map(r => r.school_id));
-
-      console.log('ACTEST getAvailableSchools - cp_comp_schools result:', { schoolNames, schoolError });
 
       // If no school names found in cp_comp_schools, get them directly from schools table
       let finalSchoolNames = schoolNames;
       if (!schoolNames?.length) {
-        console.log('ACTEST getAvailableSchools - no schools in cp_comp_schools, trying schools table directly');
         const { data: directSchoolNames, error: directSchoolError } = await supabase
           .from('schools')
           .select('id, name')
           .in('id', registeredSchools.map(r => r.school_id));
-        
-        console.log('ACTEST getAvailableSchools - direct schools result:', { directSchoolNames, directSchoolError });
         
         if (!directSchoolError && directSchoolNames) {
           finalSchoolNames = directSchoolNames.map(school => ({
@@ -292,8 +292,6 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schoolError && !finalSchoolNames?.length) throw schoolError;
 
-      console.log('ACTEST getAvailableSchools - finalSchoolNames:', finalSchoolNames);
-
       // Return available schools (registered but not yet scheduled)
       const result = registeredSchools?.filter(
         school => !scheduledSchoolIds.has(school.school_id)
@@ -305,19 +303,25 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         };
       }) || [];
 
-      console.log('ACTEST getAvailableSchools - FINAL RESULT:', result);
       return result;
     } catch (error) {
-      console.error('ACTEST getAvailableSchools - ERROR:', error);
+      console.error('Error getting available schools:', error);
       return [];
     }
-  };
+  }, [debouncedCompetitionId]);
 
   useEffect(() => {
-    if (competitionId) {
+    if (debouncedCompetitionId) {
       fetchScheduleData();
     }
-  }, [competitionId]);
+    
+    // Cleanup on unmount
+    return () => {
+      if (abortControllerRef.current) {
+        abortControllerRef.current.abort();
+      }
+    };
+  }, [debouncedCompetitionId, fetchScheduleData]);
 
   return {
     events,
