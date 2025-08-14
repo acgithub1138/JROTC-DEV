@@ -16,6 +16,7 @@ interface TimeSlot {
   value: string;
   label: string;
   time: Date;
+  available: boolean;
 }
 
 interface CompetitionEvent {
@@ -54,6 +55,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, string>>(new Map());
   const [occupiedSlots, setOccupiedSlots] = useState<Map<string, Set<string>>>(new Map());
+  const [occupiedLabels, setOccupiedLabels] = useState<Map<string, Map<string, string>>>(new Map());
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
@@ -122,22 +124,54 @@ export const MobileCompetitionRegistration: React.FC = () => {
     if (!competitionId) return;
 
     try {
-      const { data, error } = await supabase
+      // Fetch scheduled events with school information
+      const { data: schedules, error } = await supabase
         .from('cp_event_schedules')
-        .select('event_id, scheduled_time')
+        .select('event_id, scheduled_time, school_id, school_name')
         .eq('competition_id', competitionId);
 
       if (error) throw error;
 
+      // Fetch competition schools for better school name mapping
+      const { data: compSchools, error: compErr } = await supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competitionId);
+
+      if (compErr) throw compErr;
+
+      // Create a map of school IDs to school names
+      const nameBySchool = new Map<string, string>();
+      compSchools?.forEach((row: any) => {
+        if (row.school_id) {
+          nameBySchool.set(row.school_id, row.school_name || '');
+        }
+      });
+
       const occupied = new Map<string, Set<string>>();
-      data.forEach(schedule => {
+      const labels = new Map<string, Map<string, string>>();
+      
+      schedules?.forEach((schedule: any) => {
+        // Skip slots occupied by the current user's school
+        if (schedule.school_id === userProfile?.school_id) return;
+        
         if (!occupied.has(schedule.event_id)) {
           occupied.set(schedule.event_id, new Set());
         }
-        occupied.get(schedule.event_id)?.add(schedule.scheduled_time);
+        if (!labels.has(schedule.event_id)) {
+          labels.set(schedule.event_id, new Map());
+        }
+        
+        const scheduledTime = new Date(schedule.scheduled_time).toISOString();
+        occupied.get(schedule.event_id)?.add(scheduledTime);
+        
+        // Get the school name for this slot
+        const labelName = nameBySchool.get(schedule.school_id) || schedule.school_name || 'Occupied';
+        labels.get(schedule.event_id)?.set(scheduledTime, labelName);
       });
 
       setOccupiedSlots(occupied);
+      setOccupiedLabels(labels);
     } catch (error) {
       console.error('Error fetching occupied slots:', error);
     }
@@ -164,17 +198,18 @@ export const MobileCompetitionRegistration: React.FC = () => {
       }
 
       const timeString = current.toISOString();
-      if (!occupied.has(timeString)) {
-        slots.push({
-          value: timeString,
-          label: current.toLocaleTimeString([], { 
-            hour: '2-digit', 
-            minute: '2-digit',
-            hour12: false 
-          }),
-          time: new Date(current)
-        });
-      }
+      const isOccupied = occupied.has(timeString);
+
+      slots.push({
+        value: timeString,
+        label: current.toLocaleTimeString([], { 
+          hour: '2-digit', 
+          minute: '2-digit',
+          hour12: false 
+        }),
+        time: new Date(current),
+        available: !isOccupied
+      });
 
       current.setMinutes(current.getMinutes() + interval);
     }
@@ -482,11 +517,24 @@ export const MobileCompetitionRegistration: React.FC = () => {
                               No available time slots
                             </SelectItem>
                           ) : (
-                            timeSlots.map(slot => (
-                              <SelectItem key={slot.value} value={slot.value}>
-                                {slot.label}
-                              </SelectItem>
-                            ))
+                            timeSlots.map(slot => {
+                              const currentSelected = selectedTimeSlot === slot.value;
+                              const schoolName = !slot.available ? occupiedLabels.get(event.id)?.get(slot.value) : null;
+                              
+                              return (
+                                <SelectItem 
+                                  key={slot.value} 
+                                  value={slot.value}
+                                  disabled={!slot.available && !currentSelected}
+                                >
+                                  {slot.label}
+                                  {currentSelected 
+                                    ? ' (Current)' 
+                                    : (!slot.available ? ` (${schoolName || 'Filled'})` : '')
+                                  }
+                                </SelectItem>
+                              );
+                            })
                           )}
                         </SelectContent>
                       </Select>
