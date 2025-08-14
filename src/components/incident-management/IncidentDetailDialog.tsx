@@ -143,9 +143,6 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const [showDeleteConfirmation, setShowDeleteConfirmation] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
-  // Confirmation dialog state
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
-
   // Filter templates for incidents table
   const incidentTemplates = templates.filter(template => template.source_table === 'incidents' && template.is_active);
 
@@ -153,6 +150,26 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const isAssignedToIncident = currentIncident.assigned_to_admin === userProfile?.id;
   const canEditIncident = !readOnly && (canUpdate || canUpdateAssigned && isAssignedToIncident);
   const canShowEditButton = canEditIncident && !viewOnly;
+
+  // Use unsaved changes hook
+  const initialFormData = {
+    title: currentIncident.title,
+    description: currentIncident.description || '',
+    status: currentIncident.status,
+    priority: currentIncident.priority,
+    category: currentIncident.category,
+    assigned_to_admin: currentIncident.assigned_to_admin || 'unassigned',
+    due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null
+  };
+
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: editData,
+    enabled: isEditing && canEditIncident
+  });
 
   // Update currentIncident and editData when the incident prop changes
   useEffect(() => {
@@ -168,17 +185,26 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       assigned_to_admin: incidentToUse.assigned_to_admin || 'unassigned',
       due_date: incidentToUse.due_date ? new Date(incidentToUse.due_date) : null
     });
-  }, [incident, incidents]);
+    resetChanges();
+  }, [incident, incidents, resetChanges]);
   const handleDiscardChanges = () => {
+    setEditData({
+      title: currentIncident.title,
+      description: currentIncident.description || '',
+      status: currentIncident.status,
+      priority: currentIncident.priority,
+      category: currentIncident.category,
+      assigned_to_admin: currentIncident.assigned_to_admin || 'unassigned',
+      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null
+    });
+    resetChanges();
     setShowUnsavedDialog(false);
     setIsEditing(false);
     onClose();
   };
+  
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
-  };
-  const hasChanges = () => {
-    return editData.title !== currentIncident.title || editData.description !== (currentIncident.description || '') || editData.status !== currentIncident.status || editData.priority !== currentIncident.priority || editData.category !== currentIncident.category || (editData.assigned_to_admin === 'unassigned' ? null : editData.assigned_to_admin) !== currentIncident.assigned_to_admin || editData.due_date?.getTime() !== (currentIncident.due_date ? new Date(currentIncident.due_date).getTime() : null);
   };
   const sendNotificationEmail = async () => {
     if (!sendNotification || !selectedTemplate || !currentIncident.created_by) {
@@ -278,7 +304,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
         });
         return;
       }
-      const changesExist = hasChanges();
+      const changesExist = hasUnsavedChanges;
 
       // If no changes and no notification, just close the modal
       if (!changesExist && !sendNotification) {
@@ -390,6 +416,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       }
 
       // Close the modal after successful operations
+      resetChanges();
       onClose();
     } catch (error) {
       console.error('Error in handleSave:', error);
@@ -397,17 +424,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
     }
   };
   const handleCancel = () => {
-    setIsEditing(false);
-    // Reset edit data to current incident values
-    setEditData({
-      title: currentIncident.title,
-      description: currentIncident.description || '',
-      status: currentIncident.status,
-      priority: currentIncident.priority,
-      category: currentIncident.category,
-      assigned_to_admin: currentIncident.assigned_to_admin || 'unassigned',
-      due_date: currentIncident.due_date ? new Date(currentIncident.due_date) : null
-    });
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      setIsEditing(false);
+      onClose();
+    }
   };
   const handleEdit = () => {
     setIsEditing(true);
@@ -426,21 +448,18 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   };
   const handleClose = () => {
     // Check if there are unsaved changes when in edit mode
-    if (isEditing && hasChanges()) {
-      setShowConfirmDialog(true);
+    if (isEditing && hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
       return;
     }
     setIsEditing(false);
     onClose();
   };
-  const confirmClose = () => {
-    setShowConfirmDialog(false);
-    setIsEditing(false);
-    onClose();
-  };
-  const handleSaveAndClose = async () => {
-    setShowConfirmDialog(false);
-    await handleSave();
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      handleClose();
+    }
   };
   const adminOptions = [{
     value: 'unassigned',
@@ -453,7 +472,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
   const currentCategoryOption = categoryOptions.find(option => option.value === editData.category);
   return <>
-      <Dialog open={isOpen} onOpenChange={handleClose}>
+      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <div className="flex items-center justify-between">
@@ -673,28 +692,12 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
       </DialogContent>
     </Dialog>
 
-    {/* Confirmation Dialog for Unsaved Changes */}
-    <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-          <AlertDialogDescription>
-            You have unsaved changes. What would you like to do?
-          </AlertDialogDescription>
-        </AlertDialogHeader>
-        <AlertDialogFooter className="flex-col sm:flex-row gap-2">
-          <AlertDialogCancel onClick={() => setShowConfirmDialog(false)}>
-            Stay on Form
-          </AlertDialogCancel>
-          <Button variant="outline" onClick={confirmClose}>
-            Close without Saving
-          </Button>
-          <AlertDialogAction onClick={handleSaveAndClose}>
-            Save Changes
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <UnsavedChangesDialog 
+      open={showUnsavedDialog}
+      onOpenChange={setShowUnsavedDialog}
+      onDiscard={handleDiscardChanges}
+      onCancel={handleContinueEditing}
+    />
 
     </>;
 };
