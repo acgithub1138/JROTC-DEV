@@ -44,40 +44,42 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [viewSchoolId, setViewSchoolId] = useState<string | null>(null);
 
+  const fetchData = async () => {
+    setIsLoading(true);
+    setError(null);
+    const [eventsRes, schoolsRes] = await Promise.all([
+      supabase
+        .from('competition_events')
+        .select('id, event, total_points, score_sheet, school_id, created_at')
+        .eq('source_type', 'portal')
+        .eq('source_competition_id', competitionId),
+      supabase
+        .from('cp_comp_schools')
+        .select('school_id, school_name')
+        .eq('competition_id', competitionId),
+    ]);
+
+    if (eventsRes.error || schoolsRes.error) {
+      setError(eventsRes.error?.message || schoolsRes.error?.message || 'Failed to load results');
+      setIsLoading(false);
+      return;
+    }
+
+    setRows((eventsRes.data || []) as CompetitionEventRow[]);
+
+    const map: Record<string, string> = {};
+    (schoolsRes.data || []).forEach((s: CPSchoolRow) => {
+      if (s.school_id) map[s.school_id] = s.school_name || 'Unknown School';
+    });
+    setSchoolMap(map);
+
+    setIsLoading(false);
+  };
+
   useEffect(() => {
     let active = true;
     const load = async () => {
-      setIsLoading(true);
-      setError(null);
-      const [eventsRes, schoolsRes] = await Promise.all([
-        supabase
-          .from('competition_events')
-          .select('id, event, total_points, score_sheet, school_id, created_at')
-          .eq('source_type', 'portal')
-          .eq('source_competition_id', competitionId),
-        supabase
-          .from('cp_comp_schools')
-          .select('school_id, school_name')
-          .eq('competition_id', competitionId),
-      ]);
-
-      if (!active) return;
-
-      if (eventsRes.error || schoolsRes.error) {
-        setError(eventsRes.error?.message || schoolsRes.error?.message || 'Failed to load results');
-        setIsLoading(false);
-        return;
-      }
-
-      setRows((eventsRes.data || []) as CompetitionEventRow[]);
-
-      const map: Record<string, string> = {};
-      (schoolsRes.data || []).forEach((s: CPSchoolRow) => {
-        if (s.school_id) map[s.school_id] = s.school_name || 'Unknown School';
-      });
-      setSchoolMap(map);
-
-      setIsLoading(false);
+      await fetchData();
     };
 
     load();
@@ -86,26 +88,42 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     };
   }, [competitionId]);
 
-  useEffect(() => {
+  const fetchEventSheets = async () => {
     if (!viewEvent || !viewSchoolId) return;
-    let active = true;
     setIsDialogLoading(true);
-    supabase
+    const { data, error } = await supabase
       .from('competition_events')
       .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
       .eq('source_type', 'portal')
       .eq('source_competition_id', competitionId)
       .eq('event', viewEvent as any)
-      .eq('school_id', viewSchoolId as any)
-      .then(({ data, error }) => {
-        if (!active) return;
-        setEventSheets(error ? [] : (data || []));
-        setIsDialogLoading(false);
-      });
+      .eq('school_id', viewSchoolId as any);
+    
+    setEventSheets(error ? [] : (data || []));
+    setIsDialogLoading(false);
+  };
+
+  useEffect(() => {
+    let active = true;
+    const load = async () => {
+      await fetchEventSheets();
+    };
+
+    load();
     return () => {
       active = false;
     };
   }, [viewEvent, viewSchoolId, competitionId]);
+
+  const handleEventsRefresh = async () => {
+    // Small delay to ensure database updates are visible
+    await new Promise(resolve => setTimeout(resolve, 200));
+    // Refresh both the main results and the dialog data
+    await Promise.all([
+      fetchData(),
+      fetchEventSheets()
+    ]);
+  };
 
   const grouped = useMemo(() => {
     type JudgeScore = { judgeNumber?: number; score: number };
@@ -286,7 +304,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           ) : eventSheets.length === 0 ? (
             <div className="p-8 text-center text-muted-foreground">No score sheets found for this school.</div>
           ) : (
-            <PortalScoreSheetTable events={eventSheets as any} />
+            <PortalScoreSheetTable events={eventSheets as any} onEventsRefresh={handleEventsRefresh} />
           )}
         </DialogContent>
       </Dialog>
