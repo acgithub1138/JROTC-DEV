@@ -170,15 +170,14 @@ export const CompetitionScheduleTab = ({
   const printScheduleData = getPrintScheduleData();
 
   return <TooltipProvider>
-      <div className="space-y-4 print:space-y-2 schedule-print-container">
-        {/* Print-only table for schedule */}
-        <div className="hidden print:block text-xs">
-          <h2 className="text-sm font-bold mb-2 text-center">
-            {selectedSchoolFilter === 'all' 
-              ? 'Competition Schedule - All Schools' 
-              : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
-            }
-          </h2>
+      {/* Print-only content - separate from main UI */}
+      <div className="schedule-print-container hidden print:block">
+        <h2 className="text-lg font-bold mb-4 text-center">
+          {selectedSchoolFilter === 'all' 
+            ? 'Competition Schedule - All Schools' 
+            : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
+          }
+        </h2>
           
           {selectedSchoolFilter === 'all' ? (
             // Grid format for all schools: Y-axis = time, X-axis = events
@@ -259,9 +258,11 @@ export const CompetitionScheduleTab = ({
               </tbody>
             </table>
           )}
-        </div>
+      </div>
 
-        <div className="flex items-center justify-between print:hidden">
+      {/* Main UI - hidden during print */}
+      <div className="space-y-4 print:hidden">
+        <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
           </div>
