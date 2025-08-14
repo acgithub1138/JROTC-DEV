@@ -1,4 +1,3 @@
-
 import React, { useState, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -26,7 +25,6 @@ const getRoleColor = (roleName: string): string => {
   };
   return colorMap[roleName] || 'bg-gray-100 text-gray-800';
 };
-
 export const RoleManagementPage: React.FC = () => {
   const [selectedRole, setSelectedRole] = useState<UserRole>('instructor');
   const {
@@ -44,8 +42,12 @@ export const RoleManagementPage: React.FC = () => {
     isLoadingAllRoles,
     error: rolesError
   } = useDynamicRoles();
-  const { data: permissionTest } = usePermissionTest();
-  const { toast } = useToast();
+  const {
+    data: permissionTest
+  } = usePermissionTest();
+  const {
+    toast
+  } = useToast();
 
   // Debug logging
   React.useEffect(() => {
@@ -58,18 +60,21 @@ export const RoleManagementPage: React.FC = () => {
   const availableRoles = useMemo(() => {
     if (!allRoles?.length) {
       console.log('No roles available, using fallback');
-      return [
-        { value: 'instructor' as UserRole, label: 'Instructor' },
-        { value: 'command_staff' as UserRole, label: 'Command Staff' },
-        { value: 'cadet' as UserRole, label: 'Cadet' }
-      ];
+      return [{
+        value: 'instructor' as UserRole,
+        label: 'Instructor'
+      }, {
+        value: 'command_staff' as UserRole,
+        label: 'Command Staff'
+      }, {
+        value: 'cadet' as UserRole,
+        label: 'Cadet'
+      }];
     }
-
     const roles = allRoles.filter(role => !['admin'].includes(role.role_name)).map(role => ({
       value: role.role_name as UserRole,
       label: role.role_label
     }));
-
     console.log('Available roles for management:', roles);
     return roles;
   }, [allRoles]);
@@ -95,15 +100,14 @@ export const RoleManagementPage: React.FC = () => {
   }, [actions, actionOrder]);
 
   // Drag and drop sensors
-  const sensors = useSensors(
-    useSensor(PointerSensor),
-    useSensor(KeyboardSensor, {
-      coordinateGetter: sortableKeyboardCoordinates
-    })
-  );
-
+  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
+    coordinateGetter: sortableKeyboardCoordinates
+  }));
   const handleDragEnd = (event: DragEndEvent) => {
-    const { active, over } = event;
+    const {
+      active,
+      over
+    } = event;
     if (over && active.id !== over.id) {
       const oldIndex = actionOrder.findIndex(id => id === active.id);
       const newIndex = actionOrder.findIndex(id => id === over.id);
@@ -113,11 +117,14 @@ export const RoleManagementPage: React.FC = () => {
       setActionOrder(newOrder);
     }
   };
-
   const rolePermissions = getRolePermissions(selectedRole);
-
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
-    console.log('Updating permission:', { selectedRole, moduleId, actionId, enabled });
+    console.log('Updating permission:', {
+      selectedRole,
+      moduleId,
+      actionId,
+      enabled
+    });
     updatePermission({
       role: selectedRole,
       moduleId,
@@ -130,7 +137,7 @@ export const RoleManagementPage: React.FC = () => {
           description: `Permission ${enabled ? 'enabled' : 'disabled'} successfully.`
         });
       },
-      onError: (error) => {
+      onError: error => {
         console.error('Permission update error:', error);
         toast({
           title: 'Error',
@@ -140,7 +147,6 @@ export const RoleManagementPage: React.FC = () => {
       }
     });
   };
-
   const handleResetToDefaults = () => {
     console.log('Resetting permissions to defaults for role:', selectedRole);
     resetToDefaults(selectedRole, {
@@ -150,7 +156,7 @@ export const RoleManagementPage: React.FC = () => {
           description: `${selectedRole} permissions have been reset to defaults.`
         });
       },
-      onError: (error) => {
+      onError: error => {
         console.error('Reset permissions error:', error);
         toast({
           title: 'Error',
@@ -163,8 +169,7 @@ export const RoleManagementPage: React.FC = () => {
 
   // Show error state if there's an issue with roles
   if (rolesError) {
-    return (
-      <div className="p-6 max-w-7xl mx-auto">
+    return <div className="p-6 max-w-7xl mx-auto">
         <div className="mb-6">
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Role Management</h1>
           <p className="text-gray-600">Configure permissions for each user role and manage role definitions.</p>
@@ -180,8 +185,7 @@ export const RoleManagementPage: React.FC = () => {
             </div>
           </CardContent>
         </Card>
-      </div>
-    );
+      </div>;
   }
 
   // Check permission test results with proper type checking
@@ -189,25 +193,21 @@ export const RoleManagementPage: React.FC = () => {
   if (hasPermissionTestError) {
     console.warn('Permission system may have issues:', permissionTest.error);
   }
-
-  return (
-    <div className="p-6 max-w-7xl mx-auto">
+  return <div className="p-6 max-w-7xl mx-auto">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900 mb-2">Role Management</h1>
         <p className="text-gray-600">
           Configure permissions for each user role and manage role definitions.
         </p>
-        {permissionTest && (
-          <div className="mt-2 text-sm text-gray-500">
+        {permissionTest && <div className="mt-2 text-sm text-gray-500">
             System Status: {'success' in permissionTest && permissionTest.success ? '✅ Working' : '❌ Error'} | 
             Current Role: {'userRole' in permissionTest ? permissionTest.userRole : 'Unknown'} | 
-            Can Read Users: {'canReadUsers' in permissionTest ? (permissionTest.canReadUsers ? '✅' : '❌') : '❌'} | 
-            Can Create Users: {'canCreateUsers' in permissionTest ? (permissionTest.canCreateUsers ? '✅' : '❌') : '❌'}
-          </div>
-        )}
+            Can Read Users: {'canReadUsers' in permissionTest ? permissionTest.canReadUsers ? '✅' : '❌' : '❌'} | 
+            Can Create Users: {'canCreateUsers' in permissionTest ? permissionTest.canCreateUsers ? '✅' : '❌' : '❌'}
+          </div>}
       </div>
 
-      <Tabs defaultValue="permissions" className="w-full">
+      <Tabs defaultValue="permissions" className="w-full py-[2px]">
         <TabsList className="mb-6">
           <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
           <TabsTrigger value="roles">Manage Roles</TabsTrigger>
@@ -215,31 +215,25 @@ export const RoleManagementPage: React.FC = () => {
         
         <TabsContent value="permissions">
           <Card className="mb-6">
-            <CardHeader>
-              <CardTitle className="flex items-center justify-between">
+            <CardHeader className="py-0">
+              <CardTitle className="flex items-center justify-between py-0">
                 <div className="mb-6">
                   <label className="block text-sm font-medium text-gray-700 mb-2">
                     Select Role
                   </label>
                   <div className="flex items-center gap-4">
-                    <Select value={selectedRole} onValueChange={(value) => setSelectedRole(value as UserRole)}>
+                    <Select value={selectedRole} onValueChange={value => setSelectedRole(value as UserRole)}>
                       <SelectTrigger className="w-64">
                         <SelectValue placeholder="Select a role" />
                       </SelectTrigger>
                       <SelectContent>
-                        {isLoadingAllRoles ? (
-                          <SelectItem value="loading" disabled>
+                        {isLoadingAllRoles ? <SelectItem value="loading" disabled>
                             Loading roles...
-                          </SelectItem>
-                        ) : (
-                          availableRoles.map(role => (
-                            <SelectItem key={role.value} value={role.value}>
+                          </SelectItem> : availableRoles.map(role => <SelectItem key={role.value} value={role.value}>
                               <div className="flex items-center justify-between w-full">
                                 <span>{role.label}</span>
                               </div>
-                            </SelectItem>
-                          ))
-                        )}
+                            </SelectItem>)}
                       </SelectContent>
                     </Select>
                   </div>
@@ -266,31 +260,11 @@ export const RoleManagementPage: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="ccc">
-                  <PortalPermissionsTable 
-                    portal="ccc" 
-                    modules={modules} 
-                    actions={actions} 
-                    orderedActions={orderedActions} 
-                    rolePermissions={rolePermissions} 
-                    isUpdating={isUpdating} 
-                    sensors={sensors} 
-                    handleDragEnd={handleDragEnd} 
-                    handlePermissionChange={handlePermissionChange} 
-                  />
+                  <PortalPermissionsTable portal="ccc" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
                 </TabsContent>
 
                 <TabsContent value="competition">
-                  <PortalPermissionsTable 
-                    portal="competition" 
-                    modules={modules} 
-                    actions={actions} 
-                    orderedActions={orderedActions} 
-                    rolePermissions={rolePermissions} 
-                    isUpdating={isUpdating} 
-                    sensors={sensors} 
-                    handleDragEnd={handleDragEnd} 
-                    handlePermissionChange={handlePermissionChange} 
-                  />
+                  <PortalPermissionsTable portal="competition" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
                 </TabsContent>
               </Tabs>
             </CardContent>
@@ -301,6 +275,5 @@ export const RoleManagementPage: React.FC = () => {
           <UserRolesTable />
         </TabsContent>
       </Tabs>
-    </div>
-  );
+    </div>;
 };
