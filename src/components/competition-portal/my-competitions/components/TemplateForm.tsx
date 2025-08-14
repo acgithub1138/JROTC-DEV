@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { COMPETITION_EVENT_TYPES, JROTC_PROGRAMS } from '../utils/constants';
+import { JsonFieldBuilder } from './json-field-builder/JsonFieldBuilder';
 import type { CompetitionTemplate } from '../types';
 
 const templateSchema = z.object({
@@ -38,8 +39,6 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   onFormChange,
   isSubmitting
 }) => {
-  const [scoreFields, setScoreFields] = useState<Array<{ key: string; value: any }>>([]);
-
   const form = useForm<TemplateFormData>({
     resolver: zodResolver(templateSchema),
     defaultValues: {
@@ -53,6 +52,7 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   });
 
   const { formState, watch } = form;
+  const watchedValues = watch();
 
   // Watch for form changes
   useEffect(() => {
@@ -62,42 +62,8 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     return () => subscription.unsubscribe();
   }, [watch, formState.isDirty, onFormChange]);
 
-  // Initialize score fields from template
-  useEffect(() => {
-    if (template?.scores) {
-      const fields = Object.entries(template.scores).map(([key, value]) => ({
-        key,
-        value
-      }));
-      setScoreFields(fields);
-    }
-  }, [template]);
-
-  const addScoreField = () => {
-    setScoreFields([...scoreFields, { key: '', value: 0 }]);
-  };
-
-  const removeScoreField = (index: number) => {
-    const newFields = scoreFields.filter((_, i) => i !== index);
-    setScoreFields(newFields);
-    updateScores(newFields);
-  };
-
-  const updateScoreField = (index: number, field: 'key' | 'value', value: any) => {
-    const newFields = [...scoreFields];
-    newFields[index] = { ...newFields[index], [field]: value };
-    setScoreFields(newFields);
-    updateScores(newFields);
-  };
-
-  const updateScores = (fields: Array<{ key: string; value: any }>) => {
-    const scores = fields.reduce((acc, field) => {
-      if (field.key.trim()) {
-        acc[field.key.trim()] = field.value;
-      }
-      return acc;
-    }, {} as Record<string, any>);
-    form.setValue('scores', scores, { shouldDirty: true });
+  const handleScoresChange = (newScores: Record<string, any>) => {
+    form.setValue('scores', newScores, { shouldDirty: true });
   };
 
   const handleSubmit = async (data: TemplateFormData) => {
@@ -203,37 +169,13 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
           )}
         />
 
+        {/* Score Sheet Builder */}
         <div className="space-y-4">
-          <div className="flex justify-between items-center">
-            <Label>Score Sheet Fields</Label>
-            <Button type="button" variant="outline" onClick={addScoreField}>
-              Add Field
-            </Button>
-          </div>
-          
-          {scoreFields.map((field, index) => (
-            <div key={index} className="flex gap-2 items-center">
-              <Input
-                placeholder="Field name"
-                value={field.key}
-                onChange={(e) => updateScoreField(index, 'key', e.target.value)}
-              />
-              <Input
-                type="number"
-                placeholder="Max points"
-                value={field.value}
-                onChange={(e) => updateScoreField(index, 'value', parseFloat(e.target.value) || 0)}
-              />
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => removeScoreField(index)}
-              >
-                Remove
-              </Button>
-            </div>
-          ))}
+          <h3 className="text-lg font-semibold">Score Sheet Builder</h3>
+          <JsonFieldBuilder 
+            value={watchedValues.scores || {}}
+            onChange={handleScoresChange}
+          />
         </div>
 
         <div className="flex justify-end gap-2">

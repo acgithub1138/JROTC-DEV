@@ -1,0 +1,66 @@
+import React from 'react';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { JsonField } from '../types';
+interface ScoreSheetPreviewProps {
+  fields: JsonField[];
+  show: boolean;
+}
+export const ScoreSheetPreview: React.FC<ScoreSheetPreviewProps> = ({
+  fields,
+  show
+}) => {
+  if (!show || fields.length === 0) return null;
+  return <Card>
+      <CardHeader>
+        <CardTitle>Score Sheet Preview</CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="border-2 border-dashed border-muted-foreground/20 p-6 bg-background">
+          <div className="space-y-6">
+            {fields.map(field => {
+            if (field.type === 'section_header') {
+              return <div key={field.id} className="border-b-2 border-primary pb-2">
+                    <h3 className="text-lg font-bold text-primary">{field.name}</h3>
+                  </div>;
+            }
+            if (field.type === 'label' || field.type === 'bold_gray' || field.type === 'pause') {
+              return <div key={field.id} className="py-2">
+                    {field.pauseField ? <div className="bg-muted px-3 py-2 rounded">
+                        <span className="font-bold">{field.name}</span>
+                      </div> : <span className="font-medium">{field.name}</span>}
+                    {field.fieldInfo && <p className="text-sm text-muted-foreground mt-2">{field.fieldInfo}</p>}
+                  </div>;
+            }
+            if (field.type === 'penalty') {
+              return <div key={field.id} className="py-2 border-b space-y-2">
+                    <div className="flex items-center justify-between">
+                      <span className="font-medium text-destructive">{field.name}</span>
+                      <div className="flex items-center gap-2">
+                        {field.penaltyType === 'points' ? <input className="border rounded px-2 py-1 w-32" disabled placeholder="Number of violations" /> : field.penaltyType === 'minor_major' ? <select className="border rounded px-2 py-1 w-32" disabled>
+                            <option>Select type</option>
+                            <option>Minor (-20)</option>
+                            <option>Major (-50)</option>
+                          </select> : <input className="border rounded px-2 py-1 w-32" disabled />}
+                      </div>
+                    </div>
+                    {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+                    {field.penaltyType === 'points' && field.pointValue && <p className="text-xs text-destructive">Each violation: {field.pointValue} points</p>}
+                  </div>;
+            }
+            return <div key={field.id} className="border-b space-y-2 py-[2px]">
+                    <div className="flex items-center justify-between">
+                      <span className={field.pauseField ? "font-bold bg-muted px-3 py-2 rounded" : "font-medium"}>
+                        {field.name}
+                      </span>
+                      <div className="flex items-center gap-2">
+                        <input className="border rounded px-2 py-1 w-32" disabled />
+                      </div>
+                    </div>
+                  {field.fieldInfo && <p className="text-sm text-muted-foreground">{field.fieldInfo}</p>}
+                </div>;
+          })}
+          </div>
+        </div>
+      </CardContent>
+    </Card>;
+};
