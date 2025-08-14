@@ -167,13 +167,12 @@
   
   /* Ensure proper centering for print content */
   .schedule-print-container {
-    position: static !important;
-    left: auto !important;
+    position: absolute !important;
+    left: 50% !important;
     top: 0 !important;
-    transform: none !important;
-    margin: 0 !important;
+    transform: translateX(-50%) !important;
+    margin: 0 auto !important;
     display: block !important;
-    width: 100% !important;
   }
   
   .schedule-print-container table {
