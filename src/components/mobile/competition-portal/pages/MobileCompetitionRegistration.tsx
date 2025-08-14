@@ -679,7 +679,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
                         )}
                       </label>
                       <Select
-                        key={`${event.id}-${selectedTimeSlot || 'empty'}`}
+                        key={`${event.id}-${selectedTimeSlot || 'empty'}-${occupiedSlots.size}-${isLoading}`}
                         value={selectedTimeSlot || ''}
                         onValueChange={(value) => handleTimeSlotSelection(event.id, value)}
                       >
