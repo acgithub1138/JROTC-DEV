@@ -54,6 +54,7 @@ import { MobileScheduleEdit } from "@/components/mobile/competition-portal/pages
 import { MobileHostResults } from "@/components/mobile/competition-portal/pages/MobileHostResults";
 import { MobileEventResultsView } from "@/components/mobile/competition-portal/pages/MobileEventResultsView";
 import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
+import { MobileCompetitionRegistration } from "@/components/mobile/competition-portal/pages/MobileCompetitionRegistration";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -162,6 +163,11 @@ const App = () => (
                       <MobileCompetitionPortalLayout>
                         <MobileOpenCompetitions />
                       </MobileCompetitionPortalLayout>
+                    </ProtectedRoute>
+                  } />
+                  <Route path="competition-portal/register" element={
+                    <ProtectedRoute>
+                      <MobileCompetitionRegistration />
                     </ProtectedRoute>
                   } />
                   <Route path="competition-portal/my-competitions" element={

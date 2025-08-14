@@ -123,7 +123,12 @@ export const MobileOpenCompetitions: React.FC = () => {
                     <span className="text-xs text-muted-foreground">
                       Hosted by: {competition.hosting_school || 'External'}
                     </span>
-                    <Button variant="outline" size="sm" className="text-xs h-7">
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      className="text-xs h-7"
+                      onClick={() => navigate(`/mobile/competition-portal/register?competitionId=${competition.id}`)}
+                    >
                       Register
                     </Button>
                   </div>
