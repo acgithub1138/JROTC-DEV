@@ -54,14 +54,20 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
         judge_number: judgeNumber,
         calculated_at: new Date().toISOString()
       };
-      const {
-        error
-      } = await supabase.from('competition_events').update({
-        score_sheet: updatedScoreSheet,
-        total_points: calculateTotal(),
-        updated_at: new Date().toISOString()
-      }).eq('id', event.id);
+      const { error } = await supabase
+        .from('competition_events')
+        .update({
+          score_sheet: updatedScoreSheet,
+          total_points: calculateTotal(),
+          updated_at: new Date().toISOString()
+        })
+        .eq('id', event.id);
+      
       if (error) {
+        console.error('Supabase error:', error);
+        if (error.code === 'PGRST301' || error.message?.includes('permission')) {
+          throw new Error('You do not have permission to edit this score sheet. You can only edit score sheets from your own school.');
+        }
         throw error;
       }
       toast.success('Score sheet updated successfully');
