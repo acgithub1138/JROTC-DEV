@@ -104,7 +104,13 @@ export const CompetitionScheduleTab = ({
 
 
   const handlePrint = () => {
-    navigate(`/app/print-schedule?competitionId=${competitionId}&schoolFilter=${selectedSchoolFilter}`);
+    // Debug logging
+    console.log('Print button clicked, competitionId:', competitionId, 'schoolFilter:', selectedSchoolFilter);
+    
+    // Use window.open to navigate to print page in new tab
+    const printUrl = `/app/print-schedule?competitionId=${competitionId}&schoolFilter=${selectedSchoolFilter}`;
+    console.log('Opening print URL:', printUrl);
+    window.open(printUrl, '_blank');
   };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
