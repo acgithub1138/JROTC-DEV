@@ -72,13 +72,13 @@ export const EditScoreSheetDialog: React.FC<EditScoreSheetDialogProps> = ({
       }
       toast.success('Score sheet updated successfully');
       
-      // Close dialog first, then refresh data to ensure proper state reset
+      // Close dialog first, then refresh data after proper delay
       onOpenChange(false);
       
-      // Small delay to ensure dialog is fully closed before refreshing
+      // Longer delay to ensure dialog animation completes before refresh
       setTimeout(() => {
         onEventUpdated();
-      }, 100);
+      }, 300);
     } catch (error) {
       console.error('Error updating score sheet:', error);
       toast.error('Failed to update score sheet');
