@@ -11,6 +11,7 @@ export const ReportsTab = () => {
   const [selectedEvent, setSelectedEvent] = useState<string | null>(null);
   const [selectedCompetitions, setSelectedCompetitions] = useState<string[] | null>(null);
   const [visibleCriteria, setVisibleCriteria] = useState<string[]>([]);
+  const [criteriaColors, setCriteriaColors] = useState<Record<string, string>>({});
 
   // Get original criteria before mapping for the advanced widget
   const [originalCriteria, setOriginalCriteria] = useState<string[]>([]);
@@ -59,10 +60,21 @@ export const ReportsTab = () => {
     }
   }, [scoringCriteria]);
 
-  // Auto-select all criteria when scoringCriteria changes (new event selected)
+  // Generate random colors and auto-select all criteria when scoringCriteria changes
   useEffect(() => {
     if (scoringCriteria.length > 0 && selectedEvent) {
       setVisibleCriteria(scoringCriteria);
+      
+      // Generate random colors for each criteria
+      const newColors: Record<string, string> = {};
+      scoringCriteria.forEach(criteria => {
+        // Generate random HSL color with good saturation and lightness for visibility
+        const hue = Math.floor(Math.random() * 360);
+        const saturation = Math.floor(Math.random() * 40) + 60; // 60-100%
+        const lightness = Math.floor(Math.random() * 30) + 40; // 40-70%
+        newColors[criteria] = `hsl(${hue}, ${saturation}%, ${lightness}%)`;
+      });
+      setCriteriaColors(newColors);
     }
   }, [scoringCriteria, selectedEvent]);
 
@@ -110,6 +122,7 @@ export const ReportsTab = () => {
               <PerformanceChart 
                 data={reportData} 
                 visibleCriteria={visibleCriteria} 
+                criteriaColors={criteriaColors}
                 isLoading={isLoading} 
               />
             </div>
@@ -119,6 +132,7 @@ export const ReportsTab = () => {
               <ChartLegend 
                 scoringCriteria={scoringCriteria} 
                 visibleCriteria={visibleCriteria} 
+                criteriaColors={criteriaColors}
                 onCriteriaToggle={handleCriteriaVisibilityToggle} 
                 onSelectAll={handleSelectAllCriteria} 
                 onUnselectAll={handleUnselectAllCriteria} 
