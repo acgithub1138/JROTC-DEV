@@ -101,32 +101,34 @@ export const CompetitionScheduleTab = ({
 
   const getPrintScheduleData = () => {
     if (selectedSchoolFilter === 'all') {
-      // Show all schools in a simple table format
-      const allScheduleData: Array<{ time: string; event: string; school: string; location: string }> = [];
+      // Create a grid format with time as X-axis and events as Y-axis
+      const timeSlots = allTimeSlots.filter(timeSlot => 
+        events.some(event => shouldShowSlot(event.id, timeSlot))
+      );
       
-      allTimeSlots.forEach(timeSlot => {
-        events.forEach(event => {
-          // Check if this time slot is a lunch break for this event
-          const eventDetails = events.find(e => e.id === event.id);
-          const isLunchSlot = eventDetails?.timeSlots.find(
-            slot => slot.time.getTime() === timeSlot.getTime()
-          )?.isLunchBreak;
-          
-          if (!isLunchSlot) {
-            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-            if (assignedSchool) {
-              allScheduleData.push({
-                time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-                event: event.event_name,
-                school: assignedSchool.name,
-                location: event.event_location || 'TBD'
-              });
+      return {
+        timeSlots: timeSlots.map(timeSlot => 
+          formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)
+        ),
+        events: events.map(event => ({
+          name: event.event_name,
+          location: event.event_location || 'TBD',
+          assignments: timeSlots.map(timeSlot => {
+            // Check if this time slot is a lunch break for this event
+            const eventDetails = events.find(e => e.id === event.id);
+            const isLunchSlot = eventDetails?.timeSlots.find(
+              slot => slot.time.getTime() === timeSlot.getTime()
+            )?.isLunchBreak;
+            
+            if (isLunchSlot) {
+              return 'Lunch Break';
             }
-          }
-        });
-      });
-      
-      return allScheduleData.sort((a, b) => a.time.localeCompare(b.time));
+            
+            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+            return assignedSchool?.name || '-';
+          })
+        }))
+      };
     } else {
       // Show specific school's schedule
       const schoolSchedule: Array<{ time: string; event: string; location: string }> = [];
@@ -188,26 +190,57 @@ export const CompetitionScheduleTab = ({
               : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
             }
           </h2>
-          <table className="w-full border-collapse border border-black">
-            <thead>
-              <tr>
-                <th className="border border-black p-2 text-left font-bold">Time</th>
-                <th className="border border-black p-2 text-left font-bold">Event</th>
-                {selectedSchoolFilter === 'all' && <th className="border border-black p-2 text-left font-bold">School</th>}
-                <th className="border border-black p-2 text-left font-bold">Location</th>
-              </tr>
-            </thead>
-            <tbody>
-              {printScheduleData.map((item, index) => (
-                <tr key={index}>
-                  <td className="border border-black p-2">{item.time}</td>
-                  <td className="border border-black p-2">{item.event}</td>
-                  {selectedSchoolFilter === 'all' && <td className="border border-black p-2">{('school' in item ? item.school : '') as string}</td>}
-                  <td className="border border-black p-2">{item.location}</td>
+          
+          {selectedSchoolFilter === 'all' ? (
+            // Grid format for all schools: X-axis = time, Y-axis = events
+            <table className="w-full border-collapse border border-black">
+              <thead>
+                <tr>
+                  <th className="border border-black p-2 text-left font-bold">Event</th>
+                  {(printScheduleData as any).timeSlots?.map((time: string, index: number) => (
+                    <th key={index} className="border border-black p-2 text-center font-bold">
+                      {time}
+                    </th>
+                  ))}
                 </tr>
-              ))}
-            </tbody>
-          </table>
+              </thead>
+              <tbody>
+                {(printScheduleData as any).events?.map((event: any, eventIndex: number) => (
+                  <tr key={eventIndex}>
+                    <td className="border border-black p-2 font-medium">
+                      <div>{event.name}</div>
+                      <div className="text-xs text-gray-600">({event.location})</div>
+                    </td>
+                    {event.assignments.map((assignment: string, timeIndex: number) => (
+                      <td key={timeIndex} className="border border-black p-2 text-center text-xs">
+                        {assignment}
+                      </td>
+                    ))}
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          ) : (
+            // Individual school format (unchanged)
+            <table className="w-full border-collapse border border-black">
+              <thead>
+                <tr>
+                  <th className="border border-black p-2 text-left font-bold">Time</th>
+                  <th className="border border-black p-2 text-left font-bold">Event</th>
+                  <th className="border border-black p-2 text-left font-bold">Location</th>
+                </tr>
+              </thead>
+              <tbody>
+                {(printScheduleData as Array<{ time: string; event: string; location: string }>).map((item, index) => (
+                  <tr key={index}>
+                    <td className="border border-black p-2">{item.time}</td>
+                    <td className="border border-black p-2">{item.event}</td>
+                    <td className="border border-black p-2">{item.location}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
         </div>
 
         <div className="flex items-center justify-between print:hidden">
