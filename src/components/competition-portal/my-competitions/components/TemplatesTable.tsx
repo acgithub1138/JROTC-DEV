@@ -69,7 +69,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
             >
               Created {getSortIcon('created_at')}
             </TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
