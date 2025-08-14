@@ -6,6 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Edit, Printer } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
@@ -36,6 +37,7 @@ export const CompetitionScheduleTab = ({
     timezone
   } = useSchoolTimezone();
   const { userProfile } = useAuth();
+  const navigate = useNavigate();
   const [selectedEvent, setSelectedEvent] = useState<ScheduleEvent | null>(null);
   const [selectedSchoolFilter, setSelectedSchoolFilter] = useState<string>('all');
 
@@ -100,55 +102,9 @@ export const CompetitionScheduleTab = ({
     return true;
   };
 
-  const getPrintScheduleData = () => {
-    if (selectedSchoolFilter === 'all') {
-      // Create a grid format with time as Y-axis and events as X-axis
-      const timeSlots = allTimeSlots.filter(timeSlot => 
-        events.some(event => shouldShowSlot(event.id, timeSlot))
-      );
-      
-      return {
-        timeSlots: timeSlots.map(timeSlot => 
-          formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)
-        ),
-        timeSlotsRaw: timeSlots,
-        events: events.map(event => ({
-          name: event.event_name,
-          location: event.event_location || 'TBD',
-          id: event.id
-        }))
-      };
-    } else {
-      // Show specific school's schedule
-      const schoolSchedule: Array<{ time: string; event: string; location: string }> = [];
-      
-      allTimeSlots.forEach(timeSlot => {
-        events.forEach(event => {
-          // Check if this time slot is a lunch break for this event
-          const eventDetails = events.find(e => e.id === event.id);
-          const isLunchSlot = eventDetails?.timeSlots.find(
-            slot => slot.time.getTime() === timeSlot.getTime()
-          )?.isLunchBreak;
-          
-          if (!isLunchSlot) {
-            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-            if (assignedSchool?.id === selectedSchoolFilter) {
-              schoolSchedule.push({
-                time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-                event: event.event_name,
-                location: event.event_location || 'TBD'
-              });
-            }
-          }
-        });
-      });
-      
-      return schoolSchedule.sort((a, b) => a.time.localeCompare(b.time));
-    }
-  };
 
   const handlePrint = () => {
-    window.print();
+    navigate(`/app/print-schedule?competitionId=${competitionId}&schoolFilter=${selectedSchoolFilter}`);
   };
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
@@ -167,101 +123,11 @@ export const CompetitionScheduleTab = ({
   const filteredTimeSlots = allTimeSlots.filter(timeSlot => 
     events.some(event => shouldShowSlot(event.id, timeSlot))
   );
-  const printScheduleData = getPrintScheduleData();
 
   return <TooltipProvider>
-      <div className="space-y-4 print:space-y-2 schedule-print-container">
-        {/* Print-only table for schedule */}
-        <div className="hidden print:block text-xs">
-          <h2 className="text-sm font-bold mb-2 text-center">
-            {selectedSchoolFilter === 'all' 
-              ? 'Competition Schedule - All Schools' 
-              : `Competition Schedule - ${registeredSchools?.find(s => s.id === selectedSchoolFilter)?.name || 'Selected School'}`
-            }
-          </h2>
-          
-          {selectedSchoolFilter === 'all' ? (
-            // Grid format for all schools: Y-axis = time, X-axis = events
-            <table className="w-full border-collapse border border-black text-xs">
-              <colgroup>
-                <col style={{width: '15%'}} />
-                {(printScheduleData as any).events?.map((_: any, index: number) => {
-                  const eventCount = (printScheduleData as any).events?.length || 1;
-                  const columnWidth = `${85 / eventCount}%`; // 15% for time column, remaining 85% distributed evenly
-                  return <col key={index} style={{width: columnWidth}} />;
-                })}
-              </colgroup>
-              <thead>
-                <tr>
-                  <th className="border border-black p-1 text-left font-bold">Time</th>
-                  {(printScheduleData as any).events?.map((event: any, index: number) => (
-                    <th key={index} className="border border-black p-1 text-center font-bold text-xs">
-                      <div className="font-semibold">{event.name}</div>
-                      <div className="text-xs font-normal text-gray-600">({event.location})</div>
-                    </th>
-                  ))}
-                </tr>
-              </thead>
-              <tbody>
-                {(printScheduleData as any).timeSlotsRaw?.map((timeSlot: Date, timeIndex: number) => (
-                  <tr key={timeIndex}>
-                    <td className="border border-black p-1 font-medium text-xs">
-                      {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
-                    </td>
-                    {(printScheduleData as any).events?.map((event: any, eventIndex: number) => {
-                      // Check if this time slot is a lunch break for this event
-                      const eventDetails = events.find(e => e.id === event.id);
-                      const isLunchSlot = eventDetails?.timeSlots.find(
-                        slot => slot.time.getTime() === timeSlot.getTime()
-                      )?.isLunchBreak;
-                      
-                      if (isLunchSlot) {
-                        return (
-                          <td key={eventIndex} className="border border-black p-1 text-center text-xs">
-                            Lunch Break
-                          </td>
-                        );
-                      }
-                      
-                      const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                      return (
-                        <td key={eventIndex} className="border border-black p-1 text-center text-xs">
-                          {assignedSchool?.initials || assignedSchool?.name || '-'}
-                        </td>
-                      );
-                    })}
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          ) : (
-            // Individual school format with location under event
-            <table className="w-full border-collapse border border-black text-xs">
-              <thead>
-                <tr>
-                  <th className="border border-black p-1 text-left font-bold">Time</th>
-                  <th className="border border-black p-1 text-left font-bold">
-                    <div>Event</div>
-                    <div className="text-xs font-normal">(Location)</div>
-                  </th>
-                </tr>
-              </thead>
-              <tbody>
-                {(printScheduleData as Array<{ time: string; event: string; location: string }>).map((item, index) => (
-                  <tr key={index}>
-                    <td className="border border-black p-1">{item.time}</td>
-                    <td className="border border-black p-1">
-                      <div className="font-medium">{item.event}</div>
-                      <div className="text-xs text-gray-600">({item.location})</div>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
+      <div className="space-y-4">
 
-        <div className="flex items-center justify-between print:hidden">
+        <div className="flex items-center justify-between">
           <div className="text-sm text-muted-foreground">
             Competition Schedule - View and manage time slot assignments for each event
           </div>
@@ -272,7 +138,7 @@ export const CompetitionScheduleTab = ({
         </div>
 
         {/* Filters */}
-        <div className="flex items-center gap-4 print:hidden">
+        <div className="flex items-center gap-4">
           <div className="flex items-center space-x-2">
             <Label htmlFor="school-filter" className="text-sm">
               Filter by school:
@@ -296,7 +162,7 @@ export const CompetitionScheduleTab = ({
           </div>
         </div>
 
-        <Card className="print:hidden">
+        <Card>
           <CardContent className="p-0">
             <div className="overflow-x-auto">
               <table className="w-full min-w-max">
@@ -335,7 +201,7 @@ export const CompetitionScheduleTab = ({
                   {filteredTimeSlots.map((timeSlot, index) => (
                     <tr 
                       key={timeSlot.toISOString()} 
-                      className={`border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
+                      className={`border-b ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}
                     >
                       <td className="p-2 font-medium text-sm sticky left-0 bg-inherit z-10 border-r">
                         {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
