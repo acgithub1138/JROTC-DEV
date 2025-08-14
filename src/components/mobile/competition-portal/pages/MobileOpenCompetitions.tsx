@@ -37,13 +37,17 @@ export const MobileOpenCompetitions: React.FC = () => {
     fetchRegistrations();
   }, [userProfile?.school_id]);
 
-  // Filter competitions based on search term
-  const filteredOpenCompetitions = openCompetitions.filter(comp =>
-    comp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comp.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comp.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    comp.hosting_school?.toLowerCase().includes(searchTerm.toLowerCase())
-  );
+  // Filter competitions based on search term and exclude registered ones
+  const filteredOpenCompetitions = openCompetitions.filter(comp => {
+    const matchesSearch = comp.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comp.location?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comp.description?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      comp.hosting_school?.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const isNotRegistered = !registrations.some(reg => reg.competition_id === comp.id);
+    
+    return matchesSearch && isNotRegistered;
+  });
 
   // Get registered competitions
   const registeredCompetitions = openCompetitions.filter(comp =>
