@@ -74,16 +74,18 @@ export const ViewContactDialog: React.FC<ViewContactDialogProps> = ({
     </Badge>;
   };
 
-  const getTypeBadge = (type: Contact['type']) => {
+  const getTypeBadge = (type: Contact['type'], typeOther?: string | null) => {
     const variants = {
       parent: 'bg-blue-100 text-blue-800',
       relative: 'bg-purple-100 text-purple-800',
-      friend: 'bg-gray-100 text-gray-800'
+      friend: 'bg-gray-100 text-gray-800',
+      other: 'bg-orange-100 text-orange-800',
     };
     const labels = {
       parent: 'Parent',
       relative: 'Relative',
-      friend: 'Friend'
+      friend: 'Friend',
+      other: typeOther || 'Other',
     };
     return <Badge className={variants[type]}>
       {labels[type]}
@@ -115,7 +117,7 @@ export const ViewContactDialog: React.FC<ViewContactDialogProps> = ({
               <div className="grid grid-cols-2 gap-4">
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Type</label>
-                  <div className="mt-1">{getTypeBadge(contact.type)}</div>
+                  <div className="mt-1">{getTypeBadge(contact.type, contact.type_other)}</div>
                 </div>
                 <div>
                   <label className="text-sm font-medium text-muted-foreground">Status</label>

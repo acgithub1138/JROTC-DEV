@@ -18,7 +18,8 @@ export interface Contact {
   cadet_id: string | null;
   name: string;
   status: 'active' | 'semi_active' | 'not_active';
-  type: 'parent' | 'relative' | 'friend';
+  type: 'parent' | 'relative' | 'friend' | 'other';
+  type_other: string | null;
   phone: string | null;
   email: string | null;
   notes: string | null;

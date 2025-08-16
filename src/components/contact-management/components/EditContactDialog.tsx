@@ -35,12 +35,21 @@ import { Contact } from '../ContactManagementPage';
 
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['parent', 'relative', 'friend']),
+  type: z.enum(['parent', 'relative', 'friend', 'other']),
+  type_other: z.string().optional(),
   status: z.enum(['active', 'semi_active', 'not_active']),
   cadet_id: z.string().min(1),
   phone: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   notes: z.string().optional(),
+}).refine((data) => {
+  if (data.type === 'other') {
+    return data.type_other && data.type_other.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "Please specify the other type",
+  path: ["type_other"],
 });
 
 type ContactFormData = z.infer<typeof contactSchema>;
@@ -73,6 +82,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
   const initialData = {
     name: contact.name,
     type: contact.type,
+    type_other: contact.type_other || '',
     status: contact.status,
     cadet_id: contact.cadet_id || 'none',
     phone: contact.phone || '',
@@ -111,6 +121,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
       form.reset({
         name: contact.name,
         type: contact.type,
+        type_other: contact.type_other || '',
         status: contact.status,
         cadet_id: contact.cadet_id || 'none',
         phone: contact.phone || '',
@@ -154,6 +165,7 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
     onSubmit(contact.id, {
       name: data.name,
       type: data.type,
+      type_other: data.type === 'other' ? data.type_other || null : null,
       status: data.status,
       cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
       phone: data.phone || null,
@@ -204,12 +216,29 @@ export const EditContactDialog: React.FC<EditContactDialogProps> = ({
                           <SelectItem value="parent">Parent</SelectItem>
                           <SelectItem value="relative">Relative</SelectItem>
                           <SelectItem value="friend">Friend</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
                         </SelectContent>
                       </Select>
                       <FormMessage />
                     </FormItem>
                   )}
                 />
+
+                {form.watch('type') === 'other' && (
+                  <FormField
+                    control={form.control}
+                    name="type_other"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Other</FormLabel>
+                        <FormControl>
+                          <Input placeholder="Specify other type" {...field} disabled={!canUpdate} />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                )}
 
                 <FormField
                   control={form.control}

@@ -60,7 +60,7 @@ export const useContacts = (searchValue: string = '') => {
           ...contactData,
           school_id: userProfile.school_id,
           created_by: userProfile.id,
-        })
+        } as any)
         .select()
         .single();
 
@@ -85,7 +85,7 @@ export const useContacts = (searchValue: string = '') => {
     try {
       const { data, error } = await supabase
         .from('contacts')
-        .update(contactData)
+        .update(contactData as any)
         .eq('id', id)
         .select()
         .single();

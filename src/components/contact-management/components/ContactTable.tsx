@@ -39,16 +39,18 @@ export const ContactTable: React.FC<ContactTableProps> = ({
         {labels[status]}
       </Badge>;
   };
-  const getTypeBadge = (type: Contact['type']) => {
+  const getTypeBadge = (type: Contact['type'], typeOther?: string | null) => {
     const variants = {
       parent: 'bg-blue-100 text-blue-800',
       relative: 'bg-purple-100 text-purple-800',
-      friend: 'bg-gray-100 text-gray-800'
+      friend: 'bg-gray-100 text-gray-800',
+      other: 'bg-orange-100 text-orange-800',
     };
     const labels = {
       parent: 'Parent',
       relative: 'Relative',
-      friend: 'Friend'
+      friend: 'Friend',
+      other: typeOther || 'Other',
     };
     return <Badge className={variants[type]}>
         {labels[type]}
@@ -99,7 +101,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
                 {contact.name}
               </button>
             </TableCell>
-            <TableCell>{getTypeBadge(contact.type)}</TableCell>
+            <TableCell>{getTypeBadge(contact.type, contact.type_other)}</TableCell>
             <TableCell>{getStatusBadge(contact.status)}</TableCell>
             <TableCell>{contact.phone || '-'}</TableCell>
             <TableCell>{contact.email || '-'}</TableCell>

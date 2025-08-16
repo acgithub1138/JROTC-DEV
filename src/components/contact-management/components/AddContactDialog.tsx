@@ -15,12 +15,21 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 const contactSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  type: z.enum(['parent', 'relative', 'friend']),
+  type: z.enum(['parent', 'relative', 'friend', 'other']),
+  type_other: z.string().optional(),
   status: z.enum(['active', 'semi_active', 'not_active']),
   cadet_id: z.string().min(1),
   phone: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   notes: z.string().optional()
+}).refine((data) => {
+  if (data.type === 'other') {
+    return data.type_other && data.type_other.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "Please specify the other type",
+  path: ["type_other"],
 });
 type ContactFormData = z.infer<typeof contactSchema>;
 interface AddContactDialogProps {
@@ -48,6 +57,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
     defaultValues: {
       name: '',
       type: 'parent',
+      type_other: '',
       status: 'active',
       cadet_id: 'none',
       phone: '',
@@ -60,6 +70,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
   const initialFormData = {
     name: '',
     type: 'parent' as const,
+    type_other: '',
     status: 'active' as const,
     cadet_id: 'none',
     phone: '',
@@ -72,6 +83,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
   const currentFormData = {
     name: watchedData.name || '',
     type: watchedData.type || 'parent' as const,
+    type_other: watchedData.type_other || '',
     status: watchedData.status || 'active' as const,
     cadet_id: watchedData.cadet_id || 'none',
     phone: watchedData.phone || '',
@@ -116,6 +128,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
     onSubmit({
       name: data.name,
       type: data.type,
+      type_other: data.type === 'other' ? data.type_other || null : null,
       status: data.status,
       cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
       phone: data.phone || null,
@@ -157,10 +170,23 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
                         <SelectItem value="parent">Parent</SelectItem>
                         <SelectItem value="relative">Relative</SelectItem>
                         <SelectItem value="friend">Friend</SelectItem>
+                        <SelectItem value="other">Other</SelectItem>
                       </SelectContent>
                     </Select>
                     <FormMessage />
                   </FormItem>} />
+
+              {form.watch('type') === 'other' && (
+                <FormField control={form.control} name="type_other" render={({
+                field
+              }) => <FormItem>
+                      <FormLabel>Other</FormLabel>
+                      <FormControl>
+                        <Input placeholder="Specify other type" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>} />
+              )}
 
               <FormField control={form.control} name="status" render={({
               field

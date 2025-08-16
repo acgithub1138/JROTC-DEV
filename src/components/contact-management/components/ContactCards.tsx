@@ -40,17 +40,19 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
     );
   };
 
-  const getTypeBadge = (type: Contact['type']) => {
+  const getTypeBadge = (type: Contact['type'], typeOther?: string | null) => {
     const variants = {
       parent: 'bg-blue-100 text-blue-800',
       relative: 'bg-purple-100 text-purple-800',
       friend: 'bg-gray-100 text-gray-800',
+      other: 'bg-orange-100 text-orange-800',
     };
 
     const labels = {
       parent: 'Parent',
       relative: 'Relative',
       friend: 'Friend',
+      other: typeOther || 'Other',
     };
 
     return (
@@ -99,7 +101,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
               <div>
                 <CardTitle className="text-lg">{contact.name}</CardTitle>
                 <div className="flex space-x-2 mt-1">
-                  {getTypeBadge(contact.type)}
+                  {getTypeBadge(contact.type, contact.type_other)}
                   {getStatusBadge(contact.status)}
                 </div>
               </div>
