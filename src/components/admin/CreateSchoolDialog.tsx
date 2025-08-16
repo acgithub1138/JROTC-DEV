@@ -277,7 +277,7 @@ export const CreateSchoolDialog = ({
                   ...newSchool,
                   competition_module: checked as boolean
                 })} />
-                <Label htmlFor="competition_module">Enable Competition Tracking</Label>
+                <Label htmlFor="competition_module">Competition Tracking</Label>
               </div>
             </div>
             <div className="space-y-2">
@@ -287,7 +287,7 @@ export const CreateSchoolDialog = ({
                   ...newSchool,
                   competition_portal: checked as boolean
                 })} />
-                <Label htmlFor="competition_portal">Enable Competition Portal</Label>
+                <Label htmlFor="competition_portal">Competition Hosting</Label>
               </div>
             </div>
           </div>
