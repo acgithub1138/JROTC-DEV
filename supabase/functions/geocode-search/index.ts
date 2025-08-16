@@ -50,7 +50,7 @@ serve(async (req) => {
     console.log('Geocoding search for query:', query)
 
     // Call Nominatim API
-    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5`
+    const nominatimUrl = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&addressdetails=1&limit=5&countrycodes=us`
     
     const response = await fetch(nominatimUrl, {
       headers: {
