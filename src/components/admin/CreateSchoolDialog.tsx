@@ -271,7 +271,7 @@ export const CreateSchoolDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="competition_module">Competition Tracking</Label>
+              
               <div className="flex items-center space-x-2 pt-2">
                 <Checkbox id="competition_module" checked={newSchool.competition_module} onCheckedChange={checked => setNewSchool({
                   ...newSchool,
@@ -281,7 +281,7 @@ export const CreateSchoolDialog = ({
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="competition_portal">Competition Hosting</Label>
+              
               <div className="flex items-center space-x-2 pt-2">
                 <Checkbox id="competition_portal" checked={newSchool.competition_portal} onCheckedChange={checked => setNewSchool({
                   ...newSchool,
