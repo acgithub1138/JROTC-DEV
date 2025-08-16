@@ -15,12 +15,10 @@ import { toast } from 'sonner';
 import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-
 interface CreateSchoolDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
-
 interface NewSchool {
   name: string;
   initials: string;
@@ -40,11 +38,12 @@ interface NewSchool {
   notes: string;
   timezone: string;
 }
-
-export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogProps) => {
+export const CreateSchoolDialog = ({
+  open,
+  onOpenChange
+}: CreateSchoolDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
-  
   const initialSchool: NewSchool = {
     name: '',
     initials: '',
@@ -62,35 +61,31 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     subscription_end: undefined,
     referred_by: '',
     notes: '',
-    timezone: 'America/New_York',
+    timezone: 'America/New_York'
   };
-  
   const [newSchool, setNewSchool] = useState<NewSchool>(initialSchool);
-  
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: initialSchool,
     currentData: newSchool,
-    enabled: open,
+    enabled: open
   });
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
-
     try {
-      const { data, error } = await supabase
-        .from('schools')
-        .insert([newSchool])
-        .select()
-        .single();
-
+      const {
+        data,
+        error
+      } = await supabase.from('schools').insert([newSchool]).select().single();
       if (error) {
         toast.error('Failed to create school: ' + error.message);
         return;
       }
-
       toast.success('School created successfully');
-      
+
       // Reset form
       setNewSchool(initialSchool);
       resetChanges();
@@ -102,7 +97,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
       setIsLoading(false);
     }
   };
-
   const handleOpenChange = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -110,20 +104,16 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
     }
     onOpenChange(open);
   };
-
   const handleDiscardChanges = () => {
     setNewSchool(initialSchool);
     resetChanges();
     setShowUnsavedDialog(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
   };
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
@@ -137,41 +127,34 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="name">School Name</Label>
-              <Input
-                id="name"
-                value={newSchool.name}
-                onChange={(e) => setNewSchool({ ...newSchool, name: e.target.value })}
-                placeholder="Enter school name"
-                required
-              />
+              <Input id="name" value={newSchool.name} onChange={e => setNewSchool({
+                ...newSchool,
+                name: e.target.value
+              })} placeholder="Enter school name" required />
             </div>
             <div>
               <Label htmlFor="initials">School Initials</Label>
-              <Input
-                id="initials"
-                value={newSchool.initials}
-                onChange={(e) => setNewSchool({ ...newSchool, initials: e.target.value })}
-                placeholder="Enter school initials"
-              />
+              <Input id="initials" value={newSchool.initials} onChange={e => setNewSchool({
+                ...newSchool,
+                initials: e.target.value
+              })} placeholder="Enter school initials" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="contact">Contact</Label>
-              <Input
-                id="contact"
-                value={newSchool.contact}
-                onChange={(e) => setNewSchool({ ...newSchool, contact: e.target.value })}
-                placeholder="Enter contact person"
-              />
+              <Input id="contact" value={newSchool.contact} onChange={e => setNewSchool({
+                ...newSchool,
+                contact: e.target.value
+              })} placeholder="Enter contact person" />
             </div>
             <div>
               <Label htmlFor="jrotc_program">JROTC Program</Label>
-              <Select
-                value={newSchool.jrotc_program}
-                onValueChange={(value) => setNewSchool({ ...newSchool, jrotc_program: value as typeof newSchool.jrotc_program })}
-              >
+              <Select value={newSchool.jrotc_program} onValueChange={value => setNewSchool({
+                ...newSchool,
+                jrotc_program: value as typeof newSchool.jrotc_program
+              })}>
                 <SelectTrigger>
                   <SelectValue />
                 </SelectTrigger>
@@ -189,64 +172,50 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
 
           <div>
             <Label htmlFor="address">Address</Label>
-            <Input
-              id="address"
-              value={newSchool.address}
-              onChange={(e) => setNewSchool({ ...newSchool, address: e.target.value })}
-              placeholder="Enter street address"
-            />
+            <Input id="address" value={newSchool.address} onChange={e => setNewSchool({
+              ...newSchool,
+              address: e.target.value
+            })} placeholder="Enter street address" />
           </div>
 
           <div className="grid grid-cols-3 gap-4">
             <div>
               <Label htmlFor="city">City</Label>
-              <Input
-                id="city"
-                value={newSchool.city}
-                onChange={(e) => setNewSchool({ ...newSchool, city: e.target.value })}
-                placeholder="Enter city"
-              />
+              <Input id="city" value={newSchool.city} onChange={e => setNewSchool({
+                ...newSchool,
+                city: e.target.value
+              })} placeholder="Enter city" />
             </div>
             <div>
               <Label htmlFor="state">State</Label>
-              <Input
-                id="state"
-                value={newSchool.state}
-                onChange={(e) => setNewSchool({ ...newSchool, state: e.target.value })}
-                placeholder="Enter state"
-              />
+              <Input id="state" value={newSchool.state} onChange={e => setNewSchool({
+                ...newSchool,
+                state: e.target.value
+              })} placeholder="Enter state" />
             </div>
             <div>
               <Label htmlFor="zip_code">ZIP Code</Label>
-              <Input
-                id="zip_code"
-                value={newSchool.zip_code}
-                onChange={(e) => setNewSchool({ ...newSchool, zip_code: e.target.value })}
-                placeholder="Enter ZIP code"
-              />
+              <Input id="zip_code" value={newSchool.zip_code} onChange={e => setNewSchool({
+                ...newSchool,
+                zip_code: e.target.value
+              })} placeholder="Enter ZIP code" />
             </div>
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div>
               <Label htmlFor="phone">Phone</Label>
-              <Input
-                id="phone"
-                type="tel"
-                value={newSchool.phone}
-                onChange={(e) => setNewSchool({ ...newSchool, phone: e.target.value })}
-                placeholder="Enter phone number"
-              />
+              <Input id="phone" type="tel" value={newSchool.phone} onChange={e => setNewSchool({
+                ...newSchool,
+                phone: e.target.value
+              })} placeholder="Enter phone number" />
             </div>
             <div>
               <Label htmlFor="email">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                value={newSchool.email}
-                onChange={(e) => setNewSchool({ ...newSchool, email: e.target.value })}
-                placeholder="Enter email address"
-              />
+              <Input id="email" type="email" value={newSchool.email} onChange={e => setNewSchool({
+                ...newSchool,
+                email: e.target.value
+              })} placeholder="Enter email address" />
             </div>
           </div>
 
@@ -255,33 +224,21 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
               <Label htmlFor="subscription_start">Subscription Start</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {newSchool.subscription_start 
-                      ? format(new Date(newSchool.subscription_start), "PPP")
-                      : <span>Pick a date</span>
-                    }
+                    {newSchool.subscription_start ? format(new Date(newSchool.subscription_start), "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={newSchool.subscription_start ? new Date(newSchool.subscription_start) : undefined}
-                    onSelect={(date) => {
-                      const startDate = date ? date.toISOString().split('T')[0] : undefined;
-                      const endDate = date ? addYears(date, 1).toISOString().split('T')[0] : undefined;
-                      setNewSchool({
-                        ...newSchool,
-                        subscription_start: startDate,
-                        subscription_end: endDate
-                      });
-                    }}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
+                  <Calendar mode="single" selected={newSchool.subscription_start ? new Date(newSchool.subscription_start) : undefined} onSelect={date => {
+                    const startDate = date ? date.toISOString().split('T')[0] : undefined;
+                    const endDate = date ? addYears(date, 1).toISOString().split('T')[0] : undefined;
+                    setNewSchool({
+                      ...newSchool,
+                      subscription_start: startDate,
+                      subscription_end: endDate
+                    });
+                  }} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -289,28 +246,16 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
               <Label htmlFor="subscription_end">Subscription End</Label>
               <Popover>
                 <PopoverTrigger asChild>
-                  <Button
-                    variant="outline"
-                    className="w-full justify-start text-left font-normal"
-                  >
+                  <Button variant="outline" className="w-full justify-start text-left font-normal">
                     <CalendarIcon className="mr-2 h-4 w-4" />
-                    {newSchool.subscription_end 
-                      ? format(new Date(newSchool.subscription_end), "PPP")
-                      : <span>Pick a date</span>
-                    }
+                    {newSchool.subscription_end ? format(new Date(newSchool.subscription_end), "PPP") : <span>Pick a date</span>}
                   </Button>
                 </PopoverTrigger>
                 <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={newSchool.subscription_end ? new Date(newSchool.subscription_end) : undefined}
-                    onSelect={(date) => setNewSchool({
-                      ...newSchool,
-                      subscription_end: date ? date.toISOString().split('T')[0] : undefined
-                    })}
-                    initialFocus
-                    className="p-3 pointer-events-auto"
-                  />
+                  <Calendar mode="single" selected={newSchool.subscription_end ? new Date(newSchool.subscription_end) : undefined} onSelect={date => setNewSchool({
+                    ...newSchool,
+                    subscription_end: date ? date.toISOString().split('T')[0] : undefined
+                  })} initialFocus className="p-3 pointer-events-auto" />
                 </PopoverContent>
               </Popover>
             </div>
@@ -318,40 +263,30 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
 
           <div className="space-y-2">
             <Label htmlFor="referred_by">Referred By</Label>
-            <Input
-              id="referred_by"
-              value={newSchool.referred_by}
-              onChange={(e) => setNewSchool({ ...newSchool, referred_by: e.target.value })}
-              placeholder="Who referred this school?"
-            />
+            <Input id="referred_by" value={newSchool.referred_by} onChange={e => setNewSchool({
+              ...newSchool,
+              referred_by: e.target.value
+            })} placeholder="Who referred this school?" />
           </div>
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="competition_module">Competition Module</Label>
+              <Label htmlFor="competition_module">Competition Tracking</Label>
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="competition_module"
-                  checked={newSchool.competition_module}
-                  onCheckedChange={(checked) => setNewSchool({ 
-                    ...newSchool, 
-                    competition_module: checked as boolean 
-                  })}
-                />
-                <Label htmlFor="competition_module">Enable Competition Module</Label>
+                <Checkbox id="competition_module" checked={newSchool.competition_module} onCheckedChange={checked => setNewSchool({
+                  ...newSchool,
+                  competition_module: checked as boolean
+                })} />
+                <Label htmlFor="competition_module">Enable Competition Tracking</Label>
               </div>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="competition_portal">Competition Portal</Label>
+              <Label htmlFor="competition_portal">Competition Hosting</Label>
               <div className="flex items-center space-x-2 pt-2">
-                <Checkbox
-                  id="competition_portal"
-                  checked={newSchool.competition_portal}
-                  onCheckedChange={(checked) => setNewSchool({ 
-                    ...newSchool, 
-                    competition_portal: checked as boolean 
-                  })}
-                />
+                <Checkbox id="competition_portal" checked={newSchool.competition_portal} onCheckedChange={checked => setNewSchool({
+                  ...newSchool,
+                  competition_portal: checked as boolean
+                })} />
                 <Label htmlFor="competition_portal">Enable Competition Portal</Label>
               </div>
             </div>
@@ -359,41 +294,31 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
 
           <div className="space-y-2">
             <Label htmlFor="notes">Notes</Label>
-            <Textarea
-              id="notes"
-              value={newSchool.notes}
-              onChange={(e) => setNewSchool({ ...newSchool, notes: e.target.value })}
-              placeholder="Additional notes about this school..."
-              rows={3}
-            />
+            <Textarea id="notes" value={newSchool.notes} onChange={e => setNewSchool({
+              ...newSchool,
+              notes: e.target.value
+            })} placeholder="Additional notes about this school..." rows={3} />
           </div>
 
           <div className="space-y-2">
             <Label htmlFor="timezone">Timezone</Label>
-            <Select
-              value={newSchool.timezone}
-              onValueChange={(value) => setNewSchool({ ...newSchool, timezone: value })}
-            >
+            <Select value={newSchool.timezone} onValueChange={value => setNewSchool({
+              ...newSchool,
+              timezone: value
+            })}>
               <SelectTrigger>
                 <SelectValue placeholder="Select timezone" />
               </SelectTrigger>
               <SelectContent className="bg-background border shadow-md z-50">
-                {COMMON_TIMEZONES.map((tz) => (
-                  <SelectItem key={tz.value} value={tz.value}>
+                {COMMON_TIMEZONES.map(tz => <SelectItem key={tz.value} value={tz.value}>
                     {tz.label}
-                  </SelectItem>
-                ))}
+                  </SelectItem>)}
               </SelectContent>
             </Select>
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-              disabled={isLoading}
-            >
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
               Cancel
             </Button>
             <Button type="submit" disabled={isLoading}>
@@ -404,12 +329,6 @@ export const CreateSchoolDialog = ({ open, onOpenChange }: CreateSchoolDialogPro
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleContinueEditing}
-    />
-    </>
-  );
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+    </>;
 };
