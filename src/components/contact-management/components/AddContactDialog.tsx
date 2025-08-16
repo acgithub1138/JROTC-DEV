@@ -22,14 +22,14 @@ const contactSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   notes: z.string().optional()
-}).refine((data) => {
+}).refine(data => {
   if (data.type === 'other') {
     return data.type_other && data.type_other.trim().length > 0;
   }
   return true;
 }, {
   message: "Please specify the other type",
-  path: ["type_other"],
+  path: ["type_other"]
 });
 type ContactFormData = z.infer<typeof contactSchema>;
 interface AddContactDialogProps {
@@ -176,17 +176,15 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
                     <FormMessage />
                   </FormItem>} />
 
-              {form.watch('type') === 'other' && (
-                <FormField control={form.control} name="type_other" render={({
-                field
-              }) => <FormItem>
+              {form.watch('type') === 'other' && <FormField control={form.control} name="type_other" render={({
+              field
+            }) => <FormItem>
                       <FormLabel>Other</FormLabel>
                       <FormControl>
                         <Input placeholder="Specify other type" {...field} />
                       </FormControl>
                       <FormMessage />
-                    </FormItem>} />
-              )}
+                    </FormItem>} />}
 
               <FormField control={form.control} name="status" render={({
               field
@@ -204,7 +202,7 @@ export const AddContactDialog: React.FC<AddContactDialogProps> = ({
                         <SelectItem value="not_active">Not Active</SelectItem>
                       </SelectContent>
                     </Select>
-                    <FormMessage />
+                    
                   </FormItem>} />
 
               <FormField control={form.control} name="cadet_id" render={({
