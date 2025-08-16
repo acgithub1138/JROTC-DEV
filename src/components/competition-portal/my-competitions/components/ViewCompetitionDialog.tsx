@@ -93,7 +93,13 @@ export const ViewCompetitionDialog: React.FC<ViewCompetitionDialogProps> = ({
                     <MapPin className="w-4 h-4 text-muted-foreground" />
                     <div>
                       <label className="text-sm font-medium text-muted-foreground">Location</label>
-                      <p className="text-base">{competition.location}</p>
+                    <p className="text-base">
+                      {[
+                        competition.address,
+                        competition.city,
+                        competition.state && competition.zip ? `${competition.state} ${competition.zip}` : competition.state || competition.zip
+                      ].filter(Boolean).join(', ')}
+                    </p>
                     </div>
                   </div>
                 )}
