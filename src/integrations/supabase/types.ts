@@ -7,7 +7,7 @@ export type Json =
   | Json[]
 
 export type Database = {
-  // Allows to automatically instanciate createClient with right options
+  // Allows to automatically instantiate createClient with right options
   // instead of createClient<Database, { PostgrestVersion: 'XX' }>(URL, KEY)
   __InternalSupabase: {
     PostgrestVersion: "12.2.3 (519615d)"
@@ -479,6 +479,7 @@ export type Database = {
           school_id: string
           status: Database["public"]["Enums"]["contact_status"] | null
           type: Database["public"]["Enums"]["contact_type"] | null
+          type_other: string | null
           updated_at: string
         }
         Insert: {
@@ -493,6 +494,7 @@ export type Database = {
           school_id: string
           status?: Database["public"]["Enums"]["contact_status"] | null
           type?: Database["public"]["Enums"]["contact_type"] | null
+          type_other?: string | null
           updated_at?: string
         }
         Update: {
@@ -507,6 +509,7 @@ export type Database = {
           school_id?: string
           status?: Database["public"]["Enums"]["contact_status"] | null
           type?: Database["public"]["Enums"]["contact_type"] | null
+          type_other?: string | null
           updated_at?: string
         }
         Relationships: [
@@ -699,6 +702,7 @@ export type Database = {
       }
       cp_comp_schools: {
         Row: {
+          calendar_event_id: string | null
           color: string | null
           competition_id: string
           created_at: string
@@ -708,6 +712,7 @@ export type Database = {
           paid: boolean
           resource: string | null
           school_id: string | null
+          school_initials: string | null
           school_name: string | null
           status: string
           total_fee: number | null
@@ -715,6 +720,7 @@ export type Database = {
           updated_by: string | null
         }
         Insert: {
+          calendar_event_id?: string | null
           color?: string | null
           competition_id: string
           created_at?: string
@@ -724,6 +730,7 @@ export type Database = {
           paid?: boolean
           resource?: string | null
           school_id?: string | null
+          school_initials?: string | null
           school_name?: string | null
           status?: string
           total_fee?: number | null
@@ -731,6 +738,7 @@ export type Database = {
           updated_by?: string | null
         }
         Update: {
+          calendar_event_id?: string | null
           color?: string | null
           competition_id?: string
           created_at?: string
@@ -740,6 +748,7 @@ export type Database = {
           paid?: boolean
           resource?: string | null
           school_id?: string | null
+          school_initials?: string | null
           school_name?: string | null
           status?: string
           total_fee?: number | null
@@ -747,6 +756,13 @@ export type Database = {
           updated_by?: string | null
         }
         Relationships: [
+          {
+            foreignKeyName: "cp_comp_schools_calendar_event_id_fkey"
+            columns: ["calendar_event_id"]
+            isOneToOne: false
+            referencedRelation: "events"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "cp_comp_schools_competition_id_fkey"
             columns: ["competition_id"]
@@ -1059,7 +1075,15 @@ export type Database = {
           school_id?: string
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "cp_judges_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       criteria_mappings: {
         Row: {
@@ -2619,6 +2643,7 @@ export type Database = {
           created_at: string
           email: string | null
           id: string
+          initials: string | null
           jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
           notes: string | null
@@ -2642,6 +2667,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          initials?: string | null
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name: string
           notes?: string | null
@@ -2665,6 +2691,7 @@ export type Database = {
           created_at?: string
           email?: string | null
           id?: string
+          initials?: string | null
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
           name?: string
           notes?: string | null
@@ -3280,17 +3307,17 @@ export type Database = {
     Functions: {
       add_user_role: {
         Args: {
-          role_name: string
           display_label?: string
           is_admin_only?: boolean
+          role_name: string
         }
         Returns: undefined
       }
       add_user_role_to_table: {
         Args: {
-          role_name_param: string
-          role_label_param?: string
           admin_only_param?: boolean
+          role_label_param?: string
+          role_name_param: string
         }
         Returns: string
       }
@@ -3300,33 +3327,33 @@ export type Database = {
       }
       can_update_profile_role: {
         Args: {
-          target_profile_id: string
-          new_role_id: string
           new_role: Database["public"]["Enums"]["user_role"]
+          new_role_id: string
+          target_profile_id: string
         }
         Returns: boolean
       }
       can_user_access: {
-        Args: { module_name: string; action_name: string }
+        Args: { action_name: string; module_name: string }
         Returns: boolean
       }
       can_user_global: {
-        Args: { module_name: string; action_name: string }
+        Args: { action_name: string; module_name: string }
         Returns: boolean
       }
       check_email_queue_health: {
         Args: Record<PropertyKey, never>
         Returns: {
-          school_id: string
-          pending_count: number
-          stuck_count: number
           failed_count: number
-          processing_time_avg_ms: number
           health_status: string
+          pending_count: number
+          processing_time_avg_ms: number
+          school_id: string
+          stuck_count: number
         }[]
       }
       check_user_permission: {
-        Args: { user_id: string; module_name: string; action_name: string }
+        Args: { action_name: string; module_name: string; user_id: string }
         Returns: boolean
       }
       clear_password_change_requirement: {
@@ -3342,17 +3369,17 @@ export type Database = {
         Returns: undefined
       }
       current_user_has_permission: {
-        Args: { module_name: string; action_name: string }
+        Args: { action_name: string; module_name: string }
         Returns: boolean
       }
       find_similar_criteria: {
         Args: { criteria_text: string; event_type_param: string }
         Returns: {
-          id: string
           display_name: string
+          id: string
           original_criteria: Json
-          usage_count: number
           similarity_score: number
+          usage_count: number
         }[]
       }
       generate_incident_number: {
@@ -3362,17 +3389,17 @@ export type Database = {
       get_all_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          role_name: string
-          role_label: string
           can_be_assigned: boolean
+          role_label: string
+          role_name: string
         }[]
       }
       get_assignable_roles: {
         Args: Record<PropertyKey, never>
         Returns: {
-          role_name: string
-          role_label: string
           can_be_assigned: boolean
+          role_label: string
+          role_name: string
         }[]
       }
       get_current_user_id: {
@@ -3390,15 +3417,15 @@ export type Database = {
       get_incident_category_values: {
         Args: Record<PropertyKey, never>
         Returns: {
-          value: string
           label: string
+          value: string
         }[]
       }
       get_incident_status_values: {
         Args: Record<PropertyKey, never>
         Returns: {
-          value: string
           label: string
+          value: string
         }[]
       }
       get_next_subtask_number: {
@@ -3412,14 +3439,14 @@ export type Database = {
       get_stuck_emails: {
         Args: { threshold_time?: string }
         Returns: {
-          id: string
-          recipient_email: string
-          subject: string
           body: string
           created_at: string
+          id: string
           last_attempt_at: string
+          recipient_email: string
           retry_count: number
           school_id: string
+          subject: string
         }[]
       }
       get_table_columns: {
@@ -3447,15 +3474,15 @@ export type Database = {
       }
       log_email_rule_usage: {
         Args: {
-          p_rule_id: string
-          p_trigger_table: string
-          p_trigger_operation: string
-          p_record_id: string
-          p_recipient_email: string
-          p_success?: boolean
           p_error_message?: string
           p_processing_time_ms?: number
+          p_recipient_email: string
+          p_record_id: string
+          p_rule_id: string
           p_school_id?: string
+          p_success?: boolean
+          p_trigger_operation: string
+          p_trigger_table: string
         }
         Returns: undefined
       }
@@ -3466,22 +3493,22 @@ export type Database = {
       process_email_batch: {
         Args: { batch_size?: number }
         Returns: {
-          processed_count: number
-          failed_count: number
           details: Json
+          failed_count: number
+          processed_count: number
         }[]
       }
       process_email_rules_manual: {
         Args: {
-          source_table_param: string
+          operation_type_param: string
           record_id_param: string
           school_id_param: string
-          operation_type_param: string
+          source_table_param: string
         }
         Returns: Json
       }
       process_email_template: {
-        Args: { template_content: string; record_data: Json }
+        Args: { record_data: Json; template_content: string }
         Returns: string
       }
       process_overdue_task_reminders: {
@@ -3491,28 +3518,28 @@ export type Database = {
       queue_email: {
         Args:
           | {
-              template_id_param: string
               recipient_email_param: string
-              source_table_param: string
               record_id_param: string
+              rule_id_param: string
               school_id_param: string
+              source_table_param: string
+              template_id_param: string
             }
           | {
-              template_id_param: string
               recipient_email_param: string
-              source_table_param: string
               record_id_param: string
               school_id_param: string
-              rule_id_param: string
+              source_table_param: string
+              template_id_param: string
             }
         Returns: string
       }
       replace_template_variables: {
-        Args: { template_text: string; data_json: Json }
+        Args: { data_json: Json; template_text: string }
         Returns: string
       }
       resolve_user_email_with_job_priority: {
-        Args: { user_id_param: string; school_id_param: string }
+        Args: { school_id_param: string; user_id_param: string }
         Returns: {
           email: string
           source: string
@@ -3522,8 +3549,8 @@ export type Database = {
         Args: { max_age_minutes?: number }
         Returns: {
           email_id: string
-          school_id: string
           retry_count: number
+          school_id: string
         }[]
       }
       setup_role_permissions: {
@@ -3543,7 +3570,7 @@ export type Database = {
         Returns: boolean
       }
       validate_role_transition: {
-        Args: { user_id: string; old_role_id: string; new_role_id: string }
+        Args: { new_role_id: string; old_role_id: string; user_id: string }
         Returns: boolean
       }
       validate_task_priority: {
@@ -3594,7 +3621,7 @@ export type Database = {
         | "10th"
       competition_source_type: "internal" | "portal"
       contact_status: "active" | "semi_active" | "not_active"
-      contact_type: "parent" | "relative" | "friend"
+      contact_type: "parent" | "relative" | "friend" | "other"
       email_log_event: "queued" | "sent" | "failed" | "opened" | "clicked"
       email_queue_status:
         | "pending"
@@ -3838,7 +3865,7 @@ export const Constants = {
       ],
       competition_source_type: ["internal", "portal"],
       contact_status: ["active", "semi_active", "not_active"],
-      contact_type: ["parent", "relative", "friend"],
+      contact_type: ["parent", "relative", "friend", "other"],
       email_log_event: ["queued", "sent", "failed", "opened", "clicked"],
       email_queue_status: [
         "pending",

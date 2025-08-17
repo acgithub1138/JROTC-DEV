@@ -18,6 +18,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
+import { useEvents } from '@/components/calendar/hooks/useEvents';
 export const OpenCompetitionsPage = () => {
   const {
     toast
@@ -27,6 +28,7 @@ export const OpenCompetitionsPage = () => {
     userProfile
   } = useAuth();
   const isMobile = useIsMobile();
+  const { deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -159,6 +161,24 @@ export const OpenCompetitionsPage = () => {
   const confirmCancelRegistration = async () => {
     if (!competitionToCancel || !userProfile?.school_id) return;
     try {
+      // Get the calendar_event_id before deleting the registration
+      const { data: compSchool } = await supabase
+        .from('cp_comp_schools')
+        .select('calendar_event_id')
+        .eq('competition_id', competitionToCancel)
+        .eq('school_id', userProfile.school_id)
+        .single();
+
+      // Delete calendar event if it exists
+      if (compSchool?.calendar_event_id) {
+        try {
+          await deleteEvent(compSchool.calendar_event_id);
+        } catch (calendarError) {
+          console.error('Error deleting calendar event:', calendarError);
+          // Don't block cancellation if calendar deletion fails
+        }
+      }
+
       // Delete cp_event_schedules records for this school and competition
       const {
         error: scheduleError

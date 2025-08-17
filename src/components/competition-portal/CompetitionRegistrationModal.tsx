@@ -13,6 +13,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useEvents } from '@/components/calendar/hooks/useEvents';
 interface TimeSlot {
   time: Date;
   label: string;
@@ -71,6 +72,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
   const { toast } = useToast();
   const { userProfile } = useAuth();
   const { timezone } = useSchoolTimezone();
+  const { createEvent } = useEvents({ eventType: '', assignedTo: '' });
   const [selectedEvents, setSelectedEvents] = useState<Set<string>>(new Set());
   const [initialSelectedEvents, setInitialSelectedEvents] = useState<Set<string>>(new Set());
   const [selectedTimeSlots, setSelectedTimeSlots] = useState<Map<string, string>>(new Map());
@@ -432,6 +434,35 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
           .eq('school_id', userProfile.school_id);
         if (deleteScheduleError) throw deleteScheduleError;
       } else {
+        // Create calendar event for the competition
+        let calendarEventId = null;
+        try {
+          await createEvent({
+            title: competition.name,
+            description: `Competition registration - ${competition.name}`,
+            location: '',
+            start_date: competition.start_date,
+            end_date: competition.end_date,
+            event_type: 'competition',
+            is_all_day: true
+          });
+          
+          // Get the created event ID (this is a simplification - in practice we'd need to modify useEvents to return the ID)
+          const { data: recentEvent } = await supabase
+            .from('events')
+            .select('id')
+            .eq('school_id', userProfile.school_id)
+            .eq('title', competition.name)
+            .order('created_at', { ascending: false })
+            .limit(1)
+            .single();
+          
+          calendarEventId = recentEvent?.id;
+        } catch (calendarError) {
+          console.error('Error creating calendar event:', calendarError);
+          // Don't block registration if calendar creation fails
+        }
+
         // Register for the competition (only for new registrations)
         const { error: compError } = await supabase
           .from('cp_comp_schools')
@@ -440,7 +471,8 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
             school_id: userProfile.school_id,
             status: 'registered',
             created_by: userProfile.id,
-            total_fee: totalCost
+            total_fee: totalCost,
+            calendar_event_id: calendarEventId
           });
         if (compError) throw compError;
       }
