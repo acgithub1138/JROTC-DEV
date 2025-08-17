@@ -45,7 +45,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
     registration_deadline_hour: competition?.registration_deadline ? new Date(competition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
     registration_deadline_minute: competition?.registration_deadline ? new Date(competition.registration_deadline).getMinutes().toString().padStart(2, '0') : '59',
     hosting_school: competition?.hosting_school || userProfile?.schools?.name || '',
-    sop: competition?.sop || '',
+    sop: competition?.sop || 'none',
     sop_link: competition?.sop_link || '',
     sop_text: competition?.sop_text || '',
   });
@@ -174,7 +174,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
         max_participants: formData.max_participants ? parseInt(formData.max_participants) : null,
         registration_deadline: registrationDeadline ? registrationDeadline.toISOString() : null,
         hosting_school: formData.hosting_school,
-        sop: formData.sop,
+        sop: formData.sop === 'none' ? null : formData.sop,
         sop_link: formData.sop_link,
         sop_text: formData.sop_text,
       };
@@ -409,7 +409,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
               <SelectValue placeholder="Select SOP type" />
             </SelectTrigger>
             <SelectContent>
-              <SelectItem value="">None</SelectItem>
+              <SelectItem value="none">None</SelectItem>
               <SelectItem value="Link">Link</SelectItem>
               <SelectItem value="Text">Text</SelectItem>
             </SelectContent>
