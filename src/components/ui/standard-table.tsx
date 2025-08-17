@@ -21,6 +21,7 @@ interface StandardTableWrapperProps {
   onToggleColumn?: (columnKey: string) => void;
   columnsLoading?: boolean;
   extraControls?: React.ReactNode;
+  stockCounter?: React.ReactNode;
 }
 export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTableWrapperProps>(({
   title,
@@ -36,7 +37,8 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
   visibleColumns,
   onToggleColumn,
   columnsLoading,
-  extraControls
+  extraControls,
+  stockCounter
 }, ref) => <div ref={ref} className="space-y-6">
     {/* Header Section */}
     
@@ -49,6 +51,7 @@ export const StandardTableWrapper = React.forwardRef<HTMLDivElement, StandardTab
       </div>
       
       <div className="flex items-center gap-4 ml-4">
+        {stockCounter}
         {columns && onToggleColumn && <ColumnSelector columns={columns} onToggleColumn={onToggleColumn} isLoading={columnsLoading} />}
         {extraControls}
         {selectedCount > 0 && onBulkDelete && <>

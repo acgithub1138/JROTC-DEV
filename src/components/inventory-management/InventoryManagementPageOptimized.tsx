@@ -5,6 +5,7 @@ import { EditInventoryItemDialog } from './components/EditInventoryItemDialog';
 import { BulkOperationsDialog } from './components/BulkOperationsDialog';
 import { InventoryActions } from './components/InventoryActions';
 import { InventoryFilters } from './components/InventoryFilters';
+import { StockCounter } from './components/StockCounter';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { useInventoryItems } from './hooks/useInventoryItems';
@@ -52,6 +53,10 @@ const InventoryManagementPageOptimized = () => {
   
   const totalPages = getTotalPages(filteredItems.length);
   const paginatedItems = getPaginatedItems(filteredItems, currentPage);
+
+  // Calculate stock counts for filtered items
+  const inStockCount = filteredItems.filter(item => (item.qty_available || 0) > 0).length;
+  const outOfStockCount = filteredItems.filter(item => (item.qty_available || 0) <= 0).length;
   
   const handlePageChange = (page: number) => {
     setCurrentPage(page);
@@ -214,6 +219,12 @@ const InventoryManagementPageOptimized = () => {
         visibleColumns={enabledColumns.map(col => col.key)}
         onToggleColumn={toggleColumn}
         columnsLoading={columnsLoading}
+        stockCounter={
+          <StockCounter 
+            inStockCount={inStockCount}
+            outOfStockCount={outOfStockCount}
+          />
+        }
         extraControls={
           <InventoryFilters
             showOutOfStockOnly={showOutOfStockOnly}
