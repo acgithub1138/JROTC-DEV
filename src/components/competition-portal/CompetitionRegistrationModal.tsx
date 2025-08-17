@@ -43,6 +43,7 @@ interface Competition {
   fee: number | null;
   start_date: string;
   end_date: string;
+  location: string;
 }
 
 interface CompetitionRegistrationModalProps {
@@ -440,7 +441,7 @@ export const CompetitionRegistrationModal: React.FC<CompetitionRegistrationModal
           await createEvent({
             title: competition.name,
             description: `Competition registration - ${competition.name}`,
-            location: '',
+            location: competition.location || '',
             start_date: competition.start_date,
             end_date: competition.end_date,
             event_type: 'b04588d5-acae-4141-a0cf-20c46bb1ec72', // Competition event type ID
