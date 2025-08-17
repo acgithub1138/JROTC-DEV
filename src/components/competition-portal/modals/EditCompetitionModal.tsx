@@ -80,7 +80,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
 
   // Track initial data for unsaved changes
   const [initialFormData, setInitialFormData] = useState(formData);
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData: initialFormData,
     currentData: formData,
     enabled: open
@@ -205,7 +208,6 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       setIsSubmitting(false);
     }
   };
-
   const handleClose = () => {
     if (hasUnsavedChanges && !isSubmitting) {
       setShowUnsavedDialog(true);
@@ -214,13 +216,11 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
     onOpenChange(false);
   };
-
   const handleCancelDiscard = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
@@ -242,22 +242,20 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
             <div className="grid grid-cols-2 gap-4">
               <div>
                 <Label htmlFor="program">JROTC Program *</Label>
-                <Select value={formData.program} onValueChange={(value) => handleInputChange('program', value)}>
+                <Select value={formData.program} onValueChange={value => handleInputChange('program', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select JROTC Program" />
                   </SelectTrigger>
                   <SelectContent>
-                    {JROTC_PROGRAM_OPTIONS.map((option) => (
-                      <SelectItem key={option.value} value={option.value}>
+                    {JROTC_PROGRAM_OPTIONS.map(option => <SelectItem key={option.value} value={option.value}>
                         {option.label}
-                      </SelectItem>
-                    ))}
+                      </SelectItem>)}
                   </SelectContent>
                 </Select>
               </div>
               <div>
                 <Label htmlFor="status">Status *</Label>
-                <Select value={formData.status} onValueChange={(value) => handleInputChange('status', value)}>
+                <Select value={formData.status} onValueChange={value => handleInputChange('status', value)}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select Status" />
                   </SelectTrigger>
@@ -326,8 +324,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                       </SelectTrigger>
                       <SelectContent>
                         {Array.from({
-                          length: 24
-                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                            length: 24
+                          }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
                           </SelectItem>)}
                       </SelectContent>
@@ -364,8 +362,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
                       </SelectTrigger>
                       <SelectContent>
                         {Array.from({
-                        length: 24
-                      }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
+                          length: 24
+                        }, (_, i) => <SelectItem key={i} value={i.toString().padStart(2, '0')}>
                             {i.toString().padStart(2, '0')}
                           </SelectItem>)}
                       </SelectContent>
@@ -408,8 +406,8 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
           {/* SOP Section */}
           <div className="space-y-4">
             <div>
-              <Label htmlFor="sop">Standard Operating Procedure (SOP)</Label>
-              <Select value={formData.sop} onValueChange={(value) => handleInputChange('sop', value)}>
+              <Label htmlFor="sop">Competition SOP </Label>
+              <Select value={formData.sop} onValueChange={value => handleInputChange('sop', value)}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select SOP type" />
                 </SelectTrigger>
@@ -421,40 +419,27 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
               </Select>
             </div>
 
-            {formData.sop === 'link' && (
-              <div>
+            {formData.sop === 'link' && <div>
                 <Label htmlFor="sop_link">SOP Link</Label>
-                <Input 
-                  id="sop_link" 
-                  value={formData.sop_link} 
-                  onChange={e => handleInputChange('sop_link', e.target.value)} 
-                  placeholder="Enter HTML link" 
-                />
-              </div>
-            )}
+                <Input id="sop_link" value={formData.sop_link} onChange={e => handleInputChange('sop_link', e.target.value)} placeholder="Enter HTML link" />
+              </div>}
 
-            {formData.sop === 'text' && (
-              <div>
+            {formData.sop === 'text' && <div>
                 <Label htmlFor="sop_text">SOP Text</Label>
                 <div className="border rounded-md">
-                  <ReactQuill
-                    value={formData.sop_text}
-                    onChange={(value) => handleInputChange('sop_text', value)}
-                    modules={{
-                      toolbar: [
-                        [{ 'header': [1, 2, 3, false] }],
-                        ['bold', 'italic', 'underline'],
-                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
-                        ['link'],
-                        ['clean']
-                      ]
-                    }}
-                    formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
-                    style={{ minHeight: '150px' }}
-                  />
+                  <ReactQuill value={formData.sop_text} onChange={value => handleInputChange('sop_text', value)} modules={{
+                  toolbar: [[{
+                    'header': [1, 2, 3, false]
+                  }], ['bold', 'italic', 'underline'], [{
+                    'list': 'ordered'
+                  }, {
+                    'list': 'bullet'
+                  }], ['link'], ['clean']]
+                }} formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']} style={{
+                  minHeight: '150px'
+                }} />
                 </div>
-              </div>
-            )}
+              </div>}
           </div>
 
           <DialogFooter>
@@ -469,11 +454,6 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
       </DialogContent>
     </Dialog>
 
-    <UnsavedChangesDialog
-      open={showUnsavedDialog}
-      onOpenChange={setShowUnsavedDialog}
-      onDiscard={handleDiscardChanges}
-      onCancel={handleCancelDiscard}
-    />
+    <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleCancelDiscard} />
   </>;
 };
