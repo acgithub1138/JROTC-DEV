@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -37,6 +37,11 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
 }) => {
   const [localMappings, setLocalMappings] = useState<CriteriaMapping[]>(mappings);
   const [isSaving, setIsSaving] = useState(false);
+  
+  // Sync localMappings with mappings prop when it changes
+  useEffect(() => {
+    setLocalMappings(mappings);
+  }, [mappings]);
   
   const handleSaveFunction = onSave || onMappingsChange || (async () => {});
 
