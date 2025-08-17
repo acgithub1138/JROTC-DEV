@@ -9,7 +9,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { CompetitionCards } from './CompetitionCards';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import type { ColumnPreference } from '@/hooks/useColumnPreferences';
-
 interface BasicCompetitionTableProps {
   competitions: any[];
   isLoading: boolean;
@@ -22,7 +21,6 @@ interface BasicCompetitionTableProps {
   visibleColumns?: string[];
   canViewDetails?: boolean;
 }
-
 const getPlacementColor = (placement: string | null) => {
   if (!placement || placement === '-') return '';
   const num = placement.toLowerCase();
@@ -64,7 +62,6 @@ const getPlacementColor = (placement: string | null) => {
     // Default for other placements
   }
 };
-
 const PlacementCell = ({
   placement
 }: {
@@ -79,7 +76,6 @@ const PlacementCell = ({
   }
   return <span>{displayValue}</span>;
 };
-
 export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
   competitions,
   isLoading,
@@ -137,31 +133,16 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
           </TableHeader>
           <TableBody>
             {competitions.map(competition => <TableRow key={competition.id}>
-                {isColumnVisible('name') && (
-                  <TableCell className="font-medium py-[8px]">
-                    {onView ? (
-                      <button
-                        onClick={() => onView(competition)}
-                        className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
-                      >
+                {isColumnVisible('name') && <TableCell className="font-medium py-[8px]">
+                    {onView ? <button onClick={() => onView(competition)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
                         {competition.name}
-                      </button>
-                    ) : (
-                      competition.name
-                    )}
-                  </TableCell>
-                )}
-                {isColumnVisible('source_type') && (
-                  <TableCell>
-                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${
-                      competition.source_type === 'internal' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : 'bg-green-100 text-green-800'
-                    }`}>
+                      </button> : competition.name}
+                  </TableCell>}
+                {isColumnVisible('source_type') && <TableCell>
+                    <span className={`px-2 py-1 rounded-md text-xs font-medium ${competition.source_type === 'internal' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}`}>
                       {competition.source_type === 'internal' ? 'My School' : 'Portal Event'}
                     </span>
-                  </TableCell>
-                )}
+                  </TableCell>}
                 {isColumnVisible('date') && <TableCell>
                     {formatTimeForDisplay(competition.competition_date, TIME_FORMATS.DATE_ONLY, 'UTC')}
                   </TableCell>}
@@ -177,7 +158,7 @@ export const BasicCompetitionTable: React.FC<BasicCompetitionTableProps> = ({
                 {isColumnVisible('unarmed_color_guard') && <TableCell><PlacementCell placement={competition.unarmed_color_guard} /></TableCell>}
                 {isColumnVisible('unarmed_inspection') && <TableCell><PlacementCell placement={competition.unarmed_inspection} /></TableCell>}
                  <TableCell className="text-right">
-                   <div className="flex items-center justify-center gap-2">
+                   <div className="flex items-center justify-start gap-2">
                      {onAddEvent && <Tooltip>
                          <TooltipTrigger asChild>
                            <Button variant="default" size="icon" className="h-6 w-6" onClick={() => onAddEvent(competition)}>
