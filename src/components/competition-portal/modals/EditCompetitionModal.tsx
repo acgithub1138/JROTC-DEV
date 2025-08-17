@@ -5,6 +5,8 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { RichTextBodyField } from '@/components/email-management/dialogs/components/RichTextBodyField';
+import ReactQuill from 'react-quill';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { CalendarIcon } from 'lucide-react';
@@ -64,7 +66,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
     is_public: true,
     program: 'air_force',
     status: 'draft',
-    fee: ''
+    fee: '',
+    sop: 'none',
+    sop_link: '',
+    sop_text: ''
   });
   const [startDate, setStartDate] = useState<Date | undefined>(undefined);
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
@@ -103,7 +108,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         is_public: competition.is_public,
         program: competition.program || 'air_force',
         status: competition.status || 'draft',
-        fee: (competition as any).fee?.toString() || ''
+        fee: (competition as any).fee?.toString() || '',
+        sop: (competition as any).sop || 'none',
+        sop_link: (competition as any).sop_link || '',
+        sop_text: (competition as any).sop_text || ''
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
@@ -185,7 +193,10 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
         is_public: formData.is_public,
         program: formData.program,
         status: formData.status,
-        fee: formData.fee ? parseFloat(formData.fee) : null
+        fee: formData.fee ? parseFloat(formData.fee) : null,
+        sop: formData.sop === 'none' ? null : formData.sop,
+        sop_link: formData.sop === 'link' ? formData.sop_link : null,
+        sop_text: formData.sop === 'text' ? formData.sop_text : null
       };
       await onSubmit(submitData);
       resetChanges();
@@ -392,6 +403,58 @@ export const EditCompetitionModal: React.FC<EditCompetitionModalProps> = ({
               <Label htmlFor="fee">Entry Fee</Label>
               <Input id="fee" type="number" step="0.01" min="0" value={formData.fee} onChange={e => handleInputChange('fee', e.target.value)} placeholder="0.00" />
             </div>
+          </div>
+
+          {/* SOP Section */}
+          <div className="space-y-4">
+            <div>
+              <Label htmlFor="sop">Standard Operating Procedure (SOP)</Label>
+              <Select value={formData.sop} onValueChange={(value) => handleInputChange('sop', value)}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select SOP type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="none">None</SelectItem>
+                  <SelectItem value="link">Link</SelectItem>
+                  <SelectItem value="text">Text</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {formData.sop === 'link' && (
+              <div>
+                <Label htmlFor="sop_link">SOP Link</Label>
+                <Input 
+                  id="sop_link" 
+                  value={formData.sop_link} 
+                  onChange={e => handleInputChange('sop_link', e.target.value)} 
+                  placeholder="Enter HTML link" 
+                />
+              </div>
+            )}
+
+            {formData.sop === 'text' && (
+              <div>
+                <Label htmlFor="sop_text">SOP Text</Label>
+                <div className="border rounded-md">
+                  <ReactQuill
+                    value={formData.sop_text}
+                    onChange={(value) => handleInputChange('sop_text', value)}
+                    modules={{
+                      toolbar: [
+                        [{ 'header': [1, 2, 3, false] }],
+                        ['bold', 'italic', 'underline'],
+                        [{ 'list': 'ordered'}, { 'list': 'bullet' }],
+                        ['link'],
+                        ['clean']
+                      ]
+                    }}
+                    formats={['header', 'bold', 'italic', 'underline', 'list', 'bullet', 'link']}
+                    style={{ minHeight: '150px' }}
+                  />
+                </div>
+              </div>
+            )}
           </div>
 
           <DialogFooter>
