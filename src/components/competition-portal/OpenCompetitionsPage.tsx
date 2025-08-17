@@ -19,6 +19,17 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
+
+const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
+  <Dialog open={isOpen} onOpenChange={onClose}>
+    <DialogContent className="max-w-3xl max-h-[80vh] overflow-y-auto">
+      <DialogHeader>
+        <DialogTitle>Standard Operating Procedure</DialogTitle>
+      </DialogHeader>
+      <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: sopText }} />
+    </DialogContent>
+  </Dialog>
+);
 export const OpenCompetitionsPage = () => {
   const {
     toast
@@ -35,6 +46,8 @@ export const OpenCompetitionsPage = () => {
   const [isCancelDialogOpen, setIsCancelDialogOpen] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState('');
+  const [isSOPModalOpen, setIsSOPModalOpen] = useState(false);
+  const [selectedSOPText, setSelectedSOPText] = useState('');
   const debouncedSearch = useDebouncedValue(searchTerm, 300);
   const {
     data: competitions,
@@ -293,6 +306,48 @@ export const OpenCompetitionsPage = () => {
           </DialogHeader>
 
           <div className="space-y-4">
+            {/* SOP Section */}
+            {selectedCompetitionId && competitions && (() => {
+              const competition = competitions.find(c => c.id === selectedCompetitionId) as any;
+              const hasSOP = competition?.sop && competition.sop !== 'none';
+              
+              if (!hasSOP) return null;
+              
+              return (
+                <Card className="bg-muted/50">
+                  <CardContent className="pt-6">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg font-semibold flex items-center gap-2">
+                        <Calendar className="w-5 h-5" />
+                        Standard Operating Procedure
+                      </h3>
+                      {competition.sop === 'link' && competition.sop_link ? (
+                        <a 
+                          href={competition.sop_link} 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="text-primary hover:underline"
+                        >
+                          View SOP Link
+                        </a>
+                      ) : competition.sop === 'text' && competition.sop_text ? (
+                        <Button 
+                          variant="outline" 
+                          size="sm"
+                          onClick={() => {
+                            setSelectedSOPText(competition.sop_text || '');
+                            setIsSOPModalOpen(true);
+                          }}
+                        >
+                          VIEW
+                        </Button>
+                      ) : null}
+                    </div>
+                  </CardContent>
+                </Card>
+              );
+            })()}
+            
             {isEventsLoading ? <div className="space-y-4">
                 {[...Array(3)].map((_, i) => <div key={i} className="animate-pulse">
                     <div className="h-4 bg-gray-200 rounded mb-2"></div>
@@ -384,5 +439,11 @@ export const OpenCompetitionsPage = () => {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      <SOPTextModal 
+        isOpen={isSOPModalOpen} 
+        onClose={() => setIsSOPModalOpen(false)} 
+        sopText={selectedSOPText} 
+      />
     </div>;
 };
