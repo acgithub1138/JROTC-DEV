@@ -38,26 +38,24 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const { templates } = useCompetitionTemplates();
   const fieldNames = getFieldNames(events, templates);
 
-  // Function to get field name with max value if available
-  const getFieldNameWithMax = (fieldName: string): string => {
-    const cleanName = getCleanFieldName(fieldName);
-    
+  // Function to get max value for a field
+  const getFieldMaxValue = (fieldName: string): string => {
     // Get template from the first event (assuming all events use the same template)
     const firstEvent = events[0];
-    if (!firstEvent?.score_sheet?.template_id) return cleanName;
+    if (!firstEvent?.score_sheet?.template_id) return '-';
     
     const template = templates.find(t => t.id === firstEvent.score_sheet.template_id);
-    if (!template?.scores) return cleanName;
+    if (!template?.scores) return '-';
     
     // Parse the scores JSON data safely
     let scoresData: any;
     try {
       scoresData = typeof template.scores === 'string' ? JSON.parse(template.scores) : template.scores;
     } catch {
-      return cleanName;
+      return '-';
     }
     
-    if (!scoresData?.criteria || !Array.isArray(scoresData.criteria)) return cleanName;
+    if (!scoresData?.criteria || !Array.isArray(scoresData.criteria)) return '-';
     
     // Find the matching field in template criteria
     const templateField = scoresData.criteria.find((field: any) => {
@@ -65,11 +63,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
       return fieldName.includes(templateFieldId) || fieldName.includes(field.name?.replace(/\s+/g, '_').toLowerCase());
     });
     
-    if (templateField?.maxValue) {
-      return `${cleanName} (${templateField.maxValue})`;
-    }
-    
-    return cleanName;
+    return templateField?.maxValue ? String(templateField.maxValue) : '-';
   };
 
   // Function to get judge column color classes
@@ -174,7 +168,8 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead className="text-center bg-muted/30 px-2 min-w-20">Field</TableHead>
+            <TableHead className="text-center bg-muted/30 px-2 min-w-32">Field</TableHead>
+            <TableHead className="text-center bg-muted/30 px-2 min-w-16">Max</TableHead>
              {events.map((event, index) => (
                 <TableHead key={event.id} className={`text-center border-r px-2 min-w-24 ${getJudgeColorClasses(index)}`}>
                   <div className="space-y-1">
@@ -203,7 +198,10 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
             return (
               <TableRow key={fieldName}>
                 <TableCell className="sticky left-0 bg-background font-medium border-r px-2 text-sm">
-                  {getFieldNameWithMax(fieldName)}
+                  {getCleanFieldName(fieldName)}
+                </TableCell>
+                <TableCell className="text-center bg-muted/30 font-medium border-r px-2 text-sm">
+                  {getFieldMaxValue(fieldName)}
                 </TableCell>
                  {events.map((event, eventIndex) => {
                    const value = event.score_sheet?.scores?.[fieldName];
@@ -249,11 +247,14 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
             <TableCell className="sticky left-0 bg-muted/50 font-bold border-r px-2 text-sm">
               Total Points
             </TableCell>
+            <TableCell className="text-center bg-muted/50 font-bold border-r px-2 text-sm">
+              -
+            </TableCell>
              {events.map((event, eventIndex) => (
-               <TableCell key={event.id} className={`text-center font-bold border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
-                 {event.total_points || 0}
-               </TableCell>
-             ))}
+                <TableCell key={event.id} className={`text-center font-bold border-r px-1 text-sm ${getJudgeColorClasses(eventIndex)}`}>
+                  {event.total_points || 0}
+                </TableCell>
+              ))}
             <TableCell className="text-center font-bold bg-muted/50 px-1 text-sm">
               {calculateTotalAverage(events)}
             </TableCell>
@@ -264,7 +265,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
             <TableCell className="sticky left-0 bg-primary/10 font-bold border-r text-primary px-2 text-sm">
               Grand Total
             </TableCell>
-            <TableCell className="text-center font-bold text-primary px-1 text-sm" colSpan={events.length + 1}>
+            <TableCell className="text-center font-bold text-primary px-1 text-sm" colSpan={events.length + 2}>
               {events.reduce((sum, event) => sum + (event.total_points || 0), 0)} points
             </TableCell>
           </TableRow>
