@@ -7,7 +7,7 @@ interface StockCounterProps {
 
 export const StockCounter = ({ inStockCount, outOfStockCount }: StockCounterProps) => {
   return (
-    <div className="flex items-center gap-2 text-sm">
+    <div className="flex items-center justify-center gap-2 text-sm">
       <Badge variant="secondary" className="bg-emerald-100 text-emerald-800 dark:bg-emerald-900/20 dark:text-emerald-400">
         In Stock: {inStockCount}
       </Badge>
