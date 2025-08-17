@@ -403,7 +403,7 @@ export const CPCompetitionForm: React.FC<CPCompetitionFormProps> = ({
 
       <div className="space-y-4">
         <div className="space-y-2">
-          <Label htmlFor="sop">Standard Operating Procedure (SOP)</Label>
+          <Label htmlFor="sop">Competition SOP<Label>
           <Select value={formData.sop} onValueChange={(value) => updateFormData('sop', value)}>
             <SelectTrigger>
               <SelectValue placeholder="Select SOP type" />
