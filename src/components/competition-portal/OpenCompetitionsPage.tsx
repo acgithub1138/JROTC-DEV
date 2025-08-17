@@ -319,7 +319,7 @@ export const OpenCompetitionsPage = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="text-lg font-semibold flex items-center gap-2">
                         <Calendar className="w-5 h-5" />
-                        Standard Operating Procedure
+                        Competition SOP
                       </h3>
                       {competition.sop === 'link' && competition.sop_link ? (
                         <a 
