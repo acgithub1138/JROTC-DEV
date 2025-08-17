@@ -202,7 +202,7 @@ export const AdvancedCriteriaMapping: React.FC<AdvancedCriteriaMappingProps> = (
 
                   <div>
                     <Label>Select Criteria to Group:</Label>
-                    <div className="grid grid-cols-1 gap-2 mt-2 max-h-40 overflow-y-auto">
+                    <div className="grid grid-cols-2 gap-2 mt-2 max-h-40 overflow-y-auto">
                       {unmappedCriteria.map((criteria) => (
                         <div key={criteria} className="flex items-center space-x-2">
                           <Checkbox
