@@ -46,7 +46,7 @@ const MarketingFooter = () => {
             <div className="space-y-2 text-sm text-muted-foreground">
               <div className="flex items-center gap-2">
                 <Mail className="h-4 w-4" />
-                <span><a href="mailto:jrotc_ccc@careyunlimited.com">jrotc_ccc@careyunlimited.com</a></span>
+                <span><a href="mailto:admin@jortc.us">admin@jortc.us</a></span>
               </div>
               
               <div className="flex items-center gap-2">
