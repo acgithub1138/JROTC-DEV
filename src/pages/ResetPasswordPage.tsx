@@ -16,23 +16,25 @@ const ResetPasswordPage = () => {
   const [loading, setLoading] = useState(false);
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [isAuthenticating, setIsAuthenticating] = useState(true);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Check if we have the necessary tokens in the URL
-    const accessToken = searchParams.get('access_token');
-    const refreshToken = searchParams.get('refresh_token');
-    const code = searchParams.get('code');
-    
-    if (accessToken && refreshToken) {
-      // Handle direct token approach
-      supabase.auth.setSession({
-        access_token: accessToken,
-        refresh_token: refreshToken,
-      });
-    } else if (code) {
-      // Handle code exchange approach (more common for password reset)
-      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
-        if (error) {
+    // Listen for auth state changes instead of manually handling the code
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (event === 'SIGNED_IN' && session) {
+        setIsAuthenticated(true);
+        setIsAuthenticating(false);
+      } else if (event === 'TOKEN_REFRESHED' && session) {
+        setIsAuthenticated(true);
+        setIsAuthenticating(false);
+      } else if (event === 'SIGNED_OUT' || !session) {
+        setIsAuthenticated(false);
+        setIsAuthenticating(false);
+        
+        // Only show error if we have a code in URL but no session
+        const code = searchParams.get('code');
+        if (code) {
           toast({
             title: "Invalid Reset Link",
             description: "The password reset link is invalid or has expired.",
@@ -40,16 +42,30 @@ const ResetPasswordPage = () => {
           });
           navigate('/app/auth');
         }
-      });
-    } else {
-      toast({
-        title: "Invalid Reset Link",
-        description: "The password reset link is invalid or has expired.",
-        variant: "destructive",
-      });
-      navigate('/app/auth');
-      return;
-    }
+      }
+    });
+
+    // Check current session state
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsAuthenticated(true);
+      } else {
+        // If no session and no code, redirect to auth
+        const code = searchParams.get('code');
+        if (!code) {
+          toast({
+            title: "Invalid Reset Link",
+            description: "The password reset link is invalid or has expired.",
+            variant: "destructive",
+          });
+          navigate('/app/auth');
+          return;
+        }
+      }
+      setIsAuthenticating(false);
+    });
+
+    return () => subscription.unsubscribe();
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
@@ -117,48 +133,69 @@ const ResetPasswordPage = () => {
 
         <Card className="bg-white/95 backdrop-blur-sm shadow-xl">
           <CardHeader>
-            <CardTitle className="text-center text-gray-800">Create New Password</CardTitle>
+            <CardTitle className="text-center text-gray-800">
+              {isAuthenticating ? 'Verifying Reset Link...' : 'Create New Password'}
+            </CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleResetPassword} className="space-y-4">
-              <div className="space-y-2">
-                <Label htmlFor="password">New Password</Label>
-                <Input
-                  id="password"
-                  type="password"
-                  placeholder="Enter new password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
+            {isAuthenticating ? (
+              <div className="text-center py-8">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto mb-4"></div>
+                <p className="text-gray-600">Please wait while we verify your reset link...</p>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="confirmPassword">Confirm New Password</Label>
-                <Input
-                  id="confirmPassword"
-                  type="password"
-                  placeholder="Confirm new password"
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  required
-                  minLength={6}
-                />
+            ) : isAuthenticated ? (
+              <>
+                <form onSubmit={handleResetPassword} className="space-y-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="password">New Password</Label>
+                    <Input
+                      id="password"
+                      type="password"
+                      placeholder="Enter new password"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                    <Input
+                      id="confirmPassword"
+                      type="password"
+                      placeholder="Confirm new password"
+                      value={confirmPassword}
+                      onChange={(e) => setConfirmPassword(e.target.value)}
+                      required
+                      minLength={6}
+                    />
+                  </div>
+                  <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
+                    {loading ? 'Updating Password...' : 'Update Password'}
+                  </Button>
+                </form>
+                
+                <div className="mt-4 text-center">
+                  <button
+                    type="button"
+                    onClick={() => navigate('/app/auth')}
+                    className="text-blue-600 hover:text-blue-800 text-sm underline"
+                  >
+                    Back to Sign In
+                  </button>
+                </div>
+              </>
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-red-600 mb-4">Invalid or expired reset link</p>
+                <Button 
+                  onClick={() => navigate('/app/auth')}
+                  className="bg-blue-600 hover:bg-blue-700"
+                >
+                  Return to Sign In
+                </Button>
               </div>
-              <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
-                {loading ? 'Updating Password...' : 'Update Password'}
-              </Button>
-            </form>
-            
-            <div className="mt-4 text-center">
-              <button
-                type="button"
-                onClick={() => navigate('/app/auth')}
-                className="text-blue-600 hover:text-blue-800 text-sm underline"
-              >
-                Back to Sign In
-              </button>
-            </div>
+            )}
           </CardContent>
         </Card>
       </div>
