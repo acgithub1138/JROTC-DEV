@@ -54,7 +54,7 @@ const AuthPage = () => {
       const {
         error
       } = await supabase.auth.resetPasswordForEmail(formData.email, {
-        redirectTo: `${window.location.origin}/reset-password?type=recovery`
+        redirectTo: `${window.location.origin}/reset-password`
       });
       if (error) {
         toast({
@@ -65,7 +65,7 @@ const AuthPage = () => {
       } else {
         toast({
           title: "Reset Email Sent",
-          description: "Check your email for password reset instructions."
+          description: "Check your email for a 6-digit verification code and reset instructions."
         });
       }
     } catch (error: any) {
