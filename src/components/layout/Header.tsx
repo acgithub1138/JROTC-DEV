@@ -126,9 +126,9 @@ export const Header: React.FC<HeaderProps> = ({
         <div className="flex-1 flex justify-center">
           {userProfile?.schools && (
             <div className="flex items-center space-x-3">
-              {(userProfile.schools as any).logo_url && (
+              {userProfile.schools.logo_url && (
                 <img 
-                  src={(userProfile.schools as any).logo_url} 
+                  src={userProfile.schools.logo_url} 
                   alt={`${userProfile.schools.name} logo`}
                   className="w-8 h-8 object-contain"
                 />
