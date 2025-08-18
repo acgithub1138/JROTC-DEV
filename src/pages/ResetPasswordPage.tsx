@@ -20,52 +20,55 @@ const ResetPasswordPage = () => {
   const [isAuthenticated, setIsAuthenticated] = useState(false);
 
   useEffect(() => {
-    // Listen for auth state changes instead of manually handling the code
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (event === 'SIGNED_IN' && session) {
-        setIsAuthenticated(true);
-        setIsAuthenticating(false);
-      } else if (event === 'TOKEN_REFRESHED' && session) {
-        setIsAuthenticated(true);
-        setIsAuthenticating(false);
-      } else if (event === 'SIGNED_OUT' || !session) {
-        setIsAuthenticated(false);
-        setIsAuthenticating(false);
-        
-        // Only show error if we have a code in URL but no session
-        const code = searchParams.get('code');
-        if (code) {
-          toast({
-            title: "Invalid Reset Link",
-            description: "The password reset link is invalid or has expired.",
-            variant: "destructive",
-          });
-          navigate('/app/auth');
-        }
-      }
-    });
+    const code = searchParams.get('code');
+    
+    // If no code, this isn't a valid reset link
+    if (!code) {
+      setIsAuthenticated(false);
+      setIsAuthenticating(false);
+      toast({
+        title: "Invalid Reset Link",
+        description: "No reset code found in URL.",
+        variant: "destructive",
+      });
+      navigate('/app/auth');
+      return;
+    }
 
-    // Check current session state
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsAuthenticated(true);
-      } else {
-        // If no session and no code, redirect to auth
-        const code = searchParams.get('code');
-        if (!code) {
+    // Handle the code manually since detectSessionInUrl might not work for password reset
+    const handleResetCode = async () => {
+      try {
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        
+        if (error) {
+          setIsAuthenticated(false);
+          setIsAuthenticating(false);
           toast({
             title: "Invalid Reset Link",
-            description: "The password reset link is invalid or has expired.",
+            description: error.message || "The password reset link is invalid or has expired.",
             variant: "destructive",
           });
           navigate('/app/auth');
           return;
         }
+        
+        if (data.session) {
+          setIsAuthenticated(true);
+          setIsAuthenticating(false);
+        }
+      } catch (err: any) {
+        setIsAuthenticated(false);
+        setIsAuthenticating(false);
+        toast({
+          title: "Reset Link Error",
+          description: "Failed to process reset link. Please try again.",
+          variant: "destructive",
+        });
+        navigate('/app/auth');
       }
-      setIsAuthenticating(false);
-    });
+    };
 
-    return () => subscription.unsubscribe();
+    handleResetCode();
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
