@@ -21,8 +21,27 @@ const ResetPasswordPage = () => {
     // Check if we have the necessary tokens in the URL
     const accessToken = searchParams.get('access_token');
     const refreshToken = searchParams.get('refresh_token');
+    const code = searchParams.get('code');
     
-    if (!accessToken || !refreshToken) {
+    if (accessToken && refreshToken) {
+      // Handle direct token approach
+      supabase.auth.setSession({
+        access_token: accessToken,
+        refresh_token: refreshToken,
+      });
+    } else if (code) {
+      // Handle code exchange approach (more common for password reset)
+      supabase.auth.exchangeCodeForSession(code).then(({ error }) => {
+        if (error) {
+          toast({
+            title: "Invalid Reset Link",
+            description: "The password reset link is invalid or has expired.",
+            variant: "destructive",
+          });
+          navigate('/app/auth');
+        }
+      });
+    } else {
       toast({
         title: "Invalid Reset Link",
         description: "The password reset link is invalid or has expired.",
@@ -31,12 +50,6 @@ const ResetPasswordPage = () => {
       navigate('/app/auth');
       return;
     }
-
-    // Set the session with the tokens from the URL
-    supabase.auth.setSession({
-      access_token: accessToken,
-      refresh_token: refreshToken,
-    });
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
