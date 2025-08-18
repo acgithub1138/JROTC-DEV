@@ -86,7 +86,7 @@ const MarketingFooter = () => {
         <div className="border-t mt-8 pt-8 flex flex-col md:flex-row justify-between items-center">
           <p className="text-sm text-muted-foreground">© 2025 Carey Unlimited. All rights reserved.</p>
           <div className="flex space-x-6 mt-4 md:mt-0">
-            <Link to="/privacy-privacy" className="text-sm text-muted-foreground hover:text-foreground">
+            <Link to="/privacy-policy" className="text-sm text-muted-foreground hover:text-foreground">
               Privacy Policy
             </Link>
             <Link to="/terms-conditions" className="text-sm text-muted-foreground hover:text-foreground">
