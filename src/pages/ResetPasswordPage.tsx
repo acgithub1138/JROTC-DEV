@@ -68,8 +68,11 @@ const ResetPasswordPage = () => {
     // Handle password reset verification
     const handlePasswordResetVerification = async () => {
       try {
-        // For password reset, we should use exchangeCodeForSession, not verifyOtp
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        // For password reset, we need to use verifyOtp with type 'recovery'
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: code,
+          type: 'recovery'
+        });
         
         if (error) {
           setIsAuthenticated(false);
