@@ -5,9 +5,10 @@ import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger, DropdownMenuSeparator } from '@/components/ui/dropdown-menu';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/components/ui/sheet';
-import { User, LogOut, Settings, Menu, Shield, Trophy } from 'lucide-react';
+import { User, LogOut, Settings, Menu, Shield, Trophy, Building2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
+import { SchoolProfileModal } from '@/components/school/SchoolProfileModal';
 
 interface HeaderProps {
   activeModule: string;
@@ -30,6 +31,7 @@ export const Header: React.FC<HeaderProps> = ({
   } = useAuth();
   const { canAccessCompetitionPortal, setPortal } = usePortal();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [schoolProfileOpen, setSchoolProfileOpen] = useState(false);
   const {
     menuItems
   } = useSidebarPreferences();
@@ -157,7 +159,15 @@ export const Header: React.FC<HeaderProps> = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              
+              {userProfile?.role === 'instructor' && (
+                <>
+                  <DropdownMenuItem onClick={() => setSchoolProfileOpen(true)}>
+                    <Building2 className="w-4 h-4 mr-2" />
+                    School Profile
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                </>
+              )}
               
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-2" />
@@ -167,5 +177,10 @@ export const Header: React.FC<HeaderProps> = ({
           </DropdownMenu>
         </div>
       </div>
+
+      <SchoolProfileModal
+        open={schoolProfileOpen}
+        onOpenChange={setSchoolProfileOpen}
+      />
     </div>;
 };
