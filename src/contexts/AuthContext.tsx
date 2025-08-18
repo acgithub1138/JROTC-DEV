@@ -17,6 +17,7 @@ interface School {
   jrotc_program?: string;
   competition_module?: boolean;
   competition_portal?: boolean;
+  logo_url?: string;
 }
 
 interface Profile {
@@ -84,7 +85,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
             email,
             jrotc_program,
             competition_module,
-            competition_portal
+            competition_portal,
+            logo_url
           )
         `)
         .eq('id', userId)
