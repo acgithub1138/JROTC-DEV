@@ -21,39 +21,49 @@ const ResetPasswordPage = () => {
 
   useEffect(() => {
     const code = searchParams.get('code');
+    const type = searchParams.get('type');
+    const error = searchParams.get('error');
+    const errorDescription = searchParams.get('error_description');
     
-    // If no code, this isn't a valid reset link
-    if (!code) {
+    // Check for URL error parameters first
+    if (error) {
+      setIsAuthenticated(false);
+      setIsAuthenticating(false);
+      toast({
+        title: "Reset Link Error",
+        description: errorDescription || "The password reset link is invalid or has expired.",
+        variant: "destructive",
+      });
+      navigate('/app/auth');
+      return;
+    }
+    
+    // If no code or wrong type, this isn't a valid reset link
+    if (!code || type !== 'recovery') {
       setIsAuthenticated(false);
       setIsAuthenticating(false);
       toast({
         title: "Invalid Reset Link",
-        description: "No reset code found in URL.",
+        description: "No valid reset code found in URL.",
         variant: "destructive",
       });
       navigate('/app/auth');
       return;
     }
 
-    // Handle password reset code manually
-    const handlePasswordResetCode = async () => {
+    // Handle password reset verification
+    const handlePasswordResetVerification = async () => {
       try {
-        // First check if user is already authenticated (token might have been used)
-        const { data: existingSession } = await supabase.auth.getSession();
-        if (existingSession.session) {
-          setIsAuthenticated(true);
-          setIsAuthenticating(false);
-          return;
-        }
-
-        // Try to exchange the code for a session
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        // Use verifyOtp with type 'recovery' for password reset
+        const { data, error } = await supabase.auth.verifyOtp({
+          token_hash: code,
+          type: 'recovery'
+        });
         
         if (error) {
           setIsAuthenticated(false);
           setIsAuthenticating(false);
           
-          // Provide specific error messages based on error type
           let errorMessage = "The password reset link is invalid or has expired.";
           if (error.message.includes("expired")) {
             errorMessage = "The password reset link has expired. Please request a new one.";
@@ -95,7 +105,7 @@ const ResetPasswordPage = () => {
       }
     };
 
-    handlePasswordResetCode();
+    handlePasswordResetVerification();
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
