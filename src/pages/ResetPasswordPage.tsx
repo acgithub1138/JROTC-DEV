@@ -24,27 +24,41 @@ const ResetPasswordPage = () => {
     const type = searchParams.get('type');
     const error = searchParams.get('error');
     const errorDescription = searchParams.get('error_description');
+    const errorCode = searchParams.get('error_code');
     
     // Check for URL error parameters first
     if (error) {
       setIsAuthenticated(false);
       setIsAuthenticating(false);
+      
+      let errorMessage = "The password reset link is invalid or has expired.";
+      
+      if (error === 'access_denied') {
+        if (errorCode === 'otp_expired') {
+          errorMessage = "The password reset link has expired. Please request a new one.";
+        } else {
+          errorMessage = "The password reset link is invalid or has already been used.";
+        }
+      } else if (errorDescription) {
+        errorMessage = errorDescription.replace(/\+/g, ' ');
+      }
+      
       toast({
         title: "Reset Link Error",
-        description: errorDescription || "The password reset link is invalid or has expired.",
+        description: errorMessage,
         variant: "destructive",
       });
       navigate('/app/auth');
       return;
     }
     
-    // If no code or wrong type, this isn't a valid reset link
-    if (!code || type !== 'recovery') {
+    // If no code, this isn't a valid reset link
+    if (!code) {
       setIsAuthenticated(false);
       setIsAuthenticating(false);
       toast({
         title: "Invalid Reset Link",
-        description: "No valid reset code found in URL.",
+        description: "No reset code found in URL.",
         variant: "destructive",
       });
       navigate('/app/auth');
@@ -54,11 +68,8 @@ const ResetPasswordPage = () => {
     // Handle password reset verification
     const handlePasswordResetVerification = async () => {
       try {
-        // Use verifyOtp with type 'recovery' for password reset
-        const { data, error } = await supabase.auth.verifyOtp({
-          token_hash: code,
-          type: 'recovery'
-        });
+        // For password reset, we should use exchangeCodeForSession, not verifyOtp
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
         
         if (error) {
           setIsAuthenticated(false);
