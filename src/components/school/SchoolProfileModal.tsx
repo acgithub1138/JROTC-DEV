@@ -156,9 +156,26 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
       const fileExt = file.name.split('.').pop();
       const fileName = `${schoolId}/logo.${fileExt}`;
       
+      // Delete any existing logo files for this school first
+      const { data: existingFiles } = await supabase.storage
+        .from('school-logos')
+        .list(schoolId);
+      
+      if (existingFiles && existingFiles.length > 0) {
+        const filesToDelete = existingFiles
+          .filter(file => file.name.startsWith('logo.'))
+          .map(file => `${schoolId}/${file.name}`);
+        
+        if (filesToDelete.length > 0) {
+          await supabase.storage
+            .from('school-logos')
+            .remove(filesToDelete);
+        }
+      }
+      
       const { error: uploadError } = await supabase.storage
         .from('school-logos')
-        .upload(fileName, file, { upsert: true });
+        .upload(fileName, file);
 
       if (uploadError) throw uploadError;
 
@@ -166,7 +183,8 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
         .from('school-logos')
         .getPublicUrl(fileName);
 
-      return publicUrl;
+      // Add cache busting parameter
+      return `${publicUrl}?t=${Date.now()}`;
     } catch (error) {
       console.error('Error uploading logo:', error);
       toast({
@@ -273,9 +291,35 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
     setShowUnsavedDialog(false);
   };
 
-  const handleFileDelete = () => {
-    if (school) {
+  const handleFileDelete = async () => {
+    if (!school) return;
+
+    try {
+      // Delete the actual file from storage if it exists
+      if (school.logo_url) {
+        const urlParts = school.logo_url.split('/');
+        const fileName = urlParts[urlParts.length - 1].split('?')[0]; // Remove cache busting params
+        const filePath = `${school.id}/${fileName}`;
+        
+        await supabase.storage
+          .from('school-logos')
+          .remove([filePath]);
+      }
+
+      // Update the local state to remove the logo URL
       setSchool({ ...school, logo_url: null });
+      
+      toast({
+        title: "Success",
+        description: "Logo deleted successfully"
+      });
+    } catch (error) {
+      console.error('Error deleting logo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete logo",
+        variant: "destructive"
+      });
     }
   };
 
