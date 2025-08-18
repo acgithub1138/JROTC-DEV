@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,14 +11,25 @@ import { InputOTP, InputOTPGroup, InputOTPSlot } from '@/components/ui/input-otp
 
 const ResetPasswordPage = () => {
   const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [email, setEmail] = useState('');
+  const [emailEditable, setEmailEditable] = useState(true);
   const [otp, setOtp] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
   const [isOtpVerified, setIsOtpVerified] = useState(false);
   const [resendLoading, setResendLoading] = useState(false);
+
+  // Extract email from URL parameters on component mount
+  useEffect(() => {
+    const emailFromUrl = searchParams.get('email');
+    if (emailFromUrl) {
+      setEmail(decodeURIComponent(emailFromUrl));
+      setEmailEditable(false);
+    }
+  }, [searchParams]);
 
   const handleVerifyOtp = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -152,7 +163,7 @@ const ResetPasswordPage = () => {
     setResendLoading(true);
     try {
       const { error } = await supabase.auth.resetPasswordForEmail(email, {
-        redirectTo: `${window.location.origin}/reset-password`
+        redirectTo: `${window.location.origin}/reset-password?email=${encodeURIComponent(email)}`
       });
       
       if (error) {
@@ -206,17 +217,28 @@ const ResetPasswordPage = () => {
                 </div>
                 
                 <form onSubmit={handleVerifyOtp} className="space-y-4">
-                  <div className="space-y-2">
-                    <Label htmlFor="email">Email Address</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="Enter your email address"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
-                      required
-                    />
-                  </div>
+                   <div className="space-y-2">
+                     <Label htmlFor="email">Email Address</Label>
+                     <Input
+                       id="email"
+                       type="email"
+                       placeholder="Enter your email address"
+                       value={email}
+                       onChange={(e) => setEmail(e.target.value)}
+                       disabled={!emailEditable}
+                       className={!emailEditable ? "bg-gray-50" : ""}
+                       required
+                     />
+                     {!emailEditable && (
+                       <button
+                         type="button"
+                         onClick={() => setEmailEditable(true)}
+                         className="text-blue-600 hover:text-blue-800 text-sm underline"
+                       >
+                         Change email?
+                       </button>
+                     )}
+                   </div>
                   
                   <div className="space-y-2">
                     <Label htmlFor="otp">Verification Code</Label>
