@@ -21,6 +21,7 @@ import { Building2, Edit, Trash2, Search, Plus, CalendarIcon, ChevronUp, Chevron
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { FileUpload } from '@/components/ui/file-upload';
 interface School {
   id: string;
   name: string;
@@ -40,6 +41,7 @@ interface School {
   referred_by?: string;
   notes?: string;
   timezone?: string;
+  logo_url?: string;
   created_at: string;
 }
 type SortField = 'name' | 'contact' | 'competition_module' | 'competition_portal' | 'subscription_start' | 'subscription_end';
@@ -60,6 +62,8 @@ const SchoolManagementPage = () => {
   const [createSchoolOpen, setCreateSchoolOpen] = useState(false);
   const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   const [schoolToDelete, setSchoolToDelete] = useState<School | null>(null);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [sortField, setSortField] = useState<SortField>('name');
   const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
@@ -121,10 +125,49 @@ const SchoolManagementPage = () => {
     setEditingSchool(school);
     setEditDialogOpen(true);
   };
+  const uploadLogo = async (file: File, schoolId: string): Promise<string | null> => {
+    try {
+      setIsUploadingLogo(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${schoolId}/logo.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('school-logos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('school-logos')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast({
+        title: "Error",
+        description: "Failed to upload logo",
+        variant: "destructive"
+      });
+      return null;
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
   const handleSaveSchool = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!editingSchool) return;
+    
     try {
+      let logoUrl = editingSchool.logo_url;
+      
+      // Upload logo if a new file was selected
+      if (logoFile) {
+        logoUrl = await uploadLogo(logoFile, editingSchool.id);
+        if (!logoUrl) return; // Upload failed
+      }
+
       const {
         error
       } = await supabase.from('schools').update({
@@ -144,9 +187,12 @@ const SchoolManagementPage = () => {
         subscription_end: editingSchool.subscription_end,
         referred_by: editingSchool.referred_by,
         notes: editingSchool.notes,
-        timezone: editingSchool.timezone
+        timezone: editingSchool.timezone,
+        logo_url: logoUrl
       }).eq('id', editingSchool.id);
+      
       if (error) throw error;
+      
       toast({
         title: "Success",
         description: "School updated successfully"
@@ -154,6 +200,7 @@ const SchoolManagementPage = () => {
       resetChanges();
       setEditDialogOpen(false);
       setEditingSchool(null);
+      setLogoFile(null);
       fetchSchools();
     } catch (error) {
       console.error('Error saving school:', error);
@@ -264,6 +311,7 @@ const SchoolManagementPage = () => {
     setEditDialogOpen(open);
     if (!open) {
       setEditingSchool(null);
+      setLogoFile(null);
     }
   };
   const handleDiscardChanges = () => {
@@ -275,6 +323,7 @@ const SchoolManagementPage = () => {
     setShowUnsavedDialog(false);
     setEditDialogOpen(false);
     setEditingSchool(null);
+    setLogoFile(null);
   };
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
@@ -489,6 +538,15 @@ const SchoolManagementPage = () => {
               })} placeholder="Enter school initials" />
                 </div>
               </div>
+
+              <FileUpload
+                label="School Logo"
+                accept="image/*"
+                maxSize={5}
+                onFileSelect={setLogoFile}
+                currentFileUrl={editingSchool.logo_url}
+                disabled={isUploadingLogo}
+              />
               
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
@@ -667,11 +725,11 @@ const SchoolManagementPage = () => {
               </div>
               
               <div className="flex justify-end space-x-2">
-                <Button type="button" variant="outline" onClick={() => handleEditDialogOpenChange(false)}>
+                <Button type="button" variant="outline" onClick={() => handleEditDialogOpenChange(false)} disabled={isUploadingLogo}>
                   Cancel
                 </Button>
-                <Button type="submit">
-                  Update School
+                <Button type="submit" disabled={isUploadingLogo}>
+                  {isUploadingLogo ? 'Uploading...' : 'Update School'}
                 </Button>
               </div>
             </form>}

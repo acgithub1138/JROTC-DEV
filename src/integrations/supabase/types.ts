@@ -804,6 +804,9 @@ export type Database = {
           program: Database["public"]["Enums"]["jrotc_program"] | null
           registration_deadline: string | null
           school_id: string
+          sop: string | null
+          sop_link: string | null
+          sop_text: string | null
           start_date: string
           state: string | null
           status: string
@@ -827,6 +830,9 @@ export type Database = {
           program?: Database["public"]["Enums"]["jrotc_program"] | null
           registration_deadline?: string | null
           school_id: string
+          sop?: string | null
+          sop_link?: string | null
+          sop_text?: string | null
           start_date: string
           state?: string | null
           status?: string
@@ -850,6 +856,9 @@ export type Database = {
           program?: Database["public"]["Enums"]["jrotc_program"] | null
           registration_deadline?: string | null
           school_id?: string
+          sop?: string | null
+          sop_link?: string | null
+          sop_text?: string | null
           start_date?: string
           state?: string | null
           status?: string
@@ -2645,6 +2654,7 @@ export type Database = {
           id: string
           initials: string | null
           jrotc_program: Database["public"]["Enums"]["jrotc_program"] | null
+          logo_url: string | null
           name: string
           notes: string | null
           phone: string | null
@@ -2669,6 +2679,7 @@ export type Database = {
           id?: string
           initials?: string | null
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          logo_url?: string | null
           name: string
           notes?: string | null
           phone?: string | null
@@ -2693,6 +2704,7 @@ export type Database = {
           id?: string
           initials?: string | null
           jrotc_program?: Database["public"]["Enums"]["jrotc_program"] | null
+          logo_url?: string | null
           name?: string
           notes?: string | null
           phone?: string | null

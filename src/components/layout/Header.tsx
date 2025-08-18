@@ -122,12 +122,21 @@ export const Header: React.FC<HeaderProps> = ({
             </Sheet>}
         </div>
         
-        {/* Center - School Name */}
+        {/* Center - School Name with Logo */}
         <div className="flex-1 flex justify-center">
           {userProfile?.schools && (
-            <h1 className="text-xl font-semibold text-gray-900">
-              {userProfile.schools.name}
-            </h1>
+            <div className="flex items-center space-x-3">
+              {(userProfile.schools as any).logo_url && (
+                <img 
+                  src={(userProfile.schools as any).logo_url} 
+                  alt={`${userProfile.schools.name} logo`}
+                  className="w-8 h-8 object-contain"
+                />
+              )}
+              <h1 className="text-xl font-semibold text-gray-900">
+                {userProfile.schools.name}
+              </h1>
+            </div>
           )}
         </div>
         

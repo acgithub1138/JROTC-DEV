@@ -15,6 +15,7 @@ import { toast } from 'sonner';
 import { COMMON_TIMEZONES } from '@/utils/timezoneUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { FileUpload } from '@/components/ui/file-upload';
 interface CreateSchoolDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -37,6 +38,7 @@ interface NewSchool {
   referred_by: string;
   notes: string;
   timezone: string;
+  logo_url?: string;
 }
 export const CreateSchoolDialog = ({
   open,
@@ -44,6 +46,8 @@ export const CreateSchoolDialog = ({
 }: CreateSchoolDialogProps) => {
   const [isLoading, setIsLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [logoFile, setLogoFile] = useState<File | null>(null);
+  const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const initialSchool: NewSchool = {
     name: '',
     initials: '',
@@ -72,10 +76,37 @@ export const CreateSchoolDialog = ({
     currentData: newSchool,
     enabled: open
   });
+  const uploadLogo = async (file: File, schoolId: string): Promise<string | null> => {
+    try {
+      setIsUploadingLogo(true);
+      const fileExt = file.name.split('.').pop();
+      const fileName = `${schoolId}/logo.${fileExt}`;
+      
+      const { error: uploadError } = await supabase.storage
+        .from('school-logos')
+        .upload(fileName, file, { upsert: true });
+
+      if (uploadError) throw uploadError;
+
+      const { data: { publicUrl } } = supabase.storage
+        .from('school-logos')
+        .getPublicUrl(fileName);
+
+      return publicUrl;
+    } catch (error) {
+      console.error('Error uploading logo:', error);
+      toast.error('Failed to upload logo');
+      return null;
+    } finally {
+      setIsUploadingLogo(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
     try {
+      // First create the school
       const {
         data,
         error
@@ -84,10 +115,32 @@ export const CreateSchoolDialog = ({
         toast.error('Failed to create school: ' + error.message);
         return;
       }
+
+      let logoUrl = null;
+      
+      // Upload logo if a file was selected
+      if (logoFile) {
+        logoUrl = await uploadLogo(logoFile, data.id);
+        if (logoUrl) {
+          // Update the school with the logo URL
+          const { error: updateError } = await supabase
+            .from('schools')
+            .update({ logo_url: logoUrl })
+            .eq('id', data.id);
+          
+          if (updateError) {
+            console.error('Error updating school with logo:', updateError);
+            // Don't fail the creation, just warn
+            toast.error('School created but logo upload failed');
+          }
+        }
+      }
+
       toast.success('School created successfully');
 
       // Reset form
       setNewSchool(initialSchool);
+      setLogoFile(null);
       resetChanges();
       onOpenChange(false);
     } catch (error) {
@@ -106,6 +159,7 @@ export const CreateSchoolDialog = ({
   };
   const handleDiscardChanges = () => {
     setNewSchool(initialSchool);
+    setLogoFile(null);
     resetChanges();
     setShowUnsavedDialog(false);
     onOpenChange(false);
@@ -140,6 +194,14 @@ export const CreateSchoolDialog = ({
               })} placeholder="Enter school initials" />
             </div>
           </div>
+
+          <FileUpload
+            label="School Logo"
+            accept="image/*"
+            maxSize={5}
+            onFileSelect={setLogoFile}
+            disabled={isUploadingLogo}
+          />
 
           <div className="grid grid-cols-2 gap-4">
             <div>
@@ -318,11 +380,11 @@ export const CreateSchoolDialog = ({
           </div>
 
           <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading}>
+            <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} disabled={isLoading || isUploadingLogo}>
               Cancel
             </Button>
-            <Button type="submit" disabled={isLoading}>
-              {isLoading ? 'Creating...' : 'Create School'}
+            <Button type="submit" disabled={isLoading || isUploadingLogo}>
+              {(isLoading || isUploadingLogo) ? 'Creating...' : 'Create School'}
             </Button>
           </div>
         </form>
