@@ -9,6 +9,7 @@ interface FileUploadProps {
   accept?: string;
   maxSize?: number; // in MB
   onFileSelect: (file: File | null) => void;
+  onFileDelete?: () => void; // New prop for handling existing file deletion
   currentFileUrl?: string;
   disabled?: boolean;
   className?: string;
@@ -19,6 +20,7 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   accept = "image/*",
   maxSize = 5,
   onFileSelect,
+  onFileDelete,
   currentFileUrl,
   disabled = false,
   className
@@ -55,10 +57,16 @@ export const FileUpload: React.FC<FileUploadProps> = ({
   };
 
   const clearFile = () => {
-    setSelectedFile(null);
-    onFileSelect(null);
-    if (fileInputRef.current) {
-      fileInputRef.current.value = '';
+    if (selectedFile) {
+      // Clear newly selected file
+      setSelectedFile(null);
+      onFileSelect(null);
+      if (fileInputRef.current) {
+        fileInputRef.current.value = '';
+      }
+    } else if (currentFileUrl && onFileDelete) {
+      // Handle existing file deletion
+      onFileDelete();
     }
   };
 

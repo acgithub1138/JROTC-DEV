@@ -544,6 +544,13 @@ const SchoolManagementPage = () => {
                 accept="image/*"
                 maxSize={5}
                 onFileSelect={setLogoFile}
+                onFileDelete={() => {
+                  setEditingSchool({
+                    ...editingSchool,
+                    logo_url: null
+                  });
+                  setLogoFile(null);
+                }}
                 currentFileUrl={editingSchool.logo_url}
                 disabled={isUploadingLogo}
               />
