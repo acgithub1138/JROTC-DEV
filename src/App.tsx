@@ -55,6 +55,7 @@ import { MobileHostResults } from "@/components/mobile/competition-portal/pages/
 import { MobileEventResultsView } from "@/components/mobile/competition-portal/pages/MobileEventResultsView";
 import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
 import { MobileCompetitionRegistration } from "@/components/mobile/competition-portal/pages/MobileCompetitionRegistration";
+import ResetPasswordPage from "@/pages/ResetPasswordPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -259,6 +260,9 @@ const App = () => (
                     } />
                 </Route>
               </Route>
+
+              {/* Password Reset Route */}
+              <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               {/* Protected Application Routes */}
               <Route 
