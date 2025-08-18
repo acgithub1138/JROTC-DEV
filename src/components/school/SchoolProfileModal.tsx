@@ -15,6 +15,36 @@ import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { FileUpload } from '@/components/ui/file-upload';
 import { CalendarIcon } from 'lucide-react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+
+const schoolSchema = z.object({
+  initials: z.string().optional(),
+  contact: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip_code: z.string().optional(),
+  phone: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true;
+    const phoneRegex = /^[\+]?[1-9][\d]{0,15}$/;
+    return phoneRegex.test(val.replace(/[\s\-\(\)\.]/g, ''));
+  }, {
+    message: "Please enter a valid phone number"
+  }),
+  email: z.string().optional().refine((val) => {
+    if (!val || val.trim() === '') return true;
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(val);
+  }, {
+    message: "Please enter a valid email address"
+  }),
+  timezone: z.string().optional()
+});
+
+type SchoolFormData = z.infer<typeof schoolSchema>;
 
 interface School {
   id: string;
@@ -55,9 +85,24 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
   const [isUploadingLogo, setIsUploadingLogo] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
 
+  const form = useForm<SchoolFormData>({
+    resolver: zodResolver(schoolSchema),
+    defaultValues: {
+      initials: '',
+      contact: '',
+      address: '',
+      city: '',
+      state: '',
+      zip_code: '',
+      phone: '',
+      email: '',
+      timezone: ''
+    }
+  });
+
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData: originalSchool || {},
-    currentData: school || {},
+    currentData: { ...school, ...form.getValues() },
     enabled: open && !!school
   });
 
@@ -76,6 +121,17 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
 
       setSchool(data);
       setOriginalSchool(data);
+      form.reset({
+        initials: data.initials || '',
+        contact: data.contact || '',
+        address: data.address || '',
+        city: data.city || '',
+        state: data.state || '',
+        zip_code: data.zip_code || '',
+        phone: data.phone || '',
+        email: data.email || '',
+        timezone: data.timezone || ''
+      });
     } catch (error) {
       console.error('Error fetching school:', error);
       toast({
@@ -124,7 +180,7 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
     }
   };
 
-  const handleSave = async () => {
+  const handleSave = async (data: SchoolFormData) => {
     if (!school) return;
 
     try {
@@ -140,15 +196,15 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
       const { error } = await supabase
         .from('schools')
         .update({
-          initials: school.initials,
-          contact: school.contact,
-          address: school.address,
-          city: school.city,
-          state: school.state,
-          zip_code: school.zip_code,
-          phone: school.phone,
-          email: school.email,
-          timezone: school.timezone,
+          initials: data.initials,
+          contact: data.contact,
+          address: data.address,
+          city: data.city,
+          state: data.state,
+          zip_code: data.zip_code,
+          phone: data.phone,
+          email: data.email,
+          timezone: data.timezone,
           logo_url: logoUrl
         })
         .eq('id', school.id);
@@ -161,7 +217,7 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
       });
 
       // Update the original school data to reflect the saved state
-      const updatedSchool = { ...school, logo_url: logoUrl };
+      const updatedSchool = { ...school, ...data, logo_url: logoUrl };
       setSchool(updatedSchool);
       setOriginalSchool(updatedSchool);
       setLogoFile(null);
@@ -195,6 +251,17 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
   const handleDiscardChanges = () => {
     if (originalSchool) {
       setSchool(originalSchool);
+      form.reset({
+        initials: originalSchool.initials || '',
+        contact: originalSchool.contact || '',
+        address: originalSchool.address || '',
+        city: originalSchool.city || '',
+        state: originalSchool.state || '',
+        zip_code: originalSchool.zip_code || '',
+        phone: originalSchool.phone || '',
+        email: originalSchool.email || '',
+        timezone: originalSchool.timezone || ''
+      });
     }
     resetChanges();
     setShowUnsavedDialog(false);
@@ -239,201 +306,269 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
             <DialogTitle>School Profile</DialogTitle>
           </DialogHeader>
 
-          <div className="space-y-4">
-            {/* School Name & Initials */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="name">School Name</Label>
-                <Input
-                  id="name"
-                  value={school.name || ''}
-                  disabled
-                  className="bg-muted"
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSave)} className="space-y-4">
+              {/* School Name & Initials */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name">School Name</Label>
+                  <Input
+                    id="name"
+                    value={school.name || ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <FormField
+                  control={form.control}
+                  name="initials"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>School Initials</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter school initials"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="initials">School Initials</Label>
-                <Input
-                  id="initials"
-                  value={school.initials || ''}
-                  onChange={(e) => setSchool({ ...school, initials: e.target.value })}
-                  placeholder="Enter school initials"
-                />
-              </div>
-            </div>
 
-            {/* School Logo */}
-            <div>
-              <FileUpload
-                label="School Logo"
-                onFileSelect={setLogoFile}
-                accept="image/*"
-                currentFileUrl={school.logo_url}
-                onFileDelete={handleFileDelete}
+              {/* School Logo */}
+              <div>
+                <FileUpload
+                  label="School Logo"
+                  onFileSelect={setLogoFile}
+                  accept="image/*"
+                  currentFileUrl={school.logo_url}
+                  onFileDelete={handleFileDelete}
+                />
+              </div>
+
+              {/* Contact & JROTC Program */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="contact"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Contact</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter contact name"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <div className="space-y-2">
+                  <Label>JROTC Program</Label>
+                  <Input
+                    value={school.jrotc_program ? school.jrotc_program.replace('_', ' ').toUpperCase() : ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              </div>
+
+              {/* Address */}
+              <FormField
+                control={form.control}
+                name="address"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Address</FormLabel>
+                    <FormControl>
+                      <Input
+                        {...field}
+                        placeholder="Enter street address"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* Contact & JROTC Program */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="contact">Contact</Label>
-                <Input
-                  id="contact"
-                  value={school.contact || ''}
-                  onChange={(e) => setSchool({ ...school, contact: e.target.value })}
-                  placeholder="Enter contact name"
+              {/* City, State, Zip */}
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="city"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>City</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter city"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="state"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>State</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter state"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="zip_code"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>ZIP Code</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter zip code"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>JROTC Program</Label>
-                <Input
-                  value={school.jrotc_program ? school.jrotc_program.replace('_', ' ').toUpperCase() : ''}
-                  disabled
-                  className="bg-muted"
+
+              {/* Phone & Email */}
+              <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Phone</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          placeholder="Enter phone number"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Email</FormLabel>
+                      <FormControl>
+                        <Input
+                          {...field}
+                          type="email"
+                          placeholder="Enter email address"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-            </div>
 
-            {/* Address */}
-            <div className="space-y-2">
-              <Label htmlFor="address">Address</Label>
-              <Input
-                id="address"
-                value={school.address || ''}
-                onChange={(e) => setSchool({ ...school, address: e.target.value })}
-                placeholder="Enter street address"
+              {/* Subscription Start & End */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Subscription Start</Label>
+                  <Input
+                    value={school.subscription_start ? format(new Date(school.subscription_start), "PPP") : ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Subscription End</Label>
+                  <Input
+                    value={school.subscription_end ? format(new Date(school.subscription_end), "PPP") : ''}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              </div>
+
+              {/* Competition Tracking & Portal */}
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Competition Tracking</Label>
+                  <Input
+                    value={school.competition_module ? 'Enabled' : 'Disabled'}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Competition Hosting</Label>
+                  <Input
+                    value={school.competition_portal ? 'Enabled' : 'Disabled'}
+                    disabled
+                    className="bg-muted"
+                  />
+                </div>
+              </div>
+
+              {/* Timezone */}
+              <FormField
+                control={form.control}
+                name="timezone"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Timezone</FormLabel>
+                    <Select
+                      value={field.value}
+                      onValueChange={field.onChange}
+                    >
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select timezone" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        {COMMON_TIMEZONES.map((tz) => (
+                          <SelectItem key={tz.value} value={tz.value}>
+                            {tz.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
               />
-            </div>
 
-            {/* City, State, Zip */}
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="city">City</Label>
-                <Input
-                  id="city"
-                  value={school.city || ''}
-                  onChange={(e) => setSchool({ ...school, city: e.target.value })}
-                  placeholder="Enter city"
-                />
+              <div className="flex justify-end space-x-2 border-t pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => handleOpenChange(false)}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  disabled={saving || isUploadingLogo}
+                >
+                  {saving ? 'Saving...' : 'Save Changes'}
+                </Button>
               </div>
-              <div className="space-y-2">
-                <Label htmlFor="state">State</Label>
-                <Input
-                  id="state"
-                  value={school.state || ''}
-                  onChange={(e) => setSchool({ ...school, state: e.target.value })}
-                  placeholder="Enter state"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="zip_code">ZIP Code</Label>
-                <Input
-                  id="zip_code"
-                  value={school.zip_code || ''}
-                  onChange={(e) => setSchool({ ...school, zip_code: e.target.value })}
-                  placeholder="Enter zip code"
-                />
-              </div>
-            </div>
-
-            {/* Phone & Email */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone</Label>
-                <Input
-                  id="phone"
-                  value={school.phone || ''}
-                  onChange={(e) => setSchool({ ...school, phone: e.target.value })}
-                  placeholder="Enter phone number"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={school.email || ''}
-                  onChange={(e) => setSchool({ ...school, email: e.target.value })}
-                  placeholder="Enter email address"
-                />
-              </div>
-            </div>
-
-            {/* Subscription Start & End */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Subscription Start</Label>
-                <Input
-                  value={school.subscription_start ? format(new Date(school.subscription_start), "PPP") : ''}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Subscription End</Label>
-                <Input
-                  value={school.subscription_end ? format(new Date(school.subscription_end), "PPP") : ''}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-            </div>
-
-            {/* Competition Tracking & Portal */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Competition Tracking</Label>
-                <Input
-                  value={school.competition_module ? 'Enabled' : 'Disabled'}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-              <div className="space-y-2">
-                <Label>Competition Hosting</Label>
-                <Input
-                  value={school.competition_portal ? 'Enabled' : 'Disabled'}
-                  disabled
-                  className="bg-muted"
-                />
-              </div>
-            </div>
-
-            {/* Timezone */}
-            <div className="space-y-2">
-              <Label htmlFor="timezone">Timezone</Label>
-              <Select
-                value={school.timezone || ''}
-                onValueChange={(value) => setSchool({ ...school, timezone: value })}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select timezone" />
-                </SelectTrigger>
-                <SelectContent>
-                  {COMMON_TIMEZONES.map((tz) => (
-                    <SelectItem key={tz.value} value={tz.value}>
-                      {tz.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
-
-          <div className="flex justify-end space-x-2 border-t pt-6">
-            <Button
-              variant="outline"
-              onClick={() => handleOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button
-              onClick={handleSave}
-              disabled={saving || isUploadingLogo}
-            >
-              {saving ? 'Saving...' : 'Save Changes'}
-            </Button>
-          </div>
+            </form>
+          </Form>
         </DialogContent>
       </Dialog>
 
