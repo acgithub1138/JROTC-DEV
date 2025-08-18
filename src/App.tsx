@@ -261,7 +261,7 @@ const App = () => (
                 </Route>
               </Route>
 
-              {/* Password Reset Route */}
+              {/* Password Reset Route - Now inside AuthProvider */}
               <Route path="/reset-password" element={<ResetPasswordPage />} />
 
               {/* Protected Application Routes */}
