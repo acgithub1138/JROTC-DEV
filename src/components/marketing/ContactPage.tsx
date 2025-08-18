@@ -281,7 +281,7 @@ const ContactPage = () => {
                         </div>
                         <div>
                           <h3 className="font-semibold mb-1">{info.title}</h3>
-                          <p className="text-lg font-medium text-primary mb-1"><a href="mailto:jrotc_ccc@careyunlimited.com">{info.content}</a></p>
+                          <p className="text-lg font-medium text-primary mb-1"><a href="mailto:admin@jortc.us">{info.content}</a></p>
                           <p className="text-sm text-muted-foreground">{info.description}</p>
                         </div>
                       </div>
