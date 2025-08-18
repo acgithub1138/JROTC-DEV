@@ -239,184 +239,184 @@ export const SchoolProfileModal: React.FC<SchoolProfileModalProps> = ({
             <DialogTitle>School Profile</DialogTitle>
           </DialogHeader>
 
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-            {/* Left Column */}
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="name">School Name</Label>
-                  <Input
-                    id="name"
-                    value={school.name || ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="initials">School Initials</Label>
-                  <Input
-                    id="initials"
-                    value={school.initials || ''}
-                    onChange={(e) => setSchool({ ...school, initials: e.target.value })}
-                    placeholder="Enter school initials"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="contact">Contact</Label>
-                  <Input
-                    id="contact"
-                    value={school.contact || ''}
-                    onChange={(e) => setSchool({ ...school, contact: e.target.value })}
-                    placeholder="Enter contact name"
-                  />
-                </div>
-
-                <div>
-                  <Label>JROTC Program</Label>
-                  <Input
-                    value={school.jrotc_program ? school.jrotc_program.replace('_', ' ').toUpperCase() : ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="address">Address</Label>
-                  <Input
-                    id="address"
-                    value={school.address || ''}
-                    onChange={(e) => setSchool({ ...school, address: e.target.value })}
-                    placeholder="Enter street address"
-                  />
-                </div>
-
-                <div className="grid grid-cols-3 gap-4">
-                  <div>
-                    <Label htmlFor="city">City</Label>
-                    <Input
-                      id="city"
-                      value={school.city || ''}
-                      onChange={(e) => setSchool({ ...school, city: e.target.value })}
-                      placeholder="Enter city"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="state">State</Label>
-                    <Input
-                      id="state"
-                      value={school.state || ''}
-                      onChange={(e) => setSchool({ ...school, state: e.target.value })}
-                      placeholder="Enter state"
-                    />
-                  </div>
-                  <div>
-                    <Label htmlFor="zip_code">Zip Code</Label>
-                    <Input
-                      id="zip_code"
-                      value={school.zip_code || ''}
-                      onChange={(e) => setSchool({ ...school, zip_code: e.target.value })}
-                      placeholder="Enter zip code"
-                    />
-                  </div>
-                </div>
+          <div className="space-y-4">
+            {/* School Name & Initials */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="name">School Name</Label>
+                <Input
+                  id="name"
+                  value={school.name || ''}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="initials">School Initials</Label>
+                <Input
+                  id="initials"
+                  value={school.initials || ''}
+                  onChange={(e) => setSchool({ ...school, initials: e.target.value })}
+                  placeholder="Enter school initials"
+                />
               </div>
             </div>
 
-            {/* Right Column */}
-            <div className="space-y-6">
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="phone">Phone</Label>
-                  <Input
-                    id="phone"
-                    value={school.phone || ''}
-                    onChange={(e) => setSchool({ ...school, phone: e.target.value })}
-                    placeholder="Enter phone number"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="email">Email</Label>
-                  <Input
-                    id="email"
-                    type="email"
-                    value={school.email || ''}
-                    onChange={(e) => setSchool({ ...school, email: e.target.value })}
-                    placeholder="Enter email address"
-                  />
-                </div>
-
-                <div>
-                  <Label>Subscription Start</Label>
-                  <Input
-                    value={school.subscription_start ? format(new Date(school.subscription_start), "MM/dd/yyyy") : ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label>Subscription End</Label>
-                  <Input
-                    value={school.subscription_end ? format(new Date(school.subscription_end), "MM/dd/yyyy") : ''}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label>Competition Tracking</Label>
-                  <Input
-                    value={school.competition_module ? 'Enabled' : 'Disabled'}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label>Competition Hosting</Label>
-                  <Input
-                    value={school.competition_portal ? 'Enabled' : 'Disabled'}
-                    disabled
-                    className="bg-muted"
-                  />
-                </div>
-
-                <div>
-                  <Label htmlFor="timezone">Timezone</Label>
-                  <Select
-                    value={school.timezone || ''}
-                    onValueChange={(value) => setSchool({ ...school, timezone: value })}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select timezone" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {COMMON_TIMEZONES.map((tz) => (
-                        <SelectItem key={tz.value} value={tz.value}>
-                          {tz.label}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* School Logo Section */}
-          <div className="border-t pt-6">
+            {/* School Logo */}
             <div>
-              <Label>School Logo</Label>
               <FileUpload
-                label="Upload school logo"
+                label="School Logo"
                 onFileSelect={setLogoFile}
                 accept="image/*"
                 currentFileUrl={school.logo_url}
                 onFileDelete={handleFileDelete}
               />
+            </div>
+
+            {/* Contact & JROTC Program */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="contact">Contact</Label>
+                <Input
+                  id="contact"
+                  value={school.contact || ''}
+                  onChange={(e) => setSchool({ ...school, contact: e.target.value })}
+                  placeholder="Enter contact name"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>JROTC Program</Label>
+                <Input
+                  value={school.jrotc_program ? school.jrotc_program.replace('_', ' ').toUpperCase() : ''}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            </div>
+
+            {/* Address */}
+            <div className="space-y-2">
+              <Label htmlFor="address">Address</Label>
+              <Input
+                id="address"
+                value={school.address || ''}
+                onChange={(e) => setSchool({ ...school, address: e.target.value })}
+                placeholder="Enter street address"
+              />
+            </div>
+
+            {/* City, State, Zip */}
+            <div className="grid grid-cols-3 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="city">City</Label>
+                <Input
+                  id="city"
+                  value={school.city || ''}
+                  onChange={(e) => setSchool({ ...school, city: e.target.value })}
+                  placeholder="Enter city"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="state">State</Label>
+                <Input
+                  id="state"
+                  value={school.state || ''}
+                  onChange={(e) => setSchool({ ...school, state: e.target.value })}
+                  placeholder="Enter state"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="zip_code">ZIP Code</Label>
+                <Input
+                  id="zip_code"
+                  value={school.zip_code || ''}
+                  onChange={(e) => setSchool({ ...school, zip_code: e.target.value })}
+                  placeholder="Enter zip code"
+                />
+              </div>
+            </div>
+
+            {/* Phone & Email */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="phone">Phone</Label>
+                <Input
+                  id="phone"
+                  value={school.phone || ''}
+                  onChange={(e) => setSchool({ ...school, phone: e.target.value })}
+                  placeholder="Enter phone number"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="email">Email</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  value={school.email || ''}
+                  onChange={(e) => setSchool({ ...school, email: e.target.value })}
+                  placeholder="Enter email address"
+                />
+              </div>
+            </div>
+
+            {/* Subscription Start & End */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Subscription Start</Label>
+                <Input
+                  value={school.subscription_start ? format(new Date(school.subscription_start), "PPP") : ''}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Subscription End</Label>
+                <Input
+                  value={school.subscription_end ? format(new Date(school.subscription_end), "PPP") : ''}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            </div>
+
+            {/* Competition Tracking & Portal */}
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label>Competition Tracking</Label>
+                <Input
+                  value={school.competition_module ? 'Enabled' : 'Disabled'}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+              <div className="space-y-2">
+                <Label>Competition Hosting</Label>
+                <Input
+                  value={school.competition_portal ? 'Enabled' : 'Disabled'}
+                  disabled
+                  className="bg-muted"
+                />
+              </div>
+            </div>
+
+            {/* Timezone */}
+            <div className="space-y-2">
+              <Label htmlFor="timezone">Timezone</Label>
+              <Select
+                value={school.timezone || ''}
+                onValueChange={(value) => setSchool({ ...school, timezone: value })}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select timezone" />
+                </SelectTrigger>
+                <SelectContent>
+                  {COMMON_TIMEZONES.map((tz) => (
+                    <SelectItem key={tz.value} value={tz.value}>
+                      {tz.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
           </div>
 
