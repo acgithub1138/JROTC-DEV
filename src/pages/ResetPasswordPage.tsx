@@ -35,40 +35,54 @@ const ResetPasswordPage = () => {
       return;
     }
 
-    // Handle the code manually since detectSessionInUrl might not work for password reset
-    const handleResetCode = async () => {
-      try {
-        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
-        
-        if (error) {
-          setIsAuthenticated(false);
-          setIsAuthenticating(false);
-          toast({
-            title: "Invalid Reset Link",
-            description: error.message || "The password reset link is invalid or has expired.",
-            variant: "destructive",
-          });
-          navigate('/app/auth');
-          return;
-        }
-        
-        if (data.session) {
-          setIsAuthenticated(true);
-          setIsAuthenticating(false);
-        }
-      } catch (err: any) {
+    let timeoutId: NodeJS.Timeout;
+    
+    // Set up auth state listener to handle Supabase's automatic session processing
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (session) {
+        // Valid session established - user can reset password
+        setIsAuthenticated(true);
+        setIsAuthenticating(false);
+        clearTimeout(timeoutId);
+      } else if (event === 'SIGNED_OUT') {
+        // Session was cleared due to invalid/expired code
         setIsAuthenticated(false);
         setIsAuthenticating(false);
+        clearTimeout(timeoutId);
         toast({
-          title: "Reset Link Error",
-          description: "Failed to process reset link. Please try again.",
+          title: "Invalid Reset Link",
+          description: "The password reset link is invalid or has expired.",
           variant: "destructive",
         });
         navigate('/app/auth');
       }
-    };
+    });
 
-    handleResetCode();
+    // Set timeout to handle cases where auth processing gets stuck
+    timeoutId = setTimeout(() => {
+      setIsAuthenticated(false);
+      setIsAuthenticating(false);
+      toast({
+        title: "Reset Link Timeout",
+        description: "The password reset link took too long to process. Please try again.",
+        variant: "destructive",
+      });
+      navigate('/app/auth');
+    }, 10000); // 10 second timeout
+
+    // Check if session already exists (in case detectSessionInUrl already processed it)
+    supabase.auth.getSession().then(({ data: { session } }) => {
+      if (session) {
+        setIsAuthenticated(true);
+        setIsAuthenticating(false);
+        clearTimeout(timeoutId);
+      }
+    });
+
+    return () => {
+      subscription.unsubscribe();
+      clearTimeout(timeoutId);
+    };
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
