@@ -35,54 +35,67 @@ const ResetPasswordPage = () => {
       return;
     }
 
-    let timeoutId: NodeJS.Timeout;
-    
-    // Set up auth state listener to handle Supabase's automatic session processing
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
-      if (session) {
-        // Valid session established - user can reset password
-        setIsAuthenticated(true);
-        setIsAuthenticating(false);
-        clearTimeout(timeoutId);
-      } else if (event === 'SIGNED_OUT') {
-        // Session was cleared due to invalid/expired code
+    // Handle password reset code manually
+    const handlePasswordResetCode = async () => {
+      try {
+        // First check if user is already authenticated (token might have been used)
+        const { data: existingSession } = await supabase.auth.getSession();
+        if (existingSession.session) {
+          setIsAuthenticated(true);
+          setIsAuthenticating(false);
+          return;
+        }
+
+        // Try to exchange the code for a session
+        const { data, error } = await supabase.auth.exchangeCodeForSession(code);
+        
+        if (error) {
+          setIsAuthenticated(false);
+          setIsAuthenticating(false);
+          
+          // Provide specific error messages based on error type
+          let errorMessage = "The password reset link is invalid or has expired.";
+          if (error.message.includes("expired")) {
+            errorMessage = "The password reset link has expired. Please request a new one.";
+          } else if (error.message.includes("invalid") || error.message.includes("not found")) {
+            errorMessage = "The password reset link is invalid or has already been used.";
+          }
+          
+          toast({
+            title: "Invalid Reset Link",
+            description: errorMessage,
+            variant: "destructive",
+          });
+          navigate('/app/auth');
+          return;
+        }
+        
+        if (data.session) {
+          setIsAuthenticated(true);
+          setIsAuthenticating(false);
+        } else {
+          setIsAuthenticated(false);
+          setIsAuthenticating(false);
+          toast({
+            title: "Reset Link Error",
+            description: "Unable to authenticate with the reset link. Please try again.",
+            variant: "destructive",
+          });
+          navigate('/app/auth');
+        }
+      } catch (err: any) {
         setIsAuthenticated(false);
         setIsAuthenticating(false);
-        clearTimeout(timeoutId);
         toast({
-          title: "Invalid Reset Link",
-          description: "The password reset link is invalid or has expired.",
+          title: "Reset Link Error",
+          description: "An unexpected error occurred. Please try requesting a new reset link.",
           variant: "destructive",
         });
         navigate('/app/auth');
       }
-    });
-
-    // Set timeout to handle cases where auth processing gets stuck
-    timeoutId = setTimeout(() => {
-      setIsAuthenticated(false);
-      setIsAuthenticating(false);
-      toast({
-        title: "Reset Link Timeout",
-        description: "The password reset link took too long to process. Please try again.",
-        variant: "destructive",
-      });
-      navigate('/app/auth');
-    }, 10000); // 10 second timeout
-
-    // Check if session already exists (in case detectSessionInUrl already processed it)
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      if (session) {
-        setIsAuthenticated(true);
-        setIsAuthenticating(false);
-        clearTimeout(timeoutId);
-      }
-    });
-
-    return () => {
-      subscription.unsubscribe();
-      clearTimeout(timeoutId);
     };
+
+    handlePasswordResetCode();
   }, [searchParams, navigate, toast]);
 
   const handleResetPassword = async (e: React.FormEvent) => {
