@@ -14,20 +14,20 @@ const isValidEmail = (email: string): boolean => {
   const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
   return emailRegex.test(email);
 };
-
 const formatPhoneNumber = (phone: string): string => {
   const digits = phone.replace(/\D/g, '');
   if (digits.length <= 3) return digits;
   if (digits.length <= 6) return `(${digits.slice(0, 3)}) ${digits.slice(3)}`;
   return `(${digits.slice(0, 3)}) ${digits.slice(3, 6)}-${digits.slice(6, 10)}`;
 };
-
 const isValidPhoneNumber = (phone: string): boolean => {
   const digits = phone.replace(/\D/g, '');
   return digits.length === 0 || digits.length === 10;
 };
 const ContactPage = () => {
-  const { toast } = useToast();
+  const {
+    toast
+  } = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     name: "",
@@ -38,62 +38,57 @@ const ContactPage = () => {
     message: "",
     type: "demo"
   });
-
   const [errors, setErrors] = useState({
     email: "",
     phone: ""
   });
-
   useEffect(() => {
     window.scrollTo(0, 0);
   }, []);
-
   const handleSubmit = async () => {
     // Validation
-    const newErrors = { email: "", phone: "" };
+    const newErrors = {
+      email: "",
+      phone: ""
+    };
     let hasErrors = false;
-
     if (!formData.name || !formData.email || !formData.school) {
       toast({
         title: "Missing Information",
         description: "Please fill in all required fields (Name, Email, School)",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     if (!isValidEmail(formData.email)) {
       newErrors.email = "Please enter a valid email address";
       hasErrors = true;
     }
-
     if (formData.phone && !isValidPhoneNumber(formData.phone)) {
       newErrors.phone = "Please enter a valid 10-digit phone number";
       hasErrors = true;
     }
-
     setErrors(newErrors);
-
     if (hasErrors) {
       toast({
         title: "Validation Errors",
         description: "Please correct the errors below",
-        variant: "destructive",
+        variant: "destructive"
       });
       return;
     }
-
     setIsSubmitting(true);
     try {
-      const { data, error } = await supabase.functions.invoke('contact-form', {
+      const {
+        data,
+        error
+      } = await supabase.functions.invoke('contact-form', {
         body: formData
       });
-
       if (error) throw error;
-
       toast({
         title: "Message Sent Successfully!",
-        description: "Thank you for contacting us. We'll get back to you soon.",
+        description: "Thank you for contacting us. We'll get back to you soon."
       });
 
       // Reset form
@@ -106,27 +101,28 @@ const ContactPage = () => {
         message: "",
         type: "demo"
       });
-      setErrors({ email: "", phone: "" });
+      setErrors({
+        email: "",
+        phone: ""
+      });
     } catch (error) {
       console.error('Error sending contact form:', error);
       toast({
         title: "Failed to Send Message",
         description: "There was an error sending your message. Please try again or contact us directly.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsSubmitting(false);
     }
   };
-
   const handleChange = (field: string, value: string) => {
     let processedValue = value;
-    
+
     // Format phone number as user types
     if (field === "phone") {
       processedValue = formatPhoneNumber(value);
     }
-    
     setFormData(prev => ({
       ...prev,
       [field]: processedValue
@@ -145,7 +141,7 @@ const ContactPage = () => {
     title: "Email Us",
     content: "jortc_ccc@careyunlimited.com",
     description: "We are here to help!"
-  },{
+  }, {
     icon: MapPin,
     title: "Office",
     content: "Flower Mound, TX",
@@ -183,14 +179,7 @@ const ContactPage = () => {
                     </div>
                     <div className="space-y-2">
                       <Label htmlFor="email">Email Address *</Label>
-                      <Input 
-                        id="email" 
-                        type="email" 
-                        value={formData.email} 
-                        onChange={e => handleChange("email", e.target.value)} 
-                        className={errors.email ? "border-destructive" : ""}
-                        required 
-                      />
+                      <Input id="email" type="email" value={formData.email} onChange={e => handleChange("email", e.target.value)} className={errors.email ? "border-destructive" : ""} required />
                       {errors.email && <p className="text-sm text-destructive">{errors.email}</p>}
                     </div>
                   </div>
@@ -198,13 +187,7 @@ const ContactPage = () => {
                   <div className="grid md:grid-cols-2 gap-4">
                     <div className="space-y-2">
                       <Label htmlFor="phone">Phone Number</Label>
-                      <Input 
-                        id="phone" 
-                        value={formData.phone} 
-                        onChange={e => handleChange("phone", e.target.value)} 
-                        placeholder="(555) 123-4567"
-                        className={errors.phone ? "border-destructive" : ""}
-                      />
+                      <Input id="phone" value={formData.phone} onChange={e => handleChange("phone", e.target.value)} placeholder="(555) 123-4567" className={errors.phone ? "border-destructive" : ""} />
                       {errors.phone && <p className="text-sm text-destructive">{errors.phone}</p>}
                     </div>
                     <div className="space-y-2">
@@ -250,12 +233,7 @@ const ContactPage = () => {
                     <Textarea id="message" placeholder="Tell us about your current challenges or specific needs..." value={formData.message} onChange={e => handleChange("message", e.target.value)} rows={4} />
                   </div>
 
-                  <Button 
-                    onClick={handleSubmit} 
-                    size="lg" 
-                    className="w-full"
-                    disabled={isSubmitting}
-                  >
+                  <Button onClick={handleSubmit} size="lg" className="w-full" disabled={isSubmitting}>
                     {isSubmitting ? "Sending..." : "Send Message"}
                   </Button>
                 </div>
@@ -263,34 +241,7 @@ const ContactPage = () => {
             </Card>
 
             {/* Contact Information */}
-            <div className="space-y-8">
-              <div>
-                <h2 className="text-3xl font-bold mb-4">Get in Touch</h2>
-                <p className="text-lg text-muted-foreground">
-                  Our team is here to help you succeed. 
-                  We understand your challenges because we've faced them too.
-                </p>
-              </div>
-
-              <div className="grid gap-6">
-                {contactInfo.map((info, index) => <Card key={index}>
-                    <CardContent className="pt-6">
-                      <div className="flex items-start gap-4">
-                        <div className="p-2 rounded-md bg-primary/10 text-primary">
-                          <info.icon className="h-6 w-6" />
-                        </div>
-                        <div>
-                          <h3 className="font-semibold mb-1">{info.title}</h3>
-                          <p className="text-lg font-medium text-primary mb-1"><a href="mailto:admin@jortc.us">admin@jortc.us</a></p>
-                          <p className="text-sm text-muted-foreground">{info.description}</p>
-                        </div>
-                      </div>
-                    </CardContent>
-                  </Card>)}
-              </div>
-
-              
-            </div>
+            
           </div>
         </div>
       </section>
