@@ -1,18 +1,29 @@
 
 import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, Loader2, Settings } from 'lucide-react';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
+import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
 import { RuleCard } from '../components/RuleCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
+import { useAuth } from '@/contexts/AuthContext';
 
 export const EmailRulesTab: React.FC = () => {
-  const { rules, isLoading: rulesLoading, updateRule, isUpdating } = useEmailRules();
-  const { templates, isLoading: templatesLoading } = useEmailTemplates();
+  const { userProfile } = useAuth();
+  const { schools } = useUserManagement();
+  const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
   const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
   const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState<string | null>(null);
+
+  // Determine the school ID to use for fetching rules
+  const schoolIdForRules = userProfile?.role === 'admin' ? selectedSchoolId : userProfile?.school_id || '';
+
+  // Only fetch rules when a school is selected (for admin) or automatically for non-admin users
+  const { rules, isLoading: rulesLoading, updateRule, isUpdating } = useEmailRules(schoolIdForRules);
+  const { templates, isLoading: templatesLoading } = useEmailTemplates();
 
   const isLoading = rulesLoading || templatesLoading;
   const taskTemplates = templates.filter(t => t.source_table === 'tasks' && t.is_active);
@@ -60,7 +71,50 @@ export const EmailRulesTab: React.FC = () => {
         </div>
       </div>
 
-      {(taskTemplates.length === 0 || subtaskTemplates.length === 0) && (
+      {userProfile?.role === 'admin' && (
+        <Card>
+          <CardHeader>
+            <CardTitle>School Filter</CardTitle>
+            <CardDescription>
+              Select a school to view and manage its email rules
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <div className="w-64">
+              <Select value={selectedSchoolId} onValueChange={setSelectedSchoolId}>
+                <SelectTrigger className="bg-background border-border">
+                  <SelectValue placeholder="Select a school" />
+                </SelectTrigger>
+                <SelectContent className="bg-background border-border z-50">
+                  {schools
+                    .filter(school => school.name !== 'Carey Unlimited')
+                    .map((school) => (
+                      <SelectItem key={school.id} value={school.id}>
+                        {school.name}
+                      </SelectItem>
+                    ))}
+                </SelectContent>
+              </Select>
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
+      {!selectedSchoolId && userProfile?.role === 'admin' && (
+        <Card>
+          <CardContent className="flex flex-col items-center justify-center py-12">
+            <Settings className="w-12 h-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium text-muted-foreground mb-2">
+              Select a School
+            </h3>
+            <p className="text-sm text-muted-foreground text-center">
+              Please select a school from the dropdown above to view and manage email rules.
+            </p>
+          </CardContent>
+        </Card>
+      )}
+
+      {schoolIdForRules && (taskTemplates.length === 0 || subtaskTemplates.length === 0) && (
         <Alert>
           <AlertCircle className="w-4 h-4" />
           <AlertDescription>
@@ -75,7 +129,7 @@ export const EmailRulesTab: React.FC = () => {
         </Alert>
       )}
 
-      {activeRulesWithoutTemplates.length > 0 && (
+      {schoolIdForRules && activeRulesWithoutTemplates.length > 0 && (
         <Alert variant="destructive">
           <AlertCircle className="w-4 h-4" />
           <AlertDescription>
@@ -85,14 +139,15 @@ export const EmailRulesTab: React.FC = () => {
         </Alert>
       )}
 
-      <Card>
-        <CardHeader>
-          <CardTitle>Available Rules</CardTitle>
-          <CardDescription>
-            Enable rules to automatically send emails when specific task or subtask events occur. 
-            Each enabled rule requires an associated email template.
-          </CardDescription>
-        </CardHeader>
+      {schoolIdForRules && (
+        <Card>
+          <CardHeader>
+            <CardTitle>Available Rules</CardTitle>
+            <CardDescription>
+              Enable rules to automatically send emails when specific task or subtask events occur. 
+              Each enabled rule requires an associated email template.
+            </CardDescription>
+          </CardHeader>
         <CardContent>
           <div className="overflow-x-auto">
             <table className="w-full">
@@ -133,8 +188,9 @@ export const EmailRulesTab: React.FC = () => {
               </tbody>
             </table>
           </div>
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      )}
 
       {selectedTemplateForPreview && (
         <EmailPreviewDialog

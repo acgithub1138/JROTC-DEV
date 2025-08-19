@@ -43,22 +43,34 @@ export const RULE_DESCRIPTIONS: Record<RuleType, string> = {
   subtask_overdue_reminder: 'Send reminder emails 3, 2, 1 days before and on due date at 10am',
 };
 
-export const useEmailRules = () => {
+export const useEmailRules = (schoolId?: string) => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userProfile } = useAuth();
 
   const { data: rules = [], isLoading } = useQuery({
-    queryKey: ['email-rules'],
+    queryKey: ['email-rules', schoolId],
     queryFn: async () => {
-      const { data, error } = await supabase
+      // Don't fetch if no school is selected for admin users
+      if (!schoolId) {
+        return [];
+      }
+
+      let query = supabase
         .from('email_rules')
-        .select('*')
-        .order('rule_type');
+        .select('*');
+
+      // For admin users, filter by selected school
+      if (userProfile?.role === 'admin' && schoolId) {
+        query = query.eq('school_id', schoolId);
+      }
+
+      const { data, error } = await query.order('rule_type');
 
       if (error) throw error;
       return data as EmailRule[];
     },
+    enabled: !!schoolId, // Only run query when schoolId is provided
   });
 
   const updateRule = useMutation({
