@@ -44,6 +44,9 @@ export const useEmailTemplates = () => {
   const filteredTemplates = useMemo(() => {
     let filtered = templates;
 
+    // Filter out system templates (where school_id is null)
+    filtered = filtered.filter(template => template.school_id !== null);
+
     // Filter by search query
     if (searchQuery) {
       const query = searchQuery.toLowerCase();
@@ -205,6 +208,9 @@ export const useEmailTemplates = () => {
   const canEditTemplate = (template: EmailTemplate): boolean => {
     if (!userProfile) return false;
     
+    // Cannot edit system templates (null school_id)
+    if (template.school_id === null) return false;
+    
     // Admins can edit any template
     if (userProfile.role === 'admin') return true;
     
@@ -213,6 +219,9 @@ export const useEmailTemplates = () => {
   };
 
   const canCopyTemplate = (template: EmailTemplate): boolean => {
+    // Cannot copy system templates (null school_id)
+    if (template.school_id === null) return false;
+    
     return !!userProfile; // Any authenticated user can copy templates
   };
 
