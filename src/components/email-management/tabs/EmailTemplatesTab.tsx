@@ -1,5 +1,5 @@
 
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -10,6 +10,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
+import { TablePagination } from '@/components/ui/table-pagination';
 
 export const EmailTemplatesTab: React.FC = () => {
   const { canCreate } = useTablePermissions('email');
@@ -27,6 +28,17 @@ export const EmailTemplatesTab: React.FC = () => {
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
   const [previewingTemplate, setPreviewingTemplate] = useState<any>(null);
+  const [currentPage, setCurrentPage] = useState(1);
+  
+  const ITEMS_PER_PAGE = 25;
+
+  const paginatedTemplates = useMemo(() => {
+    const startIndex = (currentPage - 1) * ITEMS_PER_PAGE;
+    const endIndex = startIndex + ITEMS_PER_PAGE;
+    return templates.slice(startIndex, endIndex);
+  }, [templates, currentPage]);
+
+  const totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
 
   const handleEdit = (template: any) => {
     setEditingTemplate(template);
@@ -82,7 +94,7 @@ export const EmailTemplatesTab: React.FC = () => {
       </div>
 
       <EmailTemplatesTable
-        templates={templates}
+        templates={paginatedTemplates}
         isLoading={isLoading}
         onEdit={handleEdit}
         onView={handleView}
@@ -90,6 +102,15 @@ export const EmailTemplatesTab: React.FC = () => {
         canEditTemplate={canEditTemplate}
         canCopyTemplate={canCopyTemplate}
       />
+
+      {templates.length > ITEMS_PER_PAGE && (
+        <TablePagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={templates.length}
+          onPageChange={setCurrentPage}
+        />
+      )}
 
       <EmailTemplateDialog
         open={showCreateDialog || !!editingTemplate}
