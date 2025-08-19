@@ -140,7 +140,7 @@ serve(async (req) => {
     
     const mailOptions = {
       from: `${fromName} <${fromEmail}>`,
-      to: 'jrotc_ccc@careyunlimited.com',
+      to: 'admin@jrotc.us',
       replyTo: formData.email,
       subject: emailSubject,
       html: emailBody,
