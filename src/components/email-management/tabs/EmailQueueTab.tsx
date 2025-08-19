@@ -112,7 +112,7 @@ export const EmailQueueTab: React.FC = () => {
           const {
             data,
             error
-          } = await supabase.functions.invoke('email-queue-webhook', {
+          } = await supabase.functions.invoke('process-email-queue', {
             body: {
               email_id: email.id,
               manual_trigger: true
