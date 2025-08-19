@@ -92,22 +92,12 @@ serve(async (req) => {
     const queueItems = await processor.getQueueItems();
     console.log(`Processing ${queueItems.length} emails from queue`);
 
-    // Get global SMTP settings
-    const globalSmtpSettings = await processor.getGlobalSmtpSettings();
-
-    if (!globalSmtpSettings) {
-      console.log('No active global SMTP settings found, cannot process emails');
-      
-      if (queueItems.length > 0) {
-        await processor.handleNoSmtpSettings(queueItems);
-      }
-
+    if (queueItems.length === 0) {
       const result: ProcessingResult = {
-        success: false,
-        error: 'No active global SMTP settings configured',
+        success: true,
         processed: 0,
-        failed: queueItems.length,
-        total: queueItems.length
+        failed: 0,
+        total: 0
       };
 
       return new Response(JSON.stringify(result), {
@@ -118,8 +108,8 @@ serve(async (req) => {
       });
     }
 
-    // Process emails using global SMTP settings
-    const { processed, failed } = await processor.processEmails(queueItems, globalSmtpSettings);
+    // Process emails using Supabase email system
+    const { processed, failed } = await processor.processEmails(queueItems);
 
     const result: ProcessingResult = {
       success: true,
