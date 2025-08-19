@@ -1,6 +1,7 @@
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
-import { EmailQueueItem } from './types.ts';
-import { sendEmailViaSupabase } from './email-service.ts';
+import { EmailQueueItem, SmtpSettings } from './types.ts';
+import { sendEmailViaSMTP } from './email-service.ts';
 
 export class QueueProcessor {
   private supabaseClient;
@@ -29,7 +30,38 @@ export class QueueProcessor {
     return queueItems || [];
   }
 
-  // Removed getGlobalSmtpSettings - no longer needed with Supabase email system
+  async getGlobalSmtpSettings(): Promise<SmtpSettings | null> {
+    // Prefer environment-based SMTP settings (Supabase Secrets)
+    const host = Deno.env.get('SMTP_HOST');
+    const portStr = Deno.env.get('SMTP_PORT');
+    const user = Deno.env.get('SMTP_USERNAME');
+    const pass = Deno.env.get('SMTP_PASSWORD');
+    const fromEmail = Deno.env.get('SMTP_FROM_EMAIL');
+    const fromName = Deno.env.get('SMTP_FROM_NAME') ?? 'No-Reply';
+    const useTlsEnv = Deno.env.get('SMTP_USE_TLS');
+
+    if (!host || !user || !pass || !fromEmail) {
+      console.warn('SMTP secrets missing. Required: SMTP_HOST, SMTP_USERNAME, SMTP_PASSWORD, SMTP_FROM_EMAIL');
+      return null;
+    }
+
+    const port = Number.parseInt(portStr ?? '587');
+    const use_tls = useTlsEnv ? ['1', 'true', 'yes'].includes(useTlsEnv.toLowerCase()) : true;
+
+    const settings: SmtpSettings = {
+      smtp_host: host,
+      smtp_port: Number.isNaN(port) ? 587 : port,
+      smtp_username: user,
+      smtp_password: pass,
+      from_email: fromEmail,
+      from_name: fromName,
+      use_tls,
+      is_active: true,
+      is_global: true,
+    };
+
+    return settings;
+  }
 
   async markEmailAsSent(itemId: string): Promise<void> {
     const { error: updateError } = await this.supabaseClient
@@ -146,63 +178,81 @@ export class QueueProcessor {
     }
   }
 
-  async processEmails(queueItems: EmailQueueItem[]): Promise<{ processed: number; failed: number }> {
-    let processed = 0;
-    let failed = 0;
-
-    console.log(`Processing ${queueItems.length} emails via Supabase email system`);
+  async processEmails(queueItems: EmailQueueItem[], smtpSettings: SmtpSettings): Promise<{ processed: number; failed: number }> {
+    let processedCount = 0;
+    let failedCount = 0;
 
     for (const item of queueItems) {
       try {
-        console.log(`Processing email queue item ${item.id} for ${item.recipient_email}`);
+        console.log(`Processing email ${item.id} to ${item.recipient_email} using global SMTP`);
         
-        // Log the email being processed
-        await this.createEmailLog(item.id, 'processing', { 
-          recipient: item.recipient_email,
-          subject: item.subject 
-        });
-
-        // Send the email via Supabase
-        await sendEmailViaSupabase(item);
-
-        // Mark as sent and update task comment if needed
+        await sendEmailViaSMTP(item, smtpSettings);
         await this.markEmailAsSent(item.id);
-        processed++;
 
-        console.log(`Email sent successfully: ${item.id}`);
-
-        // Log successful sending
-        await this.createEmailLog(item.id, 'sent', { 
+        await this.createEmailLog(item.id, 'sent', {
+          sent_at: new Date().toISOString(),
           recipient: item.recipient_email,
-          message_id: 'supabase-email'
+          subject: item.subject,
+          smtp_host: smtpSettings.smtp_host,
+          smtp_type: 'global',
+          message_id: 'sent'
         });
+
+        processedCount++;
+        console.log(`Successfully processed email ${item.id} via global SMTP`);
 
       } catch (error) {
-        console.error(`Failed to send email ${item.id}:`, error);
+        console.error(`Failed to process email ${item.id}:`, error);
         
-        const errorMessage = `Email sending failed: ${error.message || 'Unknown error'}`;
+        const errorMessage = this.getSmtpErrorMessage(error, smtpSettings.smtp_host, smtpSettings.smtp_port);
+        
         await this.markEmailAsFailed(item.id, errorMessage);
-        failed++;
-
-        // Log the failure
-        await this.createEmailLog(item.id, 'failed', { 
+        await this.createEmailLog(item.id, 'failed', {
           error: errorMessage,
-          recipient: item.recipient_email
+          failed_at: new Date().toISOString(),
+          smtp_type: 'global',
+          smtp_host: smtpSettings.smtp_host,
+          original_error: error.message || 'Unknown error occurred'
         });
+
+        failedCount++;
       }
     }
 
-    return { processed, failed };
+    return { processed: processedCount, failed: failedCount };
   }
 
-  async handleNoEmailService(queueItems: EmailQueueItem[]): Promise<void> {
-    console.log(`Marking ${queueItems.length} emails as failed due to email service unavailable`);
+  private getSmtpErrorMessage(error: any, smtp_host: string, smtp_port: number): string {
+    let errorMessage = 'SMTP email sending failed';
     
+    if (error.code === 'ECONNREFUSED') {
+      errorMessage = `Cannot connect to SMTP server ${smtp_host}:${smtp_port}. The server may be down or the port may be blocked.`;
+    } else if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      errorMessage = `Connection to ${smtp_host}:${smtp_port} timed out. Network Solutions servers may be slow to respond.`;
+    } else if (error.code === 'EAUTH' || error.responseCode === 535 || error.message.includes('authentication')) {
+      errorMessage = 'SMTP authentication failed. Please verify your username and password are correct for Network Solutions.';
+    } else if (error.code === 'ESOCKET' || error.message.includes('TLS') || error.message.includes('SSL')) {
+      errorMessage = `TLS/SSL connection failed. Network Solutions requires TLS 1.2+. Please verify the TLS setting is correct for port ${smtp_port}.`;
+    } else if (error.responseCode === 550) {
+      errorMessage = `SMTP server rejected the connection. Network Solutions may not allow connections from this IP address.`;
+    } else if (error.responseCode && error.response) {
+      errorMessage = `SMTP server error (${error.responseCode}): ${error.response}`;
+    } else if (error.message.includes('certificate')) {
+      errorMessage = `SSL certificate verification failed. Network Solutions certificate may not be trusted.`;
+    } else if (error.message) {
+      errorMessage = `SMTP error: ${error.message}`;
+    }
+
+    return errorMessage;
+  }
+
+  async handleNoSmtpSettings(queueItems: EmailQueueItem[]): Promise<void> {
     for (const item of queueItems) {
-      await this.markEmailAsFailed(
-        item.id, 
-        'Email service is currently unavailable. Please check your Supabase configuration.'
-      );
+      await this.markEmailAsFailed(item.id, 'No active global SMTP settings configured');
+      await this.createEmailLog(item.id, 'failed', {
+        error: 'No active global SMTP settings configured',
+        failed_at: new Date().toISOString()
+      });
     }
   }
 }

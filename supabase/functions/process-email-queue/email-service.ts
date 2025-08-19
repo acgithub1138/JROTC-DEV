@@ -1,47 +1,83 @@
-import { EmailQueueItem } from './types.ts';
 
-export async function sendEmailViaSupabase(
-  emailData: EmailQueueItem
+import nodemailer from "npm:nodemailer@6.9.7";
+import { EmailQueueItem, SmtpSettings } from './types.ts';
+
+export async function sendEmailViaSMTP(
+  emailData: EmailQueueItem,
+  smtpSettings: SmtpSettings
 ): Promise<boolean> {
   try {
-    console.log(`Attempting to send email via Supabase to ${emailData.recipient_email}`);
+    console.log(`Attempting to send email via SMTP to ${emailData.recipient_email}`);
     
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const serviceRoleKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    
-    if (!supabaseUrl || !serviceRoleKey) {
-      throw new Error('Supabase configuration missing');
+    if (!smtpSettings.is_active) {
+      throw new Error('Global SMTP is not active');
     }
 
-    // Call our send-email-hook function directly
-    const emailHookUrl = `${supabaseUrl}/functions/v1/send-email-hook`;
-    
-    const response = await fetch(emailHookUrl, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${serviceRoleKey}`,
+    // Build SMTP configuration
+    let transporterConfig: any = {
+      host: smtpSettings.smtp_host,
+      port: smtpSettings.smtp_port,
+      auth: {
+        user: smtpSettings.smtp_username,
+        pass: smtpSettings.smtp_password,
       },
-      body: JSON.stringify({
-        to: emailData.recipient_email,
-        subject: emailData.subject,
-        html: emailData.body,
-        from: 'JROTC Management <noreply@yourdomain.com>',
-      }),
-    });
+      connectionTimeout: 30000,
+      greetingTimeout: 15000,
+      socketTimeout: 15000,
+    };
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Email sending failed: ${response.status} - ${errorText}`);
+    // Configure TLS/SSL based on port and user preference
+    if (smtpSettings.smtp_port === 465) {
+      // Implicit SSL for port 465
+      transporterConfig.secure = true;
+      transporterConfig.tls = {
+        minVersion: 'TLSv1.2',
+        maxVersion: 'TLSv1.3',
+        rejectUnauthorized: true,
+      };
+    } else if (smtpSettings.use_tls && (smtpSettings.smtp_port === 587 || smtpSettings.smtp_port === 25)) {
+      // Explicit TLS (STARTTLS) for port 587 or 25
+      transporterConfig.secure = false;
+      transporterConfig.requireTLS = true;
+      transporterConfig.tls = {
+        minVersion: 'TLSv1.2',
+        maxVersion: 'TLSv1.3',
+        rejectUnauthorized: true,
+        servername: smtpSettings.smtp_host,
+      };
+    } else {
+      // No encryption
+      transporterConfig.secure = false;
     }
 
-    const result = await response.json();
-    console.log(`Email sent successfully via Supabase:`, result);
+    console.log(`Creating SMTP transporter for ${smtpSettings.smtp_host}:${smtpSettings.smtp_port}`);
+    
+    // Create transporter
+    const transporter = nodemailer.createTransport(transporterConfig);
+
+    // Prepare email options
+    const mailOptions = {
+      from: `${smtpSettings.from_name} <${smtpSettings.from_email}>`,
+      to: emailData.recipient_email,
+      subject: emailData.subject,
+      html: emailData.body,
+    };
+
+    console.log(`Sending email from ${mailOptions.from} to ${mailOptions.to}`);
+    console.log(`Subject: ${mailOptions.subject}`);
+
+    // Send the email
+    const result = await transporter.sendMail(mailOptions);
+    
+    console.log(`Email sent successfully:`, result.messageId);
+    
+    // Close the transporter
+    transporter.close();
     
     return true;
     
   } catch (error) {
-    console.error(`Supabase email sending failed:`, error);
+    console.error(`SMTP sending failed:`, error);
     throw error;
   }
 }

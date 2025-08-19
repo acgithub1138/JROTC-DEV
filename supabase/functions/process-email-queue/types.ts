@@ -11,7 +11,17 @@ export interface EmailQueueItem {
   school_id: string;
 }
 
-// SmtpSettings interface removed - no longer needed with Supabase email system
+export interface SmtpSettings {
+  smtp_host: string;
+  smtp_port: number;
+  smtp_username: string;
+  smtp_password: string;
+  from_email: string;
+  from_name: string;
+  use_tls: boolean;
+  is_active: boolean;
+  is_global: boolean;
+}
 
 export interface ProcessingResult {
   success: boolean;
