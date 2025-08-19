@@ -1,5 +1,4 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { Resend } from "npm:resend@4.0.0";
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -45,19 +44,6 @@ serve(async (req) => {
   }
 
   try {
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
-    if (!resendApiKey) {
-      console.error('RESEND_API_KEY not configured');
-      return new Response(
-        JSON.stringify({ error: 'Email service not configured' }),
-        {
-          status: 500,
-          headers: { 'Content-Type': 'application/json', ...corsHeaders },
-        }
-      );
-    }
-
-    const resend = new Resend(resendApiKey);
     const body = await req.json();
 
     // Check if this is a Supabase auth email hook or custom email
@@ -123,16 +109,15 @@ serve(async (req) => {
           `;
       }
 
-      const emailResponse = await resend.emails.send({
-        from: 'JROTC Management <noreply@yourdomain.com>',
+      // Return email configuration for Supabase to send using its SMTP settings
+      console.log('Returning email configuration for Supabase auth email');
+
+      return new Response(JSON.stringify({
         to: [emailData.user.email],
         subject,
-        html,
-      });
-
-      console.log('Auth email sent successfully:', emailResponse);
-
-      return new Response(JSON.stringify(emailResponse), {
+        html_body: html,
+        from: 'JROTC Management <noreply@yourdomain.com>'
+      }), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
@@ -144,18 +129,15 @@ serve(async (req) => {
       // This is a custom email request (from our queue processor)
       const emailRequest = body as CustomEmailRequest;
       
-      console.log(`Sending custom email to ${emailRequest.to}`);
+      console.log(`Returning custom email configuration for ${emailRequest.to}`);
 
-      const emailResponse = await resend.emails.send({
-        from: emailRequest.from || 'JROTC Management <noreply@yourdomain.com>',
+      // Return email configuration for Supabase to send using its SMTP settings
+      return new Response(JSON.stringify({
         to: [emailRequest.to],
         subject: emailRequest.subject,
-        html: emailRequest.html,
-      });
-
-      console.log('Custom email sent successfully:', emailResponse);
-
-      return new Response(JSON.stringify(emailResponse), {
+        html_body: emailRequest.html,
+        from: emailRequest.from || 'JROTC Management <noreply@yourdomain.com>'
+      }), {
         status: 200,
         headers: {
           'Content-Type': 'application/json',
