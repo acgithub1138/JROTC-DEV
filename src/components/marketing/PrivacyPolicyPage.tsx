@@ -56,7 +56,7 @@ const PrivacyPolicyPage = () => {
             <ul className="list-disc pl-6 space-y-2">
               <li>as required by law, such as to comply with a subpoena, or similar legal process;</li>
               <li>when they believe in good faith that disclosure is necessary to protect their rights, protect your safety or the safety of others, investigate fraud, or respond to a government request;</li>
-              <li>with their trusted services providers who work on their behalf, do not have an independent use of the information we disclose to them, and have agreed to adhere to the rules set forth in this privacy statement.</li>
+              <li>with their trusted service providers who work on their behalf, do not have an independent use of the information we disclose to them, and have agreed to adhere to the rules set forth in this privacy statement.</li>
             </ul>
           </section>
 
@@ -70,7 +70,7 @@ const PrivacyPolicyPage = () => {
           <section>
             <h2 className="text-2xl font-semibold mb-4 text-foreground">Data Retention Policy</h2>
             <p>
-              The Service Provider will retain User Provided data for as long as you use the Application and for a reasonable time thereafter. If you'd like them to delete User Provided Data that you have provided via the Application, please contact them at google_dev@careyunlimited.com and they will respond in a reasonable time.
+              The Service Provider will retain User Provided data for as long as you use the Application and for a reasonable time thereafter. If you'd like them to delete User Provided Data that you have provided via the Application, please contact them at google_dev@careyunlimited.com, and they will respond in a reasonable time.
             </p>
           </section>
 
@@ -80,7 +80,7 @@ const PrivacyPolicyPage = () => {
               The Service Provider does not use the Application to knowingly solicit data from or market to children under the age of 13.
             </p>
             <p className="mb-4">
-              The Service Provider does not knowingly collect personally identifiable information from children. The Service Provider encourages all children to never submit any personally identifiable information through the Application and/or Services. The Service Provider encourage parents and legal guardians to monitor their children's Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to the Service Provider through the Application and/or Services, please contact the Service Provider (google_dev@careyunlimited.com) so that they will be able to take the necessary actions. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf).
+              The Service Provider does not knowingly collect personally identifiable information from children. The Service Provider encourages all children to never submit any personally identifiable information through the Application and/or Services. The Service Provider encourages parents and legal guardians to monitor their children's Internet usage and to help enforce this Policy by instructing their children never to provide personally identifiable information through the Application and/or Services without their permission. If you have reason to believe that a child has provided personally identifiable information to the Service Provider through the Application and/or Services, please contact the Service Provider (google_dev@careyunlimited.com) so that they will be able to take the necessary actions. You must also be at least 16 years of age to consent to the processing of your personally identifiable information in your country (in some countries we may allow your parent or guardian to do so on your behalf).
             </p>
           </section>
 

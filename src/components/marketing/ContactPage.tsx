@@ -139,7 +139,7 @@ const ContactPage = () => {
   const contactInfo = [{
     icon: Mail,
     title: "Email Us",
-    content: "jortc_ccc@careyunlimited.com",
+    content: "admin@jrotc.us",
     description: "We are here to help!"
   }, {
     icon: MapPin,
