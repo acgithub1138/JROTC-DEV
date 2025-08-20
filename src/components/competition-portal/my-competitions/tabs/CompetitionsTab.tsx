@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Plus, Search, ArrowUpDown } from 'lucide-react';
 import { ColumnSelector } from '@/components/ui/column-selector';
-import { BasicCompetitionTable } from '../components/BasicCompetitionTable';
+import { CompetitionPlacementCards } from '../components/CompetitionPlacementCards';
 import { CompetitionDialog } from '../components/CompetitionDialog';
 import { AddEventDialog } from '../components/AddEventDialog';
 import { ViewCompetitionDialog } from '../components/ViewCompetitionDialog';
@@ -172,11 +172,6 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           </Button>
         </div>
         <div className="flex items-center gap-2">
-          <ColumnSelector 
-            columns={columns}
-            onToggleColumn={toggleColumn}
-            isLoading={columnsLoading}
-          />
           {!readOnly && canCreate && (
             <Button onClick={() => setShowAddDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
@@ -186,7 +181,7 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
         </div>
       </div>
 
-      <BasicCompetitionTable 
+      <CompetitionPlacementCards 
         competitions={sortedData} 
         isLoading={isLoading} 
         onEdit={readOnly || !canUpdate ? undefined : (competition) => {
@@ -200,11 +195,10 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           handleDeleteCompetition(competition);
         }}
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onViewScoreSheets={canViewDetails ? setViewingCompetition : undefined}
         onView={canViewDetails ? handleViewScoreSheets : undefined}
-        
-        visibleColumns={visibleColumns}
-        canViewDetails={canViewDetails}
+        canEdit={canUpdate && !readOnly}
+        canDelete={canDelete && !readOnly}
+        canAddEvent={canCreate && !readOnly}
       />
 
       {!readOnly && canCreate && (
