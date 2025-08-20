@@ -67,12 +67,13 @@ const competitionMenuItems = [{
   label: 'Judges',
   icon: Shield,
   path: '/app/competition-portal/judges'
-}, {
-  id: 'analytics',
-  label: 'Analytics & Reports',
-  icon: BarChart3,
-  path: '/app/competition-portal/analytics'
 }];
+//{
+//  id: 'analytics',
+//  label: 'Analytics & Reports',
+//  icon: BarChart3,
+//  path: '/app/competition-portal/analytics'
+//}
 
 // Limited menu items for schools with competition_module but not competition_portal
 const competitionModuleMenuItems = [{
@@ -85,11 +86,6 @@ const competitionModuleMenuItems = [{
   label: 'My Competitions',
   icon: Target,
   path: '/app/competition-portal/my-competitions'
-}, {
-  id: 'score-sheets',
-  label: 'Score Sheets',
-  icon: Clipboard,
-  path: '/app/competition-portal/score-sheets'
 }];
 
 // Very limited menu items for schools without any competition access
