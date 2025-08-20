@@ -85,6 +85,11 @@ const competitionModuleMenuItems = [{
   label: 'My Competitions',
   icon: Target,
   path: '/app/competition-portal/my-competitions'
+}, {
+  id: 'score-sheets',
+  label: 'Score Sheets',
+  icon: Clipboard,
+  path: '/app/competition-portal/score-sheets'
 }];
 
 // Very limited menu items for schools without any competition access
