@@ -200,8 +200,8 @@ export const CompetitionsTab = ({ readOnly = false }: CompetitionsTabProps) => {
           handleDeleteCompetition(competition);
         }}
         onAddEvent={readOnly || !canCreate ? undefined : handleAddEvent}
-        onViewScoreSheets={canViewDetails ? handleViewScoreSheets : undefined}
-        onView={canViewDetails ? setViewingCompetition : undefined}
+        onViewScoreSheets={canViewDetails ? setViewingCompetition : undefined}
+        onView={canViewDetails ? handleViewScoreSheets : undefined}
         
         visibleColumns={visibleColumns}
         canViewDetails={canViewDetails}
