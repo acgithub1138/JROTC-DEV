@@ -1,5 +1,5 @@
 import React from 'react';
-import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid, Legend } from 'recharts';
+import { ResponsiveContainer, LineChart, Line, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 interface PerformanceData {
   date: string;
@@ -21,14 +21,14 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 }) => {
   if (isLoading) {
     return (
-      <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
+      <div className="flex items-center justify-center h-[500px] bg-muted/50 rounded-lg">
         <p className="text-muted-foreground">Loading chart data...</p>
       </div>
     );
   }
   if (!data || data.length === 0) {
     return (
-      <div className="flex items-center justify-center h-96 bg-muted/50 rounded-lg">
+      <div className="flex items-center justify-center h-[500px] bg-muted/50 rounded-lg">
         <p className="text-muted-foreground">No data available for the selected criteria.</p>
       </div>
     );
@@ -36,7 +36,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
 
   return (
-    <div className="w-full h-96">
+    <div className="w-full h-[500px]">
       <ResponsiveContainer width="100%" height="100%">
         <LineChart data={data} margin={{ top: 5, right: 30, left: 20, bottom: 5 }}>
           <CartesianGrid strokeDasharray="3 3" className="opacity-30" />
@@ -48,7 +48,6 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
             height={60}
           />
           <YAxis tick={{ fontSize: 12 }} />
-          <Legend />
           {visibleCriteria.map((criteria) => (
             <Line
               key={criteria}
