@@ -90,6 +90,7 @@ export type Database = {
         Row: {
           created_at: string
           created_by: string | null
+          description: string | null
           id: string
           is_active: boolean
           is_default: boolean
@@ -100,6 +101,7 @@ export type Database = {
         Insert: {
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           is_default?: boolean
@@ -110,6 +112,7 @@ export type Database = {
         Update: {
           created_at?: string
           created_by?: string | null
+          description?: string | null
           id?: string
           is_active?: boolean
           is_default?: boolean
@@ -697,13 +700,6 @@ export type Database = {
             columns: ["score_sheet"]
             isOneToOne: false
             referencedRelation: "competition_templates"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cp_comp_events_event"
-            columns: ["event"]
-            isOneToOne: false
-            referencedRelation: "competition_event_types"
             referencedColumns: ["id"]
           },
         ]
