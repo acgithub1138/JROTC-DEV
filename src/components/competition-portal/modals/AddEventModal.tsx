@@ -307,6 +307,37 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       toast.error('Please select a score template');
       return;
     }
+
+    // Validation for date/time ordering
+    const startDateTime = new Date(`${formData.start_date}T${formData.start_hour.padStart(2, '0')}:${formData.start_minute.padStart(2, '0')}:00`);
+    const endDateTime = new Date(`${formData.end_date}T${formData.end_hour.padStart(2, '0')}:${formData.end_minute.padStart(2, '0')}:00`);
+    
+    if (endDateTime <= startDateTime) {
+      toast.error('End date & time must be after start date & time');
+      return;
+    }
+
+    // Validation for lunch break timing
+    if (formData.lunch_start_hour && formData.lunch_start_minute && formData.lunch_end_hour && formData.lunch_end_minute) {
+      const lunchStartDateTime = new Date(`${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`);
+      const lunchEndDateTime = new Date(`${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`);
+      
+      if (lunchStartDateTime <= startDateTime) {
+        toast.error('Lunch break start must be after event start time');
+        return;
+      }
+      
+      if (lunchEndDateTime >= endDateTime) {
+        toast.error('Lunch break end must be before event end time');
+        return;
+      }
+      
+      if (lunchEndDateTime <= lunchStartDateTime) {
+        toast.error('Lunch break end must be after lunch break start');
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);

@@ -290,6 +290,36 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       return;
     }
 
+    // Validation for date/time ordering
+    const startDateTime = new Date(`${formData.start_date}T${formData.start_time_hour.padStart(2, '0')}:${formData.start_time_minute.padStart(2, '0')}:00`);
+    const endDateTime = new Date(`${formData.end_date}T${formData.end_time_hour.padStart(2, '0')}:${formData.end_time_minute.padStart(2, '0')}:00`);
+    
+    if (endDateTime <= startDateTime) {
+      toast.error('End date & time must be after start date & time');
+      return;
+    }
+
+    // Validation for lunch break timing
+    if (formData.lunch_start_time && formData.lunch_end_time) {
+      const lunchStartDateTime = new Date(`${formData.start_date}T${formData.lunch_start_time}:00`);
+      const lunchEndDateTime = new Date(`${formData.start_date}T${formData.lunch_end_time}:00`);
+      
+      if (lunchStartDateTime <= startDateTime) {
+        toast.error('Lunch break start must be after event start time');
+        return;
+      }
+      
+      if (lunchEndDateTime >= endDateTime) {
+        toast.error('Lunch break end must be before event end time');
+        return;
+      }
+      
+      if (lunchEndDateTime <= lunchStartDateTime) {
+        toast.error('Lunch break end must be after lunch break start');
+        return;
+      }
+    }
+
     setIsLoading(true);
     try {
       // Convert school timezone to UTC for database storage
