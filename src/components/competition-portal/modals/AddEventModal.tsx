@@ -36,14 +36,14 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     location: '',
     start_date: '',
     start_hour: '',
-    start_minute: '',
+    start_minute: '00',
     end_date: '',
     end_hour: '',
-    end_minute: '',
+    end_minute: '00',
     lunch_start_hour: '',
-    lunch_start_minute: '',
+    lunch_start_minute: '00',
     lunch_end_hour: '',
-    lunch_end_minute: '',
+    lunch_end_minute: '00',
     max_participants: '',
     fee: '',
     interval: '',
@@ -76,14 +76,14 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     location: '',
     start_date: '',
     start_hour: '',
-    start_minute: '',
+    start_minute: '00',
     end_date: '',
     end_hour: '',
-    end_minute: '',
+    end_minute: '00',
     lunch_start_hour: '',
-    lunch_start_minute: '',
+    lunch_start_minute: '00',
     lunch_end_hour: '',
-    lunch_end_minute: '',
+    lunch_end_minute: '00',
     max_participants: '',
     fee: '',
     interval: '',
@@ -269,8 +269,42 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       formData.lunch_end_hour, formData.lunch_end_minute]);
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Validation for mandatory fields
     if (!formData.event) {
       toast.error('Please select an event');
+      return;
+    }
+    if (!formData.location) {
+      toast.error('Please enter a location');
+      return;
+    }
+    if (!formData.start_date) {
+      toast.error('Please select a start date');
+      return;
+    }
+    if (!formData.end_date) {
+      toast.error('Please select an end date');
+      return;
+    }
+    if (!formData.lunch_start_hour || !formData.lunch_end_hour) {
+      toast.error('Please set lunch break times');
+      return;
+    }
+    if (!formData.interval) {
+      toast.error('Please enter an interval');
+      return;
+    }
+    if (!formData.max_participants) {
+      toast.error('Please enter max participants');
+      return;
+    }
+    if (!formData.fee) {
+      toast.error('Please enter an event fee');
+      return;
+    }
+    if (!formData.score_sheet) {
+      toast.error('Please select a score template');
       return;
     }
     setIsLoading(true);
@@ -311,14 +345,14 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         location: '',
         start_date: '',
         start_hour: '',
-        start_minute: '',
+        start_minute: '00',
         end_date: '',
         end_hour: '',
-        end_minute: '',
+        end_minute: '00',
         lunch_start_hour: '',
-        lunch_start_minute: '',
+        lunch_start_minute: '00',
         lunch_end_hour: '',
-        lunch_end_minute: '',
+        lunch_end_minute: '00',
         max_participants: '',
         fee: '',
         interval: '',
@@ -379,11 +413,17 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="location">Location</Label>
-            <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
-            ...prev,
-            location: e.target.value
-          }))} placeholder="Event location" />
+            <Label htmlFor="location">Location *</Label>
+            <Input 
+              id="location" 
+              value={formData.location} 
+              onChange={e => setFormData(prev => ({
+                ...prev,
+                location: e.target.value
+              }))} 
+              placeholder="Event location" 
+              required 
+            />
           </div>
 
           <div className="space-y-4">
@@ -468,7 +508,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
             </div>
 
             <div>
-              <Label>End Date & Time</Label>
+              <Label>End Date & Time *</Label>
               <div className="grid grid-cols-4 gap-2">
                 <div className="col-span-2">
                   <Input 
@@ -479,6 +519,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                       ...prev,
                       end_date: e.target.value
                     }))} 
+                    required
                   />
                 </div>
                 <div>
@@ -520,7 +561,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
 
           <div>
-            <Label>Judge Lunch Break</Label>
+            <Label>Judge Lunch Break *</Label>
             <div className="grid grid-cols-4 gap-2">
               <div>
                 <Label className="text-xs">Start Hour</Label>
@@ -619,25 +660,50 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
           <div className="grid grid-cols-3 gap-4">
             <div>
-              <Label htmlFor="interval">Interval (minutes)</Label>
-              <Input id="interval" type="number" min="0" value={formData.interval} onChange={e => setFormData(prev => ({
-              ...prev,
-              interval: e.target.value
-            }))} placeholder="0" />
+              <Label htmlFor="interval">Interval (minutes) *</Label>
+              <Input 
+                id="interval" 
+                type="number" 
+                min="0" 
+                value={formData.interval} 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  interval: e.target.value
+                }))} 
+                placeholder="0" 
+                required 
+              />
             </div>
             <div>
-              <Label htmlFor="max_participants">Max Participants</Label>
-              <Input id="max_participants" type="number" min="1" value={formData.max_participants} onChange={e => setFormData(prev => ({
-              ...prev,
-              max_participants: e.target.value
-            }))} placeholder="Maximum number of participants" />
+              <Label htmlFor="max_participants">Max Participants *</Label>
+              <Input 
+                id="max_participants" 
+                type="number" 
+                min="1" 
+                value={formData.max_participants} 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  max_participants: e.target.value
+                }))} 
+                placeholder="Maximum number of participants" 
+                required 
+              />
             </div>
             <div>
-              <Label htmlFor="fee">Event Fee</Label>
-              <Input id="fee" type="number" step="0.01" min="0" value={formData.fee} onChange={e => setFormData(prev => ({
-              ...prev,
-              fee: e.target.value
-            }))} placeholder="0.00" />
+              <Label htmlFor="fee">Event Fee *</Label>
+              <Input 
+                id="fee" 
+                type="number" 
+                step="0.01" 
+                min="0" 
+                value={formData.fee} 
+                onChange={e => setFormData(prev => ({
+                  ...prev,
+                  fee: e.target.value
+                }))} 
+                placeholder="0.00" 
+                required 
+              />
             </div>
           </div>
 
@@ -688,7 +754,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           </div>
 
           <div>
-            <Label htmlFor="score_sheet">Score Sheet Template</Label>
+            <Label htmlFor="score_sheet">Score Sheet Template *</Label>
             <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
               ...prev,
               score_sheet: value
