@@ -3485,6 +3485,14 @@ export type Database = {
           role_name: string
         }[]
       }
+      get_cadet_info_for_parent_registration: {
+        Args: { email_param: string }
+        Returns: {
+          cadet_exists: boolean
+          cadet_id: string
+          school_id: string
+        }[]
+      }
       get_current_user_id: {
         Args: Record<PropertyKey, never>
         Returns: string

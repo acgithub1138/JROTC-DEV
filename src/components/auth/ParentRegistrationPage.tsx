@@ -142,16 +142,16 @@ const ParentRegistrationPage = () => {
 
     setLoading(true);
     try {
-      // First, verify the cadet still exists using the same method as step 1
+      // Get cadet info using the secure database function
       const {
-        data: emailExists,
-        error: verifyError
-      } = await supabase.rpc('verify_cadet_email_exists', {
+        data: cadetProfileData,
+        error: cadetError
+      } = await supabase.rpc('get_cadet_info_for_parent_registration', {
         email_param: cadetInfo?.email
       });
       
-      if (verifyError) {
-        console.error("Error verifying cadet email:", verifyError);
+      if (cadetError) {
+        console.error("Error getting cadet info:", cadetError);
         toast({
           title: "Error",
           description: "An error occurred while verifying student information. Please try again.",
@@ -160,7 +160,8 @@ const ParentRegistrationPage = () => {
         return;
       }
       
-      if (!emailExists) {
+      // Check if cadet was found
+      if (!cadetProfileData || cadetProfileData.length === 0 || !cadetProfileData[0]?.cadet_exists) {
         toast({
           title: "Student Not Found",
           description: "Could not find an active student with that email address. Please go back and verify the email.",
@@ -169,26 +170,7 @@ const ParentRegistrationPage = () => {
         return;
       }
 
-      // Now get the cadet profile info for school_id
-      const {
-        data: cadetProfile,
-        error: cadetError
-      } = await supabase
-        .from('profiles')
-        .select('id, school_id')
-        .eq('email', cadetInfo?.email)
-        .eq('active', true)
-        .single();
-        
-      if (cadetError) {
-        console.error("Error fetching cadet profile:", cadetError);
-        toast({
-          title: "Error",
-          description: "An error occurred while fetching student information. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
+      const cadetProfile = cadetProfileData[0];
 
       // Get parent role ID
       const {
@@ -235,7 +217,7 @@ const ParentRegistrationPage = () => {
           phone: parentData.phone,
           type: 'parent',
           status: 'active',
-          cadet_id: cadetProfile.id,
+          cadet_id: cadetProfile.cadet_id,
           school_id: cadetProfile.school_id,
           created_by: newParentProfile.id
         });
