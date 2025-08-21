@@ -26,7 +26,7 @@ export const MobileScheduleEdit: React.FC = () => {
   }>();
   const { timezone } = useSchoolTimezone();
   const { toast } = useToast();
-  const { events, updateScheduleSlot } = useCompetitionSchedule(competitionId);
+  const { events, timeline, updateScheduleSlot } = useCompetitionSchedule(competitionId);
   
   const [registeredSchools, setRegisteredSchools] = useState<AvailableSchool[]>([]);
   const [filteredSchools, setFilteredSchools] = useState<AvailableSchool[]>([]);
@@ -43,8 +43,22 @@ export const MobileScheduleEdit: React.FC = () => {
   // Find the current event
   const event = events.find(e => e.id === eventId);
   
-  // Initialize local schedule from event data
-  const initialSchedule = event ? event.timeSlots.reduce((acc, slot) => {
+  // Generate event-specific time slots from timeline
+  const getEventTimeSlots = () => {
+    if (!timeline || !event) return [];
+    return timeline.timeSlots.filter((timeSlot: Date) => 
+      timeline.isEventActive(event.id, timeSlot)
+    ).map((timeSlot: Date) => ({
+      time: timeSlot,
+      isLunchBreak: timeline.isLunchBreak(event.id, timeSlot),
+      assignedSchool: timeline.getAssignedSchool(event.id, timeSlot)
+    }));
+  };
+
+  const eventTimeSlots = getEventTimeSlots();
+  
+  // Initialize local schedule from event-specific time slots  
+  const initialSchedule = event && eventTimeSlots ? eventTimeSlots.reduce((acc, slot) => {
     acc[slot.time.toISOString()] = slot.assignedSchool?.id || null;
     return acc;
   }, {} as Record<string, string | null>) : {};
@@ -319,7 +333,7 @@ export const MobileScheduleEdit: React.FC = () => {
               </div>
             ) : (
               <div className="space-y-2">
-                {event.timeSlots.map((slot, index) => {
+                {eventTimeSlots.map((slot, index) => {
                   const currentAssignment = localSchedule[slot.time.toISOString()];
                   const assignedSchool = currentAssignment ? 
                     registeredSchools.find(s => s.id === currentAssignment) || 

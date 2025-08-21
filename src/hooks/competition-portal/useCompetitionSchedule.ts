@@ -32,12 +32,22 @@ export interface ScheduleEvent {
   start_time: string;
   end_time: string;
   interval: number;
-  timeSlots: TimeSlot[];
+  lunch_start_time?: string;
+  lunch_end_time?: string;
+}
+
+export interface CompetitionTimeline {
+  timeSlots: Date[];
+  interval: number;
+  getAssignedSchool: (eventId: string, timeSlot: Date) => TimeSlot['assignedSchool'];
+  isEventActive: (eventId: string, timeSlot: Date) => boolean;
+  isLunchBreak: (eventId: string, timeSlot: Date) => boolean;
 }
 
 export const useCompetitionSchedule = (competitionId?: string) => {
   const [scheduleData, setScheduleData] = useState<ScheduleSlot[]>([]);
   const [events, setEvents] = useState<ScheduleEvent[]>([]);
+  const [timeline, setTimeline] = useState<CompetitionTimeline | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const abortControllerRef = useRef<AbortController | null>(null);
   const debouncedCompetitionId = useDebouncedValue(competitionId, 300);
@@ -121,55 +131,79 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       );
 
 
-      // Process events and generate time slots
-      const processedEvents: ScheduleEvent[] = eventsData?.map(event => {
-        const startTime = new Date(event.start_time);
-        const endTime = new Date(event.end_time);
-        const interval = event.interval || 15; // Default to 15 minutes
+      // Process events without individual time slots
+      const processedEvents: ScheduleEvent[] = eventsData?.map(event => ({
+        id: event.id,
+        event_name: eventTypesMap.get(event.event) || 'Unknown Event',
+        event_location: event.location,
+        start_time: event.start_time,
+        end_time: event.end_time,
+        interval: event.interval || 15,
+        lunch_start_time: event.lunch_start_time,
+        lunch_end_time: event.lunch_end_time
+      })) || [];
 
-        const timeSlots: TimeSlot[] = [];
-        const current = new Date(startTime);
-
-        // Generate time slots only within the event's actual time range
-        while (current < endTime) {
-          // Check if this is lunch time for this specific event
-          const isLunchTime = event.lunch_start_time && event.lunch_end_time && 
-            current >= new Date(event.lunch_start_time) && 
-            current < new Date(event.lunch_end_time);
-
-          // Find any schedule assignment for this exact time and event
-          const scheduleForSlot = schedulesData?.find(
-            s => s.event_id === event.id && 
-                 Math.abs(new Date(s.scheduled_time).getTime() - current.getTime()) < 1000 // Allow 1s tolerance
-          );
-
-          const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
-
-          timeSlots.push({
-            time: new Date(current),
-            duration: interval,
-            isLunchBreak: isLunchTime,
-            assignedSchool: scheduleForSlot && schoolInfo && !isLunchTime ? {
+      // Generate unified competition timeline
+      if (processedEvents.length > 0) {
+        // Find competition-wide time boundaries
+        const startTimes = processedEvents.map(e => new Date(e.start_time));
+        const endTimes = processedEvents.map(e => new Date(e.end_time));
+        const intervals = processedEvents.map(e => e.interval);
+        
+        const competitionStart = new Date(Math.min(...startTimes.map(t => t.getTime())));
+        const competitionEnd = new Date(Math.max(...endTimes.map(t => t.getTime())));
+        const minInterval = Math.min(...intervals);
+        
+        // Generate unified time slots
+        const unifiedTimeSlots: Date[] = [];
+        const current = new Date(competitionStart);
+        
+        while (current < competitionEnd) {
+          unifiedTimeSlots.push(new Date(current));
+          current.setMinutes(current.getMinutes() + minInterval);
+        }
+        
+        // Create timeline with helper functions
+        const competitionTimeline: CompetitionTimeline = {
+          timeSlots: unifiedTimeSlots,
+          interval: minInterval,
+          
+          getAssignedSchool: (eventId: string, timeSlot: Date) => {
+            const scheduleForSlot = schedulesData?.find(
+              s => s.event_id === eventId && 
+                   Math.abs(new Date(s.scheduled_time).getTime() - timeSlot.getTime()) < 1000
+            );
+            const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
+            
+            return scheduleForSlot && schoolInfo ? {
               id: scheduleForSlot.school_id,
               name: schoolInfo.name,
               initials: schoolInfo.initials,
               color: schoolInfo.color
-            } : undefined
-          });
-
-          current.setMinutes(current.getMinutes() + interval);
-        }
-
-        return {
-          id: event.id,
-          event_name: eventTypesMap.get(event.event) || 'Unknown Event',
-          event_location: event.location,
-          start_time: event.start_time,
-          end_time: event.end_time,
-          interval,
-          timeSlots
+            } : undefined;
+          },
+          
+          isEventActive: (eventId: string, timeSlot: Date) => {
+            const event = processedEvents.find(e => e.id === eventId);
+            if (!event) return false;
+            
+            const eventStart = new Date(event.start_time);
+            const eventEnd = new Date(event.end_time);
+            return timeSlot >= eventStart && timeSlot < eventEnd;
+          },
+          
+          isLunchBreak: (eventId: string, timeSlot: Date) => {
+            const event = processedEvents.find(e => e.id === eventId);
+            if (!event || !event.lunch_start_time || !event.lunch_end_time) return false;
+            
+            const lunchStart = new Date(event.lunch_start_time);
+            const lunchEnd = new Date(event.lunch_end_time);
+            return timeSlot >= lunchStart && timeSlot < lunchEnd;
+          }
         };
-      }) || [];
+        
+        setTimeline(competitionTimeline);
+      }
 
       setEvents(processedEvents);
       setScheduleData(schedulesData || []);
@@ -347,6 +381,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
   return {
     events,
+    timeline,
     scheduleData,
     isLoading,
     updateScheduleSlot,

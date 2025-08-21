@@ -25,6 +25,7 @@ export const CompetitionScheduleTab = ({
 }: CompetitionScheduleTabProps) => {
   const {
     events,
+    timeline,
     isLoading,
     updateScheduleSlot,
     getAvailableSchools,
@@ -66,20 +67,9 @@ export const CompetitionScheduleTab = ({
     }
   });
 
-  // Generate unified time slots from all events - avoid duplicates and ensure proper ordering
+  // Get unified time slots from timeline
   const getAllTimeSlots = () => {
-    const timeSlotMap = new Map<number, Date>();
-    
-    events.forEach(event => {
-      event.timeSlots.forEach(slot => {
-        const timeKey = slot.time.getTime();
-        if (!timeSlotMap.has(timeKey)) {
-          timeSlotMap.set(timeKey, slot.time);
-        }
-      });
-    });
-    
-    return Array.from(timeSlotMap.values()).sort((a, b) => a.getTime() - b.getTime());
+    return timeline?.timeSlots || [];
   };
   const handleEditEvent = (event: ScheduleEvent) => {
     setSelectedEvent(event);
@@ -92,12 +82,14 @@ export const CompetitionScheduleTab = ({
     }, 100);
   };
   const getAssignedSchoolForSlot = (eventId: string, timeSlot: Date) => {
-    const event = events.find(e => e.id === eventId);
-    if (!event) return null;
-    const slot = event.timeSlots.find(s => s.time.getTime() === timeSlot.getTime());
-    return slot?.assignedSchool || null;
+    return timeline?.getAssignedSchool(eventId, timeSlot) || null;
   };
   const shouldShowSlot = (eventId: string, timeSlot: Date) => {
+    // Only show slots when the event is actually active at this time
+    if (!timeline?.isEventActive(eventId, timeSlot)) {
+      return false;
+    }
+
     const assignedSchool = getAssignedSchoolForSlot(eventId, timeSlot);
 
     // If a specific school is selected in the filter, show only that school's slots
@@ -105,7 +97,7 @@ export const CompetitionScheduleTab = ({
       return assignedSchool?.id === selectedSchoolFilter;
     }
 
-    // Otherwise show all slots
+    // Otherwise show all slots when event is active
     return true;
   };
   const getPrintScheduleData = () => {
@@ -128,23 +120,21 @@ export const CompetitionScheduleTab = ({
         event: string;
         location: string;
       }> = [];
-      allTimeSlots.forEach(timeSlot => {
-        events.forEach(event => {
-          // Check if this time slot is a lunch break for this event
-          const eventDetails = events.find(e => e.id === event.id);
-          const isLunchSlot = eventDetails?.timeSlots.find(slot => slot.time.getTime() === timeSlot.getTime())?.isLunchBreak;
-          if (!isLunchSlot) {
-            const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-            if (assignedSchool?.id === selectedSchoolFilter) {
-              schoolSchedule.push({
-                time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
-                event: event.event_name,
-                location: event.event_location || 'TBD'
-              });
+        allTimeSlots.forEach(timeSlot => {
+          events.forEach(event => {
+            // Only process if event is active at this time and it's not a lunch break
+            if (timeline?.isEventActive(event.id, timeSlot) && !timeline?.isLunchBreak(event.id, timeSlot)) {
+              const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+              if (assignedSchool?.id === selectedSchoolFilter) {
+                schoolSchedule.push({
+                  time: formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone),
+                  event: event.event_name,
+                  location: event.event_location || 'TBD'
+                });
+              }
             }
-          }
+          });
         });
-      });
       return schoolSchedule.sort((a, b) => a.time.localeCompare(b.time));
     }
   };
@@ -204,14 +194,22 @@ export const CompetitionScheduleTab = ({
                       {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                     </td>
                     {(printScheduleData as any).events?.map((event: any, eventIndex: number) => {
-              // Check if this time slot is a lunch break for this event
-              const eventDetails = events.find(e => e.id === event.id);
-              const isLunchSlot = eventDetails?.timeSlots.find(slot => slot.time.getTime() === timeSlot.getTime())?.isLunchBreak;
+              // Check if event is active and if it's a lunch break
+              const isEventActive = timeline?.isEventActive(event.id, timeSlot);
+              const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
+              
+              if (!isEventActive) {
+                return <td key={eventIndex} className="border border-black p-1 text-center text-xs bg-gray-100">
+                          -
+                        </td>;
+              }
+              
               if (isLunchSlot) {
                 return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
                             Lunch Break
                           </td>;
               }
+              
               const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
               return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
                           {assignedSchool?.initials || assignedSchool?.name || '-'}
@@ -313,14 +311,13 @@ export const CompetitionScheduleTab = ({
                         {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                       </td>
                       {events.map(event => {
+                    const isEventActive = timeline?.isEventActive(event.id, timeSlot);
+                    const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
                     const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
                     const showSlot = shouldShowSlot(event.id, timeSlot);
 
-                    // Check if this time slot is a lunch break for this event
-                    const eventDetails = events.find(e => e.id === event.id);
-                    const isLunchSlot = eventDetails?.timeSlots.find(slot => slot.time.getTime() === timeSlot.getTime())?.isLunchBreak;
                     return <td key={event.id} className="p-2 text-center">
-                            {isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
+                            {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
                                 Lunch Break
                               </div> : assignedSchool && showSlot ? <div className="px-2 py-1 rounded text-xs text-white font-medium" style={{
                         backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
@@ -336,7 +333,7 @@ export const CompetitionScheduleTab = ({
           </CardContent>
         </Card>
 
-        {selectedEvent && <ScheduleEditModal event={selectedEvent} competitionId={competitionId} isOpen={!!selectedEvent} onClose={handleModalClose} updateScheduleSlot={updateScheduleSlot} getAvailableSchools={getAvailableSchools} />}
+        {selectedEvent && <ScheduleEditModal event={selectedEvent} competitionId={competitionId} isOpen={!!selectedEvent} onClose={handleModalClose} updateScheduleSlot={updateScheduleSlot} getAvailableSchools={getAvailableSchools} timeline={timeline} />}
       </div>
     </TooltipProvider>;
 };

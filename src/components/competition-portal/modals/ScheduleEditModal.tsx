@@ -17,6 +17,7 @@ interface ScheduleEditModalProps {
   onClose: () => void;
   updateScheduleSlot: (eventId: string, timeSlot: Date, schoolId: string | null) => Promise<void>;
   getAvailableSchools: (eventId: string, localScheduleOverrides?: Record<string, string | null>) => Promise<AvailableSchool[]>;
+  timeline: any; // Add timeline prop
 }
 interface AvailableSchool {
   id: string;
@@ -28,7 +29,8 @@ export const ScheduleEditModal = ({
   isOpen,
   onClose,
   updateScheduleSlot,
-  getAvailableSchools: _getAvailableSchools
+  getAvailableSchools: _getAvailableSchools,
+  timeline
 }: ScheduleEditModalProps) => {
   const {
     timezone
@@ -43,8 +45,22 @@ export const ScheduleEditModal = ({
   // Local state for tracking schedule changes
   const [localSchedule, setLocalSchedule] = useState<Record<string, string | null>>({});
   
-  // Initialize local schedule from event data
-  const initialSchedule = event.timeSlots.reduce((acc, slot) => {
+  // Generate event-specific time slots from timeline
+  const getEventTimeSlots = () => {
+    if (!timeline) return [];
+    return timeline.timeSlots.filter((timeSlot: Date) => 
+      timeline.isEventActive(event.id, timeSlot)
+    ).map((timeSlot: Date) => ({
+      time: timeSlot,
+      isLunchBreak: timeline.isLunchBreak(event.id, timeSlot),
+      assignedSchool: timeline.getAssignedSchool(event.id, timeSlot)
+    }));
+  };
+
+  const eventTimeSlots = getEventTimeSlots();
+  
+  // Initialize local schedule from event-specific time slots
+  const initialSchedule = eventTimeSlots.reduce((acc, slot) => {
     acc[slot.time.toISOString()] = slot.assignedSchool?.id || null;
     return acc;
   }, {} as Record<string, string | null>);
@@ -293,7 +309,7 @@ export const ScheduleEditModal = ({
               </div>
             ) : (
               <div className="space-y-2">
-                {event.timeSlots.map((slot, index) => {
+                {eventTimeSlots.map((slot, index) => {
                   const currentAssignment = localSchedule[slot.time.toISOString()];
                   const assignedSchool = currentAssignment ? 
                     registeredSchools.find(s => s.id === currentAssignment) || 
