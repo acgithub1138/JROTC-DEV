@@ -29,7 +29,7 @@ const MODULE_MAPPING: Record<string, string> = {
 const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
   console.log('getMenuItemsFromPermissions called with role:', role, 'userProfile:', userProfile);
   
-  const baseItems = [
+  const baseItems = role === 'parent' ? [] : [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
 
@@ -99,7 +99,7 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
 
 // Fallback function for when permissions aren't loaded yet
 const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[] => {
-  const baseItems = [
+  const baseItems = role === 'parent' ? [] : [
     { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
   ];
   
@@ -149,6 +149,11 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
         ...baseItems,
         { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
         { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
+        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
+      ];
+    
+    case 'parent':
+      return [
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
       ];
     
