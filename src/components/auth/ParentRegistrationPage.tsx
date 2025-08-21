@@ -164,7 +164,7 @@ const ParentRegistrationPage = () => {
               <Button
                 variant="ghost"
                 size="sm"
-                onClick={() => step === 1 ? navigate('/login') : setStep(1)}
+                onClick={() => step === 1 ? navigate('/app/auth') : setStep(1)}
                 className="p-2"
               >
                 <ArrowLeft className="w-4 h-4" />
