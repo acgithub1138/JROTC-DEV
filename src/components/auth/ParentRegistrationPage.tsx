@@ -146,11 +146,28 @@ const ParentRegistrationPage = () => {
       const {
         data: cadetProfile,
         error: cadetError
-      } = await supabase.from('profiles').select('id, school_id').eq('email', cadetInfo.email).single();
-      if (cadetError || !cadetProfile) {
+      } = await supabase
+        .from('profiles')
+        .select('id, school_id')
+        .eq('email', cadetInfo.email)
+        .eq('active', true)
+        .not('role', 'in', '(admin,instructor)')
+        .maybeSingle();
+        
+      if (cadetError) {
+        console.error("Error fetching cadet profile:", cadetError);
         toast({
           title: "Error",
-          description: "Could not find student information. Please try again.",
+          description: "An error occurred while fetching student information. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!cadetProfile) {
+        toast({
+          title: "Student Not Found",
+          description: "Could not find an active student with that email address. Please verify the email and try again.",
           variant: "destructive"
         });
         return;
