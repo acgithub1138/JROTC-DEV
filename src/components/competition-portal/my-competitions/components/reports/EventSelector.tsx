@@ -18,7 +18,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   onEventSelect,
   isLoading = false
 }) => {
-  const eventList = events || availableEvents || [];
+  const eventList = (events || availableEvents || []).sort((a, b) => a.localeCompare(b));
   const handleChange = onEventChange || onEventSelect || (() => {});
   
   return (

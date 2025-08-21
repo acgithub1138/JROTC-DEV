@@ -13,7 +13,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   selectedEvent,
   onEventChange
 }) => {
-  const uniqueEventTypes = [...new Set(events.map(event => event.competition_event_types?.name).filter(Boolean))];
+  const uniqueEventTypes = [...new Set(events.map(event => event.competition_event_types?.name).filter(Boolean))].sort((a, b) => a.localeCompare(b));
 
   return (
     <div className="flex gap-4 items-center">
