@@ -259,7 +259,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                         {editingPlacement.source === 'portal' ? (
                           // Portal competitions: show registered events
                           isLoadingRegistered ? (
-                            <SelectItem value="" disabled>Loading events...</SelectItem>
+                            <SelectItem value="loading" disabled>Loading events...</SelectItem>
                           ) : registeredEvents.length > 0 ? (
                             registeredEvents.map((event) => (
                               <SelectItem key={event.id} value={event.name}>
@@ -267,12 +267,12 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="" disabled>No registered events found</SelectItem>
+                            <SelectItem value="no-events" disabled>No registered events found</SelectItem>
                           )
                         ) : (
                           // Internal competitions: show competition event types
                           isLoadingEventTypes ? (
-                            <SelectItem value="" disabled>Loading event types...</SelectItem>
+                            <SelectItem value="loading-types" disabled>Loading event types...</SelectItem>
                           ) : eventTypes.length > 0 ? (
                             eventTypes.map((eventType) => (
                               <SelectItem key={eventType.id} value={eventType.name}>
@@ -280,7 +280,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                               </SelectItem>
                             ))
                           ) : (
-                            <SelectItem value="" disabled>No event types available</SelectItem>
+                            <SelectItem value="no-types" disabled>No event types available</SelectItem>
                           )
                         )}
                       </SelectContent>
