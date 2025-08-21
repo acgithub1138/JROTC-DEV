@@ -15,6 +15,7 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
 interface AddEventModalProps {
   open: boolean;
@@ -51,10 +52,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     resources: [] as string[]
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState<Array<{
-    id: string;
-    name: string;
-  }>>([]);
   const [judges, setJudges] = useState<Array<{
     id: string;
     name: string;
@@ -64,6 +61,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   
   // Track initial data for unsaved changes
@@ -96,7 +94,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
   useEffect(() => {
     if (open) {
-      fetchEvents();
       fetchJudges();
       fetchCompetitionDate();
     }
@@ -124,36 +121,6 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       }
     } catch (error) {
       console.error('Error fetching competition date:', error);
-    }
-  };
-  const fetchEvents = async () => {
-    try {
-      // First get all active events
-      const { data: allEvents, error: eventsError } = await supabase
-        .from('cp_events')
-        .select('id, name')
-        .eq('active', true);
-      
-      if (eventsError) throw eventsError;
-
-      // Then get events already used in this competition
-      const { data: usedEvents, error: usedError } = await supabase
-        .from('cp_comp_events')
-        .select('event')
-        .eq('competition_id', competitionId);
-      
-      if (usedError) throw usedError;
-
-      // Filter out already used events and sort alphabetically
-      const usedEventIds = new Set(usedEvents?.map(ue => ue.event) || []);
-      const availableEvents = (allEvents || [])
-        .filter(event => !usedEventIds.has(event.id))
-        .sort((a, b) => a.name.localeCompare(b.name));
-      
-      setEvents(availableEvents);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Failed to load events');
     }
   };
   const fetchJudges = async () => {
@@ -348,9 +315,13 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {events.map(event => <SelectItem key={event.id} value={event.id}>
-                    {event.name}
-                  </SelectItem>)}
+                {eventTypes
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(eventType => (
+                    <SelectItem key={eventType.id} value={eventType.id}>
+                      {eventType.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
