@@ -25,7 +25,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .from('cp_comp_events')
         .select(`
           *,
-          competition_event_types:event(name, description)
+          competition_event_types!event(name)
         `)
         .eq('competition_id', competitionId)
         .order('start_time', { ascending: true });
@@ -71,7 +71,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         })
         .select(`
           *,
-          competition_event_types:event(name, description)
+          competition_event_types!event(name)
         `)
         .single();
 
@@ -103,7 +103,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .eq('id', id)
         .select(`
           *,
-          competition_event_types:event(name, description)
+          competition_event_types!event(name)
         `)
         .single();
 

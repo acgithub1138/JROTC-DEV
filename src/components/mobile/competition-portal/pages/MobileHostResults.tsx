@@ -39,7 +39,7 @@ export const MobileHostResults: React.FC = () => {
             id,
             location,
             event,
-            cp_events!inner(name),
+            competition_event_types!event(name),
             cp_event_registrations!left(school_id, status)
           `)
           .eq('competition_id', competitionId);

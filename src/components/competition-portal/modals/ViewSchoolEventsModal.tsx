@@ -52,7 +52,7 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
             start_time,
             end_time,
             max_participants,
-            competition_event_types:event (
+            competition_event_types!event (
               name
             )
           )

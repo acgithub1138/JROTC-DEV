@@ -150,7 +150,7 @@ export const MobileEditEvent: React.FC = () => {
         .from('cp_comp_events')
         .select(`
           *,
-          competition_event_types:event(name, description)
+          competition_event_types!event(name)
         `)
         .eq('id', eventId)
         .single();
@@ -166,9 +166,9 @@ export const MobileEditEvent: React.FC = () => {
   const fetchEvents = async () => {
     try {
       const { data, error } = await supabase
-        .from('cp_events')
+        .from('competition_event_types')
         .select('id, name')
-        .eq('active', true);
+        .eq('is_active', true);
       
       if (error) throw error;
       setEvents(data || []);

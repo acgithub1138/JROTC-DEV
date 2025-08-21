@@ -84,7 +84,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
           id,
           location,
           fee,
-          competition_event_types:event (
+          competition_event_types!event (
             id,
             name
           )

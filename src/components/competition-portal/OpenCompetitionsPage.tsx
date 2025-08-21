@@ -141,12 +141,20 @@ export const OpenCompetitionsPage = () => {
         error
       } = await supabase.from('cp_comp_events').select(`
           *,
-          competition_event_types:event(name, description)
+          competition_event_types!event(name)
         `).eq('competition_id', selectedCompetitionId).order('start_time', {
         ascending: true
       });
       if (error) throw error;
-      return data;
+      
+      const transformedData = data.map(event => ({
+        ...event,
+        event: {
+          name: event.competition_event_types?.name || 'Unknown Event',
+          description: '' // Add empty description since it doesn't exist in the table
+        }
+      }));
+      return transformedData;
     },
     enabled: !!selectedCompetitionId && (isModalOpen || isRegistrationModalOpen)
   });
@@ -359,7 +367,7 @@ export const OpenCompetitionsPage = () => {
                       <div className="space-y-3">
                         <div className="flex items-center justify-between">
                           <h3 className="text-lg font-semibold">
-                            {(event.event as any)?.name || 'Event Name Not Available'}
+                            {event.competition_event_types?.name || 'Event Name Not Available'}
                           </h3>
                           {(event as any).fee && <Badge variant="secondary">
                               <DollarSign className="w-3 h-3 mr-1" />
@@ -367,9 +375,7 @@ export const OpenCompetitionsPage = () => {
                             </Badge>}
                         </div>
                         
-                        {(event.event as any)?.description && <p className="text-muted-foreground">
-                            {(event.event as any).description}
-                          </p>}
+                        
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
                           {event.start_time && <div className="flex items-center gap-2">

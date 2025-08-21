@@ -69,7 +69,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
           location,
           start_time,
           end_time,
-          competition_event_types:event(name)
+          competition_event_types!event(name)
         `)
         .eq('competition_id', competitionId)
         .in('id', registeredEventIds)
@@ -108,7 +108,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       const { data: eventData, error: eventError } = await supabase
         .from('cp_comp_events')
         .select(`
-          competition_event_types:event (
+          competition_event_types!event (
             id,
             name
           )
