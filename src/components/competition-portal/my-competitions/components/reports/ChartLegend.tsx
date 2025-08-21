@@ -27,7 +27,7 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   const criteriaList = criteria || scoringCriteria || [];
   const handleToggle = onToggle || onCriteriaToggle || (() => {});
   return (
-    <ScrollArea className="h-[400px]">
+    <ScrollArea className="h-[450px]">
       <div className="space-y-4 p-1">
         <div className="flex gap-2">
           <Button variant="outline" size="sm" onClick={onSelectAll}>
