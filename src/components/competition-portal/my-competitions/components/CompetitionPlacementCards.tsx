@@ -15,6 +15,12 @@ type Competition = Database['public']['Tables']['competitions']['Row'];
 type ExtendedCompetition = Competition & {
   source_type: 'internal' | 'portal';
   source_competition_id: string;
+  // Portal competitions have additional fields from cp_competitions table
+  address?: string;
+  city?: string;
+  state?: string;
+  zip?: string;
+  start_date?: string;
 };
 
 interface CompetitionPlacementCardsProps {
@@ -137,7 +143,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
         competition_source: source,
         event_name: newEventName,
         placement: parseInt(newPlacement),
-        competition_date: competition.competition_date
+        competition_date: competition.source_type === 'portal' ? (competition.start_date || competition.competition_date) : competition.competition_date
       });
       
       setEditingPlacement(null);
@@ -185,19 +191,48 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   </CardTitle>
                   <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
                     <Calendar className="w-4 h-4" />
-                    {new Date(competition.competition_date).toLocaleDateString()}
+                    {new Date(competition.source_type === 'portal' ? (competition.start_date || competition.competition_date) : competition.competition_date).toLocaleDateString()}
                   </div>
                   {competition.location && (
                     <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4" />
-                      <a 
-                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="text-primary hover:underline cursor-pointer"
-                      >
-                        {competition.location}
-                      </a>
+                      <div className="flex flex-col">
+                        {competition.source_type === 'portal' ? (
+                          // Portal competitions have structured address fields
+                          <>
+                            {competition.address && (
+                              <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline cursor-pointer"
+                              >
+                                {competition.address}
+                              </a>
+                            )}
+                            {(competition.city || competition.state || competition.zip) && (
+                              <a 
+                                href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="text-primary hover:underline cursor-pointer"
+                              >
+                                {[competition.city, competition.state].filter(Boolean).join(', ')}{competition.zip ? ` ${competition.zip}` : ''}
+                              </a>
+                            )}
+                          </>
+                        ) : (
+                          // Internal competitions have single location field
+                          <a 
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline cursor-pointer"
+                          >
+                            {competition.location}
+                          </a>
+                        )}
+                      </div>
                     </div>
                   )}
                 </div>
