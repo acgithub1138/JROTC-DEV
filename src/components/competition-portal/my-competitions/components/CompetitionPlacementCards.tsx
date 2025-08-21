@@ -190,7 +190,14 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   {competition.location && (
                     <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
                       <MapPin className="w-4 h-4" />
-                      {competition.location}
+                      <a 
+                        href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline cursor-pointer"
+                      >
+                        {competition.location}
+                      </a>
                     </div>
                   )}
                 </div>
