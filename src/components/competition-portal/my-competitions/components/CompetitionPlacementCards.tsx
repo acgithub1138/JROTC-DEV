@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, FileText } from 'lucide-react';
+import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, Eye } from 'lucide-react';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
 import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
@@ -214,33 +214,29 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
                     {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
                   </Badge>
-                  {/* Action Buttons */}
-                  <div className="flex items-center gap-2">
-                    {onView && (
-                      <Button variant="outline" size="sm" onClick={() => onView(competition)}>
-                        <FileText className="w-4 h-4 mr-2" />
-                        View Score Cards
-                      </Button>
-                    )}
-                    {onEdit && competition.source_type === 'internal' && canEdit && (
-                      <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
-                        <Edit className="w-4 h-4 mr-2" />
-                        Edit
-                      </Button>
-                    )}
-                    {onAddEvent && canAddEvent && (
-                      <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)}>
-                        <Plus className="w-4 h-4 mr-2" />
-                        Add Event
-                      </Button>
-                    )}
-                    {onDelete && competition.source_type === 'internal' && canDelete && (
-                      <Button variant="destructive" size="sm" onClick={() => onDelete(competition)}>
-                        <Trash2 className="w-4 h-4 mr-2" />
-                        Delete
-                      </Button>
-                    )}
-                  </div>
+                   {/* Action Buttons */}
+                   <div className="flex items-center gap-2">
+                     {onView && (
+                       <Button variant="outline" size="sm" onClick={() => onView(competition)} title="View Score Cards">
+                         <Eye className="w-4 h-4" />
+                       </Button>
+                     )}
+                     {onEdit && competition.source_type === 'internal' && canEdit && (
+                       <Button variant="outline" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
+                         <Edit className="w-4 h-4" />
+                       </Button>
+                     )}
+                     {onAddEvent && canAddEvent && (
+                       <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
+                         <Plus className="w-4 h-4" />
+                       </Button>
+                     )}
+                     {onDelete && competition.source_type === 'internal' && canDelete && (
+                       <Button variant="destructive" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
+                         <Trash2 className="w-4 h-4" />
+                       </Button>
+                     )}
+                   </div>
                 </div>
               </div>
             </div>
