@@ -166,9 +166,14 @@ export const AddResourceModal: React.FC<AddResourceModalProps> = ({
                       </SelectTrigger>
                     </FormControl>
                     <SelectContent>
-                      {users.map(user => <SelectItem key={user.id} value={user.id}>
-                          {user.last_name}, {user.first_name}
-                        </SelectItem>)}
+                      {users
+                        .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name))
+                        .map(user => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.last_name}, {user.first_name}
+                          </SelectItem>
+                        ))
+                      }
                     </SelectContent>
                   </Select>
                   <FormMessage />

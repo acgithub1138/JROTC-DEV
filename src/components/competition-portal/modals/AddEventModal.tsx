@@ -144,9 +144,11 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       
       if (usedError) throw usedError;
 
-      // Filter out already used events
+      // Filter out already used events and sort alphabetically
       const usedEventIds = new Set(usedEvents?.map(ue => ue.event) || []);
-      const availableEvents = (allEvents || []).filter(event => !usedEventIds.has(event.id));
+      const availableEvents = (allEvents || [])
+        .filter(event => !usedEventIds.has(event.id))
+        .sort((a, b) => a.name.localeCompare(b.name));
       
       setEvents(availableEvents);
     } catch (error) {
@@ -156,10 +158,12 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   };
   const fetchJudges = async () => {
     try {
-      const {
-        data,
-        error
-      } = await supabase.from('cp_judges').select('id, name').eq('available', true);
+      const { data, error } = await supabase
+        .from('cp_judges')
+        .select('id, name')
+        .eq('available', true)
+        .order('name', { ascending: true });
+      
       if (error) throw error;
       setJudges(data || []);
     } catch (error) {
@@ -205,7 +209,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     return schoolUsers.filter(user => formData.resources.includes(user.id));
   };
   const getAvailableResources = () => {
-    return schoolUsers.filter(user => !formData.resources.includes(user.id));
+    return schoolUsers
+      .filter(user => !formData.resources.includes(user.id))
+      .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
   };
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
     if (!date || !hour || !minute) return null;
