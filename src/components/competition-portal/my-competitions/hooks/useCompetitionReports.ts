@@ -32,12 +32,17 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
       setIsLoadingEvents(true);
       const { data, error } = await supabase
         .from('competition_events')
-        .select('event')
+        .select(`
+          event,
+          competition_event_types!inner(
+            name
+          )
+        `)
         .eq('school_id', userProfile.school_id);
 
       if (error) throw error;
 
-      const uniqueEvents = [...new Set(data.map(item => item.event))];
+      const uniqueEvents = [...new Set(data.map(item => item.competition_event_types?.name).filter(Boolean))];
       console.log('Available events:', uniqueEvents);
       setAvailableEvents(uniqueEvents);
     } catch (error) {
@@ -104,10 +109,13 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
           competitions!inner(
             id,
             competition_date
+          ),
+          competition_event_types!inner(
+            name
           )
         `)
         .eq('school_id', userProfile.school_id)
-        .eq('event', selectedEvent as any); // Cast to any to handle string vs enum mismatch
+        .eq('competition_event_types.name', selectedEvent);
       
       // Filter by specific competitions if selected
       if (selectedCompetitions && selectedCompetitions.length > 0) {
