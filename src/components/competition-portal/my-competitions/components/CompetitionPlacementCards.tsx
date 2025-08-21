@@ -249,11 +249,11 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   <h4 className="font-medium text-sm mb-2">Placements</h4>
                   <div className="flex flex-wrap gap-2">
                     {competitionPlacements.map((placement) => (
-                      <div key={placement.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                      <div key={placement.id} className="flex flex-col items-center gap-2 p-3 bg-muted/50 rounded-lg min-w-0">
+                        <span className="text-sm font-medium text-center">{placement.event_name}</span>
                         <Badge className={getPlacementColor(placement.placement)}>
                           {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
                         </Badge>
-                        <span className="text-sm">{placement.event_name}</span>
                         {canEdit && (
                           <div className="flex items-center gap-1 ml-2">
                             <Button
