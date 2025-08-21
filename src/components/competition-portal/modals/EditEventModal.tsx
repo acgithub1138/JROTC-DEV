@@ -19,7 +19,7 @@ import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/time
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
-  cp_events?: { name: string } | null;
+  competition_event_types?: { name: string } | null;
 };
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
 
@@ -93,9 +93,21 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         ? formatTimeForDisplay((event as any).lunch_end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
         : '';
 
-      // Find the matching event type by name
-      const eventTypeName = event.cp_events?.name || '';
-      const matchingEventType = eventTypes.find(et => et.name === eventTypeName);
+      // Find the matching event type by name or ID
+      // Since the event field now contains the competition_event_types ID directly,
+      // we need to find the matching event type
+      let eventTypeName = '';
+      let matchingEventType = null;
+      
+      if (event.competition_event_types?.name) {
+        // If we have the joined name from the query
+        eventTypeName = event.competition_event_types.name;
+        matchingEventType = eventTypes.find(et => et.name === eventTypeName);
+      } else if (event.event) {
+        // If we only have the UUID, find by ID
+        matchingEventType = eventTypes.find(et => et.id === event.event);
+        eventTypeName = matchingEventType?.name || '';
+      }
       
       const newFormData = {
         event: matchingEventType?.id || '',
@@ -230,23 +242,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
     setIsLoading(true);
     try {
-      // Find the cp_event UUID that matches the selected event type
-      let eventUuid = formData.event;
-      if (formData.event) {
-        const selectedEventType = eventTypes.find(et => et.id === formData.event);
-        if (selectedEventType) {
-          // Find the cp_event with matching name
-          const { data: cpEvents } = await supabase
-            .from('cp_events')
-            .select('id, name')
-            .eq('name', selectedEventType.name)
-            .single();
-          
-          if (cpEvents) {
-            eventUuid = cpEvents.id;
-          }
-        }
-      }
       // Convert school timezone to UTC for database storage
       const startDateTime = formData.start_date && formData.start_time_hour && formData.start_time_minute
         ? convertFromSchoolTimezone(
@@ -277,8 +272,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           ).toISOString()
         : null;
 
+      // The event field already contains the competition_event_types UUID
       const updates: CompEventUpdate = {
-        event: eventUuid,
+        event: formData.event,
         location: formData.location || null,
         start_time: startDateTime,
         end_time: endDateTime,
