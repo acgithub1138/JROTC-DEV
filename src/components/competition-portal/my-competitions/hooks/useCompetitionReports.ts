@@ -103,7 +103,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
           total_points,
           competition_id,
           source_competition_id,
-          competitions!inner(
+          competitions(
             id,
             competition_date
           ),
@@ -119,7 +119,7 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
         query = query.or(`competition_id.in.(${selectedCompetitions.join(',')}),source_competition_id.in.(${selectedCompetitions.join(',')})`);
       }
       
-      const { data, error } = await query.order('competitions(competition_date)', { ascending: true });
+      const { data, error } = await query;
 
       if (error) throw error;
 
@@ -262,7 +262,8 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
     const groupedByDate: { [date: string]: { [criteria: string]: number[] } } = {};
 
     data.forEach(item => {
-      const date = item.competitions.competition_date;
+      // Handle null competitions from left join
+      const date = item.competitions?.competition_date || 'Unknown Date';
       
       if (!groupedByDate[date]) {
         groupedByDate[date] = {};
