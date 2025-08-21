@@ -82,9 +82,15 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   useEffect(() => {
     if (open && event) {
       fetchJudges();
-      fetchFilteredScoreSheets();
     }
   }, [open, event]);
+
+  // Fetch filtered score sheets when event data is available
+  useEffect(() => {
+    if (event && formData.event) {
+      fetchFilteredScoreSheets();
+    }
+  }, [event, formData.event]);
 
   useEffect(() => {
     if (event && eventTypes.length > 0) {
@@ -157,14 +163,17 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   const fetchFilteredScoreSheets = async () => {
     try {
-      if (!event?.competition_id) return;
+      if (!event?.competition_id || !formData.event) {
+        setScoreSheets([]);
+        return;
+      }
       
       // Get the competition's program to filter score sheets
       const { data: competitionData, error: competitionError } = await supabase
         .from('cp_competitions')
         .select('program')
         .eq('id', event.competition_id)
-        .single();
+        .maybeSingle();
 
       if (competitionError) throw competitionError;
 
@@ -174,6 +183,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           .select('id, template_name, jrotc_program')
           .eq('is_active', true)
           .eq('jrotc_program', competitionData.program)
+          .eq('event', formData.event)
           .order('template_name', { ascending: true });
         
         if (error) throw error;

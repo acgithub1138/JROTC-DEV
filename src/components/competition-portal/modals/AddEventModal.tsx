@@ -103,9 +103,15 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     if (open) {
       fetchJudges();
       fetchCompetitionDate();
-      fetchFilteredScoreSheets();
     }
   }, [open]);
+
+  // Fetch filtered score sheets when event changes
+  useEffect(() => {
+    if (formData.event) {
+      fetchFilteredScoreSheets();
+    }
+  }, [formData.event]);
 
   const fetchCompetitionDate = async () => {
     try {
@@ -149,12 +155,17 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
 
   const fetchFilteredScoreSheets = async () => {
     try {
+      if (!formData.event) {
+        setScoreSheets([]);
+        return;
+      }
+
       // Get the competition's program to filter score sheets
       const { data: competitionData, error: competitionError } = await supabase
         .from('cp_competitions')
         .select('program')
         .eq('id', competitionId)
-        .single();
+        .maybeSingle();
 
       if (competitionError) throw competitionError;
 
@@ -164,6 +175,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
           .select('id, template_name, jrotc_program')
           .eq('is_active', true)
           .eq('jrotc_program', competitionData.program)
+          .eq('event', formData.event)
           .order('template_name', { ascending: true });
         
         if (error) throw error;
