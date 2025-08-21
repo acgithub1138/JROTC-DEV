@@ -317,11 +317,13 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {eventTypes.map(eventType => (
-                  <SelectItem key={eventType.id} value={eventType.name}>
-                    {eventType.name}
-                  </SelectItem>
-                ))}
+                {eventTypes
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map(eventType => (
+                    <SelectItem key={eventType.id} value={eventType.id}>
+                      {eventType.name}
+                    </SelectItem>
+                  ))}
               </SelectContent>
             </Select>
           </div>
