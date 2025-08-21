@@ -40,15 +40,15 @@ export const useCompetitionPlacements = () => {
     try {
       setIsLoading(true);
       
-      // For now, return empty array since table doesn't exist yet
-      // Once the table is created, this will be:
-      // const { data, error } = await supabase
-      //   .from('competition_placements')
-      //   .select('*')
-      //   .eq('school_id', userProfile.school_id)
-      //   .order('competition_date', { ascending: false });
+      const { data, error } = await supabase
+        .from('competition_placements' as any)
+        .select('*')
+        .eq('school_id', userProfile.school_id)
+        .order('competition_date', { ascending: false });
 
-      setPlacements([]);
+      if (error) throw error;
+
+      setPlacements((data as unknown as CompetitionPlacement[]) || []);
     } catch (error) {
       console.error('Error fetching competition placements:', error);
       toast.error('Failed to load competition placements');
@@ -61,9 +61,20 @@ export const useCompetitionPlacements = () => {
     if (!userProfile?.school_id) return;
 
     try {
-      // For now, just show a message since table doesn't exist
-      toast.error('Competition placements table not yet created. Please run the database migration first.');
-      return null;
+      const { data, error } = await supabase
+        .from('competition_placements' as any)
+        .insert({
+          ...placementData,
+          school_id: userProfile.school_id
+        })
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPlacements(prev => [data as unknown as CompetitionPlacement, ...prev]);
+      toast.success('Placement added successfully');
+      return data as unknown as CompetitionPlacement;
     } catch (error) {
       console.error('Error creating placement:', error);
       toast.error('Failed to add placement');
@@ -73,8 +84,20 @@ export const useCompetitionPlacements = () => {
 
   const updatePlacement = async (id: string, updates: CompetitionPlacementUpdate) => {
     try {
-      toast.error('Competition placements table not yet created. Please run the database migration first.');
-      return null;
+      const { data, error } = await supabase
+        .from('competition_placements' as any)
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPlacements(prev => 
+        prev.map(p => p.id === id ? data as unknown as CompetitionPlacement : p)
+      );
+      toast.success('Placement updated successfully');
+      return data as unknown as CompetitionPlacement;
     } catch (error) {
       console.error('Error updating placement:', error);
       toast.error('Failed to update placement');
@@ -84,7 +107,15 @@ export const useCompetitionPlacements = () => {
 
   const deletePlacement = async (id: string) => {
     try {
-      toast.error('Competition placements table not yet created. Please run the database migration first.');
+      const { error } = await supabase
+        .from('competition_placements' as any)
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPlacements(prev => prev.filter(p => p.id !== id));
+      toast.success('Placement deleted successfully');
     } catch (error) {
       console.error('Error deleting placement:', error);
       toast.error('Failed to delete placement');
