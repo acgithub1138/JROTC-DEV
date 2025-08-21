@@ -30,13 +30,13 @@ const ParentRegistrationPage = () => {
     setLoading(true);
 
     try {
-      // Find student by email (cadet or command_staff)
+      // Find student by email (exclude admin and instructor roles)
       const { data: cadet, error } = await supabase
         .from('profiles')
         .select('id, first_name, last_name, email, school_id, active, role')
         .eq('email', cadetEmail)
         .eq('active', true)
-        .in('role', ['cadet', 'command_staff'])
+        .not('role', 'in', '("admin","instructor")')
         .single();
 
       if (error || !cadet) {
