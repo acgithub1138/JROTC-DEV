@@ -7,7 +7,6 @@ import { Checkbox } from '@/components/ui/checkbox';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { CompetitionTemplate } from '../types';
 import { JsonFieldBuilder } from './JsonFieldBuilder';
-import { EventTypeSelect } from './EventTypeSelect';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCompetitionEventTypes } from '../hooks/useCompetitionEventTypes';
@@ -212,11 +211,18 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
 
         <div className="space-y-1">
           <Label htmlFor="event">Event Type *</Label>
-          <EventTypeSelect
-            value={formData.event}
-            onValueChange={value => updateFormData('event', value)}
-            placeholder="Select event type..."
-          />
+          <Select value={formData.event} onValueChange={value => updateFormData('event', value)}>
+            <SelectTrigger>
+              <SelectValue placeholder="Select event type..." />
+            </SelectTrigger>
+            <SelectContent>
+              {eventTypes.map(eventType => (
+                <SelectItem key={eventType.id} value={eventType.id}>
+                  {eventType.name}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
 
