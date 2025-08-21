@@ -29,7 +29,11 @@ export const useAddEventLogic = () => {
   // Get events filtered by selected program
   const availableEvents = useMemo(() => 
     selectedProgram 
-      ? [...new Set(templates.filter(t => t.jrotc_program === selectedProgram).map(t => t.event))].sort() 
+      ? [...new Set(templates
+          .filter(t => t.jrotc_program === selectedProgram)
+          .map(t => (t as any).competition_event_types?.name)
+          .filter(Boolean)
+        )].sort() 
       : [], 
     [templates, selectedProgram]
   );
@@ -37,7 +41,10 @@ export const useAddEventLogic = () => {
   // Get templates filtered by selected program and event
   const filteredTemplates = useMemo(() => 
     selectedProgram && selectedEvent 
-      ? templates.filter(t => t.jrotc_program === selectedProgram && t.event === selectedEvent) 
+      ? templates.filter(t => 
+          t.jrotc_program === selectedProgram && 
+          (t as any).competition_event_types?.name === selectedEvent
+        ) 
       : [], 
     [templates, selectedProgram, selectedEvent]
   );
