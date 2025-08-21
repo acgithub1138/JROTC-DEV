@@ -177,24 +177,8 @@ const ParentRegistrationPage = () => {
 
       const cadetProfile = cadetProfileData[0];
 
-      // Get parent role ID
-      console.log("Looking up parent role...");
-      const {
-        data: parentRole,
-        error: roleError
-      } = await supabase.from('user_roles').select('id').eq('role_name', 'parent').single();
-      
-      console.log("Parent role lookup result:", { parentRole, roleError });
-      
-      if (roleError || !parentRole) {
-        console.error("Parent role lookup failed:", roleError);
-        toast({
-          title: "Error",
-          description: "Parent role not found in system.",
-          variant: "destructive"
-        });
-        return;
-      }
+      // Hardcoded parent role ID (never changes)  
+      const parentRoleId = 'f8134411-7778-4c37-a39a-e727cfa197c8';
 
       // Create parent user account
       const result = await signUp(parentData.email, parentData.password, {
@@ -202,7 +186,7 @@ const ParentRegistrationPage = () => {
         last_name: parentData.lastName,
         school_id: cadetProfile.school_id,
         role: 'parent',
-        role_id: parentRole.id
+        role_id: parentRoleId
       });
       if (result?.error) {
         toast({
