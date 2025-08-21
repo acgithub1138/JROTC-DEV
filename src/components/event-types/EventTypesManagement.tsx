@@ -6,6 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Edit2, Plus, Palette, Globe } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useEventTypes, EventType } from '@/components/calendar/hooks/useEventTypes';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -174,35 +182,40 @@ const EventTypesManagement: React.FC = () => {
               No event types found. Create your first event type to get started.
             </div>
           ) : (
-            <div className="space-y-4">
-              {eventTypes.map((eventType) => (
-                <div
-                  key={eventType.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-4">
-                    <div
-                      className="w-6 h-6 rounded-full border-2 border-gray-300"
-                      style={{ backgroundColor: eventType.color || '#3B82F6' }}
-                    />
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <span className="font-medium">{eventType.label}</span>
-                        {eventType.is_default && (
-                          <Badge variant="secondary" className="flex items-center gap-1">
-                            <Globe className="w-3 h-3" />
-                            Global
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="text-sm text-muted-foreground">
-                        Color: {eventType.color || '#3B82F6'}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <>    
-                      <Button
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Color</TableHead>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Value</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...eventTypes]
+                  .sort((a, b) => a.label.localeCompare(b.label))
+                  .map((eventType) => (
+                  <TableRow key={eventType.id}>
+                    <TableCell>
+                      <div
+                        className="w-6 h-6 rounded-full border-2 border-gray-300"
+                        style={{ backgroundColor: eventType.color || '#3B82F6' }}
+                      />
+                    </TableCell>
+                    <TableCell className="font-medium">{eventType.label}</TableCell>
+                    <TableCell className="text-muted-foreground">{eventType.value}</TableCell>
+                    <TableCell>
+                      {eventType.is_default && (
+                        <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                          <Globe className="w-3 h-3" />
+                          Global
+                        </Badge>
+                      )}
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        <Button
                           variant="outline"
                           size="icon"
                           onClick={() => handleOpenDialog(eventType)}
@@ -217,17 +230,16 @@ const EventTypesManagement: React.FC = () => {
                           onClick={() => handleDelete(eventType)}
                           className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
                           title="Delete event type"
+                          disabled={eventType.is_default}
                         >
                           <Trash2 className="w-4 h-4" />
                         </Button>
-                      </>
-                    {eventType.is_default && (
-                      <Badge variant="outline">Protected</Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
