@@ -6,6 +6,14 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Badge } from '@/components/ui/badge';
 import { Trash2, Plus, Trophy, Globe } from 'lucide-react';
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from '@/components/ui/table';
 import { useCompetitionEventTypes } from './hooks/useCompetitionEventTypes';
 import { useToast } from '@/hooks/use-toast';
 import {
@@ -136,42 +144,49 @@ const CompetitionEventTypesManagement: React.FC = () => {
               No event types found. Create your first competition event type to get started.
             </div>
           ) : (
-            <div className="space-y-4">
-              {eventTypes.map((eventType) => (
-                <div
-                  key={eventType.id}
-                  className="flex items-center justify-between p-4 border rounded-lg hover:bg-muted/50"
-                >
-                  <div className="flex items-center gap-4">
-                    <div className="flex items-center gap-2">
-                      <span className="font-medium">{eventType.name}</span>
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead>Name</TableHead>
+                  <TableHead>Type</TableHead>
+                  <TableHead className="text-right">Actions</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {[...eventTypes]
+                  .sort((a, b) => a.name.localeCompare(b.name))
+                  .map((eventType) => (
+                  <TableRow key={eventType.id}>
+                    <TableCell className="font-medium">{eventType.name}</TableCell>
+                    <TableCell>
                       {eventType.is_default && (
-                        <Badge variant="secondary" className="flex items-center gap-1">
+                        <Badge variant="secondary" className="flex items-center gap-1 w-fit">
                           <Globe className="w-3 h-3" />
                           Default
                         </Badge>
                       )}
-                    </div>
-                  </div>
-                  <div className="flex items-center gap-2">
-                    {!eventType.is_default && (
-                      <Button
-                        variant="outline"
-                        size="icon"
-                        onClick={() => handleDelete(eventType.name)}
-                        className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
-                        title="Delete event type"
-                      >
-                        <Trash2 className="w-4 h-4" />
-                      </Button>
-                    )}
-                    {eventType.is_default && (
-                      <Badge variant="outline">Protected</Badge>
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
+                    </TableCell>
+                    <TableCell className="text-right">
+                      <div className="flex items-center justify-end gap-2">
+                        {!eventType.is_default ? (
+                          <Button
+                            variant="outline"
+                            size="icon"
+                            onClick={() => handleDelete(eventType.name)}
+                            className="text-red-600 hover:text-red-700 h-8 w-8 p-0"
+                            title="Delete event type"
+                          >
+                            <Trash2 className="w-4 h-4" />
+                          </Button>
+                        ) : (
+                          <Badge variant="outline">Protected</Badge>
+                        )}
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))}
+              </TableBody>
+            </Table>
           )}
         </CardContent>
       </Card>
