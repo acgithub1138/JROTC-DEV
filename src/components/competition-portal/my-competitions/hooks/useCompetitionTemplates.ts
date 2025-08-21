@@ -4,11 +4,18 @@ import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
+type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'] & {
+  competition_event_types: {
+    name: string;
+    id: string;
+  };
+};
 type CompetitionTemplateInsert = Database['public']['Tables']['competition_templates']['Insert'];
 type CompetitionTemplateUpdate = Database['public']['Tables']['competition_templates']['Update'];
 
-export const useCompetitionTemplates = () => {
+export type { CompetitionTemplate };
+
+const useCompetitionTemplates = () => {
   const { userProfile } = useAuth();
   const [templates, setTemplates] = useState<CompetitionTemplate[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -54,7 +61,10 @@ export const useCompetitionTemplates = () => {
       const { data, error } = await supabase
         .from('competition_templates')
         .insert(dataWithMeta)
-        .select()
+        .select(`
+          *,
+          competition_event_types!inner(name, id)
+        `)
         .single();
 
       if (error) throw error;
@@ -75,7 +85,10 @@ export const useCompetitionTemplates = () => {
         .from('competition_templates')
         .update(updates)
         .eq('id', id)
-        .select()
+        .select(`
+          *,
+          competition_event_types!inner(name, id)
+        `)
         .single();
 
       if (error) throw error;
@@ -143,7 +156,10 @@ export const useCompetitionTemplates = () => {
       const { data, error } = await supabase
         .from('competition_templates')
         .insert(newTemplate)
-        .select()
+        .select(`
+          *,
+          competition_event_types!inner(name, id)
+        `)
         .single();
 
       if (error) throw error;
@@ -183,7 +199,7 @@ export const useCompetitionTemplates = () => {
     
     const query = searchQuery.toLowerCase();
     const templateName = template.template_name.toLowerCase();
-    const eventType = template.event.toLowerCase();
+    const eventType = template.competition_event_types?.name.toLowerCase() || '';
     const jrotcProgram = template.jrotc_program.toLowerCase();
     
     return templateName.includes(query) || 
@@ -211,3 +227,5 @@ export const useCompetitionTemplates = () => {
     refetch: () => fetchTemplates(showOnlyMyTemplates)
   };
 };
+
+export { useCompetitionTemplates };

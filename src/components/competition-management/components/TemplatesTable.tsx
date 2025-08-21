@@ -5,7 +5,7 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { Edit, Trash2, Copy, Eye, Globe, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
-import { CompetitionTemplate } from '../types';
+import { type CompetitionTemplate } from '../../competition-portal/my-competitions/hooks/useCompetitionTemplates';
 import { SortConfig } from '@/components/ui/sortable-table';
 interface TemplatesTableProps {
   templates: CompetitionTemplate[];
@@ -94,7 +94,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
                   </div>
                 </TableCell>
                 <TableCell>
-                  <Badge variant="outline">{template.event}</Badge>
+                  <Badge variant="outline">{template.competition_event_types?.name || template.event}</Badge>
                 </TableCell>
                 <TableCell>
                   <Badge variant="secondary">
