@@ -142,32 +142,49 @@ const ParentRegistrationPage = () => {
 
     setLoading(true);
     try {
-      // First, get the cadet profile info for school_id
+      // First, verify the cadet still exists using the same method as step 1
+      const {
+        data: emailExists,
+        error: verifyError
+      } = await supabase.rpc('verify_cadet_email_exists', {
+        email_param: cadetInfo?.email
+      });
+      
+      if (verifyError) {
+        console.error("Error verifying cadet email:", verifyError);
+        toast({
+          title: "Error",
+          description: "An error occurred while verifying student information. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+      
+      if (!emailExists) {
+        toast({
+          title: "Student Not Found",
+          description: "Could not find an active student with that email address. Please go back and verify the email.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Now get the cadet profile info for school_id
       const {
         data: cadetProfile,
         error: cadetError
       } = await supabase
         .from('profiles')
         .select('id, school_id')
-        .eq('email', cadetInfo.email)
+        .eq('email', cadetInfo?.email)
         .eq('active', true)
-        .not('role', 'in', '(admin,instructor)')
-        .maybeSingle();
+        .single();
         
       if (cadetError) {
         console.error("Error fetching cadet profile:", cadetError);
         toast({
           title: "Error",
           description: "An error occurred while fetching student information. Please try again.",
-          variant: "destructive"
-        });
-        return;
-      }
-      
-      if (!cadetProfile) {
-        toast({
-          title: "Student Not Found",
-          description: "Could not find an active student with that email address. Please verify the email and try again.",
           variant: "destructive"
         });
         return;
