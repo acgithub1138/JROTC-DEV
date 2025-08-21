@@ -43,7 +43,7 @@ export const EventDetailsDialog = ({
           {/* Event Type Badge */}
           <div className="flex items-center gap-2">
             <Badge variant="secondary" className="capitalize">
-              {formatEventType(event.event_type)}
+              {event.event_types?.label || formatEventType(event.event_type)}
             </Badge>
             {event.is_all_day && (
               <Badge variant="outline">All Day</Badge>
