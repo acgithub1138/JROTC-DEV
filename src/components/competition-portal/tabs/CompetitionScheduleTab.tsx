@@ -299,7 +299,7 @@ export const CompetitionScheduleTab = ({
                 {/* Table Header */}
                 <thead>
                   <tr className="border-b bg-muted/30">
-                    <th className="text-left p-4 font-medium text-sm sticky left-0 bg-muted/30 z-10 min-w-[120px]">
+                    <th className="text-left p-4 font-medium text-sm sticky left-0 bg-background border-r z-10 min-w-[120px]">
                       Time Slots
                     </th>
                     {events.map(event => <th key={event.id} className="text-center p-4 min-w-[150px]">
@@ -339,7 +339,7 @@ export const CompetitionScheduleTab = ({
                           </tr>
                         )}
                         <tr className={`border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                          <td className="p-2 font-medium text-sm sticky left-0 bg-inherit z-10 border-r">
+                          <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
                             {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                           </td>
                           {events.map(event => {
