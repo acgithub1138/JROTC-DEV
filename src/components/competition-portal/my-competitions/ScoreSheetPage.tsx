@@ -42,7 +42,7 @@ export const ScoreSheetPage = () => {
     : [];
 
   // Get unique event types for the selected school
-  const uniqueEventTypes = [...new Set(eventsForSelectedSchool.map(event => event.event))];
+  const uniqueEventTypes = [...new Set(eventsForSelectedSchool.map(event => event.competition_event_types?.name).filter(Boolean))];
 
   useEffect(() => {
     // Default to first school when options load
@@ -59,7 +59,7 @@ export const ScoreSheetPage = () => {
 
   useEffect(() => {
     if (selectedSchoolId && selectedEvent) {
-      const filtered = (events as any[]).filter(event => event.school_id === selectedSchoolId && event.event === selectedEvent);
+      const filtered = (events as any[]).filter(event => event.school_id === selectedSchoolId && event.competition_event_types?.name === selectedEvent);
       setFilteredEvents(filtered);
     } else {
       setFilteredEvents([]);
