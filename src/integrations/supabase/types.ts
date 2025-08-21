@@ -612,6 +612,7 @@ export type Database = {
           notes: string | null
           resources: string[] | null
           school_id: string
+          score_sheet: string | null
           sop: string | null
           sop_link: string | null
           sop_text: string | null
@@ -636,6 +637,7 @@ export type Database = {
           notes?: string | null
           resources?: string[] | null
           school_id: string
+          score_sheet?: string | null
           sop?: string | null
           sop_link?: string | null
           sop_text?: string | null
@@ -660,6 +662,7 @@ export type Database = {
           notes?: string | null
           resources?: string[] | null
           school_id?: string
+          score_sheet?: string | null
           sop?: string | null
           sop_link?: string | null
           sop_text?: string | null
@@ -679,7 +682,7 @@ export type Database = {
             foreignKeyName: "cp_comp_events_event_fkey"
             columns: ["event"]
             isOneToOne: false
-            referencedRelation: "cp_events"
+            referencedRelation: "competition_event_types"
             referencedColumns: ["id"]
           },
           {
@@ -687,6 +690,13 @@ export type Database = {
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "cp_comp_events_score_sheet_fkey"
+            columns: ["score_sheet"]
+            isOneToOne: false
+            referencedRelation: "competition_templates"
             referencedColumns: ["id"]
           },
         ]
@@ -3649,6 +3659,10 @@ export type Database = {
       }
       validate_task_status: {
         Args: { status_value: string }
+        Returns: boolean
+      }
+      verify_cadet_email_exists: {
+        Args: { email_param: string }
         Returns: boolean
       }
     }

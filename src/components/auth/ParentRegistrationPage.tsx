@@ -15,7 +15,7 @@ const ParentRegistrationPage = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [step, setStep] = useState(1);
-  const [cadetInfo, setCadetInfo] = useState<any>(null);
+  const [cadetInfo, setCadetInfo] = useState<{ email: string } | null>(null);
   const [cadetEmail, setCadetEmail] = useState('');
   const [parentData, setParentData] = useState({
     firstName: '',
@@ -30,25 +30,32 @@ const ParentRegistrationPage = () => {
     setLoading(true);
 
     try {
-      // Find student by email (exclude admin and instructor roles)
-      const { data: cadet, error } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, email, school_id, active, role')
-        .eq('email', cadetEmail)
-        .eq('active', true)
-        .not('role', 'in', '("admin","instructor")')
-        .single();
+      // Use secure function to verify cadet email exists (excludes admin/instructor roles)
+      const { data: emailExists, error } = await supabase.rpc('verify_cadet_email_exists', {
+        email_param: cadetEmail
+      });
 
-      if (error || !cadet) {
+      if (error) {
+        console.error("Error verifying cadet email:", error);
         toast({
-          title: "Cadet Not Found",
-          description: "No active cadet found with that email address. Please check the email and try again.",
+          title: "Error",
+          description: "An error occurred while verifying the email",
           variant: "destructive"
         });
         return;
       }
 
-      setCadetInfo(cadet);
+      if (!emailExists) {
+        toast({
+          title: "Student Not Found",
+          description: "No active student found with that email address. Please check the email and try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
+      // Store cadet email and proceed to next step
+      setCadetInfo({ email: cadetEmail });
       setStep(2);
     } catch (error: any) {
       toast({
@@ -66,6 +73,22 @@ const ParentRegistrationPage = () => {
     setLoading(true);
 
     try {
+      // First, get the cadet profile info for school_id
+      const { data: cadetProfile, error: cadetError } = await supabase
+        .from('profiles')
+        .select('id, school_id')
+        .eq('email', cadetInfo.email)
+        .single();
+
+      if (cadetError || !cadetProfile) {
+        toast({
+          title: "Error",
+          description: "Could not find student information. Please try again.",
+          variant: "destructive"
+        });
+        return;
+      }
+
       // Get parent role ID
       const { data: parentRole, error: roleError } = await supabase
         .from('user_roles')
@@ -89,7 +112,7 @@ const ParentRegistrationPage = () => {
         {
           first_name: parentData.firstName,
           last_name: parentData.lastName,
-          school_id: cadetInfo.school_id,
+          school_id: cadetProfile.school_id,
           role: 'parent',
           role_id: parentRole.id
         }
@@ -104,7 +127,7 @@ const ParentRegistrationPage = () => {
         return;
       }
 
-      // Get the created user's profile to get their ID
+      // Get the created parent profile
       const { data: newParentProfile } = await supabase
         .from('profiles')
         .select('id')
@@ -121,8 +144,8 @@ const ParentRegistrationPage = () => {
             phone: parentData.phone,
             type: 'parent',
             status: 'active',
-            cadet_id: cadetInfo.id,
-            school_id: cadetInfo.school_id,
+            cadet_id: cadetProfile.id,
+            school_id: cadetProfile.school_id,
             created_by: newParentProfile.id
           });
 
@@ -176,8 +199,8 @@ const ParentRegistrationPage = () => {
             </div>
             <p className="text-sm text-gray-600">
               {step === 1 
-                ? 'Enter your cadet\'s email address to get started' 
-                : `Creating account for parent of ${cadetInfo?.first_name} ${cadetInfo?.last_name}`
+              ? 'Enter your cadet\'s email address to get started' 
+                : `Creating account for student: ${cadetInfo?.email}`
               }
             </p>
           </CardHeader>
