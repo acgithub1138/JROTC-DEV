@@ -7,6 +7,8 @@ import { Input } from '@/components/ui/input';
 import { Edit, Plus, Trash2, Trophy, Calendar, MapPin } from 'lucide-react';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
+import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
+import { useCompetitionEventTypes } from '@/components/competition-management/hooks/useCompetitionEventTypes';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -88,6 +90,12 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
   } | null>(null);
   const [newEventName, setNewEventName] = useState('');
   const [newPlacement, setNewPlacement] = useState<string>('');
+
+  // Hooks for fetching event options based on competition source
+  const { events: registeredEvents, isLoading: isLoadingRegistered } = useRegisteredEvents(
+    editingPlacement?.source === 'portal' ? editingPlacement.competitionId : undefined
+  );
+  const { eventTypes, isLoading: isLoadingEventTypes } = useCompetitionEventTypes();
 
   if (isLoading) {
     return (
@@ -242,11 +250,41 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                 {canEdit && editingPlacement?.competitionId === competition.source_competition_id && 
                  editingPlacement?.source === competition.source_type ? (
                   <div className="space-y-2 p-3 border rounded-lg bg-background">
-                    <Input
-                      placeholder="Event name"
-                      value={newEventName}
-                      onChange={(e) => setNewEventName(e.target.value)}
-                    />
+                    {/* Event Name Dropdown - conditional based on competition source */}
+                    <Select value={newEventName} onValueChange={setNewEventName}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select event" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {editingPlacement.source === 'portal' ? (
+                          // Portal competitions: show registered events
+                          isLoadingRegistered ? (
+                            <SelectItem value="" disabled>Loading events...</SelectItem>
+                          ) : registeredEvents.length > 0 ? (
+                            registeredEvents.map((event) => (
+                              <SelectItem key={event.id} value={event.name}>
+                                {event.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>No registered events found</SelectItem>
+                          )
+                        ) : (
+                          // Internal competitions: show competition event types
+                          isLoadingEventTypes ? (
+                            <SelectItem value="" disabled>Loading event types...</SelectItem>
+                          ) : eventTypes.length > 0 ? (
+                            eventTypes.map((eventType) => (
+                              <SelectItem key={eventType.id} value={eventType.name}>
+                                {eventType.name}
+                              </SelectItem>
+                            ))
+                          ) : (
+                            <SelectItem value="" disabled>No event types available</SelectItem>
+                          )
+                        )}
+                      </SelectContent>
+                    </Select>
                     <Select value={newPlacement} onValueChange={setNewPlacement}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select placement" />
