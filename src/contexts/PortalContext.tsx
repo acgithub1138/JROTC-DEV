@@ -24,9 +24,11 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const [currentPortal, setCurrentPortal] = useState<PortalType>('ccc');
 
   // Check if user can access competition portal (either competition module or competition portal enabled)
+  // Also exclude parent users from accessing competition portal
   const canAccessCompetitionPortal = 
-    userProfile?.schools?.competition_module === true || 
-    userProfile?.schools?.competition_portal === true;
+    (userProfile?.schools?.competition_module === true || 
+     userProfile?.schools?.competition_portal === true) &&
+    userProfile?.role !== 'parent';
   
   // Get stored portal preference
   useEffect(() => {
