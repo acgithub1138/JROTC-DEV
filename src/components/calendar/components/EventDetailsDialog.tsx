@@ -108,22 +108,11 @@ export const EventDetailsDialog = ({
                       <span className="text-sm text-muted-foreground">
                         {assignment.assignee_name}
                       </span>
-                      {assignment.role && (
-                        <span className="text-xs text-muted-foreground">
-                          ({assignment.role})
-                        </span>
-                      )}
-                      <Badge 
-                        variant="outline" 
-                        className={`text-xs ${
-                          assignment.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
-                          assignment.status === 'declined' ? 'bg-red-50 text-red-700 border-red-200' :
-                          assignment.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
-                          'bg-gray-50 text-gray-700 border-gray-200'
-                        }`}
-                      >
-                        {assignment.status}
-                      </Badge>
+                       {assignment.role && (
+                         <span className="text-xs text-muted-foreground">
+                           ({assignment.role})
+                         </span>
+                       )}
                     </div>
                   ))}
                 </div>
