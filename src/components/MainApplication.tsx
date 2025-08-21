@@ -18,6 +18,7 @@ import TaskOptionsManagement from './tasks/TaskOptionsManagement';
 import IncidentOptionsManagement from './incident-management/IncidentOptionsManagement';
 import ThemeManagement from './themes/ThemeManagement';
 import EventTypesManagement from './event-types/EventTypesManagement';
+import CompetitionEventTypesManagement from './competition-management/CompetitionEventTypesManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
 
 import NotFound from '@/pages/NotFound';
@@ -308,6 +309,7 @@ const SettingsPage = () => {
           <TabsTrigger value="tasks">Task Options</TabsTrigger>
           <TabsTrigger value="incidents">Incident Options</TabsTrigger>
           <TabsTrigger value="event-types">Event Types</TabsTrigger>
+          <TabsTrigger value="events">Events</TabsTrigger>
           <TabsTrigger value="themes">Themes</TabsTrigger>
         </TabsList>
         <TabsContent value="tasks">
@@ -318,6 +320,9 @@ const SettingsPage = () => {
         </TabsContent>
         <TabsContent value="event-types">
           <EventTypesManagement />
+        </TabsContent>
+        <TabsContent value="events">
+          <CompetitionEventTypesManagement />
         </TabsContent>
         <TabsContent value="themes">
           <ThemeManagement />
