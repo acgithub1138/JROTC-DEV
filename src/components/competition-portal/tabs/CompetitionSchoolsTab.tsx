@@ -13,7 +13,7 @@ import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/Vi
 import { EditSchoolModal } from '@/components/competition-portal/modals/EditSchoolModal';
 import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
-import { AddSchoolEventScoreSheetModal } from '@/components/competition-portal/modals/AddSchoolEventScoreSheetModal';
+import { AddSchoolEventModal } from '@/components/competition-portal/modals/AddSchoolEventModal';
 
 // Extend the type to include the paid and color fields
 type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row'] & {
@@ -122,11 +122,11 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                   onClick={() => setSelectedSchoolForAddEvent(school.id)}
                                 >
                                   <Plus className="w-4 h-4 mr-1" />
-                                  Add Score
+                                  Add Event
                                 </Button>
                               </TooltipTrigger>
                               <TooltipContent>
-                                <p>Add event score sheet</p>
+                                 <p>Register school for event</p>
                               </TooltipContent>
                             </Tooltip>
                             <Tooltip>
@@ -215,7 +215,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                     </Button>
                                   </TooltipTrigger>
                                   <TooltipContent>
-                                    <p>Add event score sheet</p>
+                                    <p>Register school for event</p>
                                   </TooltipContent>
                                 </Tooltip>
                                 <Tooltip>
@@ -246,7 +246,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       
       <EditSchoolModal open={!!selectedSchoolForEdit} onOpenChange={() => setSelectedSchoolForEdit(null)} competitionId={competitionId} schoolId={selectedSchoolForEdit || ''} onSchoolUpdated={refetch} />
 
-      <AddSchoolEventScoreSheetModal
+      <AddSchoolEventModal
         open={!!selectedSchoolForAddEvent}
         onOpenChange={(o) => { if (!o) setSelectedSchoolForAddEvent(null); }}
         competitionId={competitionId}
