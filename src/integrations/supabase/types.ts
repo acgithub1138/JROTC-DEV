@@ -699,6 +699,13 @@ export type Database = {
             referencedRelation: "competition_templates"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "fk_cp_comp_events_event"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
         ]
       }
       cp_comp_resources: {
