@@ -5,9 +5,6 @@ import { Skeleton } from '@/components/ui/skeleton';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
 import { format, parseISO } from 'date-fns';
-import type { Database } from '@/integrations/supabase/types';
-
-type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 interface PerformanceData {
   date: string;

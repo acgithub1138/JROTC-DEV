@@ -28,7 +28,7 @@ export interface Competition {
 export interface CompetitionTemplate {
   id: string;
   template_name: string;
-  event: CompetitionEventType;
+  event: string; // UUID reference to competition_event_types
   jrotc_program: 'air_force' | 'army' | 'coast_guard' | 'navy' | 'marine_corps' | 'space_force';
   scores: Record<string, any>;
   is_active: boolean;
@@ -44,7 +44,7 @@ export interface CompetitionEvent {
   id: string;
   school_id: string;
   competition_id: string;
-  event: CompetitionEventType;
+  event: string; // UUID reference to competition_event_types
   cadet_ids: string[];
   team_name?: string;
   total_points: number;
@@ -53,18 +53,16 @@ export interface CompetitionEvent {
   updated_at: string;
 }
 
-export type CompetitionEventType = 
-  | 'Armed Inspection'
-  | 'Armed Color Guard'
-  | 'Armed Exhibition'
-  | 'Armed Dual Exhibition'
-  | 'Armed Regulation'
-  | 'Armed Solo Exhibition'
-  | 'Unarmed Inspection'
-  | 'Unarmed Color Guard'
-  | 'Unarmed Exhibition'
-  | 'Unarmed Dual Exhibition'
-  | 'Unarmed Regulation';
+export interface CompetitionEventType {
+  id: string;
+  name: string;
+  is_active: boolean;
+  is_default: boolean;
+  sort_order: number;
+  created_at: string;
+  updated_at: string;
+  created_by?: string;
+}
 
 export type CompetitionPlacement = 
   | 'NA'

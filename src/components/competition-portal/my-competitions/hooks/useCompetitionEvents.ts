@@ -20,7 +20,10 @@ export const useCompetitionEvents = (competitionId?: string, sourceType?: 'inter
       setIsLoading(true);
       const { data, error } = await supabase
         .from('competition_events')
-        .select('*')
+        .select(`
+          *,
+          competition_event_types!inner(name, id)
+        `)
         .eq('source_competition_id', competitionId)
         .eq('source_type', sourceType || 'internal')
         .eq('school_id', userProfile.school_id)

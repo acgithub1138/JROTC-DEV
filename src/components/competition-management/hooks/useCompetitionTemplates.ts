@@ -20,7 +20,10 @@ export const useCompetitionTemplates = () => {
       setIsLoading(true);
       let query = supabase
         .from('competition_templates')
-        .select('*')
+        .select(`
+          *,
+          competition_event_types!inner(name, id)
+        `)
         .eq('is_active', true);
 
       if (myTemplatesOnly) {

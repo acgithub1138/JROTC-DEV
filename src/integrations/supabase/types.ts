@@ -132,7 +132,7 @@ export type Database = {
           cadet_ids: string[] | null
           competition_id: string | null
           created_at: string
-          event: Database["public"]["Enums"]["comp_event_type"]
+          event: string
           id: string
           school_id: string
           score_sheet: Json
@@ -148,7 +148,7 @@ export type Database = {
           cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
-          event: Database["public"]["Enums"]["comp_event_type"]
+          event: string
           id?: string
           school_id: string
           score_sheet?: Json
@@ -164,7 +164,7 @@ export type Database = {
           cadet_ids?: string[] | null
           competition_id?: string | null
           created_at?: string
-          event?: Database["public"]["Enums"]["comp_event_type"]
+          event?: string
           id?: string
           school_id?: string
           score_sheet?: Json
@@ -185,7 +185,58 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
+            foreignKeyName: "competition_events_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
+          {
             foreignKeyName: "competition_events_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      competition_placements: {
+        Row: {
+          competition_date: string
+          competition_id: string
+          competition_source: string
+          created_at: string | null
+          event_name: string
+          id: string
+          placement: number | null
+          school_id: string
+          updated_at: string | null
+        }
+        Insert: {
+          competition_date: string
+          competition_id: string
+          competition_source: string
+          created_at?: string | null
+          event_name: string
+          id?: string
+          placement?: number | null
+          school_id: string
+          updated_at?: string | null
+        }
+        Update: {
+          competition_date?: string
+          competition_id?: string
+          competition_source?: string
+          created_at?: string | null
+          event_name?: string
+          id?: string
+          placement?: number | null
+          school_id?: string
+          updated_at?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "competition_placements_school_id_fkey"
             columns: ["school_id"]
             isOneToOne: false
             referencedRelation: "schools"
@@ -269,7 +320,7 @@ export type Database = {
           created_at: string
           created_by: string | null
           description: string | null
-          event: Database["public"]["Enums"]["comp_event_type"]
+          event: string
           id: string
           is_active: boolean
           is_global: boolean
@@ -284,7 +335,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          event: Database["public"]["Enums"]["comp_event_type"]
+          event: string
           id?: string
           is_active?: boolean
           is_global?: boolean
@@ -299,7 +350,7 @@ export type Database = {
           created_at?: string
           created_by?: string | null
           description?: string | null
-          event?: Database["public"]["Enums"]["comp_event_type"]
+          event?: string
           id?: string
           is_active?: boolean
           is_global?: boolean
@@ -311,6 +362,13 @@ export type Database = {
           updated_at?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "competition_templates_event_type_id_fkey"
+            columns: ["event"]
+            isOneToOne: false
+            referencedRelation: "competition_event_types"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "competition_templates_school_id_fkey"
             columns: ["school_id"]
@@ -3607,18 +3665,6 @@ export type Database = {
         | "other"
       budget_transaction_category: "expense" | "income"
       cadet_year: "1st" | "2nd" | "3rd" | "4th"
-      comp_event_type:
-        | "Armed Inspection"
-        | "Armed Color Guard"
-        | "Armed Exhibition"
-        | "Armed Dual Exhibition"
-        | "Armed Regulation"
-        | "Armed Solo Exhibition"
-        | "Unarmed Inspection"
-        | "Unarmed Color Guard"
-        | "Unarmed Exhibition"
-        | "Unarmed Dual Exhibition"
-        | "Unarmed Regulation"
       comp_placement:
         | "NA"
         | "1st"
@@ -3849,19 +3895,6 @@ export const Constants = {
       ],
       budget_transaction_category: ["expense", "income"],
       cadet_year: ["1st", "2nd", "3rd", "4th"],
-      comp_event_type: [
-        "Armed Inspection",
-        "Armed Color Guard",
-        "Armed Exhibition",
-        "Armed Dual Exhibition",
-        "Armed Regulation",
-        "Armed Solo Exhibition",
-        "Unarmed Inspection",
-        "Unarmed Color Guard",
-        "Unarmed Exhibition",
-        "Unarmed Dual Exhibition",
-        "Unarmed Regulation",
-      ],
       comp_placement: [
         "NA",
         "1st",

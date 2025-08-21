@@ -3,9 +3,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import type { Database } from '@/integrations/supabase/types';
-
-type CompetitionEventType = Database['public']['Enums']['comp_event_type'];
 
 interface ChartLegendProps {
   scoringCriteria: string[];
