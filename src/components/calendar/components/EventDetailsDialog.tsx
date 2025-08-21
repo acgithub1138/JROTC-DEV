@@ -89,6 +89,48 @@ export const EventDetailsDialog = ({
           )}
 
           {/* Event Details */}
+          
+          {/* Assignments */}
+          {event.event_assignments && event.event_assignments.length > 0 && (
+            <div className="flex items-start gap-3">
+              <User className="w-5 h-5 text-muted-foreground mt-0.5" />
+              <div>
+                <p className="font-medium">Assignments</p>
+                <div className="space-y-2 mt-1">
+                  {event.event_assignments.map((assignment) => (
+                    <div key={assignment.id} className="flex items-center gap-2">
+                      <Badge 
+                        variant={assignment.assignee_type === 'team' ? 'default' : 'secondary'}
+                        className="text-xs"
+                      >
+                        {assignment.assignee_type === 'team' ? 'Team' : 'Cadet'}
+                      </Badge>
+                      <span className="text-sm text-muted-foreground">
+                        {assignment.assignee_name}
+                      </span>
+                      {assignment.role && (
+                        <span className="text-xs text-muted-foreground">
+                          ({assignment.role})
+                        </span>
+                      )}
+                      <Badge 
+                        variant="outline" 
+                        className={`text-xs ${
+                          assignment.status === 'confirmed' ? 'bg-green-50 text-green-700 border-green-200' :
+                          assignment.status === 'declined' ? 'bg-red-50 text-red-700 border-red-200' :
+                          assignment.status === 'completed' ? 'bg-blue-50 text-blue-700 border-blue-200' :
+                          'bg-gray-50 text-gray-700 border-gray-200'
+                        }`}
+                      >
+                        {assignment.status}
+                      </Badge>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
           <div className="border-t pt-4 space-y-2">
             <div className="flex items-center gap-3 text-sm text-muted-foreground">
               <Clock className="w-4 h-4" />

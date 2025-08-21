@@ -32,6 +32,14 @@ export interface Event {
   recurrence_rule?: any;
   recurrence_end_date?: string;
   parent_event_id?: string;
+  event_assignments?: {
+    id: string;
+    assignee_type: 'team' | 'cadet';
+    assignee_id: string;
+    role?: string;
+    status: 'assigned' | 'confirmed' | 'declined' | 'completed';
+    assignee_name?: string;
+  }[];
 }
 const CalendarManagementPage = () => {
   const [showEventDialog, setShowEventDialog] = useState(false);

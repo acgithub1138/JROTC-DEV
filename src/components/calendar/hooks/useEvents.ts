@@ -34,6 +34,13 @@ export const useEvents = (filters: EventFilters) => {
             id,
             label,
             color
+          ),
+          event_assignments(
+            id,
+            assignee_type,
+            assignee_id,
+            role,
+            status
           )
         `)
         .eq('school_id', userProfile.school_id)
@@ -49,9 +56,64 @@ export const useEvents = (filters: EventFilters) => {
         console.error('Database error fetching events:', error);
         throw error;
       }
+
+      console.log('Raw events data:', data);
       
-      console.log('Events fetched successfully:', data);
-      setEvents((data as any) || []);
+      // Enrich events with assignment names
+      if (data && data.length > 0) {
+        // Get unique assignee IDs for both teams and cadets
+        const teamIds = new Set<string>();
+        const cadetIds = new Set<string>();
+        
+        data.forEach((event: any) => {
+          event.event_assignments?.forEach((assignment: any) => {
+            if (assignment.assignee_type === 'team') {
+              teamIds.add(assignment.assignee_id);
+            } else {
+              cadetIds.add(assignment.assignee_id);
+            }
+          });
+        });
+
+        // Fetch team and cadet names
+        const [teamsResponse, cadetsResponse] = await Promise.all([
+          teamIds.size > 0 ? supabase
+            .from('teams')
+            .select('id, name')
+            .in('id', Array.from(teamIds))
+            .eq('school_id', userProfile.school_id) : Promise.resolve({ data: [] }),
+          cadetIds.size > 0 ? supabase
+            .from('profiles')
+            .select('id, first_name, last_name')
+            .in('id', Array.from(cadetIds))
+            .eq('school_id', userProfile.school_id)
+            .eq('active', true) : Promise.resolve({ data: [] })
+        ]);
+
+        const teams = teamsResponse.data || [];
+        const cadets = cadetsResponse.data || [];
+
+        // Enrich assignments with names
+        const enrichedEvents = data.map((event: any) => ({
+          ...event,
+          event_assignments: event.event_assignments?.map((assignment: any) => {
+            let assignee_name = '';
+            if (assignment.assignee_type === 'team') {
+              const team = teams.find(t => t.id === assignment.assignee_id);
+              assignee_name = team?.name || 'Unknown Team';
+            } else {
+              const cadet = cadets.find(c => c.id === assignment.assignee_id);
+              assignee_name = cadet ? `${cadet.first_name} ${cadet.last_name}` : 'Unknown Cadet';
+            }
+            return { ...assignment, assignee_name };
+          }) || []
+        }));
+
+        console.log('Events with enriched assignments:', enrichedEvents);
+        setEvents(enrichedEvents);
+      } else {
+        setEvents([]);
+      }
     } catch (error) {
       console.error('Error fetching events:', error);
       toast({
