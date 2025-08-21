@@ -30,12 +30,13 @@ const ParentRegistrationPage = () => {
     setLoading(true);
 
     try {
-      // Find cadet by email
+      // Find student by email (cadet or command_staff)
       const { data: cadet, error } = await supabase
         .from('profiles')
-        .select('id, first_name, last_name, email, school_id, active')
+        .select('id, first_name, last_name, email, school_id, active, role')
         .eq('email', cadetEmail)
         .eq('active', true)
+        .in('role', ['cadet', 'command_staff'])
         .single();
 
       if (error || !cadet) {
