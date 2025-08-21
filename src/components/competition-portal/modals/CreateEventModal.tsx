@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { JROTC_PROGRAM_OPTIONS } from '../../competition-management/utils/constants';
 import { useCompetitionTemplates } from '../../competition-management/hooks/useCompetitionTemplates';
+import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 interface CreateEventModalProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -27,6 +28,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
   onEventCreate
 }) => {
   const { templates, isLoading: templatesLoading } = useCompetitionTemplates();
+  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
   
   const initialData = {
     name: '',
@@ -69,11 +71,11 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!formData.name.trim()) return;
+    if (!formData.name) return;
     setIsLoading(true);
     try {
       await onEventCreate({
-        name: formData.name.trim(),
+        name: formData.name,
         description: formData.description.trim() || null,
         score_sheet: formData.score_sheet.trim() || null,
         jrotc_program: formData.jrotc_program || null
@@ -98,10 +100,21 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name">Event Name *</Label>
-              <Input id="name" value={formData.name} onChange={e => setFormData(prev => ({
-              ...prev,
-              name: e.target.value
-            }))} placeholder="Enter event name" required />
+              <Select value={formData.name} onValueChange={value => setFormData(prev => ({
+                ...prev,
+                name: value
+              }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event name" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventTypes.map(eventType => (
+                    <SelectItem key={eventType.id} value={eventType.name}>
+                      {eventType.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -152,7 +165,7 @@ export const CreateEventModal: React.FC<CreateEventModalProps> = ({
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || !formData.name.trim()}>
+              <Button type="submit" disabled={isLoading || !formData.name || eventTypesLoading}>
                 {isLoading ? 'Creating...' : 'Create Event'}
               </Button>
             </div>

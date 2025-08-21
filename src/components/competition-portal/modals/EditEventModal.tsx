@@ -16,6 +16,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
+import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   cp_events?: { name: string } | null;
@@ -54,7 +55,6 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     resources: [] as string[]
   });
   const [isLoading, setIsLoading] = useState(false);
-  const [events, setEvents] = useState<Array<{id: string, name: string}>>([]);
   const [judges, setJudges] = useState<Array<{id: string, name: string}>>([]);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [initialFormData, setInitialFormData] = useState(formData);
@@ -64,6 +64,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     isLoading: usersLoading
   } = useSchoolUsers(true); // Only active users
 
+  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
   const { timezone } = useSchoolTimezone();
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
@@ -74,13 +75,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   useEffect(() => {
     if (open) {
-      fetchEvents();
       fetchJudges();
     }
   }, [open]);
 
   useEffect(() => {
-    if (event && events.length > 0) {
+    if (event && eventTypes.length > 0) {
       // Convert UTC times to school timezone for display
       const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
       const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
@@ -114,22 +114,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
       setFormData(newFormData);
       setInitialFormData(newFormData);
     }
-  }, [event, events, timezone]);
-
-  const fetchEvents = async () => {
-    try {
-      const { data, error } = await supabase
-        .from('cp_events')
-        .select('id, name')
-        .eq('active', true);
-      
-      if (error) throw error;
-      setEvents(data || []);
-    } catch (error) {
-      console.error('Error fetching events:', error);
-      toast.error('Failed to load events');
-    }
-  };
+  }, [event, eventTypes, timezone]);
 
   const fetchJudges = async () => {
     try {
@@ -332,9 +317,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
                 <SelectValue placeholder="Select an event" />
               </SelectTrigger>
               <SelectContent>
-                {events.map(eventOption => (
-                  <SelectItem key={eventOption.id} value={eventOption.id}>
-                    {eventOption.name}
+                {eventTypes.map(eventType => (
+                  <SelectItem key={eventType.id} value={eventType.name}>
+                    {eventType.name}
                   </SelectItem>
                 ))}
               </SelectContent>
