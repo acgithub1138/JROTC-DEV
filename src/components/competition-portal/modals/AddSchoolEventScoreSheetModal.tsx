@@ -100,10 +100,9 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
             location,
             start_time,
             end_time,
-            cp_events:event (
+            competition_event_types:event (
               id,
-              name,
-              score_sheet
+              name
             )
           )
         `)
@@ -125,7 +124,9 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
     const loadTemplate = async () => {
       if (!selectedCompEventId) { setSelectedTemplate(null); return; }
       const reg = registrations.find(r => r.cp_comp_events?.id === selectedCompEventId);
-      const templateId = reg?.cp_comp_events?.cp_events?.score_sheet as string | undefined;
+      // Note: score_sheet template is no longer directly on competition_event_types
+      // We'll need to get the template ID from the event configuration or another source
+      const templateId = null; // TODO: Need to determine how to get template ID
       if (!templateId) { setSelectedTemplate(null); return; }
       const { data, error } = await supabase
         .from('competition_templates')
@@ -238,7 +239,7 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
               <SelectContent className="bg-background z-50">
                 {registrations.map((reg) => (
                   <SelectItem key={reg.id} value={reg.cp_comp_events?.id}>
-                    {reg.cp_comp_events?.cp_events?.name || 'Unnamed Event'}
+                    {reg.cp_comp_events?.competition_event_types?.name || 'Unnamed Event'}
                   </SelectItem>
                 ))}
               </SelectContent>

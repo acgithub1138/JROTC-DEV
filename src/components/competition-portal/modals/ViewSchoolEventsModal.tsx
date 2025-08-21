@@ -52,9 +52,8 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
             start_time,
             end_time,
             max_participants,
-            cp_events:event (
-              name,
-              description
+            competition_event_types:event (
+              name
             )
           )
         `)
@@ -96,7 +95,7 @@ export const ViewSchoolEventsModal: React.FC<ViewSchoolEventsModalProps> = ({
               {eventRegistrations.map(registration => (
                 <TableRow key={registration.id}>
                   <TableCell className="font-medium py-[6px]">
-                    {registration.cp_comp_events?.cp_events?.name || 'Unknown Event'}
+                    {registration.cp_comp_events?.competition_event_types?.name || 'Unknown Event'}
                   </TableCell>
                   <TableCell>
                     {registration.cp_comp_events?.location || '-'}

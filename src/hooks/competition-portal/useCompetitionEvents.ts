@@ -5,7 +5,7 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
-  cp_events?: { name: string } | null;
+  competition_event_types?: { name: string } | null;
   registration_count?: number;
 };
 type CompEventInsert = Database['public']['Tables']['cp_comp_events']['Insert'];
@@ -25,7 +25,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .from('cp_comp_events')
         .select(`
           *,
-          cp_events:event(name)
+          competition_event_types:event(name)
         `)
         .eq('competition_id', competitionId)
         .order('start_time', { ascending: true });
@@ -71,7 +71,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         })
         .select(`
           *,
-          cp_events:event(name)
+          competition_event_types:event(name)
         `)
         .single();
 
@@ -103,7 +103,7 @@ export const useCompetitionEvents = (competitionId?: string) => {
         .eq('id', id)
         .select(`
           *,
-          cp_events:event(name)
+          competition_event_types:event(name)
         `)
         .single();
 

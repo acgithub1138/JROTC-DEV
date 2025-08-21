@@ -69,7 +69,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
           location,
           start_time,
           end_time,
-          cp_events:event(name)
+          competition_event_types:event(name)
         `)
         .eq('competition_id', competitionId)
         .in('id', registeredEventIds)
@@ -108,10 +108,9 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
       const { data: eventData, error: eventError } = await supabase
         .from('cp_comp_events')
         .select(`
-          cp_events:event (
+          competition_event_types:event (
             id,
-            name,
-            score_sheet
+            name
           )
         `)
         .eq('id', selectedEventId)
@@ -119,7 +118,9 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
 
       if (eventError) throw eventError;
       
-      const templateId = eventData?.cp_events?.score_sheet;
+      // Note: score_sheet template is no longer directly on competition_event_types
+      // We'll need to get the template ID from the event configuration or another source
+      const templateId = null; // TODO: Need to determine how to get template ID
       if (!templateId) return null;
 
       // Then fetch the actual template
@@ -210,7 +211,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
 
       // Get the event details to use the correct event enum value
       const eventDetails = events?.find(e => e.id === selectedEventId);
-      if (!eventDetails?.cp_events?.name) {
+      if (!eventDetails?.competition_event_types?.name) {
         throw new Error('Event not found');
       }
 
@@ -227,7 +228,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
         .insert({
           school_id: userProfile.school_id,
           competition_id: competitionId,
-          event: eventDetails.cp_events.name as any, // Use the event name from cp_events
+          event: eventDetails.competition_event_types.name as any, // Use the event name from competition_event_types
           team_name: teamName || school.school_name,
           score_sheet: {
             template_id: scoreTemplate?.id,
@@ -329,7 +330,7 @@ export const MobileAddSchoolEventScoreSheet: React.FC = () => {
               <SelectContent>
                 {events?.map((event) => (
                   <SelectItem key={event.id} value={event.id}>
-                    {event.cp_events?.name} - {event.location}
+                    {event.competition_event_types?.name} - {event.location}
                   </SelectItem>
                 ))}
               </SelectContent>

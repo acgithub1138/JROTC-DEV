@@ -25,7 +25,7 @@ import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
-  cp_events?: { name: string } | null;
+  competition_event_types?: { name: string } | null;
 };
 type CompEventUpdate = Database['public']['Tables']['cp_comp_events']['Update'];
 
@@ -150,7 +150,7 @@ export const MobileEditEvent: React.FC = () => {
         .from('cp_comp_events')
         .select(`
           *,
-          cp_events:event(name)
+          competition_event_types:event(name)
         `)
         .eq('id', eventId)
         .single();
@@ -375,7 +375,7 @@ export const MobileEditEvent: React.FC = () => {
           </button>
           <div>
             <h1 className="text-2xl font-bold text-foreground">Edit Event</h1>
-            <p className="text-sm text-muted-foreground">{event.cp_events?.name || 'Event Details'}</p>
+            <p className="text-sm text-muted-foreground">{event.competition_event_types?.name || 'Event Details'}</p>
           </div>
         </div>
         <div className="flex items-center gap-2">

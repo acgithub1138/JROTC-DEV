@@ -84,7 +84,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
           id,
           location,
           fee,
-          cp_events:event (
+          competition_event_types:event (
             id,
             name
           )
@@ -92,7 +92,7 @@ export const EditSchoolModal: React.FC<EditSchoolModalProps> = ({
       if (error) throw error;
       return data.map(event => ({
         id: event.id,
-        name: event.cp_events?.name || 'Unknown Event',
+        name: event.competition_event_types?.name || 'Unknown Event',
         location: event.location,
         fee: event.fee || 0
       }));
