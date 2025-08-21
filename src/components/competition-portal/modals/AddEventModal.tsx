@@ -48,6 +48,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     fee: '',
     interval: '',
     notes: '',
+    score_sheet: '',
     judges: [] as string[],
     resources: [] as string[]
   });
@@ -55,6 +56,11 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
   const [judges, setJudges] = useState<Array<{
     id: string;
     name: string;
+  }>>([]);
+  const [scoreSheets, setScoreSheets] = useState<Array<{
+    id: string;
+    template_name: string;
+    jrotc_program: string;
   }>>([]);
   const {
     users: schoolUsers,
@@ -82,6 +88,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     fee: '',
     interval: '',
     notes: '',
+    score_sheet: '',
     judges: [] as string[],
     resources: [] as string[]
   };
@@ -96,8 +103,19 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     if (open) {
       fetchJudges();
       fetchCompetitionDate();
+      fetchScoreSheets();
     }
   }, [open]);
+
+  // Fetch filtered score sheets when event changes
+  useEffect(() => {
+    if (formData.event && eventTypes.length > 0) {
+      const selectedEventType = eventTypes.find(et => et.id === formData.event);
+      if (selectedEventType) {
+        fetchFilteredScoreSheets(selectedEventType.id);
+      }
+    }
+  }, [formData.event, eventTypes]);
 
   const fetchCompetitionDate = async () => {
     try {
@@ -136,6 +154,52 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
     } catch (error) {
       console.error('Error fetching judges:', error);
       toast.error('Failed to load judges');
+    }
+  };
+
+  const fetchScoreSheets = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('competition_templates')
+        .select('id, template_name, jrotc_program')
+        .eq('is_active', true)
+        .order('template_name', { ascending: true });
+      
+      if (error) throw error;
+      setScoreSheets(data || []);
+    } catch (error) {
+      console.error('Error fetching score sheets:', error);
+      toast.error('Failed to load score sheets');
+    }
+  };
+
+  const fetchFilteredScoreSheets = async (eventId: string) => {
+    try {
+      // Get the event details to find its JROTC program
+      const { data: eventData, error: eventError } = await supabase
+        .from('cp_events')
+        .select('jrotc_program')
+        .eq('id', eventId)
+        .single();
+
+      if (eventError) throw eventError;
+
+      if (eventData?.jrotc_program) {
+        const { data, error } = await supabase
+          .from('competition_templates')
+          .select('id, template_name, jrotc_program')
+          .eq('is_active', true)
+          .eq('jrotc_program', eventData.jrotc_program)
+          .order('template_name', { ascending: true });
+        
+        if (error) throw error;
+        setScoreSheets(data || []);
+      } else {
+        setScoreSheets([]);
+      }
+    } catch (error) {
+      console.error('Error fetching filtered score sheets:', error);
+      toast.error('Failed to load score sheets');
     }
   };
   const addJudge = (judgeId: string) => {
@@ -249,6 +313,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         fee: formData.fee ? parseFloat(formData.fee) : null,
         interval: formData.interval ? parseInt(formData.interval) : null,
         notes: formData.notes || null,
+        score_sheet: formData.score_sheet || null,
         judges: formData.judges,
         resources: formData.resources
       };
@@ -272,6 +337,7 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
         fee: '',
         interval: '',
         notes: '',
+        score_sheet: '',
         judges: [],
         resources: []
       });
@@ -633,6 +699,25 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
                     </Badge>)}
                 </div>}
             </div>
+          </div>
+
+          <div>
+            <Label htmlFor="score_sheet">Score Sheet Template</Label>
+            <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
+              ...prev,
+              score_sheet: value
+            }))}>
+              <SelectTrigger>
+                <SelectValue placeholder="Select a score sheet template" />
+              </SelectTrigger>
+              <SelectContent>
+                {scoreSheets.map(sheet => (
+                  <SelectItem key={sheet.id} value={sheet.id}>
+                    {sheet.template_name}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div>
