@@ -141,7 +141,7 @@ export const OpenCompetitionsPage = () => {
         error
       } = await supabase.from('cp_comp_events').select(`
           *,
-          event:cp_events(name, description)
+          competition_event_types:event(name, description)
         `).eq('competition_id', selectedCompetitionId).order('start_time', {
         ascending: true
       });

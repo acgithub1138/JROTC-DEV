@@ -150,7 +150,7 @@ export const MobileEditEvent: React.FC = () => {
         .from('cp_comp_events')
         .select(`
           *,
-          competition_event_types:event(name)
+          competition_event_types:event(name, description)
         `)
         .eq('id', eventId)
         .single();

@@ -80,7 +80,7 @@ export const MobileHostResults: React.FC = () => {
 
         // Process the data to create event results
         const eventResults: EventResult[] = (eventsData || []).map(event => {
-          const eventName = event.cp_events?.name || 'Unknown Event';
+          const eventName = event.competition_event_types?.name || 'Unknown Event';
           const registeredSchools = (event.cp_event_registrations || [])
             .filter((reg: any) => reg.status === 'registered')
             .length;

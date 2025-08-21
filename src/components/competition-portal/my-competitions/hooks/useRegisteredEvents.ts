@@ -25,7 +25,7 @@ export const useRegisteredEvents = (competitionId?: string) => {
           cp_comp_events!inner(
             id,
             event,
-            competition_event_types:event(name)
+            competition_event_types:event(name, description)
           )
         `)
         .eq('competition_id', competitionId)

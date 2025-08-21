@@ -82,7 +82,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
         .from('cp_comp_events')
         .select(`
           id,
-          event:cp_events(name, description),
+          competition_event_types:event(name, description),
           fee,
           start_time,
           end_time,
@@ -97,8 +97,8 @@ export const MobileCompetitionRegistration: React.FC = () => {
 
       const formattedEvents = eventsData.map(event => ({
         id: event.id,
-        name: event.event?.name || 'Unknown Event',
-        description: event.event?.description,
+        name: event.competition_event_types?.name || 'Unknown Event',
+        description: event.competition_event_types?.description,
         fee: event.fee || 0,
         start_time: event.start_time,
         end_time: event.end_time,
