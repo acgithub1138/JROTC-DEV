@@ -622,7 +622,7 @@ export const MobileCompetitionRegistration: React.FC = () => {
               <MapPin size={12} className="mr-1" />
               <button
                 onClick={() => {
-                  const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`;
+                  const mapsUrl = `https://www.google.com/maps/place/${competition.location.replace(/ /g, '+')}`;
                   window.open(mapsUrl, '_blank');
                 }}
                 className="text-xs text-left hover:text-primary transition-colors"

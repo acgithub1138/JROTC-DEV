@@ -286,7 +286,7 @@ export const MobileCalendar: React.FC = () => {
                         <div className="flex items-start gap-1 mt-1 text-sm text-muted-foreground">
                           <MapPin size={14} className="mt-0.5 flex-shrink-0" />
                           <a
-                            href={`https://maps.google.com/?q=${encodeURIComponent(event.location)}`}
+                            href={`https://www.google.com/maps/place/${event.location.replace(/ /g, '+')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="hover:text-foreground transition-colors"

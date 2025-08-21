@@ -164,7 +164,7 @@ export const MobileOpenCompetitions: React.FC = () => {
                             competition.zip
                           ].filter(Boolean);
                           const fullAddress = addressParts.join(', ');
-                          const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+                          const mapsUrl = `https://www.google.com/maps/place/${fullAddress.replace(/ /g, '+')}`;
                           window.open(mapsUrl, '_blank');
                         }}
                         className="text-xs text-left hover:text-primary transition-colors"
@@ -269,7 +269,7 @@ export const MobileOpenCompetitions: React.FC = () => {
                                 competition.zip
                               ].filter(Boolean);
                               const fullAddress = addressParts.join(', ');
-                              const mapsUrl = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(fullAddress)}`;
+                              const mapsUrl = `https://www.google.com/maps/place/${fullAddress.replace(/ /g, '+')}`;
                               window.open(mapsUrl, '_blank');
                             }}
                             className="text-xs text-left hover:text-primary transition-colors"

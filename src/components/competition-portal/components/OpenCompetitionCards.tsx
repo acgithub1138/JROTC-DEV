@@ -91,7 +91,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                 <span>
                   <div>
                     <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                      href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="text-primary hover:underline cursor-pointer"
@@ -101,7 +101,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                   </div>
                   <div>
                     <a 
-                      href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent([competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', '))}`}
+                      href={`https://www.google.com/maps/place/${[competition.address, competition.city, competition.state, competition.zip].filter(Boolean).join(', ').replace(/ /g, '+')}`}
                       target="_blank"
                       rel="noopener noreferrer"
                       className="block text-primary hover:underline cursor-pointer"

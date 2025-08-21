@@ -198,7 +198,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                         <div className="flex items-center gap-2">
                           <MapPin className="w-4 h-4" />
                           <a 
-                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`}
+                            href={`https://www.google.com/maps/place/${competition.location.replace(/ /g, '+')}`}
                             target="_blank"
                             rel="noopener noreferrer"
                             className="text-primary hover:underline cursor-pointer"
