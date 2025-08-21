@@ -128,6 +128,19 @@ export const useCompetitionReports = (selectedEvent: string | null, selectedComp
 
       console.log('Raw competition data received:', data);
       console.log('Number of records found:', data?.length || 0);
+      console.log('Selected competitions:', selectedCompetitions);
+      
+      // Debug: Check each selected competition
+      if (selectedCompetitions && selectedCompetitions.length > 0) {
+        console.log('Checking data for each selected competition:');
+        selectedCompetitions.forEach(compId => {
+          const compData = data?.filter(item => item.competition_id === compId);
+          console.log(`Competition ${compId}: found ${compData?.length || 0} Armed Inspection records`);
+          if (compData && compData.length > 0) {
+            console.log(`Sample data for ${compId}:`, compData[0]);
+          }
+        });
+      }
       
       if (data && data.length > 0) {
         console.log('Sample score sheet structure:', data[0]?.score_sheet);
