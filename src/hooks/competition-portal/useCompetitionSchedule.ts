@@ -62,7 +62,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         .select(`
           id,
           location,
-          event:cp_events(name),
+          event,
           start_time,
           end_time,
           interval,
@@ -73,6 +73,21 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         .abortSignal(abortController.signal);
 
       if (eventsError) throw eventsError;
+
+      // Fetch event types separately
+      const eventIds = eventsData?.map(e => e.event).filter(Boolean) || [];
+      const { data: eventTypesData, error: eventTypesError } = await supabase
+        .from('competition_event_types')
+        .select('id, name')
+        .in('id', eventIds)
+        .abortSignal(abortController.signal);
+
+      if (eventTypesError) throw eventTypesError;
+
+      // Create event types map
+      const eventTypesMap = new Map(
+        eventTypesData?.map(et => [et.id, et.name]) || []
+      );
 
       // Fetch all schedule slots for this competition
       const { data: schedulesData, error: schedulesError } = await supabase
@@ -155,7 +170,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
         return {
           id: event.id,
-          event_name: event.event?.name || 'Unknown Event',
+          event_name: eventTypesMap.get(event.event) || 'Unknown Event',
           event_location: event.location,
           start_time: event.start_time,
           end_time: event.end_time,
