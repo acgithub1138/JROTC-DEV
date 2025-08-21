@@ -256,21 +256,6 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                         <span className="text-sm">{placement.event_name}</span>
                         {canEdit && (
                           <div className="flex items-center gap-1 ml-2">
-                            <Select
-                              value={placement.placement?.toString() || ''}
-                              onValueChange={(value) => handleUpdatePlacement(placement.id, parseInt(value))}
-                            >
-                              <SelectTrigger className="w-16 h-7 text-xs">
-                                <SelectValue />
-                              </SelectTrigger>
-                              <SelectContent>
-                                {placementOptions.map((option) => (
-                                  <SelectItem key={option.value} value={option.value}>
-                                    {option.value}
-                                  </SelectItem>
-                                ))}
-                              </SelectContent>
-                            </Select>
                             <Button
                               variant="ghost"
                               size="sm"
