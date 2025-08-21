@@ -33,8 +33,8 @@ export const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
   const handleAddNew = async () => {
     if (newValue.trim()) {
       try {
-        await addEventType(newValue.trim());
-        onValueChange(newValue.trim());
+        const newEventType = await addEventType(newValue.trim());
+        onValueChange(newEventType.id); // Use the UUID
         setNewValue('');
         setShowAddNew(false);
         setOpen(false);
@@ -58,6 +58,10 @@ export const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
     onValueChange(selectedValue);
     setOpen(false);
   };
+
+  // Find the selected event type to display its name
+  const selectedEventType = eventTypes.find(et => et.id === value);
+  const displayValue = selectedEventType ? selectedEventType.name : value;
 
   if (showAddNew) {
     return (
@@ -104,7 +108,7 @@ export const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
           className="w-full justify-between"
           disabled={disabled}
         >
-          {value || placeholder}
+          {displayValue || placeholder}
           <ChevronDown className="ml-2 h-4 w-4 shrink-0 opacity-50" />
         </Button>
       </DropdownMenuTrigger>
@@ -119,12 +123,12 @@ export const EventTypeSelect: React.FC<EventTypeSelectProps> = ({
               eventTypes.map((eventType) => (
                 <DropdownMenuItem
                   key={eventType.id}
-                  onClick={() => handleSelectExisting(eventType.name)}
+                  onClick={() => handleSelectExisting(eventType.id)}
                 >
                   <Check
                     className={cn(
                       "mr-2 h-4 w-4",
-                      value === eventType.name ? "opacity-100" : "opacity-0"
+                      value === eventType.id ? "opacity-100" : "opacity-0"
                     )}
                   />
                   {eventType.name}

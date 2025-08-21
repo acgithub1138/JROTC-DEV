@@ -10,6 +10,7 @@ import { JsonFieldBuilder } from './JsonFieldBuilder';
 import { EventTypeSelect } from './EventTypeSelect';
 import { useCompetitionTemplates } from '../hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
+import { useCompetitionEventTypes } from '../hooks/useCompetitionEventTypes';
 import type { Database } from '@/integrations/supabase/types';
 type DatabaseCompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
 interface TemplateFormProps {
@@ -27,11 +28,27 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
   useBuilder
 }) => {
   const { templates } = useCompetitionTemplates();
+  const { eventTypes } = useCompetitionEventTypes();
   const { userProfile } = useAuth();
+  
+  // Helper function to get event UUID from name or return UUID if already valid
+  const getEventUuid = (eventValue: string | undefined | null): string => {
+    if (!eventValue) return '';
+    
+    // Check if it's already a UUID (36 characters with dashes)
+    if (eventValue.length === 36 && eventValue.includes('-')) {
+      return eventValue;
+    }
+    
+    // Otherwise, find the event type by name and return its UUID
+    const eventType = eventTypes.find(et => et.name === eventValue);
+    return eventType ? eventType.id : '';
+  };
+  
   const [formData, setFormData] = useState({
     template_name: template?.template_name || '',
     description: (template as any)?.description || '',
-    event: template?.event || 'Armed Regulation',
+    event: getEventUuid(template?.event) || '',
     jrotc_program: template?.jrotc_program || 'air_force',
     scores: typeof template?.scores === 'object' && template?.scores !== null ? template.scores as Record<string, any> : {} as Record<string, any>,
     is_active: template?.is_active ?? true,
@@ -92,9 +109,11 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
     }
   };
   // Auto-generate template name based on program and event
-  const generateTemplateName = (program: string, event: string): string => {
+  const generateTemplateName = (program: string, eventId: string): string => {
     const programLabel = programOptions.find(p => p.value === program)?.label || program;
-    const baseName = `${programLabel} - ${event}`;
+    const eventType = eventTypes.find(et => et.id === eventId);
+    const eventName = eventType ? eventType.name : eventId;
+    const baseName = `${programLabel} - ${eventName}`;
     
     // Check if this exact name exists
     const existingTemplates = templates.filter(t => 
@@ -128,7 +147,20 @@ export const TemplateForm: React.FC<TemplateFormProps> = ({
         template_name: newName
       }));
     }
-  }, [formData.jrotc_program, formData.event, templates, template]);
+  }, [formData.jrotc_program, formData.event, templates, template, eventTypes]);
+
+  // Update form data when eventTypes are loaded and we have a template with a name-based event
+  useEffect(() => {
+    if (template && eventTypes.length > 0 && template.event) {
+      const correctEventId = getEventUuid(template.event);
+      if (correctEventId && correctEventId !== formData.event) {
+        setFormData(prev => ({
+          ...prev,
+          event: correctEventId
+        }));
+      }
+    }
+  }, [eventTypes, template]);
 
   const updateFormData = (field: string, value: any) => {
     setFormData(prev => ({
