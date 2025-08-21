@@ -29,6 +29,49 @@ const ParentRegistrationPage = () => {
     email: '',
     password: ''
   });
+
+  const [validationErrors, setValidationErrors] = useState({
+    phone: '',
+    email: ''
+  });
+
+  const formatPhoneNumber = (value: string) => {
+    const cleaned = value.replace(/\D/g, '');
+    if (cleaned.length <= 3) return cleaned;
+    if (cleaned.length <= 6) return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3)}`;
+    return `(${cleaned.slice(0, 3)}) ${cleaned.slice(3, 6)}-${cleaned.slice(6, 10)}`;
+  };
+
+  const validateEmail = (email: string) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    return emailRegex.test(email);
+  };
+
+  const validatePhone = (phone: string) => {
+    const cleaned = phone.replace(/\D/g, '');
+    return cleaned.length === 10;
+  };
+
+  const handlePhoneChange = (value: string) => {
+    const formatted = formatPhoneNumber(value);
+    setParentData({ ...parentData, phone: formatted });
+    
+    if (value && !validatePhone(formatted)) {
+      setValidationErrors(prev => ({ ...prev, phone: 'Please enter a valid 10-digit phone number' }));
+    } else {
+      setValidationErrors(prev => ({ ...prev, phone: '' }));
+    }
+  };
+
+  const handleEmailChange = (value: string) => {
+    setParentData({ ...parentData, email: value });
+    
+    if (value && !validateEmail(value)) {
+      setValidationErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+    } else {
+      setValidationErrors(prev => ({ ...prev, email: '' }));
+    }
+  };
   const handleCadetEmailSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
@@ -75,6 +118,28 @@ const ParentRegistrationPage = () => {
   };
   const handleParentRegistration = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Check for validation errors before submitting
+    if (validationErrors.phone || validationErrors.email) {
+      toast({
+        title: "Validation Error",
+        description: "Please fix the validation errors before submitting.",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    // Validate required fields
+    if (!validatePhone(parentData.phone)) {
+      setValidationErrors(prev => ({ ...prev, phone: 'Please enter a valid 10-digit phone number' }));
+      return;
+    }
+
+    if (!validateEmail(parentData.email)) {
+      setValidationErrors(prev => ({ ...prev, email: 'Please enter a valid email address' }));
+      return;
+    }
+
     setLoading(true);
     try {
       // First, get the cadet profile info for school_id
@@ -212,18 +277,33 @@ const ParentRegistrationPage = () => {
                 
                 <div className="space-y-2">
                   <Label htmlFor="phone">Phone Number</Label>
-                  <Input id="phone" type="tel" placeholder="Phone number" value={parentData.phone} onChange={e => setParentData({
-                ...parentData,
-                phone: e.target.value
-              })} required />
+                  <Input 
+                    id="phone" 
+                    type="tel" 
+                    placeholder="(xxx) xxx-xxxx" 
+                    value={parentData.phone} 
+                    onChange={e => handlePhoneChange(e.target.value)} 
+                    maxLength={14}
+                    required 
+                  />
+                  {validationErrors.phone && (
+                    <p className="text-sm text-red-500">{validationErrors.phone}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
                   <Label htmlFor="email">Email Address</Label>
-                  <Input id="email" type="email" placeholder="Your email address" value={parentData.email} onChange={e => setParentData({
-                ...parentData,
-                email: e.target.value
-              })} required />
+                  <Input 
+                    id="email" 
+                    type="email" 
+                    placeholder="Your email address" 
+                    value={parentData.email} 
+                    onChange={e => handleEmailChange(e.target.value)} 
+                    required 
+                  />
+                  {validationErrors.email && (
+                    <p className="text-sm text-red-500">{validationErrors.email}</p>
+                  )}
                 </div>
                 
                 <div className="space-y-2">
