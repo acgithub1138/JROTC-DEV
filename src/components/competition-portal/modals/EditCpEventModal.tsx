@@ -9,6 +9,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { JROTC_PROGRAM_OPTIONS } from '../../competition-management/utils/constants';
 import { useCompetitionTemplates } from '../../competition-management/hooks/useCompetitionTemplates';
+import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 import type { Database } from '@/integrations/supabase/types';
 type CpEvent = Database['public']['Tables']['cp_events']['Row'];
 type CpEventUpdate = Database['public']['Tables']['cp_events']['Update'];
@@ -27,6 +28,7 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
   onSuccess
 }) => {
   const { templates, isLoading: templatesLoading } = useCompetitionTemplates();
+  const { eventTypes, isLoading: eventTypesLoading } = useCompetitionEventTypes();
   
   const [formData, setFormData] = useState({
     name: '',
@@ -94,11 +96,11 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!event || !formData.name.trim()) return;
+    if (!event || !formData.name) return;
     setIsLoading(true);
     try {
       await onEventUpdate(event.id, {
-        name: formData.name.trim(),
+        name: formData.name,
         description: formData.description.trim() || null,
         score_sheet: formData.score_sheet.trim() || null,
         jrotc_program: formData.jrotc_program as any || null
@@ -124,10 +126,21 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <Label htmlFor="name">Event Name *</Label>
-              <Input id="name" value={formData.name} onChange={e => setFormData(prev => ({
-              ...prev,
-              name: e.target.value
-            }))} placeholder="Enter event name" required />
+              <Select value={formData.name} onValueChange={value => setFormData(prev => ({
+                ...prev,
+                name: value
+              }))}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select event name" />
+                </SelectTrigger>
+                <SelectContent>
+                  {eventTypes.map(eventType => (
+                    <SelectItem key={eventType.id} value={eventType.name}>
+                      {eventType.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
@@ -178,7 +191,7 @@ export const EditCpEventModal: React.FC<EditCpEventModalProps> = ({
               <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>
                 Cancel
               </Button>
-              <Button type="submit" disabled={isLoading || !formData.name.trim()}>
+              <Button type="submit" disabled={isLoading || !formData.name || eventTypesLoading}>
                 {isLoading ? 'Updating...' : 'Update Event'}
               </Button>
             </div>
