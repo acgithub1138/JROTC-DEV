@@ -100,6 +100,7 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
             location,
             start_time,
             end_time,
+            score_sheet,
             competition_event_types:event (
               id,
               name
@@ -119,25 +120,34 @@ export const AddSchoolEventScoreSheetModal: React.FC<AddSchoolEventScoreSheetMod
     loadRegistrations();
   }, [open, schoolInfo?.school_id, competitionId]);
 
-  // When event selection changes, fetch its assigned template via cp_events.score_sheet
+  // When event selection changes, fetch its assigned template via cp_comp_events.score_sheet
   useEffect(() => {
     const loadTemplate = async () => {
-      if (!selectedCompEventId) { setSelectedTemplate(null); return; }
+      if (!selectedCompEventId) { 
+        setSelectedTemplate(null); 
+        return; 
+      }
+      
       const reg = registrations.find(r => r.cp_comp_events?.id === selectedCompEventId);
-      // Note: score_sheet template is no longer directly on competition_event_types
-      // We'll need to get the template ID from the event configuration or another source
-      const templateId = null; // TODO: Need to determine how to get template ID
-      if (!templateId) { setSelectedTemplate(null); return; }
+      const templateId = reg?.cp_comp_events?.score_sheet;
+      
+      if (!templateId) { 
+        setSelectedTemplate(null); 
+        return; 
+      }
+      
       const { data, error } = await supabase
         .from('competition_templates')
         .select('*')
         .eq('id', templateId)
         .maybeSingle();
+        
       if (error) {
         console.error(error);
         toast.error('Failed to load score sheet template');
         return;
       }
+      
       setSelectedTemplate(data);
       // Reset scores when template changes
       setScores({});
