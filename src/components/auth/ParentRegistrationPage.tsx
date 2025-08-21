@@ -178,11 +178,16 @@ const ParentRegistrationPage = () => {
       const cadetProfile = cadetProfileData[0];
 
       // Get parent role ID
+      console.log("Looking up parent role...");
       const {
         data: parentRole,
         error: roleError
       } = await supabase.from('user_roles').select('id').eq('role_name', 'parent').single();
+      
+      console.log("Parent role lookup result:", { parentRole, roleError });
+      
       if (roleError || !parentRole) {
+        console.error("Parent role lookup failed:", roleError);
         toast({
           title: "Error",
           description: "Parent role not found in system.",
