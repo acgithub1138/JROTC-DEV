@@ -47,7 +47,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   if (isLoading) {
     return (
-      <Card className="h-[500px] flex flex-col">
+      <Card className="h-[400px] flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Performance Trends</CardTitle>
@@ -70,7 +70,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
 
   if (data.length === 0 || visibleCriteria.length === 0) {
     return (
-      <Card className="h-[500px] flex flex-col">
+      <Card className="h-[400px] flex flex-col">
         <CardHeader>
           <CardTitle>Performance Trends</CardTitle>
         </CardHeader>
@@ -89,7 +89,7 @@ export const PerformanceChart: React.FC<PerformanceChartProps> = ({
   }
 
   return (
-      <Card className="h-[500px] flex flex-col">
+      <Card className="h-[400px] flex flex-col">
         <CardHeader>
           <div className="flex items-center justify-between">
             <CardTitle>Performance Trends</CardTitle>
