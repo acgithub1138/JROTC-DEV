@@ -162,11 +162,22 @@ const AuthPage = () => {
               
             </div>
             
-            <div className="mt-6 p-4 bg-blue-50 rounded-lg">
-              <p className="text-sm text-blue-800 text-center">
-                <strong>New User?</strong><br />
-                Contact your administrator or instructor to create your account.
-              </p>
+            <div className="mt-6 space-y-3">
+              <Button
+                type="button"
+                variant="outline"
+                className="w-full border-blue-600 text-blue-600 hover:bg-blue-50"
+                onClick={() => navigate('/parent-register')}
+              >
+                New Parent Login
+              </Button>
+              
+              <div className="p-4 bg-blue-50 rounded-lg">
+                <p className="text-sm text-blue-800 text-center">
+                  <strong>New Staff or Cadet?</strong><br />
+                  Contact your administrator or instructor to create your account.
+                </p>
+              </div>
             </div>
           </CardContent>
         </Card>

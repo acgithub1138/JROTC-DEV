@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -56,6 +57,7 @@ import { MobileEventResultsView } from "@/components/mobile/competition-portal/p
 import { MobileManageCompetition } from "@/components/mobile/competition-portal/pages/MobileManageCompetition";
 import { MobileCompetitionRegistration } from "@/components/mobile/competition-portal/pages/MobileCompetitionRegistration";
 import ResetPasswordPage from "@/pages/ResetPasswordPage";
+import ParentRegistrationPage from "@/components/auth/ParentRegistrationPage";
 const queryClient = new QueryClient();
 
 const App = () => (
@@ -263,6 +265,9 @@ const App = () => (
 
               {/* Password Reset Route - Now inside AuthProvider */}
               <Route path="/reset-password" element={<ResetPasswordPage />} />
+              
+              {/* Parent Registration Route */}
+              <Route path="/parent-register" element={<ParentRegistrationPage />} />
 
               {/* Protected Application Routes */}
               <Route 
