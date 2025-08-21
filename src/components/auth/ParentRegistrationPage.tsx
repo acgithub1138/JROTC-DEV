@@ -140,6 +140,9 @@ const ParentRegistrationPage = () => {
       return;
     }
 
+    console.log("Parent registration data:", parentData);
+    console.log("Cadet info from step 1:", cadetInfo);
+    
     setLoading(true);
     try {
       // Get cadet info using the secure database function
@@ -147,8 +150,10 @@ const ParentRegistrationPage = () => {
         data: cadetProfileData,
         error: cadetError
       } = await supabase.rpc('get_cadet_info_for_parent_registration', {
-        email_param: cadetInfo?.email
+        email_param: cadetInfo.email
       });
+      
+      console.log("Database response:", { cadetProfileData, cadetError });
       
       if (cadetError) {
         console.error("Error getting cadet info:", cadetError);
