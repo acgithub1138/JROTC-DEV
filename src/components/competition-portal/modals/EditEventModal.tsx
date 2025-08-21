@@ -93,8 +93,12 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         ? formatTimeForDisplay((event as any).lunch_end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
         : '';
 
+      // Find the matching event type by name
+      const eventTypeName = event.cp_events?.name || '';
+      const matchingEventType = eventTypes.find(et => et.name === eventTypeName);
+      
       const newFormData = {
-        event: event.event || '',
+        event: matchingEventType?.id || '',
         location: event.location || '',
         start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
         start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
@@ -226,6 +230,23 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
     setIsLoading(true);
     try {
+      // Find the cp_event UUID that matches the selected event type
+      let eventUuid = formData.event;
+      if (formData.event) {
+        const selectedEventType = eventTypes.find(et => et.id === formData.event);
+        if (selectedEventType) {
+          // Find the cp_event with matching name
+          const { data: cpEvents } = await supabase
+            .from('cp_events')
+            .select('id, name')
+            .eq('name', selectedEventType.name)
+            .single();
+          
+          if (cpEvents) {
+            eventUuid = cpEvents.id;
+          }
+        }
+      }
       // Convert school timezone to UTC for database storage
       const startDateTime = formData.start_date && formData.start_time_hour && formData.start_time_minute
         ? convertFromSchoolTimezone(
@@ -257,7 +278,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         : null;
 
       const updates: CompEventUpdate = {
-        event: formData.event,
+        event: eventUuid,
         location: formData.location || null,
         start_time: startDateTime,
         end_time: endDateTime,
