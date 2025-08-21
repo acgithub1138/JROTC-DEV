@@ -11,6 +11,9 @@ export interface CompetitionEvent {
   source_type?: string;
   created_at: string;
   updated_at: string;
+  competition_event_types?: {
+    name: string;
+  };
   profiles?: Array<{
     id: string;
     first_name: string;

@@ -13,7 +13,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
   selectedEvent,
   onEventChange
 }) => {
-  const uniqueEventTypes = [...new Set(events.map(event => event.event))];
+  const uniqueEventTypes = [...new Set(events.map(event => event.competition_event_types?.name).filter(Boolean))];
 
   return (
     <div className="flex gap-4 items-center">
@@ -25,7 +25,7 @@ export const EventSelector: React.FC<EventSelectorProps> = ({
         <SelectContent>
           {uniqueEventTypes.map((eventType) => (
             <SelectItem key={eventType} value={eventType}>
-              {eventType} ({events.filter(e => e.event === eventType).length} score sheets)
+              {eventType} ({events.filter(e => e.competition_event_types?.name === eventType).length} score sheets)
             </SelectItem>
           ))}
         </SelectContent>

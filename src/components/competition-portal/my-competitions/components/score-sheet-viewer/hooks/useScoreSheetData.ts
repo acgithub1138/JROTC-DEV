@@ -32,7 +32,10 @@ export const useScoreSheetData = (competition: any, open: boolean) => {
           source_competition_id,
           source_type,
           created_at,
-          updated_at
+          updated_at,
+          competition_event_types!inner(
+            name
+          )
         `)
         .or(`competition_id.eq.${compId},source_competition_id.eq.${compId}`)
         .order('created_at', { ascending: true });
