@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -99,20 +98,25 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
 
   if (isLoading) {
     return (
-      <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-        {[...Array(6)].map((_, i) => (
-          <Card key={i} className="animate-pulse">
-            <CardHeader>
-              <div className="h-6 bg-muted rounded w-3/4"></div>
-              <div className="h-4 bg-muted rounded w-1/2"></div>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                <div className="h-4 bg-muted rounded"></div>
-                <div className="h-4 bg-muted rounded w-2/3"></div>
+      <div className="space-y-4">
+        {[...Array(3)].map((_, i) => (
+          <div key={i} className="border rounded-lg bg-card animate-pulse">
+            <div className="p-4 border-b bg-muted/30">
+              <div className="flex items-center justify-between">
+                <div className="flex-1">
+                  <div className="h-6 bg-muted rounded w-1/3 mb-2"></div>
+                  <div className="h-4 bg-muted rounded w-1/4"></div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="h-6 bg-muted rounded w-16"></div>
+                  <div className="h-8 bg-muted rounded w-32"></div>
+                </div>
               </div>
-            </CardContent>
-          </Card>
+            </div>
+            <div className="p-4">
+              <div className="h-4 bg-muted rounded w-1/2"></div>
+            </div>
+          </div>
         ))}
       </div>
     );
@@ -165,7 +169,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
   };
 
   return (
-    <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+    <div className="space-y-4">
       {competitions.map((competition) => {
         const competitionPlacements = getPlacementsForCompetition(
           competition.source_competition_id,
@@ -173,54 +177,94 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
         );
 
         return (
-          <Card key={competition.id} className="transition-shadow hover:shadow-md">
-            <CardHeader>
-              <div className="flex items-start justify-between">
-                <div className="flex-1">
-                  <CardTitle 
-                    className="text-lg cursor-pointer hover:text-primary"
-                    onClick={() => onView?.(competition)}
-                  >
-                    {competition.name}
-                  </CardTitle>
-                  <div className="flex items-center gap-2 mt-2 text-sm text-muted-foreground">
-                    <Calendar className="w-4 h-4" />
-                    {new Date(competition.competition_date).toLocaleDateString()}
-                  </div>
-                  {competition.location && (
-                    <div className="flex items-center gap-2 mt-1 text-sm text-muted-foreground">
-                      <MapPin className="w-4 h-4" />
-                      {competition.location}
-                    </div>
-                  )}
-                </div>
-                <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
-                  {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
-                </Badge>
-              </div>
-            </CardHeader>
-            
-            <CardContent>
-              <div className="space-y-4">
-                {/* Existing Placements */}
-                {competitionPlacements.length > 0 && (
-                  <div className="space-y-2">
-                    <h4 className="font-medium text-sm">Placements</h4>
-                    {competitionPlacements.map((placement) => (
-                      <div key={placement.id} className="flex items-center justify-between p-2 bg-muted/50 rounded-lg">
+          <div key={competition.id} className="border rounded-lg bg-card transition-shadow hover:shadow-md animate-fade-in">
+            {/* Header Row */}
+            <div className="p-4 border-b bg-muted/30">
+              <div className="flex items-center justify-between">
+                <div className="flex items-center gap-4">
+                  <div className="flex-1">
+                    <h3 
+                      className="text-lg font-semibold cursor-pointer hover:text-primary transition-colors"
+                      onClick={() => onView?.(competition)}
+                    >
+                      {competition.name}
+                    </h3>
+                    <div className="flex items-center gap-6 mt-1 text-sm text-muted-foreground">
+                      <div className="flex items-center gap-2">
+                        <Calendar className="w-4 h-4" />
+                        {new Date(competition.competition_date).toLocaleDateString()}
+                      </div>
+                      {competition.location && (
                         <div className="flex items-center gap-2">
-                          <Badge className={getPlacementColor(placement.placement)}>
-                            {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
-                          </Badge>
-                          <span className="text-sm">{placement.event_name}</span>
+                          <MapPin className="w-4 h-4" />
+                          <a 
+                            href={`https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(competition.location)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-primary hover:underline cursor-pointer"
+                          >
+                            {competition.location}
+                          </a>
                         </div>
+                      )}
+                    </div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-3">
+                  <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
+                    {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
+                  </Badge>
+                  {/* Action Buttons */}
+                  <div className="flex items-center gap-2">
+                    {onView && (
+                      <Button variant="outline" size="sm" onClick={() => onView(competition)}>
+                        <FileText className="w-4 h-4 mr-2" />
+                        View Score Cards
+                      </Button>
+                    )}
+                    {onEdit && competition.source_type === 'internal' && canEdit && (
+                      <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
+                        <Edit className="w-4 h-4 mr-2" />
+                        Edit
+                      </Button>
+                    )}
+                    {onAddEvent && canAddEvent && (
+                      <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)}>
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Event
+                      </Button>
+                    )}
+                    {onDelete && competition.source_type === 'internal' && canDelete && (
+                      <Button variant="destructive" size="sm" onClick={() => onDelete(competition)}>
+                        <Trash2 className="w-4 h-4 mr-2" />
+                        Delete
+                      </Button>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            {/* Placements and Controls Row */}
+            <div className="p-4">
+              {/* Existing Placements */}
+              {competitionPlacements.length > 0 && (
+                <div className="mb-4">
+                  <h4 className="font-medium text-sm mb-2">Placements</h4>
+                  <div className="flex flex-wrap gap-2">
+                    {competitionPlacements.map((placement) => (
+                      <div key={placement.id} className="flex items-center gap-2 p-2 bg-muted/50 rounded-lg">
+                        <Badge className={getPlacementColor(placement.placement)}>
+                          {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
+                        </Badge>
+                        <span className="text-sm">{placement.event_name}</span>
                         {canEdit && (
-                          <div className="flex items-center gap-1">
+                          <div className="flex items-center gap-1 ml-2">
                             <Select
                               value={placement.placement?.toString() || ''}
                               onValueChange={(value) => handleUpdatePlacement(placement.id, parseInt(value))}
                             >
-                              <SelectTrigger className="w-16 h-8">
+                              <SelectTrigger className="w-16 h-7 text-xs">
                                 <SelectValue />
                               </SelectTrigger>
                               <SelectContent>
@@ -235,7 +279,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                               variant="ghost"
                               size="sm"
                               onClick={() => handleDeletePlacement(placement.id)}
-                              className="h-8 w-8 p-0"
+                              className="h-7 w-7 p-0"
                             >
                               <Trash2 className="w-3 h-3" />
                             </Button>
@@ -244,13 +288,15 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                       </div>
                     ))}
                   </div>
-                )}
+                </div>
+              )}
 
-                {/* Add New Placement */}
-                {canEdit && editingPlacement?.competitionId === competition.source_competition_id && 
-                 editingPlacement?.source === competition.source_type ? (
-                  <div className="space-y-2 p-3 border rounded-lg bg-background">
-                    {/* Event Name Dropdown - conditional based on competition source */}
+              {/* Add New Placement */}
+              {canEdit && editingPlacement?.competitionId === competition.source_competition_id && 
+               editingPlacement?.source === competition.source_type ? (
+                <div className="space-y-2 p-3 border rounded-lg bg-background">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
+                    {/* Event Name Dropdown */}
                     <Select value={newEventName} onValueChange={setNewEventName}>
                       <SelectTrigger>
                         <SelectValue placeholder="Select event" />
@@ -297,71 +343,42 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                         ))}
                       </SelectContent>
                     </Select>
-                    <div className="flex gap-2">
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddPlacement(competition.source_competition_id, competition.source_type, competition)}
-                      >
-                        Add
-                      </Button>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => {
-                          setEditingPlacement(null);
-                          setNewEventName('');
-                          setNewPlacement('');
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                    </div>
                   </div>
-                ) : canEdit ? (
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setEditingPlacement({
-                      competitionId: competition.source_competition_id,
-                      source: competition.source_type
-                    })}
-                    className="w-full"
-                  >
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Placement
-                  </Button>
-                ) : null}
-
-                {/* Action Buttons */}
-                <div className="flex gap-2 pt-2">
-                  {onView && (
-                    <Button variant="outline" size="sm" onClick={() => onView(competition)}>
-                      <FileText className="w-4 h-4 mr-2" />
-                      View Score Cards
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleAddPlacement(competition.source_competition_id, competition.source_type, competition)}
+                    >
+                      Add
                     </Button>
-                  )}
-                  {onEdit && competition.source_type === 'internal' && canEdit && (
-                    <Button variant="outline" size="sm" onClick={() => onEdit(competition)}>
-                      <Edit className="w-4 h-4 mr-2" />
-                      Edit
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => {
+                        setEditingPlacement(null);
+                        setNewEventName('');
+                        setNewPlacement('');
+                      }}
+                    >
+                      Cancel
                     </Button>
-                  )}
-                  {onAddEvent && canAddEvent && (
-                    <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)}>
-                      <Plus className="w-4 h-4 mr-2" />
-                      Add Event
-                    </Button>
-                  )}
-                  {onDelete && competition.source_type === 'internal' && canDelete && (
-                    <Button variant="destructive" size="sm" onClick={() => onDelete(competition)}>
-                      <Trash2 className="w-4 h-4 mr-2" />
-                      Delete
-                    </Button>
-                  )}
+                  </div>
                 </div>
-              </div>
-            </CardContent>
-          </Card>
+              ) : canEdit ? (
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setEditingPlacement({
+                    competitionId: competition.source_competition_id,
+                    source: competition.source_type
+                  })}
+                >
+                  <Plus className="w-4 h-4 mr-2" />
+                  Add Placement
+                </Button>
+              ) : null}
+            </div>
+          </div>
         );
       })}
     </div>
