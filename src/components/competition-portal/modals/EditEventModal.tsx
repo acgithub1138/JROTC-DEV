@@ -80,21 +80,11 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
   });
 
   useEffect(() => {
-    if (open) {
+    if (open && event) {
       fetchJudges();
-      fetchScoreSheets();
+      fetchFilteredScoreSheets();
     }
-  }, [open]);
-
-  // Fetch filtered score sheets when event changes
-  useEffect(() => {
-    if (formData.event && eventTypes.length > 0) {
-      const selectedEventType = eventTypes.find(et => et.id === formData.event);
-      if (selectedEventType) {
-        fetchFilteredScoreSheets(selectedEventType.id);
-      }
-    }
-  }, [formData.event, eventTypes]);
+  }, [open, event]);
 
   useEffect(() => {
     if (event && eventTypes.length > 0) {
@@ -165,39 +155,25 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
     }
   };
 
-  const fetchScoreSheets = async () => {
+  const fetchFilteredScoreSheets = async () => {
     try {
-      const { data, error } = await supabase
-        .from('competition_templates')
-        .select('id, template_name, jrotc_program')
-        .eq('is_active', true)
-        .order('template_name', { ascending: true });
+      if (!event?.competition_id) return;
       
-      if (error) throw error;
-      setScoreSheets(data || []);
-    } catch (error) {
-      console.error('Error fetching score sheets:', error);
-      toast.error('Failed to load score sheets');
-    }
-  };
-
-  const fetchFilteredScoreSheets = async (eventId: string) => {
-    try {
-      // Get the event details to find its JROTC program
-      const { data: eventData, error: eventError } = await supabase
-        .from('cp_events')
-        .select('jrotc_program')
-        .eq('id', eventId)
+      // Get the competition's program to filter score sheets
+      const { data: competitionData, error: competitionError } = await supabase
+        .from('cp_competitions')
+        .select('program')
+        .eq('id', event.competition_id)
         .single();
 
-      if (eventError) throw eventError;
+      if (competitionError) throw competitionError;
 
-      if (eventData?.jrotc_program) {
+      if (competitionData?.program) {
         const { data, error } = await supabase
           .from('competition_templates')
           .select('id, template_name, jrotc_program')
           .eq('is_active', true)
-          .eq('jrotc_program', eventData.jrotc_program)
+          .eq('jrotc_program', competitionData.program)
           .order('template_name', { ascending: true });
         
         if (error) throw error;
