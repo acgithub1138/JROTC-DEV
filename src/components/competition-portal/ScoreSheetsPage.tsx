@@ -9,12 +9,13 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { TemplatesTable } from '../competition-management/components/TemplatesTable';
 import { TemplateDialog } from '../competition-management/components/TemplateDialog';
 import { TemplatePreviewDialog } from '../competition-management/components/TemplatePreviewDialog';
-import { useCompetitionTemplates } from '../competition-management/hooks/useCompetitionTemplates';
+import { useCompetitionTemplates, type CompetitionTemplate } from './my-competitions/hooks/useCompetitionTemplates';
 import { useAuth } from '@/contexts/AuthContext';
 import { TablePagination } from '@/components/ui/table-pagination';
 import type { Database } from '@/integrations/supabase/types';
 
-type CompetitionTemplate = Database['public']['Tables']['competition_templates']['Row'];
+
+
 
 export const ScoreSheetsPage = () => {
   const { userProfile } = useAuth();
@@ -35,7 +36,8 @@ export const ScoreSheetsPage = () => {
     copyTemplate,
     toggleMyTemplatesFilter,
     canEditTemplate,
-    canCopyTemplate
+    canCopyTemplate,
+    refetch
   } = useCompetitionTemplates();
   
   const {
@@ -76,6 +78,8 @@ export const ScoreSheetsPage = () => {
       await createTemplate(data);
       setShowAddDialog(false);
     }
+    // Refetch to ensure consistent data display
+    refetch();
   };
 
   const handleCopy = async (templateId: string) => {
