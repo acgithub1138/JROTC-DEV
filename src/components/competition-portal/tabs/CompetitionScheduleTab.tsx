@@ -66,15 +66,20 @@ export const CompetitionScheduleTab = ({
     }
   });
 
-  // Generate unified time slots from all events
+  // Generate unified time slots from all events - avoid duplicates and ensure proper ordering
   const getAllTimeSlots = () => {
-    const timeSlots = new Set<string>();
+    const timeSlotMap = new Map<number, Date>();
+    
     events.forEach(event => {
       event.timeSlots.forEach(slot => {
-        timeSlots.add(slot.time.toISOString());
+        const timeKey = slot.time.getTime();
+        if (!timeSlotMap.has(timeKey)) {
+          timeSlotMap.set(timeKey, slot.time);
+        }
       });
     });
-    return Array.from(timeSlots).sort().map(timeStr => new Date(timeStr));
+    
+    return Array.from(timeSlotMap.values()).sort((a, b) => a.getTime() - b.getTime());
   };
   const handleEditEvent = (event: ScheduleEvent) => {
     setSelectedEvent(event);

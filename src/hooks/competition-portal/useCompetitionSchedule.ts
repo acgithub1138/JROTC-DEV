@@ -130,40 +130,32 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         const timeSlots: TimeSlot[] = [];
         const current = new Date(startTime);
 
+        // Generate time slots only within the event's actual time range
         while (current < endTime) {
-          // Check if this is lunch time
+          // Check if this is lunch time for this specific event
           const isLunchTime = event.lunch_start_time && event.lunch_end_time && 
             current >= new Date(event.lunch_start_time) && 
             current < new Date(event.lunch_end_time);
 
-          if (isLunchTime) {
-            // Add lunch break slot
-            timeSlots.push({
-              time: new Date(current),
-              duration: interval,
-              isLunchBreak: true
-            });
-          } else {
-            // Add regular time slot
-            const scheduleForSlot = schedulesData?.find(
-              s => s.event_id === event.id && 
-                   new Date(s.scheduled_time).getTime() === current.getTime()
-            );
+          // Find any schedule assignment for this exact time and event
+          const scheduleForSlot = schedulesData?.find(
+            s => s.event_id === event.id && 
+                 Math.abs(new Date(s.scheduled_time).getTime() - current.getTime()) < 1000 // Allow 1s tolerance
+          );
 
-            const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
+          const schoolInfo = scheduleForSlot ? schoolMap.get(scheduleForSlot.school_id) : undefined;
 
-            timeSlots.push({
-              time: new Date(current),
-              duration: interval,
-              isLunchBreak: false,
-              assignedSchool: scheduleForSlot && schoolInfo ? {
-                id: scheduleForSlot.school_id,
-                name: schoolInfo.name,
-                initials: schoolInfo.initials,
-                color: schoolInfo.color
-              } : undefined
-            });
-          }
+          timeSlots.push({
+            time: new Date(current),
+            duration: interval,
+            isLunchBreak: isLunchTime,
+            assignedSchool: scheduleForSlot && schoolInfo && !isLunchTime ? {
+              id: scheduleForSlot.school_id,
+              name: schoolInfo.name,
+              initials: schoolInfo.initials,
+              color: schoolInfo.color
+            } : undefined
+          });
 
           current.setMinutes(current.getMinutes() + interval);
         }
