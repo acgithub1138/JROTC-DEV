@@ -48,7 +48,6 @@ const MainApplication = () => {
       const portalPath = path.replace('/app/competition-portal/', '');
       if (portalPath.startsWith('dashboard')) return 'competition-dashboard';
       if (portalPath.startsWith('competitions')) return 'competitions';
-      if (portalPath.startsWith('events')) return 'events';
       if (portalPath.startsWith('teams')) return 'teams';
       if (portalPath.startsWith('score-sheets')) return 'score-sheets';
       if (portalPath.startsWith('templates')) return 'templates';
@@ -233,11 +232,6 @@ const MainApplication = () => {
               </ProtectedRoute>
             } />
             <Route path="competition-portal/competitions" element={
-              <ProtectedRoute>
-                <CompetitionPortalLayout />
-              </ProtectedRoute>
-            } />
-            <Route path="competition-portal/events" element={
               <ProtectedRoute>
                 <CompetitionPortalLayout />
               </ProtectedRoute>

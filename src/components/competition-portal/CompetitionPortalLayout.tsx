@@ -5,7 +5,6 @@ import { CompetitionSidebar } from './CompetitionSidebar';
 import CompetitionDashboard from './CompetitionDashboard';
 import CompetitionsPage from './CompetitionsPage';
 import MyCompetitionsPage from './my-competitions/MyCompetitionsPage';
-import { EventsPage } from './EventsPage';
 import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
@@ -30,7 +29,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/dashboard': 'competition-dashboard',
     '/app/competition-portal/competitions': 'competitions',
     '/app/competition-portal/my-competitions': 'my-competitions',
-    '/app/competition-portal/events': 'events',
+    
     '/app/competition-portal/score-sheets': 'score-sheets',
     '/app/competition-portal/judges': 'judges',
     '/app/competition-portal/analytics': 'analytics',
@@ -43,7 +42,7 @@ const CompetitionPortalLayout = () => {
     'competition-dashboard': '/app/competition-portal/dashboard',
     'competitions': '/app/competition-portal/competitions',
     'my-competitions': '/app/competition-portal/my-competitions',
-    'events': '/app/competition-portal/events',
+    
     'score-sheets': '/app/competition-portal/score-sheets',
     'judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
@@ -57,7 +56,7 @@ const CompetitionPortalLayout = () => {
     const currentModule = routeToModuleMap[location.pathname] || 'competition-dashboard';
     
     // Define which modules are accessible based on permissions
-    const portalOnlyModules = ['competition-dashboard', 'competitions', 'events', 'score-sheets', 'judges', 'analytics', 'competition-settings'];
+    const portalOnlyModules = ['competition-dashboard', 'competitions', 'score-sheets', 'judges', 'analytics', 'competition-settings'];
     const moduleAccessibleModules = ['open-competitions', 'my-competitions'];
     
     // If user doesn't have competition portal access but tries to access portal-only modules
@@ -97,8 +96,6 @@ const CompetitionPortalLayout = () => {
       return <ScoreSheetPage />;
     } else if (path.startsWith('/app/competition-portal/competition-details/')) {
       return <CompetitionDetailsPage />;
-    } else if (path === '/app/competition-portal/events') {
-      return <EventsPage />;
     } else if (path === '/app/competition-portal/score-sheets') {
       return <ScoreSheetsPage />;
     } else if (path === '/app/competition-portal/judges') {

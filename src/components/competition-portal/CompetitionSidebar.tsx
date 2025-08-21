@@ -57,11 +57,6 @@ const competitionMenuItems = [{
   label: 'Score Sheets',
   icon: Clipboard,
   path: '/app/competition-portal/score-sheets'
-},{
-  id: 'events',
-  label: 'Events',
-  icon: Calendar,
-  path: '/app/competition-portal/events'
 }, {
   id: 'judges',
   label: 'Judges',
