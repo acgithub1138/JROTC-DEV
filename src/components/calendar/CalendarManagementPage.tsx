@@ -163,11 +163,18 @@ const CalendarManagementPage = () => {
       handleCloseDialog();
     }
   };
-  return <div className="p-6 space-y-6">
-      <div className="flex justify-between items-center">
-        <h1 className="text-3xl font-bold">Calendar</h1>
-        {canCreateEvents}
-      </div>
+  return <div className={isMobile ? "h-screen overflow-hidden" : "p-6 space-y-6"}>
+      {!isMobile && (
+        <div className="flex justify-between items-center">
+          <h1 className="text-3xl font-bold">Calendar</h1>
+          {canCreateEvents && (
+            <Button onClick={handleCreateEvent} className="ml-auto">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Event
+            </Button>
+          )}
+        </div>
+      )}
 
       <CalendarView 
         events={events} 

@@ -6,6 +6,7 @@ import { MonthView } from './MonthView';
 import { WeekView } from './WeekView';
 import { DayView } from './DayView';
 import { ListView } from './ListView';
+import { MobileCalendarView } from './MobileCalendarView';
 import { format, startOfMonth, startOfWeek, startOfDay } from 'date-fns';
 
 interface CalendarViewProps {
@@ -47,29 +48,18 @@ export const CalendarView: React.FC<CalendarViewProps> = ({
     onDateSelect(date);
   };
 
-  // Mobile view - simplified month view
+  // Mobile view - iOS-style calendar with daily events
   if (isMobile) {
     return (
-      <div className="space-y-4">
-        <CalendarToolbar
-          currentDate={currentDate}
-          viewType="month"
-          onDateChange={setCurrentDate}
-          onViewChange={() => {}} // No view switching on mobile
-          onCreateEvent={onCreateEvent}
-          selectedEventType={filters.eventType || 'all'}
-          onEventTypeChange={(eventType) => onFiltersChange({ ...filters, eventType: eventType === 'all' ? '' : eventType })}
-          readOnly={readOnly}
-        />
-        
-        <MonthView
-          currentDate={currentDate}
-          events={events}
-          onEventClick={onEventEdit || onEventView}
-          onDateClick={handleDateSelect}
-          onDateDoubleClick={readOnly ? undefined : onDateDoubleClick}
-        />
-      </div>
+      <MobileCalendarView
+        events={events}
+        onEventEdit={onEventEdit}
+        onEventView={onEventView}
+        onCreateEvent={onCreateEvent}
+        onDateSelect={handleDateSelect}
+        onDateDoubleClick={onDateDoubleClick}
+        readOnly={readOnly}
+      />
     );
   }
 
