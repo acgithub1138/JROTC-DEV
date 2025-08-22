@@ -1,10 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
@@ -29,6 +30,17 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
   const [endDate, setEndDate] = useState<Date | undefined>(undefined);
   const [showStartCalendar, setShowStartCalendar] = useState(false);
   const [showEndCalendar, setShowEndCalendar] = useState(false);
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  // Track initial values to detect changes
+  const initialName = `${originalCompetitionName} (Copy)`;
+
+  // Check for unsaved changes
+  useEffect(() => {
+    const hasChanges = name !== initialName || startDate !== undefined || endDate !== undefined;
+    setHasUnsavedChanges(hasChanges);
+  }, [name, startDate, endDate, initialName]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -49,11 +61,35 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
   };
 
   const handleClose = () => {
-    if (!isLoading) {
-      setName(`${originalCompetitionName} (Copy)`);
-      setStartDate(undefined);
-      setEndDate(undefined);
+    if (isLoading) return;
+    
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      resetForm();
       onClose();
+    }
+  };
+
+  const resetForm = () => {
+    setName(`${originalCompetitionName} (Copy)`);
+    setStartDate(undefined);
+    setEndDate(undefined);
+    setHasUnsavedChanges(false);
+  };
+
+  const handleConfirmClose = () => {
+    setShowUnsavedDialog(false);
+    resetForm();
+    onClose();
+  };
+
+  const handleStartDateSelect = (date: Date | undefined) => {
+    setStartDate(date);
+    setShowStartCalendar(false);
+    // Auto-set end date to same as start date
+    if (date) {
+      setEndDate(date);
     }
   };
 
@@ -103,14 +139,7 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
                   <Calendar
                     mode="single"
                     selected={startDate}
-                    onSelect={(date) => {
-                      setStartDate(date);
-                      setShowStartCalendar(false);
-                      // Auto-adjust end date if it's before the new start date
-                      if (date && endDate && endDate < date) {
-                        setEndDate(date);
-                      }
-                    }}
+                    onSelect={handleStartDateSelect}
                     disabled={(date) => date < new Date()}
                     initialFocus
                   />
@@ -175,6 +204,26 @@ export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
             {isLoading ? 'Copying...' : 'Copy Competition'}
           </Button>
         </DialogFooter>
+
+        {/* Unsaved Changes Alert Dialog */}
+        <AlertDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
+              <AlertDialogDescription>
+                You have unsaved changes. Are you sure you want to close without copying the competition?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowUnsavedDialog(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={handleConfirmClose}>
+                Close Without Saving
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
       </DialogContent>
     </Dialog>
   );
