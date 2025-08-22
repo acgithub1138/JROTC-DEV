@@ -1,6 +1,7 @@
 
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Routes, Route, useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '@/contexts/AuthContext';
 import { Header } from './layout/Header';
 import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -39,6 +40,7 @@ const MainApplication = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const { currentPortal } = usePortal();
+  const { userProfile } = useAuth();
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
@@ -76,6 +78,13 @@ const MainApplication = () => {
     if (path.startsWith('/app/settings')) return 'settings';
     return 'dashboard';
   });
+
+  // Redirect parent users to calendar if they navigate to /app root
+  useEffect(() => {
+    if (userProfile?.role === 'parent' && (location.pathname === '/app' || location.pathname === '/app/')) {
+      navigate('/app/calendar', { replace: true });
+    }
+  }, [userProfile, location.pathname, navigate]);
 
   const handleModuleChange = (module: string) => {
     setActiveModule(module);
