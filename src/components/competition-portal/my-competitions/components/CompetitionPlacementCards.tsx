@@ -8,6 +8,7 @@ import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
 import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
 import { useCompetitionEventTypes } from '@/components/competition-management/hooks/useCompetitionEventTypes';
+import { useMyCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['competitions']['Row'];
@@ -95,6 +96,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
     editingPlacement?.source === 'portal' ? editingPlacement.competitionId : undefined
   );
   const { eventTypes, isLoading: isLoadingEventTypes } = useCompetitionEventTypes();
+  const { canUpdate } = useMyCompetitionsPermissions();
 
   if (isLoading) {
     return (
@@ -254,18 +256,18 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                         <Badge className={getPlacementColor(placement.placement)}>
                           {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
                         </Badge>
-                        {canEdit && (
-                          <div className="flex items-center gap-1 ml-2">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              onClick={() => handleDeletePlacement(placement.id)}
-                              className="h-7 w-7 p-0"
-                            >
-                              <Trash2 className="w-3 h-3" />
-                            </Button>
-                          </div>
-                        )}
+                         {canUpdate && (
+                           <div className="flex items-center gap-1 ml-2">
+                             <Button
+                               variant="ghost"
+                               size="sm"
+                               onClick={() => handleDeletePlacement(placement.id)}
+                               className="h-7 w-7 p-0"
+                             >
+                               <Trash2 className="w-3 h-3" />
+                             </Button>
+                           </div>
+                         )}
                       </div>
                     ))}
                   </div>
@@ -273,7 +275,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
               )}
 
               {/* Add New Placement */}
-              {canEdit && editingPlacement?.competitionId === competition.source_competition_id && 
+              {canUpdate && editingPlacement?.competitionId === competition.source_competition_id && 
                editingPlacement?.source === competition.source_type ? (
                 <div className="space-y-2 p-3 border rounded-lg bg-background">
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-2">
@@ -345,7 +347,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                     </Button>
                   </div>
                 </div>
-              ) : canEdit ? (
+              ) : canUpdate ? (
                 <Button
                   variant="outline"
                   size="sm"
