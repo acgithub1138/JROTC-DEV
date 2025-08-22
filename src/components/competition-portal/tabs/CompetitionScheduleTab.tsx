@@ -18,10 +18,17 @@ import { supabase } from '@/integrations/supabase/client';
 interface CompetitionScheduleTabProps {
   competitionId: string;
   readOnly?: boolean;
+  permissions?: {
+    canViewDetails: boolean;
+    canCreate: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+  };
 }
 export const CompetitionScheduleTab = ({
   competitionId,
-  readOnly = false
+  readOnly = false,
+  permissions
 }: CompetitionScheduleTabProps) => {
   const {
     events,
@@ -31,11 +38,16 @@ export const CompetitionScheduleTab = ({
     getAvailableSchools,
     refetch
   } = useCompetitionSchedule(competitionId);
+  const defaultPermissions = useCompetitionSchedulePermissions();
   const {
     canView,
     canManageSchedule,
     canUpdate
-  } = useCompetitionSchedulePermissions();
+  } = permissions ? {
+    canView: permissions.canViewDetails,
+    canManageSchedule: permissions.canCreate,
+    canUpdate: permissions.canUpdate
+  } : defaultPermissions;
   const {
     timezone
   } = useSchoolTimezone();

@@ -3,6 +3,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Label } from '@/components/ui/label';
 import { Calendar, Trophy } from 'lucide-react';
 import { CompetitionScheduleTab } from '../tabs/CompetitionScheduleTab';
+import { useOpenCompsSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface ScheduleTabProps {
   registeredCompetitions: any[];
@@ -10,6 +11,20 @@ interface ScheduleTabProps {
 
 export const ScheduleTab: React.FC<ScheduleTabProps> = ({ registeredCompetitions }) => {
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string>('');
+  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = useOpenCompsSchedulePermissions();
+
+  // Check if user can read records
+  if (!canRead) {
+    return (
+      <div className="text-center py-12">
+        <Calendar className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
+        <p className="text-gray-600">
+          You don't have permission to view schedules.
+        </p>
+      </div>
+    );
+  }
 
   if (!registeredCompetitions || registeredCompetitions.length === 0) {
     return (
@@ -51,7 +66,13 @@ export const ScheduleTab: React.FC<ScheduleTabProps> = ({ registeredCompetitions
       {selectedCompetitionId ? (
         <CompetitionScheduleTab 
           competitionId={selectedCompetitionId} 
-          readOnly={true} 
+          readOnly={true}
+          permissions={{
+            canViewDetails,
+            canCreate,
+            canUpdate,
+            canDelete
+          }}
         />
       ) : (
         <div className="text-center py-12">
