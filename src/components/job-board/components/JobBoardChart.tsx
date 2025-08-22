@@ -22,6 +22,7 @@ interface JobBoardChartProps {
   readOnly?: boolean;
   permissions?: {
     canAssign: boolean;
+    canUpdate: boolean;
   };
 }
 
@@ -32,12 +33,12 @@ const nodeTypes = {
 const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly = false, permissions }: JobBoardChartProps) => {
   // Use passed permissions or fallback to hook
   const hookPermissions = useJobBoardPermissions();
-  const { canAssign } = permissions || hookPermissions;
+  const { canAssign, canUpdate } = permissions || hookPermissions;
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canAssign);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
-  // Chart is read-only only if user doesn't have assign permission
-  const isChartReadOnly = !canAssign;
+  // Chart is interactive if user can update jobs or assign roles
+  const isChartReadOnly = readOnly || (!canUpdate && !canAssign);
   const [showResetConfirmation, setShowResetConfirmation] = useState(false);
   const [isReactFlowInitialized, setIsReactFlowInitialized] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
@@ -115,10 +116,10 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   };
 
   const handleEdgeDoubleClick = useCallback((event: React.MouseEvent, edge: Edge) => {
-    console.log('🔥 EDGE DOUBLE CLICK FIRED!', { isChartReadOnly, edgeId: edge.id, edge });
+    console.log('Edge double click - readonly:', isChartReadOnly, 'canUpdate:', (permissions || hookPermissions).canUpdate);
     
     if (isChartReadOnly) {
-      console.log('❌ Read-only mode, cancelling edge edit');
+      console.log('Read-only mode, cancelling edge edit');
       return;
     }
     event.stopPropagation();
@@ -127,8 +128,6 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
     const sourceJob = jobs.find(job => job.id === edge.source);
     const targetJob = jobs.find(job => job.id === edge.target);
     
-    console.log('Source job:', sourceJob, 'Target job:', targetJob);
-    
     if (!sourceJob || !targetJob) {
       console.log('Missing source or target job');
       return;
@@ -136,8 +135,6 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
 
     // Get connection type directly from edge data
     const connectionType = edge.data?.connectionType as 'reports_to' | 'assistant' | null;
-
-    console.log('Connection type determined:', connectionType);
 
     if (!connectionType) {
       console.log('No connection type found');
@@ -154,7 +151,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
       currentSourceHandle: edge.sourceHandle || 'bottom-source',
       currentTargetHandle: edge.targetHandle || 'top-target',
     });
-  }, [jobs, readOnly]);
+  }, [jobs, isChartReadOnly, permissions, hookPermissions]);
 
   const handleConnectionSave = useCallback((sourceHandle: string, targetHandle: string) => {
     if (!connectionEditModal.sourceJob || !connectionEditModal.targetJob || !connectionEditModal.connectionType || !onUpdateJob) {
