@@ -35,7 +35,14 @@ export const EditCadetDialog = ({
   const { userProfile } = useAuth();
   const { canResetPassword, canUpdate } = useCadetPermissions();
   const { toast } = useToast();
+  
+  // Debug logging for JROTC program
+  console.log('EditCadetDialog - userProfile:', userProfile);
+  console.log('EditCadetDialog - schools:', userProfile?.schools);
+  console.log('EditCadetDialog - jrotc_program:', userProfile?.schools?.jrotc_program);
+  
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
+  console.log('EditCadetDialog - ranks:', ranks);
   const { roleOptions } = useCadetRoles();
 
   // Password reset state
