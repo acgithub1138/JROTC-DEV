@@ -73,7 +73,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
             <th className="text-left p-3 font-medium">Module</th>
             {actions.map(action => (
               <ColumnHeader key={action.id} action={action}>
-                {action.name === 'sidebar' ? 'Module Access' : action.label}
+                {action.label}
               </ColumnHeader>
             ))}
           </tr>
