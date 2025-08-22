@@ -7,7 +7,7 @@ import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { useCompetitionEvents } from '@/hooks/competition-portal/useCompetitionEvents';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -34,9 +34,10 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   } = useCompetitionEvents(competitionId);
   const {
     canCreate,
+    canViewDetails,
     canEdit,
     canDelete
-  } = useTablePermissions('cp_comp_events');
+  } = useCompetitionEventsPermissions();
   
   // Add sorting functionality
   const { sortedData: sortedEvents, sortConfig, handleSort } = useSortableTable({
@@ -138,39 +139,45 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                       </p>
                     </div>
                     <div className="flex flex-wrap gap-2 pt-2">
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => handleViewJudges(event)}>
-                            <Eye className="w-4 h-4 mr-1" />
-                            Judges
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Judges</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => handleViewResources(event)}>
-                            <Eye className="w-4 h-4 mr-1" />
-                            Resources
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Resources</p>
-                        </TooltipContent>
-                      </Tooltip>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <Button variant="outline" size="sm" onClick={() => handleViewSchools(event)}>
-                            <Eye className="w-4 h-4 mr-1" />
-                            Schools
-                          </Button>
-                        </TooltipTrigger>
-                        <TooltipContent>
-                          <p>View Schools</p>
-                        </TooltipContent>
-                      </Tooltip>
+                      {canViewDetails && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleViewJudges(event)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              Judges
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Judges</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canViewDetails && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleViewResources(event)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              Resources
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Resources</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                      {canViewDetails && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="sm" onClick={() => handleViewSchools(event)}>
+                              <Eye className="w-4 h-4 mr-1" />
+                              Schools
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Schools</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
                       {canEdit && (
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -244,48 +251,54 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
                         : 'N/A'
                       }
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center justify-center">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewJudges(event)}>
-                              <Eye className="w-3 h-3" />
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View Judges</p>
-                          </TooltipContent>
-                        </Tooltip>
-                      </div>
-                    </TableCell>
                      <TableCell>
                        <div className="flex items-center justify-center">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewResources(event)}>
-                               <Eye className="w-3 h-3" />
-                             </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                             <p>View Resources</p>
-                           </TooltipContent>
-                         </Tooltip>
+                         {canViewDetails && (
+                           <Tooltip>
+                             <TooltipTrigger asChild>
+                               <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewJudges(event)}>
+                                 <Eye className="w-3 h-3" />
+                               </Button>
+                             </TooltipTrigger>
+                             <TooltipContent>
+                               <p>View Judges</p>
+                             </TooltipContent>
+                           </Tooltip>
+                         )}
                        </div>
                      </TableCell>
-                     <TableCell>
-                       <div className="flex items-center justify-center">
-                         <Tooltip>
-                           <TooltipTrigger asChild>
-                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewSchools(event)}>
-                               <Eye className="w-3 h-3" />
-                             </Button>
-                           </TooltipTrigger>
-                           <TooltipContent>
-                             <p>View Schools</p>
-                           </TooltipContent>
-                         </Tooltip>
-                       </div>
-                     </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center">
+                          {canViewDetails && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewResources(event)}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>View Resources</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center justify-center">
+                          {canViewDetails && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewSchools(event)}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>View Schools</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
+                        </div>
+                      </TableCell>
                      {(canEdit || canDelete) && <TableCell>
                          <div className="flex items-center justify-center gap-2">
                            {canEdit && <Tooltip>

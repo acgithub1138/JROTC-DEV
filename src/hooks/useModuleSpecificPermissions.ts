@@ -181,3 +181,18 @@ export const useCompetitionSchedulePermissions = () => {
     ...permissions
   };
 };
+
+// Competition Events specific permissions
+export const useCompetitionEventsPermissions = () => {
+  const { hasPermission } = usePermissionContext();
+  const modulePermissions = useModulePermissions('cp_comp_events');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('cp_comp_events', 'view'),
+    canEdit: hasPermission('cp_comp_events', 'update'),
+    canDelete: hasPermission('cp_comp_events', 'delete'),
+    canCreate: hasPermission('cp_comp_events', 'create'),
+  };
+};
