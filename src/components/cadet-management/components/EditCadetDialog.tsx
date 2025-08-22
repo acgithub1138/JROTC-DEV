@@ -36,13 +36,7 @@ export const EditCadetDialog = ({
   const { canResetPassword, canUpdate } = useCadetPermissions();
   const { toast } = useToast();
   
-  // Debug logging for JROTC program
-  console.log('EditCadetDialog - userProfile:', userProfile);
-  console.log('EditCadetDialog - schools:', userProfile?.schools);
-  console.log('EditCadetDialog - jrotc_program:', userProfile?.schools?.jrotc_program);
-  
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
-  console.log('EditCadetDialog - ranks:', ranks);
   const { roleOptions } = useCadetRoles();
 
   // Password reset state
@@ -71,6 +65,7 @@ export const EditCadetDialog = ({
   // Initialize form data when dialog opens or editingProfile changes
   React.useEffect(() => {
     if (editingProfile && open) {
+      // Convert null values to empty strings for Select components
       const data = {
         grade: editingProfile.grade || '',
         flight: editingProfile.flight || '',
@@ -78,6 +73,16 @@ export const EditCadetDialog = ({
         role_id: editingProfile.role_id || '',
         rank: editingProfile.rank || ''
       };
+      
+      console.log('Setting form data with:', data);
+      console.log('Original editingProfile data:', {
+        grade: editingProfile.grade,
+        flight: editingProfile.flight,
+        cadet_year: editingProfile.cadet_year,
+        role_id: editingProfile.role_id,
+        rank: editingProfile.rank
+      });
+      
       setFormData(data);
       setInitialFormData(data);
     }
@@ -248,7 +253,7 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="grade">Grade</Label>
                 <Select 
-                  value={formData.grade} 
+                  value={formData.grade || ''} 
                   onValueChange={(value) => setFormData({ ...formData, grade: value })}
                   disabled={!canUpdate}
                 >
@@ -256,6 +261,7 @@ export const EditCadetDialog = ({
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">No grade selected</SelectItem>
                     {gradeOptions.map(grade => (
                       <SelectItem key={grade} value={grade}>
                         {grade}
@@ -267,7 +273,7 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="flight">Flight</Label>
                 <Select 
-                  value={formData.flight} 
+                  value={formData.flight || ''} 
                   onValueChange={(value) => setFormData({ ...formData, flight: value })}
                   disabled={!canUpdate}
                 >
@@ -275,6 +281,7 @@ export const EditCadetDialog = ({
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">No flight selected</SelectItem>
                     {flightOptions.map(flight => (
                       <SelectItem key={flight} value={flight}>
                         {flight}
@@ -286,7 +293,7 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="cadet_year">Cadet Year</Label>
                 <Select 
-                  value={formData.cadet_year} 
+                  value={formData.cadet_year || ''} 
                   onValueChange={(value) => setFormData({ ...formData, cadet_year: value })}
                   disabled={!canUpdate}
                 >
@@ -294,6 +301,7 @@ export const EditCadetDialog = ({
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
+                    <SelectItem value="">No year selected</SelectItem>
                     {cadetYearOptions.map(year => (
                       <SelectItem key={year} value={year}>
                         {year}
@@ -307,7 +315,7 @@ export const EditCadetDialog = ({
             <div className="space-y-2">
               <Label htmlFor="role_id">Role</Label>
               <Select 
-                value={formData.role_id} 
+                value={formData.role_id || ''} 
                 onValueChange={(value) => setFormData({ ...formData, role_id: value })}
                 disabled={!canUpdate}
               >
@@ -315,6 +323,7 @@ export const EditCadetDialog = ({
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
+                  <SelectItem value="">No role selected</SelectItem>
                   {roleOptions.map(roleOption => (
                     <SelectItem key={roleOption.value} value={roleOption.value}>
                       {roleOption.label}
@@ -327,19 +336,19 @@ export const EditCadetDialog = ({
             <div className="space-y-2">
               <Label htmlFor="rank">Rank</Label>
               <Select 
-                value={formData.rank} 
-                onValueChange={(value) => setFormData({ ...formData, rank: value === "none" ? "" : value })}
+                value={formData.rank || ''} 
+                onValueChange={(value) => setFormData({ ...formData, rank: value === '' ? '' : value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select rank" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No rank</SelectItem>
+                  <SelectItem value="">No rank</SelectItem>
                   {ranks.map(rank => (
                     <SelectItem 
                       key={rank.id} 
-                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}
+                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || ''}
                     >
                       {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                     </SelectItem>
