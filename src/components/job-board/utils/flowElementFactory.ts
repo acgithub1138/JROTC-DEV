@@ -45,12 +45,53 @@ export const createFlowEdges = (
   hierarchyResult: HierarchyResult,
   jobs: JobBoardWithCadet[]
 ): Edge[] => {
-  console.log('🔗 Creating flow edges from connections:', { hierarchyEdgesCount: hierarchyResult.edges.length });
+  console.log('🔗 Creating flow edges from hierarchy:', { hierarchyEdgesCount: hierarchyResult.edges.length });
   
-  const jobMap = new Map(jobs.map(job => [job.id, job]));
   const flowEdges: Edge[] = [];
   
-  // Create edges from connections data
+  // Create edges from hierarchy edges (built from reports_to and assistant fields)
+  hierarchyResult.edges.forEach((hierarchyEdge, index) => {
+    const sourceJob = jobs.find(j => j.id === hierarchyEdge.source);
+    const targetJob = jobs.find(j => j.id === hierarchyEdge.target);
+    
+    if (!sourceJob || !targetJob) {
+      console.warn(`Source or target job not found for edge:`, hierarchyEdge);
+      return;
+    }
+
+    // Determine handles based on relationship type
+    let sourceHandle = 'bottom-source';
+    let targetHandle = 'top-target';
+    
+    if (hierarchyEdge.type === 'assistant') {
+      sourceHandle = 'right-source';
+      targetHandle = 'left-target';
+    }
+
+    const edgeObj = {
+      id: hierarchyEdge.id,
+      source: hierarchyEdge.source,
+      target: hierarchyEdge.target,
+      sourceHandle,
+      targetHandle,
+      type: 'smoothstep' as const,
+      animated: false,
+      style: { 
+        pointerEvents: 'all' as const,
+        stroke: hierarchyEdge.type === 'assistant' ? '#10b981' : '#6366f1',
+        strokeWidth: 2
+      },
+      data: { 
+        connectionType: hierarchyEdge.type,
+        connectionId: hierarchyEdge.id
+      }
+    };
+    
+    console.log(`📎 Created ${hierarchyEdge.type} edge:`, edgeObj);
+    flowEdges.push(edgeObj);
+  });
+
+  // Also create edges from connections array for backward compatibility
   jobs.forEach(job => {
     if (job.connections && job.connections.length > 0) {
       job.connections.forEach(connection => {
@@ -66,13 +107,23 @@ export const createFlowEdges = (
           return;
         }
 
+        // Check if this edge already exists from hierarchy
+        const existingEdge = flowEdges.find(edge => 
+          edge.source === job.id && edge.target === targetJob.id
+        );
+        
+        if (existingEdge) {
+          console.log(`Skipping duplicate edge from connections array`);
+          return;
+        }
+
         const edgeObj = {
           id: connection.id,
           source: job.id,
           target: targetJob.id,
           sourceHandle: connection.source_handle,
           targetHandle: connection.target_handle,
-          type: 'smoothstep',
+          type: 'smoothstep' as const,
           animated: false,
           style: { pointerEvents: 'all' as const },
           data: { 
@@ -87,7 +138,6 @@ export const createFlowEdges = (
     }
   });
 
-  // All jobs should now use the connections system
   console.log('✅ Total flow edges created:', flowEdges.length);
   return flowEdges;
 };
