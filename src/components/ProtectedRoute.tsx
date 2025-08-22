@@ -33,15 +33,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     if (user && userProfile) {
       const profileRequiresChange = !!userProfile.password_change_required;
       const metadataOverride = (user.user_metadata as any)?.password_change_required === false;
-      if (profileRequiresChange && !metadataOverride) {
-        setShowPasswordChange(true);
-      } else {
-        setShowPasswordChange(false);
-      }
+      
+      console.log('Password check:', { profileRequiresChange, metadataOverride, userId: user.id });
+      
+      const shouldShowPasswordChange = profileRequiresChange && !metadataOverride;
+      setShowPasswordChange(shouldShowPasswordChange);
     } else {
       setShowPasswordChange(false);
     }
-  }, [user, userProfile]);
+  }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
 
   // Check module permissions or admin role requirement
   useEffect(() => {
