@@ -9,28 +9,8 @@ import { useThemes } from '@/hooks/useThemes';
 import { SidebarCustomization } from './SidebarCustomization';
 import { usePortal } from '@/contexts/PortalContext';
 import { useNavigate } from 'react-router-dom';
-import {
-  User,
-  Users,
-  CheckSquare,
-  DollarSign,
-  Package,
-  Contact,
-  Trophy,
-  Shield,
-  Settings,
-  BarChart3,
-  Calendar,
-  FileText,
-  Home,
-  UserCog,
-  Building2,
-  Menu,
-  Mails,
-  Workflow,
-  Briefcase,
-  AlertTriangle,
-} from 'lucide-react';
+import * as LucideIcons from 'lucide-react';
+import { Shield, Menu, Home, Trophy } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;
@@ -47,27 +27,22 @@ const DEFAULT_THEME = {
   link_hover: '#1f2937'       // Hover background (gray-800)
 };
 
-// Icon mapping for dynamic icon resolution
-const iconMap = {
-  Home,
-  User,
-  Users,
-  Shield,
-  CheckSquare,
-  DollarSign,
-  Package,
-  Contact,
-  Settings,
-  BarChart3,
-  Calendar,
-  FileText,
-  UserCog,
-  Building2,
-  Mails,
-  Workflow,
-  Briefcase,
-  Trophy,
-  AlertTriangle,
+// Dynamic icon renderer component
+const DynamicIcon: React.FC<{ iconName: string; className?: string }> = ({ iconName, className = "" }) => {
+  const iconKey = iconName as keyof typeof LucideIcons;
+  const IconComponent = LucideIcons[iconKey];
+  
+  // Type guard to check if it's a valid React component
+  const isValidComponent = (component: any): component is React.ComponentType<any> => {
+    return typeof component === 'function' || (typeof component === 'object' && component.$$typeof);
+  };
+  
+  if (!IconComponent || !isValidComponent(IconComponent)) {
+    console.warn(`Icon "${iconName}" not found in Lucide icons, using fallback`);
+    return <Home className={className} />;
+  }
+  
+  return <IconComponent className={className} />;
 };
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
@@ -163,7 +138,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         <ScrollArea className="flex-1 px-3">
           <div className="space-y-1">
             {menuItems.map((item) => {
-              const Icon = iconMap[item.icon as keyof typeof iconMap] || Home;
               const isActive = activeModule === item.id;
               return (
                 <Button
@@ -188,7 +162,7 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
                   }}
                   onClick={() => onModuleChange(item.id)}
                 >
-                  <Icon className="w-4 h-4 mr-3" />
+                  <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3" />
                   {item.label}
                 </Button>
               );
