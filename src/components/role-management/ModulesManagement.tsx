@@ -7,22 +7,102 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, Plus, Trash2, GripVertical, Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Edit2, Save, X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, ChevronsUpDown, 
+  // Navigation & Core
+  Home, Menu, Settings, Search, Bell, Mail, User, Users, Contact, 
+  // Content & Files
+  FileText, File, Files, Folder, FolderOpen, Archive, Book, BookOpen, Clipboard, ClipboardList,
+  // Data & Analytics
+  Database, BarChart3, ChartBar, ChartLine, ChartPie, Activity, TrendingUp, Calculator,
+  // Security & Access
+  Shield, Lock, Unlock, Key, Eye, EyeOff, Fingerprint, UserCheck,
+  // Communication & Social
+  MessageSquare, MessageCircle, Phone, Video, Share, Share2, Globe,
+  // Actions & Tools
+  Edit, Edit3, Trash, Download, Upload, Copy, Move, Minus,
+  // Status & Indicators
+  Check, CheckCircle, XCircle, AlertTriangle, Info, Star, Flag,
+  // Media & Content
+  Image, Camera, Film, Music, Headphones, Volume2, Play, Pause,
+  // Business & Finance
+  DollarSign, CreditCard, Receipt, Briefcase, Building, Store,
+  // Education & Competition
+  Trophy, Award, Target, Medal, GraduationCap, BookA, Zap,
+  // Time & Calendar
+  Calendar, CalendarDays, Clock, Timer, AlarmClock, History,
+  // Network & Connectivity
+  Wifi, Cloud, Server, HardDrive, Monitor, Smartphone,
+  // Sports & Activities
+  Gamepad, Dumbbell, Bike, Car, Plane, MapPin, Map,
+  // Misc Utilities
+  Wrench, Cog, Sliders, Filter, Grid, List, Layout
+} from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 const iconOptions = [
-  'Trophy', 'Calendar', 'Users', 'FileText', 'BarChart3', 'Settings', 
-  'Shield', 'Award', 'Target', 'Clipboard', 'Search', 'User', 'Home',
-  'Bell', 'Mail', 'Database', 'Key', 'Lock', 'Unlock'
+  // Navigation & Core
+  'Home', 'Menu', 'Settings', 'Search', 'Bell', 'Mail', 'User', 'Users', 'Contact',
+  // Content & Files
+  'FileText', 'File', 'Files', 'Folder', 'FolderOpen', 'Archive', 'Book', 'BookOpen', 'Clipboard', 'ClipboardList',
+  // Data & Analytics
+  'Database', 'BarChart3', 'ChartBar', 'ChartLine', 'ChartPie', 'Activity', 'TrendingUp', 'Calculator',
+  // Security & Access
+  'Shield', 'Lock', 'Unlock', 'Key', 'Eye', 'EyeOff', 'Fingerprint', 'UserCheck',
+  // Communication & Social
+  'MessageSquare', 'MessageCircle', 'Phone', 'Video', 'Share', 'Share2', 'Globe',
+  // Actions & Tools
+  'Edit', 'Edit3', 'Trash', 'Download', 'Upload', 'Copy', 'Move', 'Minus',
+  // Status & Indicators
+  'Check', 'CheckCircle', 'XCircle', 'AlertTriangle', 'Info', 'Star', 'Flag',
+  // Media & Content
+  'Image', 'Camera', 'Film', 'Music', 'Headphones', 'Volume2', 'Play', 'Pause',
+  // Business & Finance
+  'DollarSign', 'CreditCard', 'Receipt', 'Briefcase', 'Building', 'Store',
+  // Education & Competition
+  'Trophy', 'Award', 'Target', 'Medal', 'GraduationCap', 'BookA', 'Zap',
+  // Time & Calendar
+  'Calendar', 'CalendarDays', 'Clock', 'Timer', 'AlarmClock', 'History',
+  // Network & Connectivity
+  'Wifi', 'Cloud', 'Server', 'HardDrive', 'Monitor', 'Smartphone',
+  // Sports & Activities
+  'Gamepad', 'Dumbbell', 'Bike', 'Car', 'Plane', 'MapPin', 'Map',
+  // Misc Utilities
+  'Wrench', 'Cog', 'Sliders', 'Filter', 'Grid', 'List', 'Layout'
 ];
 
 // Icon component mapping
 const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, 
-  Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock
+  // Navigation & Core
+  Home, Menu, Settings, Search, Bell, Mail, User, Users, Contact,
+  // Content & Files
+  FileText, File, Files, Folder, FolderOpen, Archive, Book, BookOpen, Clipboard, ClipboardList,
+  // Data & Analytics
+  Database, BarChart3, ChartBar, ChartLine, ChartPie, Activity, TrendingUp, Calculator,
+  // Security & Access
+  Shield, Lock, Unlock, Key, Eye, EyeOff, Fingerprint, UserCheck,
+  // Communication & Social
+  MessageSquare, MessageCircle, Phone, Video, Share, Share2, Globe,
+  // Actions & Tools
+  Edit, Edit3, Trash, Download, Upload, Copy, Move, Minus,
+  // Status & Indicators  
+  Check, CheckCircle, XCircle, AlertTriangle, Info, Star, Flag,
+  // Media & Content
+  Image, Camera, Film, Music, Headphones, Volume2, Play, Pause,
+  // Business & Finance
+  DollarSign, CreditCard, Receipt, Briefcase, Building, Store,
+  // Education & Competition
+  Trophy, Award, Target, Medal, GraduationCap, BookA, Zap,
+  // Time & Calendar
+  Calendar, CalendarDays, Clock, Timer, AlarmClock, History,
+  // Network & Connectivity
+  Wifi, Cloud, Server, HardDrive, Monitor, Smartphone,
+  // Sports & Activities
+  Gamepad, Dumbbell, Bike, Car, Plane, MapPin, Map,
+  // Misc Utilities
+  Wrench, Cog, Sliders, Filter, Grid, List, Layout
 };
 
 // Helper function to get icon component
