@@ -65,36 +65,69 @@ export const useParentCadetTasks = () => {
           return;
         }
 
-        // For now, create placeholder tasks data to avoid database query issues
-        // This will be replaced with actual task fetching once the schema is available
-        const mockTasks: CadetTask[] = contacts.flatMap((contact, index) => [
-          {
-            id: `task-${contact.id}-1`,
-            task_number: `T-${String(index + 1).padStart(3, '0')}`,
-            title: `Complete uniform inspection for ${contact.name || 'Cadet'}`,
-            status: 'in_progress',
-            priority: 'medium',
-            due_date: new Date(Date.now() + 86400000 * 7).toISOString(), // 7 days from now
-            cadet_name: contact.name || 'Unknown Cadet',
-            cadet_id: contact.cadet_id!,
-            is_subtask: false
-          },
-          {
-            id: `task-${contact.id}-2`,
-            task_number: `T-${String(index + 1).padStart(3, '0')}-A`,
-            title: `Study drill and ceremony procedures`,
-            status: 'assigned',
-            priority: 'high',
-            due_date: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days from now
-            cadet_name: contact.name || 'Unknown Cadet',
-            cadet_id: contact.cadet_id!,
-            is_subtask: false
+        // Fetch tasks and subtasks assigned to these cadets
+        const allTasks: CadetTask[] = [];
+        
+        for (const cadetId of cadetIds) {
+          const contact = contacts.find(c => c.cadet_id === cadetId);
+          
+          try {
+            // Fetch tasks assigned to this cadet
+            const { data: tasks } = await supabase
+              .from('tasks')
+              .select('id, task_number, title, status, priority, due_date, assigned_to')
+              .contains('assigned_to', [cadetId]);
+              
+            if (tasks) {
+              tasks.forEach((task) => {
+                allTasks.push({
+                  id: task.id,
+                  task_number: task.task_number || 'N/A',
+                  title: task.title || 'Untitled Task',
+                  status: task.status || 'assigned',
+                  priority: task.priority || 'medium',
+                  due_date: task.due_date,
+                  cadet_name: contact?.name || 'Unknown Cadet',
+                  cadet_id: cadetId,
+                  is_subtask: false
+                });
+              });
+            }
+          } catch (taskError) {
+            console.log('Error fetching tasks for cadet:', cadetId, taskError);
           }
-        ]);
+
+          try {
+            // Fetch subtasks assigned to this cadet
+            const { data: subtasks } = await supabase
+              .from('subtasks')
+              .select('id, task_number, title, status, priority, due_date, assigned_to')
+              .eq('assigned_to', cadetId);
+              
+            if (subtasks) {
+              subtasks.forEach((subtask) => {
+                allTasks.push({
+                  id: subtask.id,
+                  task_number: subtask.task_number || 'N/A',
+                  title: subtask.title || 'Untitled Subtask',
+                  status: subtask.status || 'assigned',
+                  priority: subtask.priority || 'medium',
+                  due_date: subtask.due_date,
+                  cadet_name: contact?.name || 'Unknown Cadet',
+                  cadet_id: cadetId,
+                  is_subtask: true,
+                  parent_task_title: 'Subtask'
+                });
+              });
+            }
+          } catch (subtaskError) {
+            console.log('Error fetching subtasks for cadet:', cadetId, subtaskError);
+          }
+        }
 
         // Calculate task counts
         const now = new Date();
-        const counts = mockTasks.reduce((acc, task) => {
+        const counts = allTasks.reduce((acc, task) => {
           acc.total++;
           
           if (task.status === 'completed') {
@@ -110,7 +143,7 @@ export const useParentCadetTasks = () => {
           return acc;
         }, { total: 0, active: 0, overdue: 0, completed: 0 });
 
-        setTasks(mockTasks);
+        setTasks(allTasks);
         setTaskCounts(counts);
 
       } catch (err) {
