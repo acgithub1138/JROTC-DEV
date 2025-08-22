@@ -236,3 +236,33 @@ export const useOpenCompetitionsPermissions = () => {
     canView: modulePermissions.canRead,
   };
 };
+
+// Open Competitions - Open tab permissions
+export const useOpenCompsOpenPermissions = () => {
+  const modulePermissions = useModulePermissions('open_comps_open');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
+// Open Competitions - Registered tab permissions
+export const useOpenCompsRegisteredPermissions = () => {
+  const modulePermissions = useModulePermissions('open_comps_registered');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
+// Open Competitions - Schedule tab permissions
+export const useOpenCompsSchedulePermissions = () => {
+  const modulePermissions = useModulePermissions('open_comps_schedule');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
