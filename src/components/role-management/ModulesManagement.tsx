@@ -420,10 +420,20 @@ export const ModulesManagement: React.FC = () => {
             {modules.map((module) => (
               <TableRow key={module.id}>
                 <TableCell>
-                  <div className="flex items-center">
-                    <GripVertical className="w-4 h-4 text-muted-foreground" />
-                    <span className="ml-2 text-sm">{(module as any).sort_order || 0}</span>
-                  </div>
+                  {editingModule === module.id ? (
+                    <Input
+                      type="number"
+                      value={editForm.sort_order || 0}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, sort_order: parseInt(e.target.value) || 0 }))}
+                      className="w-20"
+                      min="0"
+                    />
+                  ) : (
+                    <div className="flex items-center">
+                      <GripVertical className="w-4 h-4 text-muted-foreground" />
+                      <span className="ml-2 text-sm">{(module as any).sort_order || 0}</span>
+                    </div>
+                  )}
                 </TableCell>
                 <TableCell>
                   {editingModule === module.id ? (
