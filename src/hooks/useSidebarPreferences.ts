@@ -61,7 +61,7 @@ const getMenuItemsFromPermissions = (
       { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
       { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
       { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
-      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
+      { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
       // Admin-specific items
       { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 13 },
@@ -138,7 +138,7 @@ const getMenuItemsFromPermissions = (
     },
     {
       id: 'incident_management',
-      label: 'Incidents',
+      label: 'Get Help',
       icon: 'AlertTriangle',
       path: '/app/incidents',
       isVisible: hasPermission('incident_management', 'sidebar'),
@@ -183,7 +183,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
   if (role === 'admin') {
     return [
       ...baseItems,
-      // Admin-specific items
+      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 12 },
       { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 13 },
       { id: 'role-management', label: 'Role Management', icon: 'Shield', path: '/app/roles', isVisible: true, order: 14 },
@@ -206,7 +206,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
       { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
       { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
-      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
+      { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
     ];
   } else {
