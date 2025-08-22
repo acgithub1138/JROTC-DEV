@@ -53,8 +53,8 @@ const CompetitionsPage = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
-  const { canView, canEdit, canDelete, canCreate } = useTablePermissions('cp_competitions');
-  const { canManage } = useCPCompetitionPermissions();
+  const { canCreate } = useTablePermissions('cp_competitions');
+  const { canViewDetails, canEdit, canDelete, canManage } = useCPCompetitionPermissions();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -414,7 +414,7 @@ const handleEditSubmit = async (data: any) => {
 <TableCell>
   <div className="flex items-center justify-center gap-2">
     {/* View Competition */}
-    {canView && (
+    {canViewDetails && (
       <Tooltip>
         <TooltipTrigger asChild>
           <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleViewCompetition(competition)}>
@@ -427,21 +427,24 @@ const handleEditSubmit = async (data: any) => {
       </Tooltip>
     )}
 
+    {/* Edit Competition */}
+    {canEdit && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
+            <Edit className="w-3 h-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Edit</p>
+        </TooltipContent>
+      </Tooltip>
+    )}
+
     {canManage && (
       <>
-        {/* Edit Competition */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
-              <Edit className="w-3 h-3" />
-            </Button>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>Edit</p>
-          </TooltipContent>
-        </Tooltip>
-
         {/* Manage Competition */}
+
         <Tooltip>
           <TooltipTrigger asChild>
             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
@@ -452,26 +455,27 @@ const handleEditSubmit = async (data: any) => {
             <p>Manage Competition</p>
           </TooltipContent>
         </Tooltip>
+      </>
+    )}
                                 
-                                {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
-                                  <Tooltip>
-                                    <TooltipTrigger asChild>
-                                      <Button 
-                                        variant="outline" 
-                                        size="icon" 
-                                        className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" 
-                                        onClick={() => handleCancelCompetitionClick(competition)}
-                                      >
-                                        <X className="w-3 h-3" />
-                                      </Button>
-                                    </TooltipTrigger>
-                                    <TooltipContent>
-                                      <p>Cancel Competition</p>
-                                    </TooltipContent>
-                                  </Tooltip>
-                                )}
-                              </>
-                            )}
+    {/* Cancel Competition */}
+    {canDelete && ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status) && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="icon" 
+            className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" 
+            onClick={() => handleCancelCompetitionClick(competition)}
+          >
+            <X className="w-3 h-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Cancel Competition</p>
+        </TooltipContent>
+      </Tooltip>
+    )}
                           </div>
                        </TableCell>
                     </TableRow>

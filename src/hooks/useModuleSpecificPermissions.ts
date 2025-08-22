@@ -85,6 +85,9 @@ export const useCPCompetitionPermissions = () => {
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('cp_competitions', 'view'),
+    canEdit: hasPermission('cp_competitions', 'update'),
+    canDelete: hasPermission('cp_competitions', 'delete'),
     canManage: hasPermission('cp_competitions', 'manage'),
   };
 };
