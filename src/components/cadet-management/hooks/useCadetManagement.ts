@@ -31,13 +31,24 @@ export const useCadetManagement = () => {
     try {
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          user_roles (
+            role_name,
+            role_label
+          )
+        `)
         .eq('school_id', userProfile?.school_id)
-        .neq('role', 'instructor')
         .order('created_at', { ascending: false });
 
       if (error) throw error;
-      setProfiles(data || []);
+      
+      // Filter out instructor profiles
+      const filteredData = data?.filter(profile => 
+        profile.user_roles?.role_name !== 'instructor'
+      ) || [];
+      
+      setProfiles(filteredData);
     } catch (error) {
       console.error('Error fetching profiles:', error);
       toast({
