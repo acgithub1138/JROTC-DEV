@@ -44,16 +44,18 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   
   const [rows, setRows] = useState<CompetitionEventRow[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
+  const [eventMap, setEventMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewEvent, setViewEvent] = useState<string | null>(null);
+  const [viewEventId, setViewEventId] = useState<string | null>(null);
+  const [viewEventName, setViewEventName] = useState<string | null>(null);
   const [eventSheets, setEventSheets] = useState<any[]>([]);
   const [isDialogLoading, setIsDialogLoading] = useState(false);
   const [viewSchoolId, setViewSchoolId] = useState<string | null>(null);
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
-    const [eventsRes, schoolsRes] = await Promise.all([
+    const [eventsRes, schoolsRes, eventTypesRes] = await Promise.all([
       supabase
         .from('competition_events')
         .select('id, event, total_points, score_sheet, school_id, created_at')
@@ -63,21 +65,30 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
         .from('cp_comp_schools')
         .select('school_id, school_name')
         .eq('competition_id', competitionId),
+      supabase
+        .from('competition_event_types')
+        .select('id, name')
     ]);
 
-    if (eventsRes.error || schoolsRes.error) {
-      setError(eventsRes.error?.message || schoolsRes.error?.message || 'Failed to load results');
+    if (eventsRes.error || schoolsRes.error || eventTypesRes.error) {
+      setError(eventsRes.error?.message || schoolsRes.error?.message || eventTypesRes.error?.message || 'Failed to load results');
       setIsLoading(false);
       return;
     }
 
     setRows((eventsRes.data || []) as CompetitionEventRow[]);
 
-    const map: Record<string, string> = {};
+    const schoolNameMap: Record<string, string> = {};
     (schoolsRes.data || []).forEach((s: CPSchoolRow) => {
-      if (s.school_id) map[s.school_id] = s.school_name || 'Unknown School';
+      if (s.school_id) schoolNameMap[s.school_id] = s.school_name || 'Unknown School';
     });
-    setSchoolMap(map);
+    setSchoolMap(schoolNameMap);
+
+    const eventNameMap: Record<string, string> = {};
+    (eventTypesRes.data || []).forEach((e: any) => {
+      if (e.id) eventNameMap[e.id] = e.name || 'Unknown Event';
+    });
+    setEventMap(eventNameMap);
 
     setIsLoading(false);
   };
@@ -95,14 +106,14 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   }, [competitionId]);
 
   const fetchEventSheets = async () => {
-    if (!viewEvent || !viewSchoolId) return;
+    if (!viewEventId || !viewSchoolId) return;
     setIsDialogLoading(true);
     const { data, error } = await supabase
       .from('competition_events')
       .select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at')
       .eq('source_type', 'portal')
       .eq('source_competition_id', competitionId)
-      .eq('event', viewEvent as any)
+      .eq('event', viewEventId as any)
       .eq('school_id', viewSchoolId as any);
     
     setEventSheets(error ? [] : (data || []));
@@ -119,7 +130,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return () => {
       active = false;
     };
-  }, [viewEvent, viewSchoolId, competitionId]);
+  }, [viewEventId, viewSchoolId, competitionId]);
 
   const handleEventsRefresh = async () => {
     // Small delay to ensure database updates are committed
@@ -134,9 +145,9 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
   const grouped = useMemo(() => {
     type JudgeScore = { judgeNumber?: number; score: number };
     type SchoolAgg = { schoolId: string; schoolName: string; judges: JudgeScore[]; total: number };
-    const result = new Map<string, { event: string; schools: SchoolAgg[]; judgeNumbers: number[] }>();
+    const result = new Map<string, { event: string; eventId: string; schools: SchoolAgg[]; judgeNumbers: number[] }>();
 
-    const eventMap: Record<string, { schoolsMap: Map<string, SchoolAgg>; judgeSet: Set<number>; eventKey: string }> = {};
+    const eventGroupMap: Record<string, { schoolsMap: Map<string, SchoolAgg>; judgeSet: Set<number>; eventKey: string; eventId: string }> = {};
 
     function getJudgeNumber(ss: any): number | undefined {
       const candidates = [
@@ -156,9 +167,10 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     }
 
     (rows || []).forEach((r) => {
-      const ev = r.event || 'Unknown';
-      if (!eventMap[ev]) eventMap[ev] = { schoolsMap: new Map(), judgeSet: new Set(), eventKey: ev };
-      const { schoolsMap, judgeSet } = eventMap[ev];
+      const eventId = r.event || 'Unknown';
+      const eventName = eventMap[eventId] || 'Unknown Event';
+      if (!eventGroupMap[eventName]) eventGroupMap[eventName] = { schoolsMap: new Map(), judgeSet: new Set(), eventKey: eventName, eventId };
+      const { schoolsMap, judgeSet } = eventGroupMap[eventName];
 
       const schoolId = r.school_id;
       const schoolName = schoolMap[schoolId] || 'Unknown School';
@@ -177,8 +189,8 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       agg.total += score;
     });
 
-    Object.keys(eventMap).forEach((ev) => {
-      const { schoolsMap, judgeSet, eventKey } = eventMap[ev];
+    Object.keys(eventGroupMap).forEach((ev) => {
+      const { schoolsMap, judgeSet, eventKey, eventId } = eventGroupMap[ev];
       const schools = Array.from(schoolsMap.values());
 
       // Sort judges per school by judge number
@@ -194,11 +206,11 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       schools.sort((a, b) => b.total - a.total);
 
       const judgeNumbers = Array.from(judgeSet.values()).sort((a, b) => a - b);
-      result.set(ev, { event: eventKey, schools, judgeNumbers });
+      result.set(ev, { event: eventKey, eventId, schools, judgeNumbers });
     });
 
     return result;
-  }, [rows, schoolMap]);
+  }, [rows, schoolMap, eventMap]);
 
   if (!canView) {
     return <div className="p-4 text-sm text-muted-foreground">You don't have permission to view results.</div>;
@@ -213,7 +225,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
       {Array.from(grouped.values()).map((group) => (
         <Card key={group.event}>
           <CardHeader>
-            <CardTitle>{formatEventName(group.event)} - Results</CardTitle>
+            <CardTitle>{group.event} - Results</CardTitle>
           </CardHeader>
 
           <CardContent>
@@ -243,7 +255,11 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                              <Button
                                variant="outline"
                                size="sm"
-                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                                onClick={() => { 
+                                  setViewEventId(group.eventId); 
+                                  setViewEventName(group.event);
+                                  setViewSchoolId(s.schoolId); 
+                                }}
                              >
                                <Eye className="h-4 w-4 mr-1" />
                                View Details
@@ -288,7 +304,11 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                                variant="ghost"
                                size="icon"
                                aria-label={`View score sheets for ${s.schoolName}`}
-                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                                onClick={() => { 
+                                  setViewEventId(group.eventId); 
+                                  setViewEventName(group.event);
+                                  setViewSchoolId(s.schoolId); 
+                                }}
                              >
                                <Eye className="h-4 w-4" />
                              </Button>
@@ -304,13 +324,17 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
           </CardContent>
         </Card>
       ))}
-      <Dialog open={!!viewEvent && !!viewSchoolId} onOpenChange={(open) => {
-        if (!open) { setViewEvent(null); setViewSchoolId(null); }
+      <Dialog open={!!viewEventId && !!viewSchoolId} onOpenChange={(open) => {
+        if (!open) { 
+          setViewEventId(null); 
+          setViewEventName(null);
+          setViewSchoolId(null); 
+        }
       }}>
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {viewEvent ? `${viewEvent} - ${viewSchoolId ? (schoolMap[viewSchoolId] || 'School') : ''} Score Sheets` : 'Score Sheets'}
+              {viewEventName ? `${viewEventName} - ${viewSchoolId ? (schoolMap[viewSchoolId] || 'School') : ''} Score Sheets` : 'Score Sheets'}
             </DialogTitle>
           </DialogHeader>
           {isDialogLoading ? (
