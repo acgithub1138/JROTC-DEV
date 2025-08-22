@@ -40,7 +40,7 @@ class UnifiedEmailProcessor {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
     
-    const resendApiKey = Deno.env.get('RESEND_API_KEY');
+    const resendApiKey = Deno.env.get('RESEND_API_KEY1');
     console.log(`🔑 Resend API key configured: ${resendApiKey ? 'YES' : 'NO'}`);
     this.resend = new Resend(resendApiKey!);
   }
