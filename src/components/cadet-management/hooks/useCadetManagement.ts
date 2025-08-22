@@ -122,12 +122,8 @@ export const useCadetManagement = () => {
         // Extract specific error message from edge function response
         let errorMessage = 'Failed to create cadet';
         
-        // Debug: Log the full error structure
-        console.log('Full error object:', error);
-        console.log('Response data:', data);
-        
-        // Check for error in response data first (edge function return body)
-        if (data && data.error) {
+        // For 400 responses, Supabase puts the response body in `data`, not in error
+        if (data && typeof data === 'object' && data.error) {
           errorMessage = data.error;
         } else if (error.details && typeof error.details === 'string') {
           // Parse stringified JSON details
@@ -222,12 +218,8 @@ export const useCadetManagement = () => {
             // Extract specific error message from edge function response
             let errorMessage = 'Unknown error';
             
-            // Debug: Log the full error structure
-            console.log('Bulk import error object:', error);
-            console.log('Bulk import response data:', data);
-            
-            // Check for error in response data first (edge function return body)
-            if (data && data.error) {
+            // For 400 responses, Supabase puts the response body in `data`, not in error
+            if (data && typeof data === 'object' && data.error) {
               errorMessage = data.error;
             } else if (error.details && typeof error.details === 'string') {
               // Parse stringified JSON details
