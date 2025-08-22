@@ -222,7 +222,7 @@ const ParentRegistrationPage = () => {
         title: "Registration Successful",
         description: "Your parent account has been created. Please sign in to access your cadet's school calendar."
       });
-      navigate('/login');
+      navigate('/app/auth');
     } catch (error: any) {
       toast({
         title: "Error",
