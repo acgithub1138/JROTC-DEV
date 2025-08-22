@@ -1,12 +1,12 @@
 import React, { useState } from 'react';
-import { Plus, Eye, Edit } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCompetitionSchoolsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
@@ -20,9 +20,11 @@ type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row']
   paid: boolean;
   color: string;
 };
+
 interface CompetitionSchoolsTabProps {
   competitionId: string;
 }
+
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
@@ -36,12 +38,17 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   } = useCompetitionSchools(competitionId);
   const {
     canCreate,
-    canEdit
-  } = useTablePermissions('cp_comp_schools');
+    canView,
+    canViewDetails,
+    canUpdate,
+    canDelete
+  } = useCompetitionSchoolsPermissions();
+  
   const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
   const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
   const [selectedSchoolForAddEvent, setSelectedSchoolForAddEvent] = useState<string | null>(null);
+  
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
       await updateSchoolRegistration(schoolId, {
@@ -51,11 +58,13 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       console.error('Error updating school color:', error);
     }
   };
+
   if (isLoading) {
     return <div className="space-y-4">
         {[1, 2, 3].map(i => <div key={i} className="h-16 bg-muted rounded animate-pulse" />)}
       </div>;
   }
+
   return <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
@@ -65,9 +74,16 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
           </Button>}
       </div>
 
-      {schools.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {!canView ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>You don't have permission to view schools</p>
+        </div>
+      ) : schools.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No schools registered for this competition</p>
-        </div> : <TooltipProvider>
+        </div>
+      ) : (
+        <TooltipProvider>
           {isMobile ? (
             <div className="space-y-4">
               {schools.map((school: CompSchoolWithPaid) => (
@@ -101,18 +117,20 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                         />
                       </div>
                       <div className="flex flex-wrap gap-2 pt-2">
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEvents(school.id)}>
-                              <Eye className="w-4 h-4 mr-1" />
-                              Events
-                            </Button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            <p>View registered events</p>
-                          </TooltipContent>
-                        </Tooltip>
-                        {canEdit && (
+                        {canViewDetails && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEvents(school.id)}>
+                                <Eye className="w-4 h-4 mr-1" />
+                                Events
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View registered events</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                        {canUpdate && (
                           <>
                             <Tooltip>
                               <TooltipTrigger asChild>
@@ -169,16 +187,18 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                           {school.school_name || 'Unknown School'}
                         </TableCell>
                         <TableCell>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
-                                <Eye className="w-3 h-3" />
-                              </Button>
-                            </TooltipTrigger>
-                            <TooltipContent>
-                              <p>View registered events</p>
-                            </TooltipContent>
-                          </Tooltip>
+                          {canViewDetails && (
+                            <Tooltip>
+                              <TooltipTrigger asChild>
+                                <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEvents(school.id)}>
+                                  <Eye className="w-3 h-3" />
+                                </Button>
+                              </TooltipTrigger>
+                              <TooltipContent>
+                                <p>View registered events</p>
+                              </TooltipContent>
+                            </Tooltip>
+                          )}
                         </TableCell>                        
                         <TableCell>
                           <Badge variant={school.status === 'confirmed' ? 'default' : school.status === 'cancelled' ? 'destructive' : 'secondary'}>
@@ -201,7 +221,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                          </TableCell>
                         <TableCell className="text-center">
                           <div className="flex items-center justify-center gap-2">
-                            {canEdit && (
+                            {canUpdate && (
                               <>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
@@ -238,7 +258,8 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
               </CardContent>
             </Card>
           )}
-        </TooltipProvider>}
+        </TooltipProvider>
+      )}
 
       <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
       
