@@ -71,10 +71,21 @@ export const useParentCadetTasks = () => {
           {
             id: `task-${contact.id}-1`,
             task_number: `T-${String(index + 1).padStart(3, '0')}`,
-            title: `Task assigned to ${contact.name}`,
+            title: `Complete uniform inspection for ${contact.name || 'Cadet'}`,
             status: 'in_progress',
             priority: 'medium',
             due_date: new Date(Date.now() + 86400000 * 7).toISOString(), // 7 days from now
+            cadet_name: contact.name || 'Unknown Cadet',
+            cadet_id: contact.cadet_id!,
+            is_subtask: false
+          },
+          {
+            id: `task-${contact.id}-2`,
+            task_number: `T-${String(index + 1).padStart(3, '0')}-A`,
+            title: `Study drill and ceremony procedures`,
+            status: 'assigned',
+            priority: 'high',
+            due_date: new Date(Date.now() + 86400000 * 3).toISOString(), // 3 days from now
             cadet_name: contact.name || 'Unknown Cadet',
             cadet_id: contact.cadet_id!,
             is_subtask: false
