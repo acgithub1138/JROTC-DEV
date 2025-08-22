@@ -62,8 +62,8 @@ export const AddJobDialog = ({
     if (!formData.role || !formData.reports_to || !formData.assistant) return;
     onSubmit({
       ...formData,
-      cadet_id: formData.cadet_id === 'unassigned' ? undefined : formData.cadet_id,
-      reports_to: formData.reports_to || undefined,
+      cadet_id: formData.cadet_id === 'unassigned' || formData.cadet_id === '' ? undefined : formData.cadet_id,
+      reports_to: formData.reports_to || undefined,  
       assistant: formData.assistant || undefined
     });
   };
