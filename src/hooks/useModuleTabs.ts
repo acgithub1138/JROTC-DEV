@@ -17,55 +17,44 @@ export const useModuleTabs = (parentModuleId: string | null) => {
   const { hasPermission } = usePermissionContext();
 
   useEffect(() => {
-    const fetchTabs = async () => {
-      if (!parentModuleId) {
-        setTabs([]);
-        setIsLoading(false);
-        return;
+    if (!parentModuleId) {
+      setTabs([]);
+      setIsLoading(false);
+      return;
+    }
+
+    // For now, return hardcoded tabs based on parent module until database structure is ready
+    const getTabsForModule = (moduleId: string): ModuleTab[] => {
+      // Hosting competitions tabs
+      if (moduleId.includes('cp_competitions') || moduleId === 'hosting-competitions') {
+        return [
+          { id: 'events', name: 'cp_comp_events', label: 'Events', path: '', icon: 'Calendar', order: 1 },
+          { id: 'resources', name: 'cp_comp_resources', label: 'Resources', path: '', icon: 'Users', order: 2 },
+          { id: 'schools', name: 'cp_comp_schools', label: 'Schools', path: '', icon: 'School', order: 3 },
+          { id: 'schedule', name: 'cp_schedules', label: 'Schedule', path: '', icon: 'Clock', order: 4 },
+          { id: 'results', name: 'cp_results', label: 'Results', path: '', icon: 'Trophy', order: 5 }
+        ];
       }
-
-      try {
-        setIsLoading(true);
-        
-        // Use a simple text query to avoid TypeScript issues
-        const { data, error } = await supabase.rpc('get_permission_modules_simple', {
-          is_tab_param: true,
-          parent_module_param: parentModuleId,
-          is_active_param: true
-        });
-
-        if (error) {
-          console.error('Error fetching module tabs:', error);
-          setTabs([]);
-          return;
-        }
-
-        const filteredTabs: ModuleTab[] = [];
-        if (data && Array.isArray(data)) {
-          for (const tab of data) {
-            if (hasPermission(tab.name || '', 'read')) {
-              filteredTabs.push({
-                id: tab.name || '',
-                name: tab.name || '',
-                label: tab.label || tab.name || '',
-                path: tab.path || '',
-                icon: tab.icon || 'FileText',
-                order: tab.sort_order || 0
-              });
-            }
-          }
-        }
-        
-        setTabs(filteredTabs);
-      } catch (error) {
-        console.error('Error in fetchTabs:', error);
-        setTabs([]);
-      } finally {
-        setIsLoading(false);
+      
+      // My competitions tabs
+      if (moduleId.includes('my_competitions') || moduleId === 'my-competitions') {
+        return [
+          { id: 'competitions', name: 'competitions', label: 'My Competitions', path: '', icon: 'Award', order: 1 },
+          { id: 'reports', name: 'reports', label: 'Reports', path: '', icon: 'FileText', order: 2 }
+        ];
       }
+      
+      return [];
     };
 
-    fetchTabs();
+    const moduleKey = typeof parentModuleId === 'string' ? parentModuleId : '';
+    const allTabs = getTabsForModule(moduleKey);
+    
+    // Filter based on permissions
+    const filteredTabs = allTabs.filter(tab => hasPermission(tab.name, 'read'));
+    
+    setTabs(filteredTabs);
+    setIsLoading(false);
   }, [parentModuleId, hasPermission]);
 
   return { tabs, isLoading };

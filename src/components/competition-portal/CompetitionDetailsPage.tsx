@@ -5,7 +5,6 @@ import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useModuleTabs } from '@/hooks/useModuleTabs';
-import { supabase } from '@/integrations/supabase/client';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
@@ -15,27 +14,9 @@ export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
-  const [hostingCompetitionModuleId, setHostingCompetitionModuleId] = useState<string | null>(null);
   
-  const { tabs, isLoading: tabsLoading } = useModuleTabs(hostingCompetitionModuleId);
-
-  // Get the hosting competition module ID
-  useEffect(() => {
-    const fetchHostingCompetitionModule = async () => {
-      const { data, error } = await supabase
-        .from('permission_modules')
-        .select('id')
-        .eq('name', 'cp_competitions')
-        .eq('is_active', true)
-        .maybeSingle();
-      
-      if (data && !error) {
-        setHostingCompetitionModuleId(data.id);
-      }
-    };
-
-    fetchHostingCompetitionModule();
-  }, []);
+  // Use hardcoded parent module ID for now
+  const { tabs, isLoading: tabsLoading } = useModuleTabs('hosting-competitions');
 
   console.log('Route params:', params);
   console.log('Competition ID:', competitionId);

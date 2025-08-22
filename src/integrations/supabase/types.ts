@@ -2425,9 +2425,10 @@ export type Database = {
           id: string
           is_active: boolean | null
           is_competition_portal: boolean | null
+          is_tab: boolean
           label: string
           name: string
-          order: number | null
+          parent_module: string | null
           path: string | null
           sort_order: number | null
           updated_at: string
@@ -2439,9 +2440,10 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_competition_portal?: boolean | null
+          is_tab?: boolean
           label: string
           name: string
-          order?: number | null
+          parent_module?: string | null
           path?: string | null
           sort_order?: number | null
           updated_at?: string
@@ -2453,14 +2455,23 @@ export type Database = {
           id?: string
           is_active?: boolean | null
           is_competition_portal?: boolean | null
+          is_tab?: boolean
           label?: string
           name?: string
-          order?: number | null
+          parent_module?: string | null
           path?: string | null
           sort_order?: number | null
           updated_at?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "permission_modules_parent_module_fkey"
+            columns: ["parent_module"]
+            isOneToOne: false
+            referencedRelation: "permission_modules"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profile_history: {
         Row: {
@@ -3563,6 +3574,24 @@ export type Database = {
       get_next_task_number: {
         Args: { school_uuid: string }
         Returns: string
+      }
+      get_permission_modules_simple: {
+        Args: {
+          is_active_param?: boolean
+          is_tab_param?: boolean
+          parent_module_param?: string
+        }
+        Returns: {
+          icon: string
+          id: string
+          is_competition_portal: boolean
+          is_tab: boolean
+          label: string
+          name: string
+          parent_module: string
+          path: string
+          sort_order: number
+        }[]
       }
       get_stuck_emails: {
         Args: { threshold_time?: string }

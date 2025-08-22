@@ -1,37 +1,18 @@
 import React, { useState, useEffect } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useModuleTabs } from '@/hooks/useModuleTabs';
-import { supabase } from '@/integrations/supabase/client';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { ReportsTab } from './tabs/ReportsTab';
 import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const MyCompetitionsPage = () => {
-  const [myCompetitionsModuleId, setMyCompetitionsModuleId] = useState<string | null>(null);
-  const { tabs, isLoading: tabsLoading } = useModuleTabs(myCompetitionsModuleId);
+  // Use hardcoded parent module ID for now  
+  const { tabs, isLoading: tabsLoading } = useModuleTabs('my-competitions');
   const [activeTab, setActiveTab] = useState('');
   const {
     canCreate,
     canUpdate
   } = useCompetitionPermissions();
-
-  // Get the my competitions module ID
-  useEffect(() => {
-    const fetchMyCompetitionsModule = async () => {
-      const { data, error } = await supabase
-        .from('permission_modules')
-        .select('id')
-        .eq('name', 'my_competitions')
-        .eq('is_active', true)
-        .maybeSingle();
-      
-      if (data && !error) {
-        setMyCompetitionsModuleId(data.id);
-      }
-    };
-
-    fetchMyCompetitionsModule();
-  }, []);
 
   // Set default active tab when tabs are loaded
   useEffect(() => {
