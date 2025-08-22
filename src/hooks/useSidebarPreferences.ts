@@ -153,11 +153,11 @@ const getMenuItemsFromPermissions = (
     console.log(`Permission check: ${item.id} (${moduleKey}) -> sidebar = ${hasAccess}`);
   });
 
-  // Special handling for parent role - only allow calendar
+  // Special handling for parent role - only allow calendar if they have sidebar permission
   if (role === 'parent') {
     const parentItems = allPossibleItems.filter(item => 
-      item.id === 'calendar'
-    ).map(item => ({ ...item, isVisible: true }));
+      item.id === 'calendar' && hasPermission('calendar', 'sidebar')
+    );
     return [...baseItems, ...parentItems];
   }
 
@@ -191,10 +191,8 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', isVisible: true, order: 16 }
     ];
   } else if (role === 'parent') {
-    return [
-      ...baseItems,
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 2 },
-    ];
+    // Parents get only dashboard by default - permissions control actual access
+    return baseItems;
   } else if (role === 'instructor') {
     return [
       ...baseItems,
