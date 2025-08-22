@@ -124,7 +124,14 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           {
             id: school.school_id,
             name: school.school_name || 'Unknown School',
-            initials: school.school_initials || school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || '',
+            initials: school.school_initials || 
+              school.school_name
+                ?.replace(/[()]/g, '') // Remove parentheses
+                ?.split(' ')
+                ?.filter(word => word.length > 0) // Filter out empty strings
+                ?.map(word => word[0])
+                ?.join('')
+                ?.toUpperCase() || '',
             color: school.color || '#3B82F6'
           }
         ]) || []
@@ -357,7 +364,14 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         return {
           id: school.school_id,
           name: schoolName,
-          initials: schoolInfo?.school_initials || schoolName.split(' ').map(word => word[0]).join('').toUpperCase()
+          initials: schoolInfo?.school_initials || 
+            schoolName
+              ?.replace(/[()]/g, '') // Remove parentheses
+              ?.split(' ')
+              ?.filter(word => word.length > 0) // Filter out empty strings
+              ?.map(word => word[0])
+              ?.join('')
+              ?.toUpperCase() || ''
         };
       }) || [];
 

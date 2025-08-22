@@ -76,7 +76,14 @@ export const CompetitionScheduleTab = ({
       return data.map(school => ({
         id: school.school_id,
         name: school.school_name,
-        initials: school.school_initials || school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || ''
+        initials: school.school_initials || 
+          school.school_name
+            ?.replace(/[()]/g, '') // Remove parentheses
+            ?.split(' ')
+            ?.filter(word => word.length > 0) // Filter out empty strings
+            ?.map(word => word[0])
+            ?.join('')
+            ?.toUpperCase() || ''
       }));
     }
   });
