@@ -1,7 +1,8 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useOpenCompsOpenPermissions } from '@/hooks/useModuleSpecificPermissions';
@@ -52,8 +53,18 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   const defaultPermissions = useOpenCompsOpenPermissions();
   const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = permissions || defaultPermissions;
   
+  const [showSopModal, setShowSopModal] = useState(false);
+  const [selectedSopText, setSelectedSopText] = useState('');
+  const [selectedCompetitionName, setSelectedCompetitionName] = useState('');
+  
   const isRegistered = (competitionId: string) => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
+  };
+
+  const handleViewSop = (sopText: string, competitionName: string) => {
+    setSelectedSopText(sopText);
+    setSelectedCompetitionName(competitionName);
+    setShowSopModal(true);
   };
 
   // Check if user can read records
@@ -186,10 +197,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                         variant="ghost"
                         size="sm"
                         className="h-auto p-1 text-primary hover:text-primary-dark"
-                        onClick={() => {
-                          // Create a modal or popup to show SOP text
-                          alert(competition.sop_text);
-                        }}
+                        onClick={() => handleViewSop(competition.sop_text, competition.name)}
                       >
                         <Eye className="w-3 h-3 mr-1" />
                         View
@@ -252,6 +260,28 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
           </CardContent>
         </Card>
       ))}
+      
+      {/* SOP Modal */}
+      <Dialog open={showSopModal} onOpenChange={setShowSopModal}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh]">
+          <DialogHeader>
+            <DialogTitle>Standard Operating Procedures</DialogTitle>
+            <DialogDescription>
+              {selectedCompetitionName}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="max-h-[60vh] overflow-y-auto">
+            <div className="whitespace-pre-wrap text-sm leading-relaxed p-4 bg-muted rounded-md">
+              {selectedSopText}
+            </div>
+          </div>
+          <DialogFooter>
+            <Button onClick={() => setShowSopModal(false)}>
+              Close
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };
