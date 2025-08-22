@@ -163,6 +163,10 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
 
   const loadPreferences = useCallback(async () => {
     if (!debouncedUserProfile?.id || debouncedPermissionsLoading) {
+      console.log('SidebarPreferencesContext: Skipping load - no user or permissions loading:', {
+        hasUser: !!debouncedUserProfile?.id,
+        permissionsLoading: debouncedPermissionsLoading
+      });
       return;
     }
 
@@ -170,12 +174,22 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
     const cacheKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}`;
     const profileKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}`;
     
+    console.log('SidebarPreferencesContext: Loading preferences for:', {
+      userId: debouncedUserProfile.id,
+      role: debouncedUserProfile.role,
+      cacheKey,
+      isLoading: loadingRef.current,
+      lastProfileKey: lastProfileRef.current
+    });
+    
     if (loadingRef.current || lastProfileRef.current === profileKey) {
+      console.log('SidebarPreferencesContext: Skipping - already loading or same profile key');
       return;
     }
 
     // Check cache first
     if (cacheRef.current[cacheKey]) {
+      console.log('SidebarPreferencesContext: Using cached items:', cacheRef.current[cacheKey]);
       setMenuItems(cacheRef.current[cacheKey]);
       setIsLoading(false);
       lastProfileRef.current = profileKey;
@@ -190,6 +204,13 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
       const defaultItems = permissionsLoaded 
         ? getMenuItemsFromPermissions(userRole, debouncedUserProfile, hasPermission)
         : getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
+      
+      console.log('SidebarPreferencesContext: Generated default items:', {
+        role: userRole,
+        permissionsLoaded,
+        itemCount: defaultItems.length,
+        items: defaultItems
+      });
 
       // Try to load saved preferences
       try {
@@ -214,24 +235,31 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
             .map(id => defaultItems.find(item => item.id === id))
             .filter(Boolean) as MenuItem[];
           
+          console.log('SidebarPreferencesContext: Using saved preferences:', {
+            savedItemIds: savedItems,
+            validatedCount: validatedItems.length,
+            validatedItems
+          });
           setMenuItems(validatedItems);
           cacheRef.current[cacheKey] = validatedItems;
         } else {
           // No saved preferences - generate from permissions
+          console.log('SidebarPreferencesContext: No saved preferences, using defaults:', defaultItems);
           setMenuItems(defaultItems);
           cacheRef.current[cacheKey] = defaultItems;
         }
       } catch (prefsError) {
-        console.warn('Failed to load preferences, using defaults:', prefsError);
+        console.warn('SidebarPreferencesContext: Failed to load preferences, using defaults:', prefsError);
         setMenuItems(defaultItems);
         cacheRef.current[cacheKey] = defaultItems;
       }
 
       lastProfileRef.current = profileKey;
     } catch (error) {
-      console.error('Error in loadPreferences:', error);
+      console.error('SidebarPreferencesContext: Error in loadPreferences:', error);
       // Fall back to default permissions-based menu
       const fallbackItems = getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
+      console.log('SidebarPreferencesContext: Using fallback items:', fallbackItems);
       setMenuItems(fallbackItems);
       cacheRef.current[cacheKey] = fallbackItems;
     } finally {
