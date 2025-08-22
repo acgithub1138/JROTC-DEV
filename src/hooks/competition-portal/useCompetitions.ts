@@ -2,6 +2,8 @@ import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from 'sonner';
+import { convertToSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
+import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import type { Database } from '@/integrations/supabase/types';
 
 type Competition = Database['public']['Tables']['cp_competitions']['Row'];
@@ -10,6 +12,7 @@ type CompetitionUpdate = Database['public']['Tables']['cp_competitions']['Update
 
 export const useCompetitions = () => {
   const { userProfile } = useAuth();
+  const { timezone } = useSchoolTimezone();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
@@ -105,6 +108,116 @@ export const useCompetitions = () => {
     }
   };
 
+  const copyCompetition = async (originalId: string, newName: string, newStartDate: Date, newEndDate: Date) => {
+    if (!userProfile?.school_id) {
+      toast.error('User school not found');
+      return;
+    }
+
+    try {
+      // Fetch the original competition
+      const { data: originalCompetition, error: compError } = await supabase
+        .from('cp_competitions')
+        .select('*')
+        .eq('id', originalId)
+        .single();
+
+      if (compError) throw compError;
+
+      // Fetch the original competition events
+      const { data: originalEvents, error: eventsError } = await supabase
+        .from('cp_comp_events')
+        .select('*')
+        .eq('competition_id', originalId);
+
+      if (eventsError) throw eventsError;
+
+      // Calculate the date difference for time adjustments
+      const originalStartDate = new Date(originalCompetition.start_date);
+      const dateDifferenceMs = newStartDate.getTime() - originalStartDate.getTime();
+
+      // Create the new competition
+      const newCompetitionData = {
+        ...originalCompetition,
+        id: undefined, // Let database generate new ID
+        name: newName,
+        start_date: newStartDate.toISOString(),
+        end_date: newEndDate.toISOString(),
+        status: 'draft',
+        school_id: userProfile.school_id,
+        created_by: userProfile.id,
+        is_public: false,
+        created_at: undefined,
+        updated_at: undefined,
+        // Calculate new registration deadline if it existed
+        registration_deadline: originalCompetition.registration_deadline 
+          ? new Date(new Date(originalCompetition.registration_deadline).getTime() + dateDifferenceMs).toISOString()
+          : null
+      };
+
+      const { data: newCompetition, error: newCompError } = await supabase
+        .from('cp_competitions')
+        .insert(newCompetitionData)
+        .select()
+        .single();
+
+      if (newCompError) throw newCompError;
+
+      // Copy events with adjusted times
+      if (originalEvents && originalEvents.length > 0) {
+        const newEvents = originalEvents.map(event => {
+          const adjustTime = (timeStr: string | null) => {
+            if (!timeStr) return null;
+            
+            // Convert UTC time to school timezone to get the time of day
+            const originalTime = convertToSchoolTimezone(new Date(timeStr), timezone);
+            const hours = originalTime.getHours();
+            const minutes = originalTime.getMinutes();
+            const seconds = originalTime.getSeconds();
+            
+            // Apply the same time of day to the new competition date
+            const newDateTime = new Date(newStartDate);
+            newDateTime.setHours(hours, minutes, seconds, 0);
+            
+            // Convert back to UTC for storage
+            return convertFromSchoolTimezone(newDateTime, timezone).toISOString();
+          };
+
+          return {
+            ...event,
+            id: undefined, // Let database generate new ID
+            competition_id: newCompetition.id,
+            school_id: userProfile.school_id,
+            created_by: userProfile.id,
+            created_at: undefined,
+            updated_at: undefined,
+            updated_by: undefined,
+            start_time: adjustTime(event.start_time),
+            end_time: adjustTime(event.end_time),
+            lunch_start_time: adjustTime(event.lunch_start_time),
+            lunch_end_time: adjustTime(event.lunch_end_time),
+          };
+        });
+
+        const { error: eventsInsertError } = await supabase
+          .from('cp_comp_events')
+          .insert(newEvents);
+
+        if (eventsInsertError) throw eventsInsertError;
+      }
+
+      // Update local state
+      setCompetitions(prev => [newCompetition, ...prev]);
+      
+      toast.success(`Competition "${newName}" copied successfully`);
+      return newCompetition;
+    } catch (error) {
+      console.error('Error copying competition:', error);
+      toast.error('Failed to copy competition');
+      throw error;
+    }
+  };
+
   useEffect(() => {
     fetchCompetitions();
   }, [userProfile?.school_id]);
@@ -115,6 +228,7 @@ export const useCompetitions = () => {
     createCompetition,
     updateCompetition,
     deleteCompetition,
+    copyCompetition,
     refetch: fetchCompetitions
   };
 };

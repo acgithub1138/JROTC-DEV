@@ -14,9 +14,11 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { CPCompetitionDialog } from './components/CPCompetitionDialog';
 import { ViewCompetitionModal } from './ViewCompetitionModal';
 import { EditCompetitionModal } from './modals/EditCompetitionModal';
+import { CopyCompetitionModal } from './components/CopyCompetitionModal';
 import { CompetitionCards } from './components/CompetitionCards';
+import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -55,6 +57,7 @@ const CompetitionsPage = () => {
   const isMobile = useIsMobile();
   const { canCreate } = useTablePermissions('cp_competitions');
   const { canViewDetails, canEdit, canDelete, canManage } = useCPCompetitionPermissions();
+  const { copyCompetition } = useCompetitions();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -65,7 +68,9 @@ const CompetitionsPage = () => {
 const [showCreateDialog, setShowCreateDialog] = useState(false);
 const [showViewModal, setShowViewModal] = useState(false);
 const [showEditModal, setShowEditModal] = useState(false);
+const [showCopyModal, setShowCopyModal] = useState(false);
 const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+const [isCopying, setIsCopying] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<Competition | null>(null);
@@ -230,6 +235,27 @@ const handleEditSubmit = async (data: any) => {
     } catch (error) {
       console.error('Error cancelling competition:', error);
       toast.error('Failed to cancel competition');
+    }
+  };
+
+  const handleCopyCompetition = (competition: Competition) => {
+    setSelectedCompetition(competition);
+    setShowCopyModal(true);
+  };
+
+  const handleCopySubmit = async (name: string, startDate: Date, endDate: Date) => {
+    if (!selectedCompetition) return;
+
+    try {
+      setIsCopying(true);
+      await copyCompetition(selectedCompetition.id, name, startDate, endDate);
+      setShowCopyModal(false);
+      setSelectedCompetition(null);
+      fetchCompetitions(); // Refresh the list
+    } catch (error) {
+      // Error is already handled in the copyCompetition function
+    } finally {
+      setIsCopying(false);
     }
   };
 
@@ -441,6 +467,20 @@ const handleEditSubmit = async (data: any) => {
       </Tooltip>
     )}
 
+    {/* Copy Competition */}
+    {canCreate && (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleCopyCompetition(competition)}>
+            <Copy className="w-3 h-3" />
+          </Button>
+        </TooltipTrigger>
+        <TooltipContent>
+          <p>Copy</p>
+        </TooltipContent>
+      </Tooltip>
+    )}
+
     {canManage && (
       <>
         {/* Manage Competition */}
@@ -508,6 +548,15 @@ const handleEditSubmit = async (data: any) => {
   onOpenChange={setShowEditModal}
   competition={selectedCompetition}
   onSubmit={handleEditSubmit}
+/>
+
+{/* Copy Competition Modal */}
+<CopyCompetitionModal 
+  isOpen={showCopyModal}
+  onClose={() => setShowCopyModal(false)}
+  onConfirm={handleCopySubmit}
+  originalCompetitionName={selectedCompetition?.name || ''}
+  isLoading={isCopying}
 />
 
       {/* Cancel Competition Confirmation Dialog */}

@@ -1,0 +1,181 @@
+import React, { useState } from 'react';
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Button } from '@/components/ui/button';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { CalendarIcon } from 'lucide-react';
+import { format } from 'date-fns';
+import { cn } from '@/lib/utils';
+
+interface CopyCompetitionModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  onConfirm: (name: string, startDate: Date, endDate: Date) => void;
+  originalCompetitionName: string;
+  isLoading?: boolean;
+}
+
+export const CopyCompetitionModal: React.FC<CopyCompetitionModalProps> = ({
+  isOpen,
+  onClose,
+  onConfirm,
+  originalCompetitionName,
+  isLoading = false
+}) => {
+  const [name, setName] = useState(`${originalCompetitionName} (Copy)`);
+  const [startDate, setStartDate] = useState<Date | undefined>(undefined);
+  const [endDate, setEndDate] = useState<Date | undefined>(undefined);
+  const [showStartCalendar, setShowStartCalendar] = useState(false);
+  const [showEndCalendar, setShowEndCalendar] = useState(false);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!name.trim()) {
+      return;
+    }
+    
+    if (!startDate || !endDate) {
+      return;
+    }
+    
+    if (endDate < startDate) {
+      return;
+    }
+    
+    onConfirm(name.trim(), startDate, endDate);
+  };
+
+  const handleClose = () => {
+    if (!isLoading) {
+      setName(`${originalCompetitionName} (Copy)`);
+      setStartDate(undefined);
+      setEndDate(undefined);
+      onClose();
+    }
+  };
+
+  const isFormValid = name.trim() && startDate && endDate && endDate >= startDate;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={handleClose}>
+      <DialogContent className="sm:max-w-[425px]">
+        <DialogHeader>
+          <DialogTitle>Copy Competition</DialogTitle>
+          <DialogDescription>
+            Create a copy of "{originalCompetitionName}" with a new name and dates.
+          </DialogDescription>
+        </DialogHeader>
+        
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="competition-name">Competition Name *</Label>
+            <Input
+              id="competition-name"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+              placeholder="Enter competition name"
+              disabled={isLoading}
+              required
+            />
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label>Start Date *</Label>
+              <Popover open={showStartCalendar} onOpenChange={setShowStartCalendar}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !startDate && "text-muted-foreground"
+                    )}
+                    disabled={isLoading}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {startDate ? format(startDate, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={startDate}
+                    onSelect={(date) => {
+                      setStartDate(date);
+                      setShowStartCalendar(false);
+                      // Auto-adjust end date if it's before the new start date
+                      if (date && endDate && endDate < date) {
+                        setEndDate(date);
+                      }
+                    }}
+                    disabled={(date) => date < new Date()}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+
+            <div className="space-y-2">
+              <Label>End Date *</Label>
+              <Popover open={showEndCalendar} onOpenChange={setShowEndCalendar}>
+                <PopoverTrigger asChild>
+                  <Button
+                    variant="outline"
+                    className={cn(
+                      "w-full justify-start text-left font-normal",
+                      !endDate && "text-muted-foreground"
+                    )}
+                    disabled={isLoading}
+                  >
+                    <CalendarIcon className="mr-2 h-4 w-4" />
+                    {endDate ? format(endDate, "MMM d, yyyy") : "Select date"}
+                  </Button>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={endDate}
+                    onSelect={(date) => {
+                      setEndDate(date);
+                      setShowEndCalendar(false);
+                    }}
+                    disabled={(date) => {
+                      const minDate = startDate || new Date();
+                      return date < minDate;
+                    }}
+                    initialFocus
+                  />
+                </PopoverContent>
+              </Popover>
+            </div>
+          </div>
+
+          {endDate && startDate && endDate < startDate && (
+            <p className="text-sm text-destructive">End date must be on or after the start date.</p>
+          )}
+        </form>
+
+        <DialogFooter>
+          <Button 
+            type="button" 
+            variant="outline" 
+            onClick={handleClose}
+            disabled={isLoading}
+          >
+            Cancel
+          </Button>
+          <Button 
+            type="button"
+            onClick={handleSubmit}
+            disabled={!isFormValid || isLoading}
+          >
+            {isLoading ? 'Copying...' : 'Copy Competition'}
+          </Button>
+        </DialogFooter>
+      </DialogContent>
+    </Dialog>
+  );
+};
