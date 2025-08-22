@@ -45,17 +45,17 @@ export const createFlowEdges = (
   hierarchyResult: HierarchyResult,
   jobs: JobBoardWithCadet[]
 ): Edge[] => {
-  console.log('🔗 Creating flow edges from hierarchy:', { hierarchyEdgesCount: hierarchyResult.edges.length });
+  console.log('Creating flow edges - hierarchy edges:', hierarchyResult.edges.length);
   
   const flowEdges: Edge[] = [];
   
   // Create edges from hierarchy edges (built from reports_to and assistant fields)
-  hierarchyResult.edges.forEach((hierarchyEdge, index) => {
+  hierarchyResult.edges.forEach((hierarchyEdge) => {
     const sourceJob = jobs.find(j => j.id === hierarchyEdge.source);
     const targetJob = jobs.find(j => j.id === hierarchyEdge.target);
     
     if (!sourceJob || !targetJob) {
-      console.warn(`Source or target job not found for edge:`, hierarchyEdge);
+      console.warn(`Source or target job not found for edge:`, hierarchyEdge.id);
       return;
     }
 
@@ -87,7 +87,6 @@ export const createFlowEdges = (
       }
     };
     
-    console.log(`📎 Created ${hierarchyEdge.type} edge:`, edgeObj);
     flowEdges.push(edgeObj);
   });
 
@@ -113,8 +112,7 @@ export const createFlowEdges = (
         );
         
         if (existingEdge) {
-          console.log(`Skipping duplicate edge from connections array`);
-          return;
+          return; // Skip duplicate
         }
 
         const edgeObj = {
@@ -132,12 +130,11 @@ export const createFlowEdges = (
           }
         };
         
-        console.log(`📎 Created ${connection.type} edge from connections:`, edgeObj);
         flowEdges.push(edgeObj);
       });
     }
   });
 
-  console.log('✅ Total flow edges created:', flowEdges.length);
+  console.log('Flow edges created:', flowEdges.length);
   return flowEdges;
 };

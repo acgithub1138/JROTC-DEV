@@ -56,14 +56,19 @@ export const useJobBoardNodes = ({
       if (previousJob) {
         // Only check fields that affect visual representation
         const fieldsToCheck = [
-          'role', 'cadet_id', 'reports_to', 'assistant', 'connections'
+          'role', 'cadet_id', 'reports_to', 'assistant'
         ] as const;
         
         const hasChanges = fieldsToCheck.some(field => 
           currentJob[field] !== previousJob[field]
         );
         
-        if (hasChanges) {
+        // Compare connections array length (avoid deep comparison to prevent infinite loops)
+        const currentConnections = currentJob.connections || [];
+        const previousConnections = previousJob.connections || [];
+        if (currentConnections.length !== previousConnections.length) {
+          changedJobIds.add(id);
+        } else if (hasChanges) {
           changedJobIds.add(id);
         }
       }
@@ -136,7 +141,7 @@ export const useJobBoardNodes = ({
       (hasPositionChanges && savedPositionsMap.size === 0); // Only recalculate if positions were cleared
 
     if (needsLayoutRecalculation) {
-      console.log(`🎯 Recalculating layout using legacy algorithm`);
+      console.log('Layout recalculation needed due to changes');
       
       const hierarchyResult = buildJobHierarchy(jobs);
       const positions = calculateNodePositions(
@@ -153,7 +158,7 @@ export const useJobBoardNodes = ({
         
         setNodes(flowNodes);
         setEdges(flowEdges);
-        console.log(`✨ Created legacy layout with ${flowNodes.length} nodes`);
+        console.log(`Layout recalculated with ${flowNodes.length} nodes`);
         
         isInitializedRef.current = true;
       } else {
@@ -166,7 +171,7 @@ export const useJobBoardNodes = ({
       }
     } else if (hasPositionChanges) {
       // Only position changes, update existing nodes
-      console.log('📍 Updating node positions from saved preferences');
+      console.log('Updating node positions from saved preferences');
       setNodes(currentNodes => 
         currentNodes.map(node => {
           const savedPosition = savedPositionsMap.get(node.id);

@@ -21,10 +21,11 @@ export interface HierarchyResult {
 }
 
 export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult => {
-  console.log('Building hierarchy with jobs:', jobs);
+  console.log('Building hierarchy with jobs count:', jobs.length);
   
   const hierarchyNodes = new Map<string, HierarchyNode>();
   const edges: HierarchyEdge[] = [];
+  const visitedNodes = new Set<string>(); // Track visited nodes to prevent cycles
   
   // Initialize hierarchy nodes
   jobs.forEach((job) => {
@@ -38,7 +39,6 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
   // Find root nodes (no reports_to or reports_to is 'NA')
   const rootNodes: string[] = [];
   jobs.forEach((job) => {
-    console.log(`Job ${job.role} reports to: ${job.reports_to || 'none'}`);
     if (!job.reports_to || job.reports_to === 'NA') {
       rootNodes.push(job.id);
       const node = hierarchyNodes.get(job.id);
@@ -48,29 +48,42 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
     }
   });
 
-  console.log('Root nodes:', rootNodes);
+  console.log('Root nodes count:', rootNodes.length);
 
-  // Build hierarchy levels and relationships
-  const buildHierarchy = (nodeId: string, level: number) => {
+  // Build hierarchy levels and relationships with cycle detection
+  const buildHierarchy = (nodeId: string, level: number, ancestors: Set<string> = new Set()) => {
+    // Prevent infinite recursion by checking if we've seen this node in current path
+    if (ancestors.has(nodeId)) {
+      console.warn(`Circular reference detected at ${nodeId}, skipping to prevent infinite recursion`);
+      return;
+    }
+    
+    // Prevent processing same node multiple times
+    if (visitedNodes.has(nodeId)) {
+      return;
+    }
+    
     const currentJob = jobs.find(j => j.id === nodeId);
     if (!currentJob) return;
     
-    console.log(`Building hierarchy for ${currentJob.role} at level ${level}`);
+    // Prevent excessive depth
+    if (level > 10) {
+      console.warn(`Maximum hierarchy depth reached for ${currentJob.role}, stopping recursion`);
+      return;
+    }
+    
+    visitedNodes.add(nodeId);
+    const newAncestors = new Set([...ancestors, nodeId]);
     
     // Find subordinates - those who report to this person's role
     const subordinates = jobs.filter(job => {
-      const reportsToMatch = job.reports_to === currentJob.role;
-      if (reportsToMatch) {
-        console.log(`Found subordinate: ${job.role} reports to ${currentJob.role}`);
-      }
-      return reportsToMatch;
+      return job.reports_to === currentJob.role && job.id !== nodeId; // Ensure not self-reporting
     });
-    
-    console.log(`${currentJob.role} has ${subordinates.length} subordinates:`, subordinates.map(s => s.role));
     
     const currentNode = hierarchyNodes.get(nodeId);
     if (currentNode) {
       currentNode.children = subordinates.map(s => s.id);
+      currentNode.level = level;
     }
     
     subordinates.forEach((subordinate) => {
@@ -87,16 +100,12 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
         type: 'reports_to',
       });
       
-      console.log(`Created edge: ${currentJob.role} -> ${subordinate.role}`);
-      
-      buildHierarchy(subordinate.id, level + 1);
+      buildHierarchy(subordinate.id, level + 1, newAncestors);
     });
   };
 
   // Build hierarchy for each root node
   rootNodes.forEach(rootId => {
-    const rootJob = jobs.find(j => j.id === rootId);
-    console.log(`Starting hierarchy build from root: ${rootJob?.role}`);
     buildHierarchy(rootId, 0);
   });
 
@@ -106,7 +115,6 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
       // Find the person this job is assistant TO
       const supervisorJob = jobs.find(j => j.role === job.assistant);
       if (supervisorJob) {
-        console.log(`Found assistant relationship: ${job.role} is assistant to ${supervisorJob.role}`);
         // Create edge from supervisor to assistant (supervisor right -> assistant left)
         edges.push({
           id: `${supervisorJob.id}-assistant-${job.id}`,
@@ -118,8 +126,7 @@ export const buildJobHierarchy = (jobs: JobBoardWithCadet[]): HierarchyResult =>
     }
   });
 
-  console.log('Hierarchy nodes:', Array.from(hierarchyNodes.entries()));
-  console.log('Edges:', edges);
+  console.log('Hierarchy complete - nodes:', hierarchyNodes.size, 'edges:', edges.length);
 
   return {
     nodes: hierarchyNodes,
