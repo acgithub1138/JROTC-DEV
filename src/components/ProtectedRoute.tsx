@@ -1,13 +1,12 @@
 import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
-import { LoadingSpinner } from '@/components/ui/loading-spinner';
 import PasswordChangeDialog from './auth/PasswordChangeDialog';
 import ParentSetupModal from './auth/ParentSetupModal';
 import { supabase } from '@/integrations/supabase/client';
 import { useQueryClient } from '@tanstack/react-query';
 import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
-import AuthPage from '@/pages/AuthPage';
+import AuthPage from '@/components/auth/AuthPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -127,7 +126,10 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   if (loading || permissionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <LoadingSpinner />
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
+          <p className="mt-4 text-gray-600">Loading...</p>
+        </div>
       </div>
     );
   }

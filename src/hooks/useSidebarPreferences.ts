@@ -1,171 +1,195 @@
-import { useState, useEffect, useCallback, useMemo, useRef } from 'react';
-import { supabase } from '@/integrations/supabase/client';
+import { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useDebounce } from 'use-debounce';
+import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
 
 export interface MenuItem {
   id: string;
   label: string;
-  icon: any;
+  icon: string;
+  path: string;
+  isVisible: boolean;
+  order: number;
 }
 
-// Module mapping for permissions
-const MODULE_MAPPING: Record<string, string> = {
-  'user-admin': 'cadets', // Only admins should see this
-  'school-management': 'cadets', // Only admins should see this
-  'cadets': 'cadets',
+// Helper mapping for module name compatibility
+const MODULE_MAPPING: { [key: string]: string } = {
   'tasks': 'tasks',
+  'incident_management': 'incident_management',
+  'cadets': 'cadets',
   'job-board': 'job_board',
-  'teams': 'teams',
-  'budget': 'budget',
+  'teams': 'teams', 
   'inventory': 'inventory',
+  'budget': 'budget',
   'contacts': 'contacts',
   'calendar': 'calendar',
-  'email-management': 'email',
-  'incident_management': 'incident_management',
-  'role-management': 'cadets', // Only admins should see this
+  'competitions': 'competitions'
 };
 
-const getMenuItemsFromPermissions = (role: string, hasPermission: (module: string, action: string) => boolean, userProfile?: any): MenuItem[] => {
+// Generate menu items from current permissions
+const getMenuItemsFromPermissions = (
+  role: string, 
+  userProfile: any,
+  hasPermission: (module: string, action: string) => boolean
+): MenuItem[] => {
   console.log('getMenuItemsFromPermissions called with role:', role, 'userProfile:', userProfile);
   
-  const baseItems = role === 'parent' ? [] : [
-    { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
+  const baseItems: MenuItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: 'LayoutDashboard',
+      path: '/app',
+      isVisible: true,
+      order: 1
+    }
   ];
 
-  const potentialItems = [
-    { id: 'user-admin', label: 'User Management', icon: 'UserCog', adminOnly: true },
-    { id: 'school-management', label: 'School Management', icon: 'Building2', adminOnly: true },
-    { id: 'role-management', label: 'Role Management', icon: 'Shield', adminOnly: true },
-    { id: 'cadets', label: 'Cadets', icon: 'User' },
-    { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-    { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
-    { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
-    { id: 'teams', label: 'Teams', icon: 'Users' },
-    { id: 'budget', label: 'Budget', icon: 'DollarSign' },
-    { id: 'inventory', label: 'Inventory', icon: 'Package' },
-    { id: 'contacts', label: 'Contacts', icon: 'Contact' },
-    { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-    { id: 'email-management', label: 'Email', icon: 'Mails' },
-    { id: 'settings', label: 'Settings', icon: 'Settings' },
+  const allPossibleItems: MenuItem[] = [
+    {
+      id: 'tasks',
+      label: 'Tasks',
+      icon: 'CheckSquare',
+      path: '/app/tasks',
+      isVisible: hasPermission('tasks', 'sidebar'),
+      order: 2
+    },
+    {
+      id: 'cadets',
+      label: 'Cadets',
+      icon: 'Users',
+      path: '/app/cadets',
+      isVisible: hasPermission('cadets', 'sidebar'),
+      order: 3
+    },
+    {
+      id: 'job-board',
+      label: 'Job Board',
+      icon: 'Briefcase',
+      path: '/app/job-board',
+      isVisible: hasPermission('job_board', 'sidebar'),
+      order: 4
+    },
+    {
+      id: 'teams',
+      label: 'Teams',
+      icon: 'Users',
+      path: '/app/teams',
+      isVisible: hasPermission('teams', 'sidebar'),
+      order: 5
+    },
+    {
+      id: 'inventory',
+      label: 'Inventory',
+      icon: 'Package',
+      path: '/app/inventory',
+      isVisible: hasPermission('inventory', 'sidebar'),
+      order: 6
+    },
+    {
+      id: 'budget',
+      label: 'Budget',
+      icon: 'DollarSign',
+      path: '/app/budget',
+      isVisible: hasPermission('budget', 'sidebar'),
+      order: 7
+    },
+    {
+      id: 'contacts',
+      label: 'Contacts',
+      icon: 'Users',
+      path: '/app/contacts',
+      isVisible: hasPermission('contacts', 'sidebar'),
+      order: 8
+    },
+    {
+      id: 'calendar',
+      label: 'Calendar',
+      icon: 'Calendar',
+      path: '/app/calendar',
+      isVisible: hasPermission('calendar', 'sidebar'),
+      order: 9
+    },
+    {
+      id: 'competitions',
+      label: 'Competitions',
+      icon: 'Trophy',
+      path: '/app/competitions',
+      isVisible: hasPermission('competitions', 'sidebar'),
+      order: 10
+    },
+    {
+      id: 'incident_management',
+      label: 'Incidents',
+      icon: 'AlertTriangle',
+      path: '/app/incidents',
+      isVisible: hasPermission('incident_management', 'sidebar'),
+      order: 11
+    }
   ];
 
-  const allowedItems = potentialItems.filter(item => {
-    console.log(`Checking permissions for item: ${item.id}`);
-    
-    // Admin-only items
-    if (item.adminOnly && role !== 'admin') {
-      console.log(`  - Skipped ${item.id}: admin-only and role is ${role}`);
-      return false;
-    }
+  // Special handling for parent role - only allow calendar and contacts
+  if (role === 'parent') {
+    const parentItems = allPossibleItems.filter(item => 
+      item.id === 'calendar' || item.id === 'contacts'
+    ).map(item => ({ ...item, isVisible: true }));
+    return [...baseItems, ...parentItems];
+  }
 
-    // Special cases for admin items
-    if (item.adminOnly && role === 'admin') {
-      console.log(`  - Allowed ${item.id}: admin-only and role is admin`);
-      return true;
-    }
-
-    // Settings is only available to admins
-    if (item.id === 'settings') {
-      const allowed = role === 'admin';
-      console.log(`  - Settings: allowed=${allowed} (role=${role})`);
-      return allowed;
-    }
-
-    // Special handling for parent role - allow calendar and contacts
-    if (role === 'parent' && (item.id === 'calendar' || item.id === 'contacts')) {
-      console.log(`  - ${item.id}: allowed for parent role`);
-      return true;
-    }
-
-    // Special case for competitions - requires permission and competition module
-    if (item.id === 'competitions') {
-      const moduleKey = MODULE_MAPPING[item.id];
-      const hasModulePermission = moduleKey && hasPermission(moduleKey, 'sidebar');
-      const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-      console.log(`  - Competitions: moduleKey=${moduleKey}, hasModulePermission=${hasModulePermission}, hasCompetitionModule=${hasCompetitionModule}`);
-      return hasModulePermission && hasCompetitionModule;
-    }
-
-    // Check permissions for regular items
-    const moduleKey = MODULE_MAPPING[item.id];
-    if (moduleKey) {
-      const allowed = hasPermission(moduleKey, 'sidebar');
-      console.log(`  - ${item.id}: moduleKey=${moduleKey}, allowed=${allowed}`);
-      return allowed;
-    }
-
-    console.log(`  - ${item.id}: no module mapping, skipped`);
-    return false;
-  });
-
-  console.log('Final allowed items:', allowedItems.map(item => item.id));
-  return [...baseItems, ...allowedItems];
+  return [...baseItems, ...allPossibleItems.filter(item => item.isVisible)];
 };
 
-// Fallback function for when permissions aren't loaded yet
+// Fallback menu items for when permission system isn't loaded
 const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[] => {
-  const baseItems = role === 'parent' ? [] : [
-    { id: 'dashboard', label: 'Dashboard', icon: 'Home' },
+  const baseItems: MenuItem[] = [
+    {
+      id: 'dashboard',
+      label: 'Dashboard', 
+      icon: 'LayoutDashboard',
+      path: '/app',
+      isVisible: true,
+      order: 1
+    }
   ];
-  
-  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-  const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
 
-  switch (role) {
-    case 'admin':
-      return [
-        ...baseItems,
-        { id: 'user-admin', label: 'User Management', icon: 'UserCog' },
-        { id: 'school-management', label: 'School Management', icon: 'Building2' },
-        { id: 'role-management', label: 'Role Management', icon: 'Shield' },
-        { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle' },
-        { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'settings', label: 'Settings', icon: 'Settings' },
-      ];
-    
-    case 'instructor':
-      return [
-        ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'User' },
-        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
-        { id: 'teams', label: 'Teams', icon: 'Users' },
-        { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'budget', label: 'Budget', icon: 'DollarSign' },
-        { id: 'inventory', label: 'Inventory', icon: 'Package' },
-        { id: 'contacts', label: 'Contacts', icon: 'Contact' },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'email-management', label: 'Email', icon: 'Mails' },
-        { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle' },
-      ];
-    
-    case 'command_staff':
-      return [
-        ...baseItems,
-        { id: 'cadets', label: 'Cadets', icon: 'User' },
-        { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
-        { id: 'inventory', label: 'Inventory', icon: 'Package' },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-      ];
-    
-    case 'cadet':
-      return [
-        ...baseItems,
-        { id: 'tasks', label: 'Cadet Tasks', icon: 'CheckSquare' },
-        { id: 'job-board', label: 'Chain of Command', icon: 'Briefcase' },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-      ];
-    
-    case 'parent':
-      return [
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
-        { id: 'contacts', label: 'Contacts', icon: 'Contact' },
-      ];
-    
-    default:
-      return baseItems;
+  if (role === 'admin') {
+    return [
+      ...baseItems,
+      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
+      { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
+      { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
+      { id: 'teams', label: 'Teams', icon: 'Users', path: '/app/teams', isVisible: true, order: 5 },
+      { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
+      { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
+      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
+      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
+      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 }
+    ];
+  } else if (role === 'parent') {
+    return [
+      ...baseItems,
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 2 },
+      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 3 }
+    ];
+  } else if (role === 'instructor') {
+    return [
+      ...baseItems,
+      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
+      { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 4 },
+      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 5 },
+      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 6 }
+    ];
+  } else {
+    // Default cadet items
+    return [
+      ...baseItems,
+      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
+    ];
   }
 };
 
@@ -183,15 +207,31 @@ export const useSidebarPreferences = () => {
   const loadingRef = useRef<boolean>(false);
   const cacheRef = useRef<{ [key: string]: MenuItem[] }>({});
   const lastProfileRef = useRef<string>('');
+  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Debounced load function to prevent rapid successive calls
+  // Memoize derived values
+  const permissionsLoaded = useMemo(() => !debouncedPermissionsLoading, [debouncedPermissionsLoading]);
+  const userRole = useMemo(() => debouncedUserProfile?.role || 'cadet', [debouncedUserProfile?.role]);
+  const userId = useMemo(() => debouncedUserProfile?.id, [debouncedUserProfile?.id]);
+
   const loadPreferences = useCallback(async () => {
-    if (!userId) {
-      console.log('No user ID found, using default fallback items for role:', userRole);
-      // Still provide default items even without userId
-      const fallbackItems = getDefaultMenuItemsForRole(userRole, userProfile);
-      setMenuItems(fallbackItems);
+    if (!debouncedUserProfile?.id || debouncedPermissionsLoading) {
+      return;
+    }
+
+    // Prevent duplicate loads and use cache
+    const cacheKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}`;
+    const profileKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}-${Date.now()}`;
+    
+    if (loadingRef.current || lastProfileRef.current === profileKey) {
+      return;
+    }
+
+    // Check cache first
+    if (cacheRef.current[cacheKey]) {
+      setMenuItems(cacheRef.current[cacheKey]);
       setIsLoading(false);
+      lastProfileRef.current = profileKey;
       return;
     }
 
@@ -202,59 +242,69 @@ export const useSidebarPreferences = () => {
 
     // Debounce the actual loading
     loadingTimeoutRef.current = setTimeout(async () => {
-      console.log('Loading sidebar preferences for user:', userId, 'role:', userRole);
-      console.log('Permission system loaded:', permissionsLoaded);
-      console.log('User profile:', userProfile);
+      loadingRef.current = true;
       setIsLoading(true);
-      
+
       try {
         // Use database permissions if loaded, otherwise fallback to hardcoded
         const defaultItems = permissionsLoaded 
-          ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
-          : getDefaultMenuItemsForRole(userRole, userProfile);
-        
-        console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
-        console.log('Generated menu items:', defaultItems);
+          ? getMenuItemsFromPermissions(userRole, debouncedUserProfile, hasPermission)
+          : getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
 
-        // Try to load saved preferences, but don't fail if it errors
+        // Try to load saved preferences
         try {
-          const { data, error } = await supabase
+          const { data: preferences, error } = await supabase
             .from('user_sidebar_preferences')
             .select('menu_items')
             .eq('user_id', userId)
-            .single();
+            .maybeSingle();
 
           if (error && error.code !== 'PGRST116') {
-            console.warn('Error loading sidebar preferences (using defaults):', error);
+            console.error('Error fetching sidebar preferences:', error);
+            // Fall back to default permissions-based menu
+            setMenuItems(defaultItems);
+            cacheRef.current[cacheKey] = defaultItems;
+            return;
           }
 
-          if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
-            console.log('Found saved preferences, filtering menu items');
-            // Filter out invalid items and ensure all valid items are included
-            const savedItemIds = data.menu_items;
-            const orderedItems = savedItemIds
+          if (preferences?.menu_items && Array.isArray(preferences.menu_items)) {
+            // User has saved preferences - validate they still have permissions
+            const savedItems = preferences.menu_items as string[];
+            const validatedItems = savedItems
               .map(id => defaultItems.find(item => item.id === id))
               .filter(Boolean) as MenuItem[];
             
-            setMenuItems(orderedItems);
+            setMenuItems(validatedItems);
+            cacheRef.current[cacheKey] = validatedItems;
           } else {
-            console.log('No saved preferences, using default items');
+            // No saved preferences - generate from permissions
             setMenuItems(defaultItems);
+            cacheRef.current[cacheKey] = defaultItems;
           }
         } catch (prefsError) {
           console.warn('Failed to load preferences, using defaults:', prefsError);
           setMenuItems(defaultItems);
+          cacheRef.current[cacheKey] = defaultItems;
         }
+
+        lastProfileRef.current = profileKey;
       } catch (error) {
         console.error('Error in loadPreferences:', error);
-        const fallbackItems = getDefaultMenuItemsForRole(userRole);
+        // Fall back to default permissions-based menu
+        const fallbackItems = getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
         setMenuItems(fallbackItems);
+        cacheRef.current[cacheKey] = fallbackItems;
       } finally {
-        console.log('Sidebar preferences loaded, setting loading to false');
         setIsLoading(false);
+        loadingRef.current = false;
       }
-    }, 200); // Increased debounce to 200ms
-  }, [userId, userRole, permissionsLoaded, hasPermission, userProfile]);
+    }, 200);
+  }, [debouncedUserProfile?.id, debouncedUserProfile?.role, debouncedPermissionsLoading, hasPermission, permissionsLoaded, userRole, userId]);
+
+  // Load preferences when user profile changes or permissions finish loading  
+  useDeepCompareEffect(() => {
+    loadPreferences();
+  }, [debouncedUserProfile?.id, debouncedUserProfile?.role, debouncedPermissionsLoading]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {
@@ -300,28 +350,26 @@ export const useSidebarPreferences = () => {
         .eq('user_id', userId);
 
       const defaultItems = permissionsLoaded 
-        ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
-        : getDefaultMenuItemsForRole(userRole, userProfile);
+        ? getMenuItemsFromPermissions(userRole, debouncedUserProfile, hasPermission)
+        : getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
       setMenuItems(defaultItems);
       return true;
     } catch (error) {
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  }, [userId, permissionsLoaded, userRole, hasPermission]);
+  }, [userId, permissionsLoaded, userRole, hasPermission, debouncedUserProfile]);
 
   const refreshPreferences = useCallback(async () => {
     await loadPreferences();
   }, [loadPreferences]);
 
-  useEffect(() => {
-    loadPreferences();
-  }, [loadPreferences]);
-
   const getDefaultMenuItems = useMemo(() => {
     if (!debouncedUserProfile) return [];
-    return getMenuItemsFromPermissions(debouncedUserProfile.role, debouncedUserProfile, hasPermission);
-  }, [debouncedUserProfile?.role, debouncedUserProfile?.id, hasPermission]);
+    return permissionsLoaded 
+      ? getMenuItemsFromPermissions(debouncedUserProfile.role, debouncedUserProfile, hasPermission)
+      : getDefaultMenuItemsForRole(debouncedUserProfile.role, debouncedUserProfile);
+  }, [debouncedUserProfile?.role, debouncedUserProfile?.id, hasPermission, permissionsLoaded]);
 
   // Cleanup timeout on unmount
   useEffect(() => {

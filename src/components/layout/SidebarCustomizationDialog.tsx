@@ -111,7 +111,7 @@ export const SidebarCustomizationDialog: React.FC<SidebarCustomizationDialogProp
     const success = await resetToDefault();
     
     if (success) {
-      setLocalItems([...getDefaultMenuItems()]);
+      setLocalItems([...getDefaultMenuItems]);
       toast({
         title: "Reset",
         description: "Sidebar has been reset to default layout.",
