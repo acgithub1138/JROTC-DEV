@@ -2543,7 +2543,7 @@ export type Database = {
           password_change_required: boolean
           phone: string | null
           rank: string | null
-          role: Database["public"]["Enums"]["user_role"]
+          role: string
           role_id: string | null
           school_id: string
           updated_at: string
@@ -2562,7 +2562,7 @@ export type Database = {
           password_change_required?: boolean
           phone?: string | null
           rank?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
+          role: string
           role_id?: string | null
           school_id: string
           updated_at?: string
@@ -2581,7 +2581,7 @@ export type Database = {
           password_change_required?: boolean
           phone?: string | null
           rank?: string | null
-          role?: Database["public"]["Enums"]["user_role"]
+          role?: string
           role_id?: string | null
           school_id?: string
           updated_at?: string
@@ -3443,6 +3443,14 @@ export type Database = {
       can_update_profile_role: {
         Args: {
           new_role: Database["public"]["Enums"]["user_role"]
+          new_role_id: string
+          target_profile_id: string
+        }
+        Returns: boolean
+      }
+      can_update_profile_role1: {
+        Args: {
+          new_role: string
           new_role_id: string
           target_profile_id: string
         }
