@@ -130,7 +130,7 @@ const EventTypesManagement: React.FC = () => {
     if (eventType.is_default) {
       toast({
         title: 'Cannot Delete',
-        description: 'Global default event types cannot be deleted',
+        description: 'Global default event types cannot be deleted, but you can edit them',
         variant: 'destructive',
       });
       return;
@@ -167,7 +167,8 @@ const EventTypesManagement: React.FC = () => {
                 Event Types & Colors
               </CardTitle>
               <CardDescription>
-                Manage event types and their associated colors for the calendar system
+                Manage event types and their associated colors for the calendar system.
+                As an admin, you can edit both custom and global default event types.
               </CardDescription>
             </div>
             <Button onClick={() => handleOpenDialog()}>
@@ -253,7 +254,7 @@ const EventTypesManagement: React.FC = () => {
             </DialogTitle>
             <DialogDescription>
               {editingEventType 
-                ? 'Update the event type name and color'
+                ? `Update the event type name and color${editingEventType.is_default ? ' (Global Default)' : ''}`
                 : 'Create a new event type with a custom color'
               }
             </DialogDescription>

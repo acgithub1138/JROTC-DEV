@@ -106,7 +106,7 @@ export const useEventTypes = () => {
     if (eventType?.is_default) {
       toast({
         title: 'Error',
-        description: 'Cannot delete global default event types',
+        description: 'Global default event types cannot be deleted, but you can edit them',
         variant: 'destructive',
       });
       return;
@@ -136,17 +136,6 @@ export const useEventTypes = () => {
   };
 
   const updateEventType = async (id: string, updates: { value?: string; label?: string; color?: string }) => {
-    // Find the event type to check if it's a default (global) type
-    const eventType = eventTypes.find(type => type.id === id);
-    if (eventType?.is_default) {
-      toast({
-        title: 'Error',
-        description: 'Cannot modify global default event types',
-        variant: 'destructive',
-      });
-      return;
-    }
-
     try {
       const updateData: any = { ...updates };
 
