@@ -146,7 +146,7 @@ export const useCompetitions = () => {
         status: 'draft',
         school_id: userProfile.school_id,
         created_by: userProfile.id,
-        is_public: false,
+        is_public: true,
         created_at: undefined,
         updated_at: undefined,
         // Calculate new registration deadline if it existed
