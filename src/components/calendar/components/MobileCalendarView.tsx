@@ -228,44 +228,46 @@ export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
                 >
                   <CardContent className="p-3">
                     <div className="flex items-start justify-between">
-                      <div className="flex-1 min-w-0">
-                        <div className="flex items-center space-x-2 mb-1">
+                      <div className="flex-1 min-w-0 pr-2">
+                        <div className="flex items-start space-x-2 mb-1">
                           {event.event_types && (
                             <div 
-                              className="w-3 h-3 rounded-full flex-shrink-0" 
+                              className="w-3 h-3 rounded-full flex-shrink-0 mt-0.5" 
                               style={{ backgroundColor: event.event_types.color }}
                             />
                           )}
-                          <h4 className="font-medium text-foreground truncate">
+                          <h4 className="font-medium text-foreground break-words">
                             {event.title}
                           </h4>
                         </div>
                         
                         <div className="space-y-1">
-                          <div className="flex items-center text-sm text-muted-foreground">
-                            <Clock className="h-3 w-3 mr-1 flex-shrink-0" />
-                            {event.is_all_day ? (
-                              <span>All day</span>
-                            ) : (
-                              <span>
-                                {format(new Date(event.start_date), 'h:mm a')}
-                                {event.end_date && format(new Date(event.end_date), 'h:mm a') !== format(new Date(event.start_date), 'h:mm a') && 
-                                  ` - ${format(new Date(event.end_date), 'h:mm a')}`
-                                }
-                              </span>
-                            )}
+                          <div className="flex items-start text-sm text-muted-foreground">
+                            <Clock className="h-3 w-3 mr-1 flex-shrink-0 mt-0.5" />
+                            <div className="flex-1">
+                              {event.is_all_day ? (
+                                <span>All day</span>
+                              ) : (
+                                <span className="break-words">
+                                  {format(new Date(event.start_date), 'h:mm a')}
+                                  {event.end_date && format(new Date(event.end_date), 'h:mm a') !== format(new Date(event.start_date), 'h:mm a') && 
+                                    ` - ${format(new Date(event.end_date), 'h:mm a')}`
+                                  }
+                                </span>
+                              )}
+                            </div>
                           </div>
                           
                           {event.location && (
-                            <div className="flex items-center text-sm text-muted-foreground">
-                              <MapPin className="h-3 w-3 mr-1 flex-shrink-0" />
-                              <span className="truncate">{event.location}</span>
+                            <div className="flex items-start text-sm text-muted-foreground">
+                              <MapPin className="h-3 w-3 mr-1 flex-shrink-0 mt-0.5" />
+                              <span className="break-words">{event.location}</span>
                             </div>
                           )}
                           
                           {event.description && (
-                            <p className="text-sm text-muted-foreground mt-1 overflow-hidden">
-                              <span className="line-clamp-2">{event.description}</span>
+                            <p className="text-sm text-muted-foreground mt-1">
+                              <span className="line-clamp-2 break-words">{event.description}</span>
                             </p>
                           )}
                         </div>
