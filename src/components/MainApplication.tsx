@@ -79,13 +79,6 @@ const MainApplication = () => {
     return 'dashboard';
   });
 
-  // Redirect parent users to calendar if they navigate to /app root
-  useEffect(() => {
-    if (userProfile?.role === 'parent' && (location.pathname === '/app' || location.pathname === '/app/')) {
-      navigate('/app/calendar', { replace: true });
-    }
-  }, [userProfile, location.pathname, navigate]);
-
   const handleModuleChange = (module: string) => {
     setActiveModule(module);
     // Navigate to the appropriate route based on module
