@@ -6,6 +6,7 @@ import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import ParentSetupModal from './ParentSetupModal';
 
 interface PasswordChangeDialogProps {
   open: boolean;
@@ -16,6 +17,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
+  const [showParentSetup, setShowParentSetup] = useState(false);
   const [passwords, setPasswords] = useState({
     newPassword: '',
     confirmPassword: '',
@@ -74,9 +76,15 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
       });
 
       setPasswords({ newPassword: '', confirmPassword: '' });
-      onClose();
-      // Refresh the page to update auth metadata and profile state
-      window.location.reload();
+      
+      // Check if user is a parent - show setup modal
+      if (userProfile?.role === 'parent') {
+        setShowParentSetup(true);
+      } else {
+        onClose();
+        // Refresh the page to update auth metadata and profile state
+        window.location.reload();
+      }
     } catch (error: any) {
       console.error('Password change error:', error);
       toast({
@@ -89,48 +97,62 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
     }
   };
 
+  const handleParentSetupComplete = () => {
+    setShowParentSetup(false);
+    onClose();
+    // Refresh the page to update auth metadata and profile state
+    window.location.reload();
+  };
+
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
-      <DialogContent className="sm:max-w-md">
-        <DialogHeader>
-          <DialogTitle>Change Your Password</DialogTitle>
-        </DialogHeader>
-        <div className="space-y-4">
-          <p className="text-sm text-muted-foreground">
-            You are required to change your password before accessing the system.
-          </p>
-          <form onSubmit={handlePasswordChange} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
-              <Input
-                id="newPassword"
-                type="password"
-                placeholder="Enter your new password"
-                value={passwords.newPassword}
-                onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                required
-                minLength={6}
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
-              <Input
-                id="confirmPassword"
-                type="password"
-                placeholder="Confirm your new password"
-                value={passwords.confirmPassword}
-                onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                required
-                minLength={6}
-              />
-            </div>
-            <Button type="submit" className="w-full" disabled={loading}>
-              {loading ? 'Changing Password...' : 'Change Password'}
-            </Button>
-          </form>
-        </div>
-      </DialogContent>
-    </Dialog>
+    <>
+      <Dialog open={open && !showParentSetup} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle>Change Your Password</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4">
+            <p className="text-sm text-muted-foreground">
+              You are required to change your password before accessing the system.
+            </p>
+            <form onSubmit={handlePasswordChange} className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="newPassword">New Password</Label>
+                <Input
+                  id="newPassword"
+                  type="password"
+                  placeholder="Enter your new password"
+                  value={passwords.newPassword}
+                  onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="confirmPassword">Confirm New Password</Label>
+                <Input
+                  id="confirmPassword"
+                  type="password"
+                  placeholder="Confirm your new password"
+                  value={passwords.confirmPassword}
+                  onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
+                  required
+                  minLength={6}
+                />
+              </div>
+              <Button type="submit" className="w-full" disabled={loading}>
+                {loading ? 'Changing Password...' : 'Change Password'}
+              </Button>
+            </form>
+          </div>
+        </DialogContent>
+      </Dialog>
+      
+      <ParentSetupModal 
+        open={showParentSetup} 
+        onClose={handleParentSetupComplete} 
+      />
+    </>
   );
 };
 
