@@ -132,7 +132,7 @@ const ParentSetupModal: React.FC<ParentSetupModalProps> = ({ open, onClose }) =>
   };
 
   return (
-    <Dialog open={open} onOpenChange={() => {}}>
+    <Dialog open={open} onOpenChange={onClose}>
       <DialogContent className="sm:max-w-md">
         <DialogHeader>
           <DialogTitle>Complete Your Parent Account Setup</DialogTitle>
