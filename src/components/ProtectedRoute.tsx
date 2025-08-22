@@ -3,7 +3,9 @@ import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
 import AuthPage from '@/components/auth/AuthPage';
 import PasswordChangeDialog from '@/components/auth/PasswordChangeDialog';
+import ParentSetupModal from '@/components/auth/ParentSetupModal';
 import { AccessDeniedDialog } from '@/components/incident-management/AccessDeniedDialog';
+import { supabase } from '@/integrations/supabase/client';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -22,6 +24,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const { hasPermission } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
+  const [showParentSetup, setShowParentSetup] = useState(false);
 
   console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
 
@@ -58,6 +61,37 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       setShowAccessDenied(false);
     }
   }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission]);
+
+  // Check if parent user needs to complete setup
+  useEffect(() => {
+    const checkParentSetup = async () => {
+      if (user && userProfile && userProfile.role === 'parent' && !showPasswordChange) {
+        try {
+          const { data, error } = await supabase
+            .from('contacts')
+            .select('id')
+            .eq('email', userProfile.email)
+            .eq('type', 'parent')
+            .eq('school_id', userProfile.school_id)
+            .maybeSingle();
+          
+          if (error) {
+            console.error('Error checking parent contact:', error);
+            return;
+          }
+          
+          // If no contact record exists, show parent setup modal
+          setShowParentSetup(!data);
+        } catch (error) {
+          console.error('Error in parent setup check:', error);
+        }
+      } else {
+        setShowParentSetup(false);
+      }
+    };
+    
+    checkParentSetup();
+  }, [user, userProfile, showPasswordChange]);
 
   if (loading) {
     return (
@@ -117,7 +151,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     );
   }
   
-  return <>{children}</>;
+  return (
+    <>
+      {children}
+      <ParentSetupModal 
+        open={showParentSetup} 
+        onClose={() => setShowParentSetup(false)} 
+      />
+    </>
+  );
 };
 
 export default ProtectedRoute;
