@@ -310,7 +310,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
         <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
-              {viewEvent ? `${formatEventName(viewEvent)} - ${viewSchoolId ? (schoolMap[viewSchoolId] || 'School') : ''} Score Sheets` : 'Score Sheets'}
+              {viewEvent ? `${viewEvent} - ${viewSchoolId ? (schoolMap[viewSchoolId] || 'School') : ''} Score Sheets` : 'Score Sheets'}
             </DialogTitle>
           </DialogHeader>
           {isDialogLoading ? (
