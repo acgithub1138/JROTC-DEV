@@ -71,10 +71,12 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (permission.module?.name && permission.action?.name) {
           const key = `${permission.module.name}:${permission.action.name}`;
           permissionMap[key] = permission.enabled;
+          console.log(`Permission loaded: ${key} = ${permission.enabled}`);
         }
       });
       
       console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
+      console.log('Full permission map:', permissionMap);
       return permissionMap;
     },
     enabled: !!userProfile?.role,
