@@ -144,7 +144,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       'settings': '/app/settings'
     };
 
-    // Generate all possible menu items with permission checks
+    // Generate all possible menu items with permission checks using database module names as IDs
     const allMenuItems: MenuItem[] = [
       {
         id: 'tasks',
@@ -163,7 +163,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         order: 3
       },
       {
-        id: 'job-board',
+        id: 'job_board',
         label: 'Job Board',
         icon: 'Briefcase',
         path: '/app/job-board',
@@ -227,7 +227,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         order: 11
       },
       {
-        id: 'email-management',
+        id: 'email',
         label: 'Email Management',
         icon: 'Mails',
         path: '/app/email',
@@ -235,7 +235,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         order: 12
       },
       {
-        id: 'user-admin',
+        id: 'user_admin',
         label: 'User Management',
         icon: 'UserCog',
         path: '/app/users',
@@ -243,15 +243,15 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         order: 13
       },
       {
-        id: 'school-management',
+        id: 'school_admin',
         label: 'School Management',
         icon: 'Building2',
         path: '/app/school',
-        isVisible: hasPermission('school_management', 'sidebar'),
+        isVisible: hasPermission('school_admin', 'sidebar'),
         order: 14
       },
       {
-        id: 'role-management',
+        id: 'role_management',
         label: 'Role Management',
         icon: 'Shield',
         path: '/app/roles',
