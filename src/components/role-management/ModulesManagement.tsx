@@ -45,6 +45,7 @@ export const ModulesManagement: React.FC = () => {
   // Form state for new module
   const [formData, setFormData] = useState({
     name: '',
+    label: '',
     icon: 'FileText',
     path: '',
     is_active: true,
@@ -195,6 +196,7 @@ export const ModulesManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+      label: '',
       icon: 'FileText',
       path: '',
       is_active: true,
@@ -267,6 +269,18 @@ export const ModulesManagement: React.FC = () => {
                     value={formData.name}
                     onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                     required
+                    placeholder="e.g., cadets, tasks, budget"
+                  />
+                </div>
+
+                <div>
+                  <Label htmlFor="label">Display Label</Label>
+                  <Input
+                    id="label"
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    required
+                    placeholder="e.g., Cadets, Tasks, Budget"
                   />
                 </div>
                 
@@ -335,7 +349,7 @@ export const ModulesManagement: React.FC = () => {
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || !formData.name.trim() || !formData.label.trim()}
                   >
                     Create
                   </Button>
