@@ -20,6 +20,7 @@ import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCom
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCPCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const STATUS_OPTIONS = [
   { value: 'draft', label: 'Draft' },
@@ -53,6 +54,7 @@ const CompetitionsPage = () => {
   const { userProfile } = useAuth();
   const isMobile = useIsMobile();
   const { canView, canEdit, canDelete, canCreate } = useTablePermissions('cp_competitions');
+  const { canManage } = useCPCompetitionPermissions();
   const [competitions, setCompetitions] = useState<Competition[]>([]);
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
@@ -352,7 +354,7 @@ const handleEditSubmit = async (data: any) => {
                   {filteredCompetitions.map(competition => (
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
-                        {canEdit ? (
+                        {canManage ? (
                           <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                             {competition.name}
                           </button>
@@ -377,7 +379,7 @@ const handleEditSubmit = async (data: any) => {
                         </div>
                       </TableCell>
                        <TableCell>
-                         {canEdit ? (
+                         {canManage ? (
                            <Select
                              value={competition.status}
                              onValueChange={(value) => handleStatusChange(competition.id, value)}
@@ -425,7 +427,7 @@ const handleEditSubmit = async (data: any) => {
       </Tooltip>
     )}
 
-    {canEdit && (
+    {canManage && (
       <>
         {/* Edit Competition */}
         <Tooltip>

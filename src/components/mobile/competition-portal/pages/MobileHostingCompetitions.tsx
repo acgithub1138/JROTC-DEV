@@ -5,10 +5,12 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trophy, Calendar, Users, MapPin, Plus, ArrowLeft } from 'lucide-react';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
+import { useCPCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 export const MobileHostingCompetitions: React.FC = () => {
   const navigate = useNavigate();
   const { competitions, isLoading } = useCompetitions();
+  const { canManage } = useCPCompetitionPermissions();
 
   // Filter for competitions that are being hosted by this school (internal competitions)
   const hostedCompetitions = competitions.filter(comp => 
@@ -106,20 +108,22 @@ export const MobileHostingCompetitions: React.FC = () => {
                     </div>
                   </div>
 
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center text-xs text-muted-foreground">
-                      <Users size={12} className="mr-1" />
-                      <span>0 registered schools</span>
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-xs text-muted-foreground">
+                        <Users size={12} className="mr-1" />
+                        <span>0 registered schools</span>
+                      </div>
+                      {canManage && (
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="text-xs h-7"
+                          onClick={() => navigate(`/mobile/competition-portal/manage/${competition.id}`)}
+                        >
+                          Manage
+                        </Button>
+                      )}
                     </div>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      className="text-xs h-7"
-                      onClick={() => navigate(`/mobile/competition-portal/manage/${competition.id}`)}
-                    >
-                      Manage
-                    </Button>
-                  </div>
                 </div>
               </CardContent>
             </Card>

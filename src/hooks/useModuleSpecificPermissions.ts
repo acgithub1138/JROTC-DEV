@@ -77,6 +77,18 @@ export const useCompetitionPermissions = () => {
   };
 };
 
+// Competition Portal-specific permissions
+export const useCPCompetitionPermissions = () => {
+  const { hasPermission } = usePermissionContext();
+  const modulePermissions = useModulePermissions('cp_competitions');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canManage: hasPermission('cp_competitions', 'manage'),
+  };
+};
+
 
 // Job Board specific permissions - memoized
 export const useJobBoardPermissions = () => {
