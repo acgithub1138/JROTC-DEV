@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X } from 'lucide-react';
 import { format } from 'date-fns';
+import { useOpenCompsOpenPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface Competition {
   id: string;
@@ -37,9 +38,24 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   onRegisterInterest,
   onCancelRegistration,
 }) => {
+  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = useOpenCompsOpenPermissions();
+  
   const isRegistered = (competitionId: string) => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;
   };
+
+  // Check if user can read records
+  if (!canRead) {
+    return (
+      <div className="text-center py-12">
+        <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+        <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
+        <p className="text-gray-600">
+          You don't have permission to view competitions.
+        </p>
+      </div>
+    );
+  }
 
   return (
     <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
@@ -128,42 +144,52 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
             </div>
             
             <div className="flex gap-1">
-              <Button 
-                variant="outline" 
-                size="sm"
-                className="flex-1" 
-                onClick={() => onViewDetails(competition.id)}
-              >
-                <Eye className="w-3 h-3 mr-1" />
-                View
-              </Button>
-              {isRegistered(competition.id) ? (
-                <>
-                  <Button 
-                    size="sm"
-                    className="flex-1" 
-                    onClick={() => onRegisterInterest(competition.id)}
-                  >
-                    Edit
-                  </Button>
-                  <Button 
-                    variant="destructive"
-                    size="sm"
-                    className="flex-1" 
-                    onClick={() => onCancelRegistration(competition.id)}
-                  >
-                    <X className="w-3 h-3 mr-1" />
-                    Cancel
-                  </Button>
-                </>
-              ) : (
+              {canViewDetails && (
                 <Button 
+                  variant="outline" 
                   size="sm"
                   className="flex-1" 
-                  onClick={() => onRegisterInterest(competition.id)}
+                  onClick={() => onViewDetails(competition.id)}
                 >
-                  Register
+                  <Eye className="w-3 h-3 mr-1" />
+                  View
                 </Button>
+              )}
+              {isRegistered(competition.id) ? (
+                <>
+                  {canUpdate && (
+                    <Button 
+                      size="sm"
+                      className="flex-1" 
+                      onClick={() => onRegisterInterest(competition.id)}
+                    >
+                      Edit
+                    </Button>
+                  )}
+                  {canDelete && (
+                    <Button 
+                      variant="destructive"
+                      size="sm"
+                      className="flex-1" 
+                      onClick={() => onCancelRegistration(competition.id)}
+                    >
+                      <X className="w-3 h-3 mr-1" />
+                      Cancel
+                    </Button>
+                  )}
+                </>
+              ) : (
+                <>
+                  {canCreate && (
+                    <Button 
+                      size="sm"
+                      className="flex-1" 
+                      onClick={() => onRegisterInterest(competition.id)}
+                    >
+                      Register
+                    </Button>
+                  )}
+                </>
               )}
             </div>
           </CardContent>
