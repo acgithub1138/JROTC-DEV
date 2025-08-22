@@ -29,6 +29,13 @@ interface OpenCompetitionCardsProps {
   onViewDetails: (competitionId: string) => void;
   onRegisterInterest: (competitionId: string) => void;
   onCancelRegistration: (competitionId: string) => void;
+  permissions?: {
+    canRead: boolean;
+    canViewDetails: boolean;
+    canCreate: boolean;
+    canUpdate: boolean;
+    canDelete: boolean;
+  };
 }
 
 export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
@@ -37,8 +44,10 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
   onViewDetails,
   onRegisterInterest,
   onCancelRegistration,
+  permissions,
 }) => {
-  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = useOpenCompsOpenPermissions();
+  const defaultPermissions = useOpenCompsOpenPermissions();
+  const { canRead, canViewDetails, canCreate, canUpdate, canDelete } = permissions || defaultPermissions;
   
   const isRegistered = (competitionId: string) => {
     return registrations?.some(reg => reg.competition_id === competitionId) ?? false;

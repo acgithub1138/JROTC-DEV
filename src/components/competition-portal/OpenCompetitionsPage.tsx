@@ -41,8 +41,8 @@ export const OpenCompetitionsPage = () => {
   } = useAuth();
   const isMobile = useIsMobile();
   const { deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
-  const { canAccess: canAccessOpen } = useOpenCompsOpenPermissions();
-  const { canAccess: canAccessRegistered } = useOpenCompsRegisteredPermissions();
+  const openPermissions = useOpenCompsOpenPermissions();
+  const registeredPermissions = useOpenCompsRegisteredPermissions();
   const { canAccess: canAccessSchedule } = useOpenCompsSchedulePermissions();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -275,14 +275,14 @@ export const OpenCompetitionsPage = () => {
             </Card>)}
         </div> : <Tabs defaultValue="open">
           <TabsList className="grid w-full grid-cols-3">
-            {canAccessOpen && <TabsTrigger value="open">Open</TabsTrigger>}
-            {canAccessRegistered && <TabsTrigger value="registered">Registered</TabsTrigger>}
+            {openPermissions.canAccess && <TabsTrigger value="open">Open</TabsTrigger>}
+            {registeredPermissions.canAccess && <TabsTrigger value="registered">Registered</TabsTrigger>}
             {canAccessSchedule && <TabsTrigger value="schedule">Schedule</TabsTrigger>}
           </TabsList>
 
-          {canAccessOpen && (
+          {openPermissions.canAccess && (
             <TabsContent value="open">
-              {openCompetitionsList && openCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={openCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
+              {openCompetitionsList && openCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={openCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} permissions={openPermissions} /> : <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
                   <p className="text-gray-600">
@@ -293,9 +293,9 @@ export const OpenCompetitionsPage = () => {
             </TabsContent>
           )}
 
-          {canAccessRegistered && (
+          {registeredPermissions.canAccess && (
             <TabsContent value="registered">
-              {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={registeredCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
+              {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={registeredCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} permissions={registeredPermissions} /> : <div className="text-center py-12">
                   <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Competitions</h3>
                   <p className="text-gray-600">
@@ -311,7 +311,7 @@ export const OpenCompetitionsPage = () => {
             </TabsContent>
           )}
 
-          {!canAccessOpen && !canAccessRegistered && !canAccessSchedule && (
+          {!openPermissions.canAccess && !registeredPermissions.canAccess && !canAccessSchedule && (
             <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
