@@ -47,6 +47,24 @@ const getMenuItemsFromPermissions = (
     }
   ];
 
+  // Special handling for admin role - admins should have access to everything
+  if (role === 'admin') {
+    console.log('Admin detected, granting full access');
+    return [
+      ...baseItems,
+      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
+      { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
+      { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
+      { id: 'teams', label: 'Teams', icon: 'Users', path: '/app/teams', isVisible: true, order: 5 },
+      { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
+      { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
+      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
+      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
+      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 }
+    ];
+  }
+
   const allPossibleItems: MenuItem[] = [
     {
       id: 'tasks',
@@ -130,6 +148,13 @@ const getMenuItemsFromPermissions = (
     }
   ];
 
+  // Log permission checks for debugging
+  allPossibleItems.forEach(item => {
+    const moduleKey = MODULE_MAPPING[item.id] || item.id;
+    const hasAccess = hasPermission(moduleKey, 'sidebar');
+    console.log(`Permission check: ${item.id} (${moduleKey}) -> sidebar = ${hasAccess}`);
+  });
+
   // Special handling for parent role - only allow calendar and contacts
   if (role === 'parent') {
     const parentItems = allPossibleItems.filter(item => 
@@ -138,7 +163,10 @@ const getMenuItemsFromPermissions = (
     return [...baseItems, ...parentItems];
   }
 
-  return [...baseItems, ...allPossibleItems.filter(item => item.isVisible)];
+  const visibleItems = allPossibleItems.filter(item => item.isVisible);
+  console.log('Final visible items for role', role, ':', visibleItems.map(i => i.id));
+  
+  return [...baseItems, ...visibleItems];
 };
 
 // Fallback menu items for when permission system isn't loaded
