@@ -89,8 +89,8 @@ export const MobileDashboard: React.FC = () => {
         icon: CheckSquare,
         color: 'text-red-600'
       });
-    } else if (!isCadet) {
-      // Only show Total Cadets widget for non-cadet, non-instructor roles
+    } else if (!isCadet && userProfile?.role !== 'parent') {
+      // Only show Total Cadets widget for non-cadet, non-instructor, non-parent roles
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',

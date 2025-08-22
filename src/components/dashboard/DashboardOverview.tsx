@@ -17,6 +17,7 @@ import IncidentForm from '@/components/incident-management/IncidentForm';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { MyCadetsWidget } from './widgets/MyCadetsWidget';
 import { MyTasksWidget } from './widgets/MyTasksWidget';
 import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
 import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
@@ -147,8 +148,8 @@ const DashboardOverview = () => {
         color: 'text-red-600',
         bgColor: 'bg-red-100'
       });
-    } else if (!isCadet) {
-      // Only show Total Cadets widget for non-cadet, non-instructor roles
+    } else if (!isCadet && userProfile?.role !== 'parent') {
+      // Only show Total Cadets widget for non-cadet, non-instructor, non-parent roles
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
@@ -305,8 +306,12 @@ const DashboardOverview = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
-          {/* Hide My Tasks for admin users */}
-          {userProfile?.role !== 'admin' && <MyTasksWidget />}
+          {/* Hide My Tasks for admin users and show My Cadets for parent users */}
+          {userProfile?.role === 'parent' ? (
+            <MyCadetsWidget />
+          ) : userProfile?.role !== 'admin' ? (
+            <MyTasksWidget />
+          ) : null}
           {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
