@@ -215,6 +215,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
       { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
       { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
+      { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
     ];
   } else {
     // Default cadet items
