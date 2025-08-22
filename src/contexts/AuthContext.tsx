@@ -1,7 +1,7 @@
-import React, { createContext, useContext, useEffect, useState } from 'react';
+import React, { createContext, useContext, useEffect, useState, ReactNode, useMemo, useCallback, useRef } from 'react';
 import { User, Session } from '@supabase/supabase-js';
 import { supabase } from '@/integrations/supabase/client';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { Database } from '@/integrations/supabase/types';
 
 interface School {
@@ -59,17 +59,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [session, setSession] = useState<Session | null>(null);
   const [userProfile, setUserProfile] = useState<Profile | null>(null);
   const [loading, setLoading] = useState(true);
-  const [isProfileLoading, setIsProfileLoading] = useState(false);
-  const { toast } = useToast();
+  
+  // Use refs to prevent unnecessary profile fetches
+  const profileFetchingRef = useRef<boolean>(false);
+  const lastFetchedUserIdRef = useRef<string | null>(null);
 
-  const fetchUserProfile = async (userId: string) => {
-    // Prevent multiple simultaneous calls
-    if (isProfileLoading) return;
-    setIsProfileLoading(true);
+  const fetchUserProfile = useCallback(async (userId: string) => {
+    // Prevent duplicate profile fetches
+    if (profileFetchingRef.current || lastFetchedUserIdRef.current === userId) {
+      return null;
+    }
+
+    profileFetchingRef.current = true;
+    lastFetchedUserIdRef.current = userId;
+
     try {
       console.log('Fetching user profile for:', userId);
-
-      const { data, error } = await supabase
+      const { data: profile, error } = await supabase
         .from('profiles')
         .select(`
           *,
@@ -95,64 +101,55 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (error) {
         console.error('Error fetching user profile:', error);
         if (error.code !== 'PGRST116') {
-          toast({
-            title: "Profile Error",
-            description: error.message,
-            variant: "destructive",
-          });
+          toast("Profile Error", { description: error.message });
         }
-        setIsProfileLoading(false);
-        return;
+        return null;
       }
 
-      if (data) {
-        console.log('User profile fetched successfully:', {
-          id: data.id,
-          role: data.role,
-          school_id: data.school_id,
-          email: data.email
-        });
-        setUserProfile(data as unknown as Profile);
-      } else {
-        console.log('No profile found for user:', userId);
-        setUserProfile(null);
-      }
+      console.log('User profile fetched successfully:', profile);
+      return profile as Profile;
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error in fetchUserProfile:', error);
+      return null;
     } finally {
-      setIsProfileLoading(false);
+      profileFetchingRef.current = false;
     }
-  };
+  }, []);
 
   useEffect(() => {
     let mounted = true;
-    let lastFetchedUserId: string | null = null;
 
-    // Set up auth state listener
+    // Set up auth state listener FIRST
     const { data: { subscription } } = supabase.auth.onAuthStateChange(
-      (event, session) => {
+      async (event, session) => {
         console.log('Auth state changed:', event, session?.user?.id);
         
         if (!mounted) return;
-
+        
         setSession(session);
         setUser(session?.user ?? null);
         
-        if (session?.user) {
-          // Only fetch if we haven't fetched for this user yet
-          if (lastFetchedUserId !== session.user.id) {
-            lastFetchedUserId = session.user.id;
-            fetchUserProfile(session.user.id);
-          }
-        } else {
+        if (session?.user && session.user.id !== lastFetchedUserIdRef.current) {
+          // Defer profile fetching to avoid blocking auth state changes
+          setTimeout(async () => {
+            if (mounted) {
+              const profile = await fetchUserProfile(session.user.id);
+              if (profile && mounted) {
+                setUserProfile(profile);
+              }
+              setLoading(false);
+            }
+          }, 0);
+        } else if (!session?.user) {
           setUserProfile(null);
-          lastFetchedUserId = null;
+          lastFetchedUserIdRef.current = null;
+          profileFetchingRef.current = false;
+          setLoading(false);
         }
-        setLoading(false);
       }
     );
 
-    // Check for existing session
+    // THEN check for existing session
     supabase.auth.getSession().then(({ data: { session } }) => {
       if (!mounted) return;
       
@@ -160,20 +157,28 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setSession(session);
       setUser(session?.user ?? null);
       
-      if (session?.user && lastFetchedUserId !== session.user.id) {
-        lastFetchedUserId = session.user.id;
-        fetchUserProfile(session.user.id);
+      if (session?.user && lastFetchedUserIdRef.current !== session.user.id) {
+        setTimeout(async () => {
+          if (mounted) {
+            const profile = await fetchUserProfile(session.user.id);
+            if (profile && mounted) {
+              setUserProfile(profile);
+            }
+            setLoading(false);
+          }
+        }, 0);
+      } else {
+        setLoading(false);
       }
-      setLoading(false);
     });
 
     return () => {
       mounted = false;
       subscription.unsubscribe();
     };
-  }, []);
+  }, [fetchUserProfile]);
 
-  const signUp = async (email: string, password: string, userData?: any) => {
+  const signUp = useCallback(async (email: string, password: string, userData?: any) => {
     try {
       const redirectUrl = `${window.location.origin}/`;
       
@@ -187,16 +192,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: "Sign up failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast("Sign up failed", { description: error.message });
       } else {
-        toast({
-          title: "Success",
-          description: "Please check your email to confirm your account",
-        });
+        toast("Success", { description: "Please check your email to confirm your account" });
       }
 
       return { error };
@@ -204,9 +202,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Sign up error:', error);
       return { error };
     }
-  };
+  }, []);
 
-  const signIn = async (email: string, password: string) => {
+  const signIn = useCallback(async (email: string, password: string) => {
     try {
       const { error } = await supabase.auth.signInWithPassword({
         email,
@@ -214,11 +212,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       });
 
       if (error) {
-        toast({
-          title: "Sign in failed",
-          description: error.message,
-          variant: "destructive",
-        });
+        toast("Sign in failed", { description: error.message });
       }
 
       return { error };
@@ -226,20 +220,22 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.error('Sign in error:', error);
       return { error };
     }
-  };
+  }, []);
 
-  const signOut = async () => {
+  const signOut = useCallback(async () => {
     try {
       await supabase.auth.signOut();
       setUser(null);
       setSession(null);
       setUserProfile(null);
+      lastFetchedUserIdRef.current = null;
+      profileFetchingRef.current = false;
     } catch (error) {
       console.error('Sign out error:', error);
     }
-  };
+  }, []);
 
-  const createUser = async (email: string, password: string, userData?: any) => {
+  const createUser = useCallback(async (email: string, password: string, userData?: any) => {
     try {
       // Call the edge function to create the user
       const { data, error } = await supabase.functions.invoke('create-cadet-user', {
@@ -258,50 +254,34 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       if (error) {
         console.error('Edge function error:', error);
-        toast({
-          title: "User creation failed",
-          description: error.message || "Failed to create user",
-          variant: "destructive",
-        });
+        toast("User creation failed", { description: error.message || "Failed to create user" });
         return { error };
       }
 
       if (data?.error) {
-        toast({
-          title: "User creation failed",
-          description: data.error,
-          variant: "destructive",
-        });
+        toast("User creation failed", { description: data.error });
         return { error: data.error };
       }
 
-      toast({
-        title: "Success",
-        description: "User created successfully and can now log in.",
-      });
-
+      toast("Success", { description: "User created successfully and can now log in." });
       return { error: null };
     } catch (error: any) {
       console.error('User creation error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to create user",
-        variant: "destructive",
-      });
+      toast("Error", { description: "Failed to create user" });
       return { error };
     }
-  };
+  }, []);
 
-  const value: AuthContextType = {
+  const value = useMemo(() => ({
     user,
     session,
     userProfile,
+    loading,
     signUp,
     signIn,
     signOut,
     createUser,
-    loading,
-  };
+  }), [user, session, userProfile, loading, signUp, signIn, signOut, createUser]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 };

@@ -170,16 +170,19 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
 };
 
 export const useSidebarPreferences = () => {
-  const { userProfile } = useAuth();
-  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [menuItems, setMenuItems] = useState<MenuItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
-  const loadingTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-
-  // Memoize permission state to prevent unnecessary re-renders
-  const permissionsLoaded = useMemo(() => !permissionsLoading, [permissionsLoading]);
-  const userRole = useMemo(() => userProfile?.role || 'cadet', [userProfile?.role]);
-  const userId = useMemo(() => userProfile?.id, [userProfile?.id]);
+  const { userProfile } = useAuth();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
+  
+  // Add debounced values to prevent excessive calls
+  const [debouncedUserProfile] = useDebounce(userProfile, 1000);
+  const [debouncedPermissionsLoading] = useDebounce(permissionsLoading, 500);
+  
+  // Use refs to prevent duplicate loads and cache results
+  const loadingRef = useRef<boolean>(false);
+  const cacheRef = useRef<{ [key: string]: MenuItem[] }>({});
+  const lastProfileRef = useRef<string>('');
 
   // Debounced load function to prevent rapid successive calls
   const loadPreferences = useCallback(async () => {
@@ -315,11 +318,10 @@ export const useSidebarPreferences = () => {
     loadPreferences();
   }, [loadPreferences]);
 
-  const getDefaultMenuItems = useCallback(() => {
-    return permissionsLoaded 
-      ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
-      : getDefaultMenuItemsForRole(userRole, userProfile);
-  }, [permissionsLoaded, userRole, hasPermission, userProfile]);
+  const getDefaultMenuItems = useMemo(() => {
+    if (!debouncedUserProfile) return [];
+    return getMenuItemsFromPermissions(debouncedUserProfile.role, debouncedUserProfile, hasPermission);
+  }, [debouncedUserProfile?.role, debouncedUserProfile?.id, hasPermission]);
 
   // Cleanup timeout on unmount
   useEffect(() => {

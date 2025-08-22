@@ -1,11 +1,13 @@
-import React, { useState, useEffect, useRef, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
-import AuthPage from '@/components/auth/AuthPage';
-import PasswordChangeDialog from '@/components/auth/PasswordChangeDialog';
-import ParentSetupModal from '@/components/auth/ParentSetupModal';
-import { AccessDeniedDialog } from '@/components/incident-management/AccessDeniedDialog';
+import { LoadingSpinner } from '@/components/ui/loading-spinner';
+import PasswordChangeDialog from './auth/PasswordChangeDialog';
+import ParentSetupModal from './auth/ParentSetupModal';
 import { supabase } from '@/integrations/supabase/client';
+import { useQueryClient } from '@tanstack/react-query';
+import { useDeepCompareEffect } from '@/hooks/useDeepCompareEffect';
+import AuthPage from '@/pages/AuthPage';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -16,109 +18,123 @@ interface ProtectedRouteProps {
 
 const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ 
   children, 
-  module,
-  requirePermission = 'sidebar',
-  requireAdminRole = false
+  module, 
+  requirePermission = 'read',
+  requireAdminRole = false 
 }) => {
   const { user, userProfile, loading } = useAuth();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
-  
-  // Memoize values to prevent unnecessary re-renders
-  const memoizedUserId = useMemo(() => user?.id, [user?.id]);
-  const memoizedPasswordRequired = useMemo(() => userProfile?.password_change_required, [userProfile?.password_change_required]);
-  const memoizedUserMetadata = useMemo(() => user?.user_metadata, [user?.user_metadata]);
+  const queryClient = useQueryClient();
+  const parentSetupCheckRef = useRef<boolean>(false);
+  const passwordCheckRef = useRef<boolean>(false);
 
-  console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
+  // Memoized password change check
+  const passwordChangeRequired = useMemo(() => {
+    if (!user || !userProfile) return false;
 
-  // Check if user needs to change password
-  useEffect(() => {
-    if (memoizedUserId && userProfile) {
-      const profileRequiresChange = !!memoizedPasswordRequired;
-      const metadataOverride = (memoizedUserMetadata as any)?.password_change_required === false;
-      
-      console.log('Password check:', { profileRequiresChange, metadataOverride, userId: memoizedUserId });
-      
-      const shouldShowPasswordChange = profileRequiresChange && !metadataOverride;
-      setShowPasswordChange(shouldShowPasswordChange);
+    const profileRequiresChange = userProfile.password_change_required === true;
+    const metadataOverride = user.user_metadata?.password_change_required === false;
+    
+    return profileRequiresChange && !metadataOverride;
+  }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
+
+  // Update password dialog state with debouncing
+  useDeepCompareEffect(() => {
+    if (passwordCheckRef.current) return;
+    
+    if (passwordChangeRequired) {
+      passwordCheckRef.current = true;
+      setShowPasswordChange(true);
     } else {
       setShowPasswordChange(false);
+      passwordCheckRef.current = false;
     }
-  }, [memoizedUserId, memoizedPasswordRequired, memoizedUserMetadata]);
+  }, [passwordChangeRequired]);
 
-  // Check module permissions or admin role requirement
-  useEffect(() => {
-    if (user && !permissionsLoading) {
-      if (requireAdminRole) {
-        // Check if user is admin
-        const isAdmin = userProfile?.role === 'admin';
-        setShowAccessDenied(!isAdmin);
-      } else if (module) {
-        // Check module permissions
-        const hasAccess = hasPermission(module, requirePermission);
-        setShowAccessDenied(!hasAccess);
-      } else {
-        setShowAccessDenied(false);
+  // Memoized permission and admin role check
+  const accessGranted = useMemo(() => {
+    if (loading || permissionsLoading || !user) return null;
+
+    let hasAccess = true;
+
+    // Check admin role requirement
+    if (requireAdminRole) {
+      hasAccess = userProfile?.role === 'admin';
+    }
+
+    // Check module permission requirement
+    if (module && requirePermission) {
+      hasAccess = hasAccess && hasPermission(module, requirePermission);
+    }
+
+    return hasAccess;
+  }, [loading, permissionsLoading, user?.id, userProfile?.role, module, requirePermission, requireAdminRole, hasPermission]);
+
+  // Update access denied state
+  useDeepCompareEffect(() => {
+    if (accessGranted !== null) {
+      setShowAccessDenied(!accessGranted);
+    }
+  }, [accessGranted]);
+
+  // Memoized parent setup check with debouncing
+  const parentSetupRequired = useMemo(() => {
+    return user && userProfile && userProfile.role === 'parent';
+  }, [user?.id, userProfile?.role]);
+
+  // Check if parent user needs to complete setup with debouncing
+  useDeepCompareEffect(() => {
+    if (!parentSetupRequired || parentSetupCheckRef.current) {
+      if (!parentSetupRequired) {
+        setShowParentSetup(false);
+        parentSetupCheckRef.current = false;
       }
-    } else {
-      setShowAccessDenied(false);
+      return;
     }
-  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission, permissionsLoading]);
 
-  // Check if parent user needs to complete setup
-  useEffect(() => {
-    const checkParentSetup = async () => {
-      if (user && userProfile && userProfile.role === 'parent' && !showPasswordChange) {
-        console.log('Checking parent setup for user:', userProfile.email);
-        try {
-          const { data, error } = await supabase
-            .from('contacts')
-            .select('id')
-            .eq('email', userProfile.email)
-            .eq('type', 'parent')
-            .eq('school_id', userProfile.school_id)
-            .maybeSingle();
-          
-          if (error) {
-            console.error('Error checking parent contact:', error);
-            return;
-          }
-          
-          console.log('Parent contact check result:', data);
-          // If no contact record exists, show parent setup modal
-          const shouldShow = !data;
-          console.log('Should show parent setup modal:', shouldShow);
-          setShowParentSetup(shouldShow);
-        } catch (error) {
-          console.error('Error in parent setup check:', error);
+    const timeoutId = setTimeout(async () => {
+      try {
+        // Check if the parent has any contact records
+        const { data: contacts, error } = await supabase
+          .from('contacts')
+          .select('id')
+          .eq('type', 'parent')
+          .eq('email', user!.email)
+          .limit(1);
+
+        if (error) {
+          console.error('Error checking parent setup:', error);
+          setShowParentSetup(false);
+          return;
         }
-      } else {
+
+        // If no contact record exists, show setup modal
+        const needsSetup = !contacts || contacts.length === 0;
+        setShowParentSetup(needsSetup);
+        parentSetupCheckRef.current = true;
+      } catch (error) {
+        console.error('Error in parent setup check:', error);
         setShowParentSetup(false);
       }
-    };
-    
-    checkParentSetup();
-  }, [user, userProfile, showPasswordChange]);
+    }, 100);
+
+    return () => clearTimeout(timeoutId);
+  }, [parentSetupRequired, user?.email]);
 
   if (loading || permissionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto"></div>
-          <p className="mt-4 text-gray-600">Loading...</p>
-        </div>
+        <LoadingSpinner />
       </div>
     );
   }
 
   if (!user) {
-    console.log('No user found, showing auth page');
     return <AuthPage />;
   }
-
-  console.log('User authenticated, showing main app');
   
   // Show password change dialog if required
   if (showPasswordChange) {
