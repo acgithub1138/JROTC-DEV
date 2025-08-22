@@ -49,17 +49,9 @@ const getMenuItemsFromPermissions = (role: string, userProfile: any, hasPermissi
     { id: 'incident_management', label: 'Incident Management', icon: 'AlertTriangle', path: '/app/incident-management', isVisible: true, order: 10 }
   ];
 
-  // Special handling for admin and parent roles
+  // Special handling for admin role only
   if (role === 'admin') {
     return allMenuItems.filter(item => item.isVisible);
-  }
-
-  if (role === 'parent') {
-    return [
-      { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-      { id: 'tasks', label: 'My Cadets Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
-    ];
   }
 
   // For all other roles, check permissions
@@ -127,11 +119,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile: any): MenuItem[] 
         { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
       ];
     case 'parent':
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'tasks', label: 'My Cadets Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
-      ];
     default:
       return [
         { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
