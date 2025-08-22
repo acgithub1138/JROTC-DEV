@@ -162,9 +162,18 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
   const userId = useMemo(() => debouncedUserProfile?.id, [debouncedUserProfile?.id]);
 
   const loadPreferences = useCallback(async () => {
-    if (!debouncedUserProfile?.id || debouncedPermissionsLoading) {
-      console.log('SidebarPreferencesContext: Skipping load - no user or permissions loading:', {
-        hasUser: !!debouncedUserProfile?.id,
+    // Skip if no user profile ID available
+    if (!debouncedUserProfile?.id) {
+      console.log('SidebarPreferencesContext: Skipping load - no user profile ID');
+      return;
+    }
+
+    // For admin users, don't wait for permissions since they bypass permission checks
+    // For other users, wait for permissions to load
+    const isAdmin = debouncedUserProfile.role === 'admin';
+    if (!isAdmin && debouncedPermissionsLoading) {
+      console.log('SidebarPreferencesContext: Skipping load - waiting for permissions (non-admin user):', {
+        role: debouncedUserProfile.role,
         permissionsLoading: debouncedPermissionsLoading
       });
       return;
@@ -269,10 +278,20 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
     }
   }, [debouncedUserProfile?.id, debouncedUserProfile?.role, debouncedPermissionsLoading, hasPermission, permissionsLoaded, userRole, userId]);
 
-  // Load preferences when user profile changes or permissions finish loading  
+  // Load preferences when user profile changes or permissions finish loading
+  // Also trigger when the actual userProfile (not debounced) changes to handle timing issues
   useEffect(() => {
     loadPreferences();
   }, [loadPreferences]);
+
+  // Additional effect to retry loading when userProfile becomes available
+  // This handles cases where debounced values cause timing issues
+  useEffect(() => {
+    if (userProfile?.id && !isLoading && menuItems.length === 0) {
+      console.log('SidebarPreferencesContext: Retrying load after user profile became available');
+      loadPreferences();
+    }
+  }, [userProfile?.id, userProfile?.role, isLoading, menuItems.length, loadPreferences]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {
