@@ -19,7 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
-import { useCompetitionSchoolsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useOpenCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
@@ -41,7 +41,7 @@ export const OpenCompetitionsPage = () => {
   } = useAuth();
   const isMobile = useIsMobile();
   const { deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
-  const { canAccess } = useCompetitionSchoolsPermissions();
+  const { canAccess } = useOpenCompetitionsPermissions();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
