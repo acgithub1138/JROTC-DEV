@@ -104,7 +104,7 @@ export const useCadetManagement = () => {
     }
 
     try {
-      const { error } = await supabase.functions.invoke('create-cadet-user', {
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
         body: {
           email: newCadet.email,
           first_name: newCadet.first_name,
@@ -118,7 +118,22 @@ export const useCadetManagement = () => {
         }
       });
 
-      if (error) throw error;
+      if (error) {
+        // Extract specific error message from edge function response
+        let errorMessage = 'Failed to create cadet';
+        if (data && data.error) {
+          errorMessage = data.error;
+        } else if (error.message) {
+          errorMessage = error.message;
+        }
+        
+        // Check for specific error types and provide user-friendly messages
+        if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists')) {
+          errorMessage = 'Email address already exists. Please change it and try again.';
+        }
+        
+        throw new Error(errorMessage);
+      }
 
       toast({
         title: "Cadet Successfully Created",
@@ -146,16 +161,9 @@ export const useCadetManagement = () => {
     } catch (error) {
       console.error('Error creating cadet:', error);
       
-      // Check if it's a specific error from the edge function
-      let errorMessage = "Failed to create cadet";
-      if (error instanceof Error && error.message.includes('Edge Function returned a non-2xx status code')) {
-        // Try to extract the actual error message from the response
-        errorMessage = "User email already exists. Please change it and try again.";
-      }
-      
       toast({
         title: "Error",
-        description: errorMessage,
+        description: error instanceof Error ? error.message : "Failed to create cadet",
         variant: "destructive"
       });
     }
@@ -172,7 +180,7 @@ export const useCadetManagement = () => {
         const cadet = cadets[i];
         
         try {
-          const { error } = await supabase.functions.invoke('create-cadet-user', {
+          const { data, error } = await supabase.functions.invoke('create-cadet-user', {
             body: {
               email: cadet.email,
               first_name: cadet.first_name,
@@ -186,11 +194,26 @@ export const useCadetManagement = () => {
             }
           });
 
-          if (error) throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${error.message || 'Unknown error'}`);
+          if (error) {
+            // Extract specific error message from edge function response
+            let errorMessage = 'Unknown error';
+            if (data && data.error) {
+              errorMessage = data.error;
+            } else if (error.message) {
+              errorMessage = error.message;
+            }
+            
+            // Check for specific error types and provide user-friendly messages
+            if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists')) {
+              errorMessage = 'Email address already exists';
+            }
+            
+            throw new Error(`${cadet.first_name} ${cadet.last_name} (${cadet.email}): ${errorMessage}`);
+          }
           successCount++;
         } catch (error: any) {
           failedCount++;
-          errors.push(`Failed to create ${error.message}`);
+          errors.push(error.message || `Failed to create ${cadet.first_name} ${cadet.last_name}`);
         }
 
         // Update progress
