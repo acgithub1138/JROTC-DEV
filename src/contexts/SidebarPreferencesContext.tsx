@@ -172,27 +172,28 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
 
     // Prevent duplicate loads and use cache
     const cacheKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}`;
-    const profileKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}`;
+    const profileKey = `${debouncedUserProfile.id}-${debouncedUserProfile.role}-${permissionsLoaded}`;
     
     console.log('SidebarPreferencesContext: Loading preferences for:', {
       userId: debouncedUserProfile.id,
       role: debouncedUserProfile.role,
       cacheKey,
+      profileKey,
       isLoading: loadingRef.current,
-      lastProfileKey: lastProfileRef.current
+      lastProfileKey: lastProfileRef.current,
+      permissionsLoaded
     });
     
-    if (loadingRef.current || lastProfileRef.current === profileKey) {
-      console.log('SidebarPreferencesContext: Skipping - already loading or same profile key');
+    if (loadingRef.current) {
+      console.log('SidebarPreferencesContext: Skipping - already loading');
       return;
     }
 
-    // Check cache first
-    if (cacheRef.current[cacheKey]) {
+    // Check cache first, but only if we've processed this exact state before
+    if (cacheRef.current[cacheKey] && lastProfileRef.current === profileKey) {
       console.log('SidebarPreferencesContext: Using cached items:', cacheRef.current[cacheKey]);
       setMenuItems(cacheRef.current[cacheKey]);
       setIsLoading(false);
-      lastProfileRef.current = profileKey;
       return;
     }
 
