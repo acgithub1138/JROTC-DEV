@@ -37,20 +37,21 @@ const DEFAULT_THEME = {
 // Fetch competition portal menu items from database
 const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: string, action: string) => boolean) => {
   try {
-    // For now, return hardcoded modules until database structure is ready
-    const hardcodedModules = [
-      { name: 'dashboard', label: 'Dashboard', icon: 'Home', path: '/app/competition-portal/dashboard' },
-      { name: 'cp_competitions', label: 'Hosting Comps', icon: 'Trophy', path: '/app/competition-portal/competitions' },
-      { name: 'open_competitions', label: 'Open Comps', icon: 'Calendar', path: '/app/competition-portal/open-competitions' },
-      { name: 'my_competitions', label: 'My Competitions', icon: 'Award', path: '/app/competition-portal/my-competitions' },
-      { name: 'score_sheets', label: 'Score Sheets', icon: 'FileText', path: '/app/competition-portal/score-sheets' },
-      { name: 'judges', label: 'Judges', icon: 'Users', path: '/app/competition-portal/judges' }
-    ];
+    const { data: modules, error } = await supabase.rpc('get_permission_modules_simple', {
+      is_tab_param: false,
+      parent_module_param: null,
+      is_active_param: true
+    });
 
-    // Filter modules based on permissions
-    const competitionModules = hardcodedModules
-      .filter(module => hasPermission(module.name, 'read'))
-      .map(module => ({
+    if (error) {
+      console.error('Error fetching competition portal modules:', error);
+      return [];
+    }
+
+    // Filter for competition portal modules only and check permissions
+    const competitionModules = (modules || [])
+      .filter((module: any) => module.is_competition_portal && hasPermission(module.name, 'read'))
+      .map((module: any) => ({
         id: module.name,
         label: module.label,
         icon: module.icon,
