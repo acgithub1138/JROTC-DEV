@@ -101,6 +101,84 @@ export const OpenCompetitionsPage = () => {
     enabled: !!userProfile?.school_id
   });
 
+  // Query for My Competitions (internal + portal competitions)
+  const {
+    data: myCompetitions,
+    isLoading: isMyCompetitionsLoading
+  } = useQuery({
+    queryKey: ['my-competitions', userProfile?.school_id],
+    queryFn: async () => {
+      if (!userProfile?.school_id) return [];
+
+      // Fetch internal competitions (ones created by the school)
+      const { data: internalComps, error: internalError } = await supabase
+        .from('competitions')
+        .select('*')
+        .eq('school_id', userProfile.school_id)
+        .order('competition_date', { ascending: false });
+
+      if (internalError) throw internalError;
+
+      // Fetch portal competitions (ones the school is registered for)
+      const { data: portalComps, error: portalError } = await supabase
+        .from('cp_competitions')
+        .select(`
+          *,
+          cp_comp_schools!inner(
+            school_id,
+            status
+          )
+        `)
+        .eq('cp_comp_schools.school_id', userProfile.school_id)
+        .eq('cp_comp_schools.status', 'registered')
+        .order('start_date', { ascending: false });
+
+      if (portalError) throw portalError;
+
+      // Transform and combine competitions
+      const transformedInternal = (internalComps || []).map(comp => ({
+        ...comp,
+        source_type: 'internal' as const,
+        source_competition_id: comp.id,
+        start_date: comp.competition_date, // Map for consistency
+        end_date: comp.competition_date,
+        // Add missing fields that exist in cp_competitions
+        address: comp.location || '',
+        city: '',
+        state: '',
+        zip: '',
+        hosting_school: '',
+        sop: 'none' as const,
+        sop_link: null,
+        sop_text: null,
+        status: 'open' as const,
+        is_public: true,
+        max_participants: null,
+        registration_deadline: comp.registration_deadline ? new Date(comp.registration_deadline).toISOString() : null,
+        program: null,
+        fee: null
+      }));
+
+      const transformedPortal = (portalComps || []).map(comp => ({
+        ...comp,
+        source_type: 'portal' as const,
+        source_competition_id: comp.id,
+        competition_date: comp.start_date.split('T')[0] // Convert timestamp to date
+      }));
+
+      // Combine and sort by date
+      const allCompetitions = [...transformedInternal, ...transformedPortal]
+        .sort((a, b) => {
+          const dateA = new Date(a.start_date || a.competition_date);
+          const dateB = new Date(b.start_date || b.competition_date);
+          return dateB.getTime() - dateA.getTime();
+        });
+
+      return allCompetitions;
+    },
+    enabled: !!userProfile?.school_id
+  });
+
   // Query to get current registrations for the selected competition
   const {
     data: currentRegistrations
@@ -320,9 +398,27 @@ export const OpenCompetitionsPage = () => {
 
           {myCompetitionsPermissions.canAccess && (
             <TabsContent value="my-competitions">
-              {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? (
+              {isMyCompetitionsLoading ? (
+                <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+                  {[...Array(3)].map((_, i) => (
+                    <Card key={i} className="animate-pulse">
+                      <CardHeader>
+                        <div className="h-6 bg-gray-200 rounded mb-2"></div>
+                        <div className="h-4 bg-gray-200 rounded w-2/3"></div>
+                      </CardHeader>
+                      <CardContent>
+                        <div className="space-y-3">
+                          <div className="h-4 bg-gray-200 rounded"></div>
+                          <div className="h-4 bg-gray-200 rounded w-3/4"></div>
+                          <div className="h-10 bg-gray-200 rounded"></div>
+                        </div>
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              ) : myCompetitions && myCompetitions.length > 0 ? (
                 <OpenCompetitionCards 
-                  competitions={registeredCompetitionsList} 
+                  competitions={myCompetitions} 
                   registrations={registrations || []} 
                   onViewDetails={handleViewDetails} 
                   onRegisterInterest={handleRegisterInterest} 
@@ -340,7 +436,7 @@ export const OpenCompetitionsPage = () => {
                   <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
                   <h3 className="text-lg font-medium text-gray-900 mb-2">No My Competitions</h3>
                   <p className="text-gray-600">
-                    You have not registered for any competitions yet.
+                    You have not created or registered for any competitions yet.
                   </p>
                 </div>
               )}
