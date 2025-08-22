@@ -9,6 +9,7 @@ import { usePortal } from '@/contexts/PortalContext';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Calendar, Users, FileText, BarChart3, Settings, ArrowLeft, Shield, Award, Target, Clipboard, Search } from 'lucide-react';
+
 interface CompetitionSidebarProps {
   className?: string;
   activeModule: string;
@@ -63,12 +64,6 @@ const competitionMenuItems = [{
   icon: Shield,
   path: '/app/competition-portal/judges'
 }];
-//{
-//  id: 'analytics',
-//  label: 'Analytics & Reports',
-//  icon: BarChart3,
-//  path: '/app/competition-portal/analytics'
-//}
 
 // Limited menu items for schools with competition_module but not competition_portal
 const competitionModuleMenuItems = [{
@@ -90,6 +85,7 @@ const limitedMenuItems = [{
   icon: Search,
   path: '/app/competition-portal/open-competitions'
 }];
+
 export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   className,
   activeModule,
@@ -98,15 +94,9 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   sidebarOpen = false,
   setSidebarOpen
 }) => {
-  const {
-    userProfile
-  } = useAuth();
-  const {
-    setPortal
-  } = usePortal();
-  const {
-    themes
-  } = useThemes();
+  const { userProfile } = useAuth();
+  const { setPortal } = usePortal();
+  const { themes } = useThemes();
   const navigate = useNavigate();
 
   // Check permissions for Events and Judges modules
@@ -147,10 +137,12 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     : hasCompetitionModule 
       ? getFilteredMenuItems(competitionModuleMenuItems)
       : getFilteredMenuItems(limitedMenuItems);
+
   const handleReturnToCCC = () => {
     setPortal('ccc');
     navigate('/app');
   };
+  
   const handleMenuItemClick = (item: typeof competitionMenuItems[0]) => {
     onModuleChange(item.id);
     if (isMobile && setSidebarOpen) {
@@ -206,15 +198,18 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     );
   }
 
-  return <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} style={{
-    backgroundColor: currentTheme.primary_color
-  }}>
+  return (
+    <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} 
+         style={{ backgroundColor: currentTheme.primary_color }}>
       <div className="p-6">
         <div className="flex items-center space-x-2">
-          {activeTheme?.theme_image_url ? <img src={activeTheme.theme_image_url} alt="JROTC Program Logo" className="w-8 h-8 object-contain" /> : <Trophy className="w-8 h-8 text-blue-400" />}
+          {activeTheme?.theme_image_url ? (
+            <img src={activeTheme.theme_image_url} alt="JROTC Program Logo" className="w-8 h-8 object-contain" />
+          ) : (
+            <Trophy className="w-8 h-8 text-blue-400" />
+          )}
           <div>
             <h1 className="text-xl font-bold">Competition Portal</h1>
-            
           </div>
         </div>
       </div>
@@ -222,45 +217,63 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-1">
           {menuItems.map(item => {
-          const Icon = item.icon;
-          const isActive = activeModule === item.id;
-          return <Button key={item.id} variant="ghost" className="w-full justify-start text-left font-normal" style={{
-            backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
-            color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
-          }} onMouseEnter={e => {
-            if (!isActive) {
-              e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-              e.currentTarget.style.color = '#ffffff';
-            }
-          }} onMouseLeave={e => {
-            if (!isActive) {
-              e.currentTarget.style.backgroundColor = 'transparent';
-              e.currentTarget.style.color = currentTheme.link_text;
-            }
-          }} onClick={() => handleMenuItemClick(item)}>
+            const Icon = item.icon;
+            const isActive = activeModule === item.id;
+            return (
+              <Button 
+                key={item.id} 
+                variant="ghost" 
+                className="w-full justify-start text-left font-normal" 
+                style={{
+                  backgroundColor: isActive ? currentTheme.secondary_color : 'transparent',
+                  color: isActive ? currentTheme.link_selected_text : currentTheme.link_text
+                }} 
+                onMouseEnter={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+                    e.currentTarget.style.color = '#ffffff';
+                  }
+                }} 
+                onMouseLeave={e => {
+                  if (!isActive) {
+                    e.currentTarget.style.backgroundColor = 'transparent';
+                    e.currentTarget.style.color = currentTheme.link_text;
+                  }
+                }} 
+                onClick={() => handleMenuItemClick(item)}
+              >
                 <Icon className="w-4 h-4 mr-3" />
                 {item.label}
-              </Button>;
-        })}
+              </Button>
+            );
+          })}
         </div>
       </ScrollArea>
 
       {/* Return to CCC Button */}
       <div className="p-3 border-t border-gray-700">
-        <Button variant="outline" className="w-full justify-start text-left font-normal" style={{
-        borderColor: currentTheme.link_text,
-        color: currentTheme.link_text,
-        backgroundColor: 'transparent'
-      }} onMouseEnter={e => {
-        e.currentTarget.style.backgroundColor = currentTheme.link_hover;
-        e.currentTarget.style.color = '#ffffff';
-      }} onMouseLeave={e => {
-        e.currentTarget.style.backgroundColor = 'transparent';
-        e.currentTarget.style.color = currentTheme.link_text;
-      }} onClick={handleReturnToCCC}>
+        <Button 
+          variant="outline" 
+          className="w-full justify-start text-left font-normal" 
+          style={{
+            borderColor: currentTheme.link_text,
+            color: currentTheme.link_text,
+            backgroundColor: 'transparent'
+          }} 
+          onMouseEnter={e => {
+            e.currentTarget.style.backgroundColor = currentTheme.link_hover;
+            e.currentTarget.style.color = '#ffffff';
+          }} 
+          onMouseLeave={e => {
+            e.currentTarget.style.backgroundColor = 'transparent';
+            e.currentTarget.style.color = currentTheme.link_text;
+          }} 
+          onClick={handleReturnToCCC}
+        >
           <ArrowLeft className="w-4 h-4 mr-3" />
           Return to CCC
         </Button>
       </div>
-    </div>;
+    </div>
+  );
 };
