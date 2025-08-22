@@ -75,11 +75,11 @@ export const useParentCadetTasks = () => {
             // Debug: Log the cadet ID we're searching for
             console.log('Searching for tasks assigned to cadet ID:', cadetId);
             
-            // Fetch tasks - try different query approaches
+            // Fetch tasks assigned to this cadet (assigned_to is a single UUID)
             const { data: tasks, error: tasksError } = await supabase
               .from('tasks')
               .select('id, task_number, title, status, priority, due_date, assigned_to')
-              .or(`assigned_to.cs.{${cadetId}},assigned_to.eq.${cadetId}`);
+              .eq('assigned_to', cadetId);
             
             console.log('Tasks query result:', { tasks, tasksError, cadetId });
               
