@@ -184,7 +184,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', isVisible: true, order: 16 }
     ];
   } else if (role === 'parent') {
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 }
     return baseItems;
   } else if (role === 'instructor') {
     return [
