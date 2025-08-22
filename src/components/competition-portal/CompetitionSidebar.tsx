@@ -5,10 +5,12 @@ import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
-import { Trophy, Calendar, Users, FileText, BarChart3, Settings, ArrowLeft, Shield, Award, Target, Clipboard, Search } from 'lucide-react';
+import { Trophy, ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
+import * as LucideIcons from 'lucide-react';
 
 interface CompetitionSidebarProps {
   className?: string;
@@ -32,59 +34,60 @@ const DEFAULT_THEME = {
   link_hover: '#1f2937' // Hover background (gray-800)
 };
 
-// Icon map for dynamic icon rendering
-const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
-  Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search
-};
-
-// Fetch menu items from database for competition portal
-const fetchCompetitionMenuItemsFromDatabase = async (userProfile: any) => {
+// Fetch competition portal menu items from database
+const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: string, action: string) => boolean) => {
   try {
-    // Use the role enum value to get role_id first
-    const { data: roleData, error: roleError } = await supabase
-      .from('user_roles')
-      .select('id')
-      .eq('role_name', userProfile?.role)
-      .single();
-      
-    if (roleError || !roleData?.id) {
-      console.error('Error fetching role ID:', roleError);
-      return [];
-    }
-
-    const { data, error } = await supabase
+    const { data: modules, error } = await supabase
       .from('permission_modules')
-      .select(`
-        id,
-        name,
-        icon,
-        path,
-        sort_order,
-        is_active,
-        is_competition_portal,
-        role_permissions!inner(enabled, role_id)
-      `)
+      .select('id, name, label, path, icon')
       .eq('is_active', true)
-      .eq('is_competition_portal', true)
-      .eq('role_permissions.enabled', true)
-      .eq('role_permissions.role_id', roleData.id)
-      .order('sort_order');
+      .order('id', { ascending: true });
 
     if (error) {
       console.error('Error fetching competition menu items:', error);
       return [];
     }
 
-    return (data || []).map(module => ({
-      id: module.name.toLowerCase().replace(/\s+/g, '-'),
-      label: module.name,
-      icon: iconMap[module.icon] || Trophy,
-      path: module.path || `/app/competition-portal/${module.name.toLowerCase().replace(/\s+/g, '-')}`
-    }));
+    if (!modules) {
+      console.log('No modules found');
+      return [];
+    }
+
+    // Filter for competition portal modules and check permissions
+    const competitionModules = modules
+      .filter(module => module.path?.startsWith('/app/competition-portal'))
+      .filter(module => hasPermission(module.name, 'sidebar'))
+      .map(module => ({
+        id: module.name,
+        label: module.label || module.name,
+        icon: module.icon || 'Trophy',
+        path: module.path || `/app/competition-portal/${module.name}`
+      }));
+
+    console.log('Loaded competition portal modules:', competitionModules);
+    return competitionModules;
   } catch (error) {
     console.error('Error in fetchCompetitionMenuItemsFromDatabase:', error);
     return [];
   }
+};
+
+// Dynamic icon renderer component
+const DynamicIcon: React.FC<{ iconName: string; className?: string }> = ({ iconName, className = "" }) => {
+  const iconKey = iconName as keyof typeof LucideIcons;
+  const IconComponent = LucideIcons[iconKey];
+  
+  // Type guard to check if it's a valid React component
+  const isValidComponent = (component: any): component is React.ComponentType<any> => {
+    return typeof component === 'function' || (typeof component === 'object' && component.$$typeof);
+  };
+  
+  if (!IconComponent || !isValidComponent(IconComponent)) {
+    return <Trophy className={className} />;
+  }
+  
+  const ValidIcon = IconComponent as React.ComponentType<{ className?: string }>;
+  return <ValidIcon className={className} />;
 };
 
 export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
@@ -97,6 +100,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 }) => {
   const { userProfile } = useAuth();
   const { setPortal } = usePortal();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const { themes } = useThemes();
   const navigate = useNavigate();
   const [menuItems, setMenuItems] = useState<any[]>([]);
@@ -105,14 +109,13 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   // Load menu items from database
   useEffect(() => {
     const loadMenuItems = async () => {
-      if (!userProfile?.role) {
-        setIsLoading(false);
+      if (!userProfile?.role || permissionsLoading) {
         return;
       }
 
       setIsLoading(true);
       try {
-        const items = await fetchCompetitionMenuItemsFromDatabase(userProfile);
+        const items = await fetchCompetitionMenuItemsFromDatabase(hasPermission);
         setMenuItems(items);
       } catch (error) {
         console.error('Error loading competition menu items:', error);
@@ -123,7 +126,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     };
 
     loadMenuItems();
-  }, [userProfile?.role]);
+  }, [userProfile?.role, hasPermission, permissionsLoading]);
 
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program);
@@ -187,7 +190,6 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
           </SheetHeader>
           <div className="mt-6 space-y-2">
             {menuItems.map(item => {
-              const Icon = item.icon;
               const isActive = activeModule === item.id;
               return (
                 <Button
@@ -196,7 +198,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
                   className="w-full justify-start text-gray-900 hover:bg-gray-100"
                   onClick={() => handleMenuItemClick(item)}
                 >
-                  <Icon className="w-4 h-4 mr-2" />
+                  <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-2" />
                   {item.label}
                 </Button>
               );
@@ -238,7 +240,6 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
       <ScrollArea className="flex-1 px-3">
         <div className="space-y-1">
           {menuItems.map(item => {
-            const Icon = item.icon;
             const isActive = activeModule === item.id;
             return (
               <Button 
@@ -263,7 +264,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
                 }} 
                 onClick={() => handleMenuItemClick(item)}
               >
-                <Icon className="w-4 h-4 mr-3" />
+                <DynamicIcon iconName={item.icon} className="w-4 h-4 mr-3" />
                 {item.label}
               </Button>
             );
