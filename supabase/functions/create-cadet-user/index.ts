@@ -26,6 +26,7 @@ interface CreateCadetRequest {
   first_name: string
   last_name: string
   role?: 'admin' | 'instructor' | 'command_staff' | 'cadet' | 'parent'
+  role_id?: string // Accept role_id as string (like "command staff") 
   grade?: string
   rank?: string
   flight?: string
@@ -71,7 +72,8 @@ serve(async (req) => {
       password,
       first_name, 
       last_name, 
-      role = 'cadet',
+      role,
+      role_id, // Accept role_id as alternative to role
       grade, 
       rank, 
       flight, 
@@ -79,32 +81,46 @@ serve(async (req) => {
       school_id 
     }: CreateCadetRequest = requestBody
 
+    // Determine the role - if role_id is provided as string, use it; otherwise use role or default to cadet
+    let finalRole: string
+    if (role_id && typeof role_id === 'string') {
+      // Convert role_id string to proper role format
+      finalRole = role_id.replace(/\s+/g, '_').toLowerCase()
+      console.log('Using role_id:', role_id, 'converted to:', finalRole)
+    } else if (role) {
+      finalRole = role
+      console.log('Using provided role:', finalRole)
+    } else {
+      finalRole = 'cadet'
+      console.log('Defaulting to role: cadet')
+    }
+
     // Validate input parameters
     if (!email || !first_name || !last_name || !school_id) {
       throw new Error('Required fields missing: email, first_name, last_name, school_id')
     }
 
     // Validate permissions to create user with specified role
-    requireCanCreateUserWithRole(actorProfile, role)
+    requireCanCreateUserWithRole(actorProfile, finalRole)
 
     // Validate school access (non-admins can only create users in their own school)
     requireSameSchool(actorProfile, school_id)
 
-    console.log('Creating user:', email, 'with role:', role, 'in school:', school_id)
+    console.log('Creating user:', email, 'with role:', finalRole, 'in school:', school_id)
 
     // Look up the role_id from user_roles table
     const { data: roleData, error: roleError } = await supabaseAdmin
       .from('user_roles')
       .select('id')
-      .eq('role_name', role)
+      .eq('role_name', finalRole)
       .single()
 
     if (roleError || !roleData) {
       console.error('Role lookup error:', roleError)
-      throw new Error(`Invalid role: ${role}`)
+      throw new Error(`Invalid role: ${finalRole}`)
     }
 
-    console.log('Found role_id:', roleData.id, 'for role:', role)
+    console.log('Found role_id:', roleData.id, 'for role:', finalRole)
 
     // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -114,7 +130,7 @@ serve(async (req) => {
       user_metadata: {
         first_name,
         last_name,
-        role,
+        role: finalRole,
         role_id: roleData.id,
         school_id
       }
@@ -137,7 +153,7 @@ serve(async (req) => {
       throw authError
     }
 
-    console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', role)
+    console.log('User created:', email, 'user id:', authUser.user?.id, 'with role:', finalRole)
 
     // Update the profile that will be automatically created by the trigger
     // Use a more reliable approach with retries for profile updates
@@ -149,7 +165,7 @@ serve(async (req) => {
         const { error: profileError } = await supabaseAdmin
           .from('profiles')
           .update({
-            role,
+            role: finalRole,
             role_id: roleData.id, // Set the role_id from the lookup
             grade: grade || null,
             rank: rank || null,
@@ -160,7 +176,7 @@ serve(async (req) => {
           .eq('id', authUser.user!.id)
 
         if (!profileError) {
-          console.log('Profile updated successfully with role:', role, 'password_change_required: true')
+          console.log('Profile updated successfully with role:', finalRole, 'password_change_required:', password ? false : true)
           return
         }
         
@@ -179,7 +195,7 @@ serve(async (req) => {
         success: true, 
         user_id: authUser.user!.id,
         email_sent: false,
-        role: role
+        role: finalRole
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
