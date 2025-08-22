@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Checkbox } from '@/components/ui/checkbox';
 import { Edit, Trash2 } from 'lucide-react';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 interface Judge {
   id: string;
   name: string;
@@ -34,7 +34,7 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
   const {
     canEdit,
     canDelete
-  } = useTablePermissions('cp_judges');
+  } = useCPJudgesPermissions();
   
   const isAllSelected = judges.length > 0 && selectedJudges.length === judges.length;
   const isIndeterminate = selectedJudges.length > 0 && selectedJudges.length < judges.length;

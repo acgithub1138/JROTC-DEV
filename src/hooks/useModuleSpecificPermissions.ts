@@ -291,3 +291,18 @@ export const useMyCompetitionsReportsPermissions = () => {
     canView: modulePermissions.canRead,
   };
 };
+
+// CP Judges specific permissions
+export const useCPJudgesPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_judges');
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('cp_judges', 'view'),
+    canEdit: hasPermission('cp_judges', 'update'),
+    canDelete: hasPermission('cp_judges', 'delete'),
+    canCreate: hasPermission('cp_judges', 'create'),
+  };
+};

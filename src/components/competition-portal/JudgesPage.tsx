@@ -9,12 +9,12 @@ import { JudgesTable } from './components/JudgesTable';
 import { JudgeDialog } from './components/JudgeDialog';
 import { JudgesBulkImportDialog } from './components/JudgesBulkImportDialog';
 import { useJudges } from '@/hooks/competition-portal/useJudges';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCPJudgesPermissions } from '@/hooks/useModuleSpecificPermissions';
 export const JudgesPage: React.FC = () => {
   const {
     canView,
     canCreate
-  } = useTablePermissions('cp_judges');
+  } = useCPJudgesPermissions();
   const {
     judges,
     isLoading,
@@ -87,6 +87,7 @@ export const JudgesPage: React.FC = () => {
 
   // Filter judges based on search term
   const filteredJudges = judges.filter(judge => judge.name.toLowerCase().includes(searchTerm.toLowerCase()) || judge.email && judge.email.toLowerCase().includes(searchTerm.toLowerCase()) || judge.phone && judge.phone.includes(searchTerm));
+  
   if (isLoading) {
     return <div className="p-6">
         <div className="flex items-center justify-center h-64">
@@ -94,6 +95,15 @@ export const JudgesPage: React.FC = () => {
         </div>
       </div>;
   }
+
+  if (!canView) {
+    return <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">You don't have permission to view judges.</div>
+        </div>
+      </div>;
+  }
+  
   return <div className="p-6 space-y-6">
       {/* Header */}
       <div className="flex justify-between items-center">
