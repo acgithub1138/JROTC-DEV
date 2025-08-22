@@ -43,7 +43,6 @@ const MODULE_MAPPING: { [key: string]: string } = {
   'budget': 'budget',
   'contacts': 'contacts',
   'calendar': 'calendar',
-  'competitions': 'competitions',
   'email-management': 'email',
   'user-admin': 'user_admin',
   'school-management': 'school_management',
@@ -93,7 +92,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         { name: 'budget', label: 'Budget' },
         { name: 'contacts', label: 'Contacts' },
         { name: 'calendar', label: 'Calendar' },
-        { name: 'competitions', label: 'Competitions' },
+        
         { name: 'incident_management', label: 'Get Help' },
         { name: 'email', label: 'Email Management' },
         { name: 'user_admin', label: 'User Management' },
@@ -115,7 +114,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       'budget': 'DollarSign',
       'contacts': 'Users2',
       'calendar': 'Calendar',
-      'competitions': 'Trophy',
+      
       'incident_management': 'AlertTriangle',
       'email': 'Mails',
       'user_admin': 'UserCog',
@@ -135,7 +134,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       'budget': '/app/budget',
       'contacts': '/app/contacts',
       'calendar': '/app/calendar',
-      'competitions': '/app/competitions',
+      
       'incident_management': '/app/incidents',
       'email': '/app/email',
       'user_admin': '/app/users',
@@ -209,14 +208,6 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         path: '/app/calendar',
         isVisible: hasPermission('calendar', 'sidebar'),
         order: 9
-      },
-      {
-        id: 'competitions',
-        label: 'Competitions',
-        icon: 'Trophy',
-        path: '/app/competitions',
-        isVisible: hasPermission('competitions', 'sidebar'),
-        order: 10
       },
       {
         id: 'incident_management',
