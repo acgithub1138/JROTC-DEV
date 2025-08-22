@@ -12,7 +12,7 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatInSchoolTimezone } from '@/utils/timezoneUtils';
+import { formatInSchoolTimezone, convertFromSchoolTimezone } from '@/utils/timezoneUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
@@ -231,8 +231,15 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       .sort((a, b) => a.last_name.localeCompare(b.last_name) || a.first_name.localeCompare(b.first_name));
   };
   const combineDateTime = (date: string, hour: string, minute: string): string | null => {
-    if (!date || !hour || !minute) return null;
-    return `${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`;
+    if (!date || !hour || !minute || !timezone) return null;
+    
+    // Create a Date object in school timezone
+    const schoolDateTime = new Date(`${date}T${hour.padStart(2, '0')}:${minute.padStart(2, '0')}:00`);
+    
+    // Convert from school timezone to UTC
+    const utcDateTime = convertFromSchoolTimezone(schoolDateTime, timezone);
+    
+    return utcDateTime.toISOString();
   };
 
   // Calculate max participants when interval is set
@@ -343,14 +350,9 @@ export const AddEventModal: React.FC<AddEventModalProps> = ({
       const start_time = combineDateTime(formData.start_date, formData.start_hour, formData.start_minute);
       const end_time = combineDateTime(formData.end_date, formData.end_hour, formData.end_minute);
       
-      // Create lunch times using the event's start date
-      const lunch_start_time = formData.lunch_start_hour && formData.lunch_start_minute && formData.start_date
-        ? `${formData.start_date}T${formData.lunch_start_hour.padStart(2, '0')}:${formData.lunch_start_minute.padStart(2, '0')}:00`
-        : null;
-        
-      const lunch_end_time = formData.lunch_end_hour && formData.lunch_end_minute && formData.start_date
-        ? `${formData.start_date}T${formData.lunch_end_hour.padStart(2, '0')}:${formData.lunch_end_minute.padStart(2, '0')}:00`
-        : null;
+      // Create lunch times using proper timezone conversion
+      const lunch_start_time = combineDateTime(formData.start_date, formData.lunch_start_hour, formData.lunch_start_minute);
+      const lunch_end_time = combineDateTime(formData.start_date, formData.lunch_end_hour, formData.lunch_end_minute);
 
       const eventData: any = {
         competition_id: competitionId,
