@@ -62,10 +62,17 @@ export const EditCadetDialog = ({
     rank: ''
   });
 
+  // Debug the current form data state
+  React.useEffect(() => {
+    console.log('Current formData state:', formData);
+  }, [formData]);
+
   // Initialize form data when dialog opens or editingProfile changes
   React.useEffect(() => {
+    console.log('useEffect triggered - editingProfile:', editingProfile, 'open:', open);
+    
     if (editingProfile && open) {
-      // Convert null values to empty strings for Select components
+      // Convert null values to empty strings for Select components, with fallback to 'none'
       const data = {
         grade: editingProfile.grade || '',
         flight: editingProfile.flight || '',
@@ -85,6 +92,17 @@ export const EditCadetDialog = ({
       
       setFormData(data);
       setInitialFormData(data);
+    } else if (!editingProfile || !open) {
+      // Reset form when modal is closed or no cadet selected
+      const emptyData = {
+        grade: '',
+        flight: '',
+        cadet_year: '',
+        role_id: '',
+        rank: ''
+      };
+      setFormData(emptyData);
+      setInitialFormData(emptyData);
     }
   }, [editingProfile, open]);
 
@@ -254,7 +272,10 @@ export const EditCadetDialog = ({
                 <Label htmlFor="grade">Grade</Label>
                 <Select 
                   value={formData.grade || 'none'} 
-                  onValueChange={(value) => setFormData({ ...formData, grade: value === 'none' ? '' : value })}
+                  onValueChange={(value) => {
+                    console.log('Grade changed to:', value);
+                    setFormData({ ...formData, grade: value === 'none' ? '' : value });
+                  }}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
