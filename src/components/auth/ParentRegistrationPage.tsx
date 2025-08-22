@@ -26,8 +26,7 @@ const ParentRegistrationPage = () => {
     firstName: '',
     lastName: '',
     phone: '',
-    email: '',
-    password: ''
+    email: ''
   });
 
   const [validationErrors, setValidationErrors] = useState({
@@ -181,7 +180,7 @@ const ParentRegistrationPage = () => {
       const parentRoleId = 'f8134411-7778-4c37-a39a-e727cfa197c8';
 
       // Create parent user account
-      const result = await signUp(parentData.email, parentData.password, {
+      const result = await signUp(parentData.email, 'Sh0wc@se', {
         first_name: parentData.firstName,
         last_name: parentData.lastName,
         school_id: cadetProfile.school_id,
@@ -314,14 +313,6 @@ const ParentRegistrationPage = () => {
                   {validationErrors.email && (
                     <p className="text-sm text-red-500">{validationErrors.email}</p>
                   )}
-                </div>
-                
-                <div className="space-y-2">
-                  <Label htmlFor="password">Password</Label>
-                  <Input id="password" type="password" placeholder="Create a password" value={parentData.password} onChange={e => setParentData({
-                ...parentData,
-                password: e.target.value
-              })} required />
                 </div>
                 
                 <Button type="submit" className="w-full bg-blue-600 hover:bg-blue-700" disabled={loading}>
