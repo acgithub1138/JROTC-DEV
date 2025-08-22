@@ -3,8 +3,9 @@ import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Eye } from 'lucide-react';
+import { Eye, Edit } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { ScoreSheetTable as PortalScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
 
 interface CompetitionResultsTabProps {
@@ -35,6 +36,12 @@ const formatEventName = (name?: string) => {
 
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
   const isMobile = useIsMobile();
+  const {
+    canView,
+    canViewDetails,
+    canUpdate
+  } = useCompetitionResultsPermissions();
+  
   const [rows, setRows] = useState<CompetitionEventRow[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
@@ -193,6 +200,10 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
     return result;
   }, [rows, schoolMap]);
 
+  if (!canView) {
+    return <div className="p-4 text-sm text-muted-foreground">You don't have permission to view results.</div>;
+  }
+
   if (isLoading) return <div className="p-4 text-sm text-muted-foreground">Loading results...</div>;
   if (error) return <div className="p-4 text-sm text-destructive">Error: {error}</div>;
   if (rows.length === 0) return <div className="p-4 text-sm text-muted-foreground">No results submitted yet.</div>;
@@ -227,16 +238,18 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                             </div>
                           );
                         })}
-                        <div className="flex justify-end pt-2">
-                          <Button
-                            variant="outline"
-                            size="sm"
-                            onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
-                          >
-                            <Eye className="h-4 w-4 mr-1" />
-                            View Details
-                          </Button>
-                        </div>
+                         <div className="flex justify-end pt-2">
+                           {canViewDetails && (
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                             >
+                               <Eye className="h-4 w-4 mr-1" />
+                               View Details
+                             </Button>
+                           )}
+                         </div>
                       </div>
                     </CardContent>
                   </Card>
@@ -268,17 +281,19 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                             <td key={n} className="px-3 py-2">{js ? js.score : '-'}</td>
                           );
                         })}
-                        <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
-                        <td className="px-3 py-2">
-                          <Button
-                            variant="ghost"
-                            size="icon"
-                            aria-label={`View score sheets for ${s.schoolName}`}
-                            onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
-                          >
-                            <Eye className="h-4 w-4" />
-                          </Button>
-                        </td>
+                         <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
+                         <td className="px-3 py-2">
+                           {canViewDetails && (
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               aria-label={`View score sheets for ${s.schoolName}`}
+                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                             >
+                               <Eye className="h-4 w-4" />
+                             </Button>
+                           )}
+                         </td>
                       </tr>
                     ))}
 
