@@ -62,11 +62,11 @@ const getMenuItemsFromPermissions = (
       { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
       { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
       { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
+      { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
       // Admin-specific items
-      { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 12 },
-      { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 13 },
-      { id: 'role-management', label: 'Role Management', icon: 'Shield', path: '/app/roles', isVisible: true, order: 14 },
-      { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 15 },
+      { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 13 },
+      { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 14 },
+      { id: 'role-management', label: 'Role Management', icon: 'Shield', path: '/app/roles', isVisible: true, order: 15 },
       { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', isVisible: true, order: 16 }
     ];
   }
@@ -161,10 +161,10 @@ const getMenuItemsFromPermissions = (
     console.log(`Permission check: ${item.id} (${moduleKey}) -> sidebar = ${hasAccess}`);
   });
 
-  // Special handling for parent role - only allow calendar and contacts
+  // Special handling for parent role - only allow calendar
   if (role === 'parent') {
     const parentItems = allPossibleItems.filter(item => 
-      item.id === 'calendar' || item.id === 'contacts'
+      item.id === 'calendar'
     ).map(item => ({ ...item, isVisible: true }));
     return [...baseItems, ...parentItems];
   }
@@ -191,16 +191,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
   if (role === 'admin') {
     return [
       ...baseItems,
-      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-      { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
-      { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
-      { id: 'teams', label: 'Teams', icon: 'Users', path: '/app/teams', isVisible: true, order: 5 },
-      { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
-      { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
-      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
-      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
-      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       // Admin-specific items
       { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 12 },
       { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 13 },
@@ -212,16 +202,19 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
     return [
       ...baseItems,
       { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 2 },
-      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 3 }
     ];
   } else if (role === 'instructor') {
     return [
       ...baseItems,
       { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
       { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 4 },
-      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 5 },
-      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 6 }
+      { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
+      { id: 'teams', label: 'Teams', icon: 'Users', path: '/app/teams', isVisible: true, order: 5 },
+      { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
+      { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
+      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
+      { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
     ];
   } else {
     // Default cadet items
