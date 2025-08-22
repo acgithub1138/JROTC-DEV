@@ -132,6 +132,7 @@ export const ActionsManagement: React.FC = () => {
     setEditingAction(action.id);
     setEditForm({
       name: action.name,
+      label: action.label,
       description: action.description || '',
       is_active: (action as any).is_active !== false,
       sort_order: (action as any).sort_order || 0
@@ -250,7 +251,7 @@ export const ActionsManagement: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">Order</TableHead>
-              <TableHead>Action Name</TableHead>
+              <TableHead>Action Label</TableHead>
               <TableHead>Description</TableHead>
               <TableHead>Status</TableHead>
               <TableHead className="text-right">Actions</TableHead>
@@ -268,14 +269,12 @@ export const ActionsManagement: React.FC = () => {
                 <TableCell>
                   {editingAction === action.id ? (
                     <Input
-                      value={editForm.name || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                      value={editForm.label || ''}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, label: e.target.value }))}
                       className="w-full"
                     />
                   ) : (
-                    <code className="text-sm bg-muted px-2 py-1 rounded">
-                      {action.name}
-                    </code>
+                    <span className="font-medium">{action.label}</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -321,7 +320,7 @@ export const ActionsManagement: React.FC = () => {
                       <Button
                         size="sm"
                         onClick={handleSave}
-                        disabled={updateMutation.isPending || !editForm.name?.trim()}
+                        disabled={updateMutation.isPending || !editForm.label?.trim()}
                       >
                         <Save className="w-4 h-4" />
                       </Button>

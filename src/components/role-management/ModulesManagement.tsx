@@ -143,6 +143,7 @@ export const ModulesManagement: React.FC = () => {
     setEditingModule(module.id);
     setEditForm({
       name: module.name,
+      label: module.label,
       icon: (module as any).icon || 'FileText',
       path: (module as any).path || '',
       is_active: (module as any).is_active !== false,
@@ -287,7 +288,7 @@ export const ModulesManagement: React.FC = () => {
           <TableHeader>
             <TableRow>
               <TableHead className="w-[50px]">Order</TableHead>
-              <TableHead>Module Name</TableHead>
+              <TableHead>Module Label</TableHead>
               <TableHead>Icon</TableHead>
               <TableHead>Path</TableHead>
               <TableHead>Competition Portal</TableHead>
@@ -307,14 +308,12 @@ export const ModulesManagement: React.FC = () => {
                 <TableCell>
                   {editingModule === module.id ? (
                     <Input
-                      value={editForm.name || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                      value={editForm.label || ''}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, label: e.target.value }))}
                       className="w-full"
                     />
                   ) : (
-                    <code className="text-sm bg-muted px-2 py-1 rounded">
-                      {module.name}
-                    </code>
+                    <span className="font-medium">{module.label}</span>
                   )}
                 </TableCell>
                 <TableCell>
@@ -394,7 +393,7 @@ export const ModulesManagement: React.FC = () => {
                       <Button
                         size="sm"
                         onClick={handleSave}
-                        disabled={updateMutation.isPending || !editForm.name?.trim()}
+                        disabled={updateMutation.isPending || !editForm.label?.trim()}
                       >
                         <Save className="w-4 h-4" />
                       </Button>
