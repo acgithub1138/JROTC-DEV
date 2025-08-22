@@ -209,7 +209,8 @@ export const useSidebarPreferences = () => {
         }
 
         // Use database permissions if loaded, otherwise fallback to hardcoded
-        const defaultItems = permissionsLoaded 
+        // Exception: parents always use default items since they have a fixed, limited set
+        const defaultItems = (permissionsLoaded && userRole !== 'parent')
           ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
           : getDefaultMenuItemsForRole(userRole, userProfile);
         
