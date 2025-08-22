@@ -192,7 +192,7 @@ const ParentRegistrationPage = () => {
       }
       toast({
         title: "Registration Successful",
-        description: "Your parent account has been created. Please sign in to access your cadet's school calendar."
+        description: "Your parent account has been created. Please check your email for your password. Please sign in to access your cadet's school calendar."
       });
       navigate('/app/auth');
     } catch (error: any) {
