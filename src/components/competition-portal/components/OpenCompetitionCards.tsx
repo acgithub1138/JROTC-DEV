@@ -271,8 +271,7 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
             </DialogDescription>
           </DialogHeader>
           <div className="max-h-[60vh] overflow-y-auto">
-            <div className="whitespace-pre-wrap text-sm leading-relaxed p-4 bg-muted rounded-md">
-              {selectedSopText}
+            <div className="prose dark:prose-invert max-w-none text-sm leading-relaxed p-4 bg-muted rounded-md" dangerouslySetInnerHTML={{ __html: selectedSopText }}>
             </div>
           </div>
           <DialogFooter>
