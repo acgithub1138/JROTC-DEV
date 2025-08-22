@@ -96,7 +96,7 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
     editingPlacement?.source === 'portal' ? editingPlacement.competitionId : undefined
   );
   const { eventTypes, isLoading: isLoadingEventTypes } = useCompetitionEventTypes();
-  const { canUpdate } = useMyCompetitionsPermissions();
+  const { canUpdate, canViewDetails, canCreate, canDelete: canDeletePermission } = useMyCompetitionsPermissions();
 
   if (isLoading) {
     return (
@@ -212,34 +212,34 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                     </div>
                   </div>
                 </div>
-                <div className="flex items-center gap-3">
-                  <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
-                    {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
-                  </Badge>
-                   {/* Action Buttons */}
-                   <div className="flex items-center gap-2">
-                     {onView && (
-                       <Button variant="outline" size="sm" onClick={() => onView(competition)} title="View Score Cards">
-                         <Eye className="w-4 h-4" />
-                       </Button>
-                     )}
-                     {onEdit && competition.source_type === 'internal' && canEdit && (
-                       <Button variant="outline" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
-                         <Edit className="w-4 h-4" />
-                       </Button>
-                     )}
-                     {onAddEvent && canAddEvent && (
-                       <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
-                         <Plus className="w-4 h-4" />
-                       </Button>
-                     )}
-                     {onDelete && competition.source_type === 'internal' && canDelete && (
-                       <Button variant="destructive" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
-                         <Trash2 className="w-4 h-4" />
-                       </Button>
-                     )}
-                   </div>
-                </div>
+                 <div className="flex items-center gap-3">
+                   <Badge variant={competition.source_type === 'internal' ? 'default' : 'secondary'}>
+                     {competition.source_type === 'internal' ? 'Internal' : 'Portal'}
+                   </Badge>
+                    {/* Action Buttons */}
+                    <div className="flex items-center gap-2">
+                      {onView && canViewDetails && (
+                        <Button variant="outline" size="sm" onClick={() => onView(competition)} title="View Score Cards">
+                          <Eye className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {onEdit && competition.source_type === 'internal' && canUpdate && (
+                        <Button variant="outline" size="sm" onClick={() => onEdit(competition)} title="Edit Competition">
+                          <Edit className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {onAddEvent && canCreate && (
+                        <Button variant="outline" size="sm" onClick={() => onAddEvent(competition)} title="Add Event">
+                          <Plus className="w-4 h-4" />
+                        </Button>
+                      )}
+                      {onDelete && competition.source_type === 'internal' && canDeletePermission && (
+                        <Button variant="destructive" size="sm" onClick={() => onDelete(competition)} title="Delete Competition">
+                          <Trash2 className="w-4 h-4" />
+                        </Button>
+                      )}
+                    </div>
+                 </div>
               </div>
             </div>
             
