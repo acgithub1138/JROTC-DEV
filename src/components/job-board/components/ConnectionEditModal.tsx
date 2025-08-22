@@ -136,8 +136,7 @@ export const ConnectionEditModal = ({
           {/* Visual Preview - 2/3 width */}
           <div className="w-2/3 relative bg-muted/20 rounded-lg p-4 min-h-[200px]">
             <div className="relative h-full flex items-center justify-between">
-              {/* For assistant connections, show source (supervisor) on left, target (assistant) on right */}
-              {/* For reports_to connections, show target (supervisor) on left, source (subordinate) on right */}
+              {/* Always show supervisor on left, subordinate/assistant on right */}
               {connectionType === 'assistant' ? (
                 <>
                   {/* Source Job Card (Supervisor) - Left */}
