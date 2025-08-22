@@ -5,7 +5,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Button } from '@/components/ui/button';
 import { Eye, Edit } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { ScoreSheetTable as PortalScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
 
 interface CompetitionResultsTabProps {
@@ -37,8 +37,10 @@ const formatEventName = (name?: string) => {
 export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ competitionId }) => {
   const isMobile = useIsMobile();
   const {
-    canView
-  } = useCompetitionPermissions();
+    canView,
+    canViewDetails,
+    canUpdate
+  } = useCompetitionResultsPermissions();
   
   const [rows, setRows] = useState<CompetitionEventRow[]>([]);
   const [schoolMap, setSchoolMap] = useState<Record<string, string>>({});
@@ -237,14 +239,16 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                           );
                         })}
                          <div className="flex justify-end pt-2">
-                           <Button
-                             variant="outline"
-                             size="sm"
-                             onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
-                           >
-                             <Eye className="h-4 w-4 mr-1" />
-                             View Details
-                           </Button>
+                           {canViewDetails && (
+                             <Button
+                               variant="outline"
+                               size="sm"
+                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                             >
+                               <Eye className="h-4 w-4 mr-1" />
+                               View Details
+                             </Button>
+                           )}
                          </div>
                       </div>
                     </CardContent>
@@ -279,14 +283,16 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({ co
                         })}
                          <td className="px-3 py-2 font-medium">{s.total.toFixed(1)}</td>
                          <td className="px-3 py-2">
-                           <Button
-                             variant="ghost"
-                             size="icon"
-                             aria-label={`View score sheets for ${s.schoolName}`}
-                             onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
-                           >
-                             <Eye className="h-4 w-4" />
-                           </Button>
+                           {canViewDetails && (
+                             <Button
+                               variant="ghost"
+                               size="icon"
+                               aria-label={`View score sheets for ${s.schoolName}`}
+                               onClick={() => { setViewEvent(group.event); setViewSchoolId(s.schoolId); }}
+                             >
+                               <Eye className="h-4 w-4" />
+                             </Button>
+                           )}
                          </td>
                       </tr>
                     ))}
