@@ -1,23 +1,25 @@
 import React, { useState } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
+import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Checkbox } from '@/components/ui/checkbox';
-import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Edit2, Save, X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Pencil, Trash2 } from 'lucide-react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 
 export const ActionsManagement: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
-  const [editingAction, setEditingAction] = useState<any>(null);
+  const [editingAction, setEditingAction] = useState<string | null>(null);
+  const [editForm, setEditForm] = useState<any>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
 
-  // Form state
+  // Form state for new action
   const [formData, setFormData] = useState({
     name: '',
     description: '',
@@ -36,6 +38,34 @@ export const ActionsManagement: React.FC = () => {
       
       if (error) throw error;
       return data;
+    }
+  });
+
+  // Update mutation
+  const updateMutation = useMutation({
+    mutationFn: async ({ id, ...actionData }: any) => {
+      const { data, error } = await supabase
+        .from('permission_actions')
+        .update(actionData)
+        .eq('id', id)
+        .select()
+        .single();
+      
+      if (error) throw error;
+      return data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['permission_actions'] });
+      toast({ title: 'Action updated successfully' });
+      setEditingAction(null);
+      setEditForm({});
+    },
+    onError: (error: any) => {
+      toast({
+        title: 'Error updating action',
+        description: error.message,
+        variant: 'destructive'
+      });
     }
   });
 
@@ -60,34 +90,6 @@ export const ActionsManagement: React.FC = () => {
     onError: (error: any) => {
       toast({
         title: 'Error creating action',
-        description: error.message,
-        variant: 'destructive'
-      });
-    }
-  });
-
-  // Update mutation
-  const updateMutation = useMutation({
-    mutationFn: async ({ id, ...actionData }: any) => {
-      const { data, error } = await supabase
-        .from('permission_actions')
-        .update(actionData)
-        .eq('id', id)
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['permission_actions'] });
-      toast({ title: 'Action updated successfully' });
-      resetForm();
-      setIsDialogOpen(false);
-    },
-    onError: (error: any) => {
-      toast({
-        title: 'Error updating action',
         description: error.message,
         variant: 'destructive'
       });
@@ -124,151 +126,232 @@ export const ActionsManagement: React.FC = () => {
       is_active: true,
       sort_order: 0
     });
-    setEditingAction(null);
   };
 
   const handleEdit = (action: any) => {
-    setEditingAction(action);
-    setFormData({
+    setEditingAction(action.id);
+    setEditForm({
       name: action.name,
       description: action.description || '',
-      is_active: (action as any).is_active,
-      sort_order: (action as any).sort_order
+      is_active: (action as any).is_active !== false,
+      sort_order: (action as any).sort_order || 0
     });
-    setIsDialogOpen(true);
+  };
+
+  const handleSave = () => {
+    if (!editingAction) return;
+
+    updateMutation.mutate({ id: editingAction, ...editForm });
+  };
+
+  const handleCancel = () => {
+    setEditingAction(null);
+    setEditForm({});
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (editingAction) {
-      updateMutation.mutate({ id: editingAction.id, ...formData });
-    } else {
-      createMutation.mutate(formData);
-    }
+    createMutation.mutate(formData);
   };
 
-  return (
-    <div className="space-y-6">
+  if (isLoading) {
+    return (
       <Card>
         <CardHeader>
-          <CardTitle className="flex items-center justify-between">
-            Permission Actions Management
-            <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
-              <DialogTrigger asChild>
-                <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Add Action
-                </Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>
-                    {editingAction ? 'Edit Action' : 'Create New Action'}
-                  </DialogTitle>
-                </DialogHeader>
-                <form onSubmit={handleSubmit} className="space-y-4">
-                  <div>
-                    <Label htmlFor="name">Action Name</Label>
-                    <Input
-                      id="name"
-                      value={formData.name}
-                      onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                      required
-                      placeholder="e.g., create, read, update, delete"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="description">Description (optional)</Label>
-                    <Input
-                      id="description"
-                      value={formData.description}
-                      onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                      placeholder="Brief description of what this action allows"
-                    />
-                  </div>
-                  
-                  <div>
-                    <Label htmlFor="sort_order">Sort Order</Label>
-                    <Input
-                      id="sort_order"
-                      type="number"
-                      value={formData.sort_order}
-                      onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
-                    />
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <Checkbox
-                      id="is_active"
-                      checked={formData.is_active}
-                      onCheckedChange={(checked) => setFormData({ ...formData, is_active: !!checked })}
-                    />
-                    <Label htmlFor="is_active">Active</Label>
-                  </div>
-                  
-                  <div className="flex gap-2">
-                    <Button 
-                      type="submit" 
-                      disabled={createMutation.isPending || updateMutation.isPending}
-                    >
-                      {editingAction ? 'Update' : 'Create'}
-                    </Button>
-                    <Button 
-                      type="button" 
-                      variant="outline" 
-                      onClick={() => setIsDialogOpen(false)}
-                    >
-                      Cancel
-                    </Button>
-                  </div>
-                </form>
-              </DialogContent>
-            </Dialog>
-          </CardTitle>
+          <CardTitle>Permission Actions</CardTitle>
+          <CardDescription>Loading actions...</CardDescription>
         </CardHeader>
-        <CardContent>
-          {isLoading ? (
-            <div className="text-center py-8">Loading actions...</div>
-          ) : (
-            <div className="space-y-4">
-              {actions.map((action) => (
-                <div key={action.id} className="flex items-center justify-between p-4 border rounded-lg">
-                  <div className="flex items-center space-x-4">
-                    <div>
-                      <h3 className="font-medium">{action.name}</h3>
-                      <p className="text-sm text-gray-500">
-                        {action.description || 'No description'} | Order: {(action as any).sort_order}
-                      </p>
-                    </div>
-                    <Badge variant={(action as any).is_active ? 'default' : 'secondary'}>
-                      {(action as any).is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  </div>
-                  <div className="flex space-x-2">
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(action)}
-                    >
-                      <Pencil className="w-4 h-4" />
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="destructive"
-                      onClick={() => deleteMutation.mutate(action.id)}
-                      disabled={deleteMutation.isPending}
-                    >
-                      <Trash2 className="w-4 h-4" />
-                    </Button>
-                  </div>
-                </div>
-              ))}
-            </div>
-          )}
-        </CardContent>
       </Card>
-    </div>
+    );
+  }
+
+  return (
+    <Card>
+      <CardHeader>
+        <CardTitle className="flex items-center justify-between">
+          Permission Actions Management
+          <Dialog open={isDialogOpen} onOpenChange={setIsDialogOpen}>
+            <DialogTrigger asChild>
+              <Button onClick={() => { resetForm(); setIsDialogOpen(true); }}>
+                <Plus className="w-4 h-4 mr-2" />
+                Add Action
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Create New Action</DialogTitle>
+              </DialogHeader>
+              <form onSubmit={handleSubmit} className="space-y-4">
+                <div>
+                  <Label htmlFor="name">Action Name</Label>
+                  <Input
+                    id="name"
+                    value={formData.name}
+                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                    required
+                    placeholder="e.g., create, read, update, delete"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="description">Description (optional)</Label>
+                  <Input
+                    id="description"
+                    value={formData.description}
+                    onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                    placeholder="Brief description of what this action allows"
+                  />
+                </div>
+                
+                <div>
+                  <Label htmlFor="sort_order">Sort Order</Label>
+                  <Input
+                    id="sort_order"
+                    type="number"
+                    value={formData.sort_order}
+                    onChange={(e) => setFormData({ ...formData, sort_order: parseInt(e.target.value) || 0 })}
+                  />
+                </div>
+                
+                <div className="flex items-center space-x-2">
+                  <Switch
+                    id="is_active"
+                    checked={formData.is_active}
+                    onCheckedChange={(checked) => setFormData({ ...formData, is_active: !!checked })}
+                  />
+                  <Label htmlFor="is_active">Active</Label>
+                </div>
+                
+                <div className="flex gap-2">
+                  <Button 
+                    type="submit" 
+                    disabled={createMutation.isPending}
+                  >
+                    Create
+                  </Button>
+                  <Button 
+                    type="button" 
+                    variant="outline" 
+                    onClick={() => setIsDialogOpen(false)}
+                  >
+                    Cancel
+                  </Button>
+                </div>
+              </form>
+            </DialogContent>
+          </Dialog>
+        </CardTitle>
+        <CardDescription>
+          Manage permission actions that can be assigned to roles for each module.
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <Table>
+          <TableHeader>
+            <TableRow>
+              <TableHead className="w-[50px]">Order</TableHead>
+              <TableHead>Action Name</TableHead>
+              <TableHead>Description</TableHead>
+              <TableHead>Status</TableHead>
+              <TableHead className="text-right">Actions</TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {actions.map((action) => (
+              <TableRow key={action.id}>
+                <TableCell>
+                  <div className="flex items-center">
+                    <GripVertical className="w-4 h-4 text-muted-foreground" />
+                    <span className="ml-2 text-sm">{(action as any).sort_order || 0}</span>
+                  </div>
+                </TableCell>
+                <TableCell>
+                  {editingAction === action.id ? (
+                    <Input
+                      value={editForm.name || ''}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, name: e.target.value }))}
+                      className="w-full"
+                    />
+                  ) : (
+                    <code className="text-sm bg-muted px-2 py-1 rounded">
+                      {action.name}
+                    </code>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingAction === action.id ? (
+                    <Input
+                      value={editForm.description || ''}
+                      onChange={(e) => setEditForm(prev => ({ ...prev, description: e.target.value }))}
+                      className="w-full"
+                      placeholder="Brief description"
+                    />
+                  ) : (
+                    <span className="text-sm text-muted-foreground">
+                      {action.description || 'No description'}
+                    </span>
+                  )}
+                </TableCell>
+                <TableCell>
+                  {editingAction === action.id ? (
+                    <div className="flex items-center space-x-2">
+                      <Switch
+                        checked={editForm.is_active !== false}
+                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, is_active: checked }))}
+                      />
+                      <Label className="text-sm">Active</Label>
+                    </div>
+                  ) : (
+                    <Badge variant={(action as any).is_active !== false ? 'default' : 'secondary'}>
+                      {(action as any).is_active !== false ? 'Active' : 'Inactive'}
+                    </Badge>
+                  )}
+                </TableCell>
+                <TableCell className="text-right">
+                  {editingAction === action.id ? (
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={handleCancel}
+                        disabled={updateMutation.isPending}
+                      >
+                        <X className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        onClick={handleSave}
+                        disabled={updateMutation.isPending || !editForm.name?.trim()}
+                      >
+                        <Save className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  ) : (
+                    <div className="flex justify-end space-x-2">
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handleEdit(action)}
+                        disabled={updateMutation.isPending}
+                      >
+                        <Edit2 className="w-4 h-4" />
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="destructive"
+                        onClick={() => deleteMutation.mutate(action.id)}
+                        disabled={deleteMutation.isPending}
+                      >
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  )}
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </CardContent>
+    </Card>
   );
 };
