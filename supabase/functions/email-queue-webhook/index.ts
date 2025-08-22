@@ -177,7 +177,7 @@ class UnifiedEmailProcessor {
       console.log(`📧 Sending email to ${recipientCount} recipient(s): ${email.recipient_email} (retry: ${email.retry_count || 0})`);
       
       const result = await this.resend.emails.send({
-        from: 'JROTC CCC <jrotc@careyunlimited.com>',
+        from: 'JROTC CCC <noreply@jrotc.com>',
         to: recipients,
         subject: email.subject,
         html: email.body,
