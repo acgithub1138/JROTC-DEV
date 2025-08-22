@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, Plus, Trash2, GripVertical, Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock } from 'lucide-react';
+import { Edit2, Save, X, Plus, Trash2, GripVertical, Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -30,12 +30,17 @@ const getIconComponent = (iconName: string) => {
   return iconMap[iconName] || FileText;
 };
 
+type SortColumn = 'sort_order' | 'label' | 'icon' | 'path' | 'is_competition_portal' | 'is_active';
+type SortDirection = 'asc' | 'desc' | null;
+
 export const ModulesManagement: React.FC = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const [editingModule, setEditingModule] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<any>({});
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [sortColumn, setSortColumn] = useState<SortColumn>('sort_order');
+  const [sortDirection, setSortDirection] = useState<SortDirection>('asc');
 
   // Form state for new module
   const [formData, setFormData] = useState({
@@ -48,7 +53,7 @@ export const ModulesManagement: React.FC = () => {
   });
 
   // Fetch modules
-  const { data: modules = [], isLoading } = useQuery({
+  const { data: modulesData = [], isLoading } = useQuery({
     queryKey: ['permission_modules'],
     queryFn: async () => {
       const { data, error } = await supabase
@@ -60,6 +65,54 @@ export const ModulesManagement: React.FC = () => {
       return data;
     }
   });
+
+  // Sort modules based on current sort settings
+  const modules = useMemo(() => {
+    if (!sortColumn || !sortDirection) return modulesData;
+
+    return [...modulesData].sort((a, b) => {
+      const aVal = (a as any)[sortColumn];
+      const bVal = (b as any)[sortColumn];
+
+      if (sortColumn === 'sort_order') {
+        const numA = aVal || 0;
+        const numB = bVal || 0;
+        return sortDirection === 'asc' ? numA - numB : numB - numA;
+      }
+
+      if (typeof aVal === 'boolean' && typeof bVal === 'boolean') {
+        const result = aVal === bVal ? 0 : aVal ? 1 : -1;
+        return sortDirection === 'asc' ? result : -result;
+      }
+
+      const strA = (aVal || '').toString().toLowerCase();
+      const strB = (bVal || '').toString().toLowerCase();
+      const result = strA.localeCompare(strB);
+      return sortDirection === 'asc' ? result : -result;
+    });
+  }, [modulesData, sortColumn, sortDirection]);
+
+  // Handle column sorting
+  const handleSort = (column: SortColumn) => {
+    if (sortColumn === column) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : sortDirection === 'desc' ? null : 'asc');
+      if (sortDirection === 'desc') {
+        setSortColumn('sort_order');
+        setSortDirection('asc');
+      }
+    } else {
+      setSortColumn(column);
+      setSortDirection('asc');
+    }
+  };
+
+  // Get sort icon for column header
+  const getSortIcon = (column: SortColumn) => {
+    if (sortColumn !== column) return <ChevronsUpDown className="w-4 h-4" />;
+    if (sortDirection === 'asc') return <ChevronUp className="w-4 h-4" />;
+    if (sortDirection === 'desc') return <ChevronDown className="w-4 h-4" />;
+    return <ChevronsUpDown className="w-4 h-4" />;
+  };
 
   // Update mutation
   const updateMutation = useMutation({
@@ -306,12 +359,60 @@ export const ModulesManagement: React.FC = () => {
         <Table>
           <TableHeader>
             <TableRow>
-              <TableHead className="w-[50px]">Order</TableHead>
-              <TableHead>Module Label</TableHead>
-              <TableHead>Icon</TableHead>
-              <TableHead>Path</TableHead>
-              <TableHead>Competition Portal</TableHead>
-              <TableHead>Status</TableHead>
+              <TableHead 
+                className="w-[50px] cursor-pointer select-none"
+                onClick={() => handleSort('sort_order')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Order</span>
+                  {getSortIcon('sort_order')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer select-none"
+                onClick={() => handleSort('label')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Module Label</span>
+                  {getSortIcon('label')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer select-none"
+                onClick={() => handleSort('icon')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Icon</span>
+                  {getSortIcon('icon')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer select-none"
+                onClick={() => handleSort('path')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Path</span>
+                  {getSortIcon('path')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer select-none"
+                onClick={() => handleSort('is_competition_portal')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Competition Portal</span>
+                  {getSortIcon('is_competition_portal')}
+                </div>
+              </TableHead>
+              <TableHead 
+                className="cursor-pointer select-none"
+                onClick={() => handleSort('is_active')}
+              >
+                <div className="flex items-center space-x-1">
+                  <span>Status</span>
+                  {getSortIcon('is_active')}
+                </div>
+              </TableHead>
               <TableHead className="text-right">Actions</TableHead>
             </TableRow>
           </TableHeader>
