@@ -50,8 +50,17 @@ export const useModuleTabs = (parentModuleId: string | null) => {
     const moduleKey = typeof parentModuleId === 'string' ? parentModuleId : '';
     const allTabs = getTabsForModule(moduleKey);
     
-    // Filter based on permissions
-    const filteredTabs = allTabs.filter(tab => hasPermission(tab.name, 'read'));
+    // Filter based on permissions - map tab names to correct module names
+    const filteredTabs = allTabs.filter(tab => {
+      // Map tab names to their corresponding module names for permission checking
+      const moduleNameMap: Record<string, string> = {
+        'competitions': 'my_competitions',
+        'reports': 'my_competitions_reports'
+      };
+      
+      const moduleName = moduleNameMap[tab.id] || tab.name;
+      return hasPermission(moduleName, 'sidebar');
+    });
     
     setTabs(filteredTabs);
     setIsLoading(false);
