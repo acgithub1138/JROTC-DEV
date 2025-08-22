@@ -45,7 +45,7 @@ export const useCompetitionEventTypes = () => {
         .from('competition_event_types')
         .select('name')
         .eq('name', name)
-        .single();
+        .maybeSingle();
 
       if (existing) {
         throw new Error('Event type already exists');
@@ -57,7 +57,7 @@ export const useCompetitionEventTypes = () => {
         .select('sort_order')
         .order('sort_order', { ascending: false })
         .limit(1)
-        .single();
+        .maybeSingle();
 
       const newSortOrder = (lastOrder?.sort_order || 0) + 1;
 
