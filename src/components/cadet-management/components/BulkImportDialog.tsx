@@ -65,7 +65,8 @@ export const BulkImportDialog = ({
           role_id: row['Role ID'] || row['Role']?.toLowerCase() || '',
           grade: row['Grade'] || '',
           rank: row['Rank'] || '',
-          flight: row['Flight'] || ''
+          flight: row['Flight'] || '',
+          cadet_year: row['Cadet Year'] || row['Year'] || ''
         };
         const errors = validateCadetData(cadet);
         return {
@@ -174,6 +175,7 @@ export const BulkImportDialog = ({
                   <span>• Grade</span>
                   <span>• Flight</span>
                   <span>• Rank</span>
+                  <span>• Cadet Year (or Year)</span>
                 </div>
               </div>
             </div>
@@ -204,7 +206,7 @@ export const BulkImportDialog = ({
             </div>
 
             <div className="flex-1 overflow-auto p-4">
-              <Table>
+               <Table>
                 <TableHeader>
                   <TableRow>
                     <TableHead>First Name</TableHead>
@@ -214,6 +216,7 @@ export const BulkImportDialog = ({
                     <TableHead>Grade</TableHead>
                     <TableHead>Rank</TableHead>
                     <TableHead>Flight</TableHead>
+                    <TableHead>Cadet Year</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
                   </TableRow>
@@ -279,7 +282,23 @@ export const BulkImportDialog = ({
                                   {flight}
                                 </SelectItem>)}
                             </SelectContent>
-                          </Select> : cadet.flight}
+                           </Select> : cadet.flight}
+                      </TableCell>
+                      <TableCell>
+                        {editingRow === cadet.id ? 
+                          <Select value={cadet.cadet_year || ''} onValueChange={value => updateCadet(cadet.id, 'cadet_year', value)}>
+                            <SelectTrigger className="h-8">
+                              <SelectValue placeholder="Select year" />
+                            </SelectTrigger>
+                            <SelectContent>
+                              <SelectItem value="1st">1st</SelectItem>
+                              <SelectItem value="2nd">2nd</SelectItem>
+                              <SelectItem value="3rd">3rd</SelectItem>
+                              <SelectItem value="4th">4th</SelectItem>
+                            </SelectContent>
+                          </Select> : 
+                          cadet.cadet_year ? <Badge variant="outline" className="text-xs">{cadet.cadet_year}</Badge> : '-'
+                        }
                       </TableCell>
                       <TableCell>
                         {cadet.isValid ? <Badge variant="secondary" className="bg-green-100 text-green-800">
