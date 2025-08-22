@@ -1,5 +1,5 @@
 import React, { useState, useMemo } from 'react';
-import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCPScoreSheetsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { Button } from '@/components/ui/button';
 import { Switch } from '@/components/ui/switch';
 import { Label } from '@/components/ui/label';
@@ -68,7 +68,7 @@ export const ScoreSheetsPage = () => {
     setCurrentPage(1);
   }, [searchQuery, showOnlyMyTemplates]);
 
-  const { canCreate, canUpdate, canDelete, canViewDetails } = useCompetitionPermissions();
+  const { canCreate, canUpdate, canDelete, canViewDetails, canView } = useCPScoreSheetsPermissions();
 
   const handleSubmit = async (data: any) => {
     if (editingTemplate) {
@@ -85,6 +85,16 @@ export const ScoreSheetsPage = () => {
   const handleCopy = async (templateId: string) => {
     await copyTemplate(templateId);
   };
+
+  if (!canView) {
+    return (
+      <div className="p-6">
+        <div className="flex items-center justify-center h-64">
+          <div className="text-lg">You don't have permission to view score sheet templates.</div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">

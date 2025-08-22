@@ -306,3 +306,19 @@ export const useCPJudgesPermissions = () => {
     canCreate: hasPermission('cp_judges', 'create'),
   };
 };
+
+// CP Score Sheets specific permissions
+export const useCPScoreSheetsPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_score_sheets');
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('cp_score_sheets', 'view'),
+    canEdit: hasPermission('cp_score_sheets', 'update'),
+    canDelete: hasPermission('cp_score_sheets', 'delete'),
+    canCreate: hasPermission('cp_score_sheets', 'create'),
+    canUpdate: hasPermission('cp_score_sheets', 'update'), // alias for consistency
+  };
+};
