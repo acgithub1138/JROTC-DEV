@@ -153,7 +153,7 @@ export const ConnectionEditModal = ({
                   </div>
 
                   {/* Connection Text */}
-                  <div className="flex-1 mx-4 flex items-center justify-center">
+                  <div className="flex-1 mx-2 flex items-center justify-center">
                     <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
                       {connectionTypeLabel}
                     </span>
@@ -187,7 +187,7 @@ export const ConnectionEditModal = ({
                   </div>
 
                   {/* Connection Text */}
-                  <div className="flex-1 mx-4 flex items-center justify-center">
+                  <div className="flex-1 mx-2 flex items-center justify-center">
                     <span className="bg-background px-3 py-1 text-sm text-muted-foreground rounded border">
                       <ArrowRight size={18} />
                     </span>
