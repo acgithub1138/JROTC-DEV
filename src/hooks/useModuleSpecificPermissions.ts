@@ -270,10 +270,15 @@ export const useOpenCompsSchedulePermissions = () => {
 // My Competitions specific permissions
 export const useMyCompetitionsPermissions = () => {
   const modulePermissions = useModulePermissions('my_competitions');
+  const { hasPermission } = usePermissionContext();
   
   return {
     ...modulePermissions,
     canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('my_competitions', 'view'),
+    canUpdate: hasPermission('my_competitions', 'update'),
+    canDelete: hasPermission('my_competitions', 'delete'),
+    canCreate: hasPermission('my_competitions', 'create'),
   };
 };
 

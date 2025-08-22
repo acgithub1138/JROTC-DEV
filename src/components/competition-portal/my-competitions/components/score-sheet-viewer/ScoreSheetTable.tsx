@@ -32,7 +32,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
     notes: string;
     judgeNumber?: string;
   }>({ open: false, fieldName: '', notes: '', judgeNumber: '' });
-  const { canView: canViewDetails, canUpdate, canDelete } = useMyCompetitionsPermissions();
+  const { canViewDetails, canUpdate, canDelete } = useMyCompetitionsPermissions();
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const { templates } = useCompetitionTemplates();
