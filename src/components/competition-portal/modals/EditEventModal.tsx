@@ -94,18 +94,18 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   useEffect(() => {
     if (event && eventTypes.length > 0) {
-      // Format times in school timezone for display
-      const startDateStr = event.start_time ? formatTimeForDisplay(event.start_time, 'yyyy-MM-dd', timezone) : '';
-      const startTimeStr = event.start_time ? formatTimeForDisplay(event.start_time, TIME_FORMATS.TIME_ONLY_24H, timezone) : '';
-      const endDateStr = event.end_time ? formatTimeForDisplay(event.end_time, 'yyyy-MM-dd', timezone) : '';
-      const endTimeStr = event.end_time ? formatTimeForDisplay(event.end_time, TIME_FORMATS.TIME_ONLY_24H, timezone) : '';
+      // Convert UTC times to school timezone Date objects
+      const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
+      const endDate = event.end_time ? convertToSchoolTimezone(event.end_time, timezone) : null;
+      const lunchStartDate = (event as any).lunch_start_time ? convertToSchoolTimezone((event as any).lunch_start_time, timezone) : null;
+      const lunchEndDate = (event as any).lunch_end_time ? convertToSchoolTimezone((event as any).lunch_end_time, timezone) : null;
       
-      // Parse lunch times using timezone utilities
-      const lunchStartTime = (event as any).lunch_start_time 
-        ? formatTimeForDisplay((event as any).lunch_start_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+      // Format lunch times for display
+      const lunchStartTime = lunchStartDate 
+        ? `${lunchStartDate.getHours().toString().padStart(2, '0')}:${lunchStartDate.getMinutes().toString().padStart(2, '0')}`
         : '';
-      const lunchEndTime = (event as any).lunch_end_time 
-        ? formatTimeForDisplay((event as any).lunch_end_time, TIME_FORMATS.TIME_ONLY_24H, timezone)
+      const lunchEndTime = lunchEndDate 
+        ? `${lunchEndDate.getHours().toString().padStart(2, '0')}:${lunchEndDate.getMinutes().toString().padStart(2, '0')}`
         : '';
 
       // Find the matching event type by name or ID
@@ -124,19 +124,15 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         eventTypeName = matchingEventType?.name || '';
       }
       
-      // Extract hours and minutes from time strings
-      const [startHour = '09', startMinute = '00'] = startTimeStr.split(':');
-      const [endHour = '10', endMinute = '00'] = endTimeStr.split(':');
-      
       const newFormData = {
         event: matchingEventType?.id || '',
         location: event.location || '',
-        start_date: startDateStr,
-        start_time_hour: startHour.padStart(2, '0'),
-        start_time_minute: startMinute.padStart(2, '0'),
-        end_date: endDateStr,
-        end_time_hour: endHour.padStart(2, '0'),
-        end_time_minute: endMinute.padStart(2, '0'),
+        start_date: startDate ? formatTimeForDisplay(startDate, 'yyyy-MM-dd', timezone) : '',
+        start_time_hour: startDate ? startDate.getHours().toString().padStart(2, '0') : '09',
+        start_time_minute: startDate ? startDate.getMinutes().toString().padStart(2, '0') : '00',
+        end_date: endDate ? formatTimeForDisplay(endDate, 'yyyy-MM-dd', timezone) : '',
+        end_time_hour: endDate ? endDate.getHours().toString().padStart(2, '0') : '10',
+        end_time_minute: endDate ? endDate.getMinutes().toString().padStart(2, '0') : '00',
         lunch_start_time: lunchStartTime,
         lunch_end_time: lunchEndTime,
         max_participants: event.max_participants?.toString() || '',
@@ -169,12 +165,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
 
   const fetchFilteredScoreSheets = async () => {
     try {
-      console.log('Event object:', event);
-      console.log('Competition ID from event:', event?.competition_id);
-      console.log('Form data event:', formData.event);
-      
       if (!event?.competition_id || !formData.event) {
-        console.log('Missing data - event.competition_id:', event?.competition_id, 'formData.event:', formData.event);
         setScoreSheets([]);
         return;
       }
@@ -186,12 +177,7 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
         .eq('id', event.competition_id)
         .maybeSingle();
 
-      if (competitionError) {
-        console.error('Competition error:', competitionError);
-        throw competitionError;
-      }
-
-      console.log('Competition data:', competitionData);
+      if (competitionError) throw competitionError;
 
       if (competitionData?.program) {
         const { data, error } = await supabase
@@ -202,12 +188,9 @@ export const EditEventModal: React.FC<EditEventModalProps> = ({
           .eq('event', formData.event)
           .order('template_name', { ascending: true });
         
-        console.log('Score sheets query result:', data, error);
-        
         if (error) throw error;
         setScoreSheets(data || []);
       } else {
-        console.log('No program found in competition data');
         setScoreSheets([]);
       }
     } catch (error) {
