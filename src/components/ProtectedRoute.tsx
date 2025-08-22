@@ -66,6 +66,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   useEffect(() => {
     const checkParentSetup = async () => {
       if (user && userProfile && userProfile.role === 'parent' && !showPasswordChange) {
+        console.log('Checking parent setup for user:', userProfile.email);
         try {
           const { data, error } = await supabase
             .from('contacts')
@@ -80,8 +81,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
             return;
           }
           
+          console.log('Parent contact check result:', data);
           // If no contact record exists, show parent setup modal
-          setShowParentSetup(!data);
+          const shouldShow = !data;
+          console.log('Should show parent setup modal:', shouldShow);
+          setShowParentSetup(shouldShow);
         } catch (error) {
           console.error('Error in parent setup check:', error);
         }
@@ -156,7 +160,26 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       {children}
       <ParentSetupModal 
         open={showParentSetup} 
-        onClose={() => setShowParentSetup(false)} 
+        onClose={() => {
+          setShowParentSetup(false);
+          // Force a recheck of parent setup after modal closes
+          if (user && userProfile && userProfile.role === 'parent') {
+            setTimeout(() => {
+              const checkAgain = async () => {
+                const { data } = await supabase
+                  .from('contacts')
+                  .select('id')
+                  .eq('email', userProfile.email)
+                  .eq('type', 'parent')
+                  .eq('school_id', userProfile.school_id)
+                  .maybeSingle();
+                
+                setShowParentSetup(!data);
+              };
+              checkAgain();
+            }, 500);
+          }
+        }} 
       />
     </>
   );

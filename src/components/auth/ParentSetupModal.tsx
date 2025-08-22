@@ -118,6 +118,11 @@ const ParentSetupModal: React.FC<ParentSetupModalProps> = ({ open, onClose }) =>
         description: "Your parent account has been set up successfully.",
       });
 
+      // Clear form state
+      setSelectedCadetId('');
+      setPhoneNumber('');
+      
+      // Close the modal
       onClose();
     } catch (error: any) {
       console.error('Error creating contact:', error);
