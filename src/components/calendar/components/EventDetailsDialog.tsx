@@ -120,18 +120,6 @@ export const EventDetailsDialog = ({
             </div>
           )}
 
-          <div className="border-t pt-4 space-y-2">
-            <div className="flex items-center gap-3 text-sm text-muted-foreground">
-              <Clock className="w-4 h-4" />
-              <span>Created: {formatTimeForDisplay(event.created_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}</span>
-            </div>
-            {event.updated_at !== event.created_at && (
-              <div className="flex items-center gap-3 text-sm text-muted-foreground">
-                <Clock className="w-4 h-4" />
-                <span>Updated: {formatTimeForDisplay(event.updated_at, TIME_FORMATS.SHORT_DATETIME_24H, timezone)}</span>
-              </div>
-            )}
-          </div>
         </div>
       </DialogContent>
     </Dialog>
