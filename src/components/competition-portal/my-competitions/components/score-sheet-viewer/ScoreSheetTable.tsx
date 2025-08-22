@@ -9,7 +9,7 @@ import { EditScoreSheetDialog } from './EditScoreSheetDialog';
 import { DeleteScoreSheetDialog } from './DeleteScoreSheetDialog';
 import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
-import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useCompetitionTemplates } from '../../hooks/useCompetitionTemplates';
 import { toast } from 'sonner';
 
@@ -32,7 +32,7 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
     notes: string;
     judgeNumber?: string;
   }>({ open: false, fieldName: '', notes: '', judgeNumber: '' });
-  const { canViewDetails, canUpdate, canDelete } = useCompetitionPermissions();
+  const { canViewDetails, canUpdate, canDelete } = useCompetitionResultsPermissions();
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const { templates } = useCompetitionTemplates();
