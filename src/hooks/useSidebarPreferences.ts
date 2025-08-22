@@ -176,7 +176,6 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
 
   if (role === 'admin') {
     return [
-      ...baseItems,
       { id: 'incident_management', label: 'Incidents', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 12 },
       { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 13 },
@@ -185,7 +184,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
       { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', isVisible: true, order: 16 }
     ];
   } else if (role === 'parent') {
-    // Parents get only dashboard by default - permissions control actual access
+      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
     return baseItems;
   } else if (role === 'instructor') {
     return [
