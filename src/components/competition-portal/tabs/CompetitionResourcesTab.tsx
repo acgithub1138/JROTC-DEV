@@ -6,7 +6,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useCompetitionResourcesPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
 import { EditResourceModal } from '@/components/competition-portal/modals/EditResourceModal';
@@ -27,9 +27,10 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
   } = useCompetitionResources(competitionId);
   const {
     canCreate,
-    canEdit,
+    canView,
+    canUpdate,
     canDelete
-  } = useTablePermissions('cp_comp_resources');
+  } = useCompetitionResourcesPermissions();
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
   const [deletingResourceId, setDeletingResourceId] = useState(null);
@@ -59,9 +60,15 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           </Button>}
       </div>
 
-      {resources.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {!canView ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>You don't have permission to view resources</p>
+        </div>
+      ) : resources.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
-        </div> : isMobile ? (
+        </div>
+      ) : isMobile ? (
           <div className="space-y-4">
             {resources.map(resource => (
               <Card key={resource.id}>
@@ -84,9 +91,9 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
                       <p className="text-sm">{resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}</p>
                     </div>
-                    {(canEdit || canDelete) && (
-                      <div className="flex flex-wrap gap-2 pt-2">
-                        {canEdit && (
+                     {(canUpdate || canDelete) && (
+                       <div className="flex flex-wrap gap-2 pt-2">
+                         {canUpdate && (
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="sm" onClick={() => handleEdit(resource)}>
@@ -166,9 +173,9 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                 <TableCell>
                   {resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}
                 </TableCell>
-                {(canEdit || canDelete) && <TableCell>
-                    <div className="flex items-center justify-center gap-2">
-                      {canEdit && (
+                 {(canUpdate || canDelete) && <TableCell>
+                     <div className="flex items-center justify-center gap-2">
+                       {canUpdate && (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource)}>
