@@ -29,7 +29,7 @@ export const useCompetitionResources = (competitionId?: string) => {
         .from('cp_comp_resources')
         .select(`
           *,
-          cadet_profile:profiles!resource(
+          cadet_profile:profiles(
             first_name,
             last_name
           )
