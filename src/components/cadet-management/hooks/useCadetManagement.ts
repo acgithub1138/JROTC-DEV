@@ -122,11 +122,31 @@ export const useCadetManagement = () => {
         // Extract specific error message from edge function response
         let errorMessage = 'Failed to create cadet';
         
+        // Debug: Log the full error structure
+        console.log('Full error object:', error);
+        console.log('Response data:', data);
+        
         // Check for error in response data first (edge function return body)
         if (data && data.error) {
           errorMessage = data.error;
+        } else if (error.details && typeof error.details === 'string') {
+          // Parse stringified JSON details
+          try {
+            const parsed = JSON.parse(error.details);
+            if (parsed.error) errorMessage = parsed.error;
+          } catch {
+            errorMessage = error.details;
+          }
         } else if (error.details && error.details.error) {
           errorMessage = error.details.error;
+        } else if (error.context && typeof error.context === 'string') {
+          // Parse stringified JSON context
+          try {
+            const parsed = JSON.parse(error.context);
+            if (parsed.error) errorMessage = parsed.error;
+          } catch {
+            errorMessage = error.context;
+          }
         } else if (error.message && !error.message.includes('Edge Function returned a non-2xx status code')) {
           errorMessage = error.message;
         }
@@ -202,11 +222,31 @@ export const useCadetManagement = () => {
             // Extract specific error message from edge function response
             let errorMessage = 'Unknown error';
             
+            // Debug: Log the full error structure
+            console.log('Bulk import error object:', error);
+            console.log('Bulk import response data:', data);
+            
             // Check for error in response data first (edge function return body)
             if (data && data.error) {
               errorMessage = data.error;
+            } else if (error.details && typeof error.details === 'string') {
+              // Parse stringified JSON details
+              try {
+                const parsed = JSON.parse(error.details);
+                if (parsed.error) errorMessage = parsed.error;
+              } catch {
+                errorMessage = error.details;
+              }
             } else if (error.details && error.details.error) {
               errorMessage = error.details.error;
+            } else if (error.context && typeof error.context === 'string') {
+              // Parse stringified JSON context
+              try {
+                const parsed = JSON.parse(error.context);
+                if (parsed.error) errorMessage = parsed.error;
+              } catch {
+                errorMessage = error.context;
+              }
             } else if (error.message && !error.message.includes('Edge Function returned a non-2xx status code')) {
               errorMessage = error.message;
             }
