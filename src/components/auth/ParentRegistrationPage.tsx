@@ -226,7 +226,7 @@ const ParentRegistrationPage = () => {
               </CardTitle>
             </div>
             <p className="text-sm text-gray-600">
-              {step === 1 ? 'Enter your cadet\'s email address to get started' : `Creating account for student: ${cadetInfo?.email}`}
+              {step === 1 ? 'Enter your cadet\'s email address to get started' : `Your password will be sent to the email address below after creating an account.`}
             </p>
           </CardHeader>
           <CardContent>
