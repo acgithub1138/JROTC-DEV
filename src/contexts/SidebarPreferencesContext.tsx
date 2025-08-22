@@ -69,9 +69,9 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     try {
       const { data: moduleResult, error } = await supabase
         .from('permission_modules')
-        .select('id, name, label, path, icon')
+        .select('id, name, label, path, icon, sort_order')
         .eq('is_active', true)
-        .order('id', { ascending: true });
+        .order('sort_order', { ascending: true });
 
       if (!error && moduleResult) {
         modules = moduleResult;

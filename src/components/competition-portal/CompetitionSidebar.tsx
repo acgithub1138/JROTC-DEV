@@ -51,6 +51,7 @@ const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: str
     // Filter for competition portal modules only and check permissions
     const competitionModules = (modules || [])
       .filter((module: any) => module.is_competition_portal && hasPermission(module.name, 'sidebar'))
+      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
       .map((module: any) => ({
         id: module.name,
         label: module.label,
