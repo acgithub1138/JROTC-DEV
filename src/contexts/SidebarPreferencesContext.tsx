@@ -32,99 +32,120 @@ export const useSidebarPreferencesContext = () => {
   return context;
 };
 
-// Import the existing functions from the hook file
-const getMenuItemsFromPermissions = (role: string, userProfile: any, hasPermission: (module: string, action: string) => boolean): MenuItem[] => {
-  console.log('getMenuItemsFromPermissions called with role:', role, 'userProfile:', userProfile);
-  
-  const allMenuItems: MenuItem[] = [
-    { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-    { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-    { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
-    { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
-    { id: 'teams', label: 'Teams', icon: 'Shield', path: '/app/teams', isVisible: true, order: 5 },
-    { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
-    { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
-    { id: 'contacts', label: 'Contacts', icon: 'Users2', path: '/app/contacts', isVisible: true, order: 8 },
-    { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
-    { id: 'incident_management', label: 'Incident Management', icon: 'AlertTriangle', path: '/app/incident-management', isVisible: true, order: 10 }
-  ];
+// Database-driven menu items function
+const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (module: string, action: string) => boolean): Promise<MenuItem[]> => {
+  try {
+    // Always include dashboard as the first item
+    const dashboardItem: MenuItem = {
+      id: 'dashboard',
+      label: 'Dashboard',
+      icon: 'LayoutDashboard',
+      path: '/app/dashboard',
+      isVisible: true,
+      order: 1
+    };
 
-  // Special handling for admin role only
-  if (role === 'admin') {
-    return allMenuItems.filter(item => item.isVisible);
-  }
-
-  // For all other roles, check permissions
-  const permissionMap: { [key: string]: string } = {
-    'tasks': 'tasks',
-    'cadets': 'cadets', 
-    'job-board': 'job_board',
-    'teams': 'teams',
-    'inventory': 'inventory',
-    'budget': 'budget',
-    'contacts': 'contacts',
-    'calendar': 'calendar',
-    'incident_management': 'incident_management'
-  };
-
-  return allMenuItems.filter(item => {
-    if (item.id === 'dashboard') return true; // Dashboard always visible
+    // Try to query permission_modules table - if it doesn't exist, fall back to hardcoded modules
+    let modules: any[] = [];
     
-    const moduleKey = permissionMap[item.id];
-    if (!moduleKey) return false;
-    
-    const hasAccess = hasPermission(moduleKey, 'sidebar');
-    console.log(`Permission check: ${item.label} (${moduleKey}) -> sidebar = ${hasAccess}`);
-    return hasAccess;
-  });
-};
+    try {
+      const { data, error } = await supabase.rpc('get_table_columns', { table_name: 'permission_modules' });
+      
+      if (!error && data && data.length > 0) {
+        // Table exists, query it
+        const moduleResult = await supabase
+          .from('permission_modules' as any)
+          .select('id, name, label')
+          .eq('is_active', true)
+          .order('id', { ascending: true });
 
-const getDefaultMenuItemsForRole = (role: string, userProfile: any): MenuItem[] => {
-  switch (role) {
-    case 'admin':
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 2 },
-        { id: 'teams', label: 'Teams', icon: 'Shield', path: '/app/teams', isVisible: true, order: 3 },
-        { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 4 },
-        { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 5 },
-        { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
-        { id: 'contacts', label: 'Contacts', icon: 'Users2', path: '/app/contacts', isVisible: true, order: 7 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 8 }
+        if (!moduleResult.error && moduleResult.data) {
+          modules = moduleResult.data;
+        }
+      }
+    } catch (tableError) {
+      console.log('permission_modules table not available yet, using fallback');
+    }
+
+    // Fallback to hardcoded modules if table doesn't exist or is empty
+    if (modules.length === 0) {
+      modules = [
+        { name: 'tasks', label: 'Tasks' },
+        { name: 'cadets', label: 'Cadets' },
+        { name: 'job_board', label: 'Job Board' },
+        { name: 'teams', label: 'Teams' },
+        { name: 'inventory', label: 'Inventory' },
+        { name: 'budget', label: 'Budget' },
+        { name: 'contacts', label: 'Contacts' },
+        { name: 'calendar', label: 'Calendar' },
+        { name: 'incident_management', label: 'Incident Management' }
       ];
-    case 'instructor':
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 2 },
-        { id: 'teams', label: 'Teams', icon: 'Shield', path: '/app/teams', isVisible: true, order: 3 },
-        { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 4 },
-        { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 5 },
-        { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
-        { id: 'contacts', label: 'Contacts', icon: 'Users2', path: '/app/contacts', isVisible: true, order: 7 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 8 }
-      ];
-    case 'command_staff':
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 2 },
-        { id: 'teams', label: 'Teams', icon: 'Shield', path: '/app/teams', isVisible: true, order: 3 },
-        { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 4 },
-        { id: 'contacts', label: 'Contacts', icon: 'Users2', path: '/app/contacts', isVisible: true, order: 5 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 6 }
-      ];
-    case 'cadet':
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
-      ];
-    case 'parent':
-    default:
-      return [
-        { id: 'dashboard', label: 'Dashboard', icon: 'LayoutDashboard', path: '/app/dashboard', isVisible: true, order: 1 },
-        { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-        { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 3 }
-      ];
+    }
+
+    // Icon mapping
+    const iconMap: { [key: string]: string } = {
+      'dashboard': 'LayoutDashboard',
+      'tasks': 'CheckSquare',
+      'cadets': 'Users',
+      'job_board': 'Briefcase',
+      'teams': 'Shield',
+      'inventory': 'Package',
+      'budget': 'DollarSign',
+      'contacts': 'Users2',
+      'calendar': 'Calendar',
+      'incident_management': 'AlertTriangle'
+    };
+
+    // Path mapping
+    const pathMap: { [key: string]: string } = {
+      'dashboard': '/app/dashboard',
+      'tasks': '/app/tasks',
+      'cadets': '/app/cadets',
+      'job_board': '/app/job-board',
+      'teams': '/app/teams',
+      'inventory': '/app/inventory',
+      'budget': '/app/budget',
+      'contacts': '/app/contacts',
+      'calendar': '/app/calendar',
+      'incident_management': '/app/incident-management'
+    };
+
+    // Filter modules based on sidebar permissions
+    const menuItems: MenuItem[] = [dashboardItem];
+    let order = 2;
+    
+    for (const module of modules) {
+      // Skip dashboard since we already added it
+      if (module.name === 'dashboard') continue;
+      
+      // Check if user has sidebar permission for this module
+      const hasSidebarPermission = hasPermission(module.name, 'sidebar');
+      
+      if (hasSidebarPermission) {
+        menuItems.push({
+          id: module.name,
+          label: module.label || module.name,
+          icon: iconMap[module.name] || 'Circle',
+          path: pathMap[module.name] || `/app/${module.name}`,
+          isVisible: true,
+          order: order++
+        });
+      }
+    }
+
+    console.log('Database-driven menu items:', menuItems);
+    return menuItems;
+  } catch (error) {
+    console.error('Exception in fetchMenuItemsFromDatabase:', error);
+    // Fallback to just dashboard
+    return [{
+      id: 'dashboard',
+      label: 'Dashboard', 
+      icon: 'LayoutDashboard',
+      path: '/app/dashboard',
+      isVisible: true,
+      order: 1
+    }];
   }
 };
 
@@ -155,11 +176,9 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
       return;
     }
 
-    // For admin users, don't wait for permissions since they bypass permission checks
-    // For other users, wait for permissions to load
-    const isAdmin = debouncedUserProfile.role === 'admin';
-    if (!isAdmin && debouncedPermissionsLoading) {
-      console.log('SidebarPreferencesContext: Skipping load - waiting for permissions (non-admin user):', {
+    // Wait for permissions to load for all users
+    if (debouncedPermissionsLoading) {
+      console.log('SidebarPreferencesContext: Skipping load - waiting for permissions:', {
         role: debouncedUserProfile.role,
         permissionsLoading: debouncedPermissionsLoading
       });
@@ -197,10 +216,8 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
     setIsLoading(true);
 
     try {
-      // Use database permissions if loaded, otherwise fallback to hardcoded
-      const defaultItems = permissionsLoaded 
-        ? getMenuItemsFromPermissions(userRole, debouncedUserProfile, hasPermission)
-        : getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
+      // Use database-driven permissions
+      const defaultItems = await fetchMenuItemsFromDatabase(debouncedUserProfile, hasPermission);
       
       console.log('SidebarPreferencesContext: Generated default items:', {
         role: userRole,
@@ -254,8 +271,15 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
       lastProfileRef.current = profileKey;
     } catch (error) {
       console.error('SidebarPreferencesContext: Error in loadPreferences:', error);
-      // Fall back to default permissions-based menu
-      const fallbackItems = getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
+      // Fall back to minimal dashboard item
+      const fallbackItems = [{
+        id: 'dashboard',
+        label: 'Dashboard',
+        icon: 'LayoutDashboard',
+        path: '/app/dashboard',
+        isVisible: true,
+        order: 1
+      }];
       console.log('SidebarPreferencesContext: Using fallback items:', fallbackItems);
       setMenuItems(fallbackItems);
       cacheRef.current[cacheKey] = fallbackItems;
@@ -328,9 +352,8 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
         .delete()
         .eq('user_id', userId);
 
-      const defaultItems = permissionsLoaded 
-        ? getMenuItemsFromPermissions(userRole, debouncedUserProfile, hasPermission)
-        : getDefaultMenuItemsForRole(userRole, debouncedUserProfile);
+      // Use database-driven function to get default items
+      const defaultItems = await fetchMenuItemsFromDatabase(debouncedUserProfile, hasPermission);
       setMenuItems(defaultItems);
       
       // Update cache
@@ -342,7 +365,7 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
       console.error('Error resetting sidebar preferences:', error);
       return false;
     }
-  }, [userId, permissionsLoaded, userRole, hasPermission, debouncedUserProfile]);
+  }, [userId, hasPermission, debouncedUserProfile]);
 
   const refreshPreferences = useCallback(async () => {
     // Clear cache and reload
@@ -352,11 +375,10 @@ export const SidebarPreferencesProvider: React.FC<{ children: React.ReactNode }>
   }, [loadPreferences]);
 
   const getDefaultMenuItems = useMemo(() => {
-    if (!debouncedUserProfile) return [];
-    return permissionsLoaded 
-      ? getMenuItemsFromPermissions(debouncedUserProfile.role, debouncedUserProfile, hasPermission)
-      : getDefaultMenuItemsForRole(debouncedUserProfile.role, debouncedUserProfile);
-  }, [debouncedUserProfile?.role, debouncedUserProfile?.id, hasPermission, permissionsLoaded]);
+    // Since we moved to database-driven approach, return current menu items
+    // This maintains compatibility with existing code
+    return menuItems;
+  }, [menuItems]);
 
   const value: SidebarPreferencesContextType = {
     menuItems,
