@@ -69,13 +69,14 @@ export const CompetitionScheduleTab = ({
         error
       } = await supabase.from('cp_comp_schools').select(`
           school_id,
-          school_name
+          school_name,
+          school_initials
         `).eq('competition_id', competitionId);
       if (error) throw error;
       return data.map(school => ({
         id: school.school_id,
         name: school.school_name,
-        initials: school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || ''
+        initials: school.school_initials || school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || ''
       }));
     }
   });

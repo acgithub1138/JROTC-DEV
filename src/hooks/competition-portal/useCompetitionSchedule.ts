@@ -108,23 +108,23 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schedulesError) throw schedulesError;
 
-      // Fetch school data including names and generate initials
+      // Fetch school data including names and initials
       const { data: schoolsData, error: schoolsError } = await supabase
         .from('cp_comp_schools')
-        .select('school_id, school_name, color')
+        .select('school_id, school_name, school_initials, color')
         .eq('competition_id', debouncedCompetitionId)
         .abortSignal(abortController.signal);
 
       if (schoolsError) throw schoolsError;
 
-      // Create school map with generated initials
+      // Create school map using actual initials or fallback to generated ones
       const schoolMap = new Map(
         schoolsData?.map(school => [
           school.school_id,
           {
             id: school.school_id,
             name: school.school_name || 'Unknown School',
-            initials: school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || '',
+            initials: school.school_initials || school.school_name?.split(' ').map(word => word[0]).join('').toUpperCase() || '',
             color: school.color || '#3B82F6'
           }
         ]) || []
@@ -322,6 +322,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         .select(`
           school_id,
           school_name,
+          school_initials,
           schools(name)
         `)
         .eq('competition_id', debouncedCompetitionId)
@@ -339,6 +340,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           finalSchoolNames = directSchoolNames.map(school => ({
             school_id: school.id,
             school_name: school.name,
+            school_initials: null, // No initials available from direct schools table
             schools: { name: school.name }
           }));
         }
@@ -355,7 +357,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         return {
           id: school.school_id,
           name: schoolName,
-          initials: schoolName.split(' ').map(word => word[0]).join('').toUpperCase()
+          initials: schoolInfo?.school_initials || schoolName.split(' ').map(word => word[0]).join('').toUpperCase()
         };
       }) || [];
 
