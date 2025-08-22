@@ -133,12 +133,12 @@ export const EditCadetDialog = ({
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          grade: data.grade || null,
-          flight: data.flight || null,
-          cadet_year: (data.cadet_year || null) as any,
-          role_id: data.role_id || null,
+          grade: data.grade === 'none' ? null : data.grade || null,
+          flight: data.flight === 'none' ? null : data.flight || null,
+          cadet_year: (data.cadet_year === 'none' ? null : data.cadet_year || null) as any,
+          role_id: data.role_id === 'none' ? null : data.role_id || null,
           role: roleName as any, // Update role field with role_name
-          rank: data.rank || null,
+          rank: data.rank === 'none' ? null : data.rank || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProfile.id);
@@ -261,7 +261,7 @@ export const EditCadetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No grade selected</SelectItem>
+                          <SelectItem value="none">No grade selected</SelectItem>
                           {gradeOptions.map(grade => (
                             <SelectItem key={grade} value={grade}>
                               {grade}
@@ -286,7 +286,7 @@ export const EditCadetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No flight selected</SelectItem>
+                          <SelectItem value="none">No flight selected</SelectItem>
                           {flightOptions.map(flight => (
                             <SelectItem key={flight} value={flight}>
                               {flight}
@@ -311,7 +311,7 @@ export const EditCadetDialog = ({
                           </SelectTrigger>
                         </FormControl>
                         <SelectContent>
-                          <SelectItem value="">No year selected</SelectItem>
+                          <SelectItem value="none">No year selected</SelectItem>
                           {cadetYearOptions.map(year => (
                             <SelectItem key={year} value={year}>
                               {year}
@@ -338,7 +338,7 @@ export const EditCadetDialog = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No role selected</SelectItem>
+                        <SelectItem value="none">No role selected</SelectItem>
                         {roleOptions.map(roleOption => (
                           <SelectItem key={roleOption.value} value={roleOption.value}>
                             {roleOption.label}
@@ -364,11 +364,11 @@ export const EditCadetDialog = ({
                         </SelectTrigger>
                       </FormControl>
                       <SelectContent>
-                        <SelectItem value="">No rank</SelectItem>
+                        <SelectItem value="none">No rank</SelectItem>
                         {ranks.map(rank => (
                           <SelectItem 
                             key={rank.id} 
-                            value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || ''}
+                            value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
                           >
                             {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                           </SelectItem>
