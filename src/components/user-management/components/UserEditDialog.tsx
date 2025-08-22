@@ -7,7 +7,6 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/u
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Key } from 'lucide-react';
-import { Checkbox } from '@/components/ui/checkbox';
 import { User, UserRole, School } from '../types';
 import { ProfileHistoryTab } from '@/components/cadet-management/components/ProfileHistoryTab';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
@@ -182,25 +181,6 @@ export const UserEditDialog = ({
                             </SelectContent>
                           </Select>
                         </div>}
-
-                      <div className="space-y-2">
-                        <div className="flex items-center space-x-2">
-                          <Checkbox 
-                            id="password-change-required"
-                            checked={editingUser.password_change_required || false}
-                            onCheckedChange={(checked) => setEditingUser({
-                              ...editingUser,
-                              password_change_required: Boolean(checked)
-                            })}
-                          />
-                          <Label htmlFor="password-change-required" className="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70">
-                            Require password change on next login
-                          </Label>
-                        </div>
-                        <p className="text-xs text-muted-foreground ml-6">
-                          User will be prompted to change their password when they next sign in
-                        </p>
-                      </div>
 
                       {/* Password Reset Section - Only for Admins */}
                       {canResetPassword(editingUser) && <>

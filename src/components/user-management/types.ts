@@ -12,7 +12,6 @@ export interface User {
   created_at: string;
   school_id: string;
   active: boolean;
-  password_change_required?: boolean;
   schools?: { name: string };
   user_roles?: { role_name: string };
 }

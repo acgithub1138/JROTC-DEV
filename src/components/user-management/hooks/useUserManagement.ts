@@ -24,7 +24,6 @@ export const useUserManagement = () => {
           created_at,
           school_id,
           active,
-          password_change_required,
           schools (name),
           user_roles (role_name)
         `)
@@ -162,7 +161,6 @@ export const useUserManagement = () => {
         last_name: updates.last_name,
         email: updates.email,
         school_id: updates.school_id,
-        password_change_required: updates.password_change_required,
       };
 
       // If role is being updated, look up the corresponding role_id
