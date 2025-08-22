@@ -123,8 +123,8 @@ export const UserTable = ({
             </TableCell>
             
             <TableCell className="py-2">
-              <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
-                {getRoleIcon(user.role)}
+              <Badge variant="secondary" className={`${getRoleColor(user.user_roles?.role_name || user.role)} flex items-center gap-1 w-fit`}>
+                {getRoleIcon(user.user_roles?.role_name || user.role)}
                 {user.user_roles?.role_name || user.role.replace('_', ' ').toUpperCase()}
               </Badge>
             </TableCell>
