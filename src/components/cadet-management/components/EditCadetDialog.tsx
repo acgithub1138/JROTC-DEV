@@ -253,15 +253,15 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="grade">Grade</Label>
                 <Select 
-                  value={formData.grade || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, grade: value })}
+                  value={formData.grade || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, grade: value === 'none' ? '' : value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select grade" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No grade selected</SelectItem>
+                    <SelectItem value="none">No grade selected</SelectItem>
                     {gradeOptions.map(grade => (
                       <SelectItem key={grade} value={grade}>
                         {grade}
@@ -273,15 +273,15 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="flight">Flight</Label>
                 <Select 
-                  value={formData.flight || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, flight: value })}
+                  value={formData.flight || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, flight: value === 'none' ? '' : value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No flight selected</SelectItem>
+                    <SelectItem value="none">No flight selected</SelectItem>
                     {flightOptions.map(flight => (
                       <SelectItem key={flight} value={flight}>
                         {flight}
@@ -293,15 +293,15 @@ export const EditCadetDialog = ({
               <div className="space-y-2">
                 <Label htmlFor="cadet_year">Cadet Year</Label>
                 <Select 
-                  value={formData.cadet_year || ''} 
-                  onValueChange={(value) => setFormData({ ...formData, cadet_year: value })}
+                  value={formData.cadet_year || 'none'} 
+                  onValueChange={(value) => setFormData({ ...formData, cadet_year: value === 'none' ? '' : value })}
                   disabled={!canUpdate}
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="">No year selected</SelectItem>
+                    <SelectItem value="none">No year selected</SelectItem>
                     {cadetYearOptions.map(year => (
                       <SelectItem key={year} value={year}>
                         {year}
@@ -315,15 +315,15 @@ export const EditCadetDialog = ({
             <div className="space-y-2">
               <Label htmlFor="role_id">Role</Label>
               <Select 
-                value={formData.role_id || ''} 
-                onValueChange={(value) => setFormData({ ...formData, role_id: value })}
+                value={formData.role_id || 'none'} 
+                onValueChange={(value) => setFormData({ ...formData, role_id: value === 'none' ? '' : value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select role" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No role selected</SelectItem>
+                  <SelectItem value="none">No role selected</SelectItem>
                   {roleOptions.map(roleOption => (
                     <SelectItem key={roleOption.value} value={roleOption.value}>
                       {roleOption.label}
@@ -336,19 +336,19 @@ export const EditCadetDialog = ({
             <div className="space-y-2">
               <Label htmlFor="rank">Rank</Label>
               <Select 
-                value={formData.rank || ''} 
-                onValueChange={(value) => setFormData({ ...formData, rank: value === '' ? '' : value })}
+                value={formData.rank || 'none'} 
+                onValueChange={(value) => setFormData({ ...formData, rank: value === 'none' ? '' : value })}
                 disabled={!canUpdate}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select rank" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No rank</SelectItem>
+                  <SelectItem value="none">No rank</SelectItem>
                   {ranks.map(rank => (
                     <SelectItem 
                       key={rank.id} 
-                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || ''}
+                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
                     >
                       {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
                     </SelectItem>
