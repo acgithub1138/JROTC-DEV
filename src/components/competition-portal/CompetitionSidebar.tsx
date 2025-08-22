@@ -162,7 +162,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   };
   
   const handleMenuItemClick = (item: any) => {
-    onModuleChange(item.id);
+    navigate(item.path);
     if (isMobile && setSidebarOpen) {
       setSidebarOpen(false);
     }

@@ -16,57 +16,76 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
-  const [activeModule, setActiveModule] = useState('competition-dashboard');
+  const [activeModule, setActiveModule] = useState('cp_dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
 
-  // Map routes to modules
+  // Map routes to modules - keeping for backward compatibility with header
   const routeToModuleMap: { [key: string]: string } = {
-    '/app/competition-portal': 'competition-dashboard',
-    '/app/competition-portal/': 'competition-dashboard',
-    '/app/competition-portal/dashboard': 'competition-dashboard',
-    '/app/competition-portal/competitions': 'competitions',
-    '/app/competition-portal/my-competitions': 'my-competitions',
-    
-    '/app/competition-portal/score-sheets': 'score-sheets',
-    '/app/competition-portal/judges': 'judges',
+    '/app/competition-portal': 'cp_dashboard',
+    '/app/competition-portal/': 'cp_dashboard',
+    '/app/competition-portal/dashboard': 'cp_dashboard',
+    '/app/competition-portal/competitions': 'hosting_competitions',
+    '/app/competition-portal/my-competitions': 'my_competitions',
+    '/app/competition-portal/score-sheets': 'cp_score_sheets',
+    '/app/competition-portal/judges': 'cp_judges',
     '/app/competition-portal/analytics': 'analytics',
-    '/app/competition-portal/settings': 'competition-settings',
-    '/app/competition-portal/open-competitions': 'open-competitions',
+    '/app/competition-portal/settings': 'competition_settings',
+    '/app/competition-portal/open-competitions': 'open_competitions',
   };
 
-  // Map modules to routes
+  // Map modules to routes - keeping for backward compatibility with header
   const moduleToRouteMap: { [key: string]: string } = {
-    'competition-dashboard': '/app/competition-portal/dashboard',
-    'competitions': '/app/competition-portal/competitions',
-    'my-competitions': '/app/competition-portal/my-competitions',
-    
-    'score-sheets': '/app/competition-portal/score-sheets',
-    'judges': '/app/competition-portal/judges',
+    'cp_dashboard': '/app/competition-portal/dashboard',
+    'hosting_competitions': '/app/competition-portal/competitions',
+    'my_competitions': '/app/competition-portal/my-competitions',
+    'cp_score_sheets': '/app/competition-portal/score-sheets',
+    'cp_judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
-    'competition-settings': '/app/competition-portal/settings',
-    'open-competitions': '/app/competition-portal/open-competitions',
+    'competition_settings': '/app/competition-portal/settings',
+    'open_competitions': '/app/competition-portal/open-competitions',
   };
 
   useEffect(() => {
     const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
     const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-    const currentModule = routeToModuleMap[location.pathname] || 'competition-dashboard';
     
-    // Define which modules are accessible based on permissions
-    const portalOnlyModules = ['competition-dashboard', 'competitions', 'score-sheets', 'judges', 'analytics', 'competition-settings'];
-    const moduleAccessibleModules = ['open-competitions', 'my-competitions'];
+    // Extract module name from current path for active module detection
+    const pathSegments = location.pathname.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
     
-    // If user doesn't have competition portal access but tries to access portal-only modules
-    if (!hasCompetitionPortal && portalOnlyModules.includes(currentModule)) {
+    // Set active module based on current route
+    let currentModule = 'cp_dashboard'; // Default to dashboard
+    if (location.pathname.includes('/dashboard')) {
+      currentModule = 'cp_dashboard';
+    } else if (location.pathname.includes('/competitions') && !location.pathname.includes('/my-competitions')) {
+      currentModule = 'hosting_competitions';
+    } else if (location.pathname.includes('/my-competitions')) {
+      currentModule = 'my_competitions';
+    } else if (location.pathname.includes('/score-sheets')) {
+      currentModule = 'cp_score_sheets';
+    } else if (location.pathname.includes('/judges')) {
+      currentModule = 'cp_judges';
+    } else if (location.pathname.includes('/open-competitions')) {
+      currentModule = 'open_competitions';
+    }
+    
+    // Portal access checks remain the same
+    const portalOnlyPaths = ['/dashboard', '/competitions', '/score-sheets', '/judges', '/analytics', '/settings'];
+    const moduleAccessiblePaths = ['/open-competitions', '/my-competitions'];
+    
+    const currentPath = location.pathname.replace('/app/competition-portal', '');
+    
+    // If user doesn't have competition portal access but tries to access portal-only paths
+    if (!hasCompetitionPortal && portalOnlyPaths.some(path => currentPath.includes(path))) {
       navigate('/app/competition-portal/open-competitions');
       return;
     }
     
-    // If user doesn't have any competition access (neither portal nor module)
-    if (!hasCompetitionPortal && !hasCompetitionModule && !moduleAccessibleModules.includes(currentModule)) {
+    // If user doesn't have any competition access
+    if (!hasCompetitionPortal && !hasCompetitionModule && !moduleAccessiblePaths.some(path => currentPath.includes(path))) {
       navigate('/app/competition-portal/open-competitions');
       return;
     }
