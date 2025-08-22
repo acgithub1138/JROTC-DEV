@@ -8,7 +8,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Edit, Printer } from 'lucide-react';
 import { useCompetitionSchedule, ScheduleEvent } from '@/hooks/competition-portal/useCompetitionSchedule';
 import { useCompetitionSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { getSchoolDateKey } from '@/utils/timezoneUtils';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
@@ -33,9 +32,10 @@ export const CompetitionScheduleTab = ({
     refetch
   } = useCompetitionSchedule(competitionId);
   const {
-    canManageSchedule
+    canView,
+    canManageSchedule,
+    canUpdate
   } = useCompetitionSchedulePermissions();
-  const { canEdit: canEditSchools } = useTablePermissions('cp_comp_schools');
   const {
     timezone
   } = useSchoolTimezone();
@@ -142,6 +142,12 @@ export const CompetitionScheduleTab = ({
   const handlePrint = () => {
     window.print();
   };
+  if (!canView) {
+    return <div className="text-center p-8">
+        <p className="text-muted-foreground">You don't have permission to view the schedule.</p>
+      </div>;
+  }
+
   if (isLoading) {
     return <div className="flex items-center justify-center p-8">
         <div className="text-center">
@@ -307,7 +313,7 @@ export const CompetitionScheduleTab = ({
                           <div className="font-medium text-sm truncate" title={event.event_name}>
                             {event.event_name}
                           </div>
-                          {!readOnly && canEditSchools && <Tooltip>
+                          {!readOnly && canUpdate && <Tooltip>
                               <TooltipTrigger asChild>
                                 <Button variant="outline" size="icon" onClick={() => handleEditEvent(event)} className="h-6 w-6">
                                   <Edit className="h-3 w-3" />
