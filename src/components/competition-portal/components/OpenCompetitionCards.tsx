@@ -83,7 +83,10 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
                 <CardTitle className="text-lg line-clamp-2">
                   {canViewDetails ? (
                     <button
-                      onClick={() => onViewDetails(competition.id)}
+                      onClick={() => {
+                        // Navigate to score sheet page for this competition
+                        window.location.href = `/app/competitions/score-sheets/${competition.id}`;
+                      }}
                       className="text-left hover:text-primary hover:underline transition-colors cursor-pointer w-full"
                     >
                       {competition.name}
