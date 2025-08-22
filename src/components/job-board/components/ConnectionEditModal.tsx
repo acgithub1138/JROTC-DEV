@@ -172,7 +172,8 @@ export const ConnectionEditModal = ({
                 </>
               ) : (
                 <>
-                  {/* Target Job Card (Supervisor) - Left */}
+                  {/* For reports_to: supervisor (targetJob) on left, subordinate (sourceJob) on right */}
+                  {/* Supervisor (targetJob) - Left */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
                       <div className="text-xs font-medium truncate">{targetJob.role}</div>
@@ -191,7 +192,7 @@ export const ConnectionEditModal = ({
                     </span>
                   </div>
 
-                  {/* Source Job Card (Subordinate) - Right */}
+                  {/* Subordinate (sourceJob) - Right */}
                   <div className="relative">
                     <div className="w-24 h-16 bg-card border rounded-lg p-2 shadow-sm">
                       <div className="text-xs font-medium truncate">{sourceJob.role}</div>
