@@ -266,3 +266,23 @@ export const useOpenCompsSchedulePermissions = () => {
     canView: modulePermissions.canRead,
   };
 };
+
+// My Competitions specific permissions
+export const useMyCompetitionsPermissions = () => {
+  const modulePermissions = useModulePermissions('my_competitions');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
+// My Competitions Reports specific permissions
+export const useMyCompetitionsReportsPermissions = () => {
+  const modulePermissions = useModulePermissions('my_competitions_reports');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};

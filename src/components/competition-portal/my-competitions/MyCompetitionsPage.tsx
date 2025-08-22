@@ -3,7 +3,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useModuleTabs } from '@/hooks/useModuleTabs';
 import { CompetitionsTab } from './tabs/CompetitionsTab';
 import { ReportsTab } from './tabs/ReportsTab';
-import { useCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionPermissions, useMyCompetitionsPermissions, useMyCompetitionsReportsPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const MyCompetitionsPage = () => {
   // Use hardcoded parent module ID for now  
@@ -13,13 +13,23 @@ const MyCompetitionsPage = () => {
     canCreate,
     canUpdate
   } = useCompetitionPermissions();
+  
+  const { canAccess: canAccessMyCompetitions } = useMyCompetitionsPermissions();
+  const { canAccess: canAccessReports } = useMyCompetitionsReportsPermissions();
+
+  // Filter tabs based on permissions
+  const filteredTabs = tabs.filter(tab => {
+    if (tab.name === 'competitions') return canAccessMyCompetitions;
+    if (tab.name === 'reports') return canAccessReports;
+    return false; // Default to false for unknown tabs
+  });
 
   // Set default active tab when tabs are loaded
   useEffect(() => {
-    if (tabs.length > 0 && !activeTab) {
-      setActiveTab(tabs[0].name);
+    if (filteredTabs.length > 0 && !activeTab) {
+      setActiveTab(filteredTabs[0].name);
     }
-  }, [tabs, activeTab]);
+  }, [filteredTabs, activeTab]);
 
   return (
     <div className="p-6 space-y-6">
@@ -33,27 +43,27 @@ const MyCompetitionsPage = () => {
           <div className="h-10 bg-muted rounded animate-pulse" />
           <div className="h-64 bg-muted rounded animate-pulse" />
         </div>
-      ) : tabs.length > 0 ? (
+      ) : filteredTabs.length > 0 ? (
         <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-          <TabsList className={`grid w-full grid-cols-${Math.min(tabs.length, 6)}`}>
-            {tabs.map((tab) => (
+          <TabsList className={`grid w-full grid-cols-${Math.min(filteredTabs.length, 6)}`}>
+            {filteredTabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.name}>
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
           
-          {tabs.map((tab) => (
+          {filteredTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.name} className="space-y-6">
               {/* Render tab content based on tab name */}
-              {tab.name === 'competitions' && <CompetitionsTab readOnly={!canCreate} />}
-              {tab.name === 'reports' && <ReportsTab />}
+              {tab.name === 'competitions' && canAccessMyCompetitions && <CompetitionsTab readOnly={!canCreate} />}
+              {tab.name === 'reports' && canAccessReports && <ReportsTab />}
             </TabsContent>
           ))}
         </Tabs>
       ) : (
         <div className="text-center py-8">
-          <p className="text-muted-foreground">No tabs available for My Competitions.</p>
+          <p className="text-muted-foreground">No tabs available or you don't have permission to access My Competitions content.</p>
         </div>
       )}
     </div>
