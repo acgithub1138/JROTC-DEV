@@ -51,19 +51,8 @@ const getMenuItemsFromPermissions = (
   if (role === 'admin') {
     console.log('Admin detected, granting full access including admin-specific items');
     return [
-      ...baseItems,
-      { id: 'tasks', label: 'Tasks', icon: 'CheckSquare', path: '/app/tasks', isVisible: true, order: 2 },
-      { id: 'cadets', label: 'Cadets', icon: 'Users', path: '/app/cadets', isVisible: true, order: 3 },
-      { id: 'job-board', label: 'Job Board', icon: 'Briefcase', path: '/app/job-board', isVisible: true, order: 4 },
-      { id: 'teams', label: 'Teams', icon: 'Users', path: '/app/teams', isVisible: true, order: 5 },
-      { id: 'inventory', label: 'Inventory', icon: 'Package', path: '/app/inventory', isVisible: true, order: 6 },
-      { id: 'budget', label: 'Budget', icon: 'DollarSign', path: '/app/budget', isVisible: true, order: 7 },
-      { id: 'contacts', label: 'Contacts', icon: 'Users', path: '/app/contacts', isVisible: true, order: 8 },
-      { id: 'calendar', label: 'Calendar', icon: 'Calendar', path: '/app/calendar', isVisible: true, order: 9 },
-      { id: 'competitions', label: 'Competitions', icon: 'Trophy', path: '/app/competitions', isVisible: true, order: 10 },
       { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
       { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
-      // Admin-specific items
       { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 13 },
       { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 14 },
       { id: 'role-management', label: 'Role Management', icon: 'Shield', path: '/app/roles', isVisible: true, order: 15 },
@@ -154,17 +143,17 @@ const getMenuItemsFromPermissions = (
   });
 
   // Special handling for parent role - dashboard is always visible, check other permissions
-  if (role === 'parent') {
-    const allowedItems: MenuItem[] = [baseItems[0]]; // Dashboard is always visible
+//  if (role === 'parent') {
+//    const allowedItems: MenuItem[] = [baseItems[0]]; // Dashboard is always visible
     
     // Add calendar if they have sidebar permission
-    const calendarItem = allPossibleItems.find(item => item.id === 'calendar');
-    if (calendarItem && hasPermission('calendar', 'sidebar')) {
-      allowedItems.push(calendarItem);
-    }
+//    const calendarItem = allPossibleItems.find(item => item.id === 'calendar');
+//    if (calendarItem && hasPermission('calendar', 'sidebar')) {
+//      allowedItems.push(calendarItem);
+//    }
     
-    return allowedItems;
-  }
+//    return allowedItems;
+//  }
 
   const visibleItems = allPossibleItems.filter(item => item.isVisible);
   console.log('Final visible items for role', role, ':', visibleItems.map(i => i.id));
