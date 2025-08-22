@@ -22,6 +22,7 @@ export const ActionsManagement: React.FC = () => {
   // Form state for new action
   const [formData, setFormData] = useState({
     name: '',
+    label: '',
     description: '',
     is_active: true,
     sort_order: 0
@@ -122,6 +123,7 @@ export const ActionsManagement: React.FC = () => {
   const resetForm = () => {
     setFormData({
       name: '',
+      label: '',
       description: '',
       is_active: true,
       sort_order: 0
@@ -193,6 +195,17 @@ export const ActionsManagement: React.FC = () => {
                     placeholder="e.g., create, read, update, delete"
                   />
                 </div>
+
+                <div>
+                  <Label htmlFor="label">Display Label</Label>
+                  <Input
+                    id="label"
+                    value={formData.label}
+                    onChange={(e) => setFormData({ ...formData, label: e.target.value })}
+                    required
+                    placeholder="e.g., Create, Read, Update, Delete"
+                  />
+                </div>
                 
                 <div>
                   <Label htmlFor="description">Description (optional)</Label>
@@ -226,7 +239,7 @@ export const ActionsManagement: React.FC = () => {
                 <div className="flex gap-2">
                   <Button 
                     type="submit" 
-                    disabled={createMutation.isPending}
+                    disabled={createMutation.isPending || !formData.name.trim() || !formData.label.trim()}
                   >
                     Create
                   </Button>
