@@ -24,17 +24,24 @@ export const usePermissionContext = () => {
 export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const { userProfile } = useAuth();
 
+  // Add environment check for debugging logs
+  const isDevelopment = process.env.NODE_ENV === 'development';
+
   // Fetch all permission data in a single query
   const { data: permissionData, isLoading } = useQuery({
     queryKey: ['all-permissions', userProfile?.role, (userProfile as any)?.role_id, userProfile?.id],
     queryFn: async () => {
       if (!userProfile?.role) {
-        console.log('Permission query: No user role available');
+        if (isDevelopment) {
+          console.log('Permission query: No user role available');
+        }
         return null;
       }
 
       const roleId = (userProfile as any)?.role_id;
-      console.log('Fetching permissions for role:', userProfile.role, 'role_id:', roleId);
+      if (isDevelopment) {
+        console.log('Fetching permissions for role:', userProfile.role, 'role_id:', roleId);
+      }
       
       let query = supabase
         .from('role_permissions')
@@ -48,17 +55,23 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       // Handle both migrated users (with role_id) and unmigrated users (with only role enum)
       if (roleId) {
         // User has been migrated to new role system - query by role_id directly
-        console.log('Using role_id for query:', roleId);
+        if (isDevelopment) {
+          console.log('Using role_id for query:', roleId);
+        }
         query = query.eq('role_id', roleId);
       } else {
         // User still using old role enum system - query by role name
-        console.log('Using role name for query:', userProfile.role);
+        if (isDevelopment) {
+          console.log('Using role name for query:', userProfile.role);
+        }
         query = query.eq('role_id.role_name', userProfile.role);
       }
       
       const { data, error } = await query;
       
-      console.log('Permission query result:', { data, error, userRole: userProfile.role, roleId });
+      if (isDevelopment) {
+        console.log('Permission query result:', { data, error, userRole: userProfile.role, roleId });
+      }
       
       if (error) {
         console.error('Permission query error:', error);
@@ -71,12 +84,16 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
         if (permission.module?.name && permission.action?.name) {
           const key = `${permission.module.name}:${permission.action.name}`;
           permissionMap[key] = permission.enabled;
-          console.log(`Permission loaded: ${key} = ${permission.enabled}`);
+          if (isDevelopment) {
+            console.log(`Permission loaded: ${key} = ${permission.enabled}`);
+          }
         }
       });
       
-      console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
-      console.log('Full permission map:', permissionMap);
+      if (isDevelopment) {
+        console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
+        console.log('Full permission map:', permissionMap);
+      }
       return permissionMap;
     },
     enabled: !!userProfile?.role,

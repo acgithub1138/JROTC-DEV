@@ -7,6 +7,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { AuthProvider } from "@/contexts/AuthContext";
 import { PermissionProvider } from "@/contexts/PermissionContext";
+import { SidebarPreferencesProvider } from "@/contexts/SidebarPreferencesContext";
 import { PortalProvider } from "@/contexts/PortalContext";
 import ProtectedRoute from "@/components/ProtectedRoute";
 import MainApplication from "@/components/MainApplication";
@@ -65,7 +66,8 @@ const App = () => (
     <TooltipProvider>
       <AuthProvider>
         <PermissionProvider>
-          <PortalProvider>
+          <SidebarPreferencesProvider>
+            <PortalProvider>
             <Toaster />
             <Sonner />
             <BrowserRouter>
@@ -283,6 +285,7 @@ const App = () => (
             </Routes>
           </BrowserRouter>
           </PortalProvider>
+          </SidebarPreferencesProvider>
         </PermissionProvider>
       </AuthProvider>
     </TooltipProvider>
