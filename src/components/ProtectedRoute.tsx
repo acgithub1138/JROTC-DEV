@@ -86,12 +86,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check if parent user needs to complete setup with debouncing
   useDeepCompareEffect(() => {
-    if (!parentSetupRequired || parentSetupCheckRef.current) {
-      if (!parentSetupRequired) {
-        setShowParentSetup(false);
-        parentSetupCheckRef.current = false;
-      }
+    if (!parentSetupRequired) {
+      setShowParentSetup(false);
+      parentSetupCheckRef.current = false;
       return;
+    }
+
+    // Reset the ref when dependencies change so we can recheck
+    if (parentSetupCheckRef.current) {
+      parentSetupCheckRef.current = false;
     }
 
     const timeoutId = setTimeout(async () => {
