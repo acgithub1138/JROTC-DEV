@@ -1,16 +1,15 @@
 
-import React, { useState } from 'react';
+import React from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { useAuth } from '@/contexts/AuthContext';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { useThemes } from '@/hooks/useThemes';
-import { SidebarCustomization } from './SidebarCustomization';
 import { usePortal } from '@/contexts/PortalContext';
 import { useNavigate } from 'react-router-dom';
 import * as LucideIcons from 'lucide-react';
-import { Shield, Menu, Home, Trophy } from 'lucide-react';
+import { Shield, Home, Trophy } from 'lucide-react';
 
 interface SidebarProps {
   className?: string;
@@ -47,11 +46,10 @@ const DynamicIcon: React.FC<{ iconName: string; className?: string }> = ({ iconN
 
 export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onModuleChange }) => {
   const { userProfile } = useAuth();
-  const { menuItems, isLoading, refreshPreferences } = useSidebarPreferences();
+  const { menuItems, isLoading } = useSidebarPreferences();
   const { themes } = useThemes();
   const { setPortal, canAccessCompetitionPortal } = usePortal();
   const navigate = useNavigate();
-  const [showCustomization, setShowCustomization] = useState(false);
 
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => 
@@ -65,11 +63,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
     link_text: (activeTheme as any)?.link_text || DEFAULT_THEME.link_text,
     link_selected_text: (activeTheme as any)?.link_selected_text || DEFAULT_THEME.link_selected_text,
     link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover,
-  };
-
-  const handlePreferencesUpdated = async () => {
-    // Refresh the preferences data from the database
-    await refreshPreferences();
   };
 
   if (isLoading) {
@@ -110,28 +103,17 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
         style={{ backgroundColor: currentTheme.primary_color }}
       >
         <div className="p-6">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
-              {activeTheme?.theme_image_url ? (
-                <img 
-                  src={activeTheme.theme_image_url} 
-                  alt="JROTC Program Logo" 
-                  className="w-8 h-8 object-contain"
-                />
-              ) : (
-                <Shield className="w-8 h-8 text-blue-400" />
-              )}
-              <h1 className="text-xl font-bold">JROTC CCC</h1>
-            </div>
-            <Button
-              variant="ghost"
-              size="icon"
-              className="text-gray-400 hover:text-white"
-              onClick={() => setShowCustomization(true)}
-              title="Customize sidebar"
-            >
-              <Menu className="w-4 h-4" />
-            </Button>
+          <div className="flex items-center space-x-2">
+            {activeTheme?.theme_image_url ? (
+              <img 
+                src={activeTheme.theme_image_url} 
+                alt="JROTC Program Logo" 
+                className="w-8 h-8 object-contain"
+              />
+            ) : (
+              <Shield className="w-8 h-8 text-blue-400" />
+            )}
+            <h1 className="text-xl font-bold">JROTC CCC</h1>
           </div>
         </div>
 
@@ -202,12 +184,6 @@ export const Sidebar: React.FC<SidebarProps> = ({ className, activeModule, onMod
           </div>
         </ScrollArea>
       </div>
-
-      <SidebarCustomization
-        open={showCustomization}
-        onOpenChange={setShowCustomization}
-        onPreferencesUpdated={handlePreferencesUpdated}
-      />
     </>
   );
 };
