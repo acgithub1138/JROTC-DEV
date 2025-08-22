@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Edit2, Save, X, Plus, Trash2, GripVertical, Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -18,6 +18,17 @@ const iconOptions = [
   'Shield', 'Award', 'Target', 'Clipboard', 'Search', 'User', 'Home',
   'Bell', 'Mail', 'Database', 'Key', 'Lock', 'Unlock'
 ];
+
+// Icon component mapping
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, 
+  Target, Clipboard, Search, User, Home, Bell, Mail, Database, Key, Lock, Unlock
+};
+
+// Helper function to get icon component
+const getIconComponent = (iconName: string) => {
+  return iconMap[iconName] || FileText;
+};
 
 export const ModulesManagement: React.FC = () => {
   const { toast } = useToast();
@@ -213,9 +224,17 @@ export const ModulesManagement: React.FC = () => {
                       <SelectValue />
                     </SelectTrigger>
                     <SelectContent>
-                      {iconOptions.map(icon => (
-                        <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                      ))}
+                      {iconOptions.map(iconName => {
+                        const IconComponent = getIconComponent(iconName);
+                        return (
+                          <SelectItem key={iconName} value={iconName}>
+                            <div className="flex items-center space-x-2">
+                              <IconComponent className="w-4 h-4" />
+                              <span>{iconName}</span>
+                            </div>
+                          </SelectItem>
+                        );
+                      })}
                     </SelectContent>
                   </Select>
                 </div>
@@ -326,13 +345,27 @@ export const ModulesManagement: React.FC = () => {
                         <SelectValue />
                       </SelectTrigger>
                       <SelectContent>
-                        {iconOptions.map(icon => (
-                          <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                        ))}
+                        {iconOptions.map(iconName => {
+                          const IconComponent = getIconComponent(iconName);
+                          return (
+                            <SelectItem key={iconName} value={iconName}>
+                              <div className="flex items-center space-x-2">
+                                <IconComponent className="w-4 h-4" />
+                                <span>{iconName}</span>
+                              </div>
+                            </SelectItem>
+                          );
+                        })}
                       </SelectContent>
                     </Select>
                   ) : (
-                    <Badge variant="outline">{(module as any).icon || 'FileText'}</Badge>
+                    <div className="flex items-center space-x-2">
+                      {(() => {
+                        const IconComponent = getIconComponent((module as any).icon || 'FileText');
+                        return <IconComponent className="w-4 h-4" />;
+                      })()}
+                      <Badge variant="outline">{(module as any).icon || 'FileText'}</Badge>
+                    </div>
                   )}
                 </TableCell>
                 <TableCell>
