@@ -32,6 +32,25 @@ export const useSidebarPreferencesContext = () => {
   return context;
 };
 
+// Helper mapping for module name compatibility
+const MODULE_MAPPING: { [key: string]: string } = {
+  'tasks': 'tasks',
+  'incident_management': 'incident_management',
+  'cadets': 'cadets',
+  'job-board': 'job_board',
+  'teams': 'teams', 
+  'inventory': 'inventory',
+  'budget': 'budget',
+  'contacts': 'contacts',
+  'calendar': 'calendar',
+  'competitions': 'competitions',
+  'email-management': 'email',
+  'user-admin': 'user_admin',
+  'school-management': 'school_management',
+  'role-management': 'role_management',
+  'settings': 'settings'
+};
+
 // Database-driven menu items function
 const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (module: string, action: string) => boolean): Promise<MenuItem[]> => {
   try {
@@ -45,29 +64,25 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       order: 1
     };
 
-    // Try to query permission_modules table - if it doesn't exist, fall back to hardcoded modules
+    // Try to query permission_modules table directly
     let modules: any[] = [];
     
     try {
-      const { data, error } = await supabase.rpc('get_table_columns', { table_name: 'permission_modules' });
-      
-      if (!error && data && data.length > 0) {
-        // Table exists, query it
-        const moduleResult = await supabase
-          .from('permission_modules' as any)
-          .select('id, name, label')
-          .eq('is_active', true)
-          .order('id', { ascending: true });
+      const { data: moduleResult, error } = await supabase
+        .from('permission_modules')
+        .select('id, name, label')
+        .eq('is_active', true)
+        .order('id', { ascending: true });
 
-        if (!moduleResult.error && moduleResult.data) {
-          modules = moduleResult.data;
-        }
+      if (!error && moduleResult) {
+        modules = moduleResult;
+        console.log('Loaded modules from database:', modules);
       }
     } catch (tableError) {
-      console.log('permission_modules table not available yet, using fallback');
+      console.log('permission_modules table not available, using fallback');
     }
 
-    // Fallback to hardcoded modules if table doesn't exist or is empty
+    // Comprehensive fallback modules if database query fails
     if (modules.length === 0) {
       modules = [
         { name: 'tasks', label: 'Tasks' },
@@ -78,25 +93,38 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         { name: 'budget', label: 'Budget' },
         { name: 'contacts', label: 'Contacts' },
         { name: 'calendar', label: 'Calendar' },
-        { name: 'incident_management', label: 'Incident Management' }
+        { name: 'competitions', label: 'Competitions' },
+        { name: 'incident_management', label: 'Get Help' },
+        { name: 'email', label: 'Email Management' },
+        { name: 'user_admin', label: 'User Management' },
+        { name: 'school_management', label: 'School Management' },
+        { name: 'role_management', label: 'Role Management' },
+        { name: 'settings', label: 'Settings' }
       ];
+      console.log('Using fallback modules:', modules);
     }
 
-    // Icon mapping
+    // Comprehensive icon mapping
     const iconMap: { [key: string]: string } = {
       'dashboard': 'LayoutDashboard',
       'tasks': 'CheckSquare',
       'cadets': 'Users',
       'job_board': 'Briefcase',
-      'teams': 'Shield',
+      'teams': 'Users',
       'inventory': 'Package',
       'budget': 'DollarSign',
       'contacts': 'Users2',
       'calendar': 'Calendar',
-      'incident_management': 'AlertTriangle'
+      'competitions': 'Trophy',
+      'incident_management': 'AlertTriangle',
+      'email': 'Mails',
+      'user_admin': 'UserCog',
+      'school_management': 'Building2',
+      'role_management': 'Shield',
+      'settings': 'Settings'
     };
 
-    // Path mapping
+    // Comprehensive path mapping
     const pathMap: { [key: string]: string } = {
       'dashboard': '/app/dashboard',
       'tasks': '/app/tasks',
@@ -107,33 +135,144 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       'budget': '/app/budget',
       'contacts': '/app/contacts',
       'calendar': '/app/calendar',
-      'incident_management': '/app/incident-management'
+      'competitions': '/app/competitions',
+      'incident_management': '/app/incidents',
+      'email': '/app/email',
+      'user_admin': '/app/users',
+      'school_management': '/app/school',
+      'role_management': '/app/roles',
+      'settings': '/app/settings'
     };
 
-    // Filter modules based on sidebar permissions
-    const menuItems: MenuItem[] = [dashboardItem];
-    let order = 2;
-    
-    for (const module of modules) {
-      // Skip dashboard since we already added it
-      if (module.name === 'dashboard') continue;
-      
-      // Check if user has sidebar permission for this module
-      const hasSidebarPermission = hasPermission(module.name, 'sidebar');
-      
-      if (hasSidebarPermission) {
-        menuItems.push({
-          id: module.name,
-          label: module.label || module.name,
-          icon: iconMap[module.name] || 'Circle',
-          path: pathMap[module.name] || `/app/${module.name}`,
-          isVisible: true,
-          order: order++
-        });
+    // Generate all possible menu items with permission checks
+    const allMenuItems: MenuItem[] = [
+      {
+        id: 'tasks',
+        label: 'Tasks',
+        icon: 'CheckSquare',
+        path: '/app/tasks',
+        isVisible: hasPermission('tasks', 'sidebar'),
+        order: 2
+      },
+      {
+        id: 'cadets',
+        label: 'Cadets',
+        icon: 'Users',
+        path: '/app/cadets',
+        isVisible: hasPermission('cadets', 'sidebar'),
+        order: 3
+      },
+      {
+        id: 'job-board',
+        label: 'Job Board',
+        icon: 'Briefcase',
+        path: '/app/job-board',
+        isVisible: hasPermission('job_board', 'sidebar'),
+        order: 4
+      },
+      {
+        id: 'teams',
+        label: 'Teams',
+        icon: 'Users',
+        path: '/app/teams',
+        isVisible: hasPermission('teams', 'sidebar'),
+        order: 5
+      },
+      {
+        id: 'inventory',
+        label: 'Inventory',
+        icon: 'Package',
+        path: '/app/inventory',
+        isVisible: hasPermission('inventory', 'sidebar'),
+        order: 6
+      },
+      {
+        id: 'budget',
+        label: 'Budget',
+        icon: 'DollarSign',
+        path: '/app/budget',
+        isVisible: hasPermission('budget', 'sidebar'),
+        order: 7
+      },
+      {
+        id: 'contacts',
+        label: 'Contacts',
+        icon: 'Users2',
+        path: '/app/contacts',
+        isVisible: hasPermission('contacts', 'sidebar'),
+        order: 8
+      },
+      {
+        id: 'calendar',
+        label: 'Calendar',
+        icon: 'Calendar',
+        path: '/app/calendar',
+        isVisible: hasPermission('calendar', 'sidebar'),
+        order: 9
+      },
+      {
+        id: 'competitions',
+        label: 'Competitions',
+        icon: 'Trophy',
+        path: '/app/competitions',
+        isVisible: hasPermission('competitions', 'sidebar'),
+        order: 10
+      },
+      {
+        id: 'incident_management',
+        label: 'Get Help',
+        icon: 'AlertTriangle',
+        path: '/app/incidents',
+        isVisible: hasPermission('incident_management', 'sidebar'),
+        order: 11
+      },
+      {
+        id: 'email-management',
+        label: 'Email Management',
+        icon: 'Mails',
+        path: '/app/email',
+        isVisible: hasPermission('email', 'sidebar'),
+        order: 12
+      },
+      {
+        id: 'user-admin',
+        label: 'User Management',
+        icon: 'UserCog',
+        path: '/app/users',
+        isVisible: hasPermission('user_admin', 'sidebar'),
+        order: 13
+      },
+      {
+        id: 'school-management',
+        label: 'School Management',
+        icon: 'Building2',
+        path: '/app/school',
+        isVisible: hasPermission('school_management', 'sidebar'),
+        order: 14
+      },
+      {
+        id: 'role-management',
+        label: 'Role Management',
+        icon: 'Shield',
+        path: '/app/roles',
+        isVisible: hasPermission('role_management', 'sidebar'),
+        order: 15
+      },
+      {
+        id: 'settings',
+        label: 'Settings',
+        icon: 'Settings',
+        path: '/app/settings',
+        isVisible: hasPermission('settings', 'sidebar'),
+        order: 16
       }
-    }
+    ];
 
-    console.log('Database-driven menu items:', menuItems);
+    // Filter to only visible items and add dashboard
+    const visibleItems = allMenuItems.filter(item => item.isVisible);
+    const menuItems: MenuItem[] = [dashboardItem, ...visibleItems];
+
+    console.log('Generated menu items:', menuItems.map(item => `${item.id}: ${item.isVisible}`));
     return menuItems;
   } catch (error) {
     console.error('Exception in fetchMenuItemsFromDatabase:', error);
