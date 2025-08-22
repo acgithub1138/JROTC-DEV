@@ -12,11 +12,14 @@ import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePortal } from '@/contexts/PortalContext';
 import { useIsMobile } from '@/hooks/use-mobile';
+import { getDefaultCompetitionModule, canAccessCompetitionModule } from '@/utils/competitionPermissions';
 
 const CompetitionPortalLayout = () => {
   const { userProfile } = useAuth();
-  const [activeModule, setActiveModule] = useState('cp_dashboard');
+  const { hasCompetitionModule, hasCompetitionPortal } = usePortal();
+  const [activeModule, setActiveModule] = useState('open_competitions');
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const location = useLocation();
   const navigate = useNavigate();
@@ -49,49 +52,51 @@ const CompetitionPortalLayout = () => {
   };
 
   useEffect(() => {
-    const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
-    const hasCompetitionModule = userProfile?.schools?.competition_module === true;
+    // Initialize with default module when school flags are available
+    const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+    setActiveModule(defaultModule);
+  }, [hasCompetitionModule, hasCompetitionPortal]);
+
+  useEffect(() => {
+    // Map current path to module
+    const pathToModuleMap: { [key: string]: string } = {
+      '/dashboard': 'cp_dashboard',
+      '/competitions': 'hosting_competitions',
+      '/my-competitions': 'my_competitions',
+      '/score-sheets': 'cp_score_sheets',
+      '/judges': 'cp_judges',
+      '/open-competitions': 'open_competitions',
+      '/analytics': 'analytics',
+      '/settings': 'competition_settings'
+    };
     
-    // Extract module name from current path for active module detection
-    const pathSegments = location.pathname.split('/');
-    const lastSegment = pathSegments[pathSegments.length - 1];
+    const currentPath = location.pathname.replace('/app/competition-portal', '') || '/';
+    let detectedModule = 'open_competitions'; // Safe fallback
     
-    // Set active module based on current route
-    let currentModule = 'cp_dashboard'; // Default to dashboard
-    if (location.pathname.includes('/dashboard')) {
-      currentModule = 'cp_dashboard';
-    } else if (location.pathname.includes('/competitions') && !location.pathname.includes('/my-competitions')) {
-      currentModule = 'hosting_competitions';
-    } else if (location.pathname.includes('/my-competitions')) {
-      currentModule = 'my_competitions';
-    } else if (location.pathname.includes('/score-sheets')) {
-      currentModule = 'cp_score_sheets';
-    } else if (location.pathname.includes('/judges')) {
-      currentModule = 'cp_judges';
-    } else if (location.pathname.includes('/open-competitions')) {
-      currentModule = 'open_competitions';
+    // Find the matching module for current path
+    for (const [path, module] of Object.entries(pathToModuleMap)) {
+      if (currentPath.includes(path)) {
+        detectedModule = module;
+        break;
+      }
     }
     
-    // Portal access checks remain the same
-    const portalOnlyPaths = ['/dashboard', '/competitions', '/score-sheets', '/judges', '/analytics', '/settings'];
-    const moduleAccessiblePaths = ['/open-competitions', '/my-competitions'];
+    // Check if user can access the detected module
+    const canAccessModule = canAccessCompetitionModule(detectedModule, hasCompetitionModule, hasCompetitionPortal);
     
-    const currentPath = location.pathname.replace('/app/competition-portal', '');
-    
-    // If user doesn't have competition portal access but tries to access portal-only paths
-    if (!hasCompetitionPortal && portalOnlyPaths.some(path => currentPath.includes(path))) {
-      navigate('/app/competition-portal/open-competitions');
-      return;
+    if (!canAccessModule) {
+      // Redirect to default accessible module
+      const defaultModule = getDefaultCompetitionModule(hasCompetitionModule, hasCompetitionPortal);
+      const defaultRoute = moduleToRouteMap[defaultModule];
+      if (defaultRoute && location.pathname !== defaultRoute) {
+        navigate(defaultRoute);
+        return;
+      }
+      setActiveModule(defaultModule);
+    } else {
+      setActiveModule(detectedModule);
     }
-    
-    // If user doesn't have any competition access
-    if (!hasCompetitionPortal && !hasCompetitionModule && !moduleAccessiblePaths.some(path => currentPath.includes(path))) {
-      navigate('/app/competition-portal/open-competitions');
-      return;
-    }
-    
-    setActiveModule(currentModule);
-  }, [location.pathname, userProfile, navigate]);
+  }, [location.pathname, hasCompetitionModule, hasCompetitionPortal, navigate, moduleToRouteMap]);
 
   const handleModuleChange = (module: string) => {
     setActiveModule(module);

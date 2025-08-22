@@ -7,6 +7,9 @@ interface PortalContextType {
   currentPortal: PortalType;
   setPortal: (portal: PortalType) => void;
   canAccessCompetitionPortal: boolean;
+  hasCompetitionModule: boolean;
+  hasCompetitionPortal: boolean;
+  canAccessCompetitionSection: (section: 'module' | 'portal') => boolean;
 }
 
 const PortalContext = createContext<PortalContextType | undefined>(undefined);
@@ -23,12 +26,21 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
   const { userProfile } = useAuth();
   const [currentPortal, setCurrentPortal] = useState<PortalType>('ccc');
 
+  // Get school-level flags
+  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
+  const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
+  
   // Check if user can access competition portal (either competition module or competition portal enabled)
   // Also exclude parent users from accessing competition portal
   const canAccessCompetitionPortal = 
-    (userProfile?.schools?.competition_module === true || 
-     userProfile?.schools?.competition_portal === true) &&
+    (hasCompetitionModule || hasCompetitionPortal) &&
     userProfile?.role !== 'parent';
+  
+  // Helper function to check access to specific competition sections
+  const canAccessCompetitionSection = (section: 'module' | 'portal') => {
+    if (userProfile?.role === 'parent') return false;
+    return section === 'module' ? hasCompetitionModule : hasCompetitionPortal;
+  };
   
   // Get stored portal preference
   useEffect(() => {
@@ -52,6 +64,9 @@ export const PortalProvider: React.FC<{ children: React.ReactNode }> = ({ childr
     currentPortal,
     setPortal,
     canAccessCompetitionPortal,
+    hasCompetitionModule,
+    hasCompetitionPortal,
+    canAccessCompetitionSection,
   };
 
   return <PortalContext.Provider value={value}>{children}</PortalContext.Provider>;

@@ -6,6 +6,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sh
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
+import { filterCompetitionModulesBySchoolFlags } from '@/utils/competitionPermissions';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, ArrowLeft } from 'lucide-react';
@@ -35,7 +36,11 @@ const DEFAULT_THEME = {
 };
 
 // Fetch competition portal menu items from database
-const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: string, action: string) => boolean) => {
+const fetchCompetitionMenuItemsFromDatabase = async (
+  hasPermission: (module: string, action: string) => boolean,
+  hasCompetitionModule: boolean,
+  hasCompetitionPortal: boolean
+) => {
   try {
     const { data: modules, error } = await supabase.rpc('get_permission_modules_simple', {
       is_tab_param: false,
@@ -48,16 +53,28 @@ const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: str
       return [];
     }
 
-    // Filter for competition portal modules only and check permissions
-    const competitionModules = (modules || [])
-      .filter((module: any) => module.is_competition_portal && hasPermission(module.name, 'sidebar'))
-      .sort((a: any, b: any) => (a.sort_order || 0) - (b.sort_order || 0))
+    // Filter for competition portal modules only
+    const allCompetitionModules = (modules || [])
+      .filter((module: any) => module.is_competition_portal)
       .map((module: any) => ({
         id: module.name,
+        name: module.name,
         label: module.label,
         icon: module.icon,
-        path: module.path
+        path: module.path,
+        sort_order: module.sort_order || 0
       }));
+
+    // First filter by school-level flags, then by role permissions
+    const schoolFilteredModules = filterCompetitionModulesBySchoolFlags(
+      allCompetitionModules,
+      hasCompetitionModule,
+      hasCompetitionPortal
+    );
+
+    const competitionModules = schoolFilteredModules
+      .filter((module: any) => hasPermission(module.name, 'sidebar'))
+      .sort((a: any, b: any) => a.sort_order - b.sort_order);
 
     console.log('Loaded competition portal modules:', competitionModules);
     return competitionModules;
@@ -95,7 +112,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   setSidebarOpen
 }) => {
   const { userProfile } = useAuth();
-  const { setPortal } = usePortal();
+  const { setPortal, hasCompetitionModule, hasCompetitionPortal } = usePortal();
   const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const { themes } = useThemes();
   const navigate = useNavigate();
@@ -111,7 +128,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
 
       setIsLoading(true);
       try {
-        const items = await fetchCompetitionMenuItemsFromDatabase(hasPermission);
+        const items = await fetchCompetitionMenuItemsFromDatabase(hasPermission, hasCompetitionModule, hasCompetitionPortal);
         setMenuItems(items);
       } catch (error) {
         console.error('Error loading competition menu items:', error);
@@ -122,7 +139,7 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     };
 
     loadMenuItems();
-  }, [userProfile?.role, hasPermission, permissionsLoading]);
+  }, [userProfile?.role, hasPermission, permissionsLoading, hasCompetitionModule, hasCompetitionPortal]);
 
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program);
