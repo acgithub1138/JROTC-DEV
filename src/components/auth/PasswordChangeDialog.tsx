@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -22,7 +22,12 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
     confirmPassword: '',
   });
 
-  const handlePasswordChange = async (e: React.FormEvent) => {
+  // Create unique IDs to prevent DOM conflicts when multiple dialogs might render
+  const uniqueId = useMemo(() => Math.random().toString(36).substr(2, 9), []);
+  const newPasswordId = `newPassword-${uniqueId}`;
+  const confirmPasswordId = `confirmPassword-${uniqueId}`;
+
+  const handlePasswordChange = useCallback(async (e: React.FormEvent) => {
     e.preventDefault();
     
     if (passwords.newPassword !== passwords.confirmPassword) {
@@ -89,7 +94,7 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
     } finally {
       setLoading(false);
     }
-  };
+  }, [passwords, toast, onClose]);
 
   return (
     <Dialog open={open} onOpenChange={() => {}}>
@@ -103,27 +108,29 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
           </p>
           <form onSubmit={handlePasswordChange} className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="newPassword">New Password</Label>
+              <Label htmlFor={newPasswordId}>New Password</Label>
               <Input
-                id="newPassword"
+                id={newPasswordId}
                 type="password"
                 placeholder="Enter your new password"
                 value={passwords.newPassword}
                 onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
                 required
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <div className="space-y-2">
-              <Label htmlFor="confirmPassword">Confirm New Password</Label>
+              <Label htmlFor={confirmPasswordId}>Confirm New Password</Label>
               <Input
-                id="confirmPassword"
+                id={confirmPasswordId}
                 type="password"
                 placeholder="Confirm your new password"
                 value={passwords.confirmPassword}
                 onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
                 required
                 minLength={6}
+                autoComplete="new-password"
               />
             </div>
             <Button type="submit" className="w-full" disabled={loading}>

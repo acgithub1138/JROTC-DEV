@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
 import AuthPage from '@/components/auth/AuthPage';
@@ -25,6 +25,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
+  const processedPasswordCheck = useRef(false);
 
   console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
 
@@ -37,11 +38,17 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       console.log('Password check:', { profileRequiresChange, metadataOverride, userId: user.id });
       
       const shouldShowPasswordChange = profileRequiresChange && !metadataOverride;
-      setShowPasswordChange(shouldShowPasswordChange);
+      
+      // Only set if it's different from current state to prevent unnecessary re-renders
+      if (shouldShowPasswordChange !== showPasswordChange) {
+        setShowPasswordChange(shouldShowPasswordChange);
+        processedPasswordCheck.current = true;
+      }
     } else {
       setShowPasswordChange(false);
+      processedPasswordCheck.current = false;
     }
-  }, [user?.id, userProfile?.password_change_required, user?.user_metadata?.password_change_required]);
+  }, [user?.id, userProfile?.password_change_required, user?.user_metadata, showPasswordChange]);
 
   // Check module permissions or admin role requirement
   useEffect(() => {
