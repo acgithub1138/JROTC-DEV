@@ -80,7 +80,18 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
           <CardHeader className={isRegistered(competition.id) ? "pt-12" : ""}>
             <div className="flex items-start justify-between">
               <div className="flex-1">
-                <CardTitle className="text-lg line-clamp-2">{competition.name}</CardTitle>
+                <CardTitle className="text-lg line-clamp-2">
+                  {canViewDetails ? (
+                    <button
+                      onClick={() => onViewDetails(competition.id)}
+                      className="text-left hover:text-primary hover:underline transition-colors cursor-pointer w-full"
+                    >
+                      {competition.name}
+                    </button>
+                  ) : (
+                    competition.name
+                  )}
+                </CardTitle>
                 <CardDescription className="mt-1">
                   {competition.description || 'No description available'}
                 </CardDescription>
