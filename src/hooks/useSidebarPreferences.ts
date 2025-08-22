@@ -25,7 +25,12 @@ const MODULE_MAPPING: { [key: string]: string } = {
   'budget': 'budget',
   'contacts': 'contacts',
   'calendar': 'calendar',
-  'competitions': 'competitions'
+  'competitions': 'competitions',
+  'email-management': 'email',
+  'user-admin': 'user_admin',
+  'school-management': 'school_management',
+  'role-management': 'role_management',
+  'settings': 'settings'
 };
 
 // Generate menu items from current permissions
@@ -47,18 +52,7 @@ const getMenuItemsFromPermissions = (
     }
   ];
 
-  // Special handling for admin role - admins should have access to everything
-  if (role === 'admin') {
-    console.log('Admin detected, granting full access including admin-specific items');
-    return [
-      { id: 'incident_management', label: 'Get Help', icon: 'AlertTriangle', path: '/app/incidents', isVisible: true, order: 11 },
-      { id: 'email-management', label: 'Email Management', icon: 'Mail', path: '/app/email', isVisible: true, order: 12 },
-      { id: 'user-admin', label: 'User Management', icon: 'UserCog', path: '/app/users', isVisible: true, order: 13 },
-      { id: 'school-management', label: 'School Management', icon: 'Building', path: '/app/school', isVisible: true, order: 14 },
-      { id: 'role-management', label: 'Role Management', icon: 'Shield', path: '/app/roles', isVisible: true, order: 15 },
-      { id: 'settings', label: 'Settings', icon: 'Settings', path: '/app/settings', isVisible: true, order: 16 }
-    ];
-  }
+  // No special handling - all roles use the permission system
 
   const allPossibleItems: MenuItem[] = [
     {
@@ -126,12 +120,60 @@ const getMenuItemsFromPermissions = (
       order: 9
     },
     {
+      id: 'competitions',
+      label: 'Competitions',
+      icon: 'Trophy',
+      path: '/app/competitions',
+      isVisible: hasPermission('competitions', 'sidebar'),
+      order: 10
+    },
+    {
       id: 'incident_management',
       label: 'Get Help',
       icon: 'AlertTriangle',
       path: '/app/incidents',
       isVisible: hasPermission('incident_management', 'sidebar'),
       order: 11
+    },
+    {
+      id: 'email-management',
+      label: 'Email Management',
+      icon: 'Mails',
+      path: '/app/email',
+      isVisible: hasPermission('email', 'sidebar'),
+      order: 12
+    },
+    {
+      id: 'user-admin',
+      label: 'User Management',
+      icon: 'UserCog',
+      path: '/app/users',
+      isVisible: hasPermission('user_admin', 'sidebar'),
+      order: 13
+    },
+    {
+      id: 'school-management',
+      label: 'School Management',
+      icon: 'Building2',
+      path: '/app/school',
+      isVisible: hasPermission('school_management', 'sidebar'),
+      order: 14
+    },
+    {
+      id: 'role-management',
+      label: 'Role Management',
+      icon: 'Shield',
+      path: '/app/roles',
+      isVisible: hasPermission('role_management', 'sidebar'),
+      order: 15
+    },
+    {
+      id: 'settings',
+      label: 'Settings',
+      icon: 'Settings',
+      path: '/app/settings',
+      isVisible: hasPermission('settings', 'sidebar'),
+      order: 16
     }
   ];
 
