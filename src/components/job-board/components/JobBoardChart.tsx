@@ -34,7 +34,7 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   // Use passed permissions or fallback to hook
   const hookPermissions = useJobBoardPermissions();
   const { canAssign, canUpdate } = permissions || hookPermissions;
-  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canModifyLayout);
+  const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canAssign);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
   // Chart is interactive if user can update jobs or assign roles
