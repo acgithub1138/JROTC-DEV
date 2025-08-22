@@ -1,7 +1,6 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RefreshCw, GripVertical } from 'lucide-react';
-import { isPermissionRelevantForModule } from '@/utils/modulePermissionMappings';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { DndContext, closestCenter } from '@dnd-kit/core';
 import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
@@ -115,10 +114,9 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
                   <div className="font-medium">{module.label}</div>
                 </td>
                 {orderedActions.map(action => {
-              const isRelevant = isPermissionRelevantForModule(module.name, action.name);
               const isEnabled = rolePermissions[module.name]?.[action.name] || false;
               return <td key={action.id} className="p-3 text-center">
-                      {isRelevant ? <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} /> : null}
+                      <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
                     </td>;
             })}
               </tr>)}
