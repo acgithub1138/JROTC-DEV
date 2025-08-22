@@ -7,6 +7,7 @@ import { Sidebar } from './layout/Sidebar';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { usePortal } from '@/contexts/PortalContext';
 import CompetitionPortalLayout from './competition-portal/CompetitionPortalLayout';
+import { supabase } from '@/integrations/supabase/client';
 
 import ProtectedRoute from './ProtectedRoute';
 import DashboardOverview from './dashboard/DashboardOverview';
@@ -41,6 +42,19 @@ const MainApplication = () => {
   const isMobile = useIsMobile();
   const { currentPortal } = usePortal();
   const { userProfile } = useAuth();
+  const [moduleRoutes, setModuleRoutes] = useState<{ [key: string]: string }>({});
+  
+  const getModuleFromPath = (path: string, routes: { [key: string]: string }): string => {
+    if (path === '/app' || path === '/app/') return 'dashboard';
+    
+    // Find module by matching path
+    const moduleEntry = Object.entries(routes).find(([_, route]) => 
+      path.startsWith(route) && route !== '/app'
+    );
+    
+    return moduleEntry ? moduleEntry[0] : 'dashboard';
+  };
+
   const [activeModule, setActiveModule] = useState(() => {
     // Initialize active module based on current route
     const path = location.pathname;
@@ -58,38 +72,14 @@ const MainApplication = () => {
       return 'competition-dashboard';
     }
     
-    if (path === '/app' || path === '/app/') return 'dashboard';
-    if (path.startsWith('/app/tasks')) return 'tasks';
-    if (path.startsWith('/app/incidents')) return 'incident_management';
-    if (path.startsWith('/app/school')) return 'school_admin';
-    if (path.startsWith('/app/users')) return 'user_admin';
-    if (path.startsWith('/app/email')) return 'email';
-    
-    if (path.startsWith('/app/cadets')) return 'cadets';
-    if (path.startsWith('/app/job-board')) return 'job_board';
-    if (path.startsWith('/app/teams')) return 'teams';
-    if (path.startsWith('/app/inventory')) return 'inventory';
-    if (path.startsWith('/app/budget')) return 'budget';
-    if (path.startsWith('/app/contacts')) return 'contacts';
-    if (path.startsWith('/app/calendar')) return 'calendar';
-    if (path.startsWith('/app/competitions')) return 'competitions';
-    
-    if (path.startsWith('/app/roles')) return 'role_management';
-    if (path.startsWith('/app/settings')) return 'settings';
-    return 'dashboard';
-  });
-
-  const handleModuleChange = (module: string) => {
-    setActiveModule(module);
-    // Navigate to the appropriate route based on module
-    const routes: { [key: string]: string } = {
+    // Use fallback mapping for initial load
+    const fallbackRoutes = {
       'dashboard': '/app',
       'tasks': '/app/tasks',
       'incident_management': '/app/incidents',
       'school_admin': '/app/school',
       'user_admin': '/app/users',
       'email': '/app/email',
-      
       'cadets': '/app/cadets',
       'job_board': '/app/job-board',
       'teams': '/app/teams',
@@ -97,12 +87,73 @@ const MainApplication = () => {
       'budget': '/app/budget',
       'contacts': '/app/contacts',
       'calendar': '/app/calendar',
-      
       'role_management': '/app/roles',
       'settings': '/app/settings'
     };
     
-    const route = routes[module];
+    return getModuleFromPath(path, fallbackRoutes);
+  });
+
+  // Load module routes from database
+  useEffect(() => {
+    const loadModuleRoutes = async () => {
+      try {
+        const { data: modules, error } = await supabase
+          .from('permission_modules')
+          .select('name, path')
+          .eq('is_active', true);
+
+        if (!error && modules) {
+          const routes: { [key: string]: string } = {
+            'dashboard': '/app'
+          };
+          
+          modules.forEach(module => {
+            if (module.path && !module.path.startsWith('/app/competition-portal')) {
+              routes[module.name] = module.path;
+            }
+          });
+          
+          setModuleRoutes(routes);
+          console.log('Loaded module routes:', routes);
+        }
+      } catch (error) {
+        console.error('Failed to load module routes:', error);
+        // Fallback to hardcoded routes
+        setModuleRoutes({
+          'dashboard': '/app',
+          'tasks': '/app/tasks',
+          'incident_management': '/app/incidents',
+          'school_admin': '/app/school',
+          'user_admin': '/app/users',
+          'email': '/app/email',
+          'cadets': '/app/cadets',
+          'job_board': '/app/job-board',
+          'teams': '/app/teams',
+          'inventory': '/app/inventory',
+          'budget': '/app/budget',
+          'contacts': '/app/contacts',
+          'calendar': '/app/calendar',
+          'role_management': '/app/roles',
+          'settings': '/app/settings'
+        });
+      }
+    };
+
+    loadModuleRoutes();
+  }, []);
+
+  // Update active module when path changes
+  useEffect(() => {
+    if (Object.keys(moduleRoutes).length > 0) {
+      const newModule = getModuleFromPath(location.pathname, moduleRoutes);
+      setActiveModule(newModule);
+    }
+  }, [location.pathname, moduleRoutes]);
+
+  const handleModuleChange = (module: string) => {
+    setActiveModule(module);
+    const route = moduleRoutes[module];
     if (route) {
       navigate(route);
     }

@@ -69,7 +69,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     try {
       const { data: moduleResult, error } = await supabase
         .from('permission_modules')
-        .select('id, name, label')
+        .select('id, name, label, path')
         .eq('is_active', true)
         .order('id', { ascending: true });
 
@@ -84,21 +84,20 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     // Comprehensive fallback modules if database query fails
     if (modules.length === 0) {
       modules = [
-        { name: 'tasks', label: 'Tasks' },
-        { name: 'cadets', label: 'Cadets' },
-        { name: 'job_board', label: 'Job Board' },
-        { name: 'teams', label: 'Teams' },
-        { name: 'inventory', label: 'Inventory' },
-        { name: 'budget', label: 'Budget' },
-        { name: 'contacts', label: 'Contacts' },
-        { name: 'calendar', label: 'Calendar' },
-        
-        { name: 'incident_management', label: 'Get Help' },
-        { name: 'email', label: 'Email Management' },
-        { name: 'user_admin', label: 'User Management' },
-        { name: 'school_management', label: 'School Management' },
-        { name: 'role_management', label: 'Role Management' },
-        { name: 'settings', label: 'Settings' }
+        { name: 'tasks', label: 'Tasks', path: '/app/tasks' },
+        { name: 'cadets', label: 'Cadets', path: '/app/cadets' },
+        { name: 'job_board', label: 'Job Board', path: '/app/job-board' },
+        { name: 'teams', label: 'Teams', path: '/app/teams' },
+        { name: 'inventory', label: 'Inventory', path: '/app/inventory' },
+        { name: 'budget', label: 'Budget', path: '/app/budget' },
+        { name: 'contacts', label: 'Contacts', path: '/app/contacts' },
+        { name: 'calendar', label: 'Calendar', path: '/app/calendar' },
+        { name: 'incident_management', label: 'Get Help', path: '/app/incidents' },
+        { name: 'email', label: 'Email Management', path: '/app/email' },
+        { name: 'user_admin', label: 'User Management', path: '/app/users' },
+        { name: 'school_admin', label: 'School Management', path: '/app/school' },
+        { name: 'role_management', label: 'Role Management', path: '/app/roles' },
+        { name: 'settings', label: 'Settings', path: '/app/settings' }
       ];
       console.log('Using fallback modules:', modules);
     }
@@ -123,146 +122,28 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
       'settings': 'Settings'
     };
 
-    // Comprehensive path mapping
-    const pathMap: { [key: string]: string } = {
-      'dashboard': '/app/dashboard',
-      'tasks': '/app/tasks',
-      'cadets': '/app/cadets',
-      'job_board': '/app/job-board',
-      'teams': '/app/teams',
-      'inventory': '/app/inventory',
-      'budget': '/app/budget',
-      'contacts': '/app/contacts',
-      'calendar': '/app/calendar',
+
+    // Generate menu items dynamically from modules
+    const menuItems: MenuItem[] = [dashboardItem];
+    
+    for (const module of modules) {
+      // Skip dashboard and competition portal modules since dashboard is already added
+      if (module.name === 'dashboard' || module.path?.startsWith('/app/competition-portal')) continue;
       
-      'incident_management': '/app/incidents',
-      'email': '/app/email',
-      'user_admin': '/app/users',
-      'school_management': '/app/school',
-      'role_management': '/app/roles',
-      'settings': '/app/settings'
-    };
-
-    // Generate all possible menu items with permission checks using database module names as IDs
-    const allMenuItems: MenuItem[] = [
-      {
-        id: 'tasks',
-        label: 'Tasks',
-        icon: 'CheckSquare',
-        path: '/app/tasks',
-        isVisible: hasPermission('tasks', 'sidebar'),
-        order: 2
-      },
-      {
-        id: 'cadets',
-        label: 'Cadets',
-        icon: 'Users',
-        path: '/app/cadets',
-        isVisible: hasPermission('cadets', 'sidebar'),
-        order: 3
-      },
-      {
-        id: 'job_board',
-        label: 'Job Board',
-        icon: 'Briefcase',
-        path: '/app/job-board',
-        isVisible: hasPermission('job_board', 'sidebar'),
-        order: 4
-      },
-      {
-        id: 'teams',
-        label: 'Teams',
-        icon: 'Users',
-        path: '/app/teams',
-        isVisible: hasPermission('teams', 'sidebar'),
-        order: 5
-      },
-      {
-        id: 'inventory',
-        label: 'Inventory',
-        icon: 'Package',
-        path: '/app/inventory',
-        isVisible: hasPermission('inventory', 'sidebar'),
-        order: 6
-      },
-      {
-        id: 'budget',
-        label: 'Budget',
-        icon: 'DollarSign',
-        path: '/app/budget',
-        isVisible: hasPermission('budget', 'sidebar'),
-        order: 7
-      },
-      {
-        id: 'contacts',
-        label: 'Contacts',
-        icon: 'Users2',
-        path: '/app/contacts',
-        isVisible: hasPermission('contacts', 'sidebar'),
-        order: 8
-      },
-      {
-        id: 'calendar',
-        label: 'Calendar',
-        icon: 'Calendar',
-        path: '/app/calendar',
-        isVisible: hasPermission('calendar', 'sidebar'),
-        order: 9
-      },
-      {
-        id: 'incident_management',
-        label: 'Get Help',
-        icon: 'AlertTriangle',
-        path: '/app/incidents',
-        isVisible: hasPermission('incident_management', 'sidebar'),
-        order: 11
-      },
-      {
-        id: 'email',
-        label: 'Email Management',
-        icon: 'Mails',
-        path: '/app/email',
-        isVisible: hasPermission('email', 'sidebar'),
-        order: 12
-      },
-      {
-        id: 'user_admin',
-        label: 'User Management',
-        icon: 'UserCog',
-        path: '/app/users',
-        isVisible: hasPermission('user_admin', 'sidebar'),
-        order: 13
-      },
-      {
-        id: 'school_admin',
-        label: 'School Management',
-        icon: 'Building2',
-        path: '/app/school',
-        isVisible: hasPermission('school_admin', 'sidebar'),
-        order: 14
-      },
-      {
-        id: 'role_management',
-        label: 'Role Management',
-        icon: 'Shield',
-        path: '/app/roles',
-        isVisible: hasPermission('role_management', 'sidebar'),
-        order: 15
-      },
-      {
-        id: 'settings',
-        label: 'Settings',
-        icon: 'Settings',
-        path: '/app/settings',
-        isVisible: hasPermission('settings', 'sidebar'),
-        order: 16
+      // Check if user has sidebar permission for this module
+      const hasSidebarPermission = hasPermission(module.name, 'sidebar');
+      
+      if (hasSidebarPermission) {
+        menuItems.push({
+          id: module.name,
+          label: module.label || module.name,
+          icon: iconMap[module.name] || 'Circle',
+          path: module.path || `/app/${module.name}`,
+          isVisible: true,
+          order: menuItems.length + 1
+        });
       }
-    ];
-
-    // Filter to only visible items and add dashboard
-    const visibleItems = allMenuItems.filter(item => item.isVisible);
-    const menuItems: MenuItem[] = [dashboardItem, ...visibleItems];
-
+    }
     console.log('Generated menu items:', menuItems.map(item => `${item.id}: ${item.isVisible}`));
     return menuItems;
   } catch (error) {
