@@ -3,7 +3,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
-import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, Eye } from 'lucide-react';
+import { Edit, Plus, Trash2, Trophy, Calendar, MapPin, Eye, X } from 'lucide-react';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useCompetitionPlacements, type CompetitionPlacement } from '../hooks/useCompetitionPlacements';
 import { useRegisteredEvents } from '../hooks/useRegisteredEvents';
@@ -251,25 +251,23 @@ export const CompetitionPlacementCards: React.FC<CompetitionPlacementCardsProps>
                   <h4 className="font-medium text-sm mb-2">Placements</h4>
                   <div className="flex flex-wrap gap-2">
                     {competitionPlacements.map((placement) => (
-                      <div key={placement.id} className="flex flex-col items-center gap-2 p-3 bg-muted/50 rounded-lg min-w-0">
-                        <span className="text-sm font-medium text-center">{placement.event_name}</span>
-                        <Badge className={getPlacementColor(placement.placement)}>
-                          {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
-                        </Badge>
+                       <div key={placement.id} className="relative flex flex-col items-center gap-2 p-3 bg-muted/50 rounded-lg min-w-0">
                          {canUpdate && (
-                           <div className="flex items-center gap-1 ml-2">
-                             <Button
-                               variant="ghost"
-                               size="sm"
-                               onClick={() => handleDeletePlacement(placement.id)}
-                               className="h-7 w-7 p-0"
-                             >
-                               <Trash2 className="w-3 h-3" />
-                             </Button>
-                           </div>
+                           <Button
+                             variant="ghost"
+                             size="sm"
+                             onClick={() => handleDeletePlacement(placement.id)}
+                             className="absolute -top-1 -right-1 h-5 w-5 p-0 rounded-full bg-background hover:bg-destructive hover:text-destructive-foreground shadow-sm"
+                           >
+                             <X className="w-3 h-3" />
+                           </Button>
                          )}
-                      </div>
-                    ))}
+                         <span className="text-sm font-medium text-center">{placement.event_name}</span>
+                         <Badge className={getPlacementColor(placement.placement)}>
+                           {placement.placement ? `${placement.placement}${getPlacementSuffix(placement.placement)}` : 'N/A'}
+                         </Badge>
+                       </div>
+                     ))}
                   </div>
                 </div>
               )}
