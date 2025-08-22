@@ -34,6 +34,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   } = useCompetitionEvents(competitionId);
   const {
     canCreate,
+    canView,
     canViewDetails,
     canEdit,
     canDelete
@@ -106,9 +107,15 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           </Button>}
       </div>
 
-      {sortedEvents.length === 0 ? <div className="text-center py-8 text-muted-foreground">
+      {!canView ? (
+        <div className="text-center py-8 text-muted-foreground">
+          <p>You don't have permission to view events</p>
+        </div>
+      ) : sortedEvents.length === 0 ? (
+        <div className="text-center py-8 text-muted-foreground">
           <p>No events configured for this competition</p>
-        </div> : isMobile ? (
+        </div>
+      ) : isMobile ? (
           <div className="space-y-4">
             {sortedEvents.map(event => (
               <Card key={event.id}>
