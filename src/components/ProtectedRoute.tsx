@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   requireAdminRole = false
 }) => {
   const { user, userProfile, loading } = useAuth();
-  const { hasPermission } = usePermissionContext();
+  const { hasPermission, isLoading: permissionsLoading } = usePermissionContext();
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
@@ -45,7 +45,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
   // Check module permissions or admin role requirement
   useEffect(() => {
-    if (user) {
+    if (user && !permissionsLoading) {
       if (requireAdminRole) {
         // Check if user is admin
         const isAdmin = userProfile?.role === 'admin';
@@ -60,7 +60,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     } else {
       setShowAccessDenied(false);
     }
-  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission]);
+  }, [user, userProfile, module, requirePermission, requireAdminRole, hasPermission, permissionsLoading]);
 
   // Check if parent user needs to complete setup
   useEffect(() => {
@@ -93,7 +93,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     checkParentSetup();
   }, [user, userProfile, showPasswordChange]);
 
-  if (loading) {
+  if (loading || permissionsLoading) {
     return (
       <div className="min-h-screen bg-gray-50 flex items-center justify-center">
         <div className="text-center">
