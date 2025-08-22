@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePermissionContext } from '@/contexts/PermissionContext';
 import AuthPage from '@/components/auth/AuthPage';
@@ -25,30 +25,28 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
   const [showPasswordChange, setShowPasswordChange] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
   const [showParentSetup, setShowParentSetup] = useState(false);
-  const processedPasswordCheck = useRef(false);
+  
+  // Memoize values to prevent unnecessary re-renders
+  const memoizedUserId = useMemo(() => user?.id, [user?.id]);
+  const memoizedPasswordRequired = useMemo(() => userProfile?.password_change_required, [userProfile?.password_change_required]);
+  const memoizedUserMetadata = useMemo(() => user?.user_metadata, [user?.user_metadata]);
 
   console.log('ProtectedRoute - user:', user?.id, 'loading:', loading);
 
   // Check if user needs to change password
   useEffect(() => {
-    if (user && userProfile) {
-      const profileRequiresChange = !!userProfile.password_change_required;
-      const metadataOverride = (user.user_metadata as any)?.password_change_required === false;
+    if (memoizedUserId && userProfile) {
+      const profileRequiresChange = !!memoizedPasswordRequired;
+      const metadataOverride = (memoizedUserMetadata as any)?.password_change_required === false;
       
-      console.log('Password check:', { profileRequiresChange, metadataOverride, userId: user.id });
+      console.log('Password check:', { profileRequiresChange, metadataOverride, userId: memoizedUserId });
       
       const shouldShowPasswordChange = profileRequiresChange && !metadataOverride;
-      
-      // Only set if it's different from current state to prevent unnecessary re-renders
-      if (shouldShowPasswordChange !== showPasswordChange) {
-        setShowPasswordChange(shouldShowPasswordChange);
-        processedPasswordCheck.current = true;
-      }
+      setShowPasswordChange(shouldShowPasswordChange);
     } else {
       setShowPasswordChange(false);
-      processedPasswordCheck.current = false;
     }
-  }, [user?.id, userProfile?.password_change_required, user?.user_metadata, showPasswordChange]);
+  }, [memoizedUserId, memoizedPasswordRequired, memoizedUserMetadata]);
 
   // Check module permissions or admin role requirement
   useEffect(() => {

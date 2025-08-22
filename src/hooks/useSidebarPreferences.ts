@@ -72,6 +72,12 @@ const getMenuItemsFromPermissions = (role: string, hasPermission: (module: strin
       return allowed;
     }
 
+    // Special handling for parent role - allow calendar and contacts
+    if (role === 'parent' && (item.id === 'calendar' || item.id === 'contacts')) {
+      console.log(`  - ${item.id}: allowed for parent role`);
+      return true;
+    }
+
     // Special case for competitions - requires permission and competition module
     if (item.id === 'competitions') {
       const moduleKey = MODULE_MAPPING[item.id];
@@ -155,6 +161,7 @@ const getDefaultMenuItemsForRole = (role: string, userProfile?: any): MenuItem[]
     case 'parent':
       return [
         { id: 'calendar', label: 'Calendar', icon: 'Calendar' },
+        { id: 'contacts', label: 'Contacts', icon: 'Contact' },
       ];
     
     default:
@@ -198,16 +205,6 @@ export const useSidebarPreferences = () => {
       setIsLoading(true);
       
       try {
-        const { data, error } = await supabase
-          .from('user_sidebar_preferences')
-          .select('menu_items')
-          .eq('user_id', userId)
-          .single();
-
-        if (error && error.code !== 'PGRST116') {
-          console.error('Error loading sidebar preferences:', error);
-        }
-
         // Use database permissions if loaded, otherwise fallback to hardcoded
         const defaultItems = permissionsLoaded 
           ? getMenuItemsFromPermissions(userRole, hasPermission, userProfile)
@@ -215,30 +212,46 @@ export const useSidebarPreferences = () => {
         
         console.log('Using', permissionsLoaded ? 'database permissions' : 'fallback permissions', 'for role:', userRole);
         console.log('Generated menu items:', defaultItems);
-        
-        if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
-          console.log('Found saved preferences, filtering menu items');
-          // Filter out invalid items and ensure all valid items are included
-          const savedItemIds = data.menu_items;
-          const orderedItems = savedItemIds
-            .map(id => defaultItems.find(item => item.id === id))
-            .filter(Boolean) as MenuItem[];
-          
-          setMenuItems(orderedItems);
-        } else {
-          console.log('No saved preferences, using default items');
+
+        // Try to load saved preferences, but don't fail if it errors
+        try {
+          const { data, error } = await supabase
+            .from('user_sidebar_preferences')
+            .select('menu_items')
+            .eq('user_id', userId)
+            .single();
+
+          if (error && error.code !== 'PGRST116') {
+            console.warn('Error loading sidebar preferences (using defaults):', error);
+          }
+
+          if (data?.menu_items && Array.isArray(data.menu_items) && data.menu_items.length > 0) {
+            console.log('Found saved preferences, filtering menu items');
+            // Filter out invalid items and ensure all valid items are included
+            const savedItemIds = data.menu_items;
+            const orderedItems = savedItemIds
+              .map(id => defaultItems.find(item => item.id === id))
+              .filter(Boolean) as MenuItem[];
+            
+            setMenuItems(orderedItems);
+          } else {
+            console.log('No saved preferences, using default items');
+            setMenuItems(defaultItems);
+          }
+        } catch (prefsError) {
+          console.warn('Failed to load preferences, using defaults:', prefsError);
           setMenuItems(defaultItems);
         }
       } catch (error) {
-        console.error('Error loading sidebar preferences:', error);
+        console.error('Error in loadPreferences:', error);
         const fallbackItems = getDefaultMenuItemsForRole(userRole);
         setMenuItems(fallbackItems);
       } finally {
         console.log('Sidebar preferences loaded, setting loading to false');
         setIsLoading(false);
       }
-    }, 100); // 100ms debounce
-  }, [userId, userRole, permissionsLoaded, hasPermission]);
+    }, 200); // Increased debounce to 200ms
+  }, [userId, userRole, permissionsLoaded, hasPermission, userProfile]);
 
   const savePreferences = useCallback(async (newMenuItems: MenuItem[]) => {
     if (!userId) {

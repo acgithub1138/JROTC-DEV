@@ -81,9 +81,6 @@ const PasswordChangeDialog: React.FC<PasswordChangeDialogProps> = ({ open, onClo
 
       setPasswords({ newPassword: '', confirmPassword: '' });
       onClose();
-      
-      // Refresh the page to update auth metadata and profile state
-      window.location.reload();
     } catch (error: any) {
       console.error('Password change error:', error);
       toast({
