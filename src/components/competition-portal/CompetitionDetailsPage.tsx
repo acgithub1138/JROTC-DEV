@@ -1,9 +1,11 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { useModuleTabs } from '@/hooks/useModuleTabs';
+import { supabase } from '@/integrations/supabase/client';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
@@ -13,9 +15,32 @@ export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
+  const [hostingCompetitionModuleId, setHostingCompetitionModuleId] = useState<string | null>(null);
+  
+  const { tabs, isLoading: tabsLoading } = useModuleTabs(hostingCompetitionModuleId);
+
+  // Get the hosting competition module ID
+  useEffect(() => {
+    const fetchHostingCompetitionModule = async () => {
+      const { data, error } = await supabase
+        .from('permission_modules')
+        .select('id')
+        .eq('name', 'cp_competitions')
+        .eq('is_active', true)
+        .maybeSingle();
+      
+      if (data && !error) {
+        setHostingCompetitionModuleId(data.id);
+      }
+    };
+
+    fetchHostingCompetitionModule();
+  }, []);
+
   console.log('Route params:', params);
   console.log('Competition ID:', competitionId);
   console.log('Current path:', window.location.pathname);
+  
   if (!competitionId) {
     return <div className="p-6">
         <div className="text-center">
@@ -36,59 +61,44 @@ export const CompetitionDetailsPage = () => {
         </Button>
       </div>
 
-      <Tabs defaultValue="events" className="w-full">
-        <TabsList className="grid w-full grid-cols-5">
-          <TabsTrigger value="events">Events</TabsTrigger>
-          <TabsTrigger value="resources">Resources</TabsTrigger>
-          <TabsTrigger value="schools">Schools</TabsTrigger>
-          <TabsTrigger value="schedule">Schedule</TabsTrigger>
-          <TabsTrigger value="results">Results</TabsTrigger>
-        </TabsList>
-        
-        <TabsContent value="events">
-          <Card>
-            
-            <CardContent>
-              <CompetitionEventsTab competitionId={competitionId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="resources">
-          <Card>
-            
-            <CardContent>
-              <CompetitionResourcesTab competitionId={competitionId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="schools">
-          <Card>
-            
-            <CardContent>
-              <CompetitionSchoolsTab competitionId={competitionId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-        
-        <TabsContent value="schedule">
-          <Card className="schedule-print-wrapper">
-            
-            <CardContent>
-              <CompetitionScheduleTab competitionId={competitionId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="results">
-          <Card>
-            
-            <CardContent>
-              <CompetitionResultsTab competitionId={competitionId} />
-            </CardContent>
-          </Card>
-        </TabsContent>
-      </Tabs>
+      {tabsLoading ? (
+        <div className="space-y-4">
+          <div className="h-10 bg-muted rounded animate-pulse" />
+          <div className="h-64 bg-muted rounded animate-pulse" />
+        </div>
+      ) : tabs.length > 0 ? (
+        <Tabs defaultValue={tabs[0]?.name} className="w-full">
+          <TabsList className={`grid w-full grid-cols-${Math.min(tabs.length, 6)}`}>
+            {tabs.map((tab) => (
+              <TabsTrigger key={tab.id} value={tab.name}>
+                {tab.label}
+              </TabsTrigger>
+            ))}
+          </TabsList>
+          
+          {tabs.map((tab) => (
+            <TabsContent key={tab.id} value={tab.name}>
+              <Card>
+                <CardContent>
+                  {/* Render tab content based on tab name */}
+                  {tab.name === 'cp_comp_events' && <CompetitionEventsTab competitionId={competitionId} />}
+                  {tab.name === 'cp_comp_resources' && <CompetitionResourcesTab competitionId={competitionId} />}
+                  {tab.name === 'cp_comp_schools' && <CompetitionSchoolsTab competitionId={competitionId} />}
+                  {tab.name === 'cp_schedules' && (
+                    <div className="schedule-print-wrapper">
+                      <CompetitionScheduleTab competitionId={competitionId} />
+                    </div>
+                  )}
+                  {tab.name === 'cp_results' && <CompetitionResultsTab competitionId={competitionId} />}
+                </CardContent>
+              </Card>
+            </TabsContent>
+          ))}
+        </Tabs>
+      ) : (
+        <div className="text-center py-8">
+          <p className="text-muted-foreground">No tabs available for this competition.</p>
+        </div>
+      )}
     </div>;
 };

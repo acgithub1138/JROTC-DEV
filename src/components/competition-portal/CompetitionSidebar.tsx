@@ -37,32 +37,34 @@ const DEFAULT_THEME = {
 // Fetch competition portal menu items from database
 const fetchCompetitionMenuItemsFromDatabase = async (hasPermission: (module: string, action: string) => boolean) => {
   try {
-    const { data: modules, error } = await supabase
-      .from('permission_modules')
-      .select('id, name, label, path, icon')
-      .eq('is_active', true)
-      .order('id', { ascending: true });
+    const { data, error } = await supabase.rpc('get_permission_modules_simple', {
+      is_tab_param: false,
+      parent_module_param: null,
+      is_active_param: true
+    });
 
     if (error) {
       console.error('Error fetching competition menu items:', error);
       return [];
     }
 
-    if (!modules) {
+    if (!data || !Array.isArray(data)) {
       console.log('No modules found');
       return [];
     }
 
-    // Filter for competition portal modules and check permissions
-    const competitionModules = modules
-      .filter(module => module.path?.startsWith('/app/competition-portal'))
-      .filter(module => hasPermission(module.name, 'sidebar'))
-      .map(module => ({
-        id: module.name,
-        label: module.label || module.name,
-        icon: module.icon || 'Trophy',
-        path: module.path || `/app/competition-portal/${module.name}`
-      }));
+    // Filter modules based on permissions and competition portal flag
+    const competitionModules: any[] = [];
+    for (const module of data) {
+      if (module.is_competition_portal && hasPermission(module.name || '', 'read')) {
+        competitionModules.push({
+          id: module.name || '',
+          label: module.label || module.name || '',
+          icon: module.icon || 'Trophy',
+          path: module.path || `/app/competition-portal/${module.name}`
+        });
+      }
+    }
 
     console.log('Loaded competition portal modules:', competitionModules);
     return competitionModules;
