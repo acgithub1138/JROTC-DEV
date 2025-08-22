@@ -142,11 +142,11 @@ export const ModulesManagement: React.FC = () => {
     setEditingModule(module);
     setFormData({
       name: module.name,
-      icon: module.icon,
-      path: module.path || '',
-      is_active: module.is_active,
-      is_competition_portal: module.is_competition_portal,
-      sort_order: module.sort_order
+      icon: (module as any).icon,
+      path: (module as any).path || '',
+      is_active: (module as any).is_active,
+      is_competition_portal: (module as any).is_competition_portal,
+      sort_order: (module as any).sort_order
     });
     setIsDialogOpen(true);
   };
@@ -274,14 +274,14 @@ export const ModulesManagement: React.FC = () => {
                     <div>
                       <h3 className="font-medium">{module.name}</h3>
                       <p className="text-sm text-gray-500">
-                        Icon: {module.icon} | Path: {module.path || 'Not set'} | Order: {module.sort_order}
+                        Icon: {(module as any).icon} | Path: {(module as any).path || 'Not set'} | Order: {(module as any).sort_order}
                       </p>
                     </div>
                     <div className="flex space-x-2">
-                      <Badge variant={module.is_active ? 'default' : 'secondary'}>
-                        {module.is_active ? 'Active' : 'Inactive'}
+                      <Badge variant={(module as any).is_active ? 'default' : 'secondary'}>
+                        {(module as any).is_active ? 'Active' : 'Inactive'}
                       </Badge>
-                      {module.is_competition_portal && (
+                      {(module as any).is_competition_portal && (
                         <Badge variant="outline">Competition</Badge>
                       )}
                     </div>

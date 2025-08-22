@@ -1,14 +1,14 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { cn } from '@/lib/utils';
 import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from '@/components/ui/sheet';
 import { useAuth } from '@/contexts/AuthContext';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { usePortal } from '@/contexts/PortalContext';
 import { useThemes } from '@/hooks/useThemes';
 import { useNavigate } from 'react-router-dom';
 import { Trophy, Calendar, Users, FileText, BarChart3, Settings, ArrowLeft, Shield, Award, Target, Clipboard, Search } from 'lucide-react';
+import { supabase } from '@/integrations/supabase/client';
 
 interface CompetitionSidebarProps {
   className?: string;
@@ -32,59 +32,60 @@ const DEFAULT_THEME = {
   link_hover: '#1f2937' // Hover background (gray-800)
 };
 
-// Competition portal specific menu items for full access
-const competitionMenuItems = [{
-  id: 'competition-dashboard',
-  label: 'Dashboard',
-  icon: Trophy,
-  path: '/app/competition-portal/dashboard'
-}, {
-  id: 'competitions',
-  label: 'Hosting Competitions',
-  icon: Award,
-  path: '/app/competition-portal/competitions'
-}, {
-  id: 'open-competitions',
-  label: 'Open Competitions',
-  icon: Search,
-  path: '/app/competition-portal/open-competitions'
-}, {
-  id: 'my-competitions',
-  label: 'My Competitions',
-  icon: Target,
-  path: '/app/competition-portal/my-competitions'
-},{
-  id: 'score-sheets',
-  label: 'Score Sheets',
-  icon: Clipboard,
-  path: '/app/competition-portal/score-sheets'
-}, {
-  id: 'judges',
-  label: 'Judges',
-  icon: Shield,
-  path: '/app/competition-portal/judges'
-}];
+// Icon map for dynamic icon rendering
+const iconMap: { [key: string]: React.ComponentType<{ className?: string }> } = {
+  Trophy, Calendar, Users, FileText, BarChart3, Settings, Shield, Award, Target, Clipboard, Search
+};
 
-// Limited menu items for schools with competition_module but not competition_portal
-const competitionModuleMenuItems = [{
-  id: 'open-competitions',
-  label: 'Open Competitions',
-  icon: Search,
-  path: '/app/competition-portal/open-competitions'
-}, {
-  id: 'my-competitions',
-  label: 'My Competitions',
-  icon: Target,
-  path: '/app/competition-portal/my-competitions'
-}];
+// Fetch menu items from database for competition portal
+const fetchCompetitionMenuItemsFromDatabase = async (userProfile: any) => {
+  try {
+    // Use the role enum value to get role_id first
+    const { data: roleData, error: roleError } = await supabase
+      .from('user_roles')
+      .select('id')
+      .eq('role_name', userProfile?.role)
+      .single();
+      
+    if (roleError || !roleData?.id) {
+      console.error('Error fetching role ID:', roleError);
+      return [];
+    }
 
-// Very limited menu items for schools without any competition access
-const limitedMenuItems = [{
-  id: 'open-competitions',
-  label: 'Open Competitions',
-  icon: Search,
-  path: '/app/competition-portal/open-competitions'
-}];
+    const { data, error } = await supabase
+      .from('permission_modules')
+      .select(`
+        id,
+        name,
+        icon,
+        path,
+        sort_order,
+        is_active,
+        is_competition_portal,
+        role_permissions!inner(enabled, role_id)
+      `)
+      .eq('is_active', true)
+      .eq('is_competition_portal', true)
+      .eq('role_permissions.enabled', true)
+      .eq('role_permissions.role_id', roleData.id)
+      .order('sort_order');
+
+    if (error) {
+      console.error('Error fetching competition menu items:', error);
+      return [];
+    }
+
+    return (data || []).map(module => ({
+      id: module.name.toLowerCase().replace(/\s+/g, '-'),
+      label: module.name,
+      icon: iconMap[module.icon] || Trophy,
+      path: module.path || `/app/competition-portal/${module.name.toLowerCase().replace(/\s+/g, '-')}`
+    }));
+  } catch (error) {
+    console.error('Error in fetchCompetitionMenuItemsFromDatabase:', error);
+    return [];
+  }
+};
 
 export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   className,
@@ -98,10 +99,31 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
   const { setPortal } = usePortal();
   const { themes } = useThemes();
   const navigate = useNavigate();
+  const [menuItems, setMenuItems] = useState<any[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
-  // Check permissions for Events and Judges modules
-  const eventsPermissions = useTablePermissions('cp_events');
-  const judgesPermissions = useTablePermissions('cp_judges');
+  // Load menu items from database
+  useEffect(() => {
+    const loadMenuItems = async () => {
+      if (!userProfile?.role) {
+        setIsLoading(false);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const items = await fetchCompetitionMenuItemsFromDatabase(userProfile);
+        setMenuItems(items);
+      } catch (error) {
+        console.error('Error loading competition menu items:', error);
+        setMenuItems([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadMenuItems();
+  }, [userProfile?.role]);
 
   // Get the active theme that matches the user's JROTC program or use default
   const activeTheme = themes.find(theme => theme.is_active && theme.jrotc_program === userProfile?.schools?.jrotc_program);
@@ -115,35 +137,34 @@ export const CompetitionSidebar: React.FC<CompetitionSidebarProps> = ({
     link_hover: (activeTheme as any)?.link_hover || DEFAULT_THEME.link_hover
   };
 
-  // Determine which menu items to show based on access level
-  const hasCompetitionPortal = userProfile?.schools?.competition_portal === true;
-  const hasCompetitionModule = userProfile?.schools?.competition_module === true;
-  
-  // Filter menu items based on module permissions
-  const getFilteredMenuItems = (items: typeof competitionMenuItems) => {
-    return items.filter(item => {
-      if (item.id === 'events') {
-        return eventsPermissions.canView;
-      }
-      if (item.id === 'judges') {
-        return judgesPermissions.canView;
-      }
-      return true;
-    });
-  };
-  
-  const menuItems = hasCompetitionPortal 
-    ? getFilteredMenuItems(competitionMenuItems)
-    : hasCompetitionModule 
-      ? getFilteredMenuItems(competitionModuleMenuItems)
-      : getFilteredMenuItems(limitedMenuItems);
+  // Show loading state while menu items are being fetched
+  if (isLoading) {
+    return (
+      <div className={cn('fixed left-0 top-0 h-full w-64 text-white flex flex-col z-40', className)} 
+           style={{ backgroundColor: DEFAULT_THEME.primary_color }}>
+        <div className="p-6">
+          <div className="flex items-center space-x-2">
+            <Trophy className="w-8 h-8 text-blue-400" />
+            <h1 className="text-xl font-bold">Competition Portal</h1>
+          </div>
+        </div>
+        <ScrollArea className="flex-1 px-3">
+          <div className="space-y-1">
+            {[1, 2, 3].map(i => (
+              <div key={i} className="h-10 bg-gray-700 rounded animate-pulse" />
+            ))}
+          </div>
+        </ScrollArea>
+      </div>
+    );
+  }
 
   const handleReturnToCCC = () => {
     setPortal('ccc');
     navigate('/app');
   };
   
-  const handleMenuItemClick = (item: typeof competitionMenuItems[0]) => {
+  const handleMenuItemClick = (item: any) => {
     onModuleChange(item.id);
     if (isMobile && setSidebarOpen) {
       setSidebarOpen(false);

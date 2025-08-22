@@ -2389,24 +2389,30 @@ export type Database = {
           created_at: string
           description: string | null
           id: string
+          is_active: boolean | null
           label: string
           name: string
+          sort_order: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
           label: string
           name: string
+          sort_order?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
           id?: string
+          is_active?: boolean | null
           label?: string
           name?: string
+          sort_order?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -2415,28 +2421,43 @@ export type Database = {
         Row: {
           created_at: string
           description: string | null
+          icon: string | null
           id: string
+          is_active: boolean | null
+          is_competition_portal: boolean | null
           label: string
           name: string
           order: number | null
+          path: string | null
+          sort_order: number | null
           updated_at: string
         }
         Insert: {
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_active?: boolean | null
+          is_competition_portal?: boolean | null
           label: string
           name: string
           order?: number | null
+          path?: string | null
+          sort_order?: number | null
           updated_at?: string
         }
         Update: {
           created_at?: string
           description?: string | null
+          icon?: string | null
           id?: string
+          is_active?: boolean | null
+          is_competition_portal?: boolean | null
           label?: string
           name?: string
           order?: number | null
+          path?: string | null
+          sort_order?: number | null
           updated_at?: string
         }
         Relationships: []
@@ -3451,6 +3472,22 @@ export type Database = {
         Args: { school_uuid: string }
         Returns: undefined
       }
+      crosstab: {
+        Args: { "": string }
+        Returns: Record<string, unknown>[]
+      }
+      crosstab2: {
+        Args: { "": string }
+        Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_2"][]
+      }
+      crosstab3: {
+        Args: { "": string }
+        Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_3"][]
+      }
+      crosstab4: {
+        Args: { "": string }
+        Returns: Database["public"]["CompositeTypes"]["tablefunc_crosstab_4"][]
+      }
       current_user_has_permission: {
         Args: { action_name: string; module_name: string }
         Returns: boolean
@@ -3782,7 +3819,24 @@ export type Database = {
         | "special_staff"
     }
     CompositeTypes: {
-      [_ in never]: never
+      tablefunc_crosstab_2: {
+        row_name: string | null
+        category_1: string | null
+        category_2: string | null
+      }
+      tablefunc_crosstab_3: {
+        row_name: string | null
+        category_1: string | null
+        category_2: string | null
+        category_3: string | null
+      }
+      tablefunc_crosstab_4: {
+        row_name: string | null
+        category_1: string | null
+        category_2: string | null
+        category_3: string | null
+        category_4: string | null
+      }
     }
   }
 }

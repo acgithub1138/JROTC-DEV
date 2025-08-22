@@ -14,6 +14,8 @@ import { arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy }
 import { AddRoleDialog } from './AddRoleDialog';
 import { UserRolesTable } from './UserRolesTable';
 import { PortalPermissionsTable } from './PortalPermissionsTable';
+import { ModulesManagement } from './ModulesManagement';
+import { ActionsManagement } from './ActionsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
 // Helper function to get role colors
@@ -211,7 +213,9 @@ export const RoleManagementPage: React.FC = () => {
         <TabsList className="mb-6">
           <TabsTrigger value="permissions">Role Permissions</TabsTrigger>
           <TabsTrigger value="roles">Manage Roles</TabsTrigger>
-        </TabsList>        
+          <TabsTrigger value="modules">Modules</TabsTrigger>
+          <TabsTrigger value="actions">Actions</TabsTrigger>
+        </TabsList>
         
         <TabsContent value="permissions">
           <Card className="mb-6">
@@ -273,6 +277,14 @@ export const RoleManagementPage: React.FC = () => {
 
         <TabsContent value="roles">
           <UserRolesTable />
+        </TabsContent>
+
+        <TabsContent value="modules">
+          <ModulesManagement />
+        </TabsContent>
+
+        <TabsContent value="actions">
+          <ActionsManagement />
         </TabsContent>
       </Tabs>
     </div>;

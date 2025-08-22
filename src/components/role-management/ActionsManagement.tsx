@@ -132,8 +132,8 @@ export const ActionsManagement: React.FC = () => {
     setFormData({
       name: action.name,
       description: action.description || '',
-      is_active: action.is_active,
-      sort_order: action.sort_order
+      is_active: (action as any).is_active,
+      sort_order: (action as any).sort_order
     });
     setIsDialogOpen(true);
   };
@@ -239,11 +239,11 @@ export const ActionsManagement: React.FC = () => {
                     <div>
                       <h3 className="font-medium">{action.name}</h3>
                       <p className="text-sm text-gray-500">
-                        {action.description || 'No description'} | Order: {action.sort_order}
+                        {action.description || 'No description'} | Order: {(action as any).sort_order}
                       </p>
                     </div>
-                    <Badge variant={action.is_active ? 'default' : 'secondary'}>
-                      {action.is_active ? 'Active' : 'Inactive'}
+                    <Badge variant={(action as any).is_active ? 'default' : 'secondary'}>
+                      {(action as any).is_active ? 'Active' : 'Inactive'}
                     </Badge>
                   </div>
                   <div className="flex space-x-2">
