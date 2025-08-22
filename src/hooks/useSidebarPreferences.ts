@@ -137,14 +137,6 @@ const getMenuItemsFromPermissions = (
       order: 9
     },
     {
-      id: 'competitions',
-      label: 'Competitions',
-      icon: 'Trophy',
-      path: '/app/competitions',
-      isVisible: hasPermission('competitions', 'sidebar'),
-      order: 10
-    },
-    {
       id: 'incident_management',
       label: 'Incidents',
       icon: 'AlertTriangle',
