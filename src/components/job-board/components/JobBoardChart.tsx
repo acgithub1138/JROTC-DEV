@@ -34,10 +34,6 @@ const JobBoardChartInner = React.memo(({ jobs, onRefresh, onUpdateJob, readOnly 
   // Use passed permissions or fallback to hook
   const hookPermissions = useJobBoardPermissions();
   const { canAssign, canUpdate } = permissions || hookPermissions;
-  
-  // User can modify layout if they have either update or assign permissions
-  const canModifyLayout = canUpdate || canAssign;
-  
   const { savedPositionsMap, handleNodesChange, resetLayout, isResetting } = useJobBoardLayout(canModifyLayout);
   const [isFullscreen, setIsFullscreen] = useState(false);
   
