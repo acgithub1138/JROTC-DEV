@@ -125,7 +125,7 @@ export const UserTable = ({
             <TableCell className="py-2">
               <Badge variant="secondary" className={`${getRoleColor(user.role)} flex items-center gap-1 w-fit`}>
                 {getRoleIcon(user.role)}
-                {user.role.replace('_', ' ').toUpperCase()}
+                {user.user_roles?.role_name || user.role.replace('_', ' ').toUpperCase()}
               </Badge>
             </TableCell>
             <TableCell className="py-2">

@@ -24,7 +24,8 @@ export const useUserManagement = () => {
           created_at,
           school_id,
           active,
-          schools (name)
+          schools (name),
+          user_roles (role_name)
         `)
         .order('created_at', { ascending: false });
 

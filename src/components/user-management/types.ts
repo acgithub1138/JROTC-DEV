@@ -13,6 +13,7 @@ export interface User {
   school_id: string;
   active: boolean;
   schools?: { name: string };
+  user_roles?: { role_name: string };
 }
 
 export interface School {
