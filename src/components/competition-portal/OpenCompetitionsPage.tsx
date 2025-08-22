@@ -19,6 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
+import { useCompetitionSchoolsPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
@@ -40,6 +41,7 @@ export const OpenCompetitionsPage = () => {
   } = useAuth();
   const isMobile = useIsMobile();
   const { deleteEvent } = useEvents({ eventType: '', assignedTo: '' });
+  const { canAccess } = useCompetitionSchoolsPermissions();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -271,35 +273,49 @@ export const OpenCompetitionsPage = () => {
             </Card>)}
         </div> : <Tabs defaultValue="open">
           <TabsList className="grid w-full grid-cols-3">
-            <TabsTrigger value="open">Open</TabsTrigger>
-            <TabsTrigger value="registered">Registered</TabsTrigger>
-            <TabsTrigger value="schedule">Schedule</TabsTrigger>
+            {canAccess && <TabsTrigger value="open">Open</TabsTrigger>}
+            {canAccess && <TabsTrigger value="registered">Registered</TabsTrigger>}
+            {canAccess && <TabsTrigger value="schedule">Schedule</TabsTrigger>}
           </TabsList>
 
-          <TabsContent value="open">
-            {openCompetitionsList && openCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={openCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
-                <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
-                <p className="text-gray-600">
-                  There are currently no open competitions available for registration.
-                  Check back later for new opportunities!
-                </p>
-              </div>}
-          </TabsContent>
+          {canAccess && (
+            <>
+              <TabsContent value="open">
+                {openCompetitionsList && openCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={openCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
+                    <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Open Competitions</h3>
+                    <p className="text-gray-600">
+                      There are currently no open competitions available for registration.
+                      Check back later for new opportunities!
+                    </p>
+                  </div>}
+              </TabsContent>
 
-          <TabsContent value="registered">
-            {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={registeredCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
-                <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Competitions</h3>
-                <p className="text-gray-600">
-                  You have not registered for any competitions yet.
-                </p>
-              </div>}
-          </TabsContent>
+              <TabsContent value="registered">
+                {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? <OpenCompetitionCards competitions={registeredCompetitionsList} registrations={registrations || []} onViewDetails={handleViewDetails} onRegisterInterest={handleRegisterInterest} onCancelRegistration={handleCancelRegistration} /> : <div className="text-center py-12">
+                    <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                    <h3 className="text-lg font-medium text-gray-900 mb-2">No Registered Competitions</h3>
+                    <p className="text-gray-600">
+                      You have not registered for any competitions yet.
+                    </p>
+                  </div>}
+              </TabsContent>
 
-          <TabsContent value="schedule">
-            <ScheduleTab registeredCompetitions={registeredCompetitionsList} />
-          </TabsContent>
+              <TabsContent value="schedule">
+                <ScheduleTab registeredCompetitions={registeredCompetitionsList} />
+              </TabsContent>
+            </>
+          )}
+
+          {!canAccess && (
+            <div className="text-center py-12">
+              <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+              <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
+              <p className="text-gray-600">
+                You don't have permission to view this content.
+              </p>
+            </div>
+          )}
         </Tabs>}
 
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
