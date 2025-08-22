@@ -72,14 +72,23 @@ export const useParentCadetTasks = () => {
           const contact = contacts.find(c => c.cadet_id === cadetId);
           
           try {
-            // Fetch tasks assigned to this cadet
-            const { data: tasks } = await supabase
+            // Debug: Log the cadet ID we're searching for
+            console.log('Searching for tasks assigned to cadet ID:', cadetId);
+            
+            // Fetch tasks - try different query approaches
+            const { data: tasks, error: tasksError } = await supabase
               .from('tasks')
               .select('id, task_number, title, status, priority, due_date, assigned_to')
-              .contains('assigned_to', [cadetId]);
+              .or(`assigned_to.cs.{${cadetId}},assigned_to.eq.${cadetId}`);
+            
+            console.log('Tasks query result:', { tasks, tasksError, cadetId });
               
-            if (tasks) {
+            if (tasksError) {
+              console.error('Tasks query error:', tasksError);
+            } else if (tasks) {
+              console.log(`Found ${tasks.length} tasks for cadet ${cadetId}`);
               tasks.forEach((task) => {
+                console.log('Adding task:', task.task_number, task.title);
                 allTasks.push({
                   id: task.id,
                   task_number: task.task_number || 'N/A',
@@ -94,18 +103,24 @@ export const useParentCadetTasks = () => {
               });
             }
           } catch (taskError) {
-            console.log('Error fetching tasks for cadet:', cadetId, taskError);
+            console.error('Error fetching tasks for cadet:', cadetId, taskError);
           }
 
           try {
             // Fetch subtasks assigned to this cadet
-            const { data: subtasks } = await supabase
+            const { data: subtasks, error: subtasksError } = await supabase
               .from('subtasks')
               .select('id, task_number, title, status, priority, due_date, assigned_to')
               .eq('assigned_to', cadetId);
+            
+            console.log('Subtasks query result:', { subtasks, subtasksError, cadetId });
               
-            if (subtasks) {
+            if (subtasksError) {
+              console.error('Subtasks query error:', subtasksError);
+            } else if (subtasks) {
+              console.log(`Found ${subtasks.length} subtasks for cadet ${cadetId}`);
               subtasks.forEach((subtask) => {
+                console.log('Adding subtask:', subtask.task_number, subtask.title);
                 allTasks.push({
                   id: subtask.id,
                   task_number: subtask.task_number || 'N/A',
@@ -121,9 +136,12 @@ export const useParentCadetTasks = () => {
               });
             }
           } catch (subtaskError) {
-            console.log('Error fetching subtasks for cadet:', cadetId, subtaskError);
+            console.error('Error fetching subtasks for cadet:', cadetId, subtaskError);
           }
         }
+
+        console.log('Total tasks found:', allTasks.length);
+        console.log('All tasks:', allTasks.map(t => ({ task_number: t.task_number, title: t.title })));
 
         // Calculate task counts
         const now = new Date();
