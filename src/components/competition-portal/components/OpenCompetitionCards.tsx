@@ -2,7 +2,7 @@ import React from 'react';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Trophy, DollarSign, Eye, X, FileText } from 'lucide-react';
 import { format } from 'date-fns';
 import { useOpenCompsOpenPermissions } from '@/hooks/useModuleSpecificPermissions';
 
@@ -21,6 +21,9 @@ interface Competition {
   fee?: number;
   program?: string;
   hosting_school?: string;
+  sop?: string;
+  sop_link?: string;
+  sop_text?: string;
 }
 
 interface OpenCompetitionCardsProps {
@@ -164,6 +167,37 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               <div className="text-sm">
                 <strong>Hosting School:</strong> {competition.hosting_school || 'Not specified'}
               </div>
+              {(competition.sop_link || competition.sop_text) && (
+                <div className="flex items-center gap-2">
+                  <FileText className="w-4 h-4" />
+                  <span>
+                    <strong>SOP:</strong>{' '}
+                    {competition.sop_link ? (
+                      <a 
+                        href={competition.sop_link}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="text-primary hover:underline cursor-pointer"
+                      >
+                        {competition.sop_link}
+                      </a>
+                    ) : competition.sop_text ? (
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        className="h-auto p-1 text-primary hover:text-primary-dark"
+                        onClick={() => {
+                          // Create a modal or popup to show SOP text
+                          alert(competition.sop_text);
+                        }}
+                      >
+                        <Eye className="w-3 h-3 mr-1" />
+                        View
+                      </Button>
+                    ) : null}
+                  </span>
+                </div>
+              )}
             </div>
             
             <div className="flex gap-1">
