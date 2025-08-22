@@ -121,14 +121,22 @@ export const useCadetManagement = () => {
       if (error) {
         // Extract specific error message from edge function response
         let errorMessage = 'Failed to create cadet';
-        if (data && data.error) {
-          errorMessage = data.error;
-        } else if (error.message) {
+        
+        // For edge function errors, the actual error details are often in error.context or error.details
+        if (error.context && typeof error.context === 'string') {
+          try {
+            const errorData = JSON.parse(error.context);
+            if (errorData.error) errorMessage = errorData.error;
+          } catch (e) {
+            // If parsing fails, use the context as is
+            errorMessage = error.context;
+          }
+        } else if (error.message && !error.message.includes('Edge Function returned a non-2xx status code')) {
           errorMessage = error.message;
         }
         
         // Check for specific error types and provide user-friendly messages
-        if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists')) {
+        if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists') || errorMessage.includes('A user with this email address has already been registered')) {
           errorMessage = 'Email address already exists. Please change it and try again.';
         }
         
@@ -197,14 +205,22 @@ export const useCadetManagement = () => {
           if (error) {
             // Extract specific error message from edge function response
             let errorMessage = 'Unknown error';
-            if (data && data.error) {
-              errorMessage = data.error;
-            } else if (error.message) {
+            
+            // For edge function errors, the actual error details are often in error.context or error.details
+            if (error.context && typeof error.context === 'string') {
+              try {
+                const errorData = JSON.parse(error.context);
+                if (errorData.error) errorMessage = errorData.error;
+              } catch (e) {
+                // If parsing fails, use the context as is
+                errorMessage = error.context;
+              }
+            } else if (error.message && !error.message.includes('Edge Function returned a non-2xx status code')) {
               errorMessage = error.message;
             }
             
             // Check for specific error types and provide user-friendly messages
-            if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists')) {
+            if (errorMessage.includes('already been registered') || errorMessage.includes('email_exists') || errorMessage.includes('A user with this email address has already been registered')) {
               errorMessage = 'Email address already exists';
             }
             
