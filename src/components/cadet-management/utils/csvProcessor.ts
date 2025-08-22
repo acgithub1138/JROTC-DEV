@@ -53,7 +53,7 @@ export function validateCadetData(cadet: NewCadet): string[] {
 
 export function validateCSVHeaders(headers: string[]): string[] {
   const requiredHeaders = ['First Name', 'Last Name', 'Email', 'Role'];
-  const optionalHeaders = ['Grade', 'Rank', 'Flight'];
+  const optionalHeaders = ['Grade', 'Rank', 'Flight', 'Cadet Year', 'Year'];
   const validHeaders = [...requiredHeaders, ...optionalHeaders];
   
   const errors: string[] = [];

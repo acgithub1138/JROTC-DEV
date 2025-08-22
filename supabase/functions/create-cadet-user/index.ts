@@ -159,8 +159,8 @@ serve(async (req) => {
     // Use a more reliable approach with retries for profile updates
     const updateProfile = async (retries = 3): Promise<void> => {
       for (let i = 0; i < retries; i++) {
-        // Wait for profile to be created by trigger
-        await new Promise(resolve => setTimeout(resolve, 1000 * (i + 1)))
+        // Wait for profile to be created by trigger (reduced delay for bulk operations)
+        await new Promise(resolve => setTimeout(resolve, 500 * (i + 1)))
         
         const { error: profileError } = await supabaseAdmin
           .from('profiles')

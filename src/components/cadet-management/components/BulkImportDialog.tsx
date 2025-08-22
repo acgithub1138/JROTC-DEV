@@ -53,11 +53,25 @@ export const BulkImportDialog = ({
     errors: string[];
   } | null>(null);
   const [isImporting, setIsImporting] = useState(false);
+  // Helper function to convert numeric cadet year to ordinal format
+  const convertCadetYear = (year: string): string => {
+    if (!year) return '';
+    const numericYear = year.trim();
+    switch (numericYear) {
+      case '1': return '1st';
+      case '2': return '2nd';
+      case '3': return '3rd';
+      case '4': return '4th';
+      default: return year; // Return as-is if already in correct format or invalid
+    }
+  };
+
   const handleFileUpload = useCallback(async (uploadedFile: File) => {
     try {
       const csvText = await uploadedFile.text();
       const rawData = parseCSV(csvText);
       const processed = rawData.map((row, index) => {
+        const rawCadetYear = row['Cadet Year'] || row['Year'] || '';
         const cadet: NewCadet = {
           first_name: row['First Name'] || '',
           last_name: row['Last Name'] || '',
@@ -66,7 +80,7 @@ export const BulkImportDialog = ({
           grade: row['Grade'] || '',
           rank: row['Rank'] || '',
           flight: row['Flight'] || '',
-          cadet_year: row['Cadet Year'] || row['Year'] || ''
+          cadet_year: convertCadetYear(rawCadetYear)
         };
         const errors = validateCadetData(cadet);
         return {
