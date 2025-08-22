@@ -4,7 +4,13 @@ import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
-import { useModuleTabs } from '@/hooks/useModuleTabs';
+import { 
+  useCompetitionEventsPermissions,
+  useCompetitionResourcesPermissions,
+  useCompetitionSchoolsPermissions,
+  useCompetitionSchedulePermissions,
+  useCompetitionResultsPermissions
+} from '@/hooks/useModuleSpecificPermissions';
 import { CompetitionEventsTab } from './tabs/CompetitionEventsTab';
 import { CompetitionResourcesTab } from './tabs/CompetitionResourcesTab';
 import { CompetitionSchoolsTab } from './tabs/CompetitionSchoolsTab';
@@ -15,8 +21,46 @@ export const CompetitionDetailsPage = () => {
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
   
-  // Use hardcoded parent module ID for now
-  const { tabs, isLoading: tabsLoading } = useModuleTabs('hosting-competitions');
+  // Get permissions for each tab
+  const eventsPermissions = useCompetitionEventsPermissions();
+  const resourcesPermissions = useCompetitionResourcesPermissions();
+  const schoolsPermissions = useCompetitionSchoolsPermissions();
+  const schedulePermissions = useCompetitionSchedulePermissions();
+  const resultsPermissions = useCompetitionResultsPermissions();
+
+  // Define available tabs based on permissions
+  const availableTabs = [
+    {
+      id: 'events',
+      name: 'cp_comp_events',
+      label: 'Events',
+      canAccess: eventsPermissions.canAccess
+    },
+    {
+      id: 'resources',
+      name: 'cp_comp_resources',
+      label: 'Resources',
+      canAccess: resourcesPermissions.canAccess
+    },
+    {
+      id: 'schools',
+      name: 'cp_comp_schools',
+      label: 'Schools',
+      canAccess: schoolsPermissions.canAccess
+    },
+    {
+      id: 'schedule',
+      name: 'cp_schedules',
+      label: 'Schedule',
+      canAccess: schedulePermissions.canAccess
+    },
+    {
+      id: 'results',
+      name: 'cp_results',
+      label: 'Results',
+      canAccess: resultsPermissions.canAccess
+    }
+  ].filter(tab => tab.canAccess);
 
   console.log('Route params:', params);
   console.log('Competition ID:', competitionId);
@@ -42,22 +86,17 @@ export const CompetitionDetailsPage = () => {
         </Button>
       </div>
 
-      {tabsLoading ? (
-        <div className="space-y-4">
-          <div className="h-10 bg-muted rounded animate-pulse" />
-          <div className="h-64 bg-muted rounded animate-pulse" />
-        </div>
-      ) : tabs.length > 0 ? (
-        <Tabs defaultValue={tabs[0]?.name} className="w-full">
-          <TabsList className={`grid w-full grid-cols-${Math.min(tabs.length, 6)}`}>
-            {tabs.map((tab) => (
+      {availableTabs.length > 0 ? (
+        <Tabs defaultValue={availableTabs[0]?.name} className="w-full">
+          <TabsList className={`grid w-full grid-cols-${Math.min(availableTabs.length, 6)}`}>
+            {availableTabs.map((tab) => (
               <TabsTrigger key={tab.id} value={tab.name}>
                 {tab.label}
               </TabsTrigger>
             ))}
           </TabsList>
           
-          {tabs.map((tab) => (
+          {availableTabs.map((tab) => (
             <TabsContent key={tab.id} value={tab.name}>
               <Card>
                 <CardContent>

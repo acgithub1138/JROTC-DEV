@@ -196,3 +196,33 @@ export const useCompetitionEventsPermissions = () => {
     canCreate: hasPermission('cp_comp_events', 'create'),
   };
 };
+
+// Competition Resources specific permissions
+export const useCompetitionResourcesPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_comp_resources');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
+// Competition Schools specific permissions
+export const useCompetitionSchoolsPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_comp_schools');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
+
+// Competition Results specific permissions
+export const useCompetitionResultsPermissions = () => {
+  const modulePermissions = useModulePermissions('cp_comp_results');
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+  };
+};
