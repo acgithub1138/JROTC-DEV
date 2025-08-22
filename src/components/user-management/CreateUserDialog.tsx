@@ -10,6 +10,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { UserPlus, GraduationCap, Users, Shield } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useToast } from '@/hooks/use-toast';
 
 import { UserRole } from './types';
 
@@ -26,6 +27,7 @@ interface CreateUserDialogProps {
 
 const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigger, onUserCreated }) => {
   const { createUser, userProfile } = useAuth();
+  const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [open, setOpen] = useState(false);
   const [schools, setSchools] = useState<School[]>([]);
@@ -84,32 +86,63 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
     
     setLoading(true);
     
-    // Use the edge function instead of direct createUser call to ensure proper role_id setup
-    const { data, error } = await supabase.functions.invoke('create-cadet-user', {
-      body: {
-        email: formData.email,
-        password: formData.password,
-        first_name: formData.firstName,
-        last_name: formData.lastName,
-        role: formData.role,
-        school_id: formData.schoolId,
-      },
-    });
+    try {
+      // Use the edge function instead of direct createUser call to ensure proper role_id setup
+      const { data, error } = await supabase.functions.invoke('create-cadet-user', {
+        body: {
+          email: formData.email,
+          password: formData.password,
+          first_name: formData.firstName,
+          last_name: formData.lastName,
+          role: formData.role,
+          school_id: formData.schoolId,
+        },
+      });
 
-    if (error) {
-      console.error('User creation error:', error);
-    } else if (data?.error) {
-      console.error('User creation failed:', data.error);
-    } else {
-      setFormData(initialFormData);
-      resetChanges();
-      setOpen(false);
-      if (onUserCreated) {
-        onUserCreated();
+      if (error) {
+        console.error('User creation error:', error);
+        toast({
+          title: "User Creation Failed",
+          description: "There was an error creating the user. Please try again.",
+          variant: "destructive",
+        });
+      } else if (data?.error) {
+        console.error('User creation failed:', data.error);
+        // Handle specific error messages
+        let errorMessage = "Failed to create user. Please try again.";
+        if (data.error.includes("admin-only roles")) {
+          errorMessage = "You don't have permission to assign this role. Contact your administrator.";
+        } else if (data.error.includes("already exists")) {
+          errorMessage = "A user with this email already exists.";
+        }
+        toast({
+          title: "User Creation Failed",
+          description: errorMessage,
+          variant: "destructive",
+        });
+      } else {
+        // Success
+        toast({
+          title: "User Created",
+          description: "User has been created successfully.",
+        });
+        setFormData(initialFormData);
+        resetChanges();
+        setOpen(false);
+        if (onUserCreated) {
+          onUserCreated();
+        }
       }
+    } catch (err) {
+      console.error('Unexpected error:', err);
+      toast({
+        title: "Error",
+        description: "An unexpected error occurred. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
     }
-    
-    setLoading(false);
   };
 
   const getRoleIcon = (role: UserRole) => {
