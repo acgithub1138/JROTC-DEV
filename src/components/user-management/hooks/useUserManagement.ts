@@ -175,7 +175,6 @@ export const useUserManagement = () => {
           throw new Error(`Invalid role: ${updates.role}`);
         }
 
-        updateData.role = updates.role;
         updateData.role_id = roleData.id;
       }
 
