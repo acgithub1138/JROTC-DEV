@@ -19,7 +19,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { OpenCompetitionCards } from './components/OpenCompetitionCards';
 import { ScheduleTab } from './components/ScheduleTab';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
-import { useOpenCompsOpenPermissions, useOpenCompsRegisteredPermissions, useOpenCompsSchedulePermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useOpenCompsOpenPermissions, useOpenCompsRegisteredPermissions, useOpenCompsSchedulePermissions, useMyCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 const SOPTextModal = ({ isOpen, onClose, sopText }: { isOpen: boolean; onClose: () => void; sopText: string }) => (
   <Dialog open={isOpen} onOpenChange={onClose}>
@@ -44,6 +44,7 @@ export const OpenCompetitionsPage = () => {
   const openPermissions = useOpenCompsOpenPermissions();
   const registeredPermissions = useOpenCompsRegisteredPermissions();
   const { canAccess: canAccessSchedule } = useOpenCompsSchedulePermissions();
+  const myCompetitionsPermissions = useMyCompetitionsPermissions();
   const [selectedCompetitionId, setSelectedCompetitionId] = useState<string | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isRegistrationModalOpen, setIsRegistrationModalOpen] = useState(false);
@@ -274,10 +275,16 @@ export const OpenCompetitionsPage = () => {
               </CardContent>
             </Card>)}
         </div> : <Tabs defaultValue="open">
-          <TabsList className="grid w-full grid-cols-3">
+          <TabsList className={`grid w-full grid-cols-${[
+            openPermissions.canAccess,
+            registeredPermissions.canAccess,
+            canAccessSchedule,
+            myCompetitionsPermissions.canAccess
+          ].filter(Boolean).length}`}>
             {openPermissions.canAccess && <TabsTrigger value="open">Open</TabsTrigger>}
             {registeredPermissions.canAccess && <TabsTrigger value="registered">Registered</TabsTrigger>}
             {canAccessSchedule && <TabsTrigger value="schedule">Schedule</TabsTrigger>}
+            {myCompetitionsPermissions.canAccess && <TabsTrigger value="my-competitions">My Competitions</TabsTrigger>}
           </TabsList>
 
           {openPermissions.canAccess && (
@@ -311,7 +318,36 @@ export const OpenCompetitionsPage = () => {
             </TabsContent>
           )}
 
-          {!openPermissions.canAccess && !registeredPermissions.canAccess && !canAccessSchedule && (
+          {myCompetitionsPermissions.canAccess && (
+            <TabsContent value="my-competitions">
+              {registeredCompetitionsList && registeredCompetitionsList.length > 0 ? (
+                <OpenCompetitionCards 
+                  competitions={registeredCompetitionsList} 
+                  registrations={registrations || []} 
+                  onViewDetails={handleViewDetails} 
+                  onRegisterInterest={handleRegisterInterest} 
+                  onCancelRegistration={handleCancelRegistration} 
+                  permissions={{
+                    canRead: myCompetitionsPermissions.canRead,
+                    canViewDetails: myCompetitionsPermissions.canView || myCompetitionsPermissions.canRead,
+                    canCreate: myCompetitionsPermissions.canCreate,
+                    canUpdate: myCompetitionsPermissions.canUpdate,
+                    canDelete: myCompetitionsPermissions.canDelete,
+                  }} 
+                />
+              ) : (
+                <div className="text-center py-12">
+                  <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No My Competitions</h3>
+                  <p className="text-gray-600">
+                    You have not registered for any competitions yet.
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          )}
+
+          {!openPermissions.canAccess && !registeredPermissions.canAccess && !canAccessSchedule && !myCompetitionsPermissions.canAccess && (
             <div className="text-center py-12">
               <Trophy className="w-16 h-16 text-gray-300 mx-auto mb-4" />
               <h3 className="text-lg font-medium text-gray-900 mb-2">Access Restricted</h3>
