@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
+import { isTaskDone } from '@/utils/taskStatusUtils';
 
 export interface CadetTask {
   id: string;
@@ -76,10 +77,12 @@ export const useParentCadetTasks = () => {
             console.log('Searching for tasks assigned to cadet ID:', cadetId);
             
             // Fetch tasks assigned to this cadet (assigned_to is a single UUID)
+            // Filter out completed and cancelled tasks
             const { data: tasks, error: tasksError } = await supabase
               .from('tasks')
               .select('id, task_number, title, status, priority, due_date, assigned_to')
-              .eq('assigned_to', cadetId);
+              .eq('assigned_to', cadetId)
+              .not('status', 'in', '(completed,cancelled)');
             
             console.log('Tasks query result:', { tasks, tasksError, cadetId });
               
@@ -108,10 +111,12 @@ export const useParentCadetTasks = () => {
 
           try {
             // Fetch subtasks assigned to this cadet
+            // Filter out completed and cancelled subtasks
             const { data: subtasks, error: subtasksError } = await supabase
               .from('subtasks')
               .select('id, task_number, title, status, priority, due_date, assigned_to')
-              .eq('assigned_to', cadetId);
+              .eq('assigned_to', cadetId)
+              .not('status', 'in', '(completed,cancelled)');
             
             console.log('Subtasks query result:', { subtasks, subtasksError, cadetId });
               
