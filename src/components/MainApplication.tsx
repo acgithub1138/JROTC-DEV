@@ -61,12 +61,12 @@ const MainApplication = () => {
     if (path === '/app' || path === '/app/') return 'dashboard';
     if (path.startsWith('/app/tasks')) return 'tasks';
     if (path.startsWith('/app/incidents')) return 'incident_management';
-    if (path.startsWith('/app/school')) return 'school-management';
-    if (path.startsWith('/app/users')) return 'user-admin';
-    if (path.startsWith('/app/email')) return 'email-management';
+    if (path.startsWith('/app/school')) return 'school_admin';
+    if (path.startsWith('/app/users')) return 'user_admin';
+    if (path.startsWith('/app/email')) return 'email';
     
     if (path.startsWith('/app/cadets')) return 'cadets';
-    if (path.startsWith('/app/job-board')) return 'job-board';
+    if (path.startsWith('/app/job-board')) return 'job_board';
     if (path.startsWith('/app/teams')) return 'teams';
     if (path.startsWith('/app/inventory')) return 'inventory';
     if (path.startsWith('/app/budget')) return 'budget';
@@ -74,7 +74,7 @@ const MainApplication = () => {
     if (path.startsWith('/app/calendar')) return 'calendar';
     if (path.startsWith('/app/competitions')) return 'competitions';
     
-    if (path.startsWith('/app/roles')) return 'role-management';
+    if (path.startsWith('/app/roles')) return 'role_management';
     if (path.startsWith('/app/settings')) return 'settings';
     return 'dashboard';
   });
@@ -86,20 +86,19 @@ const MainApplication = () => {
       'dashboard': '/app',
       'tasks': '/app/tasks',
       'incident_management': '/app/incidents',
-      'school-management': '/app/school',
-      'user-admin': '/app/users',
-      'email-management': '/app/email',
+      'school_admin': '/app/school',
+      'user_admin': '/app/users',
+      'email': '/app/email',
       
       'cadets': '/app/cadets',
-      'job-board': '/app/job-board',
+      'job_board': '/app/job-board',
       'teams': '/app/teams',
       'inventory': '/app/inventory',
       'budget': '/app/budget',
       'contacts': '/app/contacts',
       'calendar': '/app/calendar',
-      'competitions': '/app/competitions',
       
-      'role-management': '/app/roles',
+      'role_management': '/app/roles',
       'settings': '/app/settings'
     };
     
