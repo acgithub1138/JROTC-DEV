@@ -1,20 +1,20 @@
 import React from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Users, Clock, AlertTriangle, CheckSquare } from 'lucide-react';
-import { useParentCadets } from '@/hooks/useParentCadets';
+import { CheckSquare, Clock, AlertTriangle, Users } from 'lucide-react';
+import { useParentCadetTasks } from '@/hooks/useParentCadets';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const MyCadetsWidget = () => {
   const { userProfile } = useAuth();
-  const { cadets, isLoading, error } = useParentCadets();
+  const { tasks, taskCounts, isLoading, error } = useParentCadetTasks();
 
   if (isLoading) {
     return (
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Users className="w-5 h-5 mr-2 text-primary" />
-            My Cadets
+            <CheckSquare className="w-5 h-5 mr-2 text-primary" />
+            My Cadets' Tasks
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -39,8 +39,8 @@ export const MyCadetsWidget = () => {
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center">
-            <Users className="w-5 h-5 mr-2 text-primary" />
-            My Cadets
+            <CheckSquare className="w-5 h-5 mr-2 text-primary" />
+            My Cadets' Tasks
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -54,47 +54,72 @@ export const MyCadetsWidget = () => {
   }
 
   return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center justify-between">
-          <div className="flex items-center">
-            <Users className="w-5 h-5 mr-2 text-primary" />
-            My Cadets
-          </div>
-          <div className="flex items-center space-x-2 text-sm text-muted-foreground">
-            <span>{cadets.length} cadets</span>
-          </div>
-        </CardTitle>
-      </CardHeader>
-      <CardContent>
-        <div className="space-y-3">
-          {cadets.length > 0 ? (
-            cadets.map((cadet) => (
-              <div key={cadet.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors rounded-lg">
-                <div className="w-2 h-2 rounded-full mt-2 flex-shrink-0 bg-blue-500"></div>
-                <div className="flex-1 min-w-0">
-                  <div className="flex items-center justify-between">
-                    <p className="font-medium text-foreground text-sm truncate">
-                      {cadet.name}
-                    </p>
-                  </div>
-                  <div className="flex items-center space-x-2 mt-1">
-                    <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
-                      Cadet ID: {cadet.cadet_id}
-                    </span>
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <CheckSquare className="w-5 h-5 mr-2 text-primary" />
+              My Cadets' Tasks
+            </div>
+            <div className="flex items-center space-x-2 text-sm text-muted-foreground">
+              <span>{taskCounts.total} total</span>
+              {taskCounts.overdue > 0 && (
+                <span className="flex items-center text-destructive">
+                  <AlertTriangle className="w-3 h-3 mr-1" />
+                  {taskCounts.overdue} overdue
+                </span>
+              )}
+            </div>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {tasks.length > 0 ? (
+              tasks.map((task) => (
+                <div key={task.id} className="flex items-start space-x-3 p-3 hover:bg-muted/50 transition-colors rounded-lg">
+                  <div className={`w-2 h-2 rounded-full mt-2 flex-shrink-0 ${
+                    task.status === 'completed' ? 'bg-green-500' :
+                    task.due_date && new Date(task.due_date) < new Date() ? 'bg-red-500' : 'bg-blue-500'
+                  }`}></div>
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center justify-between">
+                      <p className="font-medium text-foreground text-sm truncate">
+                        {task.task_number} - {task.title}
+                      </p>
+                      {task.due_date && (
+                        <span className="text-xs text-muted-foreground flex items-center ml-2">
+                          <Clock className="w-3 h-3 mr-1" />
+                          {new Date(task.due_date).toLocaleDateString()}
+                        </span>
+                      )}
+                    </div>
+                    <div className="flex items-center space-x-2 mt-1">
+                      <span className="text-xs px-2 py-1 rounded-full bg-blue-100 text-blue-700">
+                        {task.cadet_name}
+                      </span>
+                      <span className="text-xs px-2 py-1 rounded-full bg-purple-100 text-purple-700">
+                        {task.priority}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        task.status === 'completed' ? 'bg-green-100 text-green-700' :
+                        task.status === 'in_progress' ? 'bg-yellow-100 text-yellow-700' :
+                        'bg-gray-100 text-gray-700'
+                      }`}>
+                        {task.status.replace('_', ' ')}
+                      </span>
+                    </div>
                   </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                <CheckSquare className="w-8 h-8 mx-auto mb-2 opacity-50" />
+                <p className="text-sm">No tasks assigned to your cadets</p>
+                <p className="text-xs mt-1">Contact records may not be properly linked</p>
               </div>
-            ))
-          ) : (
-            <div className="text-center py-8 text-muted-foreground">
-              <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
-              <p className="text-sm">No cadets found</p>
-              <p className="text-xs mt-1">Contact records may not be properly linked</p>
-            </div>
-          )}
-        </div>
-      </CardContent>
-    </Card>
+            )}
+          </div>
+        </CardContent>
+      </Card>
   );
 };
