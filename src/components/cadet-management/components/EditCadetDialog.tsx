@@ -90,10 +90,11 @@ export const EditCadetDialog = ({
         rank: editingProfile.rank
       });
       
+      // Set both form data and initial form data at the same time
       setFormData(data);
       setInitialFormData(data);
-    } else if (!editingProfile || !open) {
-      // Reset form when modal is closed or no cadet selected
+    } else if (!open) {
+      // Only reset when dialog is closed, not when editingProfile is null but dialog is open
       const emptyData = {
         grade: '',
         flight: '',
