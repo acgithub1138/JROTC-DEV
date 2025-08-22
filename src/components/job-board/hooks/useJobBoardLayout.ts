@@ -18,7 +18,7 @@ interface SavedPosition {
   y: number;
 }
 
-export const useJobBoardLayout = (canModifyLayout: boolean = false) => {
+export const useJobBoardLayout = (canAssign?: boolean) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
@@ -47,7 +47,7 @@ export const useJobBoardLayout = (canModifyLayout: boolean = false) => {
   // Save position mutation with better error handling and immediate cache update
   const savePositionMutation = useMutation({
     mutationFn: async ({ jobId, position }: { jobId: string; position: { x: number; y: number } }) => {
-      if (!canModifyLayout) {
+      if (!canAssign) {
         throw new Error('Permission denied: Cannot modify layout');
       }
       
@@ -110,7 +110,7 @@ export const useJobBoardLayout = (canModifyLayout: boolean = false) => {
   // Clear all layout preferences
   const clearLayoutMutation = useMutation({
     mutationFn: async () => {
-      if (!canModifyLayout) {
+      if (!canAssign) {
         throw new Error('Permission denied: Cannot modify layout');
       }
       
@@ -159,7 +159,7 @@ export const useJobBoardLayout = (canModifyLayout: boolean = false) => {
 
   // Debounced save position function with immediate visual feedback
   const savePosition = useCallback((jobId: string, position: { x: number; y: number }) => {
-    if (!canModifyLayout) {
+    if (!canAssign) {
       toast({
         title: "Permission Denied",
         description: "You don't have permission to modify the layout",
@@ -188,7 +188,7 @@ export const useJobBoardLayout = (canModifyLayout: boolean = false) => {
     
     // Then persist to database
     savePositionMutation.mutate({ jobId, position });
-  }, [savePositionMutation, queryClient, userProfile?.school_id, canModifyLayout, toast]);
+  }, [savePositionMutation, queryClient, userProfile?.school_id, canAssign, toast]);
 
   // Reset layout to default
   const resetLayout = useCallback(() => {
