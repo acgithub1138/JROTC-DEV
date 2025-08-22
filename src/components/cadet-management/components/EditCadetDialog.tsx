@@ -1,9 +1,13 @@
 import React, { useState } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription, DialogFooter } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '@/components/ui/accordion';
@@ -16,6 +20,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Profile } from '../types';
 import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
+
+const cadetSchema = z.object({
+  grade: z.string(),
+  flight: z.string(),
+  cadet_year: z.string(),
+  role_id: z.string(),
+  rank: z.string(),
+});
+
+type CadetFormData = z.infer<typeof cadetSchema>;
 
 interface EditCadetDialogProps {
   open: boolean;
@@ -46,72 +60,37 @@ export const EditCadetDialog = ({
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
 
-  // Form data state
-  const [formData, setFormData] = useState({
-    grade: '',
-    flight: '',
-    cadet_year: '',
-    role_id: '',
-    rank: ''
-  });
-  const [initialFormData, setInitialFormData] = useState({
-    grade: '',
-    flight: '',
-    cadet_year: '',
-    role_id: '',
-    rank: ''
+  const initialData = {
+    grade: editingProfile?.grade || '',
+    flight: editingProfile?.flight || '',
+    cadet_year: editingProfile?.cadet_year || '',
+    role_id: editingProfile?.role_id || '',
+    rank: editingProfile?.rank || '',
+  };
+
+  const form = useForm<CadetFormData>({
+    resolver: zodResolver(cadetSchema),
+    defaultValues: initialData,
   });
 
-  // Debug the current form data state
-  React.useEffect(() => {
-    console.log('Current formData state:', formData);
-  }, [formData]);
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData,
+    currentData: form.watch(),
+    enabled: open,
+  });
 
-  // Initialize form data when dialog opens or editingProfile changes
   React.useEffect(() => {
-    console.log('useEffect triggered - editingProfile:', editingProfile, 'open:', open);
-    
-    if (editingProfile && open) {
-      // Convert null values to empty strings for Select components, with fallback to 'none'
-      const data = {
+    if (open && editingProfile) {
+      // Reset form with cadet data when dialog opens
+      form.reset({
         grade: editingProfile.grade || '',
         flight: editingProfile.flight || '',
         cadet_year: editingProfile.cadet_year || '',
         role_id: editingProfile.role_id || '',
-        rank: editingProfile.rank || ''
-      };
-      
-      console.log('Setting form data with:', data);
-      console.log('Original editingProfile data:', {
-        grade: editingProfile.grade,
-        flight: editingProfile.flight,
-        cadet_year: editingProfile.cadet_year,
-        role_id: editingProfile.role_id,
-        rank: editingProfile.rank
+        rank: editingProfile.rank || '',
       });
-      
-      // Set both form data and initial form data at the same time
-      setFormData(data);
-      setInitialFormData(data);
-    } else if (!open) {
-      // Only reset when dialog is closed, not when editingProfile is null but dialog is open
-      const emptyData = {
-        grade: '',
-        flight: '',
-        cadet_year: '',
-        role_id: '',
-        rank: ''
-      };
-      setFormData(emptyData);
-      setInitialFormData(emptyData);
     }
-  }, [editingProfile, open]);
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
-    initialData: initialFormData,
-    currentData: formData,
-    enabled: open && !!editingProfile
-  });
+  }, [open, editingProfile, form]);
 
   const handleClose = () => {
     if (hasUnsavedChanges) {
@@ -143,24 +122,23 @@ export const EditCadetDialog = ({
     setPendingClose(false);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (data: CadetFormData) => {
     if (!editingProfile) return;
 
     try {
       // Find the selected role to get the role_name
-      const selectedRole = roleOptions.find(r => r.value === formData.role_id);
+      const selectedRole = roleOptions.find(r => r.value === data.role_id);
       const roleName = selectedRole ? selectedRole.role_name : null;
 
       const { error } = await supabase
         .from('profiles')
         .update({ 
-          grade: formData.grade || null,
-          flight: formData.flight || null,
-          cadet_year: (formData.cadet_year || null) as any,
-          role_id: formData.role_id || null,
+          grade: data.grade || null,
+          flight: data.flight || null,
+          cadet_year: (data.cadet_year || null) as any,
+          role_id: data.role_id || null,
           role: roleName as any, // Update role field with role_name
-          rank: formData.rank || null,
+          rank: data.rank || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProfile.id);
@@ -175,7 +153,7 @@ export const EditCadetDialog = ({
       // Update editingProfile with form data
       setEditingProfile({
         ...editingProfile,
-        ...formData,
+        ...data,
         role: roleName || editingProfile.role
       });
       
@@ -248,146 +226,170 @@ export const EditCadetDialog = ({
             </DialogDescription>
           </DialogHeader>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label>Name</Label>
-                <Input 
-                  value={`${editingProfile.first_name} ${editingProfile.last_name}`} 
-                  disabled 
-                  className="bg-muted" 
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-4">
+              <div className="grid grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label>Name</Label>
+                  <Input 
+                    value={`${editingProfile.first_name} ${editingProfile.last_name}`} 
+                    disabled 
+                    className="bg-muted" 
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label>Email</Label>
+                  <Input 
+                    value={editingProfile.email} 
+                    disabled 
+                    className="bg-muted" 
+                  />
+                </div>
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
+                <FormField
+                  control={form.control}
+                  name="grade"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Grade</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select grade" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">No grade selected</SelectItem>
+                          {gradeOptions.map(grade => (
+                            <SelectItem key={grade} value={grade}>
+                              {grade}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="flight"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Flight</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select flight" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">No flight selected</SelectItem>
+                          {flightOptions.map(flight => (
+                            <SelectItem key={flight} value={flight}>
+                              {flight}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+                <FormField
+                  control={form.control}
+                  name="cadet_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Cadet Year</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="">No year selected</SelectItem>
+                          {cadetYearOptions.map(year => (
+                            <SelectItem key={year} value={year}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
                 />
               </div>
-              <div className="space-y-2">
-                <Label>Email</Label>
-                <Input 
-                  value={editingProfile.email} 
-                  disabled 
-                  className="bg-muted" 
-                />
-              </div>
-            </div>
 
-            <div className="grid grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="grade">Grade</Label>
-                <Select 
-                  value={formData.grade || 'none'} 
-                  onValueChange={(value) => {
-                    console.log('Grade changed to:', value);
-                    setFormData({ ...formData, grade: value === 'none' ? '' : value });
-                  }}
-                  disabled={!canUpdate}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select grade" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No grade selected</SelectItem>
-                    {gradeOptions.map(grade => (
-                      <SelectItem key={grade} value={grade}>
-                        {grade}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="flight">Flight</Label>
-                <Select 
-                  value={formData.flight || 'none'} 
-                  onValueChange={(value) => setFormData({ ...formData, flight: value === 'none' ? '' : value })}
-                  disabled={!canUpdate}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select flight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No flight selected</SelectItem>
-                    {flightOptions.map(flight => (
-                      <SelectItem key={flight} value={flight}>
-                        {flight}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="cadet_year">Cadet Year</Label>
-                <Select 
-                  value={formData.cadet_year || 'none'} 
-                  onValueChange={(value) => setFormData({ ...formData, cadet_year: value === 'none' ? '' : value })}
-                  disabled={!canUpdate}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select year" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="none">No year selected</SelectItem>
-                    {cadetYearOptions.map(year => (
-                      <SelectItem key={year} value={year}>
-                        {year}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
+              <FormField
+                control={form.control}
+                name="role_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No role selected</SelectItem>
+                        {roleOptions.map(roleOption => (
+                          <SelectItem key={roleOption.value} value={roleOption.value}>
+                            {roleOption.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="role_id">Role</Label>
-              <Select 
-                value={formData.role_id || 'none'} 
-                onValueChange={(value) => setFormData({ ...formData, role_id: value === 'none' ? '' : value })}
-                disabled={!canUpdate}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select role" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No role selected</SelectItem>
-                  {roleOptions.map(roleOption => (
-                    <SelectItem key={roleOption.value} value={roleOption.value}>
-                      {roleOption.label}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
+              <FormField
+                control={form.control}
+                name="rank"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Rank</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select rank" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="">No rank</SelectItem>
+                        {ranks.map(rank => (
+                          <SelectItem 
+                            key={rank.id} 
+                            value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || ''}
+                          >
+                            {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
 
-            <div className="space-y-2">
-              <Label htmlFor="rank">Rank</Label>
-              <Select 
-                value={formData.rank || 'none'} 
-                onValueChange={(value) => setFormData({ ...formData, rank: value === 'none' ? '' : value })}
-                disabled={!canUpdate}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select rank" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="none">No rank</SelectItem>
-                  {ranks.map(rank => (
-                    <SelectItem 
-                      key={rank.id} 
-                      value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
-                    >
-                      {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-
-            <DialogFooter>
-              <Button type="button" variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-              <Button type="submit" disabled={!canUpdate}>
-                Update Cadet
-              </Button>
-            </DialogFooter>
-          </form>
+              <DialogFooter>
+                <Button type="button" variant="outline" onClick={handleCancel}>
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={!canUpdate}>
+                  Update Cadet
+                </Button>
+              </DialogFooter>
+            </form>
+          </Form>
 
           {/* Password Reset Section */}
           {canResetPassword && (
