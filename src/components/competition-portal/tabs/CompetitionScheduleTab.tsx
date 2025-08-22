@@ -70,20 +70,14 @@ export const CompetitionScheduleTab = ({
       } = await supabase.from('cp_comp_schools').select(`
           school_id,
           school_name,
-          school_initials
+          school_initials,
+          schools(initials)
         `).eq('competition_id', competitionId);
       if (error) throw error;
       return data.map(school => ({
         id: school.school_id,
         name: school.school_name,
-        initials: school.school_initials || 
-          school.school_name
-            ?.replace(/[()]/g, '') // Remove parentheses
-            ?.split(' ')
-            ?.filter(word => word.length > 0) // Filter out empty strings
-            ?.map(word => word[0])
-            ?.join('')
-            ?.toUpperCase() || ''
+        initials: school.schools?.initials || school.school_initials || ''
       }));
     }
   });

@@ -108,30 +108,29 @@ export const useCompetitionSchedule = (competitionId?: string) => {
 
       if (schedulesError) throw schedulesError;
 
-      // Fetch school data including names and initials
+      // Fetch school data including names and initials from schools table
       const { data: schoolsData, error: schoolsError } = await supabase
         .from('cp_comp_schools')
-        .select('school_id, school_name, school_initials, color')
+        .select(`
+          school_id, 
+          school_name, 
+          school_initials, 
+          color,
+          schools(initials)
+        `)
         .eq('competition_id', debouncedCompetitionId)
         .abortSignal(abortController.signal);
 
       if (schoolsError) throw schoolsError;
 
-      // Create school map using actual initials or fallback to generated ones
+      // Create school map using initials from schools table
       const schoolMap = new Map(
         schoolsData?.map(school => [
           school.school_id,
           {
             id: school.school_id,
             name: school.school_name || 'Unknown School',
-            initials: school.school_initials || 
-              school.school_name
-                ?.replace(/[()]/g, '') // Remove parentheses
-                ?.split(' ')
-                ?.filter(word => word.length > 0) // Filter out empty strings
-                ?.map(word => word[0])
-                ?.join('')
-                ?.toUpperCase() || '',
+            initials: school.schools?.initials || school.school_initials || '',
             color: school.color || '#3B82F6'
           }
         ]) || []
@@ -330,7 +329,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
           school_id,
           school_name,
           school_initials,
-          schools(name)
+          schools(name, initials)
         `)
         .eq('competition_id', debouncedCompetitionId)
         .in('school_id', registeredSchools.map(r => r.school_id));
@@ -340,15 +339,15 @@ export const useCompetitionSchedule = (competitionId?: string) => {
       if (!schoolNames?.length) {
         const { data: directSchoolNames, error: directSchoolError } = await supabase
           .from('schools')
-          .select('id, name')
+          .select('id, name, initials')
           .in('id', registeredSchools.map(r => r.school_id));
         
         if (!directSchoolError && directSchoolNames) {
           finalSchoolNames = directSchoolNames.map(school => ({
             school_id: school.id,
             school_name: school.name,
-            school_initials: null, // No initials available from direct schools table
-            schools: { name: school.name }
+            school_initials: null,
+            schools: { name: school.name, initials: school.initials }
           }));
         }
       }
@@ -364,14 +363,7 @@ export const useCompetitionSchedule = (competitionId?: string) => {
         return {
           id: school.school_id,
           name: schoolName,
-          initials: schoolInfo?.school_initials || 
-            schoolName
-              ?.replace(/[()]/g, '') // Remove parentheses
-              ?.split(' ')
-              ?.filter(word => word.length > 0) // Filter out empty strings
-              ?.map(word => word[0])
-              ?.join('')
-              ?.toUpperCase() || ''
+          initials: schoolInfo?.schools?.initials || schoolInfo?.school_initials || ''
         };
       }) || [];
 
