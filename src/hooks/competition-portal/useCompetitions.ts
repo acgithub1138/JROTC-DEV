@@ -183,15 +183,13 @@ export const useCompetitions = () => {
             return convertFromSchoolTimezone(newDateTime, timezone).toISOString();
           };
 
+          const { id, created_at, updated_at, updated_by, ...eventData } = event;
+          
           return {
-            ...event,
-            id: undefined, // Let database generate new ID
+            ...eventData,
             competition_id: newCompetition.id,
             school_id: userProfile.school_id,
             created_by: userProfile.id,
-            created_at: undefined,
-            updated_at: undefined,
-            updated_by: undefined,
             start_time: adjustTime(event.start_time),
             end_time: adjustTime(event.end_time),
             lunch_start_time: adjustTime(event.lunch_start_time),
