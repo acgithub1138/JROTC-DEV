@@ -73,7 +73,7 @@ export const RoleManagementPage: React.FC = () => {
         label: 'Cadet'
       }];
     }
-    const roles = allRoles.filter(role => !['admin'].includes(role.role_name)).map(role => ({
+    const roles = allRoles.map(role => ({
       value: role.role_name as UserRole,
       label: role.role_label
     }));
