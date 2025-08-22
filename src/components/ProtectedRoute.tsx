@@ -96,12 +96,15 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
 
     const timeoutId = setTimeout(async () => {
       try {
-        // Check if the parent has any contact records
+        console.log('Checking parent setup for email:', userProfile?.email, 'school_id:', userProfile?.school_id);
+        
+        // Check if the parent has any contact records - use consistent query structure
         const { data: contacts, error } = await supabase
           .from('contacts')
           .select('id')
           .eq('type', 'parent')
-          .eq('email', user!.email)
+          .eq('email', userProfile!.email)
+          .eq('school_id', userProfile!.school_id)
           .limit(1);
 
         if (error) {
@@ -109,6 +112,8 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
           setShowParentSetup(false);
           return;
         }
+
+        console.log('Parent setup check result:', contacts);
 
         // If no contact record exists, show setup modal
         const needsSetup = !contacts || contacts.length === 0;
@@ -121,7 +126,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
     }, 100);
 
     return () => clearTimeout(timeoutId);
-  }, [parentSetupRequired, user?.email]);
+  }, [parentSetupRequired, userProfile?.email, userProfile?.school_id]);
 
   if (loading || permissionsLoading) {
     return (
@@ -184,25 +189,11 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({
       <ParentSetupModal 
         open={showParentSetup} 
         onClose={() => {
+          console.log('Parent setup modal closed, resetting check');
           setShowParentSetup(false);
-          // Force a recheck of parent setup after modal closes
-          if (user && userProfile && userProfile.role === 'parent') {
-            setTimeout(() => {
-              const checkAgain = async () => {
-                const { data } = await supabase
-                  .from('contacts')
-                  .select('id')
-                  .eq('email', userProfile.email)
-                  .eq('type', 'parent')
-                  .eq('school_id', userProfile.school_id)
-                  .maybeSingle();
-                
-                setShowParentSetup(!data);
-              };
-              checkAgain();
-            }, 500);
-          }
-        }} 
+          // Reset the check ref so the main useEffect can run again
+          parentSetupCheckRef.current = false;
+        }}
       />
     </>
   );
