@@ -196,6 +196,9 @@ const ParentRegistrationPage = () => {
         return;
       }
 
+      // Sign out immediately after account creation to prevent auto-login
+      await supabase.auth.signOut();
+
       // Get the created parent profile
       const {
         data: newParentProfile
