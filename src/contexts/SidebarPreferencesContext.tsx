@@ -69,7 +69,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     try {
       const { data: moduleResult, error } = await supabase
         .from('permission_modules')
-        .select('id, name, label, path')
+        .select('id, name, label, path, icon')
         .eq('is_active', true)
         .order('id', { ascending: true });
 
@@ -84,44 +84,23 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
     // Comprehensive fallback modules if database query fails
     if (modules.length === 0) {
       modules = [
-        { name: 'tasks', label: 'Tasks', path: '/app/tasks' },
-        { name: 'cadets', label: 'Cadets', path: '/app/cadets' },
-        { name: 'job_board', label: 'Job Board', path: '/app/job-board' },
-        { name: 'teams', label: 'Teams', path: '/app/teams' },
-        { name: 'inventory', label: 'Inventory', path: '/app/inventory' },
-        { name: 'budget', label: 'Budget', path: '/app/budget' },
-        { name: 'contacts', label: 'Contacts', path: '/app/contacts' },
-        { name: 'calendar', label: 'Calendar', path: '/app/calendar' },
-        { name: 'incident_management', label: 'Get Help', path: '/app/incidents' },
-        { name: 'email', label: 'Email Management', path: '/app/email' },
-        { name: 'user_admin', label: 'User Management', path: '/app/users' },
-        { name: 'school_admin', label: 'School Management', path: '/app/school' },
-        { name: 'role_management', label: 'Role Management', path: '/app/roles' },
-        { name: 'settings', label: 'Settings', path: '/app/settings' }
+        { name: 'tasks', label: 'Tasks', path: '/app/tasks', icon: 'CheckSquare' },
+        { name: 'cadets', label: 'Cadets', path: '/app/cadets', icon: 'Users' },
+        { name: 'job_board', label: 'Job Board', path: '/app/job-board', icon: 'Briefcase' },
+        { name: 'teams', label: 'Teams', path: '/app/teams', icon: 'Users' },
+        { name: 'inventory', label: 'Inventory', path: '/app/inventory', icon: 'Package' },
+        { name: 'budget', label: 'Budget', path: '/app/budget', icon: 'DollarSign' },
+        { name: 'contacts', label: 'Contacts', path: '/app/contacts', icon: 'Users2' },
+        { name: 'calendar', label: 'Calendar', path: '/app/calendar', icon: 'Calendar' },
+        { name: 'incident_management', label: 'Get Help', path: '/app/incidents', icon: 'AlertTriangle' },
+        { name: 'email', label: 'Email Management', path: '/app/email', icon: 'Mails' },
+        { name: 'user_admin', label: 'User Management', path: '/app/users', icon: 'UserCog' },
+        { name: 'school_admin', label: 'School Management', path: '/app/school', icon: 'Building2' },
+        { name: 'role_management', label: 'Role Management', path: '/app/roles', icon: 'Shield' },
+        { name: 'settings', label: 'Settings', path: '/app/settings', icon: 'Settings' }
       ];
       console.log('Using fallback modules:', modules);
     }
-
-    // Comprehensive icon mapping
-    const iconMap: { [key: string]: string } = {
-      'dashboard': 'LayoutDashboard',
-      'tasks': 'CheckSquare',
-      'cadets': 'Users',
-      'job_board': 'Briefcase',
-      'teams': 'Users',
-      'inventory': 'Package',
-      'budget': 'DollarSign',
-      'contacts': 'Users2',
-      'calendar': 'Calendar',
-      
-      'incident_management': 'AlertTriangle',
-      'email': 'Mails',
-      'user_admin': 'UserCog',
-      'school_management': 'Building2',
-      'role_management': 'Shield',
-      'settings': 'Settings'
-    };
-
 
     // Generate menu items dynamically from modules
     const menuItems: MenuItem[] = [dashboardItem];
@@ -137,7 +116,7 @@ const fetchMenuItemsFromDatabase = async (userProfile: any, hasPermission: (modu
         menuItems.push({
           id: module.name,
           label: module.label || module.name,
-          icon: iconMap[module.name] || 'Circle',
+          icon: module.icon || 'Circle',
           path: module.path || `/app/${module.name}`,
           isVisible: true,
           order: menuItems.length + 1
