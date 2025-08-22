@@ -77,6 +77,7 @@ const DynamicIcon: React.FC<{ iconName: string; className?: string }> = ({ iconN
   };
   
   if (!IconComponent || !isValidComponent(IconComponent)) {
+    console.warn(`Icon "${iconName}" not found in Lucide icons, using fallback`);
     return <Trophy className={className} />;
   }
   
