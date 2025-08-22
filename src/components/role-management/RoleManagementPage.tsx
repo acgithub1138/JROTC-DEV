@@ -3,14 +3,11 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Button } from '@/components/ui/button';
 import { useRoleManagement, UserRole } from '@/hooks/useRoleManagement';
-import { useRoleManagementColumnOrder } from '@/hooks/useRoleManagementColumnOrder';
 import { useDynamicRoles } from '@/hooks/useDynamicRoles';
 import { usePermissionTest } from '@/hooks/usePermissionTest';
 import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw } from 'lucide-react';
-import { DndContext, closestCenter, KeyboardSensor, PointerSensor, useSensor, useSensors, DragEndEvent } from '@dnd-kit/core';
-import { arrayMove, sortableKeyboardCoordinates, horizontalListSortingStrategy } from '@dnd-kit/sortable';
 import { AddRoleDialog } from './AddRoleDialog';
 import { UserRolesTable } from './UserRolesTable';
 import { PortalPermissionsTable } from './PortalPermissionsTable';
@@ -81,44 +78,6 @@ export const RoleManagementPage: React.FC = () => {
     return roles;
   }, [allRoles]);
 
-  // Use database-backed column ordering
-  const defaultActionIds = React.useMemo(() => actions.map(action => action.id), [actions]);
-  const {
-    actionOrder,
-    setActionOrder,
-    isLoading: isLoadingOrder
-  } = useRoleManagementColumnOrder(defaultActionIds);
-
-  // Create ordered actions based on saved order
-  const orderedActions = React.useMemo(() => {
-    if (actions.length === 0 || actionOrder.length === 0) return actions;
-
-    // Map action IDs to actual action objects
-    const orderedActionObjects = actionOrder.map(id => actions.find(action => action.id === id)).filter(Boolean);
-
-    // Add any new actions that might not be in the saved order
-    const missingActions = actions.filter(action => !actionOrder.includes(action.id));
-    return [...orderedActionObjects, ...missingActions];
-  }, [actions, actionOrder]);
-
-  // Drag and drop sensors
-  const sensors = useSensors(useSensor(PointerSensor), useSensor(KeyboardSensor, {
-    coordinateGetter: sortableKeyboardCoordinates
-  }));
-  const handleDragEnd = (event: DragEndEvent) => {
-    const {
-      active,
-      over
-    } = event;
-    if (over && active.id !== over.id) {
-      const oldIndex = actionOrder.findIndex(id => id === active.id);
-      const newIndex = actionOrder.findIndex(id => id === over.id);
-      const newOrder = arrayMove(actionOrder, oldIndex, newIndex);
-
-      // Save the new order to database
-      setActionOrder(newOrder);
-    }
-  };
   const rolePermissions = getRolePermissions(selectedRole);
   const handlePermissionChange = (moduleId: string, actionId: string, enabled: boolean) => {
     console.log('Updating permission:', {
@@ -264,11 +223,25 @@ export const RoleManagementPage: React.FC = () => {
                 </TabsList>
 
                 <TabsContent value="ccc">
-                  <PortalPermissionsTable portal="ccc" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
+                  <PortalPermissionsTable 
+                    portal="ccc" 
+                    modules={modules} 
+                    actions={actions} 
+                    rolePermissions={rolePermissions} 
+                    isUpdating={isUpdating} 
+                    handlePermissionChange={handlePermissionChange} 
+                  />
                 </TabsContent>
 
                 <TabsContent value="competition">
-                  <PortalPermissionsTable portal="competition" modules={modules} actions={actions} orderedActions={orderedActions} rolePermissions={rolePermissions} isUpdating={isUpdating} sensors={sensors} handleDragEnd={handleDragEnd} handlePermissionChange={handlePermissionChange} />
+                  <PortalPermissionsTable 
+                    portal="competition" 
+                    modules={modules} 
+                    actions={actions} 
+                    rolePermissions={rolePermissions} 
+                    isUpdating={isUpdating} 
+                    handlePermissionChange={handlePermissionChange} 
+                  />
                 </TabsContent>
               </Tabs>
             </CardContent>

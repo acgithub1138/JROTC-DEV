@@ -26,7 +26,7 @@ export const useRoleManagement = () => {
       const { data, error } = await supabase
         .from('permission_modules')
         .select('*')
-        .order('order', { ascending: true });
+        .order('sort_order', { ascending: true });
       
       if (error) throw error;
       return data;
@@ -40,7 +40,7 @@ export const useRoleManagement = () => {
       const { data, error } = await supabase
         .from('permission_actions')
         .select('*')
-        .order('label');
+        .order('sort_order', { ascending: true });
       
       if (error) throw error;
       return data;

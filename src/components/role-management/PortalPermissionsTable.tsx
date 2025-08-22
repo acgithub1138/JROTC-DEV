@@ -1,34 +1,11 @@
 import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
-import { RefreshCw, GripVertical } from 'lucide-react';
+import { RefreshCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { DndContext, closestCenter } from '@dnd-kit/core';
-import { SortableContext, horizontalListSortingStrategy } from '@dnd-kit/sortable';
-import { useSortable } from '@dnd-kit/sortable';
-import { CSS } from '@dnd-kit/utilities';
-interface SortableColumnHeaderProps {
-  action: any;
-  children: React.ReactNode;
-}
-const SortableColumnHeader: React.FC<SortableColumnHeaderProps> = ({
+const ColumnHeader: React.FC<{ action: any; children: React.ReactNode }> = ({
   action,
   children
 }) => {
-  const {
-    attributes,
-    listeners,
-    setNodeRef,
-    transform,
-    transition,
-    isDragging
-  } = useSortable({
-    id: action.id
-  });
-  const style = {
-    transform: CSS.Transform.toString(transform),
-    transition,
-    opacity: isDragging ? 0.5 : 1
-  };
   const getTooltipContent = (actionName: string) => {
     switch (actionName) {
       case 'sidebar':
@@ -47,42 +24,36 @@ const SortableColumnHeader: React.FC<SortableColumnHeaderProps> = ({
         return action.description || '';
     }
   };
-  return <TooltipProvider>
+
+  return (
+    <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <th ref={setNodeRef} style={style} className="text-center p-3 font-medium min-w-24 relative group cursor-move px-[4px] py-[4px]">
-            <div className="flex items-center justify-center gap-1">
-              <GripVertical className="w-3 h-3 text-muted-foreground opacity-0 group-hover:opacity-100 transition-opacity" />
-              <span>{children}</span>
-            </div>
+          <th className="text-center p-3 font-medium min-w-24">
+            <span>{children}</span>
           </th>
         </TooltipTrigger>
         <TooltipContent>
           <p className="text-sm">{getTooltipContent(action.name)}</p>
         </TooltipContent>
       </Tooltip>
-    </TooltipProvider>;
+    </TooltipProvider>
+  );
 };
 interface PortalPermissionsTableProps {
   portal: 'ccc' | 'competition';
   modules: any[];
   actions: any[];
-  orderedActions: any[];
   rolePermissions: any;
   isUpdating: boolean;
-  sensors: any;
-  handleDragEnd: (event: any) => void;
   handlePermissionChange: (moduleId: string, actionId: string, enabled: boolean) => void;
 }
 export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
   portal,
   modules,
   actions,
-  orderedActions,
   rolePermissions,
   isUpdating,
-  sensors,
-  handleDragEnd,
   handlePermissionChange
 }) => {
   // Filter modules based on portal
@@ -96,33 +67,39 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
     }
   });
   return <div className="overflow-x-auto">
-      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b">
-              <th className="text-left p-3 font-medium">Module</th>
-              <SortableContext items={orderedActions.map(action => action.id)} strategy={horizontalListSortingStrategy}>
-                {orderedActions.map(action => <SortableColumnHeader key={action.id} action={action}>
-                    {action.name === 'sidebar' ? 'Module Access' : action.label}
-                  </SortableColumnHeader>)}
-              </SortableContext>
+      <table className="w-full border-collapse">
+        <thead>
+          <tr className="border-b">
+            <th className="text-left p-3 font-medium">Module</th>
+            {actions.map(action => (
+              <ColumnHeader key={action.id} action={action}>
+                {action.name === 'sidebar' ? 'Module Access' : action.label}
+              </ColumnHeader>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {filteredModules.map(module => (
+            <tr key={module.id} className="border-b hover:bg-gray-50">
+              <td className="p-3 font-medium">
+                <div className="font-medium">{module.label}</div>
+              </td>
+              {actions.map(action => {
+                const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+                return (
+                  <td key={action.id} className="p-3 text-center">
+                    <Checkbox 
+                      checked={isEnabled} 
+                      disabled={isUpdating} 
+                      onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} 
+                    />
+                  </td>
+                );
+              })}
             </tr>
-          </thead>
-          <tbody>
-            {filteredModules.map(module => <tr key={module.id} className="border-b hover:bg-gray-50">
-                <td className="p-3 font-medium">
-                  <div className="font-medium">{module.label}</div>
-                </td>
-                {orderedActions.map(action => {
-              const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-              return <td key={action.id} className="p-3 text-center">
-                      <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
-                    </td>;
-            })}
-              </tr>)}
-          </tbody>
-        </table>
-      </DndContext>
+          ))}
+        </tbody>
+      </table>
 
       {isUpdating && <div className="flex items-center justify-center mt-4 text-sm text-gray-500">
           <RefreshCw className="w-4 h-4 mr-2 animate-spin" />
