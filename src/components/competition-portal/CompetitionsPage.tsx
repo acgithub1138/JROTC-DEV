@@ -17,6 +17,7 @@ import { EditCompetitionModal } from './modals/EditCompetitionModal';
 import { CopyCompetitionModal } from './components/CopyCompetitionModal';
 import { CompetitionCards } from './components/CompetitionCards';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
+import { useHostedCompetitions } from '@/hooks/competition-portal/useHostedCompetitions';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from 'lucide-react';
 import { format } from 'date-fns';
@@ -58,10 +59,9 @@ const CompetitionsPage = () => {
   const { canCreate } = useTablePermissions('cp_competitions');
   const { canViewDetails, canEdit, canDelete, canManage } = useCPCompetitionPermissions();
   const { copyCompetition } = useCompetitions();
-  const [competitions, setCompetitions] = useState<Competition[]>([]);
+  const { competitions, isLoading: loading, refetch: refetchCompetitions } = useHostedCompetitions();
   const [schools, setSchools] = useState<School[]>([]);
   const [registrationCounts, setRegistrationCounts] = useState<Record<string, number>>({});
-  const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
@@ -75,28 +75,9 @@ const [isCopying, setIsCopying] = useState(false);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<Competition | null>(null);
   useEffect(() => {
-    fetchCompetitions();
     fetchSchools();
     fetchRegistrationCounts();
   }, []);
-  const fetchCompetitions = async () => {
-    try {
-      setLoading(true);
-      const {
-        data,
-        error
-      } = await supabase.from('cp_competitions').select('*').order('start_date', {
-        ascending: true
-      });
-      if (error) throw error;
-      setCompetitions(data || []);
-    } catch (error) {
-      console.error('Error fetching competitions:', error);
-      toast.error('Failed to load competitions');
-    } finally {
-      setLoading(false);
-    }
-  };
   const fetchSchools = async () => {
     try {
       const {
@@ -174,7 +155,7 @@ const [isCopying, setIsCopying] = useState(false);
       }]);
       if (error) throw error;
       toast.success('Competition created successfully');
-      fetchCompetitions();
+      refetchCompetitions();
       fetchRegistrationCounts();
       setShowCreateDialog(false);
     } catch (error) {
@@ -205,7 +186,7 @@ const handleEditSubmit = async (data: any) => {
     if (error) throw error;
     toast.success('Competition updated successfully');
     setShowEditModal(false);
-    fetchCompetitions();
+    refetchCompetitions();
   } catch (error) {
     console.error('Error updating competition:', error);
     toast.error('Failed to update competition');
@@ -229,7 +210,7 @@ const handleEditSubmit = async (data: any) => {
       if (error) throw error;
 
       toast.success('Competition cancelled successfully');
-      fetchCompetitions();
+      refetchCompetitions();
       setShowCancelDialog(false);
       setCompetitionToCancel(null);
     } catch (error) {
@@ -251,7 +232,7 @@ const handleEditSubmit = async (data: any) => {
       await copyCompetition(selectedCompetition.id, name, startDate, endDate);
       setShowCopyModal(false);
       setSelectedCompetition(null);
-      fetchCompetitions(); // Refresh the list
+      refetchCompetitions(); // Refresh the list
     } catch (error) {
       // Error is already handled in the copyCompetition function
     } finally {
@@ -270,7 +251,7 @@ const handleEditSubmit = async (data: any) => {
       if (error) throw error;
 
       toast.success('Competition status updated successfully');
-      fetchCompetitions();
+      refetchCompetitions();
     } catch (error) {
       console.error('Error updating competition status:', error);
       toast.error('Failed to update competition status');
@@ -539,7 +520,7 @@ const handleEditSubmit = async (data: any) => {
   open={showViewModal} 
   onOpenChange={setShowViewModal} 
   hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
-  onCompetitionUpdated={fetchCompetitions}
+  onCompetitionUpdated={refetchCompetitions}
 />
 
 {/* Edit Competition Modal */}
