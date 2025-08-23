@@ -16,8 +16,9 @@ export const usePublicCompetitions = () => {
       setIsLoading(true);
       
       const { data, error } = await supabase
-        .from('cp_competitions_public_view')
+        .from('cp_competitions')
         .select('*')
+        .eq('is_public', true)
         .order('start_date', { ascending: false });
 
       if (error) throw error;
