@@ -15,11 +15,7 @@ export const useHostedCompetitions = () => {
     try {
       setIsLoading(true);
       
-      const { data, error } = await supabase
-        .from('cp_competitions_hosted_view')
-        .select('*')
-        .eq('school_id', userProfile?.school_id)
-        .order('start_date', { ascending: false });
+      const { data, error } = await supabase.functions.invoke('get-hosted-competitions');
 
       if (error) throw error;
       setCompetitions(data || []);
@@ -32,10 +28,8 @@ export const useHostedCompetitions = () => {
   };
 
   useEffect(() => {
-    if (userProfile?.school_id) {
-      fetchHostedCompetitions();
-    }
-  }, [userProfile?.school_id]);
+    fetchHostedCompetitions();
+  }, []);
 
   return {
     competitions,
