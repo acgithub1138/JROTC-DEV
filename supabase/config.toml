@@ -1,5 +1,8 @@
 project_id = "vpiwfabbzaebfkadmmgd"
 
+[functions.get-hosted-competitions]
+verify_jwt = true
+
 [functions.geocode-search]
 verify_jwt = false
 
