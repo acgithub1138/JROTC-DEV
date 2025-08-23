@@ -4,19 +4,13 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Trophy, Calendar, Users, MapPin, Plus, ArrowLeft } from 'lucide-react';
-import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
+import { useHostedCompetitions } from '@/hooks/competition-portal/useHostedCompetitions';
 import { useCPCompetitionPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 export const MobileHostingCompetitions: React.FC = () => {
   const navigate = useNavigate();
-  const { competitions, isLoading } = useCompetitions();
+  const { competitions: hostedCompetitions, isLoading } = useHostedCompetitions();
   const { canManage } = useCPCompetitionPermissions();
-
-  // Filter for competitions that are being hosted by this school (internal competitions)
-  const hostedCompetitions = competitions.filter(comp => 
-    // For now, show all competitions since we're using the portal hook
-    true
-  );
 
   if (isLoading) {
     return (

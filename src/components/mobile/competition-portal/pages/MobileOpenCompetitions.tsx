@@ -5,19 +5,16 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Search, Calendar, MapPin, Users, Trophy, ExternalLink, ArrowLeft } from 'lucide-react';
-import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
+import { usePublicCompetitions } from '@/hooks/competition-portal/usePublicCompetitions';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const MobileOpenCompetitions: React.FC = () => {
   const navigate = useNavigate();
-  const { competitions, isLoading } = useCompetitions();
+  const { competitions: openCompetitions, isLoading } = usePublicCompetitions();
   const { userProfile } = useAuth();
   const [registrations, setRegistrations] = useState<any[]>([]);
   const [searchTerm, setSearchTerm] = useState('');
-
-  // Filter for public competitions
-  const openCompetitions = competitions.filter(comp => comp.is_public);
 
   // Fetch user's registrations
   useEffect(() => {
