@@ -258,11 +258,13 @@ export const EventAssignmentSection: React.FC<EventAssignmentSectionProps> = ({
                         {team.name}
                       </SelectItem>
                     ))
-                  : profiles.map(profile => (
-                      <SelectItem key={profile.id} value={profile.id}>
-                        {profile.first_name} {profile.last_name}
-                      </SelectItem>
-                    ))
+                  : profiles
+                      .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                      .map(profile => (
+                        <SelectItem key={profile.id} value={profile.id}>
+                          {profile.last_name}, {profile.first_name}
+                        </SelectItem>
+                      ))
                 }
               </SelectContent>
             </Select>
