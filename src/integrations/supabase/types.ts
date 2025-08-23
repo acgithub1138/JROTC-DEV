@@ -682,20 +682,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cp_comp_events_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_hosted_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_comp_events_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_public_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cp_comp_events_event_fkey"
             columns: ["event"]
             isOneToOne: false
@@ -767,20 +753,6 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "cp_competitions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_comp_resources_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_hosted_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_comp_resources_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -867,20 +839,6 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "cp_competitions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_comp_schools_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_hosted_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_comp_schools_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -1034,20 +992,6 @@ export type Database = {
             referencedColumns: ["id"]
           },
           {
-            foreignKeyName: "cp_event_registrations_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_hosted_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "cp_event_registrations_competition_id_fkey"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_public_view"
-            referencedColumns: ["id"]
-          },
-          {
             foreignKeyName: "cp_event_registrations_created_by_fkey"
             columns: ["created_by"]
             isOneToOne: false
@@ -1120,20 +1064,6 @@ export type Database = {
             columns: ["competition_id"]
             isOneToOne: false
             referencedRelation: "cp_competitions"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cp_event_schedules_competition"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_hosted_view"
-            referencedColumns: ["id"]
-          },
-          {
-            foreignKeyName: "fk_cp_event_schedules_competition"
-            columns: ["competition_id"]
-            isOneToOne: false
-            referencedRelation: "cp_competitions_public_view"
             referencedColumns: ["id"]
           },
           {
@@ -3495,184 +3425,7 @@ export type Database = {
       }
     }
     Views: {
-      cp_competitions_hosted_view: {
-        Row: {
-          address: string | null
-          city: string | null
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          end_date: string | null
-          fee: number | null
-          hosting_school: string | null
-          id: string | null
-          is_public: boolean | null
-          location: string | null
-          max_participants: number | null
-          name: string | null
-          program: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline: string | null
-          school_id: string | null
-          sop: string | null
-          sop_link: string | null
-          sop_text: string | null
-          start_date: string | null
-          state: string | null
-          status: string | null
-          updated_at: string | null
-          zip: string | null
-        }
-        Insert: {
-          address?: string | null
-          city?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          fee?: number | null
-          hosting_school?: string | null
-          id?: string | null
-          is_public?: boolean | null
-          location?: string | null
-          max_participants?: number | null
-          name?: string | null
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline?: string | null
-          school_id?: string | null
-          sop?: string | null
-          sop_link?: string | null
-          sop_text?: string | null
-          start_date?: string | null
-          state?: string | null
-          status?: string | null
-          updated_at?: string | null
-          zip?: string | null
-        }
-        Update: {
-          address?: string | null
-          city?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          fee?: number | null
-          hosting_school?: string | null
-          id?: string | null
-          is_public?: boolean | null
-          location?: string | null
-          max_participants?: number | null
-          name?: string | null
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline?: string | null
-          school_id?: string | null
-          sop?: string | null
-          sop_link?: string | null
-          sop_text?: string | null
-          start_date?: string | null
-          state?: string | null
-          status?: string | null
-          updated_at?: string | null
-          zip?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cp_competitions_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
-      cp_competitions_public_view: {
-        Row: {
-          address: string | null
-          city: string | null
-          created_at: string | null
-          created_by: string | null
-          description: string | null
-          end_date: string | null
-          fee: number | null
-          hosting_school: string | null
-          id: string | null
-          is_public: boolean | null
-          location: string | null
-          max_participants: number | null
-          name: string | null
-          program: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline: string | null
-          school_id: string | null
-          sop: string | null
-          sop_link: string | null
-          sop_text: string | null
-          start_date: string | null
-          state: string | null
-          status: string | null
-          updated_at: string | null
-          zip: string | null
-        }
-        Insert: {
-          address?: string | null
-          city?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          fee?: number | null
-          hosting_school?: string | null
-          id?: string | null
-          is_public?: boolean | null
-          location?: string | null
-          max_participants?: number | null
-          name?: string | null
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline?: string | null
-          school_id?: string | null
-          sop?: string | null
-          sop_link?: string | null
-          sop_text?: string | null
-          start_date?: string | null
-          state?: string | null
-          status?: string | null
-          updated_at?: string | null
-          zip?: string | null
-        }
-        Update: {
-          address?: string | null
-          city?: string | null
-          created_at?: string | null
-          created_by?: string | null
-          description?: string | null
-          end_date?: string | null
-          fee?: number | null
-          hosting_school?: string | null
-          id?: string | null
-          is_public?: boolean | null
-          location?: string | null
-          max_participants?: number | null
-          name?: string | null
-          program?: Database["public"]["Enums"]["jrotc_program"] | null
-          registration_deadline?: string | null
-          school_id?: string | null
-          sop?: string | null
-          sop_link?: string | null
-          sop_text?: string | null
-          start_date?: string | null
-          state?: string | null
-          status?: string | null
-          updated_at?: string | null
-          zip?: string | null
-        }
-        Relationships: [
-          {
-            foreignKeyName: "cp_competitions_school_id_fkey"
-            columns: ["school_id"]
-            isOneToOne: false
-            referencedRelation: "schools"
-            referencedColumns: ["id"]
-          },
-        ]
-      }
+      [_ in never]: never
     }
     Functions: {
       add_user_role: {
