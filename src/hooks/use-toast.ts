@@ -6,7 +6,16 @@ import type {
 } from "@/components/ui/toast"
 
 const TOAST_LIMIT = 1
-const TOAST_REMOVE_DELAY = 3000
+
+// Different durations based on toast type
+const getToastDuration = (variant?: string) => {
+  switch (variant) {
+    case 'destructive':
+      return 5000; // 5 seconds for error messages
+    default:
+      return 2000; // 2 seconds for success messages
+  }
+}
 
 type ToasterToast = ToastProps & {
   id: string
@@ -55,18 +64,19 @@ interface State {
 
 const toastTimeouts = new Map<string, ReturnType<typeof setTimeout>>()
 
-const addToRemoveQueue = (toastId: string) => {
+const addToRemoveQueue = (toastId: string, duration?: number) => {
   if (toastTimeouts.has(toastId)) {
     return
   }
 
+  const removeDelay = duration || 2000; // Default to 2 seconds
   const timeout = setTimeout(() => {
     toastTimeouts.delete(toastId)
     dispatch({
       type: "REMOVE_TOAST",
       toastId: toastId,
     })
-  }, TOAST_REMOVE_DELAY)
+  }, removeDelay)
 
   toastTimeouts.set(toastId, timeout)
 }
@@ -93,10 +103,14 @@ export const reducer = (state: State, action: Action): State => {
       // ! Side effects ! - This could be extracted into a dismissToast() action,
       // but I'll keep it here for simplicity
       if (toastId) {
-        addToRemoveQueue(toastId)
+        // Find the toast to get its variant for duration
+        const toast = state.toasts.find(t => t.id === toastId);
+        const duration = getToastDuration(toast?.variant);
+        addToRemoveQueue(toastId, duration)
       } else {
         state.toasts.forEach((toast) => {
-          addToRemoveQueue(toast.id)
+          const duration = getToastDuration(toast?.variant);
+          addToRemoveQueue(toast.id, duration)
         })
       }
 
@@ -160,6 +174,11 @@ function toast({ ...props }: Toast) {
       },
     },
   })
+
+  // Auto-dismiss based on variant
+  setTimeout(() => {
+    dismiss()
+  }, getToastDuration(props.variant))
 
   return {
     id: id,
