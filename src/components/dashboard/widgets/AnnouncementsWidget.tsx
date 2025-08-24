@@ -4,6 +4,7 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { useActiveAnnouncements } from '@/hooks/useAnnouncements';
 import { AnnouncementViewer } from '@/components/announcements/components/AnnouncementViewer';
+import { AnnouncementAttachments } from './AnnouncementAttachments';
 import { 
   Megaphone, 
   ChevronDown, 
@@ -144,6 +145,8 @@ export const AnnouncementsWidget: React.FC = () => {
                       )}
                     </Button>
                   )}
+                  
+                  <AnnouncementAttachments announcementId={announcement.id} />
                 </div>
               </div>
             );
