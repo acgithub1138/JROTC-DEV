@@ -33,6 +33,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { TaskDetailProps } from './types/TaskDetailTypes';
 import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   task,
   open,
@@ -651,6 +652,16 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                 {currentTask.description || 'No description'}
               </p>}
           </div>
+
+          <Separator />
+
+          {/* Attachments */}
+          <AttachmentSection
+            recordType="task"
+            recordId={currentTask.id}
+            canEdit={canEdit}
+            defaultOpen={false}
+          />
 
           <Separator />
 

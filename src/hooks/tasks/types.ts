@@ -31,6 +31,13 @@ export interface Task {
     email: string;
   } | null;
   subtasks?: Subtask[];
+  attachments?: Array<{
+    id: string;
+    file_name: string;
+    file_size: number;
+    file_type: string;
+    created_at: string;
+  }>;
 }
 
 export interface Subtask {
@@ -61,6 +68,13 @@ export interface Subtask {
     last_name: string;
     email: string;
   } | null;
+  attachments?: Array<{
+    id: string;
+    file_name: string;
+    file_size: number;
+    file_type: string;
+    created_at: string;
+  }>;
 }
 
 export interface TaskComment {

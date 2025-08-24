@@ -38,6 +38,7 @@ import { cn } from '@/lib/utils';
 import { useIncidentPriorityOptions, useIncidentCategoryOptions } from "@/hooks/incidents/useIncidentsQuery";
 import { useIncidentMutations } from "@/hooks/incidents/useIncidentMutations";
 import { useAuth } from "@/contexts/AuthContext";
+import { AttachmentSection } from "@/components/attachments/AttachmentSection";
 
 const formSchema = z.object({
   title: z.string().min(1, "Title is required"),
@@ -239,6 +240,8 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
                 )}
               />
             </div>
+
+            {/* Note: Attachments will be available after incident creation */}
 
             <div className="flex justify-end space-x-2">
               <Button type="button" variant="outline" onClick={onClose}>

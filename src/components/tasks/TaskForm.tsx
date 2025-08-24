@@ -12,6 +12,7 @@ import { TaskDescriptionField } from './forms/fields/TaskDescriptionField';
 import { TaskPriorityStatusFields } from './forms/fields/TaskPriorityStatusFields';
 import { TaskDueDateField } from './forms/fields/TaskDueDateField';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface TaskFormProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -126,6 +127,15 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             <TaskPriorityStatusFields form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} isEditingAssignedTask={isEditingAssignedTask} statusOptions={statusOptions} priorityOptions={priorityOptions} />
             
             <TaskDueDateField form={form} />
+
+            {mode === 'edit' && task?.id && (
+              <AttachmentSection
+                recordType="task"
+                recordId={task.id}
+                canEdit={canEditThisTask}
+                defaultOpen={false}
+              />
+            )}
 
             <div className="flex justify-end pt-4">
               <Button type="submit" disabled={isSubmitting}>

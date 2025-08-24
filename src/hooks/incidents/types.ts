@@ -13,6 +13,13 @@ export interface Incident {
   completed_at?: string;
   created_at: string;
   updated_at: string;
+  attachments?: Array<{
+    id: string;
+    file_name: string;
+    file_size: number;
+    file_type: string;
+    created_at: string;
+  }>;
 }
 
 export interface IncidentComment {
