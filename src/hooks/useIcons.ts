@@ -24,7 +24,8 @@ export const useIcons = () => {
         .select('*')
         .eq('is_active', true)
         .order('category')
-        .order('name');
+        .order('name')
+        .range(0, 2000); // Fetch up to 2000 icons to ensure we get all of them
 
       if (error) throw error;
       
