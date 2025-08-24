@@ -232,15 +232,9 @@ const AnnouncementManagementPage = () => {
             <CardContent className="flex flex-col items-center justify-center py-12">
               <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
               <h3 className="text-lg font-medium mb-2">No announcements yet</h3>
-              <p className="text-muted-foreground text-center mb-4">
+              <p className="text-muted-foreground text-center">
                 Create your first announcement to keep everyone informed
               </p>
-              {canCreate && (
-                <Button onClick={handleCreate}>
-                  <Plus className="w-4 h-4 mr-2" />
-                  Create Announcement
-                </Button>
-              )}
             </CardContent>
           </Card>
         )}
