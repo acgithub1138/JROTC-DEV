@@ -8,7 +8,7 @@ import { AttachmentList } from './AttachmentList';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 interface AttachmentSectionProps {
-  recordType: 'task' | 'subtask' | 'incident';
+  recordType: 'task' | 'subtask' | 'incident' | 'announcement';
   recordId: string;
   canEdit?: boolean;
   defaultOpen?: boolean;

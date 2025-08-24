@@ -1,6 +1,6 @@
 export interface Attachment {
   id: string;
-  record_type: 'task' | 'subtask' | 'incident';
+  record_type: 'task' | 'subtask' | 'incident' | 'announcement';
   record_id: string;
   file_name: string;
   file_path: string;
@@ -13,13 +13,13 @@ export interface Attachment {
 }
 
 export interface CreateAttachmentData {
-  record_type: 'task' | 'subtask' | 'incident';
+  record_type: 'task' | 'subtask' | 'incident' | 'announcement';
   record_id: string;
   file: File;
 }
 
 export interface AttachmentListProps {
-  recordType: 'task' | 'subtask' | 'incident';
+  recordType: 'task' | 'subtask' | 'incident' | 'announcement';
   recordId: string;
   canEdit?: boolean;
 }

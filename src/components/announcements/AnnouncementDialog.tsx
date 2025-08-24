@@ -11,6 +11,7 @@ import { CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { AnnouncementRichTextEditor } from './components/AnnouncementRichTextEditor';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { Announcement } from '@/hooks/useAnnouncements';
 
 interface AnnouncementDialogProps {
@@ -210,6 +211,16 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
               label="Content *"
             />
           </div>
+
+          {/* Attachments */}
+          {mode === 'edit' && announcement && (
+            <AttachmentSection
+              recordType="announcement"
+              recordId={announcement.id}
+              canEdit={true}
+              defaultOpen={false}
+            />
+          )}
 
           {/* Actions */}
           <div className="flex justify-end space-x-2">
