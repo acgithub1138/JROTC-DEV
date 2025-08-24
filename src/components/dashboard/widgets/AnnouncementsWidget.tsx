@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 export const AnnouncementsWidget: React.FC = () => {
   const { data: announcements, isLoading } = useActiveAnnouncements();
   const [expandedAnnouncements, setExpandedAnnouncements] = useState<Set<string>>(new Set());
+  const [isWidgetExpanded, setIsWidgetExpanded] = useState(true);
 
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedAnnouncements);
@@ -46,22 +47,38 @@ export const AnnouncementsWidget: React.FC = () => {
     return (
       <Card className="w-full">
         <CardHeader>
-          <CardTitle className="flex items-center">
-            <Megaphone className="w-5 h-5 mr-2 text-primary" />
-            Announcements
+          <CardTitle className="flex items-center justify-between">
+            <div className="flex items-center">
+              <Megaphone className="w-5 h-5 mr-2 text-primary" />
+              Announcements
+            </div>
+            <Button
+              variant="ghost"
+              size="sm"
+              onClick={() => setIsWidgetExpanded(!isWidgetExpanded)}
+              className="h-auto p-1"
+            >
+              {isWidgetExpanded ? (
+                <ChevronUp className="w-4 h-4" />
+              ) : (
+                <ChevronDown className="w-4 h-4" />
+              )}
+            </Button>
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="space-y-4">
-            {[1, 2].map((i) => (
-              <div key={i} className="animate-pulse">
-                <div className="h-4 bg-muted rounded mb-2" />
-                <div className="h-3 bg-muted rounded w-3/4 mb-2" />
-                <div className="h-16 bg-muted rounded" />
-              </div>
-            ))}
-          </div>
-        </CardContent>
+        {isWidgetExpanded && (
+          <CardContent className="animate-accordion-down">
+            <div className="space-y-4">
+              {[1, 2].map((i) => (
+                <div key={i} className="animate-pulse">
+                  <div className="h-4 bg-muted rounded mb-2" />
+                  <div className="h-3 bg-muted rounded w-3/4 mb-2" />
+                  <div className="h-16 bg-muted rounded" />
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        )}
       </Card>
     );
   }
@@ -73,14 +90,29 @@ export const AnnouncementsWidget: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="flex items-center">
-          <Megaphone className="w-5 h-5 mr-2 text-primary" />
-          Announcements
+        <CardTitle className="flex items-center justify-between">
+          <div className="flex items-center">
+            <Megaphone className="w-5 h-5 mr-2 text-primary" />
+            Announcements
+          </div>
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setIsWidgetExpanded(!isWidgetExpanded)}
+            className="h-auto p-1"
+          >
+            {isWidgetExpanded ? (
+              <ChevronUp className="w-4 h-4" />
+            ) : (
+              <ChevronDown className="w-4 h-4" />
+            )}
+          </Button>
         </CardTitle>
       </CardHeader>
-      <CardContent>
-        <div className="space-y-4">
-          {announcements.map((announcement) => {
+      {isWidgetExpanded && (
+        <CardContent className="animate-accordion-down">
+          <div className="space-y-4">
+            {announcements.map((announcement) => {
             const isExpanded = expandedAnnouncements.has(announcement.id);
             const hasLongContent = announcement.content.length > 200;
             
@@ -151,8 +183,9 @@ export const AnnouncementsWidget: React.FC = () => {
               </div>
             );
           })}
-        </div>
-      </CardContent>
+          </div>
+        </CardContent>
+      )}
     </Card>
   );
 };
