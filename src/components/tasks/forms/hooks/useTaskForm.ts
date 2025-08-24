@@ -12,9 +12,10 @@ interface UseTaskFormProps {
   onOpenChange: (open: boolean) => void;
   canAssignTasks: boolean;
   currentUserId: string;
+  onTaskCreated?: (task: Task) => void;
 }
 
-export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentUserId }: UseTaskFormProps) => {
+export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentUserId, onTaskCreated }: UseTaskFormProps) => {
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
@@ -84,15 +85,19 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
     try {
       if (mode === 'create') {
         console.log('Calling createTask...');
-        await createTask(taskData);
+        const newTask = await createTask(taskData);
+        if (onTaskCreated) {
+          onTaskCreated(newTask);
+        } else {
+          onOpenChange(false);
+          form.reset();
+        }
       } else if (task) {
         console.log('Calling updateTask...');
         await updateTask({ id: task.id, ...taskData });
+        onOpenChange(false);
+        form.reset();
       }
-      
-      // Only close and reset if successful
-      onOpenChange(false);
-      form.reset();
     } catch (error) {
       console.error('Task submission failed:', error);
       // Keep form open so user can try again

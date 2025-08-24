@@ -32,6 +32,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [createdTask, setCreatedTask] = useState<Task | null>(null);
+  const [showAttachments, setShowAttachments] = useState(false);
 
   const {
     form,
@@ -44,9 +46,19 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   } = useTaskForm({
     mode,
     task,
-    onOpenChange,
+    onOpenChange: (open: boolean) => {
+      if (!open && !showAttachments) {
+        setCreatedTask(null);
+        onOpenChange(false);
+      }
+    },
     canAssignTasks,
-    currentUserId: userProfile?.id || ''
+    currentUserId: userProfile?.id || '',
+    onTaskCreated: (newTask: Task) => {
+      setCreatedTask(newTask);
+      setShowAttachments(true);
+      setHasUnsavedChanges(false);
+    }
   });
 
   // Track form changes for unsaved warning
@@ -68,8 +80,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   }, [form, mode, task]);
 
   const handleClose = () => {
-    if (hasUnsavedChanges) {
+    if (hasUnsavedChanges && !showAttachments) {
       setShowConfirmDialog(true);
+    } else if (showAttachments) {
+      setShowAttachments(false);
+      setCreatedTask(null);
+      onOpenChange(false);
     } else {
       onOpenChange(false);
     }
@@ -77,6 +93,8 @@ export const TaskForm: React.FC<TaskFormProps> = ({
 
   const confirmClose = () => {
     setShowConfirmDialog(false);
+    setShowAttachments(false);
+    setCreatedTask(null);
     form.reset();
     onOpenChange(false);
   };
@@ -86,6 +104,9 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   };
   const isEditingAssignedTask = mode === 'edit' && task?.assigned_to === userProfile?.id;
   const getDialogTitle = () => {
+    if (showAttachments && createdTask) {
+      return `Add Attachments - ${createdTask.task_number || createdTask.title}`;
+    }
     if (mode === 'create') {
       return 'Create New Task';
     }
@@ -112,38 +133,67 @@ export const TaskForm: React.FC<TaskFormProps> = ({
             {getDialogTitle()}
           </DialogTitle>
           <DialogDescription>
-            {mode === 'create' ? 'Fill in the details to create a new task.' : 'Update the task details below.'}
+            {showAttachments 
+              ? 'Your task has been created successfully! You can now add attachments or close this dialog.'
+              : mode === 'create' 
+                ? 'Fill in the details to create a new task.' 
+                : 'Update the task details below.'
+            }
           </DialogDescription>
         </DialogHeader>
 
-        <Form {...form}>
-          <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
-            <TaskTitleField form={form} />
+        {showAttachments && createdTask ? (
+          <div className="space-y-4">
+            <div className="p-4 bg-muted/50 rounded-lg">
+              <h3 className="font-medium text-sm mb-2">Task Created Successfully!</h3>
+              <p className="text-sm text-muted-foreground">
+                <strong>{createdTask.task_number}</strong> - {createdTask.title}
+              </p>
+            </div>
             
-            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
-            
-            <TaskDescriptionField form={form} />
-            
-            <TaskPriorityStatusFields form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} isEditingAssignedTask={isEditingAssignedTask} statusOptions={statusOptions} priorityOptions={priorityOptions} />
-            
-            <TaskDueDateField form={form} />
-
-            {mode === 'edit' && task?.id && (
-              <AttachmentSection
-                recordType="task"
-                recordId={task.id}
-                canEdit={canEditThisTask}
-                defaultOpen={false}
-              />
-            )}
+            <AttachmentSection
+              recordType="task"
+              recordId={createdTask.id}
+              canEdit={true}
+              defaultOpen={true}
+            />
 
             <div className="flex justify-end pt-4">
-              <Button type="submit" disabled={isSubmitting}>
-                {mode === 'create' ? 'Create Task' : 'Update Task'}
+              <Button onClick={() => handleClose()}>
+                Done
               </Button>
             </div>
-          </form>
-        </Form>
+          </div>
+        ) : (
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
+              <TaskTitleField form={form} />
+              
+              <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
+              
+              <TaskDescriptionField form={form} />
+              
+              <TaskPriorityStatusFields form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} isEditingAssignedTask={isEditingAssignedTask} statusOptions={statusOptions} priorityOptions={priorityOptions} />
+              
+              <TaskDueDateField form={form} />
+
+              {mode === 'edit' && task?.id && (
+                <AttachmentSection
+                  recordType="task"
+                  recordId={task.id}
+                  canEdit={canEditThisTask}
+                  defaultOpen={false}
+                />
+              )}
+
+              <div className="flex justify-end pt-4">
+                <Button type="submit" disabled={isSubmitting}>
+                  {mode === 'create' ? 'Create Task' : 'Update Task'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        )}
         </DialogContent>
       </Dialog>
 
