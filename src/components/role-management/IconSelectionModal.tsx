@@ -1,5 +1,6 @@
+
 import React, { useState, useMemo } from 'react';
-import { Search, Check } from 'lucide-react';
+import { Search, Check, FileText } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import {
   Dialog,
@@ -10,73 +11,63 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-// Safe list of commonly used Lucide icons (will expand to full list once working)
-const safeIconList = [
-  'Activity', 'AlertCircle', 'AlertTriangle', 'Archive', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp',
-  'Award', 'BarChart', 'BarChart2', 'BarChart3', 'Bell', 'Book', 'BookOpen', 'Briefcase', 'Calendar',
-  'Camera', 'Check', 'CheckCircle', 'ChevronDown', 'ChevronLeft', 'ChevronRight', 'ChevronUp', 'Clock',
-  'Cloud', 'Code', 'Cog', 'Copy', 'CreditCard', 'Database', 'Download', 'Edit', 'Edit2', 'Eye', 'EyeOff',
-  'File', 'FileText', 'Filter', 'Folder', 'Globe', 'Grid', 'Hash', 'Heart', 'HelpCircle', 'Home', 'Image',
-  'Inbox', 'Info', 'Key', 'Layout', 'Link', 'List', 'Lock', 'LogIn', 'LogOut', 'Mail', 'Map', 'MapPin',
-  'Menu', 'MessageCircle', 'MessageSquare', 'Minus', 'Monitor', 'MoreHorizontal', 'MoreVertical', 'Music',
-  'Package', 'Phone', 'PieChart', 'Play', 'Plus', 'PlusCircle', 'Save', 'Search', 'Send', 'Settings',
-  'Share', 'Shield', 'Star', 'Target', 'Trash', 'Trash2', 'Trophy', 'Upload', 'User', 'Users', 'Video',
-  'Wifi', 'X', 'Zap'
+// Comprehensive list of Lucide icons - using a static list to avoid dynamic loading issues
+const availableIcons = [
+  'Activity', 'Airplay', 'AlertCircle', 'AlertOctagon', 'AlertTriangle', 'AlignCenter', 'AlignJustify',
+  'AlignLeft', 'AlignRight', 'Anchor', 'Aperture', 'Archive', 'ArrowDown', 'ArrowDownCircle',
+  'ArrowDownLeft', 'ArrowDownRight', 'ArrowLeft', 'ArrowLeftCircle', 'ArrowRight', 'ArrowRightCircle',
+  'ArrowUp', 'ArrowUpCircle', 'ArrowUpLeft', 'ArrowUpRight', 'AtSign', 'Award', 'BarChart', 'BarChart2',
+  'BarChart3', 'Battery', 'BatteryCharging', 'Bell', 'BellOff', 'Bluetooth', 'Bold', 'Book',
+  'BookOpen', 'Bookmark', 'Box', 'Briefcase', 'Calendar', 'Camera', 'CameraOff', 'Cast',
+  'Check', 'CheckCircle', 'CheckCircle2', 'CheckSquare', 'ChevronDown', 'ChevronLeft', 'ChevronRight',
+  'ChevronUp', 'ChevronsDown', 'ChevronsLeft', 'ChevronsRight', 'ChevronsUp', 'Chrome', 'Circle',
+  'Clipboard', 'Clock', 'Cloud', 'CloudDrizzle', 'CloudLightning', 'CloudRain', 'CloudSnow',
+  'Code', 'Code2', 'Codepen', 'Codesandbox', 'Coffee', 'Columns', 'Command', 'Compass',
+  'Copy', 'CornerDownLeft', 'CornerDownRight', 'CornerLeftDown', 'CornerLeftUp', 'CornerRightDown',
+  'CornerRightUp', 'CornerUpLeft', 'CornerUpRight', 'Cpu', 'CreditCard', 'Crop', 'Crosshair',
+  'Database', 'Delete', 'Disc', 'DollarSign', 'Download', 'DownloadCloud', 'Droplets', 'Edit',
+  'Edit2', 'Edit3', 'ExternalLink', 'Eye', 'EyeOff', 'Facebook', 'FastForward', 'Feather',
+  'Figma', 'File', 'FileText', 'Film', 'Filter', 'Flag', 'Folder', 'FolderOpen', 'FolderPlus',
+  'Framer', 'Frown', 'Gift', 'GitBranch', 'GitCommit', 'GitMerge', 'GitPullRequest', 'Github',
+  'Gitlab', 'Globe', 'Grid', 'HardDrive', 'Hash', 'Headphones', 'Heart', 'HelpCircle',
+  'Hexagon', 'Home', 'Image', 'Inbox', 'Info', 'Instagram', 'Italic', 'Key', 'Keyboard',
+  'Layers', 'Layout', 'LifeBuoy', 'Link', 'Link2', 'Linkedin', 'List', 'Loader', 'Lock',
+  'LogIn', 'LogOut', 'Mail', 'Map', 'MapPin', 'Maximize', 'Maximize2', 'Meh', 'Menu',
+  'MessageCircle', 'MessageSquare', 'Mic', 'MicOff', 'Minimize', 'Minimize2', 'Minus', 'MinusCircle',
+  'MinusSquare', 'Monitor', 'Moon', 'MoreHorizontal', 'MoreVertical', 'MousePointer', 'Move',
+  'Music', 'Navigation', 'Navigation2', 'Octagon', 'Package', 'Paperclip', 'Pause', 'PauseCircle',
+  'PenTool', 'Percent', 'Phone', 'PhoneCall', 'PhoneIncoming', 'PhoneOff', 'PhoneOutgoing', 'PieChart',
+  'Play', 'PlayCircle', 'Plus', 'PlusCircle', 'PlusSquare', 'Pocket', 'Power', 'Printer',
+  'Radio', 'RefreshCcw', 'RefreshCw', 'Repeat', 'Repeat1', 'Rewind', 'RotateCcw', 'RotateCw',
+  'Rss', 'Save', 'Scissors', 'Search', 'Send', 'Server', 'Settings', 'Share', 'Share2',
+  'Shield', 'ShieldOff', 'ShoppingBag', 'ShoppingCart', 'Shuffle', 'Sidebar', 'SkipBack', 'SkipForward',
+  'Slack', 'Slash', 'Sliders', 'Smartphone', 'Smile', 'Speaker', 'Square', 'Star', 'StopCircle',
+  'Sun', 'Sunrise', 'Sunset', 'Tablet', 'Tag', 'Target', 'Terminal', 'Thermometer', 'ThumbsDown',
+  'ThumbsUp', 'ToggleLeft', 'ToggleRight', 'Tool', 'Trash', 'Trash2', 'TrendingDown', 'TrendingUp',
+  'Triangle', 'Trophy', 'Truck', 'Tv', 'Twitch', 'Twitter', 'Type', 'Umbrella', 'Underline',
+  'Unlock', 'Upload', 'UploadCloud', 'User', 'UserCheck', 'UserMinus', 'UserPlus', 'Users',
+  'UserX', 'Video', 'VideoOff', 'Voicemail', 'Volume', 'Volume1', 'Volume2', 'VolumeX',
+  'Watch', 'Wifi', 'WifiOff', 'Wind', 'X', 'XCircle', 'XSquare', 'Youtube', 'Zap', 'ZapOff',
+  'ZoomIn', 'ZoomOut'
 ];
 
-// Get all available Lucide icons with fallback
-const getAllIconNames = () => {
-  try {
-    const iconNames: string[] = [];
-    
-    // First, try to get all icons dynamically
-    Object.keys(Icons).forEach(key => {
-      const component = (Icons as any)[key];
-      
-      // Check if it looks like a React component
-      if (
-        typeof component === 'function' || // Function component
-        (typeof component === 'object' && 
-         component !== null && 
-         (component.$$typeof || component.render)) // React forwardRef or element
-      ) {
-        // Additional checks to filter out non-icon exports
-        if (
-          key !== 'createLucideIcon' &&
-          key !== 'icons' &&
-          !key.startsWith('create') &&
-          /^[A-Z]/.test(key) // Component naming convention
-        ) {
-          iconNames.push(key);
-        }
-      }
-    });
-    
-    // If we got a reasonable number of icons, use the dynamic list
-    if (iconNames.length > 50) {
-      console.log(`Loaded ${iconNames.length} icons dynamically`);
-      return iconNames.sort();
-    } else {
-      console.warn('Dynamic icon loading returned too few icons, falling back to safe list');
-      return safeIconList;
-    }
-  } catch (error) {
-    console.error('Error loading icons dynamically, falling back to safe list:', error);
-    return safeIconList;
-  }
-};
-
-// Get icon component from name with error handling
+// Safe function to get icon component
 const getIconComponent = (iconName: string) => {
   try {
     const IconComponent = (Icons as any)[iconName];
-    if (IconComponent) {
+    
+    // Validate that it's a valid React component
+    if (typeof IconComponent === 'function' || 
+        (typeof IconComponent === 'object' && IconComponent !== null && IconComponent.$$typeof)) {
       return IconComponent;
     }
+    
+    console.warn(`Icon ${iconName} is not a valid component, using fallback`);
+    return FileText;
   } catch (error) {
     console.error(`Error loading icon ${iconName}:`, error);
+    return FileText;
   }
-  return Icons.FileText; // Safe fallback
 };
 
 interface IconSelectionModalProps {
@@ -93,16 +84,13 @@ export const IconSelectionModal: React.FC<IconSelectionModalProps> = ({
   onIconSelect,
 }) => {
   const [searchTerm, setSearchTerm] = useState('');
-  
-  // Get all available icons
-  const iconOptions = useMemo(() => getAllIconNames(), []);
 
   const filteredIcons = useMemo(() => {
-    if (!searchTerm) return iconOptions;
-    return iconOptions.filter(icon => 
+    if (!searchTerm) return availableIcons;
+    return availableIcons.filter(icon => 
       icon.toLowerCase().includes(searchTerm.toLowerCase())
     );
-  }, [searchTerm, iconOptions]);
+  }, [searchTerm]);
 
   const handleIconClick = (iconName: string) => {
     onIconSelect(iconName);
@@ -172,7 +160,7 @@ export const IconSelectionModal: React.FC<IconSelectionModalProps> = ({
           {/* Footer */}
           <div className="flex justify-between items-center pt-4 border-t">
             <div className="text-sm text-muted-foreground">
-              {filteredIcons.length} of {iconOptions.length} icons found
+              {filteredIcons.length} of {availableIcons.length} icons found
             </div>
             <Button variant="outline" onClick={onClose}>
               Cancel
