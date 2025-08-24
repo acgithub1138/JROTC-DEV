@@ -23,7 +23,8 @@ import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
 import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
 import { useAuth } from '@/contexts/AuthContext';
 import { useCapacitor } from '@/hooks/useCapacitor';
-import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUserPermissions, useAnnouncementPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
 const DashboardOverview = () => {
   const navigate = useNavigate();
   const { userProfile } = useAuth();
@@ -34,6 +35,7 @@ const DashboardOverview = () => {
   
   const { canViewAnalytics } = useDashboardPermissions();
   const { canCreate: canCreateUsers } = useUserPermissions();
+  const { canRead: canViewAnnouncements } = useAnnouncementPermissions();
   
   // Derived permissions for UI logic
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
@@ -280,6 +282,11 @@ const DashboardOverview = () => {
           )}
         </div>
       </div>
+
+      {/* Announcements Widget - Top of Dashboard */}
+      {canViewAnnouncements && (
+        <AnnouncementsWidget />
+      )}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;

@@ -33,6 +33,7 @@ import ContactManagementPage from '@/components/contact-management/ContactManage
 import CalendarManagementPage from '@/components/calendar/CalendarManagementPage';
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
+import AnnouncementManagementPage from '@/components/announcements/AnnouncementManagementPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 
@@ -87,6 +88,7 @@ const MainApplication = () => {
       'budget': '/app/budget',
       'contacts': '/app/contacts',
       'calendar': '/app/calendar',
+      'announcements': '/app/announcements',
       'role_management': '/app/roles',
       'settings': '/app/settings'
     };
@@ -134,6 +136,7 @@ const MainApplication = () => {
           'budget': '/app/budget',
           'contacts': '/app/contacts',
           'calendar': '/app/calendar',
+          'announcements': '/app/announcements',
           'role_management': '/app/roles',
           'settings': '/app/settings'
         });
@@ -196,6 +199,7 @@ const MainApplication = () => {
             <Route path="calendar" element={<CalendarManagementPage />} />
             <Route path="competitions" element={<CompetitionManagementPage />} />
             <Route path="competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
+            <Route path="announcements" element={<AnnouncementManagementPage />} />
             <Route path="roles" element={<RoleManagementPage />} />
             
             {/* Competition Portal Routes */}

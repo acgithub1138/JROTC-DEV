@@ -14,6 +14,48 @@ export type Database = {
   }
   public: {
     Tables: {
+      announcements: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          expire_date: string | null
+          id: string
+          is_active: boolean
+          priority: number
+          publish_date: string
+          school_id: string
+          title: string
+          updated_at: string
+        }
+        Insert: {
+          author_id: string
+          content: string
+          created_at?: string
+          expire_date?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          publish_date?: string
+          school_id: string
+          title: string
+          updated_at?: string
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          expire_date?: string | null
+          id?: string
+          is_active?: boolean
+          priority?: number
+          publish_date?: string
+          school_id?: string
+          title?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       attachments: {
         Row: {
           created_at: string

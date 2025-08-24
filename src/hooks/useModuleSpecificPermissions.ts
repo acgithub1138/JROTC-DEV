@@ -322,3 +322,19 @@ export const useCPScoreSheetsPermissions = () => {
     canUpdate: hasPermission('cp_score_sheets', 'update'), // alias for consistency
   };
 };
+
+// Announcements specific permissions
+export const useAnnouncementPermissions = () => {
+  const modulePermissions = useModulePermissions('announcements');
+  const { hasPermission } = usePermissionContext();
+  
+  return {
+    ...modulePermissions,
+    canView: modulePermissions.canRead,
+    canViewDetails: hasPermission('announcements', 'view'),
+    canEdit: hasPermission('announcements', 'update'),
+    canDelete: hasPermission('announcements', 'delete'),
+    canCreate: hasPermission('announcements', 'create'),
+    canUpdate: hasPermission('announcements', 'update'), // alias for consistency
+  };
+};
