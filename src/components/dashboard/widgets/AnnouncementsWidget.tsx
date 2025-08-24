@@ -66,22 +66,7 @@ export const AnnouncementsWidget: React.FC = () => {
   }
 
   if (!announcements || announcements.length === 0) {
-    return (
-      <Card className="w-full">
-        <CardHeader>
-          <CardTitle className="flex items-center">
-            <Megaphone className="w-5 h-5 mr-2 text-primary" />
-            Announcements
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="text-center py-8 text-muted-foreground">
-            <Megaphone className="w-12 h-12 mx-auto mb-4 opacity-50" />
-            <p className="text-sm">No active announcements</p>
-          </div>
-        </CardContent>
-      </Card>
-    );
+    return null;
   }
 
   return (
