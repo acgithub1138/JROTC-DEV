@@ -27,6 +27,7 @@ import { resolveUserEmail } from "@/hooks/useEmailResolution";
 import { useToast } from "@/hooks/use-toast";
 import { UnsavedChangesDialog } from "@/components/ui/unsaved-changes-dialog";
 import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
+import { AttachmentSection } from "@/components/attachments/AttachmentSection";
 import type { Incident } from "@/hooks/incidents/types";
 interface IncidentDetailDialogProps {
   incident: Incident;
@@ -681,6 +682,13 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
               </p>}
           </div>
 
+          {/* Attachments */}
+          <AttachmentSection
+            recordType="incident"
+            recordId={currentIncident.id}
+            canEdit={canEditIncident}
+            defaultOpen={false}
+          />
 
           <Separator />
 
