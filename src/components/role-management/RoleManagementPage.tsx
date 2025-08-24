@@ -11,7 +11,7 @@ import { RefreshCw, RotateCcw } from 'lucide-react';
 import { AddRoleDialog } from './AddRoleDialog';
 import { UserRolesTable } from './UserRolesTable';
 import { PortalPermissionsTable } from './PortalPermissionsTable';
-import { ModulesManagement } from './ModulesManagement';
+import ModulesManagement from './ModulesManagement';
 import { ActionsManagement } from './ActionsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 
