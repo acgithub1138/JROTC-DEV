@@ -37,6 +37,7 @@ import { Edit2, Save, X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, Che
   // Misc Utilities
   Wrench, Cog, Sliders, Filter, Grid, List, Layout
 } from 'lucide-react';
+import * as Icons from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -243,11 +244,9 @@ const iconOptions = [
 
 // Dynamic icon mapping using lucide-react icons
 const getIconComponent = (iconName: string) => {
-  // Import all icons from lucide-react
-  const Icons = require('lucide-react');
-  
-  // Return the specific icon component or default to FileText
-  return Icons[iconName] || Icons.FileText;
+  // Use the already imported Icons from lucide-react
+  const IconComponent = (Icons as any)[iconName];
+  return IconComponent || Icons.FileText;
 };
 
 
