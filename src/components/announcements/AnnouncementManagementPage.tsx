@@ -10,6 +10,12 @@ import {
   TableHeader,
   TableRow,
 } from '@/components/ui/table';
+import {
+  Tabs,
+  TabsContent,
+  TabsList,
+  TabsTrigger,
+} from '@/components/ui/tabs';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import {
   useAnnouncements,
@@ -61,6 +67,12 @@ const AnnouncementManagementPage = () => {
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [deleteAnnouncementId, setDeleteAnnouncementId] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<'active' | 'inactive'>('active');
+
+  // Filter announcements based on active tab
+  const filteredAnnouncements = announcements?.filter(announcement => 
+    activeTab === 'active' ? announcement.is_active : !announcement.is_active
+  ) || [];
 
   const handleCreate = () => {
     setSelectedAnnouncement(null);
@@ -153,101 +165,206 @@ const AnnouncementManagementPage = () => {
         )}
       </div>
 
-      {/* Announcements Table */}
+      {/* Announcements Table with Tabs */}
       <Card>
         <CardHeader>
           <CardTitle>Announcements</CardTitle>
         </CardHeader>
         <CardContent>
-          {announcements && announcements.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Title</TableHead>
-                  <TableHead>Priority</TableHead>
-                  <TableHead>Publish Date</TableHead>
-                  <TableHead>Exp Date</TableHead>
-                  <TableHead>Active</TableHead>
-                  <TableHead className="w-[120px]">Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {announcements.map((announcement) => (
-                  <TableRow key={announcement.id}>
-                    <TableCell className="font-medium max-w-[300px]">
-                      <div className="truncate" title={announcement.title}>
-                        {announcement.title}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge 
-                        variant="secondary" 
-                        className={getPriorityColor(announcement.priority)}
-                      >
-                        {getPriorityLabel(announcement.priority)}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
-                    </TableCell>
-                    <TableCell>
-                      {announcement.expire_date ? 
-                        format(new Date(announcement.expire_date), 'MMM d, yyyy') : 
-                        '-'
-                      }
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={announcement.is_active ? "default" : "outline"}>
-                        {announcement.is_active ? "Active" : "Inactive"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-1">
-                        {canViewDetails && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleView(announcement)}
-                            title="View"
+          <Tabs value={activeTab} onValueChange={(value) => setActiveTab(value as 'active' | 'inactive')}>
+            <TabsList className="grid w-full max-w-[400px] grid-cols-2">
+              <TabsTrigger value="active">
+                Active ({announcements?.filter(a => a.is_active).length || 0})
+              </TabsTrigger>
+              <TabsTrigger value="inactive">
+                Not Active ({announcements?.filter(a => !a.is_active).length || 0})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active" className="mt-6">
+              {filteredAnnouncements.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Publish Date</TableHead>
+                      <TableHead>Exp Date</TableHead>
+                      <TableHead>Active</TableHead>
+                      <TableHead className="w-[120px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAnnouncements.map((announcement) => (
+                      <TableRow key={announcement.id}>
+                        <TableCell className="font-medium max-w-[300px]">
+                          <div className="truncate" title={announcement.title}>
+                            {announcement.title}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="secondary" 
+                            className={getPriorityColor(announcement.priority)}
                           >
-                            <Eye className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {canEdit && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleEdit(announcement)}
-                            title="Edit"
+                            {getPriorityLabel(announcement.priority)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
+                        </TableCell>
+                        <TableCell>
+                          {announcement.expire_date ? 
+                            format(new Date(announcement.expire_date), 'MMM d, yyyy') : 
+                            '-'
+                          }
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={announcement.is_active ? "default" : "outline"}>
+                            {announcement.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {canViewDetails && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleView(announcement)}
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {canEdit && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(announcement)}
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteAnnouncementId(announcement.id)}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No active announcements</h3>
+                  <p className="text-muted-foreground text-center">
+                    Create your first announcement to keep everyone informed
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+            
+            <TabsContent value="inactive" className="mt-6">
+              {filteredAnnouncements.length > 0 ? (
+                <Table>
+                  <TableHeader>
+                    <TableRow>
+                      <TableHead>Title</TableHead>
+                      <TableHead>Priority</TableHead>
+                      <TableHead>Publish Date</TableHead>
+                      <TableHead>Exp Date</TableHead>
+                      <TableHead>Active</TableHead>
+                      <TableHead className="w-[120px]">Actions</TableHead>
+                    </TableRow>
+                  </TableHeader>
+                  <TableBody>
+                    {filteredAnnouncements.map((announcement) => (
+                      <TableRow key={announcement.id}>
+                        <TableCell className="font-medium max-w-[300px]">
+                          <div className="truncate" title={announcement.title}>
+                            {announcement.title}
+                          </div>
+                        </TableCell>
+                        <TableCell>
+                          <Badge 
+                            variant="secondary" 
+                            className={getPriorityColor(announcement.priority)}
                           >
-                            <Edit className="w-4 h-4" />
-                          </Button>
-                        )}
-                        {canDelete && (
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => setDeleteAnnouncementId(announcement.id)}
-                            title="Delete"
-                          >
-                            <Trash2 className="w-4 h-4" />
-                          </Button>
-                        )}
-                      </div>
-                    </TableCell>
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          ) : (
-            <div className="flex flex-col items-center justify-center py-12">
-              <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium mb-2">No announcements yet</h3>
-              <p className="text-muted-foreground text-center">
-                Create your first announcement to keep everyone informed
-              </p>
-            </div>
-          )}
+                            {getPriorityLabel(announcement.priority)}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          {format(new Date(announcement.publish_date), 'MMM d, yyyy')}
+                        </TableCell>
+                        <TableCell>
+                          {announcement.expire_date ? 
+                            format(new Date(announcement.expire_date), 'MMM d, yyyy') : 
+                            '-'
+                          }
+                        </TableCell>
+                        <TableCell>
+                          <Badge variant={announcement.is_active ? "default" : "outline"}>
+                            {announcement.is_active ? "Active" : "Inactive"}
+                          </Badge>
+                        </TableCell>
+                        <TableCell>
+                          <div className="flex items-center gap-1">
+                            {canViewDetails && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleView(announcement)}
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {canEdit && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => handleEdit(announcement)}
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </Button>
+                            )}
+                            {canDelete && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => setDeleteAnnouncementId(announcement.id)}
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </Button>
+                            )}
+                          </div>
+                        </TableCell>
+                      </TableRow>
+                    ))}
+                  </TableBody>
+                </Table>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-12">
+                  <MessageSquare className="w-12 h-12 text-muted-foreground mb-4" />
+                  <h3 className="text-lg font-medium mb-2">No inactive announcements</h3>
+                  <p className="text-muted-foreground text-center">
+                    All announcements are currently active
+                  </p>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
         </CardContent>
       </Card>
 
