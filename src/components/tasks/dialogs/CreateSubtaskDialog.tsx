@@ -10,6 +10,7 @@ import { format } from 'date-fns';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface CreateSubtaskDialogProps {
   isOpen: boolean;
   onClose: () => void;
@@ -46,6 +47,9 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [createdSubtask, setCreatedSubtask] = useState<any>(null);
+  const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
+  const [showAttachments, setShowAttachments] = useState(false);
 
   // Track form changes for unsaved warning
   useEffect(() => {
@@ -59,19 +63,25 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
     );
     setHasUnsavedChanges(hasChanges);
   }, [formData]);
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    createSubtask({
-      parent_task_id: parentTaskId,
-      title: formData.title,
-      description: formData.description || null,
-      status: formData.status,
-      priority: formData.priority,
-      assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to || null,
-      due_date: formData.due_date?.toISOString() || null
-    });
-    resetForm();
-    onClose();
+    try {
+      const subtask = await createSubtask({
+        parent_task_id: parentTaskId,
+        title: formData.title,
+        description: formData.description || null,
+        status: formData.status,
+        priority: formData.priority,
+        assigned_to: formData.assigned_to === 'unassigned' ? null : formData.assigned_to || null,
+        due_date: formData.due_date?.toISOString() || null
+      });
+      
+      setCreatedSubtask(subtask);
+      setShowAttachmentConfirm(true);
+      resetForm();
+    } catch (error) {
+      console.error('Failed to create subtask:', error);
+    }
   };
 
   const resetForm = () => {
@@ -84,6 +94,23 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
       due_date: null
     });
     setHasUnsavedChanges(false);
+  };
+
+  const handleAttachmentConfirm = (hasAttachments: boolean) => {
+    setShowAttachmentConfirm(false);
+    if (hasAttachments) {
+      setShowAttachments(true);
+    } else {
+      setCreatedSubtask(null);
+      setShowAttachments(false);
+      onClose();
+    }
+  };
+
+  const handleAttachmentsComplete = () => {
+    setCreatedSubtask(null);
+    setShowAttachments(false);
+    onClose();
   };
 
   const handleClose = () => {
@@ -108,118 +135,136 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
       <Dialog open={isOpen} onOpenChange={hasUnsavedChanges ? handleClose : onClose}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
-          <DialogTitle>Create Subtask for: {parentTaskTitle}</DialogTitle>
+          <DialogTitle>
+            {showAttachments ? `Add Attachments to: ${createdSubtask?.title}` : `Create Subtask for: ${parentTaskTitle}`}
+          </DialogTitle>
         </DialogHeader>
         
-        <form onSubmit={handleSubmit} className="space-y-4">
-          <div>
-            <Label htmlFor="title">Title *</Label>
-            <Input id="title" value={formData.title} onChange={e => setFormData({
-            ...formData,
-            title: e.target.value
-          })} placeholder="Enter subtask title" required />
+        {showAttachments && createdSubtask ? (
+          <div className="space-y-4">
+            <AttachmentSection
+              recordType="subtask"
+              recordId={createdSubtask.id}
+              canEdit={true}
+              defaultOpen={true}
+            />
+            <div className="flex justify-end">
+              <Button onClick={handleAttachmentsComplete}>
+                Done
+              </Button>
+            </div>
           </div>
-
-          <div>
-            <Label htmlFor="description">Description</Label>
-            <Textarea id="description" value={formData.description} onChange={e => setFormData({
-            ...formData,
-            description: e.target.value
-          })} placeholder="Enter subtask description" rows={3} />
-          </div>
-
-          <div className="grid grid-cols-2 gap-4">
+        ) : (
+          <form onSubmit={handleSubmit} className="space-y-4">
             <div>
-              <Label>Status</Label>
-              <Select value={formData.status} onValueChange={value => setFormData({
+              <Label htmlFor="title">Title *</Label>
+              <Input id="title" value={formData.title} onChange={e => setFormData({
               ...formData,
-              status: value
-            })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
+              title: e.target.value
+            })} placeholder="Enter subtask title" required />
             </div>
 
             <div>
-              <Label>Priority</Label>
-              <Select value={formData.priority} onValueChange={value => setFormData({
+              <Label htmlFor="description">Description</Label>
+              <Textarea id="description" value={formData.description} onChange={e => setFormData({
               ...formData,
-              priority: value
-            })}>
-                <SelectTrigger>
-                  <SelectValue />
-                </SelectTrigger>
-                <SelectContent>
-                  {priorityOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                      {option.label}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
+              description: e.target.value
+            })} placeholder="Enter subtask description" rows={3} />
             </div>
-          </div>
 
-          <div className="grid grid-cols-2 gap-4">
-            <div>
-              <Label>Assigned To</Label>
-              <Select value={formData.assigned_to} onValueChange={value => setFormData({
-              ...formData,
-              assigned_to: value
-            })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select assignee" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="unassigned">Unassigned</SelectItem>
-                  {users.sort((a, b) => a.last_name.localeCompare(b.last_name)).map(user => <SelectItem key={user.id} value={user.id}>
-                        {user.last_name}, {user.first_name}
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Status</Label>
+                <Select value={formData.status} onValueChange={value => setFormData({
+                ...formData,
+                status: value
+              })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                        {option.label}
                       </SelectItem>)}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Priority</Label>
+                <Select value={formData.priority} onValueChange={value => setFormData({
+                ...formData,
+                priority: value
+              })}>
+                  <SelectTrigger>
+                    <SelectValue />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {priorityOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                        {option.label}
+                      </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            <div>
-              <Label>Due Date</Label>
-              <Input type="date" value={formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : ''} onChange={e => {
-              const dateValue = e.target.value;
-              if (dateValue) {
-                // Create date object from input value with validation
-                const date = new Date(dateValue + 'T00:00:00');
-                const tomorrow = new Date();
-                tomorrow.setDate(tomorrow.getDate() + 1);
-                tomorrow.setHours(0, 0, 0, 0);
-                if (date >= tomorrow) {
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <Label>Assigned To</Label>
+                <Select value={formData.assigned_to} onValueChange={value => setFormData({
+                ...formData,
+                assigned_to: value
+              })}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select assignee" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="unassigned">Unassigned</SelectItem>
+                    {users.sort((a, b) => a.last_name.localeCompare(b.last_name)).map(user => <SelectItem key={user.id} value={user.id}>
+                          {user.last_name}, {user.first_name}
+                        </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div>
+                <Label>Due Date</Label>
+                <Input type="date" value={formData.due_date ? format(formData.due_date, 'yyyy-MM-dd') : ''} onChange={e => {
+                const dateValue = e.target.value;
+                if (dateValue) {
+                  // Create date object from input value with validation
+                  const date = new Date(dateValue + 'T00:00:00');
+                  const tomorrow = new Date();
+                  tomorrow.setDate(tomorrow.getDate() + 1);
+                  tomorrow.setHours(0, 0, 0, 0);
+                  if (date >= tomorrow) {
+                    setFormData({
+                      ...formData,
+                      due_date: date
+                    });
+                  }
+                } else {
                   setFormData({
                     ...formData,
-                    due_date: date
+                    due_date: null
                   });
                 }
-              } else {
-                setFormData({
-                  ...formData,
-                  due_date: null
-                });
-              }
-            }} min={(() => {
-              const tomorrow = new Date();
-              tomorrow.setDate(tomorrow.getDate() + 1);
-              return format(tomorrow, 'yyyy-MM-dd');
-            })()} className="w-full" />
+              }} min={(() => {
+                const tomorrow = new Date();
+                tomorrow.setDate(tomorrow.getDate() + 1);
+                return format(tomorrow, 'yyyy-MM-dd');
+              })()} className="w-full" />
+              </div>
             </div>
-          </div>
 
-          <div className="flex justify-end space-x-2 pt-4">
-            <Button type="button" variant="outline" onClick={hasUnsavedChanges ? handleClose : onClose}>
-              Cancel
-            </Button>
-            <Button type="submit">Create Subtask</Button>
-          </div>
-        </form>
+            <div className="flex justify-end space-x-2 pt-4">
+              <Button type="button" variant="outline" onClick={hasUnsavedChanges ? handleClose : onClose}>
+                Cancel
+              </Button>
+              <Button type="submit">Create Subtask</Button>
+            </div>
+          </form>
+        )}
       </DialogContent>
     </Dialog>
 
@@ -235,6 +280,22 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
         <AlertDialogFooter>
           <AlertDialogCancel onClick={cancelClose}>Stay</AlertDialogCancel>
           <AlertDialogAction onClick={confirmClose}>Discard Changes</AlertDialogAction>
+        </AlertDialogFooter>
+      </AlertDialogContent>
+    </AlertDialog>
+
+    {/* Attachment Confirmation Dialog */}
+    <AlertDialog open={showAttachmentConfirm} onOpenChange={setShowAttachmentConfirm}>
+      <AlertDialogContent>
+        <AlertDialogHeader>
+          <AlertDialogTitle>Add Attachments?</AlertDialogTitle>
+          <AlertDialogDescription>
+            Your subtask has been created successfully. Would you like to add any attachments to it?
+          </AlertDialogDescription>
+        </AlertDialogHeader>
+        <AlertDialogFooter>
+          <AlertDialogCancel onClick={() => handleAttachmentConfirm(false)}>No, I'm done</AlertDialogCancel>
+          <AlertDialogAction onClick={() => handleAttachmentConfirm(true)}>Yes, add attachments</AlertDialogAction>
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>
