@@ -15,7 +15,7 @@ export interface Announcement {
   expire_date?: string;
   created_at: string;
   updated_at: string;
-  profiles?: {
+  author?: {
     first_name: string;
     last_name: string;
     email: string;
@@ -47,7 +47,7 @@ export const useAnnouncements = () => {
         .from('announcements')
         .select(`
           *,
-          profiles:author_id (
+          author:profiles!announcements_author_id_fkey (
             first_name,
             last_name,
             email
@@ -78,7 +78,7 @@ export const useActiveAnnouncements = () => {
         .from('announcements')
         .select(`
           *,
-          profiles:author_id (
+          author:profiles!announcements_author_id_fkey (
             first_name,
             last_name,
             email

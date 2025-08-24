@@ -118,8 +118,8 @@ export const AnnouncementsWidget: React.FC = () => {
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3" />
                         <span className="truncate">
-                          {announcement.profiles ? 
-                            `${announcement.profiles.first_name} ${announcement.profiles.last_name}` : 
+                          {announcement.author ? 
+                            `${announcement.author.first_name} ${announcement.author.last_name}` : 
                             'Unknown'
                           }
                         </span>

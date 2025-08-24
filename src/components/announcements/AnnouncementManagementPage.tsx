@@ -168,8 +168,8 @@ const AnnouncementManagementPage = () => {
                     <div className="flex items-center gap-4 text-sm text-muted-foreground">
                       <div className="flex items-center gap-1">
                         <User className="w-3 h-3" />
-                        {announcement.profiles ? 
-                          `${announcement.profiles.first_name} ${announcement.profiles.last_name}` : 
+                        {announcement.author ? 
+                          `${announcement.author.first_name} ${announcement.author.last_name}` : 
                           'Unknown Author'
                         }
                       </div>
@@ -282,8 +282,8 @@ const AnnouncementManagementPage = () => {
               <div className="flex items-center gap-4 text-sm text-muted-foreground">
                 <div className="flex items-center gap-1">
                   <User className="w-3 h-3" />
-                  {selectedAnnouncement.profiles ? 
-                    `${selectedAnnouncement.profiles.first_name} ${selectedAnnouncement.profiles.last_name}` : 
+                  {selectedAnnouncement.author ? 
+                    `${selectedAnnouncement.author.first_name} ${selectedAnnouncement.author.last_name}` : 
                     'Unknown Author'
                   }
                 </div>
