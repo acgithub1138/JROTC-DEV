@@ -10,6 +10,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/components/ui/dialog";
 import {
   Form,
@@ -71,6 +72,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
   const { createIncident } = useIncidentMutations();
   const [createdIncident, setCreatedIncident] = useState<Incident | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
+  const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
 
   const form = useForm<FormData>({
     resolver: zodResolver(formSchema),
@@ -95,7 +97,7 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     }, {
       onSuccess: (newIncident) => {
         setCreatedIncident(newIncident);
-        setShowAttachments(true);
+        setShowAttachmentConfirm(true);
       }
     });
   };
@@ -109,17 +111,29 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
     onClose();
   };
 
+  const handleAttachmentConfirm = (addAttachments: boolean) => {
+    setShowAttachmentConfirm(false);
+    if (addAttachments) {
+      setShowAttachments(true);
+    } else {
+      setCreatedIncident(null);
+      form.reset();
+      onClose();
+    }
+  };
+
   return (
-    <Dialog open={isOpen} onOpenChange={handleClose}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {showAttachments && createdIncident 
-              ? `Add Attachments - ${createdIncident.incident_number || createdIncident.title}`
-              : 'Create New Incident'
-            }
-          </DialogTitle>
-        </DialogHeader>
+    <>
+      <Dialog open={isOpen && !showAttachmentConfirm} onOpenChange={handleClose}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {showAttachments && createdIncident 
+                ? `Add Attachments - ${createdIncident.incident_number || createdIncident.title}`
+                : 'Create New Incident'
+              }
+            </DialogTitle>
+          </DialogHeader>
 
         {showAttachments && createdIncident ? (
           <div className="space-y-4">
@@ -292,8 +306,29 @@ const IncidentForm: React.FC<IncidentFormProps> = ({
             </form>
           </Form>
         )}
-      </DialogContent>
-    </Dialog>
+        </DialogContent>
+      </Dialog>
+
+      {/* Attachment Confirmation Dialog */}
+      <Dialog open={showAttachmentConfirm} onOpenChange={() => {}}>
+        <DialogContent className="sm:max-w-[400px]">
+          <DialogHeader>
+            <DialogTitle>Add Attachments?</DialogTitle>
+            <DialogDescription>
+              Your incident has been created successfully! Would you like to add any file attachments?
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 pt-4">
+            <Button variant="outline" onClick={() => handleAttachmentConfirm(false)}>
+              No, I'm done
+            </Button>
+            <Button onClick={() => handleAttachmentConfirm(true)}>
+              Yes, add attachments
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+    </>
   );
 };
 

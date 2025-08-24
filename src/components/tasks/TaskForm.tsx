@@ -34,6 +34,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [createdTask, setCreatedTask] = useState<Task | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
+  const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
 
   const {
     form,
@@ -56,7 +57,7 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     currentUserId: userProfile?.id || '',
     onTaskCreated: (newTask: Task) => {
       setCreatedTask(newTask);
-      setShowAttachments(true);
+      setShowAttachmentConfirm(true);
       setHasUnsavedChanges(false);
     }
   });
@@ -87,6 +88,16 @@ export const TaskForm: React.FC<TaskFormProps> = ({
       setCreatedTask(null);
       onOpenChange(false);
     } else {
+      onOpenChange(false);
+    }
+  };
+
+  const handleAttachmentConfirm = (addAttachments: boolean) => {
+    setShowAttachmentConfirm(false);
+    if (addAttachments) {
+      setShowAttachments(true);
+    } else {
+      setCreatedTask(null);
       onOpenChange(false);
     }
   };
@@ -126,12 +137,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   }
   return (
     <>
-      <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
-      <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-          <DialogTitle>
-            {getDialogTitle()}
-          </DialogTitle>
+        <Dialog open={open && !showAttachmentConfirm} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
+        <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>
+              {getDialogTitle()}
+            </DialogTitle>
           <DialogDescription>
             {showAttachments 
               ? 'Your task has been created successfully! You can now add attachments or close this dialog.'
@@ -195,7 +206,27 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           </Form>
         )}
         </DialogContent>
-      </Dialog>
+        </Dialog>
+
+        {/* Attachment Confirmation Dialog */}
+        <Dialog open={showAttachmentConfirm} onOpenChange={() => {}}>
+          <DialogContent className="sm:max-w-[400px]">
+            <DialogHeader>
+              <DialogTitle>Add Attachments?</DialogTitle>
+              <DialogDescription>
+                Your task has been created successfully! Would you like to add any file attachments?
+              </DialogDescription>
+            </DialogHeader>
+            <div className="flex justify-end gap-2 pt-4">
+              <Button variant="outline" onClick={() => handleAttachmentConfirm(false)}>
+                No, I'm done
+              </Button>
+              <Button onClick={() => handleAttachmentConfirm(true)}>
+                Yes, add attachments
+              </Button>
+            </div>
+          </DialogContent>
+        </Dialog>
 
       {/* Unsaved Changes Confirmation Dialog */}
       <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
