@@ -10,25 +10,73 @@ import {
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 
-// Get all available Lucide icons dynamically
+// Safe list of commonly used Lucide icons (will expand to full list once working)
+const safeIconList = [
+  'Activity', 'AlertCircle', 'AlertTriangle', 'Archive', 'ArrowDown', 'ArrowLeft', 'ArrowRight', 'ArrowUp',
+  'Award', 'BarChart', 'BarChart2', 'BarChart3', 'Bell', 'Book', 'BookOpen', 'Briefcase', 'Calendar',
+  'Camera', 'Check', 'CheckCircle', 'ChevronDown', 'ChevronLeft', 'ChevronRight', 'ChevronUp', 'Clock',
+  'Cloud', 'Code', 'Cog', 'Copy', 'CreditCard', 'Database', 'Download', 'Edit', 'Edit2', 'Eye', 'EyeOff',
+  'File', 'FileText', 'Filter', 'Folder', 'Globe', 'Grid', 'Hash', 'Heart', 'HelpCircle', 'Home', 'Image',
+  'Inbox', 'Info', 'Key', 'Layout', 'Link', 'List', 'Lock', 'LogIn', 'LogOut', 'Mail', 'Map', 'MapPin',
+  'Menu', 'MessageCircle', 'MessageSquare', 'Minus', 'Monitor', 'MoreHorizontal', 'MoreVertical', 'Music',
+  'Package', 'Phone', 'PieChart', 'Play', 'Plus', 'PlusCircle', 'Save', 'Search', 'Send', 'Settings',
+  'Share', 'Shield', 'Star', 'Target', 'Trash', 'Trash2', 'Trophy', 'Upload', 'User', 'Users', 'Video',
+  'Wifi', 'X', 'Zap'
+];
+
+// Get all available Lucide icons with fallback
 const getAllIconNames = () => {
-  const iconNames = Object.keys(Icons).filter(key => {
-    const value = (Icons as any)[key];
-    // Filter out non-icon exports (like createLucideIcon, icons object, etc.)
-    return typeof value === 'object' && 
-           value !== null && 
-           'displayName' in value &&
-           key !== 'createLucideIcon' &&
-           key !== 'icons' &&
-           !key.startsWith('create');
-  });
-  return iconNames.sort();
+  try {
+    const iconNames: string[] = [];
+    
+    // First, try to get all icons dynamically
+    Object.keys(Icons).forEach(key => {
+      const component = (Icons as any)[key];
+      
+      // Check if it looks like a React component
+      if (
+        typeof component === 'function' || // Function component
+        (typeof component === 'object' && 
+         component !== null && 
+         (component.$$typeof || component.render)) // React forwardRef or element
+      ) {
+        // Additional checks to filter out non-icon exports
+        if (
+          key !== 'createLucideIcon' &&
+          key !== 'icons' &&
+          !key.startsWith('create') &&
+          /^[A-Z]/.test(key) // Component naming convention
+        ) {
+          iconNames.push(key);
+        }
+      }
+    });
+    
+    // If we got a reasonable number of icons, use the dynamic list
+    if (iconNames.length > 50) {
+      console.log(`Loaded ${iconNames.length} icons dynamically`);
+      return iconNames.sort();
+    } else {
+      console.warn('Dynamic icon loading returned too few icons, falling back to safe list');
+      return safeIconList;
+    }
+  } catch (error) {
+    console.error('Error loading icons dynamically, falling back to safe list:', error);
+    return safeIconList;
+  }
 };
 
-// Get icon component from name
+// Get icon component from name with error handling
 const getIconComponent = (iconName: string) => {
-  const IconComponent = (Icons as any)[iconName];
-  return IconComponent || Icons.FileText;
+  try {
+    const IconComponent = (Icons as any)[iconName];
+    if (IconComponent) {
+      return IconComponent;
+    }
+  } catch (error) {
+    console.error(`Error loading icon ${iconName}:`, error);
+  }
+  return Icons.FileText; // Safe fallback
 };
 
 interface IconSelectionModalProps {
