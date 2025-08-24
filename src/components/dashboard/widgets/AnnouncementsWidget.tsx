@@ -99,28 +99,7 @@ export const AnnouncementsWidget: React.FC = () => {
                     <h3 className="font-medium text-sm leading-tight mb-1">
                       {announcement.title}
                     </h3>
-                    <div className="flex items-center gap-3 text-xs text-muted-foreground">
-                      <div className="flex items-center gap-1">
-                        <User className="w-3 h-3" />
-                        <span className="truncate">
-                          {announcement.author ? 
-                            `${announcement.author.first_name} ${announcement.author.last_name}` : 
-                            'Unknown'
-                          }
-                        </span>
-                      </div>
-                      <div className="flex items-center gap-1">
-                        <Calendar className="w-3 h-3" />
-                        {format(new Date(announcement.publish_date), 'MMM d')}
-                      </div>
-                      {announcement.expire_date && (
-                        <div className="flex items-center gap-1">
-                          <AlertCircle className="w-3 h-3" />
-                          <span>Expires {format(new Date(announcement.expire_date), 'MMM d')}</span>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                </div>
                   
                   <Badge 
                     variant="secondary" 
