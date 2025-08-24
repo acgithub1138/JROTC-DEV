@@ -62,7 +62,7 @@ export const AnnouncementsWidget: React.FC = () => {
     return null;
   }
   return <Card className="w-full">
-      <CardHeader className="py-[6px]">
+      <CardHeader className="py-[8px]">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
             <Megaphone className="w-5 h-5 mr-2 text-primary" />
