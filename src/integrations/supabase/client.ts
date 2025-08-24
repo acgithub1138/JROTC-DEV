@@ -10,19 +10,8 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY, {
   auth: {
-    autoRefreshToken: true,
-    persistSession: true,
-    detectSessionInUrl: true,
-    flowType: 'pkce',
     storage: localStorage,
-    storageKey: 'supabase.auth.token'
-  },
-  global: {
-    headers: {
-      'x-application-name': 'jrotc-management'
-    }
-  },
-  db: {
-    schema: 'public'
+    persistSession: true,
+    autoRefreshToken: true,
   }
 });
