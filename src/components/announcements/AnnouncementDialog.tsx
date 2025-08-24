@@ -32,6 +32,22 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
   const [priority, setPriority] = useState([0]);
+
+  // Priority mapping helper
+  const getPriorityLabel = (value: number) => {
+    switch (value) {
+      case 0: return 'Low';
+      case 1: return 'Medium'; 
+      case 2: return 'High';
+      default: return 'Low';
+    }
+  };
+
+  const getPriorityValue = (numericPriority: number) => {
+    if (numericPriority >= 7) return 2; // High
+    if (numericPriority >= 4) return 1; // Medium
+    return 0; // Low
+  };
   const [isActive, setIsActive] = useState(true);
   const [publishDate, setPublishDate] = useState<Date | undefined>(new Date());
   const [expireDate, setExpireDate] = useState<Date | undefined>();
@@ -41,7 +57,7 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
     if (announcement && mode === 'edit') {
       setTitle(announcement.title);
       setContent(announcement.content);
-      setPriority([announcement.priority]);
+      setPriority([getPriorityValue(announcement.priority)]);
       setIsActive(announcement.is_active);
       setPublishDate(new Date(announcement.publish_date));
       if (announcement.expire_date) {
@@ -69,7 +85,7 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
     const data = {
       title,
       content,
-      priority: priority[0],
+      priority: priority[0] === 2 ? 8 : priority[0] === 1 ? 5 : 2, // Convert back to numeric for storage
       is_active: isActive,
       publish_date: publishDate?.toISOString(),
       expire_date: hasExpiration && expireDate ? expireDate.toISOString() : null,
@@ -109,19 +125,20 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
               </div>
 
               <div>
-                <Label>Priority: {priority[0]}</Label>
+                <Label>Priority: {getPriorityLabel(priority[0])}</Label>
                 <div className="px-2 py-4">
                   <Slider
                     value={priority}
                     onValueChange={setPriority}
-                    max={10}
+                    max={2}
                     min={0}
                     step={1}
                     className="w-full"
                   />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
-                    <span>Low (0)</span>
-                    <span>High (10)</span>
+                    <span>Low</span>
+                    <span>Medium</span>
+                    <span>High</span>
                   </div>
                 </div>
               </div>
