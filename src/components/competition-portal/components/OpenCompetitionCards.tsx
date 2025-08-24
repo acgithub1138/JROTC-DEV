@@ -180,7 +180,6 @@ export const OpenCompetitionCards: React.FC<OpenCompetitionCardsProps> = ({
               </div>
               {(competition.sop_link || competition.sop_text) && (
                 <div className="flex items-center gap-2">
-                  <FileText className="w-4 h-4" />
                   <span>
                     <strong>SOP:</strong>{' '}
                     {competition.sop_link ? (
