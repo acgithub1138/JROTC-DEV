@@ -182,6 +182,36 @@ export const useDeleteAnnouncement = () => {
   
   return useMutation({
     mutationFn: async (id: string) => {
+      // First, get all attachments for this announcement
+      const { data: attachments, error: attachmentsFetchError } = await supabase
+        .from('attachments')
+        .select('id, file_path')
+        .eq('record_type', 'announcement')
+        .eq('record_id', id);
+
+      if (attachmentsFetchError) throw attachmentsFetchError;
+
+      // Delete attachments if they exist
+      if (attachments && attachments.length > 0) {
+        // Delete files from storage
+        const filePaths = attachments.map(att => att.file_path);
+        const { error: storageError } = await supabase.storage
+          .from('task-incident-attachments')
+          .remove(filePaths);
+
+        if (storageError) throw storageError;
+
+        // Delete attachment records from database
+        const { error: attachmentDeleteError } = await supabase
+          .from('attachments')
+          .delete()
+          .eq('record_type', 'announcement')
+          .eq('record_id', id);
+
+        if (attachmentDeleteError) throw attachmentDeleteError;
+      }
+
+      // Finally, delete the announcement
       const { error } = await supabase
         .from('announcements')
         .delete()
