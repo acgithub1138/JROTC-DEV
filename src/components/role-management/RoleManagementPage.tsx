@@ -208,10 +208,6 @@ export const RoleManagementPage: React.FC = () => {
                     <RefreshCw className="w-4 h-4" />
                     Refresh
                   </Button>
-                  <Button variant="outline" size="sm" onClick={handleResetToDefaults} disabled={isResetting} className="flex items-center gap-2">
-                    <RotateCcw className="w-4 h-4" />
-                    Reset to Defaults
-                  </Button>
                 </div>
               </CardTitle>
             </CardHeader>
