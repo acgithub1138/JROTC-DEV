@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Loader2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
@@ -34,7 +34,54 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
   const [showAddModal, setShowAddModal] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
   const [deletingResourceId, setDeletingResourceId] = useState(null);
-  
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+  };
+
+  const sortedResources = resources.sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue: any = '';
+    let bValue: any = '';
+    
+    switch (sortField) {
+      case 'cadet':
+        aValue = a.cadet_profile ? `${a.cadet_profile.last_name}, ${a.cadet_profile.first_name}`.toLowerCase() : 'unknown cadet';
+        bValue = b.cadet_profile ? `${b.cadet_profile.last_name}, ${b.cadet_profile.first_name}`.toLowerCase() : 'unknown cadet';
+        break;
+      case 'location':
+        aValue = (a.location || '').toLowerCase();
+        bValue = (b.location || '').toLowerCase();
+        break;
+      case 'start_time':
+        aValue = a.start_time ? new Date(a.start_time) : new Date(0);
+        bValue = b.start_time ? new Date(b.start_time) : new Date(0);
+        break;
+      case 'end_time':
+        aValue = a.end_time ? new Date(a.end_time) : new Date(0);
+        bValue = b.end_time ? new Date(b.end_time) : new Date(0);
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   const handleEdit = (resource) => {
     setEditingResource(resource);
   };
@@ -68,9 +115,9 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
         <div className="text-center py-8 text-muted-foreground">
           <p>No resources assigned for this competition</p>
         </div>
-      ) : isMobile ? (
+        ) : isMobile ? (
           <div className="space-y-4">
-            {resources.map(resource => (
+            {sortedResources.map(resource => (
               <Card key={resource.id}>
                 <CardHeader className="pb-3">
                   <CardTitle className="text-lg">
@@ -154,15 +201,43 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           <Table>
           <TableHeader>
             <TableRow>
-              <TableHead>Cadet</TableHead>
-              <TableHead>Location</TableHead>
-              <TableHead>Start</TableHead>
-              <TableHead>End</TableHead>
+              <TableHead>
+                <button 
+                  onClick={() => handleSort('cadet')}
+                  className="flex items-center gap-2 hover:text-foreground font-medium"
+                >
+                  Cadet {getSortIcon('cadet')}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button 
+                  onClick={() => handleSort('location')}
+                  className="flex items-center gap-2 hover:text-foreground font-medium"
+                >
+                  Location {getSortIcon('location')}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button 
+                  onClick={() => handleSort('start_time')}
+                  className="flex items-center gap-2 hover:text-foreground font-medium"
+                >
+                  Start {getSortIcon('start_time')}
+                </button>
+              </TableHead>
+              <TableHead>
+                <button 
+                  onClick={() => handleSort('end_time')}
+                  className="flex items-center gap-2 hover:text-foreground font-medium"
+                >
+                  End {getSortIcon('end_time')}
+                </button>
+              </TableHead>
               <TableHead className="text-center">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {resources.map(resource => <TableRow key={resource.id}>
+            {sortedResources.map(resource => <TableRow key={resource.id}>
                 <TableCell className="py-[8px]">
                   {resource.cadet_profile ? `${resource.cadet_profile.last_name}, ${resource.cadet_profile.first_name}` : 'Unknown Cadet'}
                 </TableCell>
