@@ -4,7 +4,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { format } from 'date-fns';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit2, MapPin } from 'lucide-react';
+import { Eye, Edit, Edit2, MapPin } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 interface ListViewProps {
@@ -161,14 +161,15 @@ export const ListView = ({
                 <TableCell className="text-center">
                   {onEventClick && (
                     <Button
-                      variant="outline"
-                      size="icon" className="h-6 w-6"
+                      variant="ghost"
+                      size="sm"
                       onClick={() => onEventClick(event)}
+                      className="h-8 w-8 p-0"
                     >
                       {readOnly ? (
-                        <Eye className="h-3 w-3" />
+                        <Eye className="h-4 w-4" />
                       ) : (
-                        <Edit2 className="h-3 w-3" />
+                        <Edit className="h-4 w-4" />
                       )}
                     </Button>
                   )}
