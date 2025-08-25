@@ -84,9 +84,9 @@ export const UserRolesTable = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <code>
+                  <span className="font-medium">
                     {role.role_name}
-                  </code>
+                  </span>
                 </TableCell>
                 <TableCell>
                   {editingRole === role.id ? <Input value={editForm.role_label || ''} onChange={e => setEditForm(prev => ({
