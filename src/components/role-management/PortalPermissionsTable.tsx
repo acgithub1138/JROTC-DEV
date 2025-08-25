@@ -30,7 +30,7 @@ const ColumnHeader: React.FC<{
   return <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <th className="text-center p-3 font-medium min-w-24">
+          <th className="text-center p-3 font-medium min-w-24 py-[8px] px-[4px]">
             <span>{children}</span>
           </th>
         </TooltipTrigger>
