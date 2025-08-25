@@ -166,21 +166,21 @@ export const RecurrenceSettings: React.FC<RecurrenceSettingsProps> = ({
                     }
                   </Button>
                 </PopoverTrigger>
-                <PopoverContent className="w-auto p-0" align="start">
-                  <Calendar
-                    mode="single"
-                    selected={recurrenceRule.endDate ? new Date(recurrenceRule.endDate) : undefined}
-                    onSelect={(date) => updateRule({ endDate: date?.toISOString() })}
-                    initialFocus
-                    className="pointer-events-auto"
-                    defaultMonth={recurrenceRule.endDate 
-                      ? new Date(recurrenceRule.endDate) 
-                      : eventStartDate 
-                        ? new Date(eventStartDate)
-                        : undefined
-                    }
-                  />
-                </PopoverContent>
+                 <PopoverContent className="w-auto p-0" align="start">
+                   <Calendar
+                     mode="single"
+                     selected={recurrenceRule.endDate ? new Date(recurrenceRule.endDate) : undefined}
+                     onSelect={(date) => updateRule({ endDate: date?.toISOString() })}
+                     initialFocus
+                     className="pointer-events-auto h-[350px]"
+                     defaultMonth={recurrenceRule.endDate 
+                       ? new Date(recurrenceRule.endDate) 
+                       : eventStartDate 
+                         ? new Date(eventStartDate)
+                         : undefined
+                     }
+                   />
+                 </PopoverContent>
               </Popover>
             </div>
           )}
