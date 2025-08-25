@@ -137,7 +137,7 @@ const AnnouncementManagementPage = () => {
                       <TableHead>Publish Date</TableHead>
                       <TableHead>Exp Date</TableHead>
                       <TableHead>Active</TableHead>
-                      <TableHead className="w-[120px]">Actions</TableHead>
+                      <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
