@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useMemo, useCallback } from 'react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCapacitor } from '@/hooks/useCapacitor';
@@ -49,30 +49,11 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
   onRefresh
 }) => {
   const isMobile = useIsMobile();
-  const { isNative, platform } = useCapacitor();
+  const { isNative } = useCapacitor();
   
-  console.log('TaskTabs mobile detection:', { 
-    isMobile, 
-    isNative, 
-    platform,
-    shouldShowCards: isNative || isMobile,
-    windowLocation: window.location.href,
-    userAgent: navigator.userAgent,
-    hasCapacitorGlobal: !!(window as any).Capacitor
-  });
-
-  const renderTaskContent = (tasks: (Task | Subtask)[], isAllTasksTab = false) => {
-    console.log('TaskTabs renderTaskContent:', { 
-      tasksLength: tasks.length, 
-      isAllTasksTab, 
-      isMobile, 
-      isNative, 
-      shouldShowCards: isNative || isMobile,
-      tasksPreview: tasks.slice(0, 2).map(t => ({ id: t.id, title: t.title }))
-    });
-    
+  // Memoize the rendering logic to prevent unnecessary re-renders
+  const renderTaskContent = useCallback((tasks: (Task | Subtask)[], isAllTasksTab = false) => {
     if (isNative || isMobile) {
-      console.log('Rendering TaskCards for mobile/native');
       return (
         <TaskCards 
           tasks={tasks}
@@ -85,7 +66,6 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
       );
     }
     
-    console.log('Rendering TaskTable for desktop');
     return (
       <TaskTable 
         tasks={tasks}
@@ -96,7 +76,7 @@ export const TaskTabs: React.FC<TaskTabsProps> = ({
         onRefresh={onRefresh}
       />
     );
-  };
+  }, [isMobile, isNative, onTaskSelect, onEditTask, overdueFilter, onOverdueFilterChange, onRefresh]);
 
   return (
     <Tabs defaultValue="mytasks" className="w-full">
