@@ -101,7 +101,7 @@ serve(async (req) => {
     }
 
     // Validate permissions to create user with specified role
-    requireCanCreateUserWithRole(actorProfile, finalRole)
+    await requireCanCreateUserWithRole(actorProfile, finalRole, supabaseAdmin)
 
     // Validate school access (non-admins can only create users in their own school)
     requireSameSchool(actorProfile, school_id)

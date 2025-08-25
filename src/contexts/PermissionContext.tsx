@@ -4,7 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from './AuthContext';
 import { Database } from '@/integrations/supabase/types';
 
-export type UserRole = Database['public']['Enums']['user_role'];
+export type UserRole = string;
 
 interface PermissionContextType {
   hasPermission: (module: string, action: string) => boolean;

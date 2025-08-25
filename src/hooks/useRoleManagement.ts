@@ -3,7 +3,7 @@ import { useCallback, useMemo } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { Database } from '@/integrations/supabase/types';
 
-export type UserRole = Database['public']['Enums']['user_role'];
+export type UserRole = string;
 export type PermissionModule = Database['public']['Tables']['permission_modules']['Row'];
 export type PermissionAction = Database['public']['Tables']['permission_actions']['Row'];
 export type RolePermission = Database['public']['Tables']['role_permissions']['Row'];

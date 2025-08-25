@@ -25,7 +25,7 @@ interface Profile {
   email: string;
   first_name: string;
   last_name: string;
-  role: Database['public']['Enums']['user_role'];
+  role: string;
   school_id: string;
   phone?: string;
   rank?: string;

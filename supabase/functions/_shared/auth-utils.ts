@@ -138,13 +138,31 @@ export function requireSameSchool(actorProfile: UserProfile, targetSchoolId: str
 /**
  * Validates user can create users with specified role
  */
-export function requireCanCreateUserWithRole(actorProfile: UserProfile, targetRole: string): void {
+export async function requireCanCreateUserWithRole(actorProfile: UserProfile, targetRole: string, supabaseAdmin: any): Promise<void> {
   // Only admins and instructors can create users
   requireMinimumRole(actorProfile, 'instructor')
   
-  // Instructors cannot create admin or instructor accounts
-  if (actorProfile.role === 'instructor' && ['admin', 'instructor'].includes(targetRole)) {
-    throw new AuthorizationError('Instructors cannot create admin or instructor accounts')
+  // Admins can create users with any role
+  if (actorProfile.role === 'admin') {
+    return
+  }
+  
+  // For non-admins, check if the target role is admin_only
+  const { data: roleData, error: roleError } = await supabaseAdmin
+    .from('user_roles')
+    .select('admin_only')
+    .eq('role_name', targetRole)
+    .single()
+  
+  if (roleError) {
+    // If role not found in user_roles table, allow (backward compatibility)
+    console.warn('Role not found in user_roles table:', targetRole)
+    return
+  }
+  
+  // Instructors cannot create admin_only roles
+  if (actorProfile.role === 'instructor' && roleData.admin_only) {
+    throw new AuthorizationError(`Cannot create users with admin-only roles: ${targetRole}`)
   }
 }
 
