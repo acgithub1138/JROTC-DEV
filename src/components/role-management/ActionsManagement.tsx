@@ -292,7 +292,7 @@ export const ActionsManagement: React.FC = () => {
                     </Badge>}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingAction === action.id ? <div className="flex justify-end space-x-2">
+                  {editingAction === action.id ? <div className="flex items-center justify-center gap-2">
                       <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleCancel} disabled={updateMutation.isPending}>
                         <X className="w-3 h-3" />
                       </Button>
