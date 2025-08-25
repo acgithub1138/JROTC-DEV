@@ -130,7 +130,7 @@ export const CalendarToolbar = ({
           <SelectContent>
             <SelectItem value="all">All Types</SelectItem>
             {eventTypes.map(type => (
-              <SelectItem key={type.id} value={type.value}>
+              <SelectItem key={type.id} value={type.id}>
                 {type.label}
               </SelectItem>
             ))}
