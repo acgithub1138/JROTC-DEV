@@ -84,7 +84,7 @@ export const UserRolesTable = () => {
                   </div>
                 </TableCell>
                 <TableCell>
-                  <code className="text-sm">
+                  <code>
                     {role.role_name}
                   </code>
                 </TableCell>
