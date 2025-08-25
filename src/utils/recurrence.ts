@@ -38,16 +38,19 @@ export function generateRecurringEvents(
       
       switch (recurrenceRule.frequency) {
         case 'daily':
-          maxInstances = Math.ceil(daysDiff / recurrenceRule.interval) + 50; // Add buffer
+          maxInstances = Math.ceil(daysDiff / recurrenceRule.interval) + 100; // Generous buffer
           break;
         case 'weekly':
-          maxInstances = Math.ceil(daysDiff / (7 * recurrenceRule.interval)) + 50; // Add buffer
+          // For weekly events, especially with specific days, we need more instances
+          const weeksSpan = Math.ceil(daysDiff / 7);
+          const possibleInstances = recurrenceRule.daysOfWeek?.length || 1;
+          maxInstances = Math.ceil(weeksSpan * possibleInstances / recurrenceRule.interval) + 200; // Very generous buffer
           break;
         case 'monthly':
-          maxInstances = Math.ceil(daysDiff / (30 * recurrenceRule.interval)) + 50; // Add buffer
+          maxInstances = Math.ceil(daysDiff / (30 * recurrenceRule.interval)) + 100; // Generous buffer
           break;
         default:
-          maxInstances = 500; // Fallback for unknown frequency
+          maxInstances = 1000; // Large fallback
       }
     } else if (recurrenceRule.endType === 'count' && recurrenceRule.occurrenceCount) {
       maxInstances = recurrenceRule.occurrenceCount;
