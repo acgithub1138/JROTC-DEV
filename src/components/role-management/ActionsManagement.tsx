@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, Plus, Trash2, GripVertical } from 'lucide-react';
+import { Edit, Edit2, Save, X, Plus, Trash2, GripVertical } from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -301,7 +301,7 @@ export const ActionsManagement: React.FC = () => {
                       </Button>
                     </div> : <div className="flex items-center justify-center gap-2">
                       <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(action)} disabled={updateMutation.isPending}>
-                        <Edit2 className="w-3 h-3" />
+                        <Edit className="w-3 h-3" />
                       </Button>
                       <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteMutation.mutate(action.id)} disabled={deleteMutation.isPending}>
                         <Trash2 className="w-3 h-3" />
