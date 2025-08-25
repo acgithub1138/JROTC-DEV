@@ -2,7 +2,10 @@ import React from 'react';
 import { Checkbox } from '@/components/ui/checkbox';
 import { RefreshCw } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-const ColumnHeader: React.FC<{ action: any; children: React.ReactNode }> = ({
+const ColumnHeader: React.FC<{
+  action: any;
+  children: React.ReactNode;
+}> = ({
   action,
   children
 }) => {
@@ -24,9 +27,7 @@ const ColumnHeader: React.FC<{ action: any; children: React.ReactNode }> = ({
         return action.description || '';
     }
   };
-
-  return (
-    <TooltipProvider>
+  return <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
           <th className="text-center p-3 font-medium min-w-24">
@@ -37,8 +38,7 @@ const ColumnHeader: React.FC<{ action: any; children: React.ReactNode }> = ({
           <p className="text-sm">{getTooltipContent(action.name)}</p>
         </TooltipContent>
       </Tooltip>
-    </TooltipProvider>
-  );
+    </TooltipProvider>;
 };
 interface PortalPermissionsTableProps {
   portal: 'ccc' | 'competition';
@@ -71,33 +71,23 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
         <thead>
           <tr className="border-b">
             <th className="text-left p-3 font-medium">Module</th>
-            {actions.map(action => (
-              <ColumnHeader key={action.id} action={action}>
+            {actions.map(action => <ColumnHeader key={action.id} action={action}>
                 {action.label}
-              </ColumnHeader>
-            ))}
+              </ColumnHeader>)}
           </tr>
         </thead>
         <tbody>
-          {filteredModules.map(module => (
-            <tr key={module.id} className="border-b hover:bg-gray-50">
-              <td className="p-3 font-medium">
+          {filteredModules.map(module => <tr key={module.id} className="border-b hover:bg-gray-50">
+              <td className="p-3 font-medium py-[4px] px-[4px]">
                 <div className="font-medium">{module.label}</div>
               </td>
               {actions.map(action => {
-                const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-                return (
-                  <td key={action.id} className="p-3 text-center">
-                    <Checkbox 
-                      checked={isEnabled} 
-                      disabled={isUpdating} 
-                      onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} 
-                    />
-                  </td>
-                );
-              })}
-            </tr>
-          ))}
+            const isEnabled = rolePermissions[module.name]?.[action.name] || false;
+            return <td key={action.id} className="p-3 text-center">
+                    <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
+                  </td>;
+          })}
+            </tr>)}
         </tbody>
       </table>
 
