@@ -9,12 +9,15 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Edit2, Save, X, GripVertical } from 'lucide-react';
 import { useUserRolesManagement, type UserRole } from '@/hooks/useUserRolesManagement';
 import { toast } from 'sonner';
-
 export const UserRolesTable = () => {
-  const { userRoles, isLoading, updateRole, isUpdating } = useUserRolesManagement();
+  const {
+    userRoles,
+    isLoading,
+    updateRole,
+    isUpdating
+  } = useUserRolesManagement();
   const [editingRole, setEditingRole] = useState<string | null>(null);
   const [editForm, setEditForm] = useState<Partial<UserRole>>({});
-
   const handleEdit = (role: UserRole) => {
     setEditingRole(role.id);
     setEditForm({
@@ -23,10 +26,8 @@ export const UserRolesTable = () => {
       is_active: role.is_active
     });
   };
-
   const handleSave = () => {
     if (!editingRole) return;
-
     updateRole({
       id: editingRole,
       updates: {
@@ -35,35 +36,27 @@ export const UserRolesTable = () => {
         is_active: editForm.is_active
       }
     });
-
     setEditingRole(null);
     setEditForm({});
   };
-
   const handleCancel = () => {
     setEditingRole(null);
     setEditForm({});
   };
-
   const getRoleBadgeVariant = (role: UserRole) => {
     if (!role.is_active) return 'secondary';
     if (role.admin_only) return 'destructive';
     return 'default';
   };
-
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>User Roles</CardTitle>
           <CardDescription>Loading roles...</CardDescription>
         </CardHeader>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle>User Roles Management</CardTitle>
         <CardDescription>
@@ -79,12 +72,11 @@ export const UserRolesTable = () => {
               <TableHead>Display Label</TableHead>
               <TableHead>Admin Only</TableHead>
               <TableHead>Status</TableHead>
-              <TableHead className="text-right">Actions</TableHead>
+              <TableHead className="text-center ">Actions</TableHead>
             </TableRow>
           </TableHeader>
           <TableBody>
-            {userRoles.map((role) => (
-              <TableRow key={role.id}>
+            {userRoles.map(role => <TableRow key={role.id}>
                 <TableCell>
                   <div className="flex items-center">
                     <GripVertical className="w-4 h-4 text-muted-foreground" />
@@ -97,83 +89,48 @@ export const UserRolesTable = () => {
                   </code>
                 </TableCell>
                 <TableCell>
-                  {editingRole === role.id ? (
-                    <Input
-                      value={editForm.role_label || ''}
-                      onChange={(e) => setEditForm(prev => ({ ...prev, role_label: e.target.value }))}
-                      className="w-full"
-                    />
-                  ) : (
-                    <span>{role.role_label}</span>
-                  )}
+                  {editingRole === role.id ? <Input value={editForm.role_label || ''} onChange={e => setEditForm(prev => ({
+                ...prev,
+                role_label: e.target.value
+              }))} className="w-full" /> : <span>{role.role_label}</span>}
                 </TableCell>
                 <TableCell>
-                  {editingRole === role.id ? (
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={editForm.admin_only || false}
-                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, admin_only: checked }))}
-                        disabled={role.role_name === 'admin' || role.role_name === 'instructor'}
-                      />
+                  {editingRole === role.id ? <div className="flex items-center space-x-2">
+                      <Switch checked={editForm.admin_only || false} onCheckedChange={checked => setEditForm(prev => ({
+                  ...prev,
+                  admin_only: checked
+                }))} disabled={role.role_name === 'admin' || role.role_name === 'instructor'} />
                       <Label className="text-sm">Admin Only</Label>
-                    </div>
-                  ) : (
-                    <Badge variant={role.admin_only ? 'destructive' : 'secondary'}>
+                    </div> : <Badge variant={role.admin_only ? 'destructive' : 'secondary'}>
                       {role.admin_only ? 'Admin Only' : 'Assignable'}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </TableCell>
                 <TableCell>
-                  {editingRole === role.id ? (
-                    <div className="flex items-center space-x-2">
-                      <Switch
-                        checked={editForm.is_active !== false}
-                        onCheckedChange={(checked) => setEditForm(prev => ({ ...prev, is_active: checked }))}
-                        disabled={role.role_name === 'admin'}
-                      />
+                  {editingRole === role.id ? <div className="flex items-center space-x-2">
+                      <Switch checked={editForm.is_active !== false} onCheckedChange={checked => setEditForm(prev => ({
+                  ...prev,
+                  is_active: checked
+                }))} disabled={role.role_name === 'admin'} />
                       <Label className="text-sm">Active</Label>
-                    </div>
-                  ) : (
-                    <Badge variant={getRoleBadgeVariant(role)}>
+                    </div> : <Badge variant={getRoleBadgeVariant(role)}>
                       {role.is_active ? 'Active' : 'Inactive'}
-                    </Badge>
-                  )}
+                    </Badge>}
                 </TableCell>
                 <TableCell className="text-right">
-                  {editingRole === role.id ? (
-                    <div className="flex justify-end space-x-2">
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={handleCancel}
-                        disabled={isUpdating}
-                      >
+                  {editingRole === role.id ? <div className="flex justify-end space-x-2">
+                      <Button size="sm" variant="outline" onClick={handleCancel} disabled={isUpdating}>
                         <X className="w-4 h-4" />
                       </Button>
-                      <Button
-                        size="sm"
-                        onClick={handleSave}
-                        disabled={isUpdating || !editForm.role_label?.trim()}
-                      >
+                      <Button size="sm" onClick={handleSave} disabled={isUpdating || !editForm.role_label?.trim()}>
                         <Save className="w-4 h-4" />
                       </Button>
-                    </div>
-                  ) : (
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handleEdit(role)}
-                      disabled={isUpdating}
-                    >
+                    </div> : <Button size="sm" variant="outline" onClick={() => handleEdit(role)} disabled={isUpdating}>
                       <Edit2 className="w-4 h-4" />
-                    </Button>
-                  )}
+                    </Button>}
                 </TableCell>
-              </TableRow>
-            ))}
+              </TableRow>)}
           </TableBody>
         </Table>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
