@@ -83,7 +83,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
               </td>
               {actions.map(action => {
             const isEnabled = rolePermissions[module.name]?.[action.name] || false;
-            return <td key={action.id} className="p-3 text-center">
+            return <td key={action.id} className="p-3 text-center px-[4px] py-[4px]">
                     <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
                   </td>;
           })}
