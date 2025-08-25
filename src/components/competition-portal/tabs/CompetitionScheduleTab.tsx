@@ -215,44 +215,42 @@ export const CompetitionScheduleTab = ({
                   const previousDateKey = timeIndex > 0 ? getSchoolDateKey((printScheduleData as any).timeSlotsRaw[timeIndex - 1], timezone) : null;
                   const isNewDay = timeIndex === 0 || currentDateKey !== previousDateKey;
                   
-                  return (
-                    <React.Fragment key={timeIndex}>
-                      {isNewDay && (
-                        <tr>
-                          <td colSpan={(printScheduleData as any).events?.length + 1} className="border border-black p-2 text-center font-bold text-xs bg-gray-200">
-                            {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
-                          </td>
-                        </tr>
-                      )}
-                      <tr>
-                        <td className="border border-black p-1 font-medium text-xs">
-                          {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                  return [
+                    isNewDay && (
+                      <tr key={`day-${timeIndex}`}>
+                        <td colSpan={(printScheduleData as any).events?.length + 1} className="border border-black p-2 text-center font-bold text-xs bg-gray-200">
+                          {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
                         </td>
-                        {(printScheduleData as any).events?.map((event: any, eventIndex: number) => {
-                  // Check if event is active and if it's a lunch break
-                  const isEventActive = timeline?.isEventActive(event.id, timeSlot);
-                  const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
-                  
-                  if (!isEventActive) {
-                    return <td key={eventIndex} className="border border-black p-1 text-center text-xs bg-gray-100">
-                              -
-                            </td>;
-                  }
-                  
-                  if (isLunchSlot) {
-                    return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
-                                Lunch Break
-                              </td>;
-                  }
-                  
-                  const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                  return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
-                              {assignedSchool?.initials || assignedSchool?.name || '-'}
-                            </td>;
-                })}
                       </tr>
-                    </React.Fragment>
-                  );
+                    ),
+                    <tr key={timeIndex}>
+                      <td className="border border-black p-1 font-medium text-xs">
+                        {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                      </td>
+                      {(printScheduleData as any).events?.map((event: any, eventIndex: number) => {
+                // Check if event is active and if it's a lunch break
+                const isEventActive = timeline?.isEventActive(event.id, timeSlot);
+                const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
+                
+                if (!isEventActive) {
+                  return <td key={eventIndex} className="border border-black p-1 text-center text-xs bg-gray-100">
+                            -
+                          </td>;
+                }
+                
+                if (isLunchSlot) {
+                  return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
+                              Lunch Break
+                            </td>;
+                }
+                
+                const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                return <td key={eventIndex} className="border border-black p-1 text-center text-xs">
+                            {assignedSchool?.initials || assignedSchool?.name || '-'}
+                          </td>;
+              })}
+                    </tr>
+                  ].filter(Boolean);
                 })}
               </tbody>
             </table> :
@@ -349,38 +347,36 @@ export const CompetitionScheduleTab = ({
                     const previousDateKey = index > 0 ? getSchoolDateKey(filteredTimeSlots[index - 1], timezone) : null;
                     const isNewDay = index === 0 || currentDateKey !== previousDateKey;
                     
-                    return (
-                      <React.Fragment key={timeSlot.toISOString()}>
-                        {isNewDay && (
-                          <tr className="bg-muted/50">
-                            <td colSpan={events.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
-                              {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
-                            </td>
-                          </tr>
-                        )}
-                        <tr className={`border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
-                          <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
-                            {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                    return [
+                      isNewDay && (
+                        <tr key={`day-${index}`} className="bg-muted/50">
+                          <td colSpan={events.length + 1} className="p-3 text-center font-semibold text-sm border-b-2 border-primary">
+                            {formatTimeForDisplay(timeSlot, TIME_FORMATS.FULL_DATE, timezone)}
                           </td>
-                          {events.map(event => {
-                        const isEventActive = timeline?.isEventActive(event.id, timeSlot);
-                        const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
-                        const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
-                        const showSlot = shouldShowSlot(event.id, timeSlot);
-
-                        return <td key={event.id} className="p-2 text-center">
-                                {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
-                                    Lunch Break
-                                  </div> : assignedSchool && showSlot ? <div className="px-2 py-1 rounded text-xs text-white font-medium" style={{
-                            backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
-                          }}>
-                                    {assignedSchool.name}
-                                  </div> : <div className="text-muted-foreground text-xs">-</div>}
-                              </td>;
-                      })}
                         </tr>
-                      </React.Fragment>
-                    );
+                      ),
+                      <tr key={timeSlot.toISOString()} className={`border-b print:break-inside-avoid ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                        <td className="p-2 font-medium text-sm sticky left-0 bg-background z-10 border-r">
+                          {formatTimeForDisplay(timeSlot, TIME_FORMATS.TIME_ONLY_24H, timezone)}
+                        </td>
+                        {events.map(event => {
+                      const isEventActive = timeline?.isEventActive(event.id, timeSlot);
+                      const isLunchSlot = timeline?.isLunchBreak(event.id, timeSlot);
+                      const assignedSchool = getAssignedSchoolForSlot(event.id, timeSlot);
+                      const showSlot = shouldShowSlot(event.id, timeSlot);
+
+                      return <td key={event.id} className="p-2 text-center">
+                              {!isEventActive ? <div className="text-muted-foreground/50 text-xs">-</div> : isLunchSlot ? <div className="px-2 py-1 rounded text-xs bg-orange-100 text-orange-800 font-medium">
+                                  Lunch Break
+                                </div> : assignedSchool && showSlot ? <div className="px-2 py-1 rounded text-xs text-white font-medium" style={{
+                          backgroundColor: assignedSchool.color || 'hsl(var(--primary))'
+                        }}>
+                                  {assignedSchool.name}
+                                </div> : <div className="text-muted-foreground text-xs">-</div>}
+                            </td>;
+                    })}
+                      </tr>
+                    ].filter(Boolean);
                   })}
                 </tbody>
               </table>
