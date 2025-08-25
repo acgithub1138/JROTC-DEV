@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Eye, Edit, Trash2 } from 'lucide-react';
+import { Plus, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -48,7 +48,54 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
   const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
   const [selectedSchoolForAddEvent, setSelectedSchoolForAddEvent] = useState<string | null>(null);
-  
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+  };
+
+  const sortedSchools = schools.sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue: any = '';
+    let bValue: any = '';
+    
+    switch (sortField) {
+      case 'school_name':
+        aValue = (a.school_name || 'unknown school').toLowerCase();
+        bValue = (b.school_name || 'unknown school').toLowerCase();
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'paid':
+        aValue = a.paid ? 1 : 0;
+        bValue = b.paid ? 1 : 0;
+        break;
+      case 'fee':
+        aValue = a.total_fee || 0;
+        bValue = b.total_fee || 0;
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
+
   const handleColorChange = async (schoolId: string, newColor: string) => {
     try {
       await updateSchoolRegistration(schoolId, {
@@ -86,7 +133,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         <TooltipProvider>
           {isMobile ? (
             <div className="space-y-4">
-              {schools.map((school: CompSchoolWithPaid) => (
+              {sortedSchools.map((school: CompSchoolWithPaid) => (
                 <Card key={school.id}>
                   <CardHeader className="pb-3">
                     <CardTitle className="text-lg">{school.school_name || 'Unknown School'}</CardTitle>
@@ -172,17 +219,45 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                 <Table>
                   <TableHeader>
                     <TableRow>
-                      <TableHead>School Name</TableHead>
+                      <TableHead>
+                        <button 
+                          onClick={() => handleSort('school_name')}
+                          className="flex items-center gap-2 hover:text-foreground font-medium"
+                        >
+                          School Name {getSortIcon('school_name')}
+                        </button>
+                      </TableHead>
                       <TableHead>Events</TableHead>
-                      <TableHead>Status</TableHead>
-                      <TableHead>Paid</TableHead>
-                      <TableHead>Fee</TableHead>
+                      <TableHead>
+                        <button 
+                          onClick={() => handleSort('status')}
+                          className="flex items-center gap-2 hover:text-foreground font-medium"
+                        >
+                          Status {getSortIcon('status')}
+                        </button>
+                      </TableHead>
+                      <TableHead>
+                        <button 
+                          onClick={() => handleSort('paid')}
+                          className="flex items-center gap-2 hover:text-foreground font-medium"
+                        >
+                          Paid {getSortIcon('paid')}
+                        </button>
+                      </TableHead>
+                      <TableHead>
+                        <button 
+                          onClick={() => handleSort('fee')}
+                          className="flex items-center gap-2 hover:text-foreground font-medium"
+                        >
+                          Fee {getSortIcon('fee')}
+                        </button>
+                      </TableHead>
                       <TableHead>Color</TableHead>
                       <TableHead className="text-center">Actions</TableHead>
                     </TableRow>
                   </TableHeader>
                   <TableBody>
-                    {schools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
+                    {sortedSchools.map((school: CompSchoolWithPaid) => <TableRow key={school.id}>
                         <TableCell className="font-medium py-[8px]">
                           {school.school_name || 'Unknown School'}
                         </TableCell>
