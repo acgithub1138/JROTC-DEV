@@ -13,7 +13,6 @@ import { cn } from '@/lib/utils';
 import { AnnouncementRichTextEditor } from './components/AnnouncementRichTextEditor';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { Announcement } from '@/hooks/useAnnouncements';
-
 interface AnnouncementDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -21,7 +20,6 @@ interface AnnouncementDialogProps {
   onSubmit: (data: any) => void;
   mode: 'create' | 'edit';
 }
-
 export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
   open,
   onOpenChange,
@@ -36,13 +34,16 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
   // Priority mapping helper
   const getPriorityLabel = (value: number) => {
     switch (value) {
-      case 0: return 'Low';
-      case 1: return 'Medium'; 
-      case 2: return 'High';
-      default: return 'Low';
+      case 0:
+        return 'Low';
+      case 1:
+        return 'Medium';
+      case 2:
+        return 'High';
+      default:
+        return 'Low';
     }
   };
-
   const getPriorityValue = (numericPriority: number) => {
     if (numericPriority >= 7) return 2; // High
     if (numericPriority >= 4) return 1; // Medium
@@ -52,7 +53,6 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
   const [publishDate, setPublishDate] = useState<Date | undefined>(new Date());
   const [expireDate, setExpireDate] = useState<Date | undefined>();
   const [hasExpiration, setHasExpiration] = useState(false);
-
   useEffect(() => {
     if (announcement && mode === 'edit') {
       setTitle(announcement.title);
@@ -78,31 +78,29 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
       setHasExpiration(false);
     }
   }, [announcement, mode, open]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     const data = {
       title,
       content,
-      priority: priority[0] === 2 ? 8 : priority[0] === 1 ? 5 : 2, // Convert back to numeric for storage
+      priority: priority[0] === 2 ? 8 : priority[0] === 1 ? 5 : 2,
+      // Convert back to numeric for storage
       is_active: isActive,
       publish_date: publishDate?.toISOString(),
-      expire_date: hasExpiration && expireDate ? expireDate.toISOString() : null,
+      expire_date: hasExpiration && expireDate ? expireDate.toISOString() : null
     };
-
     if (mode === 'edit' && announcement) {
-      onSubmit({ ...data, id: announcement.id });
+      onSubmit({
+        ...data,
+        id: announcement.id
+      });
     } else {
       onSubmit(data);
     }
-
     onOpenChange(false);
   };
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-4xl max-h-[90vh] overflow-y-auto">
+  return <Dialog open={open} onOpenChange={onOpenChange}>
+      <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {mode === 'create' ? 'Create New Announcement' : 'Edit Announcement'}
@@ -115,26 +113,13 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
             <div className="space-y-4">
               <div>
                 <Label htmlFor="title">Title *</Label>
-                <Input
-                  id="title"
-                  value={title}
-                  onChange={(e) => setTitle(e.target.value)}
-                  placeholder="Enter announcement title"
-                  required
-                />
+                <Input id="title" value={title} onChange={e => setTitle(e.target.value)} placeholder="Enter announcement title" required />
               </div>
 
               <div>
                 <Label>Priority: {getPriorityLabel(priority[0])}</Label>
                 <div className="px-2 py-4">
-                  <Slider
-                    value={priority}
-                    onValueChange={setPriority}
-                    max={2}
-                    min={0}
-                    step={1}
-                    className="w-full"
-                  />
+                  <Slider value={priority} onValueChange={setPriority} max={2} min={0} step={1} className="w-full" />
                   <div className="flex justify-between text-xs text-muted-foreground mt-1">
                     <span>Low</span>
                     <span>Medium</span>
@@ -144,11 +129,7 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="active"
-                  checked={isActive}
-                  onCheckedChange={setIsActive}
-                />
+                <Switch id="active" checked={isActive} onCheckedChange={setIsActive} />
                 <Label htmlFor="active">Active</Label>
               </div>
             </div>
@@ -159,85 +140,46 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
                 <Label>Publish Date *</Label>
                 <Popover>
                   <PopoverTrigger asChild>
-                    <Button
-                      variant={"outline"}
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !publishDate && "text-muted-foreground"
-                      )}
-                    >
+                    <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !publishDate && "text-muted-foreground")}>
                       <CalendarIcon className="mr-2 h-4 w-4" />
                       {publishDate ? format(publishDate, "PPP") : <span>Pick a date</span>}
                     </Button>
                   </PopoverTrigger>
                   <PopoverContent className="w-auto p-0">
-                    <Calendar
-                      mode="single"
-                      selected={publishDate}
-                      onSelect={setPublishDate}
-                      initialFocus
-                    />
+                    <Calendar mode="single" selected={publishDate} onSelect={setPublishDate} initialFocus />
                   </PopoverContent>
                 </Popover>
               </div>
 
               <div className="flex items-center space-x-2">
-                <Switch
-                  id="expiration"
-                  checked={hasExpiration}
-                  onCheckedChange={setHasExpiration}
-                />
+                <Switch id="expiration" checked={hasExpiration} onCheckedChange={setHasExpiration} />
                 <Label htmlFor="expiration">Set expiration date</Label>
               </div>
 
-              {hasExpiration && (
-                <div>
+              {hasExpiration && <div>
                   <Label>Expire Date</Label>
                   <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant={"outline"}
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !expireDate && "text-muted-foreground"
-                        )}
-                      >
+                      <Button variant={"outline"} className={cn("w-full justify-start text-left font-normal", !expireDate && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {expireDate ? format(expireDate, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={expireDate}
-                        onSelect={setExpireDate}
-                        initialFocus
-                      />
+                      <Calendar mode="single" selected={expireDate} onSelect={setExpireDate} initialFocus />
                     </PopoverContent>
                   </Popover>
-                </div>
-              )}
+                </div>}
             </div>
           </div>
 
           {/* Content Editor */}
           <div>
-            <AnnouncementRichTextEditor
-              value={content}
-              onChange={setContent}
-              label="Content *"
-            />
+            <AnnouncementRichTextEditor value={content} onChange={setContent} label="Content *" />
           </div>
 
           {/* Attachments */}
-          {mode === 'edit' && announcement && (
-            <AttachmentSection
-              recordType="announcement"
-              recordId={announcement.id}
-              canEdit={true}
-              defaultOpen={false}
-            />
-          )}
+          {mode === 'edit' && announcement && <AttachmentSection recordType="announcement" recordId={announcement.id} canEdit={true} defaultOpen={false} />}
 
           {/* Actions */}
           <div className="flex justify-end space-x-2">
@@ -250,6 +192,5 @@ export const AnnouncementDialog: React.FC<AnnouncementDialogProps> = ({
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
