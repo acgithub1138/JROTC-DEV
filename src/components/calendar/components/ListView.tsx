@@ -161,15 +161,14 @@ export const ListView = ({
                 <TableCell className="text-center">
                   {onEventClick && (
                     <Button
-                      variant="ghost"
-                      size="sm"
+                      variant="outline"
+                      size="icon" className="h-6 w-6"
                       onClick={() => onEventClick(event)}
-                      className="h-8 w-8 p-0"
                     >
                       {readOnly ? (
-                        <Eye className="h-4 w-4" />
+                        <Eye className="h-3 w-3" />
                       ) : (
-                        <Edit2 className="h-4 w-4" />
+                        <Edit2 className="h-3 w-3" />
                       )}
                     </Button>
                   )}
