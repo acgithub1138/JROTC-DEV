@@ -75,7 +75,7 @@ const CalendarManagementPage = () => {
   };
   const handleEditEvent = (event: Event) => {
     if (!canViewDetails) return; // Don't show anything if can't view
-    
+
     if (canUpdateEvents) {
       setEditingEvent(event);
       setShowEventDialog(true);
@@ -85,7 +85,6 @@ const CalendarManagementPage = () => {
       setShowEventDetailsDialog(true);
     }
   };
-  
   const handleViewEvent = (event: Event) => {
     if (!canViewDetails) return; // Don't show anything if can't view
     setViewingEvent(event);
@@ -117,7 +116,6 @@ const CalendarManagementPage = () => {
     setEditingEvent(null);
     setShowEventDialog(true);
   };
-
   const handleDeleteEvent = (event: Event) => {
     // Check if this is a recurring event
     if (event.is_recurring || event.parent_event_id) {
@@ -129,7 +127,6 @@ const CalendarManagementPage = () => {
       setShowDeleteDialog(true);
     }
   };
-
   const handleDeleteEventById = async (id: string) => {
     // Find the event by ID first
     const event = events.find(e => e.id === id);
@@ -140,21 +137,18 @@ const CalendarManagementPage = () => {
       await deleteEvent(id);
     }
   };
-
   const handleDeleteThisEvent = async () => {
     if (deletingEvent) {
       await deleteEvent(deletingEvent.id);
       handleCloseDialog();
     }
   };
-
   const handleConfirmSingleDelete = async () => {
     if (deletingEvent) {
       await deleteEvent(deletingEvent.id);
       handleCloseDialog();
     }
   };
-
   const handleDeleteSeries = async () => {
     if (deletingEvent) {
       // If it's an instance, get the parent ID, otherwise use the event ID
@@ -164,61 +158,20 @@ const CalendarManagementPage = () => {
     }
   };
   return <div className={isMobile ? "h-screen overflow-hidden" : "p-6 space-y-6"}>
-      {!isMobile && (
-        <div className="flex justify-between items-center">
+      {!isMobile && <div className="flex justify-between items-center">
           <h1 className="text-3xl font-bold">Calendar</h1>
-          {canCreateEvents && (
-            <Button onClick={handleCreateEvent} className="ml-auto">
-              <Plus className="h-4 w-4 mr-2" />
-              Add Event
-            </Button>
-          )}
-        </div>
-      )}
+          {canCreateEvents}
+        </div>}
 
-      <CalendarView 
-        events={events} 
-        isLoading={isLoading} 
-        onEventEdit={canViewDetails ? handleEditEvent : undefined} 
-        onEventView={canViewDetails ? handleViewEvent : undefined} 
-        onEventDelete={canCreateEvents ? handleDeleteEventById : undefined} 
-        onDateSelect={handleDateSelect} 
-        onDateDoubleClick={handleDateDoubleClick} 
-        onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} 
-        filters={filters} 
-        onFiltersChange={setFilters} 
-        readOnly={!canCreateEvents} 
-      />
+      <CalendarView events={events} isLoading={isLoading} onEventEdit={canViewDetails ? handleEditEvent : undefined} onEventView={canViewDetails ? handleViewEvent : undefined} onEventDelete={canCreateEvents ? handleDeleteEventById : undefined} onDateSelect={handleDateSelect} onDateDoubleClick={handleDateDoubleClick} onCreateEvent={canCreateEvents ? handleCreateEvent : undefined} filters={filters} onFiltersChange={setFilters} readOnly={!canCreateEvents} />
 
-      {(canCreateEvents || canUpdateEvents) && (
-        <EventDialog 
-          open={showEventDialog} 
-          onOpenChange={handleCloseDialog} 
-          event={editingEvent} 
-          selectedDate={selectedDate} 
-          onSubmit={handleEventSubmit} 
-          onDelete={canDeleteEvents ? handleDeleteEvent : undefined} 
-        />
-      )}
+      {(canCreateEvents || canUpdateEvents) && <EventDialog open={showEventDialog} onOpenChange={handleCloseDialog} event={editingEvent} selectedDate={selectedDate} onSubmit={handleEventSubmit} onDelete={canDeleteEvents ? handleDeleteEvent : undefined} />}
 
       <EventDetailsDialog open={showEventDetailsDialog} onOpenChange={handleCloseDialog} event={viewingEvent} />
 
-      <RecurringDeleteDialog
-        open={showRecurringDeleteDialog}
-        onOpenChange={setShowRecurringDeleteDialog}
-        eventTitle={deletingEvent?.title || ''}
-        isRecurringParent={deletingEvent?.is_recurring || false}
-        onDeleteThis={handleDeleteThisEvent}
-        onDeleteSeries={handleDeleteSeries}
-      />
+      <RecurringDeleteDialog open={showRecurringDeleteDialog} onOpenChange={setShowRecurringDeleteDialog} eventTitle={deletingEvent?.title || ''} isRecurringParent={deletingEvent?.is_recurring || false} onDeleteThis={handleDeleteThisEvent} onDeleteSeries={handleDeleteSeries} />
 
-      <DeleteEventDialog 
-        open={showDeleteDialog} 
-        onOpenChange={() => setShowDeleteDialog(false)} 
-        event={deletingEvent} 
-        onConfirm={handleConfirmSingleDelete} 
-        loading={false}
-      />
+      <DeleteEventDialog open={showDeleteDialog} onOpenChange={() => setShowDeleteDialog(false)} event={deletingEvent} onConfirm={handleConfirmSingleDelete} loading={false} />
     </div>;
 };
 export default CalendarManagementPage;
