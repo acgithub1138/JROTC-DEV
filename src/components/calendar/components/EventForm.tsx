@@ -118,10 +118,14 @@ export const EventForm: React.FC<EventFormProps> = ({
       if (event.recurrence_rule) {
         setRecurrenceRule(event.recurrence_rule);
       }
-    } else if (selectedDate && !timezoneLoading) {
+    } else if (selectedDate && !timezoneLoading && !eventTypesLoading) {
       // Convert selected date to school timezone for display
       const schoolDate = convertToSchoolTimezone(selectedDate, timezone);
       const dateStr = format(schoolDate, 'yyyy-MM-dd');
+      
+      // Find the "Event" type as default
+      const defaultEventType = eventTypes.find(type => type.label.toLowerCase() === 'event');
+      
       const newFormData = {
         title: '',
         description: '',
@@ -132,13 +136,13 @@ export const EventForm: React.FC<EventFormProps> = ({
         end_time_hour: '10',
         end_time_minute: '00',
         location: '',
-        event_type: '',
+        event_type: defaultEventType?.id || '',
         is_all_day: false,
       };
       setFormData(newFormData);
       setInitialFormData(newFormData);
     }
-  }, [event, selectedDate, timezone, timezoneLoading]);
+  }, [event, selectedDate, timezone, timezoneLoading, eventTypes, eventTypesLoading]);
 
   const validateDateTime = () => {
     if (!formData.start_date) return { isValid: true, error: '' };
