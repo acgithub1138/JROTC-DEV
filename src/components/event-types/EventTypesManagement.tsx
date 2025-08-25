@@ -165,7 +165,7 @@ const EventTypesManagement: React.FC = () => {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {[...eventTypes].sort((a, b) => a.label.localeCompare(b.label)).map(eventType => <TableRow key={eventType.id}>
+                {[...eventTypes].sort((a, b) => (a.order || 0) - (b.order || 0)).map(eventType => <TableRow key={eventType.id}>
                     <TableCell>
                       <div className="w-6 h-6 rounded-full border-2 border-gray-300" style={{
                   backgroundColor: eventType.color || '#3B82F6'

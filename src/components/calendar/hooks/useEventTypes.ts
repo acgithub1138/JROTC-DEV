@@ -10,6 +10,7 @@ export interface EventType {
   color?: string;
   school_id: string | null; // Now nullable for global defaults
   is_default: boolean;
+  order?: number;
 }
 
 export const useEventTypes = () => {
@@ -28,7 +29,7 @@ export const useEventTypes = () => {
         .select('*')
         .or(`school_id.is.null,school_id.eq.${userProfile.school_id}`)
         .order('is_default', { ascending: false })
-        .order('label', { ascending: true }); // Show defaults first, then custom types alphabetically
+        .order('order', { ascending: true }); // Show defaults first, then by order
 
       if (error) throw error;
       setEventTypes(data || []);
@@ -76,12 +77,12 @@ export const useEventTypes = () => {
         throw error;
       }
 
-      setEventTypes(prev => [...prev, data].sort((a, b) => {
-        // Sort by is_default first (defaults first), then by label
+      setEventTypes(prev => [...prev, data as EventType].sort((a, b) => {
+        // Sort by is_default first (defaults first), then by order
         if (a.is_default !== b.is_default) {
           return b.is_default ? 1 : -1;
         }
-        return a.label.localeCompare(b.label);
+        return (a.order || 0) - (b.order || 0);
       }));
       toast({
         title: 'Success',
@@ -149,12 +150,12 @@ export const useEventTypes = () => {
       if (error) throw error;
 
       setEventTypes(prev => prev.map(type => 
-        type.id === id ? data : type
+        type.id === id ? data as EventType : type
       ).sort((a, b) => {
         if (a.is_default !== b.is_default) {
           return b.is_default ? 1 : -1;
         }
-        return a.label.localeCompare(b.label);
+        return (a.order || 0) - (b.order || 0);
       }));
       
       toast({
