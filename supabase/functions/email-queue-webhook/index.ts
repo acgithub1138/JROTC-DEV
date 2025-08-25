@@ -398,7 +398,7 @@ class UnifiedEmailProcessor {
 }
 
 serve(async (req) => {
-  console.log('🔥 Function starting - basic test');
+  console.log('🔥 Function starting');
   
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -407,31 +407,55 @@ serve(async (req) => {
   }
 
   const requestId = crypto.randomUUID();
-  console.log(`🚀 [${requestId}] Unified Email Processor started - v2`);
+  console.log(`🚀 [${requestId}] Unified Email Processor started`);
 
   try {
-    // Test basic environment variables
-    const supabaseUrl = Deno.env.get('SUPABASE_URL');
-    const supabaseKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
-    const resendKey = Deno.env.get('RESEND_API_KEY');
-    
-    console.log(`Environment check: SUPABASE_URL=${supabaseUrl ? 'SET' : 'MISSING'}, SUPABASE_KEY=${supabaseKey ? 'SET' : 'MISSING'}, RESEND_KEY=${resendKey ? 'SET' : 'MISSING'}`);
-    
     const body = await req.json();
-    console.log(`📝 [${requestId}] Request body:`, body);
+    console.log(`📝 [${requestId}] Request body:`, JSON.stringify(body));
 
-    // Return success for now to test basic functionality
+    const processor = UnifiedEmailProcessor.getInstance();
+
+    // Handle single email processing
+    if (body.email_id) {
+      console.log(`📧 [${requestId}] Processing single email: ${body.email_id}`);
+      const result = await processor.processEmail(body.email_id);
+      
+      return new Response(JSON.stringify({
+        success: result.success,
+        error: result.error,
+        requestId
+      }), {
+        status: result.success ? 200 : 500,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    // Handle batch processing (scheduled or manual)
+    if (body.process_all || body.scheduled) {
+      console.log(`📋 [${requestId}] Processing all emails (includeStuck: ${body.scheduled})`);
+      const result = await processor.processAllEmails(body.scheduled);
+      
+      console.log(`✅ [${requestId}] Processing complete: ${result.processed} processed, ${result.succeeded} succeeded, ${result.failed} failed`);
+      
+      return new Response(JSON.stringify({
+        success: true,
+        processed: result.processed,
+        succeeded: result.succeeded,
+        failed: result.failed,
+        requestId
+      }), {
+        status: 200,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+      });
+    }
+
+    console.log(`❌ [${requestId}] Invalid request - no valid parameters found`);
     return new Response(JSON.stringify({
-      success: true,
-      message: 'Function is working - basic test',
-      environmentCheck: {
-        supabaseUrl: supabaseUrl ? 'SET' : 'MISSING',
-        supabaseKey: supabaseKey ? 'SET' : 'MISSING', 
-        resendKey: resendKey ? 'SET' : 'MISSING'
-      },
+      success: false,
+      error: 'Invalid request: missing email_id or process_all parameter',
       requestId
     }), {
-      status: 200,
+      status: 400,
       headers: { ...corsHeaders, 'Content-Type': 'application/json' }
     });
 
