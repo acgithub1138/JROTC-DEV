@@ -161,7 +161,7 @@ const EventTypesManagement: React.FC = () => {
                   <TableHead>Name</TableHead>
                   <TableHead>Value</TableHead>
                   <TableHead>Type</TableHead>
-                  <TableHead className="text-center ">Actions</TableHead>
+                  <TableHead className="text-center">Actions</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
