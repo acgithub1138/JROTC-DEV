@@ -299,7 +299,7 @@ export const ActionsManagement: React.FC = () => {
                       <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || !editForm.label?.trim()}>
                         <Save className="w-4 h-4" />
                       </Button>
-                    </div> : <div className="flex justify-end space-x-2">
+                    </div> : <div className="flex items-center justify-center gap-2">
                       <Button size="sm" variant="outline" onClick={() => handleEdit(action)} disabled={updateMutation.isPending}>
                         <Edit2 className="w-4 h-4" />
                       </Button>
