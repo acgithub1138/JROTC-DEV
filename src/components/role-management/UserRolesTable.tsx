@@ -116,7 +116,7 @@ export const UserRolesTable = () => {
                       {role.is_active ? 'Active' : 'Inactive'}
                     </Badge>}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="flex items-center justify-center gap-2">
                   {editingRole === role.id ? <div className="flex justify-end space-x-2">
                       <Button size="sm" variant="outline" onClick={handleCancel} disabled={isUpdating}>
                         <X className="w-4 h-4" />
