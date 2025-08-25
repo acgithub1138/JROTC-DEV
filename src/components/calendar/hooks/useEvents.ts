@@ -219,6 +219,7 @@ export const useEvents = (filters: EventFilters) => {
 
   const updateEvent = async (id: string, eventData: Partial<Event>) => {
     try {
+      // Update the parent event
       const { data, error } = await supabase
         .from('events')
         .update(eventData as any) // Cast to any due to schema migration
@@ -228,10 +229,40 @@ export const useEvents = (filters: EventFilters) => {
 
       if (error) throw error;
 
-      setEvents(prev => prev.map(event => event.id === id ? data : event));
+      // If this is a recurring event and recurrence rule was updated, regenerate instances
+      if (data.is_recurring && data.recurrence_rule && eventData.recurrence_rule) {
+        // Delete existing recurring instances
+        const { error: deleteError } = await supabase
+          .from('events')
+          .delete()
+          .eq('parent_event_id', id);
+
+        if (deleteError) {
+          console.error('Error deleting existing recurring instances:', deleteError);
+        } else {
+          // Generate new recurring instances
+          const recurringInstances = generateRecurringEvents(data, data.recurrence_rule as any);
+          
+          if (recurringInstances.length > 0) {
+            const { error: insertError } = await supabase
+              .from('events')
+              .insert(recurringInstances);
+
+            if (insertError) {
+              console.error('Error creating recurring instances:', insertError);
+            }
+          }
+        }
+      }
+
+      // Refresh events to show all updated instances
+      await fetchEvents();
+      
       toast({
         title: 'Success',
-        description: 'Event updated successfully',
+        description: data.is_recurring 
+          ? 'Recurring event updated successfully' 
+          : 'Event updated successfully',
       });
     } catch (error) {
       console.error('Error updating event:', error);
