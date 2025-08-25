@@ -8,13 +8,14 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Separator } from '@/components/ui/separator';
 import { Eye, EyeOff, Key } from 'lucide-react';
 import { User, UserRole, School } from '../types';
+import { DynamicRole } from '@/hooks/useDynamicRoles';
 import { ProfileHistoryTab } from '@/components/cadet-management/components/ProfileHistoryTab';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 interface UserEditDialogProps {
   user: User | null;
   schools: School[];
-  allowedRoles: UserRole[];
+  allowedRoles: DynamicRole[];
   canResetPassword: (user: User) => boolean;
   isAdmin: boolean;
   open: boolean;
@@ -150,16 +151,16 @@ export const UserEditDialog = ({
                       
                       <div className="space-y-2">
                         <Label htmlFor="edit-role">Role</Label>
-                        <Select value={editingUser.role} onValueChange={(value: UserRole) => setEditingUser({
+                        <Select value={editingUser.role} onValueChange={(value: string) => setEditingUser({
                         ...editingUser,
-                        role: value
+                        role: value as UserRole
                       })}>
                           <SelectTrigger>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
-                            {allowedRoles.map(role => <SelectItem key={role} value={role}>
-                                {role.charAt(0).toUpperCase() + role.slice(1).replace('_', ' ')}
+                            {allowedRoles.map(role => <SelectItem key={role.role_name} value={role.role_name}>
+                                {role.role_label}
                               </SelectItem>)}
                           </SelectContent>
                         </Select>

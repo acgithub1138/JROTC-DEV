@@ -13,6 +13,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useToast } from '@/hooks/use-toast';
 
 import { UserRole } from './types';
+import { DynamicRole } from '@/hooks/useDynamicRoles';
 
 interface School {
   id: string;
@@ -20,7 +21,7 @@ interface School {
 }
 
 interface CreateUserDialogProps {
-  allowedRoles: UserRole[];
+  allowedRoles: DynamicRole[];
   trigger?: React.ReactNode;
   onUserCreated?: () => void;
 }
@@ -254,17 +255,17 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
             <Label htmlFor="role">Role</Label>
             <Select 
               value={formData.role} 
-              onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
+              onValueChange={(value: string) => setFormData({ ...formData, role: value as UserRole })}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select role" />
               </SelectTrigger>
               <SelectContent>
                 {allowedRoles.map((role) => (
-                  <SelectItem key={role} value={role}>
+                  <SelectItem key={role.role_name} value={role.role_name}>
                     <div className="flex items-center">
-                      {getRoleIcon(role)}
-                      <span className="ml-2">{getRoleLabel(role)}</span>
+                      {getRoleIcon(role.role_name as UserRole)}
+                      <span className="ml-2">{role.role_label}</span>
                     </div>
                   </SelectItem>
                 ))}

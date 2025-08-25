@@ -1,16 +1,23 @@
 import { useAuth } from '@/contexts/AuthContext';
 import { User, UserRole } from '../types';
-import { useDynamicRoles } from '@/hooks/useDynamicRoles';
+import { useDynamicRoles, DynamicRole } from '@/hooks/useDynamicRoles';
 
 export const useUserPermissions = () => {
   const { userProfile } = useAuth();
-  const { assignableRoles } = useDynamicRoles();
+  const { allRoles, assignableRoles } = useDynamicRoles();
 
-  const getAllowedRoles = (): UserRole[] => {
+  const getAllowedRoles = (): DynamicRole[] => {
     if (!userProfile) return [];
     
-    // Use the dynamic roles from the database
-    return assignableRoles.map(role => role.role_name as UserRole);
+    // Get assignable role names
+    const assignableRoleNames = assignableRoles
+      .filter(role => role.can_be_assigned)
+      .map(role => role.role_name);
+    
+    // Return full role objects that match assignable role names
+    return allRoles.filter(role => 
+      assignableRoleNames.includes(role.role_name)
+    );
   };
 
   const canCreateUsers = () => {
