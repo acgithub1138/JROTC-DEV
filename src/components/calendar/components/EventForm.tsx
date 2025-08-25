@@ -483,6 +483,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         onRecurringChange={setIsRecurring}
         recurrenceRule={recurrenceRule}
         onRecurrenceRuleChange={setRecurrenceRule}
+        eventStartDate={formData.start_date}
       />
 
       {/* Show Event Assignments for existing events or when editing */}

@@ -17,6 +17,7 @@ interface RecurrenceSettingsProps {
   onRecurringChange: (recurring: boolean) => void;
   recurrenceRule: RecurrenceRule;
   onRecurrenceRuleChange: (rule: RecurrenceRule) => void;
+  eventStartDate?: string; // Event start date to use as default for end date picker
 }
 
 const DAYS_OF_WEEK = [
@@ -34,6 +35,7 @@ export const RecurrenceSettings: React.FC<RecurrenceSettingsProps> = ({
   onRecurringChange,
   recurrenceRule,
   onRecurrenceRuleChange,
+  eventStartDate,
 }) => {
   const updateRule = (updates: Partial<RecurrenceRule>) => {
     onRecurrenceRuleChange({ ...recurrenceRule, ...updates });
@@ -171,6 +173,12 @@ export const RecurrenceSettings: React.FC<RecurrenceSettingsProps> = ({
                     onSelect={(date) => updateRule({ endDate: date?.toISOString() })}
                     initialFocus
                     className="pointer-events-auto"
+                    defaultMonth={recurrenceRule.endDate 
+                      ? new Date(recurrenceRule.endDate) 
+                      : eventStartDate 
+                        ? new Date(eventStartDate)
+                        : undefined
+                    }
                   />
                 </PopoverContent>
               </Popover>
