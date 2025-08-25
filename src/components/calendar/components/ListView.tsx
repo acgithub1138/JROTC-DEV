@@ -6,18 +6,24 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Eye, Edit, Edit2, MapPin } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 interface ListViewProps {
   events: Event[];
   onEventClick?: (event: Event) => void;
+  onDeleteEvent?: (event: Event) => void;
   readOnly?: boolean;
 }
 
 export const ListView = ({
   events,
   onEventClick,
+  onDeleteEvent,
   readOnly = false,
 }: ListViewProps) => {
+  const permissions = useTablePermissions('events');
+  
   // Sort events by start date and take the next 25
   const sortedEvents = events
     .filter(event => new Date(event.start_date) >= new Date())
@@ -159,20 +165,15 @@ export const ListView = ({
                   )}
                 </TableCell>
                 <TableCell className="text-center">
-                  {onEventClick && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => onEventClick(event)}
-                      className="h-8 w-8 p-0"
-                    >
-                      {readOnly ? (
-                        <Eye className="h-4 w-4" />
-                      ) : (
-                        <Edit className="h-4 w-4" />
-                      )}
-                    </Button>
-                  )}
+                  <TableActionButtons
+                    canView={permissions.canViewDetails}
+                    canEdit={permissions.canEdit}
+                    canDelete={permissions.canDelete}
+                    onView={readOnly && onEventClick ? () => onEventClick(event) : undefined}
+                    onEdit={!readOnly && onEventClick ? () => onEventClick(event) : undefined}
+                    onDelete={onDeleteEvent ? () => onDeleteEvent(event) : undefined}
+                    readOnly={readOnly}
+                  />
                 </TableCell>
               </TableRow>
             ))}
