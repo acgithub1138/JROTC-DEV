@@ -266,7 +266,7 @@ export const ActionsManagement: React.FC = () => {
                     <span className="ml-2 text-sm">{(action as any).sort_order || 0}</span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-[8px]">
                   {editingAction === action.id ? <Input value={editForm.label || ''} onChange={e => setEditForm(prev => ({
                 ...prev,
                 label: e.target.value
