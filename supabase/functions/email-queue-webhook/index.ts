@@ -29,7 +29,7 @@ interface EmailQueueItem {
 class UnifiedEmailProcessor {
   private static instance: UnifiedEmailProcessor;
   private supabase: any;
-  private resend: Resend;
+  private resend: Resend | null;
   private lastEmailSent: number = 0;
   private readonly RATE_LIMIT_MS = 2000; // 2 seconds between emails
   private processingLock = false;
@@ -42,7 +42,14 @@ class UnifiedEmailProcessor {
     
     const resendApiKey = Deno.env.get('RESEND_API_KEY');
     console.log(`🔑 Resend API key configured: ${resendApiKey ? 'YES' : 'NO'}`);
-    this.resend = new Resend(resendApiKey!);
+    
+    // Only initialize Resend if API key is available
+    if (resendApiKey) {
+      this.resend = new Resend(resendApiKey);
+    } else {
+      this.resend = null;
+      console.error('❌ RESEND_API_KEY not found in environment variables');
+    }
   }
 
   public static getInstance(): UnifiedEmailProcessor {
@@ -170,6 +177,16 @@ class UnifiedEmailProcessor {
 
   private async sendEmailViaResend(email: EmailQueueItem): Promise<{ success: boolean; resendId?: string; isRateLimited?: boolean; errorMessage?: string }> {
     try {
+      // Check if Resend is properly initialized
+      if (!this.resend) {
+        const errorMsg = 'Resend client not initialized - API key missing';
+        console.error(`❌ ${errorMsg}`);
+        return { 
+          success: false, 
+          errorMessage: errorMsg
+        };
+      }
+
       // Check if recipient_email contains multiple recipients (comma-separated)
       const recipients = email.recipient_email.split(',').map(email => email.trim()).filter(email => email);
       const recipientCount = recipients.length;
