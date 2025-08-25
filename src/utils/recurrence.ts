@@ -72,7 +72,11 @@ export function generateRecurringEvents(
   while (instanceCount < maxInstances) {
     // Check end conditions
     if (recurrenceRule.endType === 'date' && recurrenceRule.endDate) {
-      if (isAfter(currentDate, new Date(recurrenceRule.endDate))) break;
+      // Include events on the end date by comparing with start of next day
+      const endDate = new Date(recurrenceRule.endDate);
+      const nextDay = new Date(endDate);
+      nextDay.setDate(nextDay.getDate() + 1);
+      if (!isBefore(currentDate, nextDay)) break;
     }
     
     if (recurrenceRule.endType === 'count' && recurrenceRule.occurrenceCount) {
