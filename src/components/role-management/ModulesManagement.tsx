@@ -407,7 +407,7 @@ const ModulesManagement: React.FC = () => {
                       <span className="ml-2 text-sm">{(module as any).sort_order || 0}</span>
                     </div>}
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-[8px]">
                   {editingModule === module.id ? <Input value={editForm.label || ''} onChange={e => setEditForm(prev => ({
                 ...prev,
                 label: e.target.value
