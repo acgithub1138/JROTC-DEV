@@ -1318,7 +1318,6 @@ export type Database = {
           enabled: boolean
           id: string
           module_id: string
-          role: Database["public"]["Enums"]["user_role"]
           role_id: string | null
         }
         Insert: {
@@ -1327,7 +1326,6 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_id: string
-          role: Database["public"]["Enums"]["user_role"]
           role_id?: string | null
         }
         Update: {
@@ -1336,7 +1334,6 @@ export type Database = {
           enabled?: boolean
           id?: string
           module_id?: string
-          role?: Database["public"]["Enums"]["user_role"]
           role_id?: string | null
         }
         Relationships: [
@@ -3563,14 +3560,6 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      add_user_role: {
-        Args: {
-          display_label?: string
-          is_admin_only?: boolean
-          role_name: string
-        }
-        Returns: undefined
-      }
       add_user_role_to_table: {
         Args: {
           admin_only_param?: boolean
@@ -3585,7 +3574,7 @@ export type Database = {
       }
       can_update_profile_role: {
         Args: {
-          new_role: Database["public"]["Enums"]["user_role"]
+          new_role: string
           new_role_id: string
           target_profile_id: string
         }
@@ -3990,13 +3979,6 @@ export type Database = {
         | "cadet_major"
         | "cadet_lieutenant_colonel"
         | "cadet_colonel"
-      user_role:
-        | "admin"
-        | "instructor"
-        | "command_staff"
-        | "cadet"
-        | "parent"
-        | "special_staff"
     }
     CompositeTypes: {
       tablefunc_crosstab_2: {
@@ -4244,14 +4226,6 @@ export const Constants = {
         "cadet_major",
         "cadet_lieutenant_colonel",
         "cadet_colonel",
-      ],
-      user_role: [
-        "admin",
-        "instructor",
-        "command_staff",
-        "cadet",
-        "parent",
-        "special_staff",
       ],
     },
   },
