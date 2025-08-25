@@ -27,8 +27,34 @@ export interface RecurringEventInstance {
 export function generateRecurringEvents(
   baseEvent: any,
   recurrenceRule: RecurrenceRule,
-  maxInstances: number = 100
+  maxInstances?: number
 ): RecurringEventInstance[] {
+  // Calculate a reasonable max instances based on the recurrence rule
+  if (!maxInstances) {
+    if (recurrenceRule.endType === 'date' && recurrenceRule.endDate) {
+      const startDate = new Date(baseEvent.start_date);
+      const endDate = new Date(recurrenceRule.endDate);
+      const daysDiff = Math.ceil((endDate.getTime() - startDate.getTime()) / (1000 * 60 * 60 * 24));
+      
+      switch (recurrenceRule.frequency) {
+        case 'daily':
+          maxInstances = Math.ceil(daysDiff / recurrenceRule.interval) + 50; // Add buffer
+          break;
+        case 'weekly':
+          maxInstances = Math.ceil(daysDiff / (7 * recurrenceRule.interval)) + 50; // Add buffer
+          break;
+        case 'monthly':
+          maxInstances = Math.ceil(daysDiff / (30 * recurrenceRule.interval)) + 50; // Add buffer
+          break;
+        default:
+          maxInstances = 500; // Fallback for unknown frequency
+      }
+    } else if (recurrenceRule.endType === 'count' && recurrenceRule.occurrenceCount) {
+      maxInstances = recurrenceRule.occurrenceCount;
+    } else {
+      maxInstances = 100; // Default for 'never' ending events
+    }
+  }
   const instances: RecurringEventInstance[] = [];
   const startDate = new Date(baseEvent.start_date);
   const endDate = baseEvent.end_date ? new Date(baseEvent.end_date) : null;
