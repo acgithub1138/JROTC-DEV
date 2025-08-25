@@ -19,7 +19,7 @@ import { CompetitionCards } from './components/CompetitionCards';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
 import { useHostedCompetitions } from '@/hooks/competition-portal/useHostedCompetitions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy } from 'lucide-react';
+import { CalendarDays, MapPin, Users, Plus, Search, Filter, Edit, Eye, X, GitCompareArrows, Copy, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from 'sonner';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
@@ -65,6 +65,8 @@ const CompetitionsPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [statusFilter, setStatusFilter] = useState<string>('all');
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
 const [showCreateDialog, setShowCreateDialog] = useState(false);
 const [showViewModal, setShowViewModal] = useState(false);
 const [showEditModal, setShowEditModal] = useState(false);
@@ -132,16 +134,66 @@ const [isCopying, setIsCopying] = useState(false);
         return 'secondary';
     }
   };
-  const filteredCompetitions = competitions.filter(competition => {
-    const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
-    
-    // Filter by active/non-active tab
-    const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
-    const matchesTab = activeTab === 'active' ? isActive : !isActive;
-    
-    return matchesSearch && matchesStatus && matchesTab;
-  });
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+  };
+
+  const filteredAndSortedCompetitions = competitions
+    .filter(competition => {
+      const matchesSearch = competition.name.toLowerCase().includes(searchTerm.toLowerCase()) || competition.location.toLowerCase().includes(searchTerm.toLowerCase()) || getSchoolName(competition.school_id).toLowerCase().includes(searchTerm.toLowerCase());
+      const matchesStatus = statusFilter === 'all' || competition.status === statusFilter;
+      
+      // Filter by active/non-active tab
+      const isActive = ['draft', 'open', 'registration_closed', 'in_progress'].includes(competition.status);
+      const matchesTab = activeTab === 'active' ? isActive : !isActive;
+      
+      return matchesSearch && matchesStatus && matchesTab;
+    })
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      
+      let aValue: any = '';
+      let bValue: any = '';
+      
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'description':
+          aValue = (a.description || '').toLowerCase();
+          bValue = (b.description || '').toLowerCase();
+          break;
+        case 'date':
+          aValue = new Date(a.start_date);
+          bValue = new Date(b.start_date);
+          break;
+        case 'status':
+          aValue = a.status;
+          bValue = b.status;
+          break;
+        case 'registrations':
+          aValue = registrationCounts[a.id] || 0;
+          bValue = registrationCounts[b.id] || 0;
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
   const canCreateCompetition = canCreate;
   const handleCreateCompetition = async (data: any) => {
     try {
@@ -321,7 +373,7 @@ const handleEditSubmit = async (data: any) => {
       </Card>
 
       {/* Competitions Table/Cards */}
-      {filteredCompetitions.length === 0 ? (
+      {filteredAndSortedCompetitions.length === 0 ? (
         <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
@@ -331,7 +383,7 @@ const handleEditSubmit = async (data: any) => {
         </Card>
       ) : isMobile ? (
         <CompetitionCards
-          competitions={filteredCompetitions}
+          competitions={filteredAndSortedCompetitions}
           registrationCounts={registrationCounts}
           userProfile={userProfile}
           getStatusBadgeVariant={getStatusBadgeVariant}
@@ -349,16 +401,51 @@ const handleEditSubmit = async (data: any) => {
               <Table>
                 <TableHeader>
                   <TableRow>
-                    <TableHead>Name</TableHead>
-                    <TableHead>Description</TableHead>
-                    <TableHead>Date</TableHead>
-                    <TableHead>Status</TableHead>
-                    <TableHead>Registered Schools</TableHead>
+                    <TableHead>
+                      <button 
+                        onClick={() => handleSort('name')}
+                        className="flex items-center gap-2 hover:text-foreground font-medium"
+                      >
+                        Name {getSortIcon('name')}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button 
+                        onClick={() => handleSort('description')}
+                        className="flex items-center gap-2 hover:text-foreground font-medium"
+                      >
+                        Description {getSortIcon('description')}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button 
+                        onClick={() => handleSort('date')}
+                        className="flex items-center gap-2 hover:text-foreground font-medium"
+                      >
+                        Date {getSortIcon('date')}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button 
+                        onClick={() => handleSort('status')}
+                        className="flex items-center gap-2 hover:text-foreground font-medium"
+                      >
+                        Status {getSortIcon('status')}
+                      </button>
+                    </TableHead>
+                    <TableHead>
+                      <button 
+                        onClick={() => handleSort('registrations')}
+                        className="flex items-center gap-2 hover:text-foreground font-medium"
+                      >
+                        Registered Schools {getSortIcon('registrations')}
+                      </button>
+                    </TableHead>
                     <TableHead className="text-center">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {filteredCompetitions.map(competition => (
+                  {filteredAndSortedCompetitions.map(competition => (
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
                         {canManage ? (
