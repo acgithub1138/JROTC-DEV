@@ -21,6 +21,10 @@ interface JudgesTableProps {
   selectedJudges: string[];
   onSelectJudge: (judgeId: string, checked: boolean) => void;
   onSelectAll: (checked: boolean) => void;
+  sortField: string;
+  sortDirection: 'asc' | 'desc';
+  onSort: (field: string) => void;
+  getSortIcon: (field: string) => React.ReactNode;
 }
 export const JudgesTable: React.FC<JudgesTableProps> = ({
   judges,
@@ -29,7 +33,11 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
   onDelete,
   selectedJudges,
   onSelectJudge,
-  onSelectAll
+  onSelectAll,
+  sortField,
+  sortDirection,
+  onSort,
+  getSortIcon
 }) => {
   const {
     canEdit,
@@ -58,11 +66,46 @@ export const JudgesTable: React.FC<JudgesTableProps> = ({
                 className={isIndeterminate ? "data-[state=checked]:bg-primary data-[state=checked]:opacity-50" : ""}
               />
             </TableHead>
-            <TableHead>Name</TableHead>
-            <TableHead>Phone</TableHead>
-            <TableHead>Email</TableHead>
-            <TableHead>Status</TableHead>
-            <TableHead>Created</TableHead>
+            <TableHead>
+              <button 
+                onClick={() => onSort('name')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Name {getSortIcon('name')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button 
+                onClick={() => onSort('phone')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Phone {getSortIcon('phone')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button 
+                onClick={() => onSort('email')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Email {getSortIcon('email')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button 
+                onClick={() => onSort('status')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Status {getSortIcon('status')}
+              </button>
+            </TableHead>
+            <TableHead>
+              <button 
+                onClick={() => onSort('created_at')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Created {getSortIcon('created_at')}
+              </button>
+            </TableHead>
             <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </TableHeader>

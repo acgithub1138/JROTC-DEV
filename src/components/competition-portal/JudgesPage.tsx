@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Plus, Search, Upload, ChevronDown } from 'lucide-react';
+import { Plus, Search, Upload, ChevronDown, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { JudgesTable } from './components/JudgesTable';
 import { JudgeDialog } from './components/JudgeDialog';
 import { JudgesBulkImportDialog } from './components/JudgesBulkImportDialog';
@@ -31,6 +31,22 @@ export const JudgesPage: React.FC = () => {
   const [deleteConfirmJudge, setDeleteConfirmJudge] = useState<any>(null);
   const [searchTerm, setSearchTerm] = useState('');
   const [selectedJudges, setSelectedJudges] = useState<string[]>([]);
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+  };
+
   const handleEdit = (judge: any) => {
     setEditingJudge(judge);
   };
@@ -72,7 +88,7 @@ export const JudgesPage: React.FC = () => {
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
-      setSelectedJudges(filteredJudges.map(judge => judge.id));
+      setSelectedJudges(filteredAndSortedJudges.map(judge => judge.id));
     } else {
       setSelectedJudges([]);
     }
@@ -85,8 +101,48 @@ export const JudgesPage: React.FC = () => {
     setSelectedJudges([]);
   };
 
-  // Filter judges based on search term
-  const filteredJudges = judges.filter(judge => judge.name.toLowerCase().includes(searchTerm.toLowerCase()) || judge.email && judge.email.toLowerCase().includes(searchTerm.toLowerCase()) || judge.phone && judge.phone.includes(searchTerm));
+  // Filter and sort judges based on search term and sort options
+  const filteredAndSortedJudges = judges
+    .filter(judge => 
+      judge.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      judge.email && judge.email.toLowerCase().includes(searchTerm.toLowerCase()) || 
+      judge.phone && judge.phone.includes(searchTerm)
+    )
+    .sort((a, b) => {
+      if (!sortField) return 0;
+      
+      let aValue: any = '';
+      let bValue: any = '';
+      
+      switch (sortField) {
+        case 'name':
+          aValue = a.name.toLowerCase();
+          bValue = b.name.toLowerCase();
+          break;
+        case 'phone':
+          aValue = (a.phone || '').toLowerCase();
+          bValue = (b.phone || '').toLowerCase();
+          break;
+        case 'email':
+          aValue = (a.email || '').toLowerCase();
+          bValue = (b.email || '').toLowerCase();
+          break;
+        case 'status':
+          aValue = a.available ? 1 : 0;
+          bValue = b.available ? 1 : 0;
+          break;
+        case 'created_at':
+          aValue = new Date(a.created_at);
+          bValue = new Date(b.created_at);
+          break;
+        default:
+          return 0;
+      }
+      
+      if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+      if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+      return 0;
+    });
   
   if (isLoading) {
     return <div className="p-6">
@@ -163,7 +219,7 @@ export const JudgesPage: React.FC = () => {
       </Card>
 
       {/* Judges Table */}
-      {filteredJudges.length === 0 ? <Card>
+      {filteredAndSortedJudges.length === 0 ? <Card>
           <CardContent className="p-12 text-center">
             <div className="text-muted-foreground">
               {judges.length === 0 ? 'No judges found.' : 'No judges match your search criteria.'}
@@ -172,13 +228,17 @@ export const JudgesPage: React.FC = () => {
         </Card> : <Card>
           <CardContent className="py-[8px]">
             <JudgesTable 
-              judges={filteredJudges} 
+              judges={filteredAndSortedJudges} 
               isLoading={isLoading} 
               onEdit={handleEdit} 
               onDelete={handleDeleteClick}
               selectedJudges={selectedJudges}
               onSelectJudge={handleSelectJudge}
               onSelectAll={handleSelectAll}
+              sortField={sortField}
+              sortDirection={sortDirection}
+              onSort={handleSort}
+              getSortIcon={getSortIcon}
             />
           </CardContent>
         </Card>}
