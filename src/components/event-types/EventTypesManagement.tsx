@@ -171,7 +171,7 @@ const EventTypesManagement: React.FC = () => {
                   backgroundColor: eventType.color || '#3B82F6'
                 }} />
                     </TableCell>
-                    <TableCell className="font-medium">{eventType.label}</TableCell>
+                    <TableCell className="font-medium py-[8px]">{eventType.label}</TableCell>
                     <TableCell className="text-muted-foreground">{eventType.value}</TableCell>
                     <TableCell>
                       {eventType.is_default && <Badge variant="secondary" className="flex items-center gap-1 w-fit">
