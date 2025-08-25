@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, GripVertical } from 'lucide-react';
+import { Edit, Edit2, Save, X, GripVertical } from 'lucide-react';
 import { useUserRolesManagement, type UserRole } from '@/hooks/useUserRolesManagement';
 import { toast } from 'sonner';
 export const UserRolesTable = () => {
@@ -125,7 +125,7 @@ export const UserRolesTable = () => {
                         <X className="w-3 h-3" />
                       </Button>
                   </div> : <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(role)} disabled={isUpdating}>
-                      <Edit2 className="w-3 h-3" />
+                      <Edit className="w-3 h-3" />
                     </Button>}
                 </TableCell>
               </TableRow>)}
