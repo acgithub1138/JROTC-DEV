@@ -267,17 +267,17 @@ const ThemeCard: React.FC<{
           <div className="flex space-x-2">
             <Button
               variant="outline"
-              size="icon"
+              size="icon" className="h-6 w-6"
               onClick={() => onEdit(theme)}
             >
-              <Edit className="h-4 w-4" />
+              <Edit className="h-3 w-3" />
             </Button>
             <Button
               variant="outline"
-              size="icon"
+              size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
               onClick={() => onDelete(theme.id)}
             >
-              <Trash2 className="h-4 w-4" />
+              <Trash2 className="h-3 w-3" />
             </Button>
           </div>
         </div>
