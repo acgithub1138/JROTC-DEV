@@ -86,7 +86,7 @@ export const TemplatesTable: React.FC<TemplatesTableProps> = ({
           <TableBody>
             {templates.map(template => <TableRow key={template.id}>
                 <TableCell className="font-medium">
-                  <div className="flex items-center gap-2 py-[4px]">
+                  <div className="flex items-center gap-2 py-[6px]">
                     {template.template_name}
                     {template.is_global && <div title="Global Template">
                         <Globe className="w-4 h-4 text-blue-500" />
