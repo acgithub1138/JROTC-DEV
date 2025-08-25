@@ -74,7 +74,7 @@ serve(async (req) => {
     }
 
     // Validate permissions to reset password
-    requireCanResetPassword(actorProfile, targetProfile)
+    await requireCanResetPassword(actorProfile, targetProfile, supabaseAdmin)
 
     console.log('User', actorProfile.id, 'resetting password for user:', userId)
 

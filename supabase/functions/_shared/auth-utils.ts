@@ -71,32 +71,22 @@ export async function validateAuthentication(req: Request): Promise<AuthContext>
 }
 
 /**
- * Role hierarchy for permission checking
+ * Checks user permission using database function
  */
-const ROLE_HIERARCHY: Record<string, number> = {
-  'admin': 100,
-  'instructor': 80,
-  'command_staff': 60,
-  'cadet': 40,
-  'parent': 20
-}
+async function checkUserPermission(userId: string, module: string, action: string, supabaseAdmin: any): Promise<boolean> {
+  const { data, error } = await supabaseAdmin
+    .rpc('check_user_permission', {
+      user_id: userId,
+      module_name: module,
+      action_name: action
+    })
 
-/**
- * Checks if user has minimum required role level
- */
-export function hasMinimumRole(userRole: string, minimumRole: string): boolean {
-  const userLevel = ROLE_HIERARCHY[userRole] || 0
-  const requiredLevel = ROLE_HIERARCHY[minimumRole] || 0
-  return userLevel >= requiredLevel
-}
+  if (error) {
+    console.error('Error checking user permission:', error)
+    return false
+  }
 
-/**
- * Checks if user can perform action on target user based on role hierarchy
- */
-export function canActOnUser(actorRole: string, targetRole: string): boolean {
-  const actorLevel = ROLE_HIERARCHY[actorRole] || 0
-  const targetLevel = ROLE_HIERARCHY[targetRole] || 0
-  return actorLevel > targetLevel
+  return data === true
 }
 
 /**
@@ -108,23 +98,6 @@ export function requireRole(profile: UserProfile, requiredRoles: string[]): void
   }
 }
 
-/**
- * Validates user has minimum role level
- */
-export function requireMinimumRole(profile: UserProfile, minimumRole: string): void {
-  if (!hasMinimumRole(profile.role, minimumRole)) {
-    throw new AuthorizationError(`Access denied. Minimum role required: ${minimumRole}. Current role: ${profile.role}`)
-  }
-}
-
-/**
- * Validates user can act on target user (role hierarchy check)
- */
-export function requireCanActOnUser(actorProfile: UserProfile, targetRole: string): void {
-  if (!canActOnUser(actorProfile.role, targetRole)) {
-    throw new AuthorizationError(`Insufficient permissions to perform this action on a ${targetRole}`)
-  }
-}
 
 /**
  * Validates users are in the same school (for non-admin users)
@@ -139,8 +112,11 @@ export function requireSameSchool(actorProfile: UserProfile, targetSchoolId: str
  * Validates user can create users with specified role
  */
 export async function requireCanCreateUserWithRole(actorProfile: UserProfile, targetRole: string, supabaseAdmin: any): Promise<void> {
-  // Only admins and instructors can create users
-  requireMinimumRole(actorProfile, 'instructor')
+  // Check permission to create users
+  const canCreateUsers = await checkUserPermission(actorProfile.id, 'cadets', 'create', supabaseAdmin)
+  if (!canCreateUsers) {
+    throw new AuthorizationError('Access denied. You do not have permission to create users')
+  }
   
   // Admins can create users with any role
   if (actorProfile.role === 'admin') {
@@ -160,8 +136,8 @@ export async function requireCanCreateUserWithRole(actorProfile: UserProfile, ta
     return
   }
   
-  // Instructors cannot create admin_only roles
-  if (actorProfile.role === 'instructor' && roleData.admin_only) {
+  // Non-admins cannot create admin_only roles
+  if (roleData.admin_only) {
     throw new AuthorizationError(`Cannot create users with admin-only roles: ${targetRole}`)
   }
 }
@@ -169,37 +145,37 @@ export async function requireCanCreateUserWithRole(actorProfile: UserProfile, ta
 /**
  * Validates user can reset password for target user
  */
-export function requireCanResetPassword(actorProfile: UserProfile, targetProfile: UserProfile): void {
+export async function requireCanResetPassword(actorProfile: UserProfile, targetProfile: UserProfile, supabaseAdmin: any): Promise<void> {
   // Users cannot reset their own password through this function
   if (actorProfile.id === targetProfile.id) {
     throw new AuthorizationError('Cannot reset your own password through this function')
   }
 
-  // Check minimum role requirement
-  requireMinimumRole(actorProfile, 'instructor')
+  // Check permission to reset passwords
+  const canResetPassword = await checkUserPermission(actorProfile.id, 'cadets', 'reset_password', supabaseAdmin)
+  if (!canResetPassword) {
+    throw new AuthorizationError('Access denied. You do not have permission to reset passwords')
+  }
 
   // Check school requirement for non-admins
   requireSameSchool(actorProfile, targetProfile.school_id)
-
-  // Check role hierarchy
-  requireCanActOnUser(actorProfile, targetProfile.role)
 }
 
 /**
  * Validates user can toggle status for target user
  */
-export function requireCanToggleUserStatus(actorProfile: UserProfile, targetProfile: UserProfile): void {
+export async function requireCanToggleUserStatus(actorProfile: UserProfile, targetProfile: UserProfile, supabaseAdmin: any): Promise<void> {
   // Users cannot toggle their own status
   if (actorProfile.id === targetProfile.id) {
     throw new AuthorizationError('Cannot toggle your own account status')
   }
 
-  // Check minimum role requirement
-  requireMinimumRole(actorProfile, 'instructor')
+  // Check permission to delete users (toggle status)
+  const canDeleteUsers = await checkUserPermission(actorProfile.id, 'cadets', 'delete', supabaseAdmin)
+  if (!canDeleteUsers) {
+    throw new AuthorizationError('Access denied. You do not have permission to toggle user status')
+  }
 
   // Check school requirement for non-admins
   requireSameSchool(actorProfile, targetProfile.school_id)
-
-  // Check role hierarchy
-  requireCanActOnUser(actorProfile, targetProfile.role)
 }

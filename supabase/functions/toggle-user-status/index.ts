@@ -90,7 +90,7 @@ serve(async (req) => {
 
         // Validate permissions for this specific user
         try {
-          requireCanToggleUserStatus(actorProfile, targetProfile)
+          await requireCanToggleUserStatus(actorProfile, targetProfile, supabaseAdmin)
         } catch (permissionError) {
           console.error('Permission denied for user', targetUserId, ':', permissionError.message)
           errors.push({ userId: targetUserId, error: permissionError.message })
