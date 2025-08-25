@@ -1,4 +1,5 @@
 import { useState, useMemo } from 'react';
+import { useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
@@ -17,6 +18,7 @@ export interface CadetPTData {
 
 export const usePTTestBulk = () => {
   const { userProfile } = useAuth();
+  const queryClient = useQueryClient();
   const [loading, setLoading] = useState(false);
   const [cadetData, setCadetData] = useState<Map<string, PTTestScores>>(new Map());
 
@@ -113,6 +115,9 @@ export const usePTTestBulk = () => {
         return false;
       }
 
+      // Invalidate PT tests queries to refresh the data
+      queryClient.invalidateQueries({ queryKey: ['pt-tests'] });
+      
       toast({
         title: "Success",
         description: `Saved PT test results for ${cadets.length} cadet${cadets.length > 1 ? 's' : ''}`,
