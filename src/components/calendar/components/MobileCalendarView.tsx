@@ -63,12 +63,43 @@ export const MobileCalendarView: React.FC<MobileCalendarViewProps> = ({
   };
 
   // Get events for selected date
-  const selectedDateEvents = events.filter(event => 
-    isSameDay(new Date(event.start_date), selectedDate)
-  );
+  const selectedDateEvents = events.filter(event => {
+    const eventStart = new Date(event.start_date);
+    const eventEnd = event.end_date ? new Date(event.end_date) : eventStart;
+    
+    // For multi-day events, check if the selected date falls within the event's date range
+    const dateStart = new Date(selectedDate);
+    dateStart.setHours(0, 0, 0, 0);
+    
+    const eventStartDate = new Date(eventStart);
+    eventStartDate.setHours(0, 0, 0, 0);
+    
+    const eventEndDate = new Date(eventEnd);
+    eventEndDate.setHours(0, 0, 0, 0);
+    
+    return dateStart >= eventStartDate && dateStart <= eventEndDate;
+  });
 
   // Get events for calendar display (show dots for days with events)
-  const eventDates = events.map(event => startOfDay(new Date(event.start_date)));
+  const eventDates = events.flatMap(event => {
+    const eventStart = new Date(event.start_date);
+    const eventEnd = event.end_date ? new Date(event.end_date) : eventStart;
+    
+    // Generate all dates in the event's date range
+    const dates = [];
+    const currentDate = new Date(eventStart);
+    currentDate.setHours(0, 0, 0, 0);
+    
+    const endDate = new Date(eventEnd);
+    endDate.setHours(0, 0, 0, 0);
+    
+    while (currentDate <= endDate) {
+      dates.push(new Date(currentDate));
+      currentDate.setDate(currentDate.getDate() + 1);
+    }
+    
+    return dates;
+  });
 
   const modifiers = {
     hasEvents: eventDates,

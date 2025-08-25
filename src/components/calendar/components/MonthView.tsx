@@ -42,7 +42,22 @@ export const MonthView = ({
 
   const getEventsForDate = (date: Date) => {
     if (isLoading) return [];
-    return events.filter(event => isSameDayInSchoolTimezone(event.start_date, date, timezone));
+    return events.filter(event => {
+      const eventStart = new Date(event.start_date);
+      const eventEnd = event.end_date ? new Date(event.end_date) : eventStart;
+      
+      // For multi-day events, check if the date falls within the event's date range
+      const dateStart = new Date(date);
+      dateStart.setHours(0, 0, 0, 0);
+      
+      const eventStartDate = new Date(eventStart);
+      eventStartDate.setHours(0, 0, 0, 0);
+      
+      const eventEndDate = new Date(eventEnd);
+      eventEndDate.setHours(0, 0, 0, 0);
+      
+      return dateStart >= eventStartDate && dateStart <= eventEndDate;
+    });
   };
 
   if (isLoading) {
