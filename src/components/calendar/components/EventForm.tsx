@@ -311,7 +311,7 @@ export const EventForm: React.FC<EventFormProps> = ({
             </Select>
             <Dialog open={showAddEventTypeDialog} onOpenChange={setShowAddEventTypeDialog}>
               <DialogTrigger asChild>
-                <Button type="button" variant="outline" size="sm">
+                <Button type="button" variant="outline" size="sm" title="Add new Event Type">
                   <Plus className="w-4 h-4" />
                 </Button>
               </DialogTrigger>
