@@ -179,9 +179,9 @@ const EventTypesManagement: React.FC = () => {
                           Global
                         </Badge>}
                     </TableCell>
-                    <TableCell className="text-right">
+                    <TableCell>
                       <div className="flex items-center justify-center gap-2">
-                        <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(eventType)} className="h-8 w-8 p-0" title="Edit">
+                        <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenDialog(eventType)} title="Edit">
                           <Edit2 className="w-3 h-3" />
                         </Button>
                         <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDelete(eventType)} title="Delete" disabled={eventType.is_default}>
