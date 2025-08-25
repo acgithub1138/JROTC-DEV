@@ -458,23 +458,43 @@ export const EventForm: React.FC<EventFormProps> = ({
       )}
 
       {formData.is_all_day && (
-        <div>
-          <Label htmlFor="start_date_day">Event Date *</Label>
-          <Input
-            id="start_date_day"
-            type="date"
-            value={formData.start_date}
-            onChange={(e) => {
-              const dateStr = e.target.value;
-              handleChange('start_date', dateStr);
-              handleChange('end_date', dateStr);
-              handleChange('start_time_hour', '00');
-              handleChange('start_time_minute', '00');
-              handleChange('end_time_hour', '23');
-              handleChange('end_time_minute', '59');
-            }}
-            required
-          />
+        <div className="space-y-4">
+          <div>
+            <Label htmlFor="start_date_all_day">Start Date *</Label>
+            <Input
+              id="start_date_all_day"
+              type="date"
+              value={formData.start_date}
+              onChange={(e) => {
+                const dateStr = e.target.value;
+                handleChange('start_date', dateStr);
+                // Auto-set end date if empty or same as previous start date
+                if (!formData.end_date || formData.end_date === formData.start_date) {
+                  handleChange('end_date', dateStr);
+                }
+                handleChange('start_time_hour', '00');
+                handleChange('start_time_minute', '00');
+              }}
+              required
+              disabled={!canEdit}
+            />
+          </div>
+
+          <div>
+            <Label htmlFor="end_date_all_day">End Date</Label>
+            <Input
+              id="end_date_all_day"
+              type="date"
+              value={formData.end_date}
+              onChange={(e) => {
+                const dateStr = e.target.value;
+                handleChange('end_date', dateStr);
+                handleChange('end_time_hour', '23');
+                handleChange('end_time_minute', '59');
+              }}
+              disabled={!canEdit}
+            />
+          </div>
         </div>
       )}
 
