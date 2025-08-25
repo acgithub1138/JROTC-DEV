@@ -1,11 +1,9 @@
-
 import React from 'react';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2 } from 'lucide-react';
-
 interface Option {
   id: string;
   value: string;
@@ -14,20 +12,17 @@ interface Option {
   sort_order: number;
   is_active: boolean;
 }
-
 interface OptionsTableProps {
   options: Option[];
   onEdit: (option: Option) => void;
   onDelete: (id: string) => void;
 }
-
 export const OptionsTable: React.FC<OptionsTableProps> = ({
   options,
   onEdit,
   onDelete
 }) => {
-  return (
-    <Table>
+  return <Table>
       <TableHeader>
         <TableRow>
           <TableHead>Label</TableHead>
@@ -38,9 +33,8 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
         </TableRow>
       </TableHeader>
       <TableBody>
-        {options.map((option) => (
-          <TableRow key={option.id}>
-            <TableCell>{option.label}</TableCell>
+        {options.map(option => <TableRow key={option.id}>
+            <TableCell className="py-[8px]">{option.label}</TableCell>
             <TableCell><code>{option.value}</code></TableCell>
             <TableCell>
               <Badge className={option.color_class}>{option.label}</Badge>
@@ -74,9 +68,7 @@ export const OptionsTable: React.FC<OptionsTableProps> = ({
                 </TooltipProvider>
               </div>
             </TableCell>
-          </TableRow>
-        ))}
+          </TableRow>)}
       </TableBody>
-    </Table>
-  );
+    </Table>;
 };
