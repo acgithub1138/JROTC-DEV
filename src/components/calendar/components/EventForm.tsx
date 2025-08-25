@@ -184,7 +184,7 @@ export const EventForm: React.FC<EventFormProps> = ({
         title: formData.title,
         description: formData.description,
         location: formData.location,
-        event_type: formData.event_type, // Reference to event_types table
+        event_type: formData.event_type || null, // Convert empty string to null for UUID field
         is_all_day: formData.is_all_day,
         start_date: startDateUTC.toISOString(),
         end_date: endDateUTC ? endDateUTC.toISOString() : null,
