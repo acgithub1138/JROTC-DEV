@@ -11,13 +11,21 @@ interface ContactTableProps {
   onEdit: (contact: Contact) => void;
   onView: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
+  sortField?: string;
+  sortDirection?: 'asc' | 'desc';
+  onSort?: (field: string) => void;
+  getSortIcon?: (field: string) => React.ReactNode;
 }
 export const ContactTable: React.FC<ContactTableProps> = ({
   contacts,
   isLoading,
   onEdit,
   onView,
-  onDelete
+  onDelete,
+  sortField,
+  sortDirection,
+  onSort,
+  getSortIcon
 }) => {
   const {
     canEdit: canUpdate,
@@ -83,11 +91,66 @@ export const ContactTable: React.FC<ContactTableProps> = ({
   return <StandardTable>
       <StandardTableHeader>
         <TableRow>
-          <TableHead>Name</TableHead>
-          <TableHead>Type</TableHead>
-          <TableHead>Status</TableHead>
-          <TableHead>Phone</TableHead>
-          <TableHead>Email</TableHead>
+          <TableHead>
+            {onSort ? (
+              <button 
+                onClick={() => onSort('name')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Name {getSortIcon?.('name')}
+              </button>
+            ) : (
+              'Name'
+            )}
+          </TableHead>
+          <TableHead>
+            {onSort ? (
+              <button 
+                onClick={() => onSort('type')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Type {getSortIcon?.('type')}
+              </button>
+            ) : (
+              'Type'
+            )}
+          </TableHead>
+          <TableHead>
+            {onSort ? (
+              <button 
+                onClick={() => onSort('status')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Status {getSortIcon?.('status')}
+              </button>
+            ) : (
+              'Status'
+            )}
+          </TableHead>
+          <TableHead>
+            {onSort ? (
+              <button 
+                onClick={() => onSort('phone')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Phone {getSortIcon?.('phone')}
+              </button>
+            ) : (
+              'Phone'
+            )}
+          </TableHead>
+          <TableHead>
+            {onSort ? (
+              <button 
+                onClick={() => onSort('email')}
+                className="flex items-center gap-2 hover:text-foreground font-medium"
+              >
+                Email {getSortIcon?.('email')}
+              </button>
+            ) : (
+              'Email'
+            )}
+          </TableHead>
           <TableHead className="text-center">Actions</TableHead>
         </TableRow>
       </StandardTableHeader>

@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { ContactTable } from './components/ContactTable';
@@ -35,6 +35,8 @@ const ContactManagementPage = () => {
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
+  const [sortField, setSortField] = useState<string>('');
+  const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const isMobile = useIsMobile();
 
   const {
@@ -44,6 +46,56 @@ const ContactManagementPage = () => {
     updateContact,
     deleteContact,
   } = useContacts(searchValue);
+
+  const handleSort = (field: string) => {
+    if (sortField === field) {
+      setSortDirection(sortDirection === 'asc' ? 'desc' : 'asc');
+    } else {
+      setSortField(field);
+      setSortDirection('asc');
+    }
+  };
+
+  const getSortIcon = (field: string) => {
+    if (sortField !== field) return <ArrowUpDown className="w-4 h-4" />;
+    return sortDirection === 'asc' ? <ArrowUp className="w-4 h-4" /> : <ArrowDown className="w-4 h-4" />;
+  };
+
+  const sortedContacts = contacts.sort((a, b) => {
+    if (!sortField) return 0;
+    
+    let aValue: any = '';
+    let bValue: any = '';
+    
+    switch (sortField) {
+      case 'name':
+        aValue = a.name.toLowerCase();
+        bValue = b.name.toLowerCase();
+        break;
+      case 'type':
+        aValue = a.type;
+        bValue = b.type;
+        break;
+      case 'status':
+        aValue = a.status;
+        bValue = b.status;
+        break;
+      case 'phone':
+        aValue = (a.phone || '').toLowerCase();
+        bValue = (b.phone || '').toLowerCase();
+        break;
+      case 'email':
+        aValue = (a.email || '').toLowerCase();
+        bValue = (b.email || '').toLowerCase();
+        break;
+      default:
+        return 0;
+    }
+    
+    if (aValue < bValue) return sortDirection === 'asc' ? -1 : 1;
+    if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
+    return 0;
+  });
 
   const handleDeleteContact = (contact: Contact) => {
     setDeletingContact(contact);
@@ -83,18 +135,22 @@ const ContactManagementPage = () => {
       >
         {isMobile ? (
           <ContactCards
-            contacts={contacts}
+            contacts={sortedContacts}
             isLoading={isLoading}
             onEdit={setEditingContact}
             onDelete={handleDeleteContact}
           />
         ) : (
           <ContactTable
-            contacts={contacts}
+            contacts={sortedContacts}
             isLoading={isLoading}
             onEdit={setEditingContact}
             onView={setViewingContact}
             onDelete={handleDeleteContact}
+            sortField={sortField}
+            sortDirection={sortDirection}
+            onSort={handleSort}
+            getSortIcon={getSortIcon}
           />
         )}
       </StandardTableWrapper>
