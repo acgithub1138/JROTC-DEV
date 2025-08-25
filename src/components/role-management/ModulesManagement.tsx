@@ -6,7 +6,7 @@ import { Switch } from '@/components/ui/switch';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Edit2, Save, X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
+import { Edit, Edit2, Save, X, Plus, Trash2, GripVertical, ChevronUp, ChevronDown, ChevronsUpDown } from 'lucide-react';
 import * as Icons from 'lucide-react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
@@ -467,7 +467,7 @@ const ModulesManagement: React.FC = () => {
                       </Button>
                     </div> : <div className="flex items-center justify-center gap-2">
                       <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(module)} disabled={updateMutation.isPending}>
-                        <Edit2 className="w-3 h-3" />
+                        <Edit className="w-3 h-3" />
                       </Button>
                       <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteMutation.mutate(module.id)} disabled={deleteMutation.isPending}>
                         <Trash2 className="w-3 h-3" />
