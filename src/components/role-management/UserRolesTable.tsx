@@ -83,7 +83,7 @@ export const UserRolesTable = () => {
                     <span className="ml-2 text-sm">{role.sort_order}</span>
                   </div>
                 </TableCell>
-                <TableCell>
+                <TableCell className="py-[8px]">
                   <span className="font-medium">
                     {role.role_name}
                   </span>
