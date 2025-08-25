@@ -293,18 +293,18 @@ export const ActionsManagement: React.FC = () => {
                 </TableCell>
                 <TableCell className="text-right">
                   {editingAction === action.id ? <div className="flex justify-end space-x-2">
-                      <Button size="sm" variant="outline" onClick={handleCancel} disabled={updateMutation.isPending}>
-                        <X className="w-4 h-4" />
+                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleCancel} disabled={updateMutation.isPending}>
+                        <X className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" onClick={handleSave} disabled={updateMutation.isPending || !editForm.label?.trim()}>
-                        <Save className="w-4 h-4" />
+                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleSave} disabled={updateMutation.isPending || !editForm.label?.trim()}>
+                        <Save className="w-3 h-3" />
                       </Button>
                     </div> : <div className="flex items-center justify-center gap-2">
-                      <Button size="sm" variant="outline" onClick={() => handleEdit(action)} disabled={updateMutation.isPending}>
-                        <Edit2 className="w-4 h-4" />
+                      <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(action)} disabled={updateMutation.isPending}>
+                        <Edit2 className="w-3 h-3" />
                       </Button>
-                      <Button size="sm" variant="destructive" onClick={() => deleteMutation.mutate(action.id)} disabled={deleteMutation.isPending}>
-                        <Trash2 className="w-4 h-4" />
+                      <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => deleteMutation.mutate(action.id)} disabled={deleteMutation.isPending}>
+                        <Trash2 className="w-3 h-3" />
                       </Button>
                     </div>}
                 </TableCell>
