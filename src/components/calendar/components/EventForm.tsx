@@ -297,7 +297,16 @@ export const EventForm: React.FC<EventFormProps> = ({
         />
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div>
+        <Label htmlFor="location">Location</Label>
+        <AddressLookupField
+          value={formData.location}
+          onValueChange={(value) => handleChange('location', value)}
+          placeholder="Enter location or search address"
+        />
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-end">
         <div>
           <Label htmlFor="event_type">Event Type</Label>
           <div className="flex gap-2">
@@ -355,23 +364,14 @@ export const EventForm: React.FC<EventFormProps> = ({
           </div>
         </div>
 
-        <div>
-          <Label htmlFor="location">Location</Label>
-          <AddressLookupField
-            value={formData.location}
-            onValueChange={(value) => handleChange('location', value)}
-            placeholder="Enter location or search address"
+        <div className="flex items-center space-x-2">
+          <Switch
+            id="is_all_day"
+            checked={formData.is_all_day}
+            onCheckedChange={(checked) => handleChange('is_all_day', checked)}
           />
+          <Label htmlFor="is_all_day">All day event</Label>
         </div>
-      </div>
-
-      <div className="flex items-center space-x-2">
-        <Switch
-          id="is_all_day"
-          checked={formData.is_all_day}
-          onCheckedChange={(checked) => handleChange('is_all_day', checked)}
-        />
-        <Label htmlFor="is_all_day">All day event</Label>
       </div>
 
       {!formData.is_all_day && (
