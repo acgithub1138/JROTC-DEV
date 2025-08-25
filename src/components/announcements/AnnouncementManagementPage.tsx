@@ -164,7 +164,7 @@ const AnnouncementManagementPage = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center justify-start gap-2">
+                          <div className="flex items-center justify-center gap-2">
                             {canViewDetails && <Button variant="ghost" size="sm" onClick={() => handleView(announcement)} title="View">
                                 <Eye className="w-4 h-4" />
                               </Button>}
