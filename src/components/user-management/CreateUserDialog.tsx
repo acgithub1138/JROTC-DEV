@@ -257,7 +257,14 @@ const CreateUserDialog: React.FC<CreateUserDialogProps> = ({ allowedRoles, trigg
               onValueChange={(value: UserRole) => setFormData({ ...formData, role: value })}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Select role" />
+                <SelectValue placeholder="Select role">
+                  {formData.role && (
+                    <div className="flex items-center">
+                      {getRoleIcon(formData.role)}
+                      <span className="ml-2">{getRoleLabel(formData.role)}</span>
+                    </div>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
                 {allowedRoles.map((role) => (
