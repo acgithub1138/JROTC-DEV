@@ -121,11 +121,11 @@ export const UserRolesTable = () => {
                       <Button size="icon" variant="outline" className="h-6 w-6" onClick={handleSave} disabled={isUpdating || !editForm.role_label?.trim()}>
                         <Save className="w-3 h-3" />
                       </Button>
-                    </div> : <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(role)} disabled={isUpdating}>
-                      <Edit2 className="w-3 h-3" />
                       <Button size="icon" variant="outline" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={handleCancel} disabled={isUpdating}>
                         <X className="w-3 h-3" />
                       </Button>
+                  </div> : <Button size="icon" variant="outline" className="h-6 w-6" onClick={() => handleEdit(role)} disabled={isUpdating}>
+                      <Edit2 className="w-3 h-3" />
                     </Button>}
                 </TableCell>
               </TableRow>)}
