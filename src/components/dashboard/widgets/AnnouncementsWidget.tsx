@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { useActiveAnnouncements } from '@/hooks/useAnnouncements';
 import { AnnouncementViewer } from '@/components/announcements/components/AnnouncementViewer';
 import { AnnouncementAttachments } from './AnnouncementAttachments';
@@ -15,6 +16,7 @@ export const AnnouncementsWidget: React.FC = () => {
   } = useActiveAnnouncements();
   const [expandedAnnouncements, setExpandedAnnouncements] = useState<Set<string>>(new Set());
   const [isWidgetExpanded, setIsWidgetExpanded] = useState(true);
+  const [viewingAnnouncement, setViewingAnnouncement] = useState<any>(null);
   const toggleExpanded = (id: string) => {
     const newExpanded = new Set(expandedAnnouncements);
     if (newExpanded.has(id)) {
@@ -61,7 +63,8 @@ export const AnnouncementsWidget: React.FC = () => {
   if (!announcements || announcements.length === 0) {
     return null;
   }
-  return <Card className="w-full">
+  return <>
+    <Card className="w-full">
       <CardHeader className="py-[8px]">
         <CardTitle className="flex items-center justify-between">
           <div className="flex items-center">
@@ -82,7 +85,10 @@ export const AnnouncementsWidget: React.FC = () => {
                 {/* Header */}
                 <div className="flex items-start justify-between gap-2">
                   <div className="flex-1 min-w-0">
-                    <h3 className="font-medium text-sm leading-tight mb-1">
+                    <h3 
+                      className="font-medium text-sm leading-tight mb-1 cursor-pointer hover:text-primary transition-colors" 
+                      onClick={() => setViewingAnnouncement(announcement)}
+                    >
                       {announcement.title}
                     </h3>
                 </div>
@@ -115,5 +121,37 @@ export const AnnouncementsWidget: React.FC = () => {
         })}
           </div>
         </CardContent>}
-    </Card>;
+    </Card>
+
+    {/* View Modal */}
+    <Dialog open={!!viewingAnnouncement} onOpenChange={(open) => !open && setViewingAnnouncement(null)}>
+      <DialogContent className="max-w-2xl max-h-[80vh] overflow-y-auto">
+        <DialogHeader>
+          <DialogTitle className="flex items-center justify-between">
+            <span>{viewingAnnouncement?.title}</span>
+            <Badge variant="secondary" className={cn("text-xs", getPriorityColor(viewingAnnouncement?.priority || 0))}>
+              {getPriorityLabel(viewingAnnouncement?.priority || 0)}
+            </Badge>
+          </DialogTitle>
+        </DialogHeader>
+        
+        {viewingAnnouncement && (
+          <div className="space-y-4">
+            <div className="text-sm text-muted-foreground">
+              Published: {format(new Date(viewingAnnouncement.publish_date), 'MMM d, yyyy')}
+              {viewingAnnouncement.expire_date && (
+                <> • Expires: {format(new Date(viewingAnnouncement.expire_date), 'MMM d, yyyy')}</>
+              )}
+            </div>
+            
+            <div className="prose prose-sm max-w-none">
+              <AnnouncementViewer content={viewingAnnouncement.content} />
+            </div>
+            
+            <AnnouncementAttachments announcementId={viewingAnnouncement.id} />
+          </div>
+        )}
+      </DialogContent>
+    </Dialog>
+  </>;
 };
