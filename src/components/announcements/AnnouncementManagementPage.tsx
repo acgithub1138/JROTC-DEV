@@ -143,7 +143,11 @@ const AnnouncementManagementPage = () => {
                   <TableBody>
                     {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
                         <TableCell className="font-medium max-w-[300px] py-[6px]">
-                          <div className="truncate" title={announcement.title}>
+                          <div 
+                            className="truncate cursor-pointer hover:text-primary transition-colors" 
+                            title={announcement.title}
+                            onClick={() => handleView(announcement)}
+                          >
                             {announcement.title}
                           </div>
                         </TableCell>
@@ -202,7 +206,11 @@ const AnnouncementManagementPage = () => {
                   <TableBody>
                     {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
                         <TableCell className="font-medium max-w-[300px]">
-                          <div className="truncate" title={announcement.title}>
+                          <div 
+                            className="truncate cursor-pointer hover:text-primary transition-colors" 
+                            title={announcement.title}
+                            onClick={() => handleView(announcement)}
+                          >
                             {announcement.title}
                           </div>
                         </TableCell>
