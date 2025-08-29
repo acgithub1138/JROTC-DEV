@@ -3643,6 +3643,10 @@ export type Database = {
         Args: { action_name: string; module_name: string }
         Returns: boolean
       }
+      deactivate_expired_announcements: {
+        Args: Record<PropertyKey, never>
+        Returns: Json
+      }
       find_similar_criteria: {
         Args: { criteria_text: string; event_type_param: string }
         Returns: {
