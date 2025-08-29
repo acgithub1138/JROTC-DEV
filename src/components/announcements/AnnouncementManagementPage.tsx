@@ -8,6 +8,7 @@ import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement, Announcement } from '@/hooks/useAnnouncements';
 import { AnnouncementDialog } from './AnnouncementDialog';
 import { AnnouncementViewer } from './components/AnnouncementViewer';
+import { AnnouncementAttachments } from '../dashboard/widgets/AnnouncementAttachments';
 import { Plus, Edit, Trash2, Eye, Calendar, AlertCircle, User, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
 import { toast } from '@/hooks/use-toast';
@@ -294,6 +295,8 @@ const AnnouncementManagementPage = () => {
               <div className="border-t pt-4">
                 <AnnouncementViewer content={selectedAnnouncement.content} />
               </div>
+              
+              <AnnouncementAttachments announcementId={selectedAnnouncement.id} />
             </div>}
         </DialogContent>
       </Dialog>
