@@ -223,15 +223,15 @@ const AnnouncementManagementPage = () => {
                           </Badge>
                         </TableCell>
                         <TableCell>
-                          <div className="flex items-center gap-1">
-                            {canViewDetails && <Button variant="ghost" size="sm" onClick={() => handleView(announcement)} title="View">
-                                <Eye className="w-4 h-4" />
+                          <div className="flex items-center justify-center gap-2">
+                            {canViewDetails && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleView(announcement)} title="View">
+                                <Eye className="w-3 h-3" />
                               </Button>}
-                            {canEdit && <Button variant="ghost" size="sm" onClick={() => handleEdit(announcement)} title="Edit">
-                                <Edit className="w-4 h-4" />
+                            {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
+                                <Edit className="w-3 h-3" />
                               </Button>}
-                            {canDelete && <Button variant="ghost" size="sm" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
-                                <Trash2 className="w-4 h-4" />
+                            {canDelete && <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => setDeleteAnnouncementId(announcement.id)} title="Delete">
+                                <Trash2 className="w-3 h-3" />
                               </Button>}
                           </div>
                         </TableCell>
