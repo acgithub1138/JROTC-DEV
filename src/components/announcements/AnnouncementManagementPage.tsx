@@ -145,9 +145,13 @@ const AnnouncementManagementPage = () => {
                     {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
                         <TableCell className="font-medium max-w-[300px] py-[6px]">
                           <div 
-                            className="truncate cursor-pointer hover:text-primary transition-colors" 
+                            className={`truncate transition-colors ${
+                              canViewDetails 
+                                ? 'cursor-pointer text-blue-600 hover:text-blue-800' 
+                                : 'text-foreground'
+                            }`}
                             title={announcement.title}
-                            onClick={() => handleView(announcement)}
+                            onClick={canViewDetails ? () => handleView(announcement) : undefined}
                           >
                             {announcement.title}
                           </div>
@@ -170,9 +174,6 @@ const AnnouncementManagementPage = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-start gap-2">
-                            {canViewDetails && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleView(announcement)} title="View">
-                                <Eye className="w-3 h-3" />
-                              </Button>}
                             {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
                                 <Edit className="w-3 h-3" />
                               </Button>}
@@ -208,9 +209,13 @@ const AnnouncementManagementPage = () => {
                     {filteredAnnouncements.map(announcement => <TableRow key={announcement.id}>
                         <TableCell className="font-medium max-w-[300px]">
                           <div 
-                            className="truncate cursor-pointer hover:text-primary transition-colors" 
+                            className={`truncate transition-colors ${
+                              canViewDetails 
+                                ? 'cursor-pointer text-blue-600 hover:text-blue-800' 
+                                : 'text-foreground'
+                            }`}
                             title={announcement.title}
-                            onClick={() => handleView(announcement)}
+                            onClick={canViewDetails ? () => handleView(announcement) : undefined}
                           >
                             {announcement.title}
                           </div>
@@ -233,9 +238,6 @@ const AnnouncementManagementPage = () => {
                         </TableCell>
                         <TableCell>
                           <div className="flex items-center justify-center gap-2">
-                            {canViewDetails && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleView(announcement)} title="View">
-                                <Eye className="w-3 h-3" />
-                              </Button>}
                             {canEdit && <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(announcement)} title="Edit">
                                 <Edit className="w-3 h-3" />
                               </Button>}
