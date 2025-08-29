@@ -28,8 +28,22 @@ export const AnnouncementAttachments: React.FC<AnnouncementAttachmentsProps> = (
     }
   };
 
-  if (isLoading || !attachments || attachments.length === 0) {
-    return null;
+  if (isLoading) {
+    return (
+      <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+        <Paperclip className="w-3 h-3 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">Loading attachments...</span>
+      </div>
+    );
+  }
+
+  if (!attachments || attachments.length === 0) {
+    return (
+      <div className="flex items-center gap-2 pt-2 border-t border-border/50">
+        <Paperclip className="w-3 h-3 text-muted-foreground" />
+        <span className="text-xs text-muted-foreground">No attachments</span>
+      </div>
+    );
   }
 
   return (

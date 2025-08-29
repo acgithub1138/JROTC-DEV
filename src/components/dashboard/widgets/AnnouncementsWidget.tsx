@@ -2,7 +2,7 @@ import React, { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from '@/components/ui/dialog';
 import { useActiveAnnouncements } from '@/hooks/useAnnouncements';
 import { AnnouncementViewer } from '@/components/announcements/components/AnnouncementViewer';
 import { AnnouncementAttachments } from './AnnouncementAttachments';
@@ -133,6 +133,9 @@ export const AnnouncementsWidget: React.FC = () => {
               {getPriorityLabel(viewingAnnouncement?.priority || 0)}
             </Badge>
           </DialogTitle>
+          <DialogDescription>
+            View the full announcement details and attachments
+          </DialogDescription>
         </DialogHeader>
         
         {viewingAnnouncement && (
