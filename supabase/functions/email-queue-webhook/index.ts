@@ -1,3 +1,6 @@
+// DO NOT EDIT //
+// DO NOT EDIT //
+
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2";
 import { Resend } from "npm:resend@2.0.0";
@@ -40,7 +43,7 @@ class UnifiedEmailProcessor {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
     
-    const resendApiKey = Deno.env.get('SMTP_PASSWORD');
+    const resendApiKey = Deno.env.get('RESEND_API_KEY');
     console.log(`🔑 Resend API key configured: ${resendApiKey ? 'YES' : 'NO'}`);
     
     // Only initialize Resend if API key is available
