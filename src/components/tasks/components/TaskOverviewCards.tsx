@@ -7,6 +7,7 @@ import { format } from 'date-fns';
 import { EditableField } from './EditableField';
 import { EditState } from '../types/TaskDetailTypes';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 
 interface TaskOverviewCardsProps {
   task: any;
@@ -37,6 +38,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
   onEditStateChange,
   onQuickUpdate
 }) => {
+  const { canAssign } = useTaskPermissions();
   const currentStatusOption = statusOptions.find(option => option.value === task.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === task.priority);
 
@@ -119,7 +121,7 @@ export const TaskOverviewCards: React.FC<TaskOverviewCardsProps> = ({
           <div className="flex items-center gap-2">
             <User className="w-4 h-4 text-gray-500" />
             <span className="text-sm text-gray-600">Assigned to:</span>
-            {userProfile?.role === 'instructor' || userProfile?.role === 'command_staff' ? (
+            {canAssign ? (
               <EditableField
                 field="assigned_to"
                 currentValue={task.assigned_to || 'unassigned'}
