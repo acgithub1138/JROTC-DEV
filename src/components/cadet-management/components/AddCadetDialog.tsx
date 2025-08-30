@@ -11,6 +11,7 @@ import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { generateYearOptions } from '@/utils/yearOptions';
 interface AddCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,7 +44,8 @@ export const AddCadetDialog = ({
     grade: '',
     flight: '',
     cadet_year: '',
-    rank: ''
+    rank: '',
+    start_year: ''
   };
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
@@ -74,7 +76,17 @@ export const AddCadetDialog = ({
   };
 
   const handleDiscardChanges = () => {
-    setNewCadet(initialData);
+    setNewCadet({
+      first_name: '',
+      last_name: '',
+      email: '',
+      role_id: '',
+      grade: '',
+      flight: '',
+      cadet_year: '',
+      rank: '',
+      start_year: undefined
+    });
     resetChanges();
     setShowUnsavedDialog(false);
     onOpenChange(false);
@@ -136,7 +148,7 @@ export const AddCadetDialog = ({
             </Select>
           </div>
 
-          <div className="grid grid-cols-3 gap-4">
+          <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="grade">Grade</Label>
               <Select value={newCadet.grade || ""} onValueChange={value => setNewCadet({
@@ -153,6 +165,25 @@ export const AddCadetDialog = ({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="start_year">Start Year (Freshman)</Label>
+              <Select value={newCadet.start_year?.toString() || ""} onValueChange={value => setNewCadet({
+              ...newCadet,
+              start_year: value ? parseInt(value) : undefined
+            })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select start year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {generateYearOptions().map(year => <SelectItem key={year} value={year.toString()}>
+                      {year}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
+
+          <div className="grid grid-cols-3 gap-4">
             <div className="space-y-2">
               <Label htmlFor="flight">Flight</Label>
               <Select value={newCadet.flight || ""} onValueChange={value => setNewCadet({
@@ -185,26 +216,26 @@ export const AddCadetDialog = ({
                 </SelectContent>
               </Select>
             </div>
+            <div className="space-y-2">
+              <Label htmlFor="rank">Rank</Label>
+              <Select value={newCadet.rank || ""} onValueChange={value => setNewCadet({
+              ...newCadet,
+              rank: value === "none" ? "" : value
+            })} disabled={ranks.length === 0}>
+                <SelectTrigger>
+                  <SelectValue placeholder={ranks.length === 0 ? userProfile?.schools?.jrotc_program ? "No ranks available" : "Set JROTC program first" : "Select rank"} />
+                </SelectTrigger>
+                <SelectContent>
+                  {ranks.length === 0 ? <SelectItem value="none" disabled>
+                      {userProfile?.schools?.jrotc_program ? "No ranks available for this program" : "JROTC program not set for school"}
+                    </SelectItem> : ranks.map(rank => <SelectItem key={rank.id} value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}>
+                        {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                      </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
 
-          <div className="space-y-2">
-            <Label htmlFor="rank">Rank</Label>
-            <Select value={newCadet.rank || ""} onValueChange={value => setNewCadet({
-            ...newCadet,
-            rank: value === "none" ? "" : value
-          })} disabled={ranks.length === 0}>
-              <SelectTrigger>
-                <SelectValue placeholder={ranks.length === 0 ? userProfile?.schools?.jrotc_program ? "No ranks available" : "Set JROTC program first" : "Select rank"} />
-              </SelectTrigger>
-              <SelectContent>
-                {ranks.length === 0 ? <SelectItem value="none" disabled>
-                    {userProfile?.schools?.jrotc_program ? "No ranks available for this program" : "JROTC program not set for school"}
-                  </SelectItem> : ranks.map(rank => <SelectItem key={rank.id} value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || "none"}>
-                      {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                    </SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
           
           <div className="flex justify-end space-x-2">
             <Button type="button" variant="outline" onClick={handleCancel}>

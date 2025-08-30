@@ -20,6 +20,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Profile } from '../types';
 import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
+import { generateYearOptions } from '@/utils/yearOptions';
 
 const cadetSchema = z.object({
   grade: z.string(),
@@ -27,6 +28,7 @@ const cadetSchema = z.object({
   cadet_year: z.string(),
   role_id: z.string(),
   rank: z.string(),
+  start_year: z.string(),
 });
 
 type CadetFormData = z.infer<typeof cadetSchema>;
@@ -66,6 +68,7 @@ export const EditCadetDialog = ({
     cadet_year: editingProfile?.cadet_year || '',
     role_id: editingProfile?.role_id || '',
     rank: editingProfile?.rank || '',
+    start_year: editingProfile?.start_year?.toString() || '',
   };
 
   const form = useForm<CadetFormData>({
@@ -88,6 +91,7 @@ export const EditCadetDialog = ({
         cadet_year: editingProfile.cadet_year || '',
         role_id: editingProfile.role_id || '',
         rank: editingProfile.rank || '',
+        start_year: editingProfile.start_year?.toString() || '',
       });
     }
   }, [open, editingProfile, form]);
@@ -139,6 +143,7 @@ export const EditCadetDialog = ({
           role_id: data.role_id === 'none' ? null : data.role_id || null,
           role: roleName as any, // Update role field with role_name
           rank: data.rank === 'none' ? null : data.rank || null,
+          start_year: data.start_year === 'none' ? null : (data.start_year ? parseInt(data.start_year) : null),
           updated_at: new Date().toISOString()
         })
         .eq('id', editingProfile.id);
@@ -153,7 +158,12 @@ export const EditCadetDialog = ({
       // Update editingProfile with form data
       setEditingProfile({
         ...editingProfile,
-        ...data,
+        grade: data.grade === 'none' ? undefined : data.grade,
+        flight: data.flight === 'none' ? undefined : data.flight,
+        cadet_year: data.cadet_year === 'none' ? undefined : data.cadet_year,
+        role_id: data.role_id === 'none' ? '' : data.role_id,
+        rank: data.rank === 'none' ? undefined : data.rank,
+        start_year: data.start_year === 'none' ? undefined : (data.start_year ? parseInt(data.start_year) : undefined),
         role: roleName || editingProfile.role
       });
       
@@ -247,7 +257,7 @@ export const EditCadetDialog = ({
                 </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-4">
+              <div className="grid grid-cols-2 gap-4">
                 <FormField
                   control={form.control}
                   name="grade"
@@ -273,6 +283,34 @@ export const EditCadetDialog = ({
                     </FormItem>
                   )}
                 />
+                <FormField
+                  control={form.control}
+                  name="start_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Start Year (Freshman)</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select start year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No start year selected</SelectItem>
+                          {generateYearOptions().map(year => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
                   name="flight"
@@ -323,6 +361,7 @@ export const EditCadetDialog = ({
                     </FormItem>
                   )}
                 />
+                <div></div> {/* Empty div for spacing */}
               </div>
 
               <FormField

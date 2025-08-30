@@ -10,6 +10,7 @@ export interface Profile {
   rank?: string;
   flight?: string;
   cadet_year?: string;
+  start_year?: number;
   active: boolean;
   created_at: string;
   updated_at: string;
@@ -25,4 +26,5 @@ export interface NewCadet {
   rank?: string;
   flight?: string;
   cadet_year?: string;
+  start_year?: number;
 }

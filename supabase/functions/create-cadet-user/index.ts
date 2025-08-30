@@ -31,6 +31,7 @@ interface CreateCadetRequest {
   rank?: string
   flight?: string
   cadet_year?: string
+  start_year?: number
   school_id: string
 }
 
@@ -78,6 +79,7 @@ serve(async (req) => {
       rank, 
       flight, 
       cadet_year,
+      start_year,
       school_id 
     }: CreateCadetRequest = requestBody
 
@@ -171,6 +173,7 @@ serve(async (req) => {
             rank: rank || null,
             flight: flight || null,
             cadet_year: cadet_year || null,
+            start_year: start_year || null,
             password_change_required: password ? false : true, // Only require password change if using default password
           })
           .eq('id', authUser.user!.id)
