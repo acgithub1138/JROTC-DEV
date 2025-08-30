@@ -40,10 +40,8 @@ export const CadetModal: React.FC<CadetModalProps> = ({
   
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
-  const [customPassword, setCustomPassword] = useState('');
-  const [useCustomPassword, setUseCustomPassword] = useState(false);
-  const [isResettingPassword, setIsResettingPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
+  const [isResettingPassword, setIsResettingPassword] = useState(false);
 
   const initialData = isEdit && cadetData ? cadetData : {
     first_name: '',
@@ -117,39 +115,15 @@ export const CadetModal: React.FC<CadetModalProps> = ({
     
     try {
       setIsResettingPassword(true);
-      
-      if (useCustomPassword) {
-        // Validate custom password
-        if (!customPassword || customPassword.length < 6) {
-          toast.error('Password must be at least 6 characters long');
-          return;
-        }
-        
-        // Use the reset-user-password function with custom password
-        const { error } = await supabase.functions.invoke('reset-user-password', {
-          body: { 
-            userId: cadetData.id,
-            newPassword: customPassword
-          }
-        });
+      const { data, error } = await supabase.functions.invoke('reset-cadet-password', {
+        body: { cadetId: cadetData.id }
+      });
 
-        if (error) throw error;
-        
-        toast.success('Password reset successfully');
-        setCustomPassword('');
-        setUseCustomPassword(false);
-      } else {
-        // Generate random password (existing functionality)
-        const { data, error } = await supabase.functions.invoke('reset-cadet-password', {
-          body: { cadetId: cadetData.id }
-        });
+      if (error) throw error;
 
-        if (error) throw error;
-
-        setNewPassword(data.password);
-        setShowPassword(true);
-        toast.success('Password reset successfully');
-      }
+      setNewPassword(data.password);
+      setShowPassword(true);
+      toast.success('Password reset successfully');
     } catch (error) {
       console.error('Error resetting password:', error);
       toast.error('Failed to reset password');
@@ -289,10 +263,14 @@ export const CadetModal: React.FC<CadetModalProps> = ({
                     <SelectValue placeholder="Select flight" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="Alpha">Alpha</SelectItem>
-                    <SelectItem value="Bravo">Bravo</SelectItem>
-                    <SelectItem value="Charlie">Charlie</SelectItem>
-                    <SelectItem value="Delta">Delta</SelectItem>
+                    <SelectItem value="alpha">Alpha</SelectItem>
+                    <SelectItem value="bravo">Bravo</SelectItem>
+                    <SelectItem value="charlie">Charlie</SelectItem>
+                    <SelectItem value="delta">Delta</SelectItem>
+                    <SelectItem value="echo">Echo</SelectItem>
+                    <SelectItem value="foxtrot">Foxtrot</SelectItem>
+                    <SelectItem value="golf">Golf</SelectItem>
+                    <SelectItem value="hotel">Hotel</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -306,10 +284,10 @@ export const CadetModal: React.FC<CadetModalProps> = ({
                     <SelectValue placeholder="Select cadet year" />
                   </SelectTrigger>
                   <SelectContent>
-                    <SelectItem value="LET-1">LET-1</SelectItem>
-                    <SelectItem value="LET-2">LET-2</SelectItem>
-                    <SelectItem value="LET-3">LET-3</SelectItem>
-                    <SelectItem value="LET-4">LET-4</SelectItem>
+                    <SelectItem value="1">1st</SelectItem>
+                    <SelectItem value="2">2nd</SelectItem>
+                    <SelectItem value="3">3rd</SelectItem>
+                    <SelectItem value="4">4th</SelectItem>
                   </SelectContent>
                 </Select>
               </div>
@@ -340,105 +318,48 @@ export const CadetModal: React.FC<CadetModalProps> = ({
                   <AccordionTrigger className="px-4 py-3 hover:no-underline">
                     Password Reset
                   </AccordionTrigger>
-                   <AccordionContent className="px-4 pb-4">
-                     <div className="space-y-4">
-                       <p className="text-sm text-muted-foreground">
-                         Reset the cadet's password to a new randomly generated password or specify a custom password.
-                       </p>
-                       
-                       {/* Password Type Selection */}
-                       <div className="space-y-3">
-                         <div className="flex items-center space-x-2">
-                           <input
-                             type="radio"
-                             id="random-password"
-                             name="password-type"
-                             checked={!useCustomPassword}
-                             onChange={() => setUseCustomPassword(false)}
-                             className="h-4 w-4"
-                           />
-                           <Label htmlFor="random-password">Generate random password</Label>
-                         </div>
-                         <div className="flex items-center space-x-2">
-                           <input
-                             type="radio"
-                             id="custom-password"
-                             name="password-type"
-                             checked={useCustomPassword}
-                             onChange={() => setUseCustomPassword(true)}
-                             className="h-4 w-4"
-                           />
-                           <Label htmlFor="custom-password">Specify custom password</Label>
-                         </div>
-                       </div>
-
-                       {/* Custom Password Input */}
-                       {useCustomPassword && (
-                         <div className="space-y-2">
-                           <Label htmlFor="custom-password-input">Custom Password</Label>
-                           <div className="flex items-center space-x-2">
-                             <Input
-                               id="custom-password-input"
-                               type={showPassword ? 'text' : 'password'}
-                               value={customPassword}
-                               onChange={(e) => setCustomPassword(e.target.value)}
-                               placeholder="Enter custom password (min 6 characters)"
-                               className="flex-1"
-                             />
-                             <Button
-                               type="button"
-                               variant="outline"
-                               size="icon"
-                               onClick={() => setShowPassword(!showPassword)}
-                             >
-                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                             </Button>
-                           </div>
-                           <p className="text-xs text-muted-foreground">
-                             Password must be at least 6 characters long.
-                           </p>
-                         </div>
-                       )}
-
-                       {/* Reset Button */}
-                       <Button
-                         type="button"
-                         variant="outline"
-                         onClick={handleResetPassword}
-                         disabled={isResettingPassword || (useCustomPassword && (!customPassword || customPassword.length < 6))}
-                         className="w-full"
-                       >
-                         {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-                         {useCustomPassword ? 'Set Custom Password' : 'Generate Random Password'}
-                       </Button>
-                       
-                       {/* Display Generated Password */}
-                       {newPassword && !useCustomPassword && (
-                         <div className="space-y-2">
-                           <Label>Generated Password</Label>
-                           <div className="flex items-center space-x-2">
-                             <Input
-                               type={showPassword ? 'text' : 'password'}
-                               value={newPassword}
-                               readOnly
-                               className="bg-muted"
-                             />
-                             <Button
-                               type="button"
-                               variant="outline"
-                               size="icon"
-                               onClick={() => setShowPassword(!showPassword)}
-                             >
-                               {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
-                             </Button>
-                           </div>
-                           <p className="text-sm text-muted-foreground">
-                             Please provide this password to the cadet securely.
-                           </p>
-                         </div>
-                       )}
-                     </div>
-                   </AccordionContent>
+                  <AccordionContent className="px-4 pb-4">
+                    <div className="space-y-4">
+                      <p className="text-sm text-muted-foreground">
+                        Reset the cadet's password to a new randomly generated password.
+                      </p>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        onClick={handleResetPassword}
+                        disabled={isResettingPassword}
+                        className="w-full"
+                      >
+                        {isResettingPassword && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
+                        Reset Password
+                      </Button>
+                      
+                      {newPassword && (
+                        <div className="space-y-2">
+                          <Label>New Password</Label>
+                          <div className="flex items-center space-x-2">
+                            <Input
+                              type={showPassword ? 'text' : 'password'}
+                              value={newPassword}
+                              readOnly
+                              className="bg-muted"
+                            />
+                            <Button
+                              type="button"
+                              variant="outline"
+                              size="icon"
+                              onClick={() => setShowPassword(!showPassword)}
+                            >
+                              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                            </Button>
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            Please provide this password to the cadet securely.
+                          </p>
+                        </div>
+                      )}
+                    </div>
+                  </AccordionContent>
                 </AccordionItem>
               </Accordion>
             )}
