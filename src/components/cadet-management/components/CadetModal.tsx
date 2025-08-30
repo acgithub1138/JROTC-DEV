@@ -114,6 +114,18 @@ export const CadetModal: React.FC<CadetModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
+    // Clear any existing email error first
+    setEmailError('');
+    
+    // Check for required fields manually
+    const requiredFields = ['first_name', 'last_name', 'email', 'role_id', 'start_year'];
+    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    
+    if (missingFields.length > 0) {
+      toast.error('Please fill in all required fields');
+      return;
+    }
+    
     // Only check email for new cadets (not in edit mode)
     if (!isEdit && formData.email) {
       const emailExists = await checkEmailExists(formData.email);
@@ -122,9 +134,6 @@ export const CadetModal: React.FC<CadetModalProps> = ({
         return;
       }
     }
-    
-    // Clear any existing email error
-    setEmailError('');
     
     await onSubmit(formData);
     resetChanges();
