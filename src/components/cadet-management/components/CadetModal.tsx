@@ -219,6 +219,7 @@ export const CadetModal: React.FC<CadetModalProps> = ({
                 <Select
                   value={formData.start_year?.toString() || ''}
                   onValueChange={(value) => setFormData({ ...formData, start_year: parseInt(value) })}
+                  required
                 >
                   <SelectTrigger>
                     <SelectValue placeholder="Select start year" />
