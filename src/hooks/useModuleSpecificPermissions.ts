@@ -130,6 +130,20 @@ export const useDashboardPermissions = () => {
     ...modulePermissions,
     canView: modulePermissions.canRead,
     canViewAnalytics: hasPermission('dashboard', 'view_analytics'),
+    
+    // Widget permissions
+    canViewStatsCadets: hasPermission('dashboard', 'view_stats_cadets'),
+    canViewStatsTasks: hasPermission('dashboard', 'view_stats_tasks'),
+    canViewStatsBudget: hasPermission('dashboard', 'view_stats_budget'),
+    canViewStatsInventory: hasPermission('dashboard', 'view_stats_inventory'),
+    canViewStatsIncidents: hasPermission('dashboard', 'view_stats_incidents'),
+    canViewStatsSchools: hasPermission('dashboard', 'view_stats_schools'),
+    canViewMyTasks: hasPermission('dashboard', 'view_my_tasks'),
+    canViewMyCadets: hasPermission('dashboard', 'view_my_cadets'),
+    canViewUpcomingEvents: hasPermission('dashboard', 'view_upcoming_events'),
+    canViewQuickActions: hasPermission('dashboard', 'view_quick_actions'),
+    canViewAnnouncements: hasPermission('dashboard', 'view_announcements_widget'),
+    canViewMobileFeatures: hasPermission('dashboard', 'view_mobile_features'),
   };
 };
 

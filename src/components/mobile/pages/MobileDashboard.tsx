@@ -12,9 +12,9 @@ import {
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { useAuth } from '@/contexts/AuthContext';
+import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useDashboardPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useCapacitor } from '@/hooks/useCapacitor';
-import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { MobileNotificationCenter } from '@/components/mobile/MobileNotificationCenter';
 import { MobileEnhancements } from '@/components/mobile/MobileEnhancements';
@@ -27,6 +27,16 @@ export const MobileDashboard: React.FC = () => {
     data: stats,
     isLoading: statsLoading
   } = useDashboardStats();
+
+  const {
+    canViewStatsCadets,
+    canViewStatsTasks,
+    canViewStatsInventory,
+    canViewStatsIncidents,
+    canViewStatsSchools,
+    canViewUpcomingEvents,
+    canViewMobileFeatures
+  } = useDashboardPermissions();
 
   // Memoize filters to prevent infinite re-renders
   const eventFilters = useMemo(() => ({
@@ -53,16 +63,16 @@ export const MobileDashboard: React.FC = () => {
     return filtered;
   }, [events, eventsLoading]);
 
-  // Derived permissions for UI logic
+  // Derived permissions for UI logic (legacy - to be removed after full migration)
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isCadet = userProfile?.role === 'cadet';
 
-  // Configure stats based on user role - same logic as web dashboard
+  // Permission-based stats configuration for mobile
   const getStatsConfig = () => {
     const baseStats = [];
 
-    // Admin-specific dashboard
-    if (userProfile?.role === 'admin') {
+    // Schools Statistics (Admin only)
+    if (canViewStatsSchools) {
       baseStats.push({
         title: 'Total Schools',
         value: statsLoading ? '...' : stats?.schools.total.toString() || '0',
@@ -70,6 +80,10 @@ export const MobileDashboard: React.FC = () => {
         icon: Building,
         color: 'text-blue-600'
       });
+    }
+
+    // Incidents Statistics (Admin only)
+    if (canViewStatsIncidents && userProfile?.role === 'admin') {
       baseStats.push({
         title: 'Active Incidents',
         value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
@@ -77,20 +91,10 @@ export const MobileDashboard: React.FC = () => {
         icon: AlertTriangle,
         color: 'text-red-600'
       });
-      return baseStats;
     }
 
-    // For instructors, show Overdue Tasks instead of Total Cadets
-    if (userProfile?.role === 'instructor') {
-      baseStats.push({
-        title: 'Overdue Tasks',
-        value: statsLoading ? '...' : stats?.tasks.overdue.toString() || '0',
-        change: statsLoading ? '...' : 'Past due date',
-        icon: CheckSquare,
-        color: 'text-red-600'
-      });
-    } else if (!isCadet && userProfile?.role !== 'parent') {
-      // Only show Total Cadets widget for non-cadet, non-instructor, non-parent roles
+    // Cadets Statistics
+    if (canViewStatsCadets && !isCadet && userProfile?.role !== 'parent') {
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
@@ -100,36 +104,26 @@ export const MobileDashboard: React.FC = () => {
       });
     }
 
-    // Show additional stats only for command staff and above
-    if (isCommandStaffOrAbove) {
+    // Tasks Statistics - Overdue for instructors, active for others
+    if (canViewStatsTasks) {
+      const showOverdue = userProfile?.role === 'instructor';
       baseStats.push({
-        title: 'Active Tasks',
-        value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
-        change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
+        title: showOverdue ? 'Overdue Tasks' : 'Active Tasks',
+        value: statsLoading ? '...' : (showOverdue ? stats?.tasks.overdue : stats?.tasks.active)?.toString() || '0',
+        change: statsLoading ? '...' : showOverdue ? 'Past due date' : `${stats?.tasks.overdue || 0} overdue`,
         icon: CheckSquare,
-        color: 'text-green-600'
+        color: showOverdue ? 'text-red-600' : 'text-green-600'
       });
-
-      // Show equipment only for non-command staff (instructors)
-      if (userProfile?.role === 'instructor') {
-        baseStats.push({
-          title: 'Equipment',
-          value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
-          change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
-          icon: Package,
-          color: 'text-purple-600'
-        });
-      }
     }
 
-    // Budget is only for instructors
-    if (userProfile?.role === 'instructor') {
+    // Inventory Statistics (for instructors)
+    if (canViewStatsInventory && userProfile?.role === 'instructor') {
       baseStats.push({
-        title: 'Net Budget',
-        value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
-        change: statsLoading ? '...' : `${(stats?.budget.totalIncome || 0).toLocaleString()} income, ${(stats?.budget.totalExpenses || 0).toLocaleString()} expenses`,
-        icon: DollarSign,
-        color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600'
+        title: 'Equipment',
+        value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
+        icon: Package,
+        color: 'text-purple-600'
       });
     }
 
@@ -175,14 +169,12 @@ export const MobileDashboard: React.FC = () => {
         })}
       </div>
 
-      {/* Mobile Notification Center - Only show on native platforms */}
-      {isNative && <MobileNotificationCenter />}
-      
-      {/* Mobile Features Widget - Show for all mobile-relevant features */}
-      {isNative && <MobileEnhancements />}
+      {/* Mobile Notification Center and Features */}
+      {canViewMobileFeatures && <MobileNotificationCenter />}
+      {canViewMobileFeatures && <MobileEnhancements />}
 
-      {/* Upcoming Events - hidden for admin users */}
-      {userProfile?.role !== 'admin' && (
+      {/* Upcoming Events - Only show if permission allows */}
+      {canViewUpcomingEvents && (
         <Card className="bg-card border-border">
           <CardHeader>
             <CardTitle className="text-lg font-semibold text-foreground flex items-center">

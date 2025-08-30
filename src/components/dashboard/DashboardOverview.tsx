@@ -33,11 +33,24 @@ const DashboardOverview = () => {
   const { canCreate: canCreateTasks } = useTaskPermissions();
   const { canCreate: canCreateEvents } = useEventPermissions();
   
-  const { canViewAnalytics } = useDashboardPermissions();
+  const {
+    canViewAnalytics,
+    canViewStatsCadets,
+    canViewStatsTasks, 
+    canViewStatsBudget,
+    canViewStatsInventory,
+    canViewStatsIncidents,
+    canViewStatsSchools,
+    canViewMyTasks,
+    canViewMyCadets,
+    canViewUpcomingEvents,
+    canViewQuickActions,
+    canViewAnnouncements,
+    canViewMobileFeatures
+  } = useDashboardPermissions();
   const { canCreate: canCreateUsers } = useUserPermissions();
-  const { canRead: canViewAnnouncements } = useAnnouncementPermissions();
   
-  // Derived permissions for UI logic
+  // Derived permissions for UI logic (legacy - to be removed after permission migration)
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isCadet = userProfile?.role === 'cadet';
   
@@ -115,12 +128,12 @@ const DashboardOverview = () => {
       });
     }
   };
-  // Configure stats based on user role
+  // Permission-based stats configuration
   const getStatsConfig = () => {
     const baseStats = [];
 
-    // Admin-specific dashboard
-    if (userProfile?.role === 'admin') {
+    // Schools Statistics (Admin only)
+    if (canViewStatsSchools) {
       baseStats.push({
         title: 'Total Schools',
         value: statsLoading ? '...' : stats?.schools.total.toString() || '0',
@@ -129,6 +142,10 @@ const DashboardOverview = () => {
         color: 'text-blue-600',
         bgColor: 'bg-blue-100'
       });
+    }
+
+    // Incidents Statistics
+    if (canViewStatsIncidents) {
       baseStats.push({
         title: 'Active Incidents',
         value: statsLoading ? '...' : stats?.incidents.active.toString() || '0',
@@ -137,21 +154,10 @@ const DashboardOverview = () => {
         color: 'text-red-600',
         bgColor: 'bg-red-100'
       });
-      return baseStats;
     }
 
-    // For instructors, show Overdue Tasks instead of Total Cadets
-    if (userProfile?.role === 'instructor') {
-      baseStats.push({
-        title: 'Overdue Tasks',
-        value: statsLoading ? '...' : stats?.tasks.overdue.toString() || '0',
-        change: statsLoading ? '...' : 'Past due date',
-        icon: CheckSquare,
-        color: 'text-red-600',
-        bgColor: 'bg-red-100'
-      });
-    } else if (!isCadet && userProfile?.role !== 'parent') {
-      // Only show Total Cadets widget for non-cadet, non-instructor, non-parent roles
+    // Cadets Statistics
+    if (canViewStatsCadets) {
       baseStats.push({
         title: 'Total Cadets',
         value: statsLoading ? '...' : stats?.cadets.total.toString() || '0',
@@ -162,32 +168,34 @@ const DashboardOverview = () => {
       });
     }
 
-    // Show additional stats only for command staff and above
-    if (isCommandStaffOrAbove) {
+    // Tasks Statistics
+    if (canViewStatsTasks) {
+      // Show overdue tasks for instructors, active tasks for others
+      const showOverdue = userProfile?.role === 'instructor';
       baseStats.push({
-        title: 'Active Tasks',
-        value: statsLoading ? '...' : stats?.tasks.active.toString() || '0',
-        change: statsLoading ? '...' : `${stats?.tasks.overdue || 0} overdue`,
+        title: showOverdue ? 'Overdue Tasks' : 'Active Tasks',
+        value: statsLoading ? '...' : (showOverdue ? stats?.tasks.overdue : stats?.tasks.active)?.toString() || '0',
+        change: statsLoading ? '...' : showOverdue ? 'Past due date' : `${stats?.tasks.overdue || 0} overdue`,
         icon: CheckSquare,
-        color: 'text-green-600',
-        bgColor: 'bg-green-100'
+        color: showOverdue ? 'text-red-600' : 'text-green-600',
+        bgColor: showOverdue ? 'bg-red-100' : 'bg-green-100'
       });
-
-      // Show equipment only for non-command staff (instructors)
-      if (userProfile?.role === 'instructor') {
-        baseStats.push({
-          title: 'Equipment',
-          value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
-          change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
-          icon: Package,
-          color: 'text-purple-600',
-          bgColor: 'bg-purple-100'
-        });
-      }
     }
 
-    // Budget is only for instructors
-    if (userProfile?.role === 'instructor') {
+    // Inventory Statistics  
+    if (canViewStatsInventory) {
+      baseStats.push({
+        title: 'Equipment',
+        value: statsLoading ? '...' : stats?.inventory.total.toString() || '0',
+        change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
+        icon: Package,
+        color: 'text-purple-600',
+        bgColor: 'bg-purple-100'
+      });
+    }
+
+    // Budget Statistics
+    if (canViewStatsBudget) {
       baseStats.push({
         title: 'Net Budget',
         value: statsLoading ? '...' : `$${(stats?.budget.netBudget || 0).toLocaleString()}`,
@@ -203,9 +211,9 @@ const DashboardOverview = () => {
 
   const statsConfig = getStatsConfig();
   
-  // Render Quick Actions as a widget for Admin and Command Staff
+  // Permission-based Quick Actions widget
   const renderQuickActionsWidget = () => {
-    if (!isCommandStaffOrAbove) return null;
+    if (!canViewQuickActions) return null;
     
     return (
       <Card className="hover:shadow-md transition-shadow col-span-2">
@@ -223,10 +231,12 @@ const DashboardOverview = () => {
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
                   </button>
-                  <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
-                    <Users className="w-4 h-4 text-green-600 mr-2" />
-                    <p className="font-medium text-sm">Create User</p>
-                  </button>
+                  {canCreateUsers && (
+                    <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                      <Users className="w-4 h-4 text-green-600 mr-2" />
+                      <p className="font-medium text-sm">Create User</p>
+                    </button>
+                  )}
                 </>
               )}
               {/* Non-admin actions */}
@@ -313,10 +323,10 @@ const DashboardOverview = () => {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
-          {/* Hide My Tasks for admin users and show My Cadets for parent users */}
-          {userProfile?.role === 'parent' ? (
+          {/* My Cadets Widget for parents, My Tasks for others */}
+          {canViewMyCadets && userProfile?.role === 'parent' ? (
             <MyCadetsWidget />
-          ) : userProfile?.role !== 'admin' ? (
+          ) : canViewMyTasks && userProfile?.role !== 'admin' ? (
             <MyTasksWidget />
           ) : null}
           {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
@@ -325,14 +335,14 @@ const DashboardOverview = () => {
 
         {/* Right Column: Mobile Features and Events */}
         <div className="space-y-6">
-          {/* Mobile Notification Center - Only show on native platforms */}
-          {isNative && <MobileNotificationCenter />}
+          {/* Mobile Notification Center */}
+          {isNative && canViewMobileFeatures && <MobileNotificationCenter />}
           
-          {/* Mobile Features Widget - Show for all mobile-relevant features */}
-          {isNative && <MobileEnhancements />}
+          {/* Mobile Features Widget */}
+          {isNative && canViewMobileFeatures && <MobileEnhancements />}
           
-          {/* Upcoming Events - hidden for admin users */}
-          {userProfile?.role !== 'admin' && (
+          {/* Upcoming Events */}
+          {canViewUpcomingEvents && (
             <Card>
             <CardHeader>
               <CardTitle className="flex items-center">

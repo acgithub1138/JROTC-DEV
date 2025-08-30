@@ -9,8 +9,9 @@ import { useToast } from '@/hooks/use-toast';
 import { Badge } from '@/components/ui/badge';
 import { RefreshCw, RotateCcw } from 'lucide-react';
 import { AddRoleDialog } from './AddRoleDialog';
-import { UserRolesTable } from './UserRolesTable';
 import { PortalPermissionsTable } from './PortalPermissionsTable';
+import { DashboardWidgetsTable } from './DashboardWidgetsTable';
+import { UserRolesTable } from './UserRolesTable';
 import ModulesManagement from './ModulesManagement';
 import { ActionsManagement } from './ActionsManagement';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -216,6 +217,7 @@ export const RoleManagementPage: React.FC = () => {
                 <TabsList className="mb-6">
                   <TabsTrigger value="ccc">CCC Portal Permissions</TabsTrigger>
                   <TabsTrigger value="competition">Comp Portal Permissions</TabsTrigger>
+                  <TabsTrigger value="dashboard">Dashboard Widgets</TabsTrigger>
                 </TabsList>
 
                 <TabsContent value="ccc">
@@ -232,6 +234,16 @@ export const RoleManagementPage: React.FC = () => {
                 <TabsContent value="competition">
                   <PortalPermissionsTable 
                     portal="competition" 
+                    modules={modules} 
+                    actions={actions} 
+                    rolePermissions={rolePermissions} 
+                    isUpdating={isUpdating} 
+                    handlePermissionChange={handlePermissionChange} 
+                  />
+                </TabsContent>
+
+                <TabsContent value="dashboard">
+                  <DashboardWidgetsTable
                     modules={modules} 
                     actions={actions} 
                     rolePermissions={rolePermissions} 
