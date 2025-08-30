@@ -11,7 +11,8 @@ import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
-import { generateYearOptions } from '@/utils/yearOptions';
+import { getYearOptions } from '@/utils/yearOptions';
+import { useEmailValidation } from '@/hooks/useEmailValidation';
 interface AddCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -43,7 +44,7 @@ export const AddCadetDialog = ({
     flight: '',
     cadet_year: '',
     rank: '',
-    start_year: ''
+    start_year: undefined
   };
   const {
     hasUnsavedChanges,
@@ -53,6 +54,12 @@ export const AddCadetDialog = ({
     currentData: newCadet as any,
     enabled: open
   });
+
+  // Email validation hook
+  const { isChecking: isCheckingEmail, exists: emailExists, error: emailError } = useEmailValidation(
+    newCadet.email,
+    open && newCadet.email.length > 0
+  );
   const handleOpenChange = (open: boolean) => {
     if (!open && hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -123,6 +130,18 @@ export const AddCadetDialog = ({
               ...newCadet,
               email: e.target.value
             })} required />
+            {isCheckingEmail && (
+              <p className="text-sm text-muted-foreground">Checking email...</p>
+            )}
+            {!isCheckingEmail && emailExists === false && newCadet.email && (
+              <p className="text-sm text-emerald-600">Email is good</p>
+            )}
+            {!isCheckingEmail && emailExists === true && (
+              <p className="text-sm text-destructive">User email already exists, please enter a new email</p>
+            )}
+            {emailError && (
+              <p className="text-sm text-destructive">{emailError}</p>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -153,8 +172,8 @@ export const AddCadetDialog = ({
                   <SelectValue placeholder="Select start year" />
                 </SelectTrigger>
                 <SelectContent>
-                  {generateYearOptions().map(year => <SelectItem key={year} value={year.toString()}>
-                      {year}
+                  {getYearOptions().map(year => <SelectItem key={year.value} value={year.value}>
+                      {year.label}
                     </SelectItem>)}
                 </SelectContent>
               </Select>
