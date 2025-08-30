@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus } from 'lucide-react';
+import { CalendarIcon, Plus, CalendarDays } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { Skeleton } from '@/components/ui/skeleton';
@@ -184,7 +184,7 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({ search
       {sortedData.length === 0 ? (
         <Card className="p-8">
           <div className="text-center">
-            <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <CalendarDays className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
             <h3 className="text-lg font-medium mb-2">No Community Service Records</h3>
             <p className="text-muted-foreground mb-4">
               {debouncedSearchTerm || selectedDate 
