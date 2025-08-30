@@ -3,6 +3,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/contexts/AuthContext';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useState, useMemo } from 'react';
 
 export interface EmailTemplate {
@@ -25,6 +26,7 @@ export const useEmailTemplates = () => {
   const { toast } = useToast();
   const queryClient = useQueryClient();
   const { userProfile } = useAuth();
+  const { canView, canViewDetails, canEdit, canDelete, canCreate } = useTablePermissions('email');
   const [showOnlyMyTemplates, setShowOnlyMyTemplates] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
 
@@ -44,13 +46,16 @@ export const useEmailTemplates = () => {
   const filteredTemplates = useMemo(() => {
     let filtered = templates;
 
-    // Show global templates (school_id is null) and school-specific templates for users with email read permission
-    // Only admins can see all templates regardless of permission
-    if (userProfile?.role !== 'admin') {
+    // Show templates based on email view permission
+    // Users with email view permission can see global templates and their school's templates
+    if (canView) {
       filtered = filtered.filter(template => 
         template.school_id === null || // Global templates
         template.school_id === userProfile?.school_id // School-specific templates
       );
+    } else {
+      // No permission - show empty list
+      filtered = [];
     }
 
     // Filter by search query
@@ -71,7 +76,7 @@ export const useEmailTemplates = () => {
     }
 
     return filtered;
-  }, [templates, searchQuery, showOnlyMyTemplates, userProfile?.school_id, userProfile?.role]);
+  }, [templates, searchQuery, showOnlyMyTemplates, userProfile?.school_id, canView]);
 
   const createTemplate = useMutation({
     mutationFn: async (templateData: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
@@ -212,39 +217,37 @@ export const useEmailTemplates = () => {
   };
 
   const canEditTemplate = (template: EmailTemplate): boolean => {
-    if (!userProfile) return false;
+    if (!userProfile || !canEdit) return false;
     
-    // Cannot edit system templates (null school_id)
+    // Cannot edit global templates (null school_id)
     if (template.school_id === null) return false;
     
-    // Admins can edit any template
-    if (userProfile.role === 'admin') return true;
-    
-    // Users can only edit school-specific templates from their school
-    return !template.is_global && template.school_id === userProfile.school_id;
+    // Users with edit permission can only edit templates from their school
+    return template.school_id === userProfile.school_id;
   };
 
   const canCopyTemplate = (template: EmailTemplate): boolean => {
-    // Admins can copy any template, including global ones
-    if (userProfile?.role === 'admin') return true;
+    if (!userProfile || !canCreate) return false;
     
-    // Cannot copy system templates (null school_id) unless admin
-    if (template.school_id === null) return false;
-    
-    return !!userProfile; // Any authenticated user can copy school templates
+    // Can copy any template they can see (global or school templates)
+    return true;
   };
 
   const canDeleteTemplate = (template: EmailTemplate): boolean => {
-    if (!userProfile) return false;
+    if (!userProfile || !canDelete) return false;
     
-    // Admins can delete any template, including global ones
-    if (userProfile.role === 'admin') return true;
-    
-    // Cannot delete system templates (null school_id)
+    // Cannot delete global templates (null school_id)
     if (template.school_id === null) return false;
     
-    // Users can only delete school-specific templates from their school
+    // Users with delete permission can only delete templates from their school
     return template.school_id === userProfile.school_id;
+  };
+
+  const canViewTemplate = (template: EmailTemplate): boolean => {
+    if (!userProfile || !canViewDetails) return false;
+    
+    // Can view any template they can see (global or school templates)
+    return true;
   };
 
   return {
@@ -261,6 +264,8 @@ export const useEmailTemplates = () => {
     canEditTemplate,
     canCopyTemplate,
     canDeleteTemplate,
+    canViewTemplate,
+    canCreate,
     isCreating: createTemplate.isPending,
     isUpdating: updateTemplate.isPending,
     isDeleting: deleteTemplate.isPending,

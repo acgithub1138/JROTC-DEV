@@ -6,14 +6,12 @@ import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Search } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
 
 export const EmailTemplatesTab: React.FC = () => {
-  const { canCreate } = useTablePermissions('email');
   const { 
     templates, 
     isLoading, 
@@ -23,7 +21,10 @@ export const EmailTemplatesTab: React.FC = () => {
     toggleMyTemplatesFilter, 
     copyTemplate,
     canEditTemplate,
-    canCopyTemplate 
+    canCopyTemplate,
+    canDeleteTemplate,
+    canViewTemplate,
+    canCreate
   } = useEmailTemplates();
   const [showCreateDialog, setShowCreateDialog] = useState(false);
   const [editingTemplate, setEditingTemplate] = useState<any>(null);
@@ -101,6 +102,8 @@ export const EmailTemplatesTab: React.FC = () => {
         onCopy={handleCopy}
         canEditTemplate={canEditTemplate}
         canCopyTemplate={canCopyTemplate}
+        canDeleteTemplate={canDeleteTemplate}
+        canViewTemplate={canViewTemplate}
       />
 
       {templates.length > ITEMS_PER_PAGE && (

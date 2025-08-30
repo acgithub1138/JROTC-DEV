@@ -6,11 +6,11 @@ import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Edit, Trash2, Eye, Copy, Globe } from 'lucide-react';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
-import { useEmailPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { format } from 'date-fns';
 import { useState, useMemo } from 'react';
 import { SortConfig } from '@/components/ui/sortable-table';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
+
 interface EmailTemplatesTableProps {
   templates: EmailTemplate[];
   isLoading: boolean;
@@ -19,7 +19,10 @@ interface EmailTemplatesTableProps {
   onCopy?: (templateId: string) => void;
   canEditTemplate?: (template: EmailTemplate) => boolean;
   canCopyTemplate?: (template: EmailTemplate) => boolean;
+  canDeleteTemplate?: (template: EmailTemplate) => boolean;
+  canViewTemplate?: (template: EmailTemplate) => boolean;
 }
+
 export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   templates,
   isLoading,
@@ -27,16 +30,13 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
   onView,
   onCopy,
   canEditTemplate,
-  canCopyTemplate
+  canCopyTemplate,
+  canDeleteTemplate,
+  canViewTemplate
 }) => {
   const {
     deleteTemplate
   } = useEmailTemplates();
-  const {
-    canUpdate,
-    canDelete,
-    canViewDetails
-  } = useEmailPermissions();
   const [sortConfig, setSortConfig] = useState<SortConfig | null>({
     key: 'name',
     direction: 'asc'
@@ -101,7 +101,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
         <TableBody>
           {sortedTemplates.map(template => <TableRow key={template.id}>
               <TableCell className="font-medium py-2">
-                {canViewDetails && onView ? <button onClick={() => onView(template)} className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer bg-transparent border-none p-0 font-medium text-left">
+                {canViewTemplate?.(template) && onView ? <button onClick={() => onView(template)} className="text-blue-600 hover:text-blue-800 hover:underline cursor-pointer bg-transparent border-none p-0 font-medium text-left">
                     {template.name}
                   </button> : template.name}
               </TableCell>
@@ -127,7 +127,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
               </TableCell>
               <TableCell className="py-2">
                 <div className="flex items-center justify-start gap-2">
-                  {canViewDetails && onView && <Tooltip>
+                  {canViewTemplate?.(template) && onView && <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => onView(template)}>
                           <Eye className="w-3 h-3" />
@@ -157,7 +157,7 @@ export const EmailTemplatesTable: React.FC<EmailTemplatesTableProps> = ({
                         <p>Edit template</p>
                       </TooltipContent>
                     </Tooltip>}
-                  {canDelete && canEditTemplate?.(template) && <Tooltip>
+                  {canDeleteTemplate?.(template) && <Tooltip>
                       <TooltipTrigger asChild>
                         <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" onClick={() => handleDeleteClick(template)}>
                           <Trash2 className="w-3 h-3" />
