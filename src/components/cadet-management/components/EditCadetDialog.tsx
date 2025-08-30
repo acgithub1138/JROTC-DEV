@@ -257,7 +257,60 @@ export const EditCadetDialog = ({
                 </div>
               </div>
 
+              {/* Row 2: Role */}
+              <FormField
+                control={form.control}
+                name="role_id"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Role</FormLabel>
+                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                      <FormControl>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select role" />
+                        </SelectTrigger>
+                      </FormControl>
+                      <SelectContent>
+                        <SelectItem value="none">No role selected</SelectItem>
+                        {roleOptions.map(roleOption => (
+                          <SelectItem key={roleOption.value} value={roleOption.value}>
+                            {roleOption.label}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+
+              {/* Row 3: Freshman Year and Grade */}
               <div className="grid grid-cols-2 gap-4">
+                <FormField
+                  control={form.control}
+                  name="start_year"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Freshman Year</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select start year" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No start year selected</SelectItem>
+                          {generateYearOptions().map(year => (
+                            <SelectItem key={year} value={year.toString()}>
+                              {year}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
                 <FormField
                   control={form.control}
                   name="grade"
@@ -283,33 +336,9 @@ export const EditCadetDialog = ({
                     </FormItem>
                   )}
                 />
-                <FormField
-                  control={form.control}
-                  name="start_year"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Start Year (Freshman)</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select start year" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="none">No start year selected</SelectItem>
-                          {generateYearOptions().map(year => (
-                            <SelectItem key={year} value={year.toString()}>
-                              {year}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
+              {/* Row 4: Flight, Cadet Year, and Rank */}
               <div className="grid grid-cols-3 gap-4">
                 <FormField
                   control={form.control}
@@ -361,63 +390,35 @@ export const EditCadetDialog = ({
                     </FormItem>
                   )}
                 />
-                <div></div> {/* Empty div for spacing */}
+                <FormField
+                  control={form.control}
+                  name="rank"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>Rank</FormLabel>
+                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select rank" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No rank</SelectItem>
+                          {ranks.map(rank => (
+                            <SelectItem 
+                              key={rank.id} 
+                              value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
+                            >
+                              {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
               </div>
-
-              <FormField
-                control={form.control}
-                name="role_id"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Role</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select role" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No role selected</SelectItem>
-                        {roleOptions.map(roleOption => (
-                          <SelectItem key={roleOption.value} value={roleOption.value}>
-                            {roleOption.label}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
-              <FormField
-                control={form.control}
-                name="rank"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Rank</FormLabel>
-                    <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
-                      <FormControl>
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select rank" />
-                        </SelectTrigger>
-                      </FormControl>
-                      <SelectContent>
-                        <SelectItem value="none">No rank</SelectItem>
-                        {ranks.map(rank => (
-                          <SelectItem 
-                            key={rank.id} 
-                            value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
-                          >
-                            {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
 
               <DialogFooter>
                 <Button type="button" variant="outline" onClick={handleCancel}>
