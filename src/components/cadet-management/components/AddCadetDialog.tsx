@@ -123,44 +123,45 @@ export const AddCadetDialog = ({
               })} required />
             </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
-            <Input id="email" type="email" value={newCadet.email} onChange={e => setNewCadet({
-              ...newCadet,
-              email: e.target.value
-            })} required />
-            {isCheckingEmail && (
-              <p className="text-sm text-muted-foreground">Checking email...</p>
-            )}
-            {!isCheckingEmail && emailExists === false && newCadet.email && (
-              <p className="text-sm text-emerald-600">Email is good</p>
-            )}
-            {!isCheckingEmail && emailExists === true && (
-              <p className="text-sm text-destructive">User email already exists, please enter a new email</p>
-            )}
-            {emailError && (
-              <p className="text-sm text-destructive">{emailError}</p>
-            )}
+          
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="email">Email *</Label>
+              <Input id="email" type="email" value={newCadet.email} onChange={e => setNewCadet({
+                ...newCadet,
+                email: e.target.value
+              })} required />
+              {isCheckingEmail && (
+                <p className="text-sm text-muted-foreground">Checking email...</p>
+              )}
+              {!isCheckingEmail && emailExists === false && newCadet.email && (
+                <p className="text-sm text-emerald-600">Email is good</p>
+              )}
+              {!isCheckingEmail && emailExists === true && (
+                <p className="text-sm text-destructive">User email already exists, please enter a new email</p>
+              )}
+              {emailError && (
+                <p className="text-sm text-destructive">{emailError}</p>
+              )}
+            </div>
+  
+            <div className="space-y-2">
+              <Label htmlFor="role_id">Role *</Label>
+              <Select value={newCadet.role_id} onValueChange={(value: string) => setNewCadet({
+                ...newCadet,
+                role_id: value
+              })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select role" />
+                </SelectTrigger>
+                <SelectContent>
+                  {roleOptions.map(role => <SelectItem key={role.value} value={role.value}>
+                      {role.label}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
           </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="role_id">Role *</Label>
-            <Select value={newCadet.role_id} onValueChange={(value: string) => setNewCadet({
-              ...newCadet,
-              role_id: value
-            })}>
-              <SelectTrigger>
-                <SelectValue placeholder="Select role" />
-              </SelectTrigger>
-              <SelectContent>
-                {roleOptions.map(role => <SelectItem key={role.value} value={role.value}>
-                    {role.label}
-                  </SelectItem>)}
-              </SelectContent>
-            </Select>
-          </div>
-
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start_year">Freshman Year</Label>
