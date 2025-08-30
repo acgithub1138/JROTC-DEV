@@ -58,6 +58,11 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
 }) => {
   // Filter modules based on portal
   const filteredModules = modules.filter(module => {
+    // Exclude dashboard widget modules from both portal grids
+    if (module.name.startsWith('dashboard_')) {
+      return false;
+    }
+    
     if (portal === 'ccc') {
       // CCC Portal modules - show modules where is_competition_portal is false
       return !module.is_competition_portal;
