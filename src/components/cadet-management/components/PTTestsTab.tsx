@@ -60,7 +60,10 @@ export const PTTestsTab = ({
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [editingPTTest, setEditingPTTest] = useState<PTTest | null>(null);
-  const { deletePTTest, isDeleting } = usePTTestEdit();
+  const {
+    deletePTTest,
+    isDeleting
+  } = usePTTestEdit();
   const {
     data: ptTests = [],
     isLoading,
@@ -116,7 +119,6 @@ export const PTTestsTab = ({
     const secs = seconds % 60;
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
-
   const handleDelete = (ptTest: PTTest) => {
     deletePTTest(ptTest.id, {
       onSuccess: () => {
@@ -253,9 +255,7 @@ export const PTTestsTab = ({
                       {getSortIcon('mile_time')}
                     </Button>
                   </TableHead>
-                  {(canUpdate || canDelete) && (
-                    <TableHead className="text-center">Actions</TableHead>
-                  )}
+                  {(canUpdate || canDelete) && <TableHead className="text-center">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -283,33 +283,15 @@ export const PTTestsTab = ({
                     <TableCell className="text-center">
                       {formatTime(test.mile_time)}
                     </TableCell>
-                    {(canUpdate || canDelete) && (
-                      <TableCell className="text-center">
+                    {(canUpdate || canDelete) && <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {canUpdate && (
-                            <Button
-                              variant="outline"
-                              size="icon"
-                              onClick={() => setEditingPTTest(test)}
-                              className="h-6 w-6"
-                            >
+                          {canUpdate && <Button variant="outline" size="icon" onClick={() => setEditingPTTest(test)} className="h-6 w-6">
                               <Edit className="w-3 h-3" />
-                            </Button>
-                          )}
-                           {canDelete && (
-                             <AlertDialog>
+                            </Button>}
+                           {canDelete && <AlertDialog>
                                <AlertDialogTrigger asChild>
-                                 <Button
-                                   variant="outline"
-                                   size="icon"
-                                   className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300"
-                                   disabled={isDeleting}
-                                 >
-                                   {isDeleting ? (
-                                     <Loader2 className="h-3 w-3 animate-spin" />
-                                   ) : (
-                                     <Trash2 className="h-3 w-3" />
-                                   )}
+                                 <Button variant="outline" size="icon" className="h-6 w-6 text-red-600 hover:text-red-700 hover:border-red-300" disabled={isDeleting}>
+                                   {isDeleting ? <Loader2 className="h-3 w-3 animate-spin" /> : <Trash2 className="h-3 w-3" />}
                                  </Button>
                                </AlertDialogTrigger>
                                <AlertDialogContent>
@@ -327,25 +309,18 @@ export const PTTestsTab = ({
                                    </AlertDialogAction>
                                  </AlertDialogFooter>
                                </AlertDialogContent>
-                             </AlertDialog>
-                           )}
+                             </AlertDialog>}
                         </div>
-                      </TableCell>
-                    )}
+                      </TableCell>}
                   </TableRow>)}
               </TableBody>
             </Table>
           </CardContent>
         </Card>}
       
-      <PTTestEditModal
-        open={!!editingPTTest}
-        onOpenChange={(open) => !open && setEditingPTTest(null)}
-        ptTest={editingPTTest}
-        onSuccess={() => {
-          refetch();
-          setEditingPTTest(null);
-        }}
-      />
+      <PTTestEditModal open={!!editingPTTest} onOpenChange={open => !open && setEditingPTTest(null)} ptTest={editingPTTest} onSuccess={() => {
+      refetch();
+      setEditingPTTest(null);
+    }} />
     </div>;
 };

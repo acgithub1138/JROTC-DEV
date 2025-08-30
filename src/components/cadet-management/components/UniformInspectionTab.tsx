@@ -18,11 +18,9 @@ import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { UniformInspectionBulkDialog } from './UniformInspectionBulkDialog';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
-
 interface UniformInspectionTabProps {
   searchTerm?: string;
 }
-
 interface UniformInspection {
   id: string;
   cadet_id: string;
@@ -36,28 +34,39 @@ interface UniformInspection {
     rank: string | null;
   };
 }
-
 export const UniformInspectionTab = ({
   searchTerm: externalSearchTerm = ''
 }: UniformInspectionTabProps) => {
-  const { userProfile } = useAuth();
-  const { canView, canViewDetails, canEdit: canUpdate, canDelete, canCreate } = useTablePermissions('uniform_inspection');
-  const { timezone } = useSchoolTimezone();
-  
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canView,
+    canViewDetails,
+    canEdit: canUpdate,
+    canDelete,
+    canCreate
+  } = useTablePermissions('uniform_inspection');
+  const {
+    timezone
+  } = useSchoolTimezone();
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
   const [showBulkDialog, setShowBulkDialog] = useState(false);
 
   // Query uniform inspections from the database
-  const { data: inspections = [], isLoading } = useQuery({
+  const {
+    data: inspections = [],
+    isLoading
+  } = useQuery({
     queryKey: ['uniform-inspections', userProfile?.school_id, selectedDate, debouncedSearchTerm],
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
-
-      const { data, error } = await supabase
-        .from('uniform_inspections')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('uniform_inspections').select(`
           id,
           cadet_id,
           date,
@@ -69,15 +78,13 @@ export const UniformInspectionTab = ({
             grade,
             rank
           )
-        `)
-        .eq('school_id', userProfile.school_id)
-        .order('date', { ascending: false });
-
+        `).eq('school_id', userProfile.school_id).order('date', {
+        ascending: false
+      });
       if (error) {
         console.error('Error fetching uniform inspections:', error);
         return [];
       }
-
       let filteredData = data || [];
 
       // Apply date filter if selected
@@ -85,111 +92,70 @@ export const UniformInspectionTab = ({
         const dateStr = format(selectedDate, 'yyyy-MM-dd');
         filteredData = filteredData.filter(inspection => inspection.date === dateStr);
       }
-
       return filteredData;
     },
     enabled: !!userProfile?.school_id && canView
   });
-
   const filteredInspections = React.useMemo(() => {
     if (!debouncedSearchTerm) return inspections;
-    return inspections.filter((inspection) => 
-      `${inspection.profiles?.first_name || ''} ${inspection.profiles?.last_name || ''}`
-        .toLowerCase()
-        .includes(debouncedSearchTerm.toLowerCase())
-    );
+    return inspections.filter(inspection => `${inspection.profiles?.first_name || ''} ${inspection.profiles?.last_name || ''}`.toLowerCase().includes(debouncedSearchTerm.toLowerCase()));
   }, [inspections, debouncedSearchTerm]);
-
-  const { sortedData, sortConfig, handleSort } = useSortableTable({
+  const {
+    sortedData,
+    sortConfig,
+    handleSort
+  } = useSortableTable({
     data: filteredInspections,
-    defaultSort: { key: 'date', direction: 'desc' },
+    defaultSort: {
+      key: 'date',
+      direction: 'desc'
+    },
     customSortFn: (a, b, sortConfig) => {
-      const aValue = sortConfig.key === 'cadet_name' 
-        ? `${a.profiles.last_name}, ${a.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade' 
-        ? a.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? a.profiles.rank || ''
-        : a[sortConfig.key as keyof UniformInspection];
-        
-      const bValue = sortConfig.key === 'cadet_name'
-        ? `${b.profiles.last_name}, ${b.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade'
-        ? b.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? b.profiles.rank || ''
-        : b[sortConfig.key as keyof UniformInspection];
-
+      const aValue = sortConfig.key === 'cadet_name' ? `${a.profiles.last_name}, ${a.profiles.first_name}` : sortConfig.key === 'profiles.grade' ? a.profiles.grade || '' : sortConfig.key === 'profiles.rank' ? a.profiles.rank || '' : a[sortConfig.key as keyof UniformInspection];
+      const bValue = sortConfig.key === 'cadet_name' ? `${b.profiles.last_name}, ${b.profiles.first_name}` : sortConfig.key === 'profiles.grade' ? b.profiles.grade || '' : sortConfig.key === 'profiles.rank' ? b.profiles.rank || '' : b[sortConfig.key as keyof UniformInspection];
       if (aValue === null || aValue === undefined) return 1;
       if (bValue === null || bValue === undefined) return -1;
-      
       if (typeof aValue === 'string' && typeof bValue === 'string') {
         const comparison = aValue.localeCompare(bValue);
         return sortConfig.direction === 'asc' ? comparison : -comparison;
       }
-      
       if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
       if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
       return 0;
     }
   });
-
   const getSortIcon = (columnKey: string) => {
     if (sortConfig?.key !== columnKey) {
       return <ArrowUpDown className="w-4 h-4 opacity-50" />;
     }
     return <ArrowUpDown className={cn("w-4 h-4", sortConfig.direction === 'asc' ? 'rotate-180' : '')} />;
   };
-
   if (isLoading) {
-    return (
-      <div className="space-y-4">
+    return <div className="space-y-4">
         <div className="animate-pulse">
           <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
           <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+            {[...Array(5)].map((_, i) => <div key={i} className="h-16 bg-gray-200 rounded"></div>)}
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
-
-  return (
-    <div className="space-y-6">
+  return <div className="space-y-6">
       {/* Header Controls */}
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="flex flex-col sm:flex-row gap-4">
           {/* Date Filter */}
           <Popover>
             <PopoverTrigger asChild>
-              <Button
-                variant="outline"
-                className={cn(
-                  "w-[240px] justify-start text-left font-normal",
-                  !selectedDate && "text-muted-foreground"
-                )}
-              >
+              <Button variant="outline" className={cn("w-[240px] justify-start text-left font-normal", !selectedDate && "text-muted-foreground")}>
                 <CalendarIcon className="mr-2 h-4 w-4" />
                 {selectedDate ? format(selectedDate, "PPP") : <span>Filter by date</span>}
               </Button>
             </PopoverTrigger>
             <PopoverContent className="w-auto p-0" align="start">
-              <Calendar
-                mode="single"
-                selected={selectedDate}
-                onSelect={setSelectedDate}
-                initialFocus
-                className="p-3 pointer-events-auto"
-              />
+              <Calendar mode="single" selected={selectedDate} onSelect={setSelectedDate} initialFocus className="p-3 pointer-events-auto" />
               <div className="p-3 border-t">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setSelectedDate(undefined)}
-                  className="w-full"
-                >
+                <Button variant="outline" size="sm" onClick={() => setSelectedDate(undefined)} className="w-full">
                   Clear Filter
                 </Button>
               </div>
@@ -199,91 +165,63 @@ export const UniformInspectionTab = ({
 
         {/* Add Button */}
         <div className="flex gap-2">
-          {canCreate && (
-            <Button variant="outline" onClick={() => setShowBulkDialog(true)}>
+          {canCreate && <Button variant="outline" onClick={() => setShowBulkDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Inspection
-            </Button>
-          )}
+            </Button>}
         </div>
       </div>
 
       {/* Uniform Inspections Display */}
-      {sortedData.length === 0 ? (
-        <Card>
+      {sortedData.length === 0 ? <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No uniform inspections found</p>
-            {selectedDate && (
-              <p className="text-sm text-muted-foreground mt-2">
+            {selectedDate && <p className="text-sm text-muted-foreground mt-2">
                 Try selecting a different date or clearing the date filter.
-              </p>
-            )}
+              </p>}
           </CardContent>
-        </Card>
-      ) : (
-        <Card>
+        </Card> : <Card>
           <CardContent className="p-0">
             <Table>
               <TableHeader>
                 <TableRow>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('cadet_name')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('cadet_name')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Cadet
                       {getSortIcon('cadet_name')}
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('profiles.grade')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('profiles.grade')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Grade
                       {getSortIcon('profiles.grade')}
                     </Button>
                   </TableHead>
                   <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('date')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                    <Button variant="ghost" onClick={() => handleSort('date')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Date
                       {getSortIcon('date')}
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                   <Button
-                      variant="ghost"
-                      onClick={() => handleSort('grade')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
+                   <Button variant="ghost" onClick={() => handleSort('grade')} className="h-auto p-0 font-medium hover:bg-transparent">
                       Score
                       {getSortIcon('grade')}
                     </Button>
                   </TableHead>
                   <TableHead>Notes</TableHead>
-                  {(canUpdate || canDelete) && (
-                    <TableHead className="text-center">Actions</TableHead>
-                  )}
+                  {(canUpdate || canDelete) && <TableHead className="text-center">Actions</TableHead>}
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {sortedData.map((inspection) => (
-                  <TableRow key={inspection.id}>
+                {sortedData.map(inspection => <TableRow key={inspection.id}>
                     <TableCell className="font-medium py-[6px]">
                       {inspection.profiles.last_name}, {inspection.profiles.first_name}
                     </TableCell>
                     <TableCell>
-                      {inspection.profiles.grade ? (
-                        <Badge variant="outline" className="text-xs">
+                      {inspection.profiles.grade ? <Badge variant="outline" className="text-xs">
                           {inspection.profiles.grade}
-                        </Badge>
-                      ) : '-'}
+                        </Badge> : '-'}
                     </TableCell>
                     <TableCell>
                       {formatTimeForDisplay(inspection.date, TIME_FORMATS.SHORT_DATE, timezone)}
@@ -294,38 +232,24 @@ export const UniformInspectionTab = ({
                     <TableCell className="max-w-xs truncate">
                       {inspection.notes || '-'}
                     </TableCell>
-                    {(canUpdate || canDelete) && (
-                      <TableCell className="text-center">
-                        <TableActionButtons
-                          canEdit={canUpdate}
-                          canDelete={canDelete}
-                          onEdit={() => {
-                            // TODO: Implement edit functionality
-                            console.log('Edit inspection:', inspection.id);
-                          }}
-                          onDelete={() => {
-                            // TODO: Implement delete functionality
-                            console.log('Delete inspection:', inspection.id);
-                          }}
-                        />
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
+                    {(canUpdate || canDelete) && <TableCell className="text-center">
+                        <TableActionButtons canEdit={canUpdate} canDelete={canDelete} onEdit={() => {
+                  // TODO: Implement edit functionality
+                  console.log('Edit inspection:', inspection.id);
+                }} onDelete={() => {
+                  // TODO: Implement delete functionality
+                  console.log('Delete inspection:', inspection.id);
+                }} />
+                      </TableCell>}
+                  </TableRow>)}
               </TableBody>
             </Table>
           </CardContent>
-        </Card>
-      )}
+        </Card>}
 
       {/* Bulk Dialog */}
-      <UniformInspectionBulkDialog
-        open={showBulkDialog}
-        onOpenChange={setShowBulkDialog}
-        onSuccess={() => {
-          // Refresh the data
-        }}
-      />
-    </div>
-  );
+      <UniformInspectionBulkDialog open={showBulkDialog} onOpenChange={setShowBulkDialog} onSuccess={() => {
+      // Refresh the data
+    }} />
+    </div>;
 };

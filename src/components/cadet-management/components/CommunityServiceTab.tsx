@@ -196,7 +196,7 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
             <TableBody>
               {sortedData.map(record => <TableRow key={record.id}>
                   <TableCell>
-                    <div className="font-medium">
+                    <div className="font-medium py-[6px]">
                       {record.cadet.last_name}, {record.cadet.first_name}
                     </div>
                   </TableCell>
