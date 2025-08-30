@@ -1,6 +1,7 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { Profile, NewCadet } from '../types';
@@ -8,12 +9,22 @@ import { Profile, NewCadet } from '../types';
 export const useCadetManagement = () => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
+  const { hasPermission } = usePermissionContext();
+  
+  // Determine the first accessible tab as default
+  const getDefaultTab = () => {
+    if (hasPermission('cadets', 'read')) return 'cadets';
+    if (hasPermission('pt_tests', 'read')) return 'pt-tests';
+    if (hasPermission('uniform_inspection', 'read')) return 'uniform-inspection';
+    if (hasPermission('community_service', 'read')) return 'community-service';
+    return 'cadets'; // fallback
+  };
   
   const [profiles, setProfiles] = useState<Profile[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('cadets');
+  const [activeTab, setActiveTab] = useState(getDefaultTab());
   const [statusLoading, setStatusLoading] = useState(false);
 
   const [newCadet, setNewCadet] = useState<NewCadet>({

@@ -9,6 +9,7 @@ import { CommunityServiceTab } from './CommunityServiceTab';
 import { Profile } from '../types';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { usePermissionContext } from '@/contexts/PermissionContext';
 interface CadetTabsContentProps {
   activeTab: string;
   onTabChange: (value: string) => void;
@@ -50,6 +51,25 @@ export const CadetTabsContent = ({
     canUpdate,
     canDelete
   } = useCadetPermissions();
+  const { hasPermission } = usePermissionContext();
+  
+  // Check permissions for each module
+  const canAccessCadets = hasPermission('cadets', 'read');
+  const canAccessPTTests = hasPermission('pt_tests', 'read');
+  const canAccessUniformInspection = hasPermission('uniform_inspection', 'read');
+  const canAccessCommunityService = hasPermission('community_service', 'read');
+  
+  // Filter available tabs based on permissions
+  const availableTabs = [
+    { value: 'cadets', label: `Cadets (${profiles.length})`, canAccess: canAccessCadets },
+    { value: 'pt-tests', label: 'PT Tests', canAccess: canAccessPTTests },
+    { value: 'uniform-inspection', label: 'Uniform Inspection', canAccess: canAccessUniformInspection },
+    { value: 'community-service', label: 'Community Service', canAccess: canAccessCommunityService }
+  ].filter(tab => tab.canAccess);
+  
+  const gridCols = availableTabs.length === 1 ? 'grid-cols-1' : 
+                   availableTabs.length === 2 ? 'grid-cols-2' : 
+                   availableTabs.length === 3 ? 'grid-cols-3' : 'grid-cols-4';
   const renderCadetDisplay = () => {
     if (isMobile) {
       return <CadetCards profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} />;
@@ -57,74 +77,75 @@ export const CadetTabsContent = ({
     return <CadetTable profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
   };
   return <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
-      <TabsList className="grid w-full grid-cols-4">
-        <TabsTrigger value="cadets">
-          Cadets ({profiles.length})
-        </TabsTrigger>
-        <TabsTrigger value="pt-tests">
-          PT Tests
-        </TabsTrigger>
-        <TabsTrigger value="uniform-inspection">
-          Uniform Inspection
-        </TabsTrigger>
-        <TabsTrigger value="community-service">
-          Community Service
-        </TabsTrigger>
+      <TabsList className={`grid w-full ${gridCols}`}>
+        {availableTabs.map(tab => (
+          <TabsTrigger key={tab.value} value={tab.value}>
+            {tab.label}
+          </TabsTrigger>
+        ))}
       </TabsList>
       
-      <TabsContent value="cadets" className="mt-4">
-        <Tabs value={activeSubTab} onValueChange={onSubTabChange} className="w-full">
-          <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="active">
-              Active ({profiles.filter(p => p.active).length})
-            </TabsTrigger>
-            <TabsTrigger value="inactive">
-              Non-Active ({profiles.filter(p => !p.active).length})
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="active" className="mt-4">
-            {!isMobile && (
-              <div className="flex justify-end p-4 border-b py-[4px]">
-                <BulkCadetActions 
-                  selectedCadets={selectedCadets} 
-                  onSelectionClear={() => onSelectAll(false)} 
-                  canEdit={canUpdate} 
-                  canDelete={canDelete} 
-                  onRefresh={onRefresh} 
-                />
-              </div>
-            )}
-            {renderCadetDisplay()}
-          </TabsContent>
+      {canAccessCadets && (
+        <TabsContent value="cadets" className="mt-4">
+          <Tabs value={activeSubTab} onValueChange={onSubTabChange} className="w-full">
+            <TabsList className="grid w-full grid-cols-2">
+              <TabsTrigger value="active">
+                Active ({profiles.filter(p => p.active).length})
+              </TabsTrigger>
+              <TabsTrigger value="inactive">
+                Non-Active ({profiles.filter(p => !p.active).length})
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="active" className="mt-4">
+              {!isMobile && (
+                <div className="flex justify-end p-4 border-b py-[4px]">
+                  <BulkCadetActions 
+                    selectedCadets={selectedCadets} 
+                    onSelectionClear={() => onSelectAll(false)} 
+                    canEdit={canUpdate} 
+                    canDelete={canDelete} 
+                    onRefresh={onRefresh} 
+                  />
+                </div>
+              )}
+              {renderCadetDisplay()}
+            </TabsContent>
 
-          <TabsContent value="inactive" className="mt-4">
-            {!isMobile && (
-              <div className="flex justify-end p-4 border-b">
-                <BulkCadetActions 
-                  selectedCadets={selectedCadets} 
-                  onSelectionClear={() => onSelectAll(false)} 
-                  canEdit={canUpdate} 
-                  canDelete={canDelete} 
-                  onRefresh={onRefresh} 
-                />
-              </div>
-            )}
-            {renderCadetDisplay()}
-          </TabsContent>
-        </Tabs>
-      </TabsContent>
+            <TabsContent value="inactive" className="mt-4">
+              {!isMobile && (
+                <div className="flex justify-end p-4 border-b">
+                  <BulkCadetActions 
+                    selectedCadets={selectedCadets} 
+                    onSelectionClear={() => onSelectAll(false)} 
+                    canEdit={canUpdate} 
+                    canDelete={canDelete} 
+                    onRefresh={onRefresh} 
+                  />
+                </div>
+              )}
+              {renderCadetDisplay()}
+            </TabsContent>
+          </Tabs>
+        </TabsContent>
+      )}
 
-      <TabsContent value="pt-tests" className="mt-4">
-        <PTTestsTab onOpenBulkDialog={onOpenPTTestDialog} searchTerm={searchTerm} />
-      </TabsContent>
+      {canAccessPTTests && (
+        <TabsContent value="pt-tests" className="mt-4">
+          <PTTestsTab onOpenBulkDialog={onOpenPTTestDialog} searchTerm={searchTerm} />
+        </TabsContent>
+      )}
 
-      <TabsContent value="uniform-inspection" className="mt-4">
-        <UniformInspectionTab searchTerm={searchTerm} />
-      </TabsContent>
+      {canAccessUniformInspection && (
+        <TabsContent value="uniform-inspection" className="mt-4">
+          <UniformInspectionTab searchTerm={searchTerm} />
+        </TabsContent>
+      )}
 
-      <TabsContent value="community-service" className="mt-4">
-        <CommunityServiceTab searchTerm={searchTerm} />
-      </TabsContent>
+      {canAccessCommunityService && (
+        <TabsContent value="community-service" className="mt-4">
+          <CommunityServiceTab searchTerm={searchTerm} />
+        </TabsContent>
+      )}
     </Tabs>;
 };
