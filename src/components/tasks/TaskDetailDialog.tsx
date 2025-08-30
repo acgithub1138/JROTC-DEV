@@ -20,7 +20,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
@@ -72,14 +72,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   } = useTaskPriorityOptions();
   const {
     canView,
-    canEdit: canUpdate,
+    canUpdate,
+    canUpdateAssigned,
+    canAssign,
     canDelete,
     canCreate
-  } = useTablePermissions('tasks');
-  
-  // For backward compatibility, derive permissions from table permissions
-  const canUpdateAssigned = canUpdate; // Use same permission for assigned tasks
-  const canAssign = canUpdate; // Use update permission for assign
+  } = useTaskPermissions();
   
   // Add debug logging to track permission values
   console.log('🔍 TaskDetailDialog permissions:', { 
@@ -88,6 +86,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
     canUpdateAssigned, 
     canAssign,
     canCreate,
+    canDelete,
     userRole: userProfile?.role 
   });
   const {

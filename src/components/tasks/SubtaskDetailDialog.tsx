@@ -16,7 +16,7 @@ import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
@@ -62,15 +62,22 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     priorityOptions
   } = useTaskPriorityOptions();
   const {
-    canEdit: canUpdate,
-    canDelete
-  } = useTablePermissions('tasks');
+    canView,
+    canUpdate,
+    canUpdateAssigned,
+    canAssign,
+    canDelete,
+    canCreate
+  } = useTaskPermissions();
   
   // Add debug logging to track permission values  
   console.log('🔍 SubtaskDetailDialog permissions:', { 
-    canView: true, // SubtaskDetailDialog doesn't check canView, always allows view
+    canView,
     canUpdate,
+    canUpdateAssigned,
+    canAssign,
     canDelete,
+    canCreate,
     userRole: userProfile?.role 
   });
   const {
@@ -82,7 +89,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const {
     toast
   } = useToast();
-  const canAssign = canUpdate; // For now, use update permission for assign
+  // canAssign is now provided directly by useTaskPermissions()
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
   const [sendNotification, setSendNotification] = useState(false);
   const [selectedTemplate, setSelectedTemplate] = useState<string>('');

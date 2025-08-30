@@ -40,7 +40,7 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
 
       const roleId = (userProfile as any)?.role_id;
       if (isDevelopment) {
-        console.log('Fetching permissions for role:', userProfile.role, 'role_id:', roleId);
+        console.log('🔍 PERMISSION CONTEXT: Fetching permissions for role:', userProfile.role, 'role_id:', roleId, 'user_id:', (userProfile as any)?.id);
       }
       
       let query = supabase
@@ -56,13 +56,13 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       if (roleId) {
         // User has been migrated to new role system - query by role_id directly
         if (isDevelopment) {
-          console.log('Using role_id for query:', roleId);
+          console.log('🔍 PERMISSION CONTEXT: Using role_id for query:', roleId);
         }
         query = query.eq('role_id', roleId);
       } else {
         // User still using old role enum system - query by role name
         if (isDevelopment) {
-          console.log('Using role name for query:', userProfile.role);
+          console.log('🔍 PERMISSION CONTEXT: Using role name for query:', userProfile.role);
         }
         query = query.eq('role_id.role_name', userProfile.role);
       }
@@ -70,7 +70,14 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       const { data, error } = await query;
       
       if (isDevelopment) {
-        console.log('Permission query result:', { data, error, userRole: userProfile.role, roleId });
+        console.log('🔍 PERMISSION CONTEXT: Permission query result:', { 
+          data, 
+          error, 
+          userRole: userProfile.role, 
+          roleId, 
+          dataLength: data?.length || 0,
+          rawQuery: query 
+        });
       }
       
       if (error) {
@@ -85,14 +92,20 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
           const key = `${permission.module.name}:${permission.action.name}`;
           permissionMap[key] = permission.enabled;
           if (isDevelopment) {
-            console.log(`Permission loaded: ${key} = ${permission.enabled}`);
+            console.log(`🔍 PERMISSION CONTEXT: Permission loaded: ${key} = ${permission.enabled}`);
           }
         }
       });
       
       if (isDevelopment) {
-        console.log('Permission map loaded:', Object.keys(permissionMap).length, 'permissions');
-        console.log('Full permission map:', permissionMap);
+        console.log('🔍 PERMISSION CONTEXT: Permission map loaded for role', userProfile.role, ':', Object.keys(permissionMap).length, 'permissions');
+        console.log('🔍 PERMISSION CONTEXT: Full permission map for role', userProfile.role, ':', permissionMap);
+        
+        // Log specific task permissions for debugging
+        const taskPermissions = Object.keys(permissionMap)
+          .filter(key => key.startsWith('tasks:'))
+          .reduce((acc, key) => ({ ...acc, [key]: permissionMap[key] }), {});
+        console.log('🔍 PERMISSION CONTEXT: Task permissions for role', userProfile.role, ':', taskPermissions);
       }
       return permissionMap;
     },
@@ -107,11 +120,25 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
   // Memoized permission checker for optimal performance
   const hasPermission = useMemo(() => {
     return (module: string, action: string): boolean => {
-      if (!permissionData || !userProfile?.role) return false;
+      if (!permissionData || !userProfile?.role) {
+        if (isDevelopment) {
+          console.log('🔍 PERMISSION CONTEXT: hasPermission returning false - no data or role:', { 
+            hasPermissionData: !!permissionData, 
+            hasRole: !!userProfile?.role, 
+            module, 
+            action 
+          });
+        }
+        return false;
+      }
       const key = `${module}:${action}`;
-      return permissionData[key] || false;
+      const result = permissionData[key] || false;
+      if (isDevelopment && (module === 'tasks' || action === 'view')) {
+        console.log(`🔍 PERMISSION CONTEXT: hasPermission(${module}, ${action}) = ${result} for role ${userProfile.role}`);
+      }
+      return result;
     };
-  }, [permissionData, userProfile?.role]);
+  }, [permissionData, userProfile?.role, isDevelopment]);
 
   const value: PermissionContextType = {
     hasPermission,
