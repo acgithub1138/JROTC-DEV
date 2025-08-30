@@ -1,0 +1,121 @@
+-- Add new dashboard widget permissions to permission_actions table
+INSERT INTO public.permission_actions (name, label, description, module_id, is_active)
+SELECT 
+  action_name,
+  action_label,
+  action_description,
+  pm.id,
+  true
+FROM (VALUES
+  ('view_stats_cadets', 'View Cadets Statistics', 'View cadet statistics widget on dashboard'),
+  ('view_stats_tasks', 'View Tasks Statistics', 'View task statistics widget on dashboard'),
+  ('view_stats_budget', 'View Budget Statistics', 'View budget statistics widget on dashboard'),
+  ('view_stats_inventory', 'View Inventory Statistics', 'View inventory statistics widget on dashboard'),
+  ('view_stats_incidents', 'View Incidents Statistics', 'View incident statistics widget on dashboard'),
+  ('view_stats_schools', 'View Schools Statistics', 'View school statistics widget on dashboard'),
+  ('view_my_tasks', 'View My Tasks Widget', 'View my tasks widget on dashboard'),
+  ('view_my_cadets', 'View My Cadets Widget', 'View my cadets widget on dashboard'),
+  ('view_upcoming_events', 'View Upcoming Events Widget', 'View upcoming events widget on dashboard'),
+  ('view_quick_actions', 'View Quick Actions Widget', 'View quick actions widget on dashboard'),
+  ('view_announcements', 'View Announcements Widget', 'View announcements widget on dashboard'),
+  ('view_mobile_features', 'View Mobile Features Widget', 'View mobile-specific widgets on dashboard')
+) AS new_actions(action_name, action_label, action_description)
+CROSS JOIN public.permission_modules pm
+WHERE pm.name = 'dashboard'
+ON CONFLICT (name, module_id) DO NOTHING;
+
+-- Set default permissions for existing roles
+-- Admin gets all dashboard widget permissions
+INSERT INTO public.default_role_permissions (role_id, module_id, action_id, enabled)
+SELECT 
+  ur.id,
+  pm.id,
+  pa.id,
+  true
+FROM public.user_roles ur
+CROSS JOIN public.permission_modules pm
+CROSS JOIN public.permission_actions pa
+WHERE ur.role_name = 'admin'
+  AND pm.name = 'dashboard'
+  AND pa.name IN (
+    'view_stats_cadets', 'view_stats_tasks', 'view_stats_budget', 
+    'view_stats_inventory', 'view_stats_incidents', 'view_stats_schools',
+    'view_my_tasks', 'view_my_cadets', 'view_upcoming_events',
+    'view_quick_actions', 'view_announcements', 'view_mobile_features'
+  )
+ON CONFLICT (role_id, module_id, action_id) DO UPDATE SET enabled = true;
+
+-- Instructor gets most widgets except admin-specific ones
+INSERT INTO public.default_role_permissions (role_id, module_id, action_id, enabled)
+SELECT 
+  ur.id,
+  pm.id,
+  pa.id,
+  true
+FROM public.user_roles ur
+CROSS JOIN public.permission_modules pm
+CROSS JOIN public.permission_actions pa
+WHERE ur.role_name = 'instructor'
+  AND pm.name = 'dashboard'
+  AND pa.name IN (
+    'view_stats_cadets', 'view_stats_tasks', 'view_stats_budget', 
+    'view_stats_inventory', 'view_stats_incidents',
+    'view_my_tasks', 'view_upcoming_events',
+    'view_quick_actions', 'view_announcements', 'view_mobile_features'
+  )
+ON CONFLICT (role_id, module_id, action_id) DO UPDATE SET enabled = true;
+
+-- Command Staff gets appropriate widgets
+INSERT INTO public.default_role_permissions (role_id, module_id, action_id, enabled)
+SELECT 
+  ur.id,
+  pm.id,
+  pa.id,
+  true
+FROM public.user_roles ur
+CROSS JOIN public.permission_modules pm
+CROSS JOIN public.permission_actions pa
+WHERE ur.role_name = 'command_staff'
+  AND pm.name = 'dashboard'
+  AND pa.name IN (
+    'view_stats_cadets', 'view_stats_tasks', 
+    'view_my_tasks', 'view_upcoming_events',
+    'view_quick_actions', 'view_announcements', 'view_mobile_features'
+  )
+ON CONFLICT (role_id, module_id, action_id) DO UPDATE SET enabled = true;
+
+-- Cadet gets limited widget set
+INSERT INTO public.default_role_permissions (role_id, module_id, action_id, enabled)
+SELECT 
+  ur.id,
+  pm.id,
+  pa.id,
+  true
+FROM public.user_roles ur
+CROSS JOIN public.permission_modules pm
+CROSS JOIN public.permission_actions pa
+WHERE ur.role_name = 'cadet'
+  AND pm.name = 'dashboard'
+  AND pa.name IN (
+    'view_my_tasks', 'view_upcoming_events',
+    'view_announcements', 'view_mobile_features'
+  )
+ON CONFLICT (role_id, module_id, action_id) DO UPDATE SET enabled = true;
+
+-- Parent gets parent-specific widgets
+INSERT INTO public.default_role_permissions (role_id, module_id, action_id, enabled)
+SELECT 
+  ur.id,
+  pm.id,
+  pa.id,
+  true
+FROM public.user_roles ur
+CROSS JOIN public.permission_modules pm
+CROSS JOIN public.permission_actions pa
+WHERE ur.role_name = 'parent'
+  AND pm.name = 'dashboard'
+  AND pa.name IN (
+    'view_my_cadets', 'view_upcoming_events',
+    'view_announcements', 'view_mobile_features'
+  )
+ON CONFLICT (role_id, module_id, action_id) DO UPDATE SET enabled = true;
