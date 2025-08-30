@@ -24,7 +24,26 @@ export const ChartLegend: React.FC<ChartLegendProps> = ({
   onSelectAll,
   onUnselectAll
 }) => {
-  const criteriaList = criteria || scoringCriteria || [];
+  const sortCriteriaByNumber = (criteria: string[]): string[] => {
+    return [...criteria].sort((a, b) => {
+      const aNum = parseFloat(a.match(/^\d+/)?.[0] || '');
+      const bNum = parseFloat(b.match(/^\d+/)?.[0] || '');
+      
+      // If both start with numbers, sort numerically
+      if (!isNaN(aNum) && !isNaN(bNum)) {
+        return aNum - bNum;
+      }
+      
+      // If only one starts with a number, number comes first
+      if (!isNaN(aNum) && isNaN(bNum)) return -1;
+      if (isNaN(aNum) && !isNaN(bNum)) return 1;
+      
+      // If neither starts with a number, sort alphabetically
+      return a.localeCompare(b);
+    });
+  };
+
+  const criteriaList = sortCriteriaByNumber(criteria || scoringCriteria || []);
   const handleToggle = onToggle || onCriteriaToggle || (() => {});
   return (
     <ScrollArea className="h-[450px]">
