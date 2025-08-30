@@ -11,6 +11,7 @@ import { ProfileHistoryTab } from './ProfileHistoryTab';
 import { ProfileEquipmentTab } from './ProfileEquipmentTab';
 import { ProfileCompetitionsTab } from './ProfileCompetitionsTab';
 import { ProfilePTTestsTab } from './ProfilePTTestsTab';
+import { ProfileInspectionServiceTab } from './ProfileInspectionServiceTab';
 import { useJobRole } from '../hooks/useJobRole';
 import { formatRankWithAbbreviation } from '@/utils/rankDisplay';
 import { useAuth } from '@/contexts/AuthContext';
@@ -126,10 +127,11 @@ export const ViewCadetDialog = ({
 
           <div className="flex-1 overflow-hidden">
             <Tabs defaultValue="equipment" className="h-full flex flex-col">
-              <TabsList className="grid w-full grid-cols-4">
+              <TabsList className="grid w-full grid-cols-5">
                 <TabsTrigger value="equipment">Equipment</TabsTrigger>
                 <TabsTrigger value="competitions">Competitions</TabsTrigger>
                 <TabsTrigger value="pt-tests">PT Tests</TabsTrigger>
+                <TabsTrigger value="inspection-service">Inspection & Service</TabsTrigger>
                 <TabsTrigger value="history">History</TabsTrigger>
               </TabsList>
               
@@ -149,6 +151,12 @@ export const ViewCadetDialog = ({
                 <TabsContent value="pt-tests" className="h-full overflow-auto mt-0 p-0">
                   <div className="h-full overflow-y-auto">
                     <ProfilePTTestsTab profileId={profile.id} />
+                  </div>
+                </TabsContent>
+                
+                <TabsContent value="inspection-service" className="h-full overflow-auto mt-0 p-0">
+                  <div className="h-full overflow-y-auto">
+                    <ProfileInspectionServiceTab profileId={profile.id} />
                   </div>
                 </TabsContent>
 
