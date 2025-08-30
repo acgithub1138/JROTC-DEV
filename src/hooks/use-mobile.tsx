@@ -5,7 +5,7 @@ const MOBILE_BREAKPOINT = 768
 
 export function useIsMobile() {
   const [isMobile, setIsMobile] = React.useState<boolean>(false)
-  const { isNative, platform } = useCapacitor();
+  const { isNative, platform, isLoading } = useCapacitor();
   
   React.useEffect(() => {
     const detectMobile = () => {
@@ -40,19 +40,29 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
-  // For iPads, prioritize screen size over native detection
-  // If it's an iPad with large screen, treat as desktop regardless of native mode
+  // Handle loading state - make stable decisions based on screen size only
   const userAgent = navigator.userAgent.toLowerCase();
   const isIpad = /ipad/i.test(userAgent);
   const screenIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
   
+  // If Capacitor is still loading, make decision based on screen size only
+  if (isLoading) {
+    // For iPads while loading, use screen size only
+    if (isIpad) {
+      return screenIsMobile;
+    }
+    // For other devices while loading, use screen size + user agent detection
+    const isMobileUA = /android|webos|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
+    return screenIsMobile || (isMobileUA && !isIpad);
+  }
+  
+  // For iPads, prioritize screen size over native detection
+  // If it's an iPad with large screen, treat as desktop regardless of native mode
   if (isIpad) {
     // For iPads, only use mobile mode if screen is actually small
-    const result = screenIsMobile;
-    return result;
+    return screenIsMobile;
   }
   
   // For non-iPads, use the original logic
-  const result = isNative || isMobile;
-  return result
+  return isNative || isMobile;
 }
