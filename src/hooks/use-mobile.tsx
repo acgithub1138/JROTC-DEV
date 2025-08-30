@@ -40,6 +40,19 @@ export function useIsMobile() {
     return () => mql.removeEventListener("change", onChange)
   }, [])
 
+  // For iPads, prioritize screen size over native detection
+  // If it's an iPad with large screen, treat as desktop regardless of native mode
+  const userAgent = navigator.userAgent.toLowerCase();
+  const isIpad = /ipad/i.test(userAgent);
+  const screenIsMobile = window.innerWidth < MOBILE_BREAKPOINT;
+  
+  if (isIpad) {
+    // For iPads, only use mobile mode if screen is actually small
+    const result = screenIsMobile;
+    return result;
+  }
+  
+  // For non-iPads, use the original logic
   const result = isNative || isMobile;
   return result
 }
