@@ -71,12 +71,15 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
       return module.is_competition_portal;
     }
   });
+
+  // Filter out widget actions from both portal grids
+  const filteredActions = actions.filter(action => !action.is_widget);
   return <div className="overflow-x-auto">
       <table className="w-full border-collapse">
         <thead>
           <tr className="border-b">
             <th className="text-left p-3 font-medium">Module</th>
-            {actions.map(action => <ColumnHeader key={action.id} action={action}>
+            {filteredActions.map(action => <ColumnHeader key={action.id} action={action}>
                 {action.label}
               </ColumnHeader>)}
           </tr>
@@ -86,7 +89,7 @@ export const PortalPermissionsTable: React.FC<PortalPermissionsTableProps> = ({
               <td className="p-3 font-medium py-[4px] px-[4px]">
                 <div className="font-medium">{module.label}</div>
               </td>
-              {actions.map(action => {
+              {filteredActions.map(action => {
             const isEnabled = rolePermissions[module.name]?.[action.name] || false;
             return <td key={action.id} className="p-3 text-center px-[4px] py-[4px]">
                     <Checkbox checked={isEnabled} disabled={isUpdating} onCheckedChange={checked => handlePermissionChange(module.id, action.id, !!checked)} />
