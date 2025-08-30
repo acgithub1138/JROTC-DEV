@@ -44,8 +44,10 @@ export const useEmailTemplates = () => {
   const filteredTemplates = useMemo(() => {
     let filtered = templates;
 
-    // Filter out system templates (where school_id is null)
-    filtered = filtered.filter(template => template.school_id !== null);
+    // Filter out system templates (where school_id is null) - but admins can see all
+    if (userProfile?.role !== 'admin') {
+      filtered = filtered.filter(template => template.school_id !== null);
+    }
 
     // Filter by search query
     if (searchQuery) {
@@ -65,7 +67,7 @@ export const useEmailTemplates = () => {
     }
 
     return filtered;
-  }, [templates, searchQuery, showOnlyMyTemplates, userProfile?.school_id]);
+  }, [templates, searchQuery, showOnlyMyTemplates, userProfile?.school_id, userProfile?.role]);
 
   const createTemplate = useMutation({
     mutationFn: async (templateData: Omit<EmailTemplate, 'id' | 'created_at' | 'updated_at' | 'created_by' | 'school_id'>) => {
