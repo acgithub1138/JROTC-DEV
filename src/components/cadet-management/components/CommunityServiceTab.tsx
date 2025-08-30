@@ -1,122 +1,131 @@
-import React, { useState } from 'react';
+import React, { useState, useMemo } from 'react';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent } from '@/components/ui/card';
+import { Card } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, ArrowUpDown } from 'lucide-react';
+import { CalendarIcon, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
-import { useQuery } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
-import { useAuth } from '@/contexts/AuthContext';
+import { Skeleton } from '@/components/ui/skeleton';
+import { SortableTableHead } from '@/components/ui/sortable-table';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { useSortableTable } from '@/hooks/useSortableTable';
+import { useAuth } from '@/contexts/AuthContext';
 import { useDebounce } from 'use-debounce';
-import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
-import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { useSortableTable } from '@/hooks/useSortableTable';
+import { useCommunityService, CommunityServiceRecord } from '../hooks/useCommunityService';
+import { CommunityServiceDialog } from './CommunityServiceDialog';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 
 interface CommunityServiceTabProps {
   searchTerm?: string;
 }
 
-interface CommunityService {
-  id: string;
-  cadet_id: string;
-  date: string;
-  hours: number | null;
-  activity: string | null;
-  organization: string | null;
-  notes: string | null;
-  profiles: {
-    first_name: string;
-    last_name: string;
-    grade: string | null;
-    rank: string | null;
-  };
-}
-
-export const CommunityServiceTab = ({
-  searchTerm: externalSearchTerm = ''
-}: CommunityServiceTabProps) => {
+export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({ searchTerm }) => {
   const { userProfile } = useAuth();
-  const { canView, canViewDetails, canEdit: canUpdate, canDelete, canCreate } = useTablePermissions('community_service');
-  const { timezone } = useSchoolTimezone();
+  const { canView, canViewDetails, canEdit, canDelete, canCreate } = useTablePermissions('community_service');
   
-  const searchTerm = externalSearchTerm;
-  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [dialogMode, setDialogMode] = useState<'create' | 'edit' | 'view'>('create');
+  const [selectedRecord, setSelectedRecord] = useState<CommunityServiceRecord | null>(null);
+  const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
 
-  // Mock data query - replace with actual table when implemented
-  const { data: communityService = [], isLoading } = useQuery({
-    queryKey: ['community-service', userProfile?.school_id, selectedDate, debouncedSearchTerm],
-    queryFn: async () => {
-      // TODO: Replace with actual community_service table query
-      return [];
-    },
-    enabled: !!userProfile?.school_id
-  });
+  const { 
+    records: communityServiceRecords, 
+    isLoading,
+    createRecord,
+    updateRecord,
+    deleteRecord,
+    isCreating,
+    isUpdating,
+    isDeleting
+  } = useCommunityService(debouncedSearchTerm, selectedDate);
 
-  const filteredCommunityService = React.useMemo(() => {
-    if (!searchTerm) return communityService;
-    return communityService.filter((service: CommunityService) => 
-      `${service.profiles.first_name} ${service.profiles.last_name}`
-        .toLowerCase()
-        .includes(searchTerm.toLowerCase())
-    );
-  }, [communityService, searchTerm]);
-
+  // Set up sortable table with custom sorting logic
   const { sortedData, sortConfig, handleSort } = useSortableTable({
-    data: filteredCommunityService,
+    data: communityServiceRecords,
     defaultSort: { key: 'date', direction: 'desc' },
-    customSortFn: (a, b, sortConfig) => {
-      const aValue = sortConfig.key === 'cadet_name' 
-        ? `${a.profiles.last_name}, ${a.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade' 
-        ? a.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? a.profiles.rank || ''
-        : a[sortConfig.key as keyof CommunityService];
-        
-      const bValue = sortConfig.key === 'cadet_name'
-        ? `${b.profiles.last_name}, ${b.profiles.first_name}`
-        : sortConfig.key === 'profiles.grade'
-        ? b.profiles.grade || ''
-        : sortConfig.key === 'profiles.rank'
-        ? b.profiles.rank || ''
-        : b[sortConfig.key as keyof CommunityService];
-
-      if (aValue === null || aValue === undefined) return 1;
-      if (bValue === null || bValue === undefined) return -1;
-      
-      if (typeof aValue === 'string' && typeof bValue === 'string') {
-        const comparison = aValue.localeCompare(bValue);
+    customSortFn: (a: CommunityServiceRecord, b: CommunityServiceRecord, sortConfig) => {
+      if (sortConfig.key === 'cadet') {
+        const nameA = `${a.cadet.last_name}, ${a.cadet.first_name}`;
+        const nameB = `${b.cadet.last_name}, ${b.cadet.first_name}`;
+        const comparison = nameA.localeCompare(nameB);
         return sortConfig.direction === 'asc' ? comparison : -comparison;
       }
-      
-      if (aValue < bValue) return sortConfig.direction === 'asc' ? -1 : 1;
-      if (aValue > bValue) return sortConfig.direction === 'asc' ? 1 : -1;
-      return 0;
+      if (sortConfig.key === 'grade') {
+        const gradeA = a.cadet.grade || '';
+        const gradeB = b.cadet.grade || '';
+        const comparison = gradeA.localeCompare(gradeB);
+        return sortConfig.direction === 'asc' ? comparison : -comparison;
+      }
+      return 0; // Fall back to default sorting
     }
   });
 
-  const getSortIcon = (columnKey: string) => {
-    if (sortConfig?.key !== columnKey) {
-      return <ArrowUpDown className="w-4 h-4 opacity-50" />;
-    }
-    return <ArrowUpDown className={cn("w-4 h-4", sortConfig.direction === 'asc' ? 'rotate-180' : '')} />;
+  // Dialog handlers
+  const handleAddRecord = () => {
+    setSelectedRecord(null);
+    setDialogMode('create');
+    setIsDialogOpen(true);
   };
+
+  const handleEditRecord = (record: CommunityServiceRecord) => {
+    setSelectedRecord(record);
+    setDialogMode('edit');
+    setIsDialogOpen(true);
+  };
+
+  const handleViewRecord = (record: CommunityServiceRecord) => {
+    setSelectedRecord(record);
+    setDialogMode('view');
+    setIsDialogOpen(true);
+  };
+
+  const handleDeleteRecord = (record: CommunityServiceRecord) => {
+    setDeleteRecordId(record.id);
+  };
+
+  const confirmDelete = () => {
+    if (deleteRecordId) {
+      deleteRecord(deleteRecordId);
+      setDeleteRecordId(null);
+    }
+  };
+
+  const handleDialogSubmit = (data: any) => {
+    if (dialogMode === 'create') {
+      createRecord(data);
+    } else if (dialogMode === 'edit') {
+      updateRecord(data);
+    }
+    setIsDialogOpen(false);
+  };
+
+  if (!canView) {
+    return <div>You do not have permission to view community service records.</div>;
+  }
 
   if (isLoading) {
     return (
       <div className="space-y-4">
-        <div className="animate-pulse">
-          <div className="h-8 bg-gray-200 rounded w-64 mb-4"></div>
-          <div className="space-y-4">
-            {[...Array(5)].map((_, i) => (
-              <div key={i} className="h-16 bg-gray-200 rounded"></div>
-            ))}
+        <div className="flex justify-between items-center">
+          <div className="flex items-center gap-4">
+            <Skeleton className="h-10 w-[200px]" />
+          </div>
+          <Skeleton className="h-10 w-[140px]" />
+        </div>
+        
+        <div className="rounded-md border">
+          <div className="p-4">
+            <div className="space-y-3">
+              {[...Array(5)].map((_, i) => (
+                <Skeleton key={i} className="h-12 w-full" />
+              ))}
+            </div>
           </div>
         </div>
       </div>
@@ -163,121 +172,134 @@ export const CommunityServiceTab = ({
             </PopoverContent>
           </Popover>
         </div>
-
-        {/* Add Button */}
-        <div className="flex gap-2">
-          {canCreate && (
-            <Button variant="outline">
-              <Plus className="w-4 h-4 mr-2" />
-              Add Service Hours
-            </Button>
-          )}
-        </div>
+        {canCreate && (
+          <Button onClick={handleAddRecord} className="bg-primary hover:bg-primary/90">
+            <Plus className="h-4 w-4 mr-2" />
+            Add Service Hours
+          </Button>
+        )}
       </div>
 
       {/* Community Service Display */}
       {sortedData.length === 0 ? (
-        <Card>
-          <CardContent className="text-center py-8">
-            <p className="text-muted-foreground">No community service records found</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              This feature is coming soon - community service hour tracking will be available here.
+        <Card className="p-8">
+          <div className="text-center">
+            <Calendar className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
+            <h3 className="text-lg font-medium mb-2">No Community Service Records</h3>
+            <p className="text-muted-foreground mb-4">
+              {debouncedSearchTerm || selectedDate 
+                ? "No records match your current filters." 
+                : "No community service records have been added yet."}
             </p>
-          </CardContent>
+            {canCreate && !debouncedSearchTerm && !selectedDate && (
+              <Button onClick={handleAddRecord} className="bg-primary hover:bg-primary/90">
+                <Plus className="h-4 w-4 mr-2" />
+                Add First Service Record
+              </Button>
+            )}
+          </div>
         </Card>
       ) : (
         <Card>
-          <CardContent className="p-0">
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('cadet_name')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
-                      Cadet
-                      {getSortIcon('cadet_name')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('profiles.grade')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
-                      Grade
-                      {getSortIcon('profiles.grade')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('date')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
-                      Date
-                      {getSortIcon('date')}
-                    </Button>
-                  </TableHead>
-                  <TableHead className="text-center">
-                    <Button
-                      variant="ghost"
-                      onClick={() => handleSort('hours')}
-                      className="h-auto p-0 font-medium hover:bg-transparent"
-                    >
-                      Hours
-                      {getSortIcon('hours')}
-                    </Button>
-                  </TableHead>
-                  <TableHead>Activity</TableHead>
-                  <TableHead>Organization</TableHead>
-                  {(canUpdate || canDelete) && (
-                    <TableHead className="text-center">Actions</TableHead>
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <SortableTableHead sortKey="cadet" currentSort={sortConfig} onSort={handleSort}>
+                  Cadet
+                </SortableTableHead>
+                <SortableTableHead sortKey="grade" currentSort={sortConfig} onSort={handleSort} className="text-center">
+                  Grade
+                </SortableTableHead>
+                <SortableTableHead sortKey="date" currentSort={sortConfig} onSort={handleSort}>
+                  Date
+                </SortableTableHead>
+                <SortableTableHead sortKey="hours" currentSort={sortConfig} onSort={handleSort} className="text-center">
+                  Hours
+                </SortableTableHead>
+                <SortableTableHead sortKey="event" currentSort={sortConfig} onSort={handleSort}>
+                  Event/Activity
+                </SortableTableHead>
+                {(canViewDetails || canEdit || canDelete) && (
+                  <TableHead className="text-center">Actions</TableHead>
+                )}
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {sortedData.map((record) => (
+                <TableRow key={record.id}>
+                  <TableCell>
+                    <div className="font-medium">
+                      {record.cadet.last_name}, {record.cadet.first_name}
+                    </div>
+                  </TableCell>
+                  <TableCell className="text-center">
+                    {record.cadet.grade && (
+                      <Badge variant="outline" className="font-mono text-xs">
+                        {record.cadet.grade}
+                      </Badge>
+                    )}
+                  </TableCell>
+                  <TableCell>
+                    {format(new Date(record.date), 'MMM d, yyyy')}
+                  </TableCell>
+                  <TableCell className="text-center font-medium">
+                    {record.hours}
+                  </TableCell>
+                  <TableCell>
+                    <div className="max-w-[300px] truncate" title={record.event}>
+                      {record.event}
+                    </div>
+                  </TableCell>
+                  {(canViewDetails || canEdit || canDelete) && (
+                    <TableCell className="text-center">
+                      <TableActionButtons
+                        canView={canViewDetails}
+                        canEdit={canEdit}
+                        canDelete={canDelete}
+                        onView={() => handleViewRecord(record)}
+                        onEdit={() => handleEditRecord(record)}
+                        onDelete={() => handleDeleteRecord(record)}
+                      />
+                    </TableCell>
                   )}
                 </TableRow>
-              </TableHeader>
-              <TableBody>
-                {sortedData.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell className="font-medium py-[6px]">
-                      {service.profiles.last_name}, {service.profiles.first_name}
-                    </TableCell>
-                    <TableCell>
-                      {service.profiles.grade ? (
-                        <Badge variant="outline" className="text-xs">
-                          {service.profiles.grade}
-                        </Badge>
-                      ) : '-'}
-                    </TableCell>
-                    <TableCell>
-                      {formatTimeForDisplay(service.date, TIME_FORMATS.SHORT_DATE, timezone)}
-                    </TableCell>
-                    <TableCell className="text-center">
-                      {service.hours || '-'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {service.activity || '-'}
-                    </TableCell>
-                    <TableCell className="max-w-xs truncate">
-                      {service.organization || '-'}
-                    </TableCell>
-                    {(canUpdate || canDelete) && (
-                      <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {/* Action buttons will be added when implementing full functionality */}
-                          <span className="text-xs text-muted-foreground">Coming soon</span>
-                        </div>
-                      </TableCell>
-                    )}
-                  </TableRow>
-                ))}
-              </TableBody>
-            </Table>
-          </CardContent>
+              ))}
+            </TableBody>
+          </Table>
         </Card>
       )}
+
+      {/* Community Service Dialog */}
+      <CommunityServiceDialog
+        open={isDialogOpen}
+        onOpenChange={setIsDialogOpen}
+        record={selectedRecord}
+        onSubmit={handleDialogSubmit}
+        mode={dialogMode}
+        isSubmitting={isCreating || isUpdating}
+      />
+
+      {/* Delete Confirmation Dialog */}
+      <AlertDialog open={!!deleteRecordId} onOpenChange={() => setDeleteRecordId(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Community Service Record</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this community service record? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction 
+              onClick={confirmDelete} 
+              className="bg-destructive hover:bg-destructive/90"
+              disabled={isDeleting}
+            >
+              {isDeleting ? 'Deleting...' : 'Delete'}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };
