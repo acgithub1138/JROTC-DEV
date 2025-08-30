@@ -66,16 +66,16 @@ const incrementCadetYear = (currentYear: string | null): string => {
   if (!currentYear) return '1st Year';
   
   switch (currentYear) {
-    case '1st Year':
-      return '2nd Year';
-    case '2nd Year':
-      return '3rd Year';
-    case '3rd Year':
-      return '4th Year';
-    case '4th Year':
-      return '5th Year';
+    case '1st':
+      return '2nd';
+    case '2nd':
+      return '3rd';
+    case '3rd':
+      return '4th';
+    case '4th':
+      return '4th';
     default:
-      return '1st Year';
+      return '1st';
   }
 };
 
