@@ -5,7 +5,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@
 import { Badge } from '@/components/ui/badge';
 import { Calendar } from '@/components/ui/calendar';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
-import { CalendarIcon, Plus, ArrowUpDown } from 'lucide-react';
+import { CalendarIcon, Plus, ArrowUpDown, Edit, Trash2 } from 'lucide-react';
 import { format } from 'date-fns';
 import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
@@ -16,6 +16,8 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
+import { UniformInspectionBulkDialog } from './UniformInspectionBulkDialog';
+import { TableActionButtons } from '@/components/ui/table-action-buttons';
 
 interface UniformInspectionTabProps {
   searchTerm?: string;
@@ -45,15 +47,53 @@ export const UniformInspectionTab = ({
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
+  const [showBulkDialog, setShowBulkDialog] = useState(false);
 
-  // Mock data query - replace with actual table when implemented
+  // Query uniform inspections from the database
   const { data: inspections = [], isLoading } = useQuery({
     queryKey: ['uniform-inspections', userProfile?.school_id, selectedDate, debouncedSearchTerm],
     queryFn: async () => {
-      // TODO: Replace with actual uniform_inspections table query
-      return [];
+      if (!userProfile?.school_id) return [];
+
+      let query = supabase
+        .from('uniform_inspections')
+        .select(`
+          id,
+          cadet_id,
+          date,
+          overall_score,
+          notes,
+          profiles!uniform_inspections_cadet_id_fkey (
+            first_name,
+            last_name,
+            grade,
+            rank
+          )
+        `)
+        .eq('school_id', userProfile.school_id);
+
+      if (selectedDate) {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        query = query.eq('date', dateStr);
+      }
+
+      if (debouncedSearchTerm) {
+        // This is a simplified search - in production you might want to use a full-text search
+        query = query.or(
+          `profiles.first_name.ilike.%${debouncedSearchTerm}%,profiles.last_name.ilike.%${debouncedSearchTerm}%`
+        );
+      }
+
+      const { data, error } = await query.order('date', { ascending: false });
+
+      if (error) {
+        console.error('Error fetching uniform inspections:', error);
+        return [];
+      }
+
+      return data || [];
     },
-    enabled: !!userProfile?.school_id
+    enabled: !!userProfile?.school_id && canView
   });
 
   const filteredInspections = React.useMemo(() => {
@@ -165,7 +205,7 @@ export const UniformInspectionTab = ({
         {/* Add Button */}
         <div className="flex gap-2">
           {canCreate && (
-            <Button variant="outline">
+            <Button variant="outline" onClick={() => setShowBulkDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Inspection
             </Button>
@@ -259,10 +299,18 @@ export const UniformInspectionTab = ({
                     </TableCell>
                     {(canUpdate || canDelete) && (
                       <TableCell className="text-center">
-                        <div className="flex items-center justify-center gap-2">
-                          {/* Action buttons will be added when implementing full functionality */}
-                          <span className="text-xs text-muted-foreground">Coming soon</span>
-                        </div>
+                        <TableActionButtons
+                          canEdit={canUpdate}
+                          canDelete={canDelete}
+                          onEdit={() => {
+                            // TODO: Implement edit functionality
+                            console.log('Edit inspection:', inspection.id);
+                          }}
+                          onDelete={() => {
+                            // TODO: Implement delete functionality
+                            console.log('Delete inspection:', inspection.id);
+                          }}
+                        />
                       </TableCell>
                     )}
                   </TableRow>
@@ -272,6 +320,15 @@ export const UniformInspectionTab = ({
           </CardContent>
         </Card>
       )}
+
+      {/* Bulk Dialog */}
+      <UniformInspectionBulkDialog
+        open={showBulkDialog}
+        onOpenChange={setShowBulkDialog}
+        onSuccess={() => {
+          // Refresh the data
+        }}
+      />
     </div>
   );
 };
