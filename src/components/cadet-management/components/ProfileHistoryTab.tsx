@@ -70,15 +70,15 @@ export const ProfileHistoryTab = ({
       </Card>;
   }
   return <Card>
-      <CardHeader className="py-[6px]">
+      <CardHeader className="py-[8px]">
         <CardTitle>Profile Change History</CardTitle>
       </CardHeader>
       <CardContent>
         {history.length === 0 ? <div className="text-center py-8 text-muted-foreground">
             <p>No profile changes recorded yet</p>
           </div> : <ScrollArea className="h-[250px]">
-            <div className="space-y-3 pr-4">
-              {history.map(item => <div key={item.id} className="border rounded-lg p-3">
+            <div className="space-y-3 pr-4 py-[2px]">
+              {history.map(item => <div key={item.id} className="border rounded-lg p-3 py-[8px] px-[8px]">
                   <div className="flex items-center justify-between">
                     <p className="text-sm text-gray-700">
                       <span className="font-medium">
