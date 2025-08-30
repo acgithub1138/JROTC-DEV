@@ -5,14 +5,15 @@ import { ITEMS_PER_PAGE } from '@/constants/pagination';
 export const getFilteredProfiles = (
   profiles: Profile[], 
   activeTab: string, 
+  activeSubTab: string,
   searchTerm: string
 ): Profile[] => {
-  // If we're on the PT Tests tab, return empty array since PT Tests handles its own data
-  if (activeTab === 'pt-tests') {
+  // If we're not on the cadets tab, return empty array since other tabs handle their own data
+  if (activeTab !== 'cadets') {
     return [];
   }
   
-  const isActive = activeTab === 'active';
+  const isActive = activeSubTab === 'active';
   return profiles.filter(profile => {
     const matchesActiveStatus = profile.active === isActive;
     

@@ -37,6 +37,9 @@ const CadetManagementPage = () => {
     handleSaveProfile,
     fetchProfiles
   } = useCadetManagement();
+  
+  // New state for sub-tab management
+  const [activeSubTab, setActiveSubTab] = useState('active');
   const {
     selectedCadets,
     massOperationLoading,
@@ -118,7 +121,7 @@ const CadetManagementPage = () => {
   const handleAddCadetWrapper = (e: React.FormEvent) => {
     handleAddCadet(e, () => setAddDialogOpen(false));
   };
-  const filteredProfiles = getFilteredProfiles(profiles, activeTab, searchTerm);
+  const filteredProfiles = getFilteredProfiles(profiles, activeTab, activeSubTab, searchTerm);
   const totalPages = getTotalPages(filteredProfiles.length);
   const paginatedProfiles = getPaginatedProfiles(filteredProfiles, currentPage);
   const handlePageChange = (page: number) => {
@@ -128,7 +131,7 @@ const CadetManagementPage = () => {
   // Clear selection when changing tabs or search
   React.useEffect(() => {
     clearSelection();
-  }, [activeTab, searchTerm]);
+  }, [activeTab, activeSubTab, searchTerm]);
   if (loading) {
     return <div className="p-6">
         <div className="animate-pulse">
@@ -152,10 +155,27 @@ const CadetManagementPage = () => {
         </CardHeader>
         <CardContent>
 
-          <CadetTabsContent activeTab={activeTab} onTabChange={setActiveTab} profiles={profiles} paginatedProfiles={paginatedProfiles} selectedCadets={selectedCadets} massOperationLoading={massOperationLoading} onEditProfile={handleEditProfile} onViewProfile={handleViewProfile} onToggleStatus={profile => {
-          setProfileToToggle(profile);
-          setStatusDialogOpen(true);
-        }} onSelectCadet={handleSelectCadet} onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} onRefresh={fetchProfiles} onOpenPTTestDialog={() => setPTTestDialogOpen(true)} searchTerm={searchTerm} />
+          <CadetTabsContent 
+            activeTab={activeTab} 
+            onTabChange={setActiveTab}
+            activeSubTab={activeSubTab}
+            onSubTabChange={setActiveSubTab}
+            profiles={profiles} 
+            paginatedProfiles={paginatedProfiles} 
+            selectedCadets={selectedCadets} 
+            massOperationLoading={massOperationLoading} 
+            onEditProfile={handleEditProfile} 
+            onViewProfile={handleViewProfile} 
+            onToggleStatus={profile => {
+              setProfileToToggle(profile);
+              setStatusDialogOpen(true);
+            }} 
+            onSelectCadet={handleSelectCadet} 
+            onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} 
+            onRefresh={fetchProfiles} 
+            onOpenPTTestDialog={() => setPTTestDialogOpen(true)} 
+            searchTerm={searchTerm} 
+          />
 
           {filteredProfiles.length === 0 && <div className="text-center py-8 text-muted-foreground">
               No cadets found

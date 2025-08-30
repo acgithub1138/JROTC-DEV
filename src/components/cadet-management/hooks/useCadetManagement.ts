@@ -13,7 +13,7 @@ export const useCadetManagement = () => {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState('');
   const [currentPage, setCurrentPage] = useState(1);
-  const [activeTab, setActiveTab] = useState('active');
+  const [activeTab, setActiveTab] = useState('cadets');
   const [statusLoading, setStatusLoading] = useState(false);
 
   const [newCadet, setNewCadet] = useState<NewCadet>({
