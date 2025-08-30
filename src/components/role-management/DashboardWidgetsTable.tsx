@@ -157,9 +157,9 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
 
   const getPermissionKey = (actionId: string) => `${dashboardModule.id}-${actionId}`;
 
-  const isPermissionEnabled = (actionId: string) => {
-    const modulePermissions = rolePermissions[dashboardModule.id];
-    return modulePermissions ? modulePermissions[actionId] : false;
+  const isPermissionEnabled = (actionName: string) => {
+    const modulePermissions = rolePermissions[dashboardModule.name];
+    return modulePermissions ? modulePermissions[actionName] : false;
   };
 
   return (
@@ -197,7 +197,7 @@ export const DashboardWidgetsTable: React.FC<DashboardWidgetsTableProps> = ({
 
                 const Icon = widget.icon;
                 const permissionKey = getPermissionKey(action.id);
-                const isEnabled = isPermissionEnabled(action.id);
+                const isEnabled = isPermissionEnabled(action.name);
 
                 return (
                   <TableRow key={widget.name} className="hover:bg-muted/50">
