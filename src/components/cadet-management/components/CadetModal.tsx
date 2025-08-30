@@ -42,6 +42,8 @@ export const CadetModal: React.FC<CadetModalProps> = ({
   const [showPassword, setShowPassword] = useState(false);
   const [newPassword, setNewPassword] = useState('');
   const [isResettingPassword, setIsResettingPassword] = useState(false);
+  const [emailError, setEmailError] = useState('');
+  const [isCheckingEmail, setIsCheckingEmail] = useState(false);
 
   const initialData = isEdit && cadetData ? cadetData : {
     first_name: '',
@@ -77,8 +79,53 @@ export const CadetModal: React.FC<CadetModalProps> = ({
     }
   }, [cadetData, isEdit, resetChanges]);
 
+  // Clear email error when modal opens/closes
+  useEffect(() => {
+    if (!open) {
+      setEmailError('');
+    }
+  }, [open]);
+
+  const checkEmailExists = async (email: string): Promise<boolean> => {
+    if (!email) return false;
+    
+    try {
+      setIsCheckingEmail(true);
+      const { data, error } = await supabase
+        .from('profiles')
+        .select('email')
+        .eq('email', email.toLowerCase())
+        .maybeSingle();
+
+      if (error && error.code !== 'PGRST116') {
+        console.error('Error checking email:', error);
+        return false;
+      }
+
+      return !!data;
+    } catch (error) {
+      console.error('Error checking email:', error);
+      return false;
+    } finally {
+      setIsCheckingEmail(false);
+    }
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    
+    // Only check email for new cadets (not in edit mode)
+    if (!isEdit && formData.email) {
+      const emailExists = await checkEmailExists(formData.email);
+      if (emailExists) {
+        setEmailError('Email already exists, enter a new email');
+        return;
+      }
+    }
+    
+    // Clear any existing email error
+    setEmailError('');
+    
     await onSubmit(formData);
     resetChanges();
     onOpenChange(false);
@@ -185,12 +232,19 @@ export const CadetModal: React.FC<CadetModalProps> = ({
                   id="email"
                   type="email"
                   value={formData.email || ''}
-                  onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                  onChange={(e) => {
+                    setFormData({ ...formData, email: e.target.value });
+                    // Clear email error when user starts typing
+                    if (emailError) setEmailError('');
+                  }}
                   placeholder="Enter email address"
                   required
                   readOnly={isEdit}
-                  className={isEdit ? 'bg-muted' : ''}
+                  className={isEdit ? 'bg-muted' : (emailError ? 'border-destructive' : '')}
                 />
+                {emailError && (
+                  <p className="text-sm text-destructive mt-1">{emailError}</p>
+                )}
               </div>
               <div className="space-y-2">
                 <Label htmlFor="role">Role</Label>
