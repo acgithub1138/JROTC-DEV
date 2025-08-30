@@ -15,7 +15,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useQuery } from '@tanstack/react-query';
 import { CommunityServiceRecord, CreateCommunityServiceData, UpdateCommunityServiceData } from '../hooks/useCommunityService';
-
 interface CommunityServiceDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -24,7 +23,6 @@ interface CommunityServiceDialogProps {
   mode: 'create' | 'edit' | 'view';
   isSubmitting?: boolean;
 }
-
 interface CadetOption {
   id: string;
   first_name: string;
@@ -32,7 +30,6 @@ interface CadetOption {
   grade: string | null;
   rank: string | null;
 }
-
 export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
   open,
   onOpenChange,
@@ -41,7 +38,9 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
   mode,
   isSubmitting = false
 }) => {
-  const { userProfile } = useAuth();
+  const {
+    userProfile
+  } = useAuth();
   const [cadetId, setCadetId] = useState('');
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [event, setEvent] = useState('');
@@ -49,29 +48,25 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
   const [notes, setNotes] = useState('');
 
   // Fetch all cadets for selection
-  const { data: cadets = [], isLoading: cadetsLoading } = useQuery({
+  const {
+    data: cadets = [],
+    isLoading: cadetsLoading
+  } = useQuery({
     queryKey: ['cadets-for-community-service', userProfile?.school_id],
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
-
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('id, first_name, last_name, grade, rank')
-        .eq('school_id', userProfile.school_id)
-        .eq('active', true)
-        .neq('role', 'instructor')
-        .order('last_name');
-
+      const {
+        data,
+        error
+      } = await supabase.from('profiles').select('id, first_name, last_name, grade, rank').eq('school_id', userProfile.school_id).eq('active', true).neq('role', 'instructor').order('last_name');
       if (error) {
         console.error('Error fetching cadets:', error);
         throw error;
       }
-
       return data as CadetOption[];
     },
-    enabled: !!userProfile?.school_id && open,
+    enabled: !!userProfile?.school_id && open
   });
-
   useEffect(() => {
     if (record && (mode === 'edit' || mode === 'view')) {
       setCadetId(record.cadet_id);
@@ -88,40 +83,32 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
       setNotes('');
     }
   }, [record, mode, open]);
-
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
     if (!date || !cadetId || !event || !hours) {
       return;
     }
-
     const data = {
       cadet_id: cadetId,
       date: date.toISOString().split('T')[0],
       event: event.trim(),
       hours: parseFloat(hours),
-      notes: notes.trim() || undefined,
+      notes: notes.trim() || undefined
     };
-
     if (mode === 'edit' && record) {
       onSubmit({
         ...data,
-        id: record.id,
+        id: record.id
       } as UpdateCommunityServiceData);
     } else {
       onSubmit(data as CreateCommunityServiceData);
     }
   };
-
   const getSelectedCadet = () => {
     return cadets.find(c => c.id === cadetId);
   };
-
   const isViewMode = mode === 'view';
-
-  return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+  return <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
@@ -137,58 +124,37 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
             <div className="space-y-4">
               <div>
                 <Label htmlFor="cadet">Cadet *</Label>
-                {isViewMode ? (
-                  <div className="p-2 bg-muted rounded-md">
+                {isViewMode ? <div className="p-2 bg-muted rounded-md">
                     {record?.cadet ? `${record.cadet.last_name}, ${record.cadet.first_name}` : 'N/A'}
                     {record?.cadet?.grade && ` (${record.cadet.grade})`}
-                  </div>
-                ) : (
-                  <Select value={cadetId} onValueChange={setCadetId} disabled={cadetsLoading}>
+                  </div> : <Select value={cadetId} onValueChange={setCadetId} disabled={cadetsLoading}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a cadet" />
                     </SelectTrigger>
                     <SelectContent>
-                      {cadets.map((cadet) => (
-                        <SelectItem key={cadet.id} value={cadet.id}>
+                      {cadets.map(cadet => <SelectItem key={cadet.id} value={cadet.id}>
                           {cadet.last_name}, {cadet.first_name}
                           {cadet.grade && ` (${cadet.grade})`}
-                        </SelectItem>
-                      ))}
+                        </SelectItem>)}
                     </SelectContent>
-                  </Select>
-                )}
+                  </Select>}
               </div>
 
               <div>
                 <Label>Date *</Label>
-                {isViewMode ? (
-                  <div className="p-2 bg-muted rounded-md">
+                {isViewMode ? <div className="p-2 bg-muted rounded-md">
                     {date ? format(date, "PPP") : 'N/A'}
-                  </div>
-                ) : (
-                  <Popover>
+                  </div> : <Popover>
                     <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !date && "text-muted-foreground"
-                        )}
-                      >
+                      <Button variant="outline" className={cn("w-full justify-start text-left font-normal", !date && "text-muted-foreground")}>
                         <CalendarIcon className="mr-2 h-4 w-4" />
                         {date ? format(date, "PPP") : <span>Pick a date</span>}
                       </Button>
                     </PopoverTrigger>
                     <PopoverContent className="w-auto p-0">
-                      <Calendar
-                        mode="single"
-                        selected={date}
-                        onSelect={setDate}
-                        initialFocus
-                      />
+                      <Calendar mode="single" selected={date} onSelect={setDate} initialFocus />
                     </PopoverContent>
-                  </Popover>
-                )}
+                  </Popover>}
               </div>
             </div>
 
@@ -196,60 +162,27 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
             <div className="space-y-4">
               <div>
                 <Label htmlFor="event">Activity/Event *</Label>
-                {isViewMode ? (
-                  <div className="p-2 bg-muted rounded-md min-h-[40px]">
+                {isViewMode ? <div className="p-2 bg-muted rounded-md min-h-[40px]">
                     {event || 'N/A'}
-                  </div>
-                ) : (
-                  <Input
-                    id="event"
-                    value={event}
-                    onChange={(e) => setEvent(e.target.value)}
-                    placeholder="e.g., Food bank volunteer, Park cleanup"
-                    required
-                  />
-                )}
+                  </div> : <Input id="event" value={event} onChange={e => setEvent(e.target.value)} placeholder="e.g., Food bank volunteer, Park cleanup" required />}
               </div>
 
               <div>
                 <Label htmlFor="hours">Hours *</Label>
-                {isViewMode ? (
-                  <div className="p-2 bg-muted rounded-md">
+                {isViewMode ? <div className="p-2 bg-muted rounded-md">
                     {hours || 'N/A'}
-                  </div>
-                ) : (
-                  <Input
-                    id="hours"
-                    type="number"
-                    step="0.5"
-                    min="0"
-                    max="24"
-                    value={hours}
-                    onChange={(e) => setHours(e.target.value)}
-                    placeholder="0.0"
-                    required
-                  />
-                )}
+                  </div> : <Input id="hours" type="number" step="0.5" min="0" max="24" value={hours} onChange={e => setHours(e.target.value)} placeholder="0.0" required />}
               </div>
             </div>
           </div>
 
           {/* Notes */}
           <div>
-            <Label htmlFor="notes">Notes</Label>
-            {isViewMode ? (
-              <div className="p-2 bg-muted rounded-md min-h-[80px]">
+            <Label htmlFor="notes">Event Description
+          </Label>
+            {isViewMode ? <div className="p-2 bg-muted rounded-md min-h-[80px]">
                 {notes || 'No notes'}
-              </div>
-            ) : (
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Additional details about the service..."
-                rows={3}
-              />
-            )}
+              </div> : <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional details about the service..." rows={3} />}
           </div>
 
           {/* Actions */}
@@ -257,14 +190,11 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
             <Button type="button" variant="outline" onClick={() => onOpenChange(false)}>
               {isViewMode ? 'Close' : 'Cancel'}
             </Button>
-            {!isViewMode && (
-              <Button type="submit" disabled={isSubmitting}>
+            {!isViewMode && <Button type="submit" disabled={isSubmitting}>
                 {isSubmitting ? 'Saving...' : mode === 'create' ? 'Add Service' : 'Update Service'}
-              </Button>
-            )}
+              </Button>}
           </div>
         </form>
       </DialogContent>
-    </Dialog>
-  );
+    </Dialog>;
 };
