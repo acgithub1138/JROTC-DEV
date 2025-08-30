@@ -119,7 +119,10 @@ export const CadetModal: React.FC<CadetModalProps> = ({
     
     // Check for required fields manually
     const requiredFields = ['first_name', 'last_name', 'email', 'role_id', 'start_year'];
-    const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
+    const missingFields = requiredFields.filter(field => {
+      const value = formData[field as keyof typeof formData];
+      return value === null || value === undefined || value === '';
+    });
     
     // Debug logging
     console.log('Form data when submitting:', formData);
