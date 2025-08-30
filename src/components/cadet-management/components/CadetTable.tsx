@@ -1,4 +1,3 @@
-
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { SortableTableHead } from '@/components/ui/sortable-table';
 import { Button } from '@/components/ui/button';
@@ -86,7 +85,7 @@ export const CadetTable = ({
               ${activeTab === 'inactive' ? "opacity-60" : ""}
               ${selectedCadets.includes(profile.id) ? "bg-blue-50" : ""}
             `}>
-            <TableCell className="py-2">
+            <TableCell className="py-[6px]">
               <Checkbox checked={selectedCadets.includes(profile.id)} onCheckedChange={checked => onSelectCadet(profile.id, checked as boolean)} />
             </TableCell>
             <TableCell className="font-medium py-[6px]">
@@ -95,45 +94,34 @@ export const CadetTable = ({
                 </Button> : <span>{profile.last_name}, {profile.first_name}</span>}
             </TableCell>
             
-            <TableCell className="capitalize py-2">{profile.role || 'No Role'}</TableCell>
-            <TableCell className="py-2">
+            <TableCell className="capitalize py-[6px]">{profile.role || 'No Role'}</TableCell>
+            <TableCell className="py-[6px]">
               {profile.grade ? <Badge className={`text-xs ${getGradeColor(profile.grade)}`}>
                   {profile.grade}
                 </Badge> : '-'}
             </TableCell>
-            <TableCell className="py-2">
+            <TableCell className="py-[6px]">
               {profile.cadet_year ? <Badge variant="outline" className="text-xs">
                   {profile.cadet_year}
                 </Badge> : '-'}
             </TableCell>
-            <TableCell className="py-2">
+            <TableCell className="py-[6px]">
               {formatRankWithAbbreviation(profile.rank, userProfile?.schools?.jrotc_program as JROTCProgram)}
             </TableCell>
-            <TableCell className="py-2">{profile.flight || '-'}</TableCell>
-            <TableCell className="text-right py-2">
-              {activeTab === 'active' ? (
-                <TableActionButtons 
-                  canEdit={canEdit} 
-                  canDelete={false}
-                  onEdit={() => onEditProfile(profile)} 
-                  customActions={[{
-                    icon: <X className="w-4 h-4" />,
-                    label: "Deactivate profile",
-                    onClick: () => onToggleStatus(profile),
-                    show: canDelete,
-                    className: "text-red-600 hover:text-red-700 hover:border-red-300"
-                  }]} 
-                />
-              ) : (
-                <TableActionButtons 
-                  customActions={[{
-                    icon: <><CheckCircle className="w-4 h-4 mr-1" />Activate</>,
-                    label: "Activate profile",
-                    onClick: () => onToggleStatus(profile),
-                    show: canDelete
-                  }]} 
-                />
-              )}
+            <TableCell className="py-[6px]">{profile.flight || '-'}</TableCell>
+            <TableCell className="text-right py-[6px]">
+              {activeTab === 'active' ? <TableActionButtons canEdit={canEdit} canDelete={false} onEdit={() => onEditProfile(profile)} customActions={[{
+            icon: <X className="w-4 h-4" />,
+            label: "Deactivate profile",
+            onClick: () => onToggleStatus(profile),
+            show: canDelete,
+            className: "text-red-600 hover:text-red-700 hover:border-red-300"
+          }]} /> : <TableActionButtons customActions={[{
+            icon: <><CheckCircle className="w-4 h-4 mr-1" />Activate</>,
+            label: "Activate profile",
+            onClick: () => onToggleStatus(profile),
+            show: canDelete
+          }]} />}
             </TableCell>
           </TableRow>)}
       </TableBody>
