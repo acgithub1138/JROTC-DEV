@@ -16,7 +16,7 @@ interface PTTestBulkDialogProps {
   onOpenChange: (open: boolean) => void;
   onSuccess?: () => void;
 }
-const FLIGHTS = ['Alpha', 'Bravo', 'Charlie', 'Delta'];
+const FLIGHTS = ['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo', 'Foxtrot', 'Golf', 'Hotel'];
 export const PTTestBulkDialog = ({
   open,
   onOpenChange,
