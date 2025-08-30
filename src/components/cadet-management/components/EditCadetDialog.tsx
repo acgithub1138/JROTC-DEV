@@ -21,18 +21,15 @@ import { Profile } from '../types';
 import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 import { generateYearOptions } from '@/utils/yearOptions';
-
 const cadetSchema = z.object({
   grade: z.string(),
   flight: z.string(),
   cadet_year: z.string(),
   role_id: z.string(),
   rank: z.string(),
-  start_year: z.string(),
+  start_year: z.string()
 });
-
 type CadetFormData = z.infer<typeof cadetSchema>;
-
 interface EditCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -40,7 +37,6 @@ interface EditCadetDialogProps {
   setEditingProfile: (profile: Profile | null) => void;
   onRefresh?: () => void;
 }
-
 export const EditCadetDialog = ({
   open,
   onOpenChange,
@@ -48,12 +44,20 @@ export const EditCadetDialog = ({
   setEditingProfile,
   onRefresh
 }: EditCadetDialogProps) => {
-  const { userProfile } = useAuth();
-  const { canResetPassword, canUpdate } = useCadetPermissions();
-  const { toast } = useToast();
-  
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    canResetPassword,
+    canUpdate
+  } = useCadetPermissions();
+  const {
+    toast
+  } = useToast();
   const ranks = getRanksForProgram(userProfile?.schools?.jrotc_program as JROTCProgram);
-  const { roleOptions } = useCadetRoles();
+  const {
+    roleOptions
+  } = useCadetRoles();
 
   // Password reset state
   const [newPassword, setNewPassword] = useState('');
@@ -61,27 +65,26 @@ export const EditCadetDialog = ({
   const [passwordResetLoading, setPasswordResetLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingClose, setPendingClose] = useState(false);
-
   const initialData = {
     grade: editingProfile?.grade || '',
     flight: editingProfile?.flight || '',
     cadet_year: editingProfile?.cadet_year || '',
     role_id: editingProfile?.role_id || '',
     rank: editingProfile?.rank || '',
-    start_year: editingProfile?.start_year?.toString() || '',
+    start_year: editingProfile?.start_year?.toString() || ''
   };
-
   const form = useForm<CadetFormData>({
     resolver: zodResolver(cadetSchema),
-    defaultValues: initialData,
+    defaultValues: initialData
   });
-
-  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+  const {
+    hasUnsavedChanges,
+    resetChanges
+  } = useUnsavedChanges({
     initialData,
     currentData: form.watch(),
-    enabled: open,
+    enabled: open
   });
-
   React.useEffect(() => {
     if (open && editingProfile) {
       // Reset form with cadet data when dialog opens
@@ -91,11 +94,10 @@ export const EditCadetDialog = ({
         cadet_year: editingProfile.cadet_year || '',
         role_id: editingProfile.role_id || '',
         rank: editingProfile.rank || '',
-        start_year: editingProfile.start_year?.toString() || '',
+        start_year: editingProfile.start_year?.toString() || ''
       });
     }
   }, [open, editingProfile, form]);
-
   const handleClose = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -104,7 +106,6 @@ export const EditCadetDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleCancel = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
@@ -113,43 +114,36 @@ export const EditCadetDialog = ({
       onOpenChange(false);
     }
   };
-
   const handleDiscardChanges = () => {
     resetChanges();
     setShowUnsavedDialog(false);
     setPendingClose(false);
     onOpenChange(false);
   };
-
   const handleContinueEditing = () => {
     setShowUnsavedDialog(false);
     setPendingClose(false);
   };
-
   const handleSubmit = async (data: CadetFormData) => {
     if (!editingProfile) return;
-
     try {
       // Find the selected role to get the role_name
       const selectedRole = roleOptions.find(r => r.value === data.role_id);
       const roleName = selectedRole ? selectedRole.role_name : null;
-
-      const { error } = await supabase
-        .from('profiles')
-        .update({ 
-          grade: data.grade === 'none' ? null : data.grade || null,
-          flight: data.flight === 'none' ? null : data.flight || null,
-          cadet_year: (data.cadet_year === 'none' ? null : data.cadet_year || null) as any,
-          role_id: data.role_id === 'none' ? null : data.role_id || null,
-          role: roleName as any, // Update role field with role_name
-          rank: data.rank === 'none' ? null : data.rank || null,
-          start_year: data.start_year === 'none' ? null : (data.start_year ? parseInt(data.start_year) : null),
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', editingProfile.id);
-
+      const {
+        error
+      } = await supabase.from('profiles').update({
+        grade: data.grade === 'none' ? null : data.grade || null,
+        flight: data.flight === 'none' ? null : data.flight || null,
+        cadet_year: (data.cadet_year === 'none' ? null : data.cadet_year || null) as any,
+        role_id: data.role_id === 'none' ? null : data.role_id || null,
+        role: roleName as any,
+        // Update role field with role_name
+        rank: data.rank === 'none' ? null : data.rank || null,
+        start_year: data.start_year === 'none' ? null : data.start_year ? parseInt(data.start_year) : null,
+        updated_at: new Date().toISOString()
+      }).eq('id', editingProfile.id);
       if (error) throw error;
-
       toast({
         title: "Success",
         description: `Updated ${editingProfile.first_name} ${editingProfile.last_name}'s information`
@@ -163,15 +157,12 @@ export const EditCadetDialog = ({
         cadet_year: data.cadet_year === 'none' ? undefined : data.cadet_year,
         role_id: data.role_id === 'none' ? '' : data.role_id,
         rank: data.rank === 'none' ? undefined : data.rank,
-        start_year: data.start_year === 'none' ? undefined : (data.start_year ? parseInt(data.start_year) : undefined),
+        start_year: data.start_year === 'none' ? undefined : data.start_year ? parseInt(data.start_year) : undefined,
         role: roleName || editingProfile.role
       });
-      
       resetChanges();
       onOpenChange(false);
       onRefresh?.();
-      
-      
     } catch (error) {
       console.error('Error updating cadet:', error);
       toast({
@@ -181,7 +172,6 @@ export const EditCadetDialog = ({
       });
     }
   };
-
   const handleResetPassword = async () => {
     if (!newPassword.trim()) {
       toast({
@@ -191,20 +181,18 @@ export const EditCadetDialog = ({
       });
       return;
     }
-
     if (!editingProfile) return;
-
     setPasswordResetLoading(true);
     try {
-      const { error } = await supabase.functions.invoke('reset-user-password', {
+      const {
+        error
+      } = await supabase.functions.invoke('reset-user-password', {
         body: {
           userId: editingProfile.id,
           newPassword: newPassword
         }
       });
-
       if (error) throw error;
-
       toast({
         title: "Success",
         description: `Password reset successfully for ${editingProfile.first_name} ${editingProfile.last_name}`
@@ -222,11 +210,8 @@ export const EditCadetDialog = ({
       setPasswordResetLoading(false);
     }
   };
-
   if (!editingProfile) return null;
-
-  return (
-    <>
+  return <>
       <Dialog open={open} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
@@ -241,28 +226,18 @@ export const EditCadetDialog = ({
               <div className="grid grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <Label>Name</Label>
-                  <Input 
-                    value={`${editingProfile.first_name} ${editingProfile.last_name}`} 
-                    disabled 
-                    className="bg-muted" 
-                  />
+                  <Input value={`${editingProfile.first_name} ${editingProfile.last_name}`} disabled className="bg-muted" />
                 </div>
                 <div className="space-y-2">
                   <Label>Email</Label>
-                  <Input 
-                    value={editingProfile.email} 
-                    disabled 
-                    className="bg-muted" 
-                  />
+                  <Input value={editingProfile.email} disabled className="bg-muted" />
                 </div>
               </div>
 
               {/* Row 2: Role */}
-              <FormField
-                control={form.control}
-                name="role_id"
-                render={({ field }) => (
-                  <FormItem>
+              <FormField control={form.control} name="role_id" render={({
+              field
+            }) => <FormItem>
                     <FormLabel>Role</FormLabel>
                     <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                       <FormControl>
@@ -272,25 +247,19 @@ export const EditCadetDialog = ({
                       </FormControl>
                       <SelectContent>
                         <SelectItem value="none">No role selected</SelectItem>
-                        {roleOptions.map(roleOption => (
-                          <SelectItem key={roleOption.value} value={roleOption.value}>
+                        {roleOptions.map(roleOption => <SelectItem key={roleOption.value} value={roleOption.value}>
                             {roleOption.label}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
                     </Select>
                     <FormMessage />
-                  </FormItem>
-                )}
-              />
+                  </FormItem>} />
 
               {/* Row 3: Freshman Year and Grade */}
               <div className="grid grid-cols-2 gap-4">
-                <FormField
-                  control={form.control}
-                  name="start_year"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="start_year" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Freshman Year</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                         <FormControl>
@@ -300,22 +269,16 @@ export const EditCadetDialog = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No start year selected</SelectItem>
-                          {generateYearOptions().map(year => (
-                            <SelectItem key={year} value={year.toString()}>
+                          {generateYearOptions().map(year => <SelectItem key={year} value={year.toString()}>
                               {year}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="grade"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="grade" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Grade</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                         <FormControl>
@@ -325,26 +288,20 @@ export const EditCadetDialog = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No grade selected</SelectItem>
-                          {gradeOptions.map(grade => (
-                            <SelectItem key={grade} value={grade}>
+                          {gradeOptions.map(grade => <SelectItem key={grade} value={grade}>
                               {grade}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               {/* Row 4: Flight, Cadet Year, and Rank */}
               <div className="grid grid-cols-3 gap-4">
-                <FormField
-                  control={form.control}
-                  name="flight"
-                  render={({ field }) => (
-                    <FormItem>
+                <FormField control={form.control} name="flight" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Flight</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                         <FormControl>
@@ -354,22 +311,16 @@ export const EditCadetDialog = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No flight selected</SelectItem>
-                          {flightOptions.map(flight => (
-                            <SelectItem key={flight} value={flight}>
+                          {flightOptions.map(flight => <SelectItem key={flight} value={flight}>
                               {flight}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="cadet_year"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="cadet_year" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Cadet Year</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                         <FormControl>
@@ -379,22 +330,16 @@ export const EditCadetDialog = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No year selected</SelectItem>
-                          {cadetYearOptions.map(year => (
-                            <SelectItem key={year} value={year}>
+                          {cadetYearOptions.map(year => <SelectItem key={year} value={year}>
                               {year}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="rank"
-                  render={({ field }) => (
-                    <FormItem>
+                    </FormItem>} />
+                <FormField control={form.control} name="rank" render={({
+                field
+              }) => <FormItem>
                       <FormLabel>Rank</FormLabel>
                       <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
                         <FormControl>
@@ -404,20 +349,13 @@ export const EditCadetDialog = ({
                         </FormControl>
                         <SelectContent>
                           <SelectItem value="none">No rank</SelectItem>
-                          {ranks.map(rank => (
-                            <SelectItem 
-                              key={rank.id} 
-                              value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}
-                            >
+                          {ranks.map(rank => <SelectItem key={rank.id} value={rank.abbreviation ? `${rank.rank} (${rank.abbreviation})` : rank.rank || 'none'}>
                               {rank.rank} {rank.abbreviation && `(${rank.abbreviation})`}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                    </FormItem>} />
               </div>
 
               <DialogFooter>
@@ -432,10 +370,9 @@ export const EditCadetDialog = ({
           </Form>
 
           {/* Password Reset Section */}
-          {canResetPassword && (
-            <Accordion type="single" collapsible className="mt-6">
+          {canResetPassword && <Accordion type="single" collapsible className="mt-6">
               <AccordionItem value="password-reset">
-                <AccordionTrigger className="text-lg font-semibold">
+                <AccordionTrigger className="text-lg font-semibold py-[4px]">
                   Reset Password
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4">
@@ -446,49 +383,24 @@ export const EditCadetDialog = ({
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
                     <div className="relative">
-                      <Input 
-                        id="newPassword"
-                        type={showPassword ? "text" : "password"}
-                        value={newPassword}
-                        onChange={(e) => setNewPassword(e.target.value)}
-                        placeholder="Enter new password"
-                        className="pr-10"
-                      />
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="sm"
-                        className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                        onClick={() => setShowPassword(!showPassword)}
-                      >
+                      <Input id="newPassword" type={showPassword ? "text" : "password"} value={newPassword} onChange={e => setNewPassword(e.target.value)} placeholder="Enter new password" className="pr-10" />
+                      <Button type="button" variant="ghost" size="sm" className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent" onClick={() => setShowPassword(!showPassword)}>
                         {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
                       </Button>
                     </div>
                   </div>
 
                   <div className="flex justify-end">
-                    <Button
-                      type="button"
-                      onClick={handleResetPassword}
-                      disabled={passwordResetLoading || !newPassword.trim()}
-                      variant="destructive"
-                    >
+                    <Button type="button" onClick={handleResetPassword} disabled={passwordResetLoading || !newPassword.trim()} variant="destructive">
                       {passwordResetLoading ? 'Resetting...' : 'Reset Password'}
                     </Button>
                   </div>
                 </AccordionContent>
               </AccordionItem>
-            </Accordion>
-          )}
+            </Accordion>}
         </DialogContent>
       </Dialog>
 
-      <UnsavedChangesDialog 
-        open={showUnsavedDialog} 
-        onOpenChange={setShowUnsavedDialog} 
-        onDiscard={handleDiscardChanges} 
-        onCancel={handleContinueEditing} 
-      />
-    </>
-  );
+      <UnsavedChangesDialog open={showUnsavedDialog} onOpenChange={setShowUnsavedDialog} onDiscard={handleDiscardChanges} onCancel={handleContinueEditing} />
+    </>;
 };
