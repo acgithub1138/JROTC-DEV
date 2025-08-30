@@ -182,7 +182,7 @@ export const CommunityServiceDialog: React.FC<CommunityServiceDialogProps> = ({
           </Label>
             {isViewMode ? <div className="p-2 bg-muted rounded-md min-h-[80px]">
                 {notes || 'No notes'}
-              </div> : <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Additional details about the service..." rows={3} />}
+              </div> : <Textarea id="notes" value={notes} onChange={e => setNotes(e.target.value)} placeholder="Add details about the event..." rows={3} />}
           </div>
 
           {/* Actions */}
