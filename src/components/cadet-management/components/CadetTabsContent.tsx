@@ -55,9 +55,9 @@ export const CadetTabsContent = ({
   
   // Check permissions for each module
   const canAccessCadets = hasPermission('cadets', 'read');
-  const canAccessPTTests = hasPermission('pt_tests', 'read');
-  const canAccessUniformInspection = hasPermission('uniform_inspection', 'read');
-  const canAccessCommunityService = hasPermission('community_service', 'read');
+  const canAccessPTTests = hasPermission('pt_tests', 'sidebar');
+  const canAccessUniformInspection = hasPermission('uniform_inspection', 'sidebar');
+  const canAccessCommunityService = hasPermission('community_service', 'sidebar');
   
   // Filter available tabs based on permissions
   const availableTabs = [

@@ -11,7 +11,7 @@ import { cn } from '@/lib/utils';
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
-import { useCadetPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
@@ -39,7 +39,7 @@ export const UniformInspectionTab = ({
   searchTerm: externalSearchTerm = ''
 }: UniformInspectionTabProps) => {
   const { userProfile } = useAuth();
-  const { canCreate, canUpdate, canDelete } = useCadetPermissions();
+  const { canView, canViewDetails, canEdit: canUpdate, canDelete, canCreate } = useTablePermissions('uniform_inspection');
   const { timezone } = useSchoolTimezone();
   
   const searchTerm = externalSearchTerm;
