@@ -133,25 +133,6 @@ export const MultipleCadetsCommunityServiceDialog: React.FC<MultipleCadetsCommun
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-6">
-          {/* Selected Cadets Display */}
-          {selectedCadetIds.length > 0 && (
-            <div>
-              <Label>Selected Cadets ({selectedCadetIds.length})</Label>
-              <div className="flex flex-wrap gap-2 mt-2">
-                {getSelectedCadets().map(cadet => (
-                  <Badge key={cadet.id} variant="secondary" className="flex items-center gap-1">
-                    {cadet.last_name}, {cadet.first_name}
-                    {cadet.grade && ` (${cadet.grade})`}
-                    <X 
-                      className="w-3 h-3 cursor-pointer hover:text-destructive" 
-                      onClick={() => handleRemoveCadet(cadet.id)}
-                    />
-                  </Badge>
-                ))}
-              </div>
-            </div>
-          )}
-
           {/* Cadet Selection */}
           <div>
             <Label>Select Cadets *</Label>
