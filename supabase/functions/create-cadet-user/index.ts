@@ -83,18 +83,58 @@ serve(async (req) => {
       school_id 
     }: CreateCadetRequest = requestBody
 
-    // Determine the role - if role_id is provided as string, use it; otherwise use role or default to cadet
+    // Determine the role and role_id
     let finalRole: string
+    let finalRoleId: string
+    
     if (role_id && typeof role_id === 'string') {
-      // Convert role_id string to proper role format
-      finalRole = role_id.replace(/\s+/g, '_').toLowerCase()
-      console.log('Using role_id:', role_id, 'converted to:', finalRole)
+      // role_id is provided as UUID, look up the role_name
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .select('id, role_name')
+        .eq('id', role_id)
+        .single()
+
+      if (roleError || !roleData) {
+        console.error('Role lookup by ID error:', roleError)
+        throw new Error(`Invalid role ID: ${role_id}`)
+      }
+
+      finalRole = roleData.role_name
+      finalRoleId = roleData.id
+      console.log('Using role_id:', role_id, 'found role:', finalRole)
     } else if (role) {
-      finalRole = role
-      console.log('Using provided role:', finalRole)
+      // role is provided as string, look up the role_id
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .select('id, role_name')
+        .eq('role_name', role)
+        .single()
+
+      if (roleError || !roleData) {
+        console.error('Role lookup by name error:', roleError)
+        throw new Error(`Invalid role: ${role}`)
+      }
+
+      finalRole = roleData.role_name
+      finalRoleId = roleData.id
+      console.log('Using provided role:', finalRole, 'role_id:', finalRoleId)
     } else {
-      finalRole = 'cadet'
-      console.log('Defaulting to role: cadet')
+      // Default to cadet role
+      const { data: roleData, error: roleError } = await supabaseAdmin
+        .from('user_roles')
+        .select('id, role_name')
+        .eq('role_name', 'cadet')
+        .single()
+
+      if (roleError || !roleData) {
+        console.error('Default cadet role lookup error:', roleError)
+        throw new Error('Could not find default cadet role')
+      }
+
+      finalRole = roleData.role_name
+      finalRoleId = roleData.id
+      console.log('Defaulting to role: cadet, role_id:', finalRoleId)
     }
 
     // Validate input parameters
@@ -108,21 +148,7 @@ serve(async (req) => {
     // Validate school access (non-admins can only create users in their own school)
     requireSameSchool(actorProfile, school_id)
 
-    console.log('Creating user:', email, 'with role:', finalRole, 'in school:', school_id)
-
-    // Look up the role_id from user_roles table
-    const { data: roleData, error: roleError } = await supabaseAdmin
-      .from('user_roles')
-      .select('id')
-      .eq('role_name', finalRole)
-      .single()
-
-    if (roleError || !roleData) {
-      console.error('Role lookup error:', roleError)
-      throw new Error(`Invalid role: ${finalRole}`)
-    }
-
-    console.log('Found role_id:', roleData.id, 'for role:', finalRole)
+    console.log('Creating user:', email, 'with role:', finalRole, 'role_id:', finalRoleId, 'in school:', school_id)
 
     // Create user directly with provided or default password
     const { data: authUser, error: authError } = await supabaseAdmin.auth.admin.createUser({
@@ -133,7 +159,7 @@ serve(async (req) => {
         first_name,
         last_name,
         role: finalRole,
-        role_id: roleData.id,
+        role_id: finalRoleId,
         school_id
       }
     })
@@ -168,7 +194,7 @@ serve(async (req) => {
           .from('profiles')
           .update({
             role: finalRole,
-            role_id: roleData.id, // Set the role_id from the lookup
+            role_id: finalRoleId, // Set the role_id from the lookup
             grade: grade || null,
             rank: rank || null,
             flight: flight || null,
