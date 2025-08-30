@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { toast } from '@/hooks/use-toast';
 
 export interface UniformInspectionScores {
-  overallScore: string;
+  grade: string;
   notes: string;
 }
 
@@ -23,18 +23,18 @@ export const useUniformInspectionBulk = () => {
   const updateCadetScore = (cadetId: string, field: keyof UniformInspectionScores, value: string) => {
     setCadetData(prev => {
       const newMap = new Map(prev);
-      const existing = newMap.get(cadetId) || { overallScore: '', notes: '' };
+      const existing = newMap.get(cadetId) || { grade: '', notes: '' };
       newMap.set(cadetId, { ...existing, [field]: value });
       return newMap;
     });
   };
 
   const getCadetScores = (cadetId: string): UniformInspectionScores => {
-    return cadetData.get(cadetId) || { overallScore: '', notes: '' };
+    return cadetData.get(cadetId) || { grade: '', notes: '' };
   };
 
   const hasScoreData = (scores: UniformInspectionScores): boolean => {
-    return scores.overallScore.trim() !== '';
+    return scores.grade.trim() !== '';
   };
 
   const cadetDataWithScores = useMemo(() => {
@@ -72,11 +72,11 @@ export const useUniformInspectionBulk = () => {
         school_id: userProfile.school_id,
         cadet_id: cadetId,
         date: date.toISOString().split('T')[0],
-        overall_score: scores.overallScore.trim() ? parseInt(scores.overallScore) : null,
+        grade: scores.grade.trim() ? parseInt(scores.grade) : null,
         notes: scores.notes.trim() || null,
       }));
 
-      const { error } = await supabase
+      const { error } = await (supabase as any)
         .from('uniform_inspections')
         .insert(inspectionRecords);
 

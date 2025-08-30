@@ -27,7 +27,7 @@ interface UniformInspection {
   id: string;
   cadet_id: string;
   date: string;
-  overall_score: number | null;
+  grade: number | null;
   notes: string | null;
   profiles: {
     first_name: string;
@@ -55,13 +55,13 @@ export const UniformInspectionTab = ({
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
 
-      let query = supabase
+      const { data, error } = await (supabase as any)
         .from('uniform_inspections')
         .select(`
           id,
           cadet_id,
           date,
-          overall_score,
+          grade,
           notes,
           profiles!uniform_inspections_cadet_id_fkey (
             first_name,
@@ -70,40 +70,35 @@ export const UniformInspectionTab = ({
             rank
           )
         `)
-        .eq('school_id', userProfile.school_id);
-
-      if (selectedDate) {
-        const dateStr = format(selectedDate, 'yyyy-MM-dd');
-        query = query.eq('date', dateStr);
-      }
-
-      if (debouncedSearchTerm) {
-        // This is a simplified search - in production you might want to use a full-text search
-        query = query.or(
-          `profiles.first_name.ilike.%${debouncedSearchTerm}%,profiles.last_name.ilike.%${debouncedSearchTerm}%`
-        );
-      }
-
-      const { data, error } = await query.order('date', { ascending: false });
+        .eq('school_id', userProfile.school_id)
+        .order('date', { ascending: false });
 
       if (error) {
         console.error('Error fetching uniform inspections:', error);
         return [];
       }
 
-      return data || [];
+      let filteredData = data || [];
+
+      // Apply date filter if selected
+      if (selectedDate) {
+        const dateStr = format(selectedDate, 'yyyy-MM-dd');
+        filteredData = filteredData.filter(inspection => inspection.date === dateStr);
+      }
+
+      return filteredData;
     },
     enabled: !!userProfile?.school_id && canView
   });
 
   const filteredInspections = React.useMemo(() => {
-    if (!searchTerm) return inspections;
-    return inspections.filter((inspection: UniformInspection) => 
-      `${inspection.profiles.first_name} ${inspection.profiles.last_name}`
+    if (!debouncedSearchTerm) return inspections;
+    return inspections.filter((inspection) => 
+      `${inspection.profiles?.first_name || ''} ${inspection.profiles?.last_name || ''}`
         .toLowerCase()
-        .includes(searchTerm.toLowerCase())
+        .includes(debouncedSearchTerm.toLowerCase())
     );
-  }, [inspections, searchTerm]);
+  }, [inspections, debouncedSearchTerm]);
 
   const { sortedData, sortConfig, handleSort } = useSortableTable({
     data: filteredInspections,
@@ -218,9 +213,11 @@ export const UniformInspectionTab = ({
         <Card>
           <CardContent className="text-center py-8">
             <p className="text-muted-foreground">No uniform inspections found</p>
-            <p className="text-sm text-muted-foreground mt-2">
-              This feature is coming soon - uniform inspection tracking will be available here.
-            </p>
+            {selectedDate && (
+              <p className="text-sm text-muted-foreground mt-2">
+                Try selecting a different date or clearing the date filter.
+              </p>
+            )}
           </CardContent>
         </Card>
       ) : (
@@ -260,13 +257,13 @@ export const UniformInspectionTab = ({
                     </Button>
                   </TableHead>
                   <TableHead className="text-center">
-                    <Button
+                   <Button
                       variant="ghost"
-                      onClick={() => handleSort('overall_score')}
+                      onClick={() => handleSort('grade')}
                       className="h-auto p-0 font-medium hover:bg-transparent"
                     >
                       Score
-                      {getSortIcon('overall_score')}
+                      {getSortIcon('grade')}
                     </Button>
                   </TableHead>
                   <TableHead>Notes</TableHead>
@@ -291,9 +288,9 @@ export const UniformInspectionTab = ({
                     <TableCell>
                       {formatTimeForDisplay(inspection.date, TIME_FORMATS.SHORT_DATE, timezone)}
                     </TableCell>
-                    <TableCell className="text-center">
-                      {inspection.overall_score || '-'}
-                    </TableCell>
+                     <TableCell className="text-center">
+                       {inspection.grade || '-'}
+                     </TableCell>
                     <TableCell className="max-w-xs truncate">
                       {inspection.notes || '-'}
                     </TableCell>

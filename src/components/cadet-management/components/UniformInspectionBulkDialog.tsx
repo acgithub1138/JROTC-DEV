@@ -157,7 +157,7 @@ export const UniformInspectionBulkDialog = ({
                     {/* Header */}
                     <div className="grid grid-cols-4 gap-2 p-3 bg-muted font-medium text-sm">
                       <div className="col-span-2">Cadet</div>
-                      <div>Overall Score</div>
+                      <div>Grade</div>
                       <div>Notes</div>
                     </div>
 
@@ -182,8 +182,8 @@ export const UniformInspectionBulkDialog = ({
                                 placeholder="0-100"
                                 min="0"
                                 max="100"
-                                value={scores.overallScore}
-                                onChange={(e) => updateCadetScore(cadet.id, 'overallScore', e.target.value)}
+                                value={scores.grade}
+                                onChange={(e) => updateCadetScore(cadet.id, 'grade', e.target.value)}
                                 className="w-full"
                               />
                             </div>
