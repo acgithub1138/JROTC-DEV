@@ -216,9 +216,7 @@ export const EditCadetDialog = ({
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>Edit Cadet Information</DialogTitle>
-            <DialogDescription>
-              Update the cadet's grade, rank, and flight information.
-            </DialogDescription>
+            
           </DialogHeader>
 
           <Form {...form}>
