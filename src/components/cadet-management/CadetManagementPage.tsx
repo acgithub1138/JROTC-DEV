@@ -13,7 +13,7 @@ import { CadetDialogs } from './components/CadetDialogs';
 import { PTTestBulkDialog } from './components/PTTestBulkDialog';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
-import { Profile, NewCadet } from './types';
+import { Profile } from './types';
 const CadetManagementPage = () => {
   const {
     canUpdate,
@@ -32,7 +32,7 @@ const CadetManagementPage = () => {
     newCadet,
     setNewCadet,
     handleToggleUserStatus,
-    handleAddCadet: handleAddCadetSubmit,
+    handleAddCadet,
     handleBulkImport,
     handleSaveProfile,
     fetchProfiles
@@ -49,9 +49,9 @@ const CadetManagementPage = () => {
     handleBulkUpdateRole,
     handleBulkDeactivate
   } = useCadetMassOperations();
-  const [cadetModalOpen, setCadetModalOpen] = useState(false);
-  const [isEditMode, setIsEditMode] = useState(false);
-  const [currentCadetData, setCurrentCadetData] = useState<Profile | NewCadet | null>(null);
+  const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+  const [editDialogOpen, setEditDialogOpen] = useState(false);
+  const [addDialogOpen, setAddDialogOpen] = useState(false);
   const [bulkImportDialogOpen, setBulkImportDialogOpen] = useState(false);
   const [statusDialogOpen, setStatusDialogOpen] = useState(false);
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
@@ -67,15 +67,8 @@ const CadetManagementPage = () => {
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const handleEditProfile = (profile: Profile) => {
     if (!canUpdate) return;
-    setCurrentCadetData(profile);
-    setIsEditMode(true);
-    setCadetModalOpen(true);
-  };
-
-  const handleAddCadetModal = () => {
-    setCurrentCadetData(newCadet);
-    setIsEditMode(false);
-    setCadetModalOpen(true);
+    setEditingProfile(profile);
+    setEditDialogOpen(true);
   };
   const handleViewProfile = (profile: Profile) => {
     setViewingProfile(profile);
@@ -122,15 +115,8 @@ const CadetManagementPage = () => {
     }
     return success;
   };
-  const handleCadetSubmit = async (data: any) => {
-    if (isEditMode) {
-      // Handle edit submission
-      await handleSaveProfile(data);
-    } else {
-      // Handle create submission - pass data directly to avoid race condition
-      await handleAddCadetSubmit(data, () => {});
-    }
-    setCadetModalOpen(false);
+  const handleAddCadetWrapper = (e: React.FormEvent) => {
+    handleAddCadet(e, () => setAddDialogOpen(false));
   };
   const filteredProfiles = getFilteredProfiles(profiles, activeTab, searchTerm);
   const totalPages = getTotalPages(filteredProfiles.length);
@@ -154,7 +140,7 @@ const CadetManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <CadetPageHeader onAddCadet={handleAddCadetModal} onBulkImport={() => setBulkImportDialogOpen(true)} />
+      <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
 
       <Card>
         <CardHeader>
@@ -179,39 +165,7 @@ const CadetManagementPage = () => {
         </CardContent>
       </Card>
 
-      <CadetDialogs 
-        cadetModalOpen={cadetModalOpen} 
-        setCadetModalOpen={setCadetModalOpen} 
-        isEditMode={isEditMode} 
-        cadetData={currentCadetData} 
-        onCadetSubmit={handleCadetSubmit} 
-        onRefresh={fetchProfiles} 
-        statusDialogOpen={statusDialogOpen} 
-        setStatusDialogOpen={setStatusDialogOpen} 
-        profileToToggle={profileToToggle} 
-        onToggleStatus={handleToggleStatusWrapper} 
-        statusLoading={statusLoading} 
-        bulkImportDialogOpen={bulkImportDialogOpen} 
-        setBulkImportDialogOpen={setBulkImportDialogOpen} 
-        onBulkImport={handleBulkImport} 
-        gradeDialogOpen={gradeDialogOpen} 
-        setGradeDialogOpen={setGradeDialogOpen} 
-        rankDialogOpen={rankDialogOpen} 
-        setRankDialogOpen={setRankDialogOpen} 
-        flightDialogOpen={flightDialogOpen} 
-        setFlightDialogOpen={setFlightDialogOpen} 
-        roleDialogOpen={roleDialogOpen} 
-        setRoleDialogOpen={setRoleDialogOpen} 
-        deactivateDialogOpen={deactivateDialogOpen} 
-        setDeactivateDialogOpen={setDeactivateDialogOpen} 
-        selectedCount={selectedCadets.length} 
-        massOperationLoading={massOperationLoading} 
-        onMassUpdateGrade={handleMassUpdateGrade} 
-        onMassUpdateRank={handleMassUpdateRank} 
-        onMassUpdateFlight={handleMassUpdateFlight} 
-        onMassUpdateRole={handleMassUpdateRole} 
-        onMassDeactivate={handleMassDeactivate} 
-      />
+      <CadetDialogs addDialogOpen={addDialogOpen} setAddDialogOpen={setAddDialogOpen} newCadet={newCadet} setNewCadet={setNewCadet} onAddCadet={handleAddCadetWrapper} editDialogOpen={editDialogOpen} setEditDialogOpen={setEditDialogOpen} editingProfile={editingProfile} setEditingProfile={setEditingProfile} onRefresh={fetchProfiles} statusDialogOpen={statusDialogOpen} setStatusDialogOpen={setStatusDialogOpen} profileToToggle={profileToToggle} onToggleStatus={handleToggleStatusWrapper} statusLoading={statusLoading} bulkImportDialogOpen={bulkImportDialogOpen} setBulkImportDialogOpen={setBulkImportDialogOpen} onBulkImport={handleBulkImport} gradeDialogOpen={gradeDialogOpen} setGradeDialogOpen={setGradeDialogOpen} rankDialogOpen={rankDialogOpen} setRankDialogOpen={setRankDialogOpen} flightDialogOpen={flightDialogOpen} setFlightDialogOpen={setFlightDialogOpen} roleDialogOpen={roleDialogOpen} setRoleDialogOpen={setRoleDialogOpen} deactivateDialogOpen={deactivateDialogOpen} setDeactivateDialogOpen={setDeactivateDialogOpen} selectedCount={selectedCadets.length} massOperationLoading={massOperationLoading} onMassUpdateGrade={handleMassUpdateGrade} onMassUpdateRank={handleMassUpdateRank} onMassUpdateFlight={handleMassUpdateFlight} onMassUpdateRole={handleMassUpdateRole} onMassDeactivate={handleMassDeactivate} />
       
       <ViewCadetDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} profile={viewingProfile} onEditProfile={handleEditProfile} />
       

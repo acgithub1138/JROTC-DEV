@@ -1,6 +1,7 @@
 
 import React from 'react';
-import { CadetModal } from './CadetModal';
+import { AddCadetDialog } from './AddCadetDialog';
+import { EditCadetDialog } from './EditCadetDialog';
 import { StatusConfirmationDialog } from './StatusConfirmationDialog';
 import { MassUpdateGradeDialog } from './MassUpdateGradeDialog';
 import { MassUpdateRankDialog } from './MassUpdateRankDialog';
@@ -11,12 +12,18 @@ import { BulkImportDialog } from './BulkImportDialog';
 import { Profile, NewCadet } from '../types';
 
 interface CadetDialogsProps {
-  // Unified Cadet Modal
-  cadetModalOpen: boolean;
-  setCadetModalOpen: (open: boolean) => void;
-  isEditMode: boolean;
-  cadetData: Profile | NewCadet | null;
-  onCadetSubmit: (data: any) => void;
+  // Add Dialog
+  addDialogOpen: boolean;
+  setAddDialogOpen: (open: boolean) => void;
+  newCadet: any;
+  setNewCadet: (cadet: any) => void;
+  onAddCadet: (e: React.FormEvent) => void;
+  
+  // Edit Dialog
+  editDialogOpen: boolean;
+  setEditDialogOpen: (open: boolean) => void;
+  editingProfile: Profile | null;
+  setEditingProfile: (profile: Profile | null) => void;
   onRefresh?: () => void;
   
   // Status Dialog
@@ -63,12 +70,19 @@ export const CadetDialogs = (props: CadetDialogsProps) => {
         loading={props.statusLoading}
       />
 
-      <CadetModal
-        open={props.cadetModalOpen}
-        onOpenChange={props.setCadetModalOpen}
-        isEdit={props.isEditMode}
-        cadetData={props.cadetData}
-        onSubmit={props.onCadetSubmit}
+      <AddCadetDialog
+        open={props.addDialogOpen}
+        onOpenChange={props.setAddDialogOpen}
+        newCadet={props.newCadet}
+        setNewCadet={props.setNewCadet}
+        onSubmit={props.onAddCadet}
+      />
+
+      <EditCadetDialog
+        open={props.editDialogOpen}
+        onOpenChange={props.setEditDialogOpen}
+        editingProfile={props.editingProfile}
+        setEditingProfile={props.setEditingProfile}
         onRefresh={props.onRefresh}
       />
 
