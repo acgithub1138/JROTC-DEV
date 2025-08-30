@@ -121,8 +121,19 @@ export const CadetModal: React.FC<CadetModalProps> = ({
     const requiredFields = ['first_name', 'last_name', 'email', 'role_id', 'start_year'];
     const missingFields = requiredFields.filter(field => !formData[field as keyof typeof formData]);
     
+    // Debug logging
+    console.log('Form data when submitting:', formData);
+    console.log('Missing required fields:', missingFields);
+    console.log('Required fields check:', {
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      email: formData.email,
+      role_id: formData.role_id,
+      start_year: formData.start_year
+    });
+    
     if (missingFields.length > 0) {
-      toast.error('Please fill in all required fields');
+      toast.error(`Please fill in all required fields. Missing: ${missingFields.join(', ')}`);
       return;
     }
     
