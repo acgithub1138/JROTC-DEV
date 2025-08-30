@@ -24,7 +24,8 @@ export const useCadetManagement = () => {
     grade: '',
     rank: '',
     flight: '',
-    cadet_year: ''
+    cadet_year: '',
+    start_year: undefined
   });
 
   const fetchProfiles = async () => {
@@ -114,6 +115,7 @@ export const useCadetManagement = () => {
           rank: newCadet.rank || null,
           flight: newCadet.flight || null,
           cadet_year: newCadet.cadet_year || null,
+          start_year: newCadet.start_year || null,
           school_id: userProfile?.school_id!
         }
       });
@@ -169,7 +171,8 @@ export const useCadetManagement = () => {
         grade: '',
         rank: '',
         flight: '',
-        cadet_year: ''
+        cadet_year: '',
+        start_year: undefined
       });
       
       fetchProfiles();
@@ -210,6 +213,7 @@ export const useCadetManagement = () => {
               rank: cadet.rank || null,
               flight: cadet.flight || null,
               cadet_year: cadet.cadet_year || null,
+              start_year: cadet.start_year || null,
               school_id: userProfile?.school_id!
             }
           });
