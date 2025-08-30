@@ -185,6 +185,57 @@ export type Database = {
           },
         ]
       }
+      community_service: {
+        Row: {
+          cadet_id: string
+          created_at: string
+          date: string
+          event: string | null
+          hours: number | null
+          id: string
+          notes: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          cadet_id: string
+          created_at?: string
+          date: string
+          event?: string | null
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          cadet_id?: string
+          created_at?: string
+          date?: string
+          event?: string | null
+          hours?: number | null
+          id?: string
+          notes?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_service_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "community_service_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
       competition_event_types: {
         Row: {
           created_at: string
@@ -3456,6 +3507,54 @@ export type Database = {
           updated_at?: string
         }
         Relationships: []
+      }
+      uniform_inspections: {
+        Row: {
+          cadet_id: string
+          created_at: string
+          date: string
+          grade: number | null
+          id: string
+          notes: string | null
+          school_id: string
+          updated_at: string
+        }
+        Insert: {
+          cadet_id: string
+          created_at?: string
+          date: string
+          grade?: number | null
+          id?: string
+          notes?: string | null
+          school_id: string
+          updated_at?: string
+        }
+        Update: {
+          cadet_id?: string
+          created_at?: string
+          date?: string
+          grade?: number | null
+          id?: string
+          notes?: string | null
+          school_id?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "uniform_inspections_cadet_id_fkey"
+            columns: ["cadet_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "uniform_inspections_school_id_fkey"
+            columns: ["school_id"]
+            isOneToOne: false
+            referencedRelation: "schools"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       user_roles: {
         Row: {

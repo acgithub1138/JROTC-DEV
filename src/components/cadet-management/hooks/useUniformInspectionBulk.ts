@@ -76,7 +76,7 @@ export const useUniformInspectionBulk = () => {
         notes: scores.notes.trim() || null,
       }));
 
-      const { error } = await (supabase as any)
+      const { error } = await supabase
         .from('uniform_inspections')
         .insert(inspectionRecords);
 

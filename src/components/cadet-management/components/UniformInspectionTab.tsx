@@ -55,7 +55,7 @@ export const UniformInspectionTab = ({
     queryFn: async () => {
       if (!userProfile?.school_id) return [];
 
-      const { data, error } = await (supabase as any)
+      const { data, error } = await supabase
         .from('uniform_inspections')
         .select(`
           id,
