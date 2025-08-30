@@ -13,6 +13,7 @@ import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { getYearOptions } from '@/utils/yearOptions';
 import { useEmailValidation } from '@/hooks/useEmailValidation';
+import { calculateGrade, shouldAutoCalculateGrade } from '@/utils/gradeCalculation';
 interface AddCadetDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
@@ -165,10 +166,20 @@ export const AddCadetDialog = ({
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="start_year">Freshman Year</Label>
-              <Select value={newCadet.start_year?.toString() || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                start_year: value ? parseInt(value) : undefined
-              })}>
+              <Select value={newCadet.start_year?.toString() || ""} onValueChange={value => {
+                const freshmanYear = value ? parseInt(value) : undefined;
+                const updatedCadet = {
+                  ...newCadet,
+                  start_year: freshmanYear
+                };
+                
+                // Auto-calculate grade if freshman year is selected
+                if (shouldAutoCalculateGrade(freshmanYear)) {
+                  updatedCadet.grade = calculateGrade(freshmanYear);
+                }
+                
+                setNewCadet(updatedCadet);
+              }}>
                 <SelectTrigger>
                   <SelectValue placeholder="Select start year" />
                 </SelectTrigger>
@@ -180,11 +191,15 @@ export const AddCadetDialog = ({
               </Select>
             </div>
             <div className="space-y-2">
-              <Label htmlFor="grade">Grade</Label>
-              <Select value={newCadet.grade || ""} onValueChange={value => setNewCadet({
-                ...newCadet,
-                grade: value
-              })}>
+              <Label htmlFor="grade">Grade {shouldAutoCalculateGrade(newCadet.start_year) && "(Auto-calculated)"}</Label>
+              <Select 
+                value={newCadet.grade || ""} 
+                onValueChange={value => setNewCadet({
+                  ...newCadet,
+                  grade: value
+                })}
+                disabled={shouldAutoCalculateGrade(newCadet.start_year)}
+              >
                 <SelectTrigger>
                   <SelectValue placeholder="Select grade" />
                 </SelectTrigger>

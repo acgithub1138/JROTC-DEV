@@ -21,6 +21,7 @@ import { Profile } from '../types';
 import { gradeOptions, flightOptions, cadetYearOptions } from '../constants';
 import { useCadetRoles } from '@/hooks/useCadetRoles';
 import { generateYearOptions } from '@/utils/yearOptions';
+import { calculateGrade, shouldAutoCalculateGrade } from '@/utils/gradeCalculation';
 const cadetSchema = z.object({
   grade: z.string(),
   flight: z.string(),
@@ -259,7 +260,15 @@ export const EditCadetDialog = ({
                 field
               }) => <FormItem>
                       <FormLabel>Freshman Year</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+                      <Select onValueChange={(value) => {
+                        field.onChange(value);
+                        const freshmanYear = value && value !== 'none' ? parseInt(value) : undefined;
+                        
+                        // Auto-calculate grade if freshman year is selected
+                        if (shouldAutoCalculateGrade(freshmanYear)) {
+                          form.setValue('grade', calculateGrade(freshmanYear));
+                        }
+                      }} value={field.value} disabled={!canUpdate}>
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select start year" />
@@ -276,9 +285,18 @@ export const EditCadetDialog = ({
                     </FormItem>} />
                 <FormField control={form.control} name="grade" render={({
                 field
-              }) => <FormItem>
-                      <FormLabel>Grade</FormLabel>
-                      <Select onValueChange={field.onChange} value={field.value} disabled={!canUpdate}>
+              }) => {
+                const startYear = form.watch('start_year');
+                const freshmanYear = startYear && startYear !== 'none' ? parseInt(startYear) : undefined;
+                const isAutoCalculated = shouldAutoCalculateGrade(freshmanYear);
+                
+                return <FormItem>
+                      <FormLabel>Grade {isAutoCalculated && "(Auto-calculated)"}</FormLabel>
+                      <Select 
+                        onValueChange={field.onChange} 
+                        value={field.value} 
+                        disabled={!canUpdate || isAutoCalculated}
+                      >
                         <FormControl>
                           <SelectTrigger>
                             <SelectValue placeholder="Select grade" />
@@ -292,7 +310,8 @@ export const EditCadetDialog = ({
                         </SelectContent>
                       </Select>
                       <FormMessage />
-                    </FormItem>} />
+                    </FormItem>
+              }} />
               </div>
 
               {/* Row 4: Flight, Cadet Year, and Rank */}
