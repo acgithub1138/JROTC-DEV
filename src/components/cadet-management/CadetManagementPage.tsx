@@ -127,9 +127,8 @@ const CadetManagementPage = () => {
       // Handle edit submission
       await handleSaveProfile(data);
     } else {
-      // Handle create submission
-      setNewCadet(data);
-      await handleAddCadetSubmit({ preventDefault: () => {} } as React.FormEvent, () => {});
+      // Handle create submission - pass data directly to avoid race condition
+      await handleAddCadetSubmit(data, () => {});
     }
     setCadetModalOpen(false);
   };

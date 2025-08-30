@@ -91,10 +91,10 @@ export const useCadetManagement = () => {
     }
   };
 
-  const handleAddCadet = async (e: React.FormEvent, onSuccess?: () => void) => {
-    e.preventDefault();
+  const handleAddCadet = async (cadetData?: any, onSuccess?: () => void) => {
+    const dataToUse = cadetData || newCadet;
 
-    if (!newCadet.first_name || !newCadet.last_name || !newCadet.email) {
+    if (!dataToUse.first_name || !dataToUse.last_name || !dataToUse.email) {
       toast({
         title: "Error",
         description: "Please fill in all required fields",
@@ -106,14 +106,14 @@ export const useCadetManagement = () => {
     try {
       const { data, error } = await supabase.functions.invoke('create-cadet-user', {
         body: {
-          email: newCadet.email,
-          first_name: newCadet.first_name,
-          last_name: newCadet.last_name,
-          role_id: newCadet.role_id,
-          grade: newCadet.grade || null,
-          rank: newCadet.rank || null,
-          flight: newCadet.flight || null,
-          cadet_year: newCadet.cadet_year || null,
+          email: dataToUse.email,
+          first_name: dataToUse.first_name,
+          last_name: dataToUse.last_name,
+          role_id: dataToUse.role_id,
+          grade: dataToUse.grade || null,
+          rank: dataToUse.rank || null,
+          flight: dataToUse.flight || null,
+          cadet_year: dataToUse.cadet_year || null,
           school_id: userProfile?.school_id!
         }
       });
@@ -160,7 +160,7 @@ export const useCadetManagement = () => {
 
       toast({
         title: "Cadet Successfully Created",
-        description: `${newCadet.first_name} ${newCadet.last_name} has been created with default password: Sh0wc@se`,
+        description: `${dataToUse.first_name} ${dataToUse.last_name} has been created with default password: Sh0wc@se`,
         duration: 8000
       });
 
