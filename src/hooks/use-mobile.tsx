@@ -14,13 +14,16 @@ export function useIsMobile() {
       
       // Check user agent for mobile devices
       const userAgent = navigator.userAgent.toLowerCase();
-      const isMobileUA = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
+      
+      // Separate iPad detection - iPads should be treated as desktop when screen is large enough
+      const isIpad = /ipad/i.test(userAgent);
+      const isMobileUA = /android|webos|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
       
       // Check for touch support
       const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
       
-      // Final mobile detection - only consider screen size and user agent for accurate detection
-      const detectedMobile = screenIsMobile || isMobileUA;
+      // Final mobile detection - treat iPad as mobile only if screen width is small
+      const detectedMobile = screenIsMobile || (isMobileUA && !isIpad) || (isIpad && screenIsMobile);
       
       return detectedMobile;
     };
