@@ -55,9 +55,9 @@ export const CadetTabsContent = ({
   
   // Check permissions for each module
   const canAccessCadets = hasPermission('cadets', 'read');
-  const canAccessPTTests = hasPermission('pt_tests', 'sidebar');
-  const canAccessUniformInspection = hasPermission('uniform_inspection', 'sidebar');
-  const canAccessCommunityService = hasPermission('community_service', 'sidebar');
+  const canAccessPTTests = hasPermission('pt_tests', 'read');
+  const canAccessUniformInspection = hasPermission('uniform_inspection', 'read');
+  const canAccessCommunityService = hasPermission('community_service', 'read');
   
   // Filter available tabs based on permissions
   const availableTabs = [
@@ -72,9 +72,9 @@ export const CadetTabsContent = ({
                    availableTabs.length === 3 ? 'grid-cols-3' : 'grid-cols-4';
   const renderCadetDisplay = () => {
     if (isMobile) {
-      return <CadetCards profiles={paginatedProfiles} activeTab={activeSubTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} />;
+      return <CadetCards profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} />;
     }
-    return <CadetTable profiles={paginatedProfiles} activeTab={activeSubTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
+    return <CadetTable profiles={paginatedProfiles} activeTab={activeTab} onEditProfile={onEditProfile} onViewProfile={onViewProfile} onToggleStatus={onToggleStatus} selectedCadets={selectedCadets} onSelectCadet={onSelectCadet} onSelectAll={checked => onSelectAll(checked)} />;
   };
   return <Tabs value={activeTab} onValueChange={onTabChange} className="w-full">
       <TabsList className={`grid w-full ${gridCols}`}>
