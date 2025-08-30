@@ -1,13 +1,13 @@
 /**
  * Generate year options for start year selection
- * Returns an array of years from current year back to 10 years ago
+ * Returns an array of years from current year back to 5 years ago
  */
 export const generateYearOptions = (): number[] => {
   const currentYear = new Date().getFullYear();
   const years: number[] = [];
   
-  // Generate years from current year back to 10 years ago
-  for (let i = 0; i <= 10; i++) {
+  // Generate years from current year back to 5 years ago
+  for (let i = 0; i <= 5; i++) {
     years.push(currentYear - i);
   }
   
