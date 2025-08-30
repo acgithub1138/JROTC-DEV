@@ -376,9 +376,7 @@ export const EditCadetDialog = ({
                   Reset Password
                 </AccordionTrigger>
                 <AccordionContent className="space-y-4">
-                  <p className="text-sm text-muted-foreground">
-                    Reset the cadet's password. They will need to use the new password to sign in.
-                  </p>
+                  
                   
                   <div className="space-y-2">
                     <Label htmlFor="newPassword">New Password</Label>
