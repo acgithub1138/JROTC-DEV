@@ -122,6 +122,9 @@ export const useCadetManagement = () => {
         // Extract specific error message from edge function response
         let errorMessage = 'Failed to create cadet';
         
+        console.log('Edge function error:', error);
+        console.log('Edge function data:', data);
+        
         // For 400 responses, Supabase puts the response body in `data`, not in error
         if (data && typeof data === 'object' && data.error) {
           errorMessage = data.error;
