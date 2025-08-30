@@ -150,22 +150,6 @@ export const AddCadetDialog = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="grade">Grade</Label>
-              <Select value={newCadet.grade || ""} onValueChange={value => setNewCadet({
-              ...newCadet,
-              grade: value
-            })}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select grade" />
-                </SelectTrigger>
-                <SelectContent>
-                  {gradeOptions.map(grade => <SelectItem key={grade} value={grade}>
-                      {grade}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
-            <div className="space-y-2">
               <Label htmlFor="start_year">Start Year (Freshman)</Label>
               <Select value={newCadet.start_year?.toString() || ""} onValueChange={value => setNewCadet({
               ...newCadet,
@@ -177,6 +161,22 @@ export const AddCadetDialog = ({
                 <SelectContent>
                   {generateYearOptions().map(year => <SelectItem key={year} value={year.toString()}>
                       {year}
+                    </SelectItem>)}
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="grade">Grade</Label>
+              <Select value={newCadet.grade || ""} onValueChange={value => setNewCadet({
+              ...newCadet,
+              grade: value
+            })}>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select grade" />
+                </SelectTrigger>
+                <SelectContent>
+                  {gradeOptions.map(grade => <SelectItem key={grade} value={grade}>
+                      {grade}
                     </SelectItem>)}
                 </SelectContent>
               </Select>
