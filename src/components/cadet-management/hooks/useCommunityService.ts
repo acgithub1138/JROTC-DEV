@@ -34,6 +34,14 @@ export interface UpdateCommunityServiceData extends CreateCommunityServiceData {
   id: string;
 }
 
+export interface BulkCreateCommunityServiceData {
+  cadetIds: string[];
+  date: string;
+  event: string;
+  hours: number;
+  notes?: string;
+}
+
 export const useCommunityService = (searchTerm?: string, selectedDate?: Date) => {
   const { userProfile } = useAuth();
   const queryClient = useQueryClient();
@@ -169,6 +177,35 @@ export const useCommunityService = (searchTerm?: string, selectedDate?: Date) =>
     },
   });
 
+  const bulkCreateMutation = useMutation({
+    mutationFn: async (data: BulkCreateCommunityServiceData) => {
+      if (!userProfile?.school_id) throw new Error('No school ID');
+
+      const { cadetIds, ...eventData } = data;
+      const records = cadetIds.map(cadetId => ({
+        ...eventData,
+        cadet_id: cadetId,
+        school_id: userProfile.school_id,
+      }));
+
+      const { data: results, error } = await supabase
+        .from('community_service')
+        .insert(records)
+        .select();
+
+      if (error) throw error;
+      return results;
+    },
+    onSuccess: (results) => {
+      queryClient.invalidateQueries({ queryKey: ['community-service'] });
+      toast.success(`${results.length} community service records created successfully`);
+    },
+    onError: (error) => {
+      console.error('Error creating community service records:', error);
+      toast.error('Failed to create community service records');
+    },
+  });
+
   return {
     records,
     isLoading,
@@ -176,8 +213,10 @@ export const useCommunityService = (searchTerm?: string, selectedDate?: Date) =>
     createRecord: createMutation.mutate,
     updateRecord: updateMutation.mutate,
     deleteRecord: deleteMutation.mutate,
+    bulkCreateRecords: bulkCreateMutation.mutate,
     isCreating: createMutation.isPending,
     isUpdating: updateMutation.isPending,
     isDeleting: deleteMutation.isPending,
+    isBulkCreating: bulkCreateMutation.isPending,
   };
 };

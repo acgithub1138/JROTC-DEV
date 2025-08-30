@@ -16,6 +16,7 @@ import { useDebounce } from 'use-debounce';
 import { useSortableTable } from '@/hooks/useSortableTable';
 import { useCommunityService, CommunityServiceRecord } from '../hooks/useCommunityService';
 import { CommunityServiceDialog } from './CommunityServiceDialog';
+import { MultipleCadetsCommunityServiceDialog } from './MultipleCadetsCommunityServiceDialog';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 interface CommunityServiceTabProps {
@@ -40,15 +41,18 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
   const [dialogMode, setDialogMode] = useState<'create' | 'edit' | 'view'>('create');
   const [selectedRecord, setSelectedRecord] = useState<CommunityServiceRecord | null>(null);
   const [deleteRecordId, setDeleteRecordId] = useState<string | null>(null);
+  const [isMultipleCadetsDialogOpen, setIsMultipleCadetsDialogOpen] = useState(false);
   const {
     records: communityServiceRecords,
     isLoading,
     createRecord,
     updateRecord,
     deleteRecord,
+    bulkCreateRecords,
     isCreating,
     isUpdating,
-    isDeleting
+    isDeleting,
+    isBulkCreating
   } = useCommunityService(debouncedSearchTerm, selectedDate);
 
   // Set up sortable table with custom sorting logic
@@ -112,6 +116,11 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
     }
     setIsDialogOpen(false);
   };
+
+  const handleMultipleCadetsSubmit = (data: any) => {
+    bulkCreateRecords(data);
+    setIsMultipleCadetsDialogOpen(false);
+  };
   if (!canView) {
     return <div>You do not have permission to view community service records.</div>;
   }
@@ -155,10 +164,22 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
             </PopoverContent>
           </Popover>
         </div>
-        {canCreate && <Button onClick={handleAddRecord} className="bg-primary hover:bg-primary/90">
-            <Plus className="h-4 w-4 mr-2" />
-            Add Service Hours
-          </Button>}
+        {canCreate && (
+          <div className="flex gap-2">
+            <Button onClick={handleAddRecord} className="bg-primary hover:bg-primary/90">
+              <Plus className="h-4 w-4 mr-2" />
+              Add Service Hours
+            </Button>
+            <Button 
+              onClick={() => setIsMultipleCadetsDialogOpen(true)}
+              variant="outline" 
+              className="border-primary text-primary hover:bg-primary hover:text-primary-foreground"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Multiple Cadets
+            </Button>
+          </div>
+        )}
       </div>
 
       {/* Community Service Display */}
@@ -225,7 +246,22 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({
         </Card>}
 
       {/* Community Service Dialog */}
-      <CommunityServiceDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} record={selectedRecord} onSubmit={handleDialogSubmit} mode={dialogMode} isSubmitting={isCreating || isUpdating} />
+      <CommunityServiceDialog 
+        open={isDialogOpen} 
+        onOpenChange={setIsDialogOpen} 
+        record={selectedRecord} 
+        onSubmit={handleDialogSubmit} 
+        mode={dialogMode} 
+        isSubmitting={isCreating || isUpdating} 
+      />
+
+      {/* Multiple Cadets Community Service Dialog */}
+      <MultipleCadetsCommunityServiceDialog
+        open={isMultipleCadetsDialogOpen}
+        onOpenChange={setIsMultipleCadetsDialogOpen}
+        onSubmit={handleMultipleCadetsSubmit}
+        isSubmitting={isBulkCreating}
+      />
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteRecordId} onOpenChange={() => setDeleteRecordId(null)}>
