@@ -44,9 +44,13 @@ export const useEmailTemplates = () => {
   const filteredTemplates = useMemo(() => {
     let filtered = templates;
 
-    // Filter out system templates (where school_id is null) - but admins can see all
+    // Show global templates (school_id is null) and school-specific templates for users with email read permission
+    // Only admins can see all templates regardless of permission
     if (userProfile?.role !== 'admin') {
-      filtered = filtered.filter(template => template.school_id !== null);
+      filtered = filtered.filter(template => 
+        template.school_id === null || // Global templates
+        template.school_id === userProfile?.school_id // School-specific templates
+      );
     }
 
     // Filter by search query
@@ -221,10 +225,26 @@ export const useEmailTemplates = () => {
   };
 
   const canCopyTemplate = (template: EmailTemplate): boolean => {
-    // Cannot copy system templates (null school_id)
+    // Admins can copy any template, including global ones
+    if (userProfile?.role === 'admin') return true;
+    
+    // Cannot copy system templates (null school_id) unless admin
     if (template.school_id === null) return false;
     
-    return !!userProfile; // Any authenticated user can copy templates
+    return !!userProfile; // Any authenticated user can copy school templates
+  };
+
+  const canDeleteTemplate = (template: EmailTemplate): boolean => {
+    if (!userProfile) return false;
+    
+    // Admins can delete any template, including global ones
+    if (userProfile.role === 'admin') return true;
+    
+    // Cannot delete system templates (null school_id)
+    if (template.school_id === null) return false;
+    
+    // Users can only delete school-specific templates from their school
+    return template.school_id === userProfile.school_id;
   };
 
   return {
@@ -240,6 +260,7 @@ export const useEmailTemplates = () => {
     toggleMyTemplatesFilter,
     canEditTemplate,
     canCopyTemplate,
+    canDeleteTemplate,
     isCreating: createTemplate.isPending,
     isUpdating: updateTemplate.isPending,
     isDeleting: deleteTemplate.isPending,
