@@ -20,7 +20,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
-import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
@@ -72,11 +72,24 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   } = useTaskPriorityOptions();
   const {
     canView,
-    canUpdate,
-    canUpdateAssigned,
-    canAssign,
+    canEdit: canUpdate,
+    canDelete,
     canCreate
-  } = useTaskPermissions();
+  } = useTablePermissions('tasks');
+  
+  // For backward compatibility, derive permissions from table permissions
+  const canUpdateAssigned = canUpdate; // Use same permission for assigned tasks
+  const canAssign = canUpdate; // Use update permission for assign
+  
+  // Add debug logging to track permission values
+  console.log('🔍 TaskDetailDialog permissions:', { 
+    canView, 
+    canUpdate, 
+    canUpdateAssigned, 
+    canAssign,
+    canCreate,
+    userRole: userProfile?.role 
+  });
   const {
     templates
   } = useEmailTemplates();
@@ -459,13 +472,17 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
   // If user doesn't have view permission, don't show the dialog content
+  // Use the same permission logic as SubtaskDetailDialog
   if (!canView) {
+    console.log('🚨 TaskDetailDialog: Access denied - canView:', canView);
     return <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-md">
+        <DialogContent className="sm:max-w-md" aria-describedby="access-denied-description">
           <DialogHeader>
             <DialogTitle>Access Denied</DialogTitle>
           </DialogHeader>
-          <p className="text-sm text-gray-600">You don't have permission to view task details.</p>
+          <p id="access-denied-description" className="text-sm text-muted-foreground">
+            You don't have permission to view task details.
+          </p>
         </DialogContent>
       </Dialog>;
   }

@@ -9,8 +9,6 @@ import { User, LogOut, Settings, Menu, Shield, Trophy, Building2 } from 'lucide-
 import { Button } from '@/components/ui/button';
 import { useSidebarPreferences } from '@/hooks/useSidebarPreferences';
 import { SchoolProfileModal } from '@/components/school/SchoolProfileModal';
-import { useIsMobile } from '@/hooks/use-mobile';
-import { useCapacitor } from '@/hooks/useCapacitor';
 
 interface HeaderProps {
   activeModule: string;
@@ -37,20 +35,6 @@ export const Header: React.FC<HeaderProps> = ({
   const {
     menuItems
   } = useSidebarPreferences();
-  
-  const isMobileDetected = useIsMobile();
-  const { isNative, platform } = useCapacitor();
-  const [screenSize, setScreenSize] = useState({ width: window.innerWidth, height: window.innerHeight });
-
-  // Update screen size on resize
-  React.useEffect(() => {
-    const updateScreenSize = () => {
-      setScreenSize({ width: window.innerWidth, height: window.innerHeight });
-    };
-    
-    window.addEventListener('resize', updateScreenSize);
-    return () => window.removeEventListener('resize', updateScreenSize);
-  }, []);
 
   const getModuleTitle = (module: string) => {
     const titles: {
@@ -141,7 +125,7 @@ export const Header: React.FC<HeaderProps> = ({
         </div>
         
         {/* Center - School Name with Logo */}
-        <div className="flex-1 flex justify-center items-center space-x-6">
+        <div className="flex-1 flex justify-center">
           {userProfile?.schools && (
             <div className="flex items-center space-x-3">
               {userProfile.schools.logo_url && (
@@ -156,30 +140,6 @@ export const Header: React.FC<HeaderProps> = ({
               </h1>
             </div>
           )}
-          
-          {/* Debug Info */}
-          <div className="flex flex-col items-center text-xs text-gray-500 bg-gray-50 px-3 py-2 rounded-md">
-            <div className="font-mono">
-              {(() => {
-                const userAgent = navigator.userAgent.toLowerCase();
-                const isIpad = /ipad/i.test(userAgent);
-                const isMobileUA = /android|webos|iphone|ipod|blackberry|iemobile|opera mini|mobile/i.test(userAgent);
-                
-                if (isIpad) {
-                  return screenSize.width < 768 ? 'iPad (Mobile)' : 'iPad (Desktop)';
-                } else if (isNative) {
-                  return `${platform} (Native)`;
-                } else if (isMobileDetected) {
-                  return 'Mobile (Web)';
-                } else {
-                  return 'Desktop (Web)';
-                }
-              })()}
-            </div>
-            <div className="font-mono text-xs">
-              {screenSize.width} × {screenSize.height}
-            </div>
-          </div>
         </div>
         
         {/* Right side - User Menu */}

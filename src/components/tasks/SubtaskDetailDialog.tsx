@@ -65,6 +65,14 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     canEdit: canUpdate,
     canDelete
   } = useTablePermissions('tasks');
+  
+  // Add debug logging to track permission values  
+  console.log('🔍 SubtaskDetailDialog permissions:', { 
+    canView: true, // SubtaskDetailDialog doesn't check canView, always allows view
+    canUpdate,
+    canDelete,
+    userRole: userProfile?.role 
+  });
   const {
     templates
   } = useEmailTemplates();
