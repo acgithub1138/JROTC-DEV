@@ -5,11 +5,9 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Badge } from '@/components/ui/badge';
 import { format } from 'date-fns';
-
 interface ProfileEquipmentTabProps {
   profileId: string;
 }
-
 interface EquipmentItem {
   id: string;
   item_id: string | null;
@@ -23,15 +21,20 @@ interface EquipmentItem {
     notes: string | null;
   }[];
 }
-
-export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => {
-  const { data: equipment = [], isLoading } = useQuery({
+export const ProfileEquipmentTab = ({
+  profileId
+}: ProfileEquipmentTabProps) => {
+  const {
+    data: equipment = [],
+    isLoading
+  } = useQuery({
     queryKey: ['profile-equipment', profileId],
     queryFn: async () => {
       // Get all inventory items where this profile is in the issued_to array
-      const { data, error } = await supabase
-        .from('inventory_items')
-        .select(`
+      const {
+        data,
+        error
+      } = await supabase.from('inventory_items').select(`
           id,
           item_id,
           item,
@@ -43,18 +46,14 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
             expected_return_date,
             notes
           )
-        `)
-        .contains('issued_to', [profileId]);
-
+        `).contains('issued_to', [profileId]);
       if (error) {
         console.error('Error fetching equipment:', error);
         throw error;
       }
-
       return data as EquipmentItem[];
-    },
+    }
   });
-
   const getStatusColor = (status: string) => {
     switch (status.toLowerCase()) {
       case 'available':
@@ -69,33 +68,21 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
         return 'bg-gray-100 text-gray-800';
     }
   };
-
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardContent className="p-6">
           <div className="animate-pulse space-y-4">
-            {[...Array(3)].map((_, i) => (
-              <div key={i} className="h-16 bg-muted rounded"></div>
-            ))}
+            {[...Array(3)].map((_, i) => <div key={i} className="h-16 bg-muted rounded"></div>)}
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <CardTitle>Assigned Equipment</CardTitle>
-      </CardHeader>
+  return <Card className="h-full flex flex-col">
+      
       <CardContent className="flex-1 overflow-hidden">
-        {equipment.length === 0 ? (
-          <div className="text-center py-8 text-muted-foreground">
+        {equipment.length === 0 ? <div className="text-center py-8 text-muted-foreground">
             <p>No equipment currently assigned</p>
-          </div>
-        ) : (
-          <div className="h-full overflow-y-auto">
+          </div> : <div className="h-full overflow-y-auto">
             <Table>
               <TableHeader>
                 <TableRow>
@@ -106,9 +93,8 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {equipment.map((item) => {
-                  return (
-                    <TableRow key={item.id}>
+                {equipment.map(item => {
+              return <TableRow key={item.id}>
                       <TableCell>
                         {item.item_id || '-'}
                       </TableCell>
@@ -117,19 +103,14 @@ export const ProfileEquipmentTab = ({ profileId }: ProfileEquipmentTabProps) => 
                       <TableCell>
                         <div>
                           <p>{item.item}</p>
-                          {item.description && (
-                            <p className="text-muted-foreground">{item.description}</p>
-                          )}
+                          {item.description && <p className="text-muted-foreground">{item.description}</p>}
                         </div>
                       </TableCell>
-                    </TableRow>
-                  );
-                })}
+                    </TableRow>;
+            })}
               </TableBody>
             </Table>
-          </div>
-        )}
+          </div>}
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };

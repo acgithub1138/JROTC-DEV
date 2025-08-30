@@ -73,9 +73,7 @@ export const ProfileCompetitionsTab = ({
       </Card>;
   }
   return <Card className="h-full flex flex-col">
-      <CardHeader className="flex-shrink-0">
-        <CardTitle>Competition History</CardTitle>
-      </CardHeader>
+      
       <CardContent className="flex-1 overflow-hidden">
         {competitions.length === 0 ? <div className="text-center py-8 text-muted-foreground">
             <p>No competition participation recorded</p>
