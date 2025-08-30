@@ -144,7 +144,9 @@ export const CadetModal: React.FC<CadetModalProps> = ({
     if (!isEdit && formData.email) {
       const emailExists = await checkEmailExists(formData.email);
       if (emailExists) {
-        setEmailError('Email already exists, enter a new email');
+        console.log('Email exists check returned true for:', formData.email);
+        setEmailError('Email already exists, please enter a different email');
+        toast.error("Email already exists. Please use a different email address.");
         return;
       }
     }
