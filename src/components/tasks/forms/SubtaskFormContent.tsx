@@ -12,10 +12,8 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { SubtaskTitleField } from './fields/SubtaskTitleField';
 import { SubtaskDescriptionField } from './fields/SubtaskDescriptionField';
-import { TaskStatusField } from './fields/TaskStatusField';
-import { TaskPriorityField } from './fields/TaskPriorityField';
-import { TaskAssigneeField } from './fields/TaskAssigneeField';
-import { TaskDueDateField } from './fields/TaskDueDateField';
+import { TaskInfoFields } from './fields/TaskInfoFields';
+import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
 
 interface SubtaskFormContentProps {
   open: boolean;
@@ -190,55 +188,24 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
         <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
           {/* Top Section - Two Columns */}
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
-            {/* Left Column - Subtask Info */}
-            <div className="space-y-4">
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Number</label>
-                <div className="text-sm mt-1">
-                  {mode === 'edit' && subtask ? subtask.id.slice(0, 8) : 'Auto-generated'}
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Created By</label>
-                <div className="text-sm mt-1">
-                  {mode === 'edit' && subtask?.assigned_by_profile 
-                    ? `${subtask.assigned_by_profile.last_name}, ${subtask.assigned_by_profile.first_name}`
-                    : userProfile ? `${userProfile.last_name}, ${userProfile.first_name}` : 'Unknown'
-                  }
-                </div>
-              </div>
-              
-              <div>
-                <label className="text-sm font-medium text-muted-foreground">Created</label>
-                <div className="text-sm mt-1">
-                  {mode === 'edit' && subtask?.created_at 
-                    ? new Date(subtask.created_at).toLocaleDateString()
-                    : 'Today'
-                  }
-                </div>
-              </div>
-            </div>
+            <TaskInfoFields
+              mode={mode}
+              taskNumber={mode === 'edit' && subtask ? subtask.id.slice(0, 8) : undefined}
+              createdAt={subtask?.created_at}
+              createdBy={mode === 'edit' && subtask?.assigned_by_profile 
+                ? `${subtask.assigned_by_profile.last_name}, ${subtask.assigned_by_profile.first_name}`
+                : undefined
+              }
+            />
             
-            {/* Right Column - Priority, Status, Assigned to, Due Date */}
-            <div className="space-y-4">
-              <TaskPriorityField 
-                form={form as any} 
-                priorityOptions={priorityOptions}
-                isLoading={priorityLoading}
-              />
-              <TaskStatusField 
-                form={form as any} 
-                statusOptions={statusOptions}
-                isLoading={statusLoading}
-              />
-              <TaskAssigneeField 
-                form={form as any} 
-                canAssignTasks={true}
-                canEditThisTask={true}
-              />
-              <TaskDueDateField form={form as any} />
-            </div>
+            <TaskPriorityStatusDueDateFields
+              form={form as any}
+              canAssignTasks={true}
+              canEditThisTask={true}
+              isEditingAssignedTask={false}
+              statusOptions={statusOptions}
+              priorityOptions={priorityOptions}
+            />
           </div>
 
           {/* Bottom Section - Single Column */}
