@@ -437,7 +437,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                <CardHeader className="py-[8px]">
                  <CardTitle className="flex items-center justify-between">
                    Summary
-                   {canEdit && <Button variant="ghost" size="sm" onClick={() => setEditingSummary(!editingSummary)}>
+                   {canEdit && <Button variant="ghost" size="sm" onClick={() => {
+                     if (!editingSummary && task) {
+                       setEditedTask(task); // Ensure we have current values
+                     }
+                     setEditingSummary(!editingSummary);
+                   }}>
                      <Edit className="w-4 h-4" />
                    </Button>}
                  </CardTitle>
