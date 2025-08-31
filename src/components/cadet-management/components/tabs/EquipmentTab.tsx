@@ -4,45 +4,38 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Package } from 'lucide-react';
 import { useCadetEquipment } from '@/hooks/useCadetRecords';
-
 interface EquipmentTabProps {
   cadetId: string;
 }
-
-export const EquipmentTab: React.FC<EquipmentTabProps> = ({ cadetId }) => {
-  const { data: equipment = [], isLoading } = useCadetEquipment(cadetId);
-
+export const EquipmentTab: React.FC<EquipmentTabProps> = ({
+  cadetId
+}) => {
+  const {
+    data: equipment = [],
+    isLoading
+  } = useCadetEquipment(cadetId);
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>Equipment Records</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">Loading equipment records...</div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
-  return (
-    <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <Package className="h-5 w-5" />
-          Equipment Records
-        </CardTitle>
-      </CardHeader>
+  return <Card>
+      
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
               <tr className="border-b">
-                <th className="text-left p-3 font-semibold">Item</th>
-                <th className="text-left p-3 font-semibold">Serial Number</th>
-                <th className="text-left p-3 font-semibold">Condition</th>
-                <th className="text-left p-3 font-semibold">Assigned Date</th>
-                <th className="text-left p-3 font-semibold">Notes</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Item</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Serial Number</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Condition</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Assigned Date</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Notes</th>
               </tr>
             </thead>
             <tbody>
@@ -55,6 +48,5 @@ export const EquipmentTab: React.FC<EquipmentTabProps> = ({ cadetId }) => {
           </table>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };

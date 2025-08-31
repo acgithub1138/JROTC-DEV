@@ -60,21 +60,16 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({
     }
   };
   return <Card>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <History className="h-5 w-5" />
-          Cadet History ({history.length})
-        </CardTitle>
-      </CardHeader>
+      
       <CardContent>
         <div className="overflow-x-auto">
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Type</TableHead>
-                <TableHead>Description</TableHead>
-                <TableHead>Details</TableHead>
-                <TableHead>Date</TableHead>
+                <TableHead className="px-[8px] py-[8px]">Type</TableHead>
+                <TableHead className="px-[8px] py-[8px]">Description</TableHead>
+                <TableHead className="px-[8px] py-[8px]">Details</TableHead>
+                <TableHead className="px-[8px] py-[8px]">Date</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody>
