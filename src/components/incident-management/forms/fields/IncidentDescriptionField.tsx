@@ -13,16 +13,20 @@ export const IncidentDescriptionField: React.FC<IncidentDescriptionFieldProps> =
       control={form.control}
       name="description"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>Description <span className="text-destructive">*</span></FormLabel>
-          <FormControl>
-            <Textarea
-              placeholder="Enter incident description"
-              rows={4}
-              {...field}
-            />
-          </FormControl>
-          <FormMessage />
+        <FormItem className="flex items-start gap-4">
+          <FormLabel className="w-32 text-right flex-shrink-0 pt-2">
+            Description <span className="text-destructive">*</span>
+          </FormLabel>
+          <div className="flex-1">
+            <FormControl>
+              <Textarea
+                placeholder="Enter incident description"
+                rows={4}
+                {...field}
+              />
+            </FormControl>
+            <FormMessage />
+          </div>
         </FormItem>
       )}
     />

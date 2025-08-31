@@ -13,12 +13,16 @@ export const IncidentTitleField: React.FC<IncidentTitleFieldProps> = ({ form }) 
       control={form.control}
       name="title"
       render={({ field }) => (
-        <FormItem>
-          <FormLabel>Title <span className="text-destructive">*</span></FormLabel>
-          <FormControl>
-            <Input placeholder="Enter incident title" {...field} />
-          </FormControl>
-          <FormMessage />
+        <FormItem className="flex items-center gap-4">
+          <FormLabel className="w-32 text-right flex-shrink-0">
+            Title <span className="text-destructive">*</span>
+          </FormLabel>
+          <div className="flex-1">
+            <FormControl>
+              <Input placeholder="Enter incident title" {...field} />
+            </FormControl>
+            <FormMessage />
+          </div>
         </FormItem>
       )}
     />

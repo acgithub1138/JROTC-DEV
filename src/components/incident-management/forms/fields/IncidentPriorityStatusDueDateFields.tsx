@@ -26,23 +26,27 @@ export const IncidentPriorityStatusDueDateFields: React.FC<IncidentPriorityStatu
         control={form.control}
         name="priority"
         render={({ field }) => (
-          <FormItem>
-            <FormLabel>Priority <span className="text-destructive">*</span></FormLabel>
-            <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
-              <FormControl>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select priority" />
-                </SelectTrigger>
-              </FormControl>
-              <SelectContent>
-                {priorityOptions.map((option) => (
-                  <SelectItem key={option.value} value={option.value}>
-                    {option.label}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-            <FormMessage />
+          <FormItem className="flex items-center gap-4">
+            <FormLabel className="w-24 text-right flex-shrink-0">
+              Priority <span className="text-destructive">*</span>
+            </FormLabel>
+            <div className="flex-1">
+              <Select onValueChange={field.onChange} defaultValue={field.value} value={field.value}>
+                <FormControl>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select priority" />
+                  </SelectTrigger>
+                </FormControl>
+                <SelectContent>
+                  {priorityOptions.map((option) => (
+                    <SelectItem key={option.value} value={option.value}>
+                      {option.label}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+              <FormMessage />
+            </div>
           </FormItem>
         )}
       />
@@ -51,41 +55,43 @@ export const IncidentPriorityStatusDueDateFields: React.FC<IncidentPriorityStatu
         control={form.control}
         name="due_date"
         render={({ field }) => (
-          <FormItem className="flex flex-col">
-            <FormLabel>Due Date</FormLabel>
-            <Popover>
-              <PopoverTrigger asChild>
-                <FormControl>
-                  <Button
-                    variant={"outline"}
-                    className={cn(
-                      "w-full pl-3 text-left font-normal",
-                      !field.value && "text-muted-foreground"
-                    )}
-                  >
-                    {field.value ? (
-                      format(field.value, "PPP")
-                    ) : (
-                      <span>Pick a date</span>
-                    )}
-                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                  </Button>
-                </FormControl>
-              </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
-                <Calendar
-                  mode="single"
-                  selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) =>
-                    date < new Date()
-                  }
-                  initialFocus
-                  className="p-3 pointer-events-auto"
-                />
-              </PopoverContent>
-            </Popover>
-            <FormMessage />
+          <FormItem className="flex items-center gap-4">
+            <FormLabel className="w-24 text-right flex-shrink-0">Due Date</FormLabel>
+            <div className="flex-1">
+              <Popover>
+                <PopoverTrigger asChild>
+                  <FormControl>
+                    <Button
+                      variant={"outline"}
+                      className={cn(
+                        "w-full pl-3 text-left font-normal",
+                        !field.value && "text-muted-foreground"
+                      )}
+                    >
+                      {field.value ? (
+                        format(field.value, "PPP")
+                      ) : (
+                        <span>Pick a date</span>
+                      )}
+                      <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                    </Button>
+                  </FormControl>
+                </PopoverTrigger>
+                <PopoverContent className="w-auto p-0" align="start">
+                  <Calendar
+                    mode="single"
+                    selected={field.value}
+                    onSelect={field.onChange}
+                    disabled={(date) =>
+                      date < new Date()
+                    }
+                    initialFocus
+                    className="p-3 pointer-events-auto"
+                  />
+                </PopoverContent>
+              </Popover>
+              <FormMessage />
+            </div>
           </FormItem>
         )}
       />
