@@ -19,7 +19,8 @@ import {
   Calendar,
   Zap,
   Megaphone,
-  Smartphone
+  Smartphone,
+  Heart
 } from 'lucide-react';
 
 interface DashboardWidget {
@@ -64,6 +65,13 @@ const dashboardWidgets: DashboardWidget[] = [
     label: 'Incidents Statistics',
     description: 'Display active incidents and urgent/critical',
     icon: AlertTriangle,
+    category: 'Statistics'
+  },
+  {
+    name: 'view_stats_community_service',
+    label: 'Community Service Hours',
+    description: 'Display accumulated service hours for current school year (Aug-June)',
+    icon: Heart,
     category: 'Statistics'
   },
   {
