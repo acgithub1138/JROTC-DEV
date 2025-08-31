@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Users, Plus } from 'lucide-react';
@@ -15,6 +16,7 @@ import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
 const CadetManagementPage = () => {
+  const navigate = useNavigate();
   const {
     canUpdate,
     canCreate
@@ -70,12 +72,10 @@ const CadetManagementPage = () => {
   const [deactivateDialogOpen, setDeactivateDialogOpen] = useState(false);
   const handleEditProfile = (profile: Profile) => {
     if (!canUpdate) return;
-    setEditingProfile(profile);
-    setEditDialogOpen(true);
+    navigate(`/app/cadets/cadet_record?mode=edit&id=${profile.id}`);
   };
   const handleViewProfile = (profile: Profile) => {
-    setViewingProfile(profile);
-    setViewDialogOpen(true);
+    navigate(`/app/cadets/cadet_record?mode=view&id=${profile.id}`);
   };
   const handleToggleStatusWrapper = async () => {
     if (!profileToToggle) return;
@@ -143,7 +143,10 @@ const CadetManagementPage = () => {
       </div>;
   }
   return <div className="p-6 space-y-6">
-      <CadetPageHeader onAddCadet={() => setAddDialogOpen(true)} onBulkImport={() => setBulkImportDialogOpen(true)} />
+      <CadetPageHeader 
+        onAddCadet={() => navigate('/app/cadets/cadet_record?mode=create')} 
+        onBulkImport={() => setBulkImportDialogOpen(true)} 
+      />
 
       <Card>
         <CardHeader>

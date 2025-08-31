@@ -27,6 +27,7 @@ import EmailManagementPage from './email-management/EmailManagementPage';
 
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
+import { CadetRecordPage } from '@/components/cadet-management/CadetRecordPage';
 import JobBoardPage from '@/components/job-board/JobBoardPage';
 import TeamsManagementPage from '@/components/teams/TeamsManagementPage';
 import InventoryManagementPage from '@/components/inventory-management/InventoryManagementPage';
@@ -195,6 +196,7 @@ const MainApplication = () => {
             <Route path="email" element={<EmailManagementPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
+            <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />
