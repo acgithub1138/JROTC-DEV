@@ -466,7 +466,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       setEditingSummary(false);
       setEditingDescription(false);
       setHasUnsavedChanges(false);
-      handleBack(); // Navigate back appropriately
+      // Navigate back - for subtasks go to main tasks page, for tasks use normal back behavior
+      if (recordType === 'subtask') {
+        navigate('/app/tasks');
+      } else {
+        handleBack();
+      }
       
     } catch (error) {
       console.error(`Error saving ${recordType}:`, error);
