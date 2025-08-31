@@ -8,6 +8,8 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskFormContent } from './forms/TaskFormContent';
@@ -78,6 +80,17 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
   const [isLoading, setIsLoading] = useState(false);
   const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true); // Default: New -> Old
+  const [editingSummary, setEditingSummary] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
+  const [editedTask, setEditedTask] = useState<any>(task || {});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+
+  // Update edited task when task changes
+  useEffect(() => {
+    if (task) {
+      setEditedTask(task);
+    }
+  }, [task]);
 
   // Permission checks
   useEffect(() => {
@@ -244,6 +257,88 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     return priorityOption;
   };
 
+  // Handle editing functions
+  const handleTaskFieldChange = (field: string, value: any) => {
+    setEditedTask(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  const handleSaveChanges = async () => {
+    if (!task || !hasUnsavedChanges) return;
+    
+    try {
+      setIsLoading(true);
+      
+      // Build update object with only changed fields
+      const updates: any = { id: task.id };
+      const changedFields: string[] = [];
+      
+      if (editedTask.title !== task.title) {
+        updates.title = editedTask.title;
+        changedFields.push('title');
+      }
+      if (editedTask.description !== task.description) {
+        updates.description = editedTask.description;
+        changedFields.push('description');
+      }
+      if (editedTask.priority !== task.priority) {
+        updates.priority = editedTask.priority;
+        changedFields.push('priority');
+      }
+      if (editedTask.status !== task.status) {
+        updates.status = editedTask.status;
+        changedFields.push('status');
+      }
+      if (editedTask.assigned_to !== task.assigned_to) {
+        updates.assigned_to = editedTask.assigned_to;
+        changedFields.push('assigned_to');
+      }
+      if (editedTask.due_date !== task.due_date) {
+        updates.due_date = editedTask.due_date;
+        changedFields.push('due_date');
+      }
+
+      if (changedFields.length > 0) {
+        await updateTask(updates);
+        
+        // Add system comment about changes
+        const changeDescription = changedFields.map(field => {
+          switch(field) {
+            case 'title': return `Title changed to "${editedTask.title}"`;
+            case 'description': return 'Description updated';
+            case 'priority': return `Priority changed to ${priorityOptions.find(p => p.value === editedTask.priority)?.label || editedTask.priority}`;
+            case 'status': return `Status changed to ${statusOptions.find(s => s.value === editedTask.status)?.label || editedTask.status}`;
+            case 'assigned_to': return `Assigned to ${users.find(u => u.id === editedTask.assigned_to) ? `${users.find(u => u.id === editedTask.assigned_to)?.last_name}, ${users.find(u => u.id === editedTask.assigned_to)?.first_name}` : 'Unassigned'}`;
+            case 'due_date': return `Due date changed to ${editedTask.due_date ? formatInTimeZone(new Date(editedTask.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}`;
+            default: return `${field} updated`;
+          }
+        }).join(', ');
+        
+        addSystemComment(`Task updated: ${changeDescription}`);
+        
+        toast({
+          title: "Task Updated",
+          description: "Your changes have been saved successfully."
+        });
+      }
+      
+      setEditingSummary(false);
+      setEditingDescription(false);
+      setHasUnsavedChanges(false);
+      navigate('/app/tasks');
+      
+    } catch (error) {
+      console.error('Error saving task:', error);
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
   // Get assigned user display name
   const getAssignedUserName = () => {
     if (!task?.assigned_to) return 'Unassigned';
@@ -325,9 +420,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                   {isDuplicating ? 'Duplicating...' : 'Duplicate'}
                 </Button>}
               
-              {canEdit && <Button onClick={handleEdit} className="flex items-center gap-2">
-                  <Edit className="w-4 h-4" />
-                  Edit
+              {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+                  <Save className="w-4 h-4" />
+                  {isLoading ? 'Saving...' : 'Save Changes'}
                 </Button>}
             </div>
           </div>
@@ -339,65 +434,138 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           <div className="space-y-6">
             {/* Summary */}
             <Card>
-              <CardHeader className="py-[8px]">
-                <CardTitle>Summary</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <span className="text-sm text-muted-foreground">Number</span>
-                    <p className="font-medium">{task.task_number || 'N/A'}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Status</span>
-                    <div className="mt-1">
-                      <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
-                        {statusInfo?.label || task.status}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Assigned to</span>
-                    <p className="font-medium">{getAssignedUserName()}</p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Priority</span>
-                    <div className="mt-1">
-                      <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
-                        {priorityInfo?.label || task.priority}
-                      </Badge>
-                    </div>
-                  </div>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Created</span>
-                    <p className="font-medium">
-                      {formatInTimeZone(new Date(task.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                    </p>
-                  </div>
-                  <div>
-                    <span className="text-sm text-muted-foreground">Due Date</span>
-                    <p className="font-medium">
-                      {task.due_date ? formatInTimeZone(new Date(task.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
-                    </p>
-                  </div>
-                </div>
-              </CardContent>
+               <CardHeader className="py-[8px]">
+                 <CardTitle className="flex items-center justify-between">
+                   Summary
+                   {canEdit && <Button variant="ghost" size="sm" onClick={() => setEditingSummary(!editingSummary)}>
+                     <Edit className="w-4 h-4" />
+                   </Button>}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div className="grid grid-cols-2 gap-4">
+                   <div>
+                     <span className="text-sm text-muted-foreground">Number</span>
+                     <p className="font-medium">{task.task_number || 'N/A'}</p>
+                   </div>
+                   <div>
+                     <span className="text-sm text-muted-foreground">Status</span>
+                     <div className="mt-1">
+                       {editingSummary ? (
+                         <Select value={editedTask.status || ''} onValueChange={(value) => handleTaskFieldChange('status', value)}>
+                           <SelectTrigger className="w-full">
+                             <SelectValue placeholder="Select status" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {statusOptions.map(option => (
+                               <SelectItem key={option.value} value={option.value}>
+                                 {option.label}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       ) : (
+                         <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                           {statusInfo?.label || task.status}
+                         </Badge>
+                       )}
+                     </div>
+                   </div>
+                   <div>
+                     <span className="text-sm text-muted-foreground">Assigned to</span>
+                     {editingSummary ? (
+                       <Select value={editedTask.assigned_to || ''} onValueChange={(value) => handleTaskFieldChange('assigned_to', value || null)}>
+                         <SelectTrigger className="w-full mt-1">
+                           <SelectValue placeholder="Select user" />
+                         </SelectTrigger>
+                         <SelectContent>
+                           <SelectItem value="">Unassigned</SelectItem>
+                           {users.map(user => (
+                             <SelectItem key={user.id} value={user.id}>
+                               {user.last_name}, {user.first_name}
+                             </SelectItem>
+                           ))}
+                         </SelectContent>
+                       </Select>
+                     ) : (
+                       <p className="font-medium">{getAssignedUserName()}</p>
+                     )}
+                   </div>
+                   <div>
+                     <span className="text-sm text-muted-foreground">Priority</span>
+                     <div className="mt-1">
+                       {editingSummary ? (
+                         <Select value={editedTask.priority || ''} onValueChange={(value) => handleTaskFieldChange('priority', value)}>
+                           <SelectTrigger className="w-full">
+                             <SelectValue placeholder="Select priority" />
+                           </SelectTrigger>
+                           <SelectContent>
+                             {priorityOptions.map(option => (
+                               <SelectItem key={option.value} value={option.value}>
+                                 {option.label}
+                               </SelectItem>
+                             ))}
+                           </SelectContent>
+                         </Select>
+                       ) : (
+                         <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                           {priorityInfo?.label || task.priority}
+                         </Badge>
+                       )}
+                     </div>
+                   </div>
+                   <div>
+                     <span className="text-sm text-muted-foreground">Created</span>
+                     <p className="font-medium">
+                       {formatInTimeZone(new Date(task.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                     </p>
+                   </div>
+                   <div>
+                     <span className="text-sm text-muted-foreground">Due Date</span>
+                     {editingSummary ? (
+                       <Input 
+                         type="datetime-local"
+                         value={editedTask.due_date ? new Date(editedTask.due_date).toISOString().slice(0, 16) : ''}
+                         onChange={(e) => handleTaskFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                         className="mt-1"
+                       />
+                     ) : (
+                       <p className="font-medium">
+                         {task.due_date ? formatInTimeZone(new Date(task.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
+                       </p>
+                     )}
+                   </div>
+                 </div>
+               </CardContent>
             </Card>
 
             {/* Details */}
-            <Card>
-              <CardHeader className="py-[8px]">
-                <CardTitle>Task Description</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <div>
-                  
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
-                    {task.description || 'No description provided.'}
-                  </p>
-                </div>
-              </CardContent>
-            </Card>
+             <Card>
+               <CardHeader className="py-[8px]">
+                 <CardTitle className="flex items-center justify-between">
+                   Task Description
+                   {canEdit && <Button variant="ghost" size="sm" onClick={() => setEditingDescription(!editingDescription)}>
+                     <Edit className="w-4 h-4" />
+                   </Button>}
+                 </CardTitle>
+               </CardHeader>
+               <CardContent>
+                 <div>
+                   {editingDescription ? (
+                     <Textarea 
+                       value={editedTask.description || ''} 
+                       onChange={(e) => handleTaskFieldChange('description', e.target.value)}
+                       className="min-h-[120px]"
+                       placeholder="Enter task description..."
+                     />
+                   ) : (
+                     <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                       {task.description || 'No description provided.'}
+                     </p>
+                   )}
+                 </div>
+               </CardContent>
+             </Card>
 
             {/* Attachments */}
             <Card>
