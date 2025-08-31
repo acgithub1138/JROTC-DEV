@@ -455,7 +455,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             case 'priority': return `Priority changed to ${priorityOptions.find(p => p.value === editedRecord.priority)?.label || editedRecord.priority}`;
             case 'status': return `Status changed to ${statusOptions.find(s => s.value === editedRecord.status)?.label || editedRecord.status}`;
             case 'assigned_to': return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
-            case 'due_date': return `Due date changed to ${editedRecord.due_date ? formatInTimeZone(new Date(editedRecord.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}`;
+            case 'due_date': return `Due date changed to ${editedRecord.due_date ? formatInTimeZone(new Date(editedRecord.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}`;
             default: return `${field} updated`;
           }
         }).join(', ');
@@ -737,10 +737,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                      </div>
                    </div>
                    <div>
-                      <span className="text-sm text-muted-foreground">Created</span>
-                      <p className="font-medium">
-                        {formatInTimeZone(new Date(record.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                      </p>
+                       <span className="text-sm text-muted-foreground">Created</span>
+                       <p className="font-medium">
+                         {formatInTimeZone(new Date(record.created_at), 'America/New_York', 'M/d/yyyy')}
+                       </p>
                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Due Date</span>
@@ -753,9 +753,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                            className="mt-1"
                          />
                        ) : (
-                        <p className="font-medium">
-                          {record.due_date ? formatInTimeZone(new Date(record.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
-                        </p>
+                         <p className="font-medium">
+                           {record.due_date ? formatInTimeZone(new Date(record.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}
+                         </p>
                       )}
                    </div>
                  </div>
