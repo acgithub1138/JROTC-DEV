@@ -45,6 +45,7 @@ import CompetitionManagementPage from '@/components/competition-management/Compe
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 import AnnouncementManagementPage from '@/components/announcements/AnnouncementManagementPage';
 import { ChainOfCommandRecordPage } from '@/components/cadets/ChainOfCommandRecordPage';
+import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 
@@ -213,6 +214,7 @@ const MainApplication = () => {
           <Route path="cadets/service_record" element={<CommunityServiceCreatePage />} />
           <Route path="cadets/service_record_edit/:id" element={<CommunityServiceEditPage />} />
             <Route path="cadets/coc_record" element={<ChainOfCommandRecordPage />} />
+            <Route path="teams/team_record" element={<TeamRecordPage />} />
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />

@@ -6,13 +6,12 @@ import { useTeamMutations } from './hooks/useTeamMutations';
 import { TeamsPageHeader } from './components/TeamsPageHeader';
 import { TeamsTable } from './components/TeamsTable';
 import { TeamCards } from './components/TeamCards';
-import { AddTeamDialog } from './components/AddTeamDialog';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { EditTeamDialog } from './components/EditTeamDialog';
 import { SendEmailDialog } from './components/SendEmailDialog';
 import { ViewTeamMembersDialog } from './components/ViewTeamMembersDialog';
-import { TeamWithMembers, NewTeam } from './types';
+import { TeamWithMembers } from './types';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useNavigate } from 'react-router-dom';
 const TeamsManagementPage = () => {
   const {
     teams,
@@ -20,52 +19,21 @@ const TeamsManagementPage = () => {
     refetch
   } = useTeams();
   const {
-    createTeam,
-    updateTeam,
     deleteTeam
   } = useTeamMutations();
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const { canCreate, canEdit: canUpdate, canDelete } = useTablePermissions('teams');
-  const [addDialogOpen, setAddDialogOpen] = useState(false);
-  const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [sendEmailDialogOpen, setSendEmailDialogOpen] = useState(false);
   const [viewMembersDialogOpen, setViewMembersDialogOpen] = useState(false);
-  const [editingTeam, setEditingTeam] = useState<TeamWithMembers | null>(null);
   const [emailTeam, setEmailTeam] = useState<TeamWithMembers | null>(null);
   const [viewingTeam, setViewingTeam] = useState<TeamWithMembers | null>(null);
-  const [newTeam, setNewTeam] = useState<NewTeam>({
-    name: '',
-    description: '',
-    team_lead_id: '',
-    member_ids: []
-  });
-  const handleAddTeam = async (teamData: NewTeam) => {
-    const success = await createTeam(teamData);
-    if (success) {
-      setAddDialogOpen(false);
-      setNewTeam({
-        name: '',
-        description: '',
-        team_lead_id: '',
-        member_ids: []
-      });
-      refetch();
-    }
-    return success;
+  const handleAddTeam = () => {
+    navigate('/app/teams/team_record');
   };
+
   const handleEditTeam = (team: TeamWithMembers) => {
-    setEditingTeam(team);
-    setEditDialogOpen(true);
-  };
-  const handleUpdateTeam = async (teamData: Partial<TeamWithMembers>) => {
-    if (!editingTeam) return false;
-    const success = await updateTeam(editingTeam.id, teamData);
-    if (success) {
-      setEditDialogOpen(false);
-      setEditingTeam(null);
-      refetch();
-    }
-    return success;
+    navigate(`/app/teams/team_record?id=${team.id}`);
   };
   const handleDeleteTeam = async (teamId: string) => {
     const success = await deleteTeam(teamId);
@@ -94,7 +62,7 @@ const TeamsManagementPage = () => {
   }
   return <div className="p-6 space-y-6">
       <TeamsPageHeader 
-        onAddTeam={() => setAddDialogOpen(true)} 
+        onAddTeam={handleAddTeam} 
         canCreate={canCreate} 
       />
 
@@ -130,9 +98,6 @@ const TeamsManagementPage = () => {
         </CardContent>
       </Card>
 
-      <AddTeamDialog open={addDialogOpen} onOpenChange={setAddDialogOpen} newTeam={newTeam} setNewTeam={setNewTeam} onAddTeam={handleAddTeam} />
-
-      <EditTeamDialog open={editDialogOpen} onOpenChange={setEditDialogOpen} team={editingTeam} onUpdateTeam={handleUpdateTeam} />
 
       <SendEmailDialog open={sendEmailDialogOpen} onOpenChange={setSendEmailDialogOpen} team={emailTeam} />
 
