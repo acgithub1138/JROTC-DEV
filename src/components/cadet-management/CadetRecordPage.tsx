@@ -341,32 +341,7 @@ export const CadetRecordPage: React.FC = () => {
             <CardHeader className="py-3">
               <CardTitle>Status Information</CardTitle>
             </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <div className="mt-1">
-                    <Badge variant={currentCadet.active ? "default" : "secondary"}>
-                      {currentCadet.active ? "Active" : "Inactive"}
-                    </Badge>
-                  </div>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Role</span>
-                  <p className="font-medium">{currentCadet.role || 'Cadet'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Start Year</span>
-                  <p className="font-medium">{(currentCadet as any).start_year || 'Not set'}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Joined</span>
-                  <p className="font-medium">
-                    {currentCadet.created_at ? format(new Date(currentCadet.created_at), 'MMM dd, yyyy') : 'Unknown'}
-                  </p>
-                </div>
-              </div>
-            </CardContent>
+            
           </Card>
         </div>
 
