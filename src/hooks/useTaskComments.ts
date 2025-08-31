@@ -4,11 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { TaskComment } from './useTasks';
+import { useCommentEmailService } from '@/hooks/email/useCommentEmailService';
 
 export const useTaskComments = (taskId: string) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { processCommentEmailRules } = useCommentEmailService();
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['task-comments', taskId],
@@ -61,6 +63,16 @@ export const useTaskComments = (taskId: string) => {
         title: "Comment added",
         description: "Your comment has been added successfully.",
       });
+      
+      // Trigger email notification for comment
+      if (userProfile?.id && userProfile?.school_id) {
+        processCommentEmailRules({
+          sourceTable: 'tasks',
+          recordId: taskId,
+          schoolId: userProfile.school_id,
+          commenterId: userProfile.id,
+        });
+      }
     },
     onError: (error) => {
       toast({

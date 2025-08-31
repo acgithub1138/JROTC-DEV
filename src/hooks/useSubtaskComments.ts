@@ -2,6 +2,7 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { useCommentEmailService } from '@/hooks/email/useCommentEmailService';
 
 export interface SubtaskComment {
   id: string;
@@ -20,6 +21,7 @@ export const useSubtaskComments = (subtaskId: string) => {
   const { userProfile } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const { processCommentEmailRules } = useCommentEmailService();
 
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ['subtask-comments', subtaskId],
@@ -72,6 +74,16 @@ export const useSubtaskComments = (subtaskId: string) => {
         title: "Comment added",
         description: "Your comment has been added successfully.",
       });
+      
+      // Trigger email notification for comment
+      if (userProfile?.id && userProfile?.school_id) {
+        processCommentEmailRules({
+          sourceTable: 'subtasks',
+          recordId: subtaskId,
+          schoolId: userProfile.school_id,
+          commenterId: userProfile.id,
+        });
+      }
     },
     onError: (error) => {
       toast({

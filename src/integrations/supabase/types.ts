@@ -3896,6 +3896,15 @@ export type Database = {
         Args: Record<PropertyKey, never>
         Returns: undefined
       }
+      process_comment_email_notification: {
+        Args: {
+          commenter_id_param: string
+          record_id_param: string
+          school_id_param: string
+          source_table_param: string
+        }
+        Returns: Json
+      }
       process_email_batch: {
         Args: { batch_size?: number }
         Returns: {
