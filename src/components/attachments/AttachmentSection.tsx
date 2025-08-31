@@ -40,9 +40,11 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   if (showTitleWithCount) {
     return (
       <div className="space-y-3">
-         <div className="flex items-center justify-center gap-2">
-
-           Attachments
+         <div className="flex items-center justify-between">
+           <div className="">
+             <Paperclip className="h-4 w-4" />
+             <span>Attachments {attachments.length > 0 && `(${attachments.length})`}</span>
+           </div>
            {canEdit && !showUpload && (
              <Button
                variant="ghost"
