@@ -170,7 +170,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
             return (
               <FormItem className="flex items-center gap-4">
                 <FormLabel className="w-24 text-right flex-shrink-0">
-                  Grade</br>{isAutoCalculated && "(Auto-calculated)"}
+                  <div>Grade</div>{isAutoCalculated && "(Auto-calculated)"}
                 </FormLabel>
                 <div className="flex-1">
                   <Select 
