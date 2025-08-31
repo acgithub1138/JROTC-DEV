@@ -39,7 +39,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                 </SelectTrigger>
               </FormControl>
               <SelectContent>
-                <SelectItem value="">No role selected</SelectItem>
+                <SelectItem value="none">No role selected</SelectItem>
                 {roleOptions.map(roleOption => (
                   <SelectItem key={roleOption.value} value={roleOption.value}>
                     {roleOption.label}
@@ -78,7 +78,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">No start year selected</SelectItem>
+                  <SelectItem value="none">No start year selected</SelectItem>
                   {generateYearOptions().map(year => (
                     <SelectItem key={year} value={year.toString()}>
                       {year}
@@ -115,7 +115,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                     </SelectTrigger>
                   </FormControl>
                   <SelectContent>
-                    <SelectItem value="">No grade selected</SelectItem>
+                    <SelectItem value="none">No grade selected</SelectItem>
                     {gradeOptions.map(grade => (
                       <SelectItem key={grade} value={grade}>
                         {grade}
@@ -145,7 +145,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">No flight selected</SelectItem>
+                  <SelectItem value="none">No flight selected</SelectItem>
                   {flightOptions.map(flight => (
                     <SelectItem key={flight} value={flight}>
                       {flight}
@@ -171,7 +171,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">No year selected</SelectItem>
+                  <SelectItem value="none">No year selected</SelectItem>
                   {cadetYearOptions.map(year => (
                     <SelectItem key={year} value={year}>
                       {year}
@@ -197,7 +197,7 @@ export const CadetRoleGradeFields: React.FC<CadetRoleGradeFieldsProps> = ({
                   </SelectTrigger>
                 </FormControl>
                 <SelectContent>
-                  <SelectItem value="">No rank</SelectItem>
+                  <SelectItem value="none">No rank</SelectItem>
                   {ranks.map(rank => (
                     <SelectItem 
                       key={rank.id} 

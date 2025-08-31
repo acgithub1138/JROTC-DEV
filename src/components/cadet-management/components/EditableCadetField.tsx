@@ -32,7 +32,7 @@ export const EditableCadetField: React.FC<EditableCadetFieldProps> = ({
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
-          <SelectItem value="">Not set</SelectItem>
+          <SelectItem value="none">Not set</SelectItem>
           {options.map(option => (
             <SelectItem key={option} value={option}>
               {option}
