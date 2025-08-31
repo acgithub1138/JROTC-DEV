@@ -2,6 +2,7 @@ import React from 'react';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { History, User, FileText } from 'lucide-react';
 import { useCadetHistory } from '@/hooks/useCadetRecords';
 
@@ -73,41 +74,44 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {history.map((entry, index) => (
-            <div key={entry.id} className="flex gap-3">
-              {/* Timeline indicator */}
-              <div className="flex flex-col items-center">
-                <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted">
-                  {getTypeIcon(entry.type)}
-                </div>
-                {index < history.length - 1 && (
-                  <div className="mt-2 h-8 w-0.5 bg-border"></div>
-                )}
-              </div>
-              
-              {/* Content */}
-              <div className="flex-1 space-y-2 pb-4">
-                <div className="flex items-center justify-between">
-                  <h4 className="font-semibold">{entry.description}</h4>
-                  <div className="flex items-center gap-2">
-                    <Badge variant={getTypeBadgeVariant(entry.type)}>
-                      {entry.type}
-                    </Badge>
+        <div className="overflow-x-auto">
+          <Table>
+            <TableHeader>
+              <TableRow>
+                <TableHead>Type</TableHead>
+                <TableHead>Description</TableHead>
+                <TableHead>Details</TableHead>
+                <TableHead>Date</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody>
+              {history.map((entry) => (
+                <TableRow key={entry.id} className="hover:bg-muted/50">
+                  <TableCell>
+                    <div className="flex items-center gap-2">
+                      {getTypeIcon(entry.type)}
+                      <Badge variant={getTypeBadgeVariant(entry.type)}>
+                        {entry.type}
+                      </Badge>
+                    </div>
+                  </TableCell>
+                  <TableCell>
+                    <span className="font-semibold">{entry.description}</span>
+                  </TableCell>
+                  <TableCell>
                     <span className="text-sm text-muted-foreground">
-                      {format(new Date(entry.date), 'PPp')}
+                      {entry.details || '-'}
                     </span>
-                  </div>
-                </div>
-                
-                {entry.details && (
-                  <div className="text-sm text-muted-foreground">
-                    {entry.details}
-                  </div>
-                )}
-              </div>
-            </div>
-          ))}
+                  </TableCell>
+                  <TableCell>
+                    <span className="text-sm">
+                      {format(new Date(entry.date), 'MMM dd, yyyy HH:mm')}
+                    </span>
+                  </TableCell>
+                </TableRow>
+              ))}
+            </TableBody>
+          </Table>
         </div>
       </CardContent>
     </Card>
