@@ -288,34 +288,6 @@ export const CadetRecordPage: React.FC = () => {
       <CadetOverviewCards cadet={currentCadet} />
 
       {/* Main Content - Two Column Layout */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
-        {/* Left Column */}
-        
-
-        {/* Right Column */}
-        <div className="space-y-6">
-          {/* Additional Information */}
-          
-
-          {/* Quick Actions */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle>Quick Actions</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-2">
-                {canEditCadet && <Button variant="outline" className="w-full justify-start" onClick={() => handleModeChange('edit')}>
-                    <Edit className="w-4 h-4 mr-2" />
-                    Edit Information
-                  </Button>}
-                <Button variant="outline" className="w-full justify-start" disabled>
-                  <GraduationCap className="w-4 h-4 mr-2" />
-                  View Records (Coming Soon)
-                </Button>
-              </div>
-            </CardContent>
-          </Card>
-        </div>
-      </div>
+      
     </div>;
 };
