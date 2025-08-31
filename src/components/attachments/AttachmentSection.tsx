@@ -39,7 +39,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
 
   if (showTitleWithCount) {
     return (
-      <div className="space-y-3">
+      <div className="py-[8px]">
          <div className="flex items-center justify-between">
           Attachments
            {canEdit && !showUpload && (
