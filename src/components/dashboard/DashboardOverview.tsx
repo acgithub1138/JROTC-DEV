@@ -7,13 +7,11 @@ import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { useToast } from '@/hooks/use-toast';
-
 import { TaskForm } from '@/components/tasks/TaskForm';
 import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
 import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
 import IncidentForm from '@/components/incident-management/IncidentForm';
-
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
 import { CreateSchoolDialog } from '@/components/admin/CreateSchoolDialog';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
@@ -27,16 +25,26 @@ import { useTaskPermissions, useEventPermissions, useDashboardPermissions, useUs
 import { AnnouncementsWidget } from './widgets/AnnouncementsWidget';
 const DashboardOverview = () => {
   const navigate = useNavigate();
-  const { userProfile } = useAuth();
-  const { toast } = useToast();
-  const { isNative, platform } = useCapacitor();
-  const { canCreate: canCreateTasks } = useTaskPermissions();
-  const { canCreate: canCreateEvents } = useEventPermissions();
-  
+  const {
+    userProfile
+  } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    isNative,
+    platform
+  } = useCapacitor();
+  const {
+    canCreate: canCreateTasks
+  } = useTaskPermissions();
+  const {
+    canCreate: canCreateEvents
+  } = useEventPermissions();
   const {
     canViewAnalytics,
     canViewStatsCadets,
-    canViewStatsTasks, 
+    canViewStatsTasks,
     canViewStatsBudget,
     canViewStatsInventory,
     canViewStatsIncidents,
@@ -49,29 +57,29 @@ const DashboardOverview = () => {
     canViewAnnouncements,
     canViewMobileFeatures
   } = useDashboardPermissions();
-  const { canCreate: canCreateUsers } = useUserPermissions();
-  
+  const {
+    canCreate: canCreateUsers
+  } = useUserPermissions();
+
   // Derived permissions for UI logic (legacy - to be removed after permission migration)
   const isCommandStaffOrAbove = userProfile?.role === 'admin' || userProfile?.role === 'instructor' || userProfile?.role === 'command_staff';
   const isCadet = userProfile?.role === 'cadet';
-  
+
   // Memoize filters to prevent infinite re-renders
   const eventFilters = useMemo(() => ({
     eventType: '',
     assignedTo: ''
   }), []);
-  
   const {
     data: stats,
     isLoading: statsLoading
   } = useDashboardStats();
-
   const {
     events,
     isLoading: eventsLoading,
     createEvent
   } = useEvents(eventFilters);
-  
+
   // Import budget hooks for transaction creation
   const budgetFilters = useMemo(() => ({
     search: '',
@@ -82,7 +90,9 @@ const DashboardOverview = () => {
     showArchived: false,
     budgetYear: ''
   }), []);
-  const { createTransaction } = useBudgetTransactions(budgetFilters);
+  const {
+    createTransaction
+  } = useBudgetTransactions(budgetFilters);
 
   // Filter and sort upcoming events
   const upcomingEvents = useMemo(() => {
@@ -104,28 +114,25 @@ const DashboardOverview = () => {
     console.log('Filtered upcoming events:', filtered);
     return filtered;
   }, [events, eventsLoading]);
-  
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
   const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
   const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
-  
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
-
   const handleCreateTransaction = async (data: any) => {
     try {
       await createTransaction(data);
       toast({
         title: "Success",
-        description: `${data.category === 'income' ? 'Income' : 'Expense'} created successfully`,
+        description: `${data.category === 'income' ? 'Income' : 'Expense'} created successfully`
       });
     } catch (error) {
       toast({
         title: "Error",
         description: `Failed to create ${data.category === 'income' ? 'income' : 'expense'}`,
-        variant: "destructive",
+        variant: "destructive"
       });
     }
   };
@@ -218,18 +225,14 @@ const DashboardOverview = () => {
         bgColor: 'bg-pink-100'
       });
     }
-
     return baseStats;
   };
-
   const statsConfig = getStatsConfig();
-  
+
   // Permission-based Quick Actions widget
   const renderQuickActionsWidget = () => {
     if (!canViewQuickActions) return null;
-    
-    return (
-      <Card className="hover:shadow-md transition-shadow col-span-2">
+    return <Card className="hover:shadow-md transition-shadow col-span-2">
         <CardContent className="p-6 py-[12px]">
           <div className="space-y-3">
             <div className="flex items-center mb-3">
@@ -238,36 +241,27 @@ const DashboardOverview = () => {
             </div>
             <div className="grid grid-cols-2 gap-2">
               {/* Admin-specific actions */}
-              {userProfile?.role === 'admin' && (
-                <>
+              {userProfile?.role === 'admin' && <>
                   <button onClick={() => setIsCreateSchoolOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Building className="w-4 h-4 text-blue-600 mr-2" />
                     <p className="font-medium text-sm">Create School</p>
                   </button>
-                  {canCreateUsers && (
-                    <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  {canCreateUsers && <button onClick={() => setIsCreateUserOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                       <Users className="w-4 h-4 text-green-600 mr-2" />
                       <p className="font-medium text-sm">Create User</p>
-                    </button>
-                  )}
-                </>
-              )}
+                    </button>}
+                </>}
               {/* Non-admin actions */}
-              {userProfile?.role !== 'admin' && canCreateTasks && (
-                <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+              {userProfile?.role !== 'admin' && canCreateTasks && <button onClick={() => setIsCreateTaskOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <CheckSquare className="w-4 h-4 text-green-600 mr-2" />
                   <p className="font-medium text-sm">Create Task</p>
-                </button>
-              )}
-              {userProfile?.role !== 'admin' && canCreateEvents && (
-                <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                </button>}
+              {userProfile?.role !== 'admin' && canCreateEvents && <button onClick={() => setIsCreateEventOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                   <Calendar className="w-4 h-4 text-purple-600 mr-2" />
                   <p className="font-medium text-sm">Create Event</p>
-                </button>
-              )}
+                </button>}
               {/* Instructor-only actions */}
-              {userProfile?.role === 'instructor' && (
-                <>
+              {userProfile?.role === 'instructor' && <>
                   <button onClick={() => setIsCreateIncidentOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
@@ -280,15 +274,12 @@ const DashboardOverview = () => {
                     <DollarSign className="w-4 h-4 text-red-600 mr-2" />
                     <p className="font-medium text-sm">Add Expense</p>
                   </button>
-                </>
-              )}
+                </>}
             </div>
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   };
-
   return <div className="p-6 space-y-6">
       {/* Welcome Header with Mobile Status */}
       <div className="flex justify-between items-center">
@@ -297,19 +288,15 @@ const DashboardOverview = () => {
           <p className="text-muted-foreground">
             Welcome back, {userProfile?.first_name}! Here's an overview of your JROTC unit.
           </p>
-          {isNative && (
-            <Badge variant="secondary" className="mt-2">
+          {isNative && <Badge variant="secondary" className="mt-2">
               <Smartphone className="w-3 h-3 mr-1" />
               Mobile App - {platform}
-            </Badge>
-          )}
+            </Badge>}
         </div>
       </div>
 
       {/* Announcements Widget - Top of Dashboard */}
-      {canViewAnnouncements && (
-        <AnnouncementsWidget />
-      )}
+      {canViewAnnouncements && <AnnouncementsWidget />}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {statsConfig.map(stat => {
         const Icon = stat.icon;
@@ -319,7 +306,7 @@ const DashboardOverview = () => {
                   <div>
                     <p className="text-sm font-medium text-gray-600">{stat.title}</p>
                     <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                    <p className="text-sm text-gray-500 mt-1">{stat.change}</p>
+                    
                   </div>
                   <div className={`p-3 rounded-full ${stat.bgColor}`}>
                     <Icon className={`w-6 h-6 ${stat.color}`} />
@@ -337,11 +324,7 @@ const DashboardOverview = () => {
         {/* Left Column: My Tasks and Quick Actions for non-command staff */}
         <div className="space-y-6">
           {/* My Cadets Widget for parents, My Tasks for others */}
-          {canViewMyCadets && userProfile?.role === 'parent' ? (
-            <MyCadetsWidget />
-          ) : canViewMyTasks && userProfile?.role !== 'admin' ? (
-            <MyTasksWidget />
-          ) : null}
+          {canViewMyCadets && userProfile?.role === 'parent' ? <MyCadetsWidget /> : canViewMyTasks && userProfile?.role !== 'admin' ? <MyTasksWidget /> : null}
           {/* Quick Actions Widget for non-command staff roles (instructors/admins) */}
           {userProfile?.role !== 'command_staff' && renderQuickActionsWidget()}
         </div>
@@ -355,8 +338,7 @@ const DashboardOverview = () => {
           {isNative && canViewMobileFeatures && <MobileEnhancements />}
           
           {/* Upcoming Events */}
-          {canViewUpcomingEvents && (
-            <Card>
+          {canViewUpcomingEvents && <Card>
             <CardHeader>
               <CardTitle className="flex items-center">
                 <Calendar className="w-5 h-5 mr-2 text-primary" />
@@ -390,69 +372,45 @@ const DashboardOverview = () => {
                   </div>}
               </div>
             </CardContent>
-          </Card>
-          )}
+          </Card>}
         </div>
       </div>
 
       {/* Modals - Only show for roles that can use them */}
-      {userProfile?.role === 'instructor' && (
-        <>
+      {userProfile?.role === 'instructor' && <>
 
           <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
 
           <AddExpenseDialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} onSubmit={handleCreateTransaction} />
 
-          <IncidentForm 
-            isOpen={isCreateIncidentOpen} 
-            onClose={() => setIsCreateIncidentOpen(false)} 
-          />
-        </>
-      )}
+          <IncidentForm isOpen={isCreateIncidentOpen} onClose={() => setIsCreateIncidentOpen(false)} />
+        </>}
 
-      {canCreateTasks && (
-        <TaskForm open={isCreateTaskOpen} onOpenChange={setIsCreateTaskOpen} mode="create" />
-      )}
+      {canCreateTasks && <TaskForm open={isCreateTaskOpen} onOpenChange={setIsCreateTaskOpen} mode="create" />}
 
-      {canCreateEvents && (
-        <EventDialog 
-          open={isCreateEventOpen} 
-          onOpenChange={setIsCreateEventOpen} 
-          event={null} 
-          selectedDate={null} 
-          onSubmit={async (eventData: any) => {
-            try {
-              await createEvent(eventData);
-              toast({
-                title: "Success",
-                description: "Event created successfully",
-              });
-              setIsCreateEventOpen(false);
-            } catch (error) {
-              toast({
-                title: "Error",
-                description: "Failed to create event",
-                variant: "destructive",
-              });
-            }
-          }} 
-        />
-      )}
+      {canCreateEvents && <EventDialog open={isCreateEventOpen} onOpenChange={setIsCreateEventOpen} event={null} selectedDate={null} onSubmit={async (eventData: any) => {
+      try {
+        await createEvent(eventData);
+        toast({
+          title: "Success",
+          description: "Event created successfully"
+        });
+        setIsCreateEventOpen(false);
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to create event",
+          variant: "destructive"
+        });
+      }
+    }} />}
 
 
       {/* Admin-only modals */}
-      {userProfile?.role === 'admin' && (
-        <>
-          <CreateUserDialog 
-            open={isCreateUserOpen} 
-            onOpenChange={setIsCreateUserOpen} 
-          />
-          <CreateSchoolDialog 
-            open={isCreateSchoolOpen} 
-            onOpenChange={setIsCreateSchoolOpen} 
-          />
-        </>
-      )}
+      {userProfile?.role === 'admin' && <>
+          <CreateUserDialog open={isCreateUserOpen} onOpenChange={setIsCreateUserOpen} />
+          <CreateSchoolDialog open={isCreateSchoolOpen} onOpenChange={setIsCreateSchoolOpen} />
+        </>}
     </div>;
 };
 export default DashboardOverview;
