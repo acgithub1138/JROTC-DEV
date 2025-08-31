@@ -1,5 +1,4 @@
 import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -38,7 +37,6 @@ interface UniformInspection {
 export const UniformInspectionTab = ({
   searchTerm: externalSearchTerm = ''
 }: UniformInspectionTabProps) => {
-  const navigate = useNavigate();
   const {
     userProfile
   } = useAuth();
@@ -167,7 +165,7 @@ export const UniformInspectionTab = ({
 
         {/* Add Button */}
         <div className="flex gap-2">
-          {canCreate && <Button variant="outline" onClick={() => navigate('/app/cadets/inspection_create')}>
+          {canCreate && <Button variant="outline" onClick={() => setShowBulkDialog(true)}>
               <Plus className="w-4 h-4 mr-2" />
               Add Inspection
             </Button>}
@@ -235,12 +233,13 @@ export const UniformInspectionTab = ({
                       {inspection.notes || '-'}
                     </TableCell>
                     {(canUpdate || canDelete) && <TableCell className="text-center">
-                        <TableActionButtons 
-                          canEdit={canUpdate} 
-                          canDelete={canDelete} 
-                          onEdit={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
-                          onDelete={() => navigate(`/app/cadets/inspection_edit?id=${inspection.id}`)}
-                        />
+                        <TableActionButtons canEdit={canUpdate} canDelete={canDelete} onEdit={() => {
+                  // TODO: Implement edit functionality
+                  console.log('Edit inspection:', inspection.id);
+                }} onDelete={() => {
+                  // TODO: Implement delete functionality
+                  console.log('Delete inspection:', inspection.id);
+                }} />
                       </TableCell>}
                   </TableRow>)}
               </TableBody>
@@ -248,5 +247,9 @@ export const UniformInspectionTab = ({
           </CardContent>
         </Card>}
 
+      {/* Bulk Dialog */}
+      <UniformInspectionBulkDialog open={showBulkDialog} onOpenChange={setShowBulkDialog} onSuccess={() => {
+      // Refresh the data
+    }} />
     </div>;
 };
