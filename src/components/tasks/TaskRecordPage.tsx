@@ -568,10 +568,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       try {
         await addSystemComment(newComment);
         setNewComment('');
-        toast({
-          title: "Comment Added",
-          description: "Your comment has been added successfully."
-        });
+        // Toast is handled by the mutation hook
       } catch (error) {
         toast({
           title: "Error",
