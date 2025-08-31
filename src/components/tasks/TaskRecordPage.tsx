@@ -77,7 +77,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Local state
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
   const [isLoading, setIsLoading] = useState(false);
-  const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true);
+  const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true); // Default: New -> Old
 
   // Permission checks
   useEffect(() => {
