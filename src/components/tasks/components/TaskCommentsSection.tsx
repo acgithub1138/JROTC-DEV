@@ -73,6 +73,22 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       );
     }
     
+    // Convert CSV-like lists to bulleted lists
+    // Look for patterns like "A, B, C" and convert to bullet points
+    const csvPattern = /(.+?), (.+?), (.+)/;
+    if (csvPattern.test(text) && !text.includes('changed from')) {
+      const items = text.split(', ').map(item => item.trim());
+      if (items.length > 2) {
+        return (
+          <ul className="list-disc list-inside space-y-1">
+            {items.map((item, index) => (
+              <li key={index} className="text-sm">{item}</li>
+            ))}
+          </ul>
+        );
+      }
+    }
+    
     return text;
   };
 
@@ -137,10 +153,12 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
             <div className="flex items-center justify-between mb-2">
               <div className="flex items-center gap-2">
                 <span className="font-medium text-sm">
-                  {comment.user_profile.first_name} {comment.user_profile.last_name}
+                  {comment.user_profile.last_name}, {comment.user_profile.first_name}
                 </span>
-                {comment.is_system_comment && (
-                  <Badge variant="secondary" className="text-xs">System</Badge>
+                {comment.is_system_comment ? (
+                  <Badge variant="secondary" className="text-xs">Update</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs">Comment</Badge>
                 )}
               </div>
               <span className="text-xs text-gray-500">
