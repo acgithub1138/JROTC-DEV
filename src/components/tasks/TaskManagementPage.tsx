@@ -44,18 +44,16 @@ const TaskManagementPage: React.FC = () => {
   const handleTaskSelect = (task: Task | Subtask) => {
     // Check if user has view permissions
     if (canView) {
-      // Navigate to view page for both tasks and subtasks
-      const taskId = 'parent_task_id' in task ? task.parent_task_id : task.id;
-      navigate(`/app/tasks/task_record?id=${taskId}`);
+      // Navigate to view page for both tasks and subtasks using their own ID
+      navigate(`/app/tasks/task_record?id=${task.id}`);
     } else {
       setShowAccessDenied(true);
     }
   };
 
   const handleEditTask = (task: Task | Subtask) => {
-    // Navigate to edit page
-    const taskId = 'parent_task_id' in task ? task.parent_task_id : task.id;
-    navigate(`/app/tasks/task_record?mode=edit&id=${taskId}`);
+    // Navigate to edit page using the record's own ID
+    navigate(`/app/tasks/task_record?mode=edit&id=${task.id}`);
   };
 
   const handleCreateTask = () => {
