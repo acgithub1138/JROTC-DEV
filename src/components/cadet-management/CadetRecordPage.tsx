@@ -276,7 +276,7 @@ export const CadetRecordPage: React.FC = () => {
                 </span>
               </h1>
               <Badge variant="secondary" className="text-sm">
-                {currentCadet.role_id.name || 'No Role'}
+                {currentCadet.role_id?.role_name || 'No Role'}
               </Badge>
             </div>
             <p className="text-muted-foreground">{currentCadet.email}</p>
