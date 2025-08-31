@@ -22,9 +22,7 @@ import { Input } from '@/components/ui/input';
 import { useIncidentPriorityOptions, useIncidentCategoryOptions, useIncidentStatusOptions } from '@/hooks/incidents/useIncidentsQuery';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import type { Incident } from '@/hooks/incidents/types';
-
 type IncidentRecordMode = 'create' | 'edit' | 'view';
-
 const getStatusBadgeClass = (status: string) => {
   switch (status.toLowerCase()) {
     case 'open':
@@ -39,7 +37,6 @@ const getStatusBadgeClass = (status: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 const getPriorityBadgeClass = (priority: string) => {
   switch (priority.toLowerCase()) {
     case 'low':
@@ -54,7 +51,6 @@ const getPriorityBadgeClass = (priority: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 const getCategoryBadgeClass = (category: string) => {
   switch (category.toLowerCase()) {
     case 'issue':
@@ -69,29 +65,50 @@ const getCategoryBadgeClass = (category: string) => {
       return 'bg-gray-100 text-gray-800';
   }
 };
-
 export const IncidentRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
+
   // Extract parameters from URL
-  const mode = (searchParams.get('mode') as IncidentRecordMode) || 'view';
+  const mode = searchParams.get('mode') as IncidentRecordMode || 'view';
   const incidentId = searchParams.get('id');
-  
+
   // Permissions
-  const { canCreate, canUpdate, canUpdateAssigned, canView } = useIncidentPermissions();
-  
+  const {
+    canCreate,
+    canUpdate,
+    canUpdateAssigned,
+    canView
+  } = useIncidentPermissions();
+
   // Data
-  const { incidents, isLoading: incidentsLoading } = useIncidents();
+  const {
+    incidents,
+    isLoading: incidentsLoading
+  } = useIncidents();
   const incident = incidents.find(i => i.id === incidentId);
-  const { data: statusOptions = [] } = useIncidentStatusOptions();
-  const { data: priorityOptions = [] } = useIncidentPriorityOptions();
-  const { data: categoryOptions = [] } = useIncidentCategoryOptions();
-  const { users: allUsers } = useSchoolUsers();
-  const { users: activeUsers } = useSchoolUsers(true);
-  
+  const {
+    data: statusOptions = []
+  } = useIncidentStatusOptions();
+  const {
+    data: priorityOptions = []
+  } = useIncidentPriorityOptions();
+  const {
+    data: categoryOptions = []
+  } = useIncidentCategoryOptions();
+  const {
+    users: allUsers
+  } = useSchoolUsers();
+  const {
+    users: activeUsers
+  } = useSchoolUsers(true);
+
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<IncidentRecordMode>(mode);
   const [editedIncident, setEditedIncident] = useState<any>(incident || {});
@@ -102,12 +119,12 @@ export const IncidentRecordPage: React.FC = () => {
   const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true);
   const [newComment, setNewComment] = useState('');
   const [isAddingComment, setIsAddingComment] = useState(false);
-  
+
   // Comments (only if incident exists)
-  const { 
-    comments, 
+  const {
+    comments,
     isLoading: commentsLoading,
-    addComment 
+    addComment
   } = useIncidentComments(incident?.id || '');
 
   // Update currentMode when URL mode changes
@@ -124,14 +141,16 @@ export const IncidentRecordPage: React.FC = () => {
 
   // Handle incident field changes
   const handleIncidentFieldChange = (field: string, value: any) => {
-    setEditedIncident(prev => ({ ...prev, [field]: value }));
+    setEditedIncident(prev => ({
+      ...prev,
+      [field]: value
+    }));
     setHasUnsavedChanges(true);
   };
 
   // Handle save changes
   const handleSaveChanges = async () => {
     if (!incident || !hasUnsavedChanges) return;
-    
     try {
       setIsLoading(true);
       // This would need to be implemented with actual incident update mutation
@@ -159,7 +178,9 @@ export const IncidentRecordPage: React.FC = () => {
     if (!newComment.trim()) return;
     setIsAddingComment(true);
     try {
-      await addComment.mutateAsync({ comment_text: newComment });
+      await addComment.mutateAsync({
+        comment_text: newComment
+      });
       setNewComment('');
     } catch (error) {
       toast({
@@ -177,12 +198,10 @@ export const IncidentRecordPage: React.FC = () => {
     if (!incident) return null;
     return statusOptions.find(s => s.value === incident.status);
   };
-
   const getPriorityInfo = () => {
     if (!incident) return null;
     return priorityOptions.find(p => p.value === incident.priority);
   };
-
   const getCategoryInfo = () => {
     if (!incident) return null;
     return categoryOptions.find(c => c.value === incident.category);
@@ -190,8 +209,7 @@ export const IncidentRecordPage: React.FC = () => {
 
   // Check permissions for the current incident
   const isAssignedToIncident = incident?.assigned_to_admin === userProfile?.id;
-  const canEditIncident = canUpdate || (canUpdateAssigned && isAssignedToIncident);
-
+  const canEditIncident = canUpdate || canUpdateAssigned && isAssignedToIncident;
   const getAssignedUserName = () => {
     if (!incident?.assigned_to_admin) return 'Unassigned';
     const user = allUsers.find(u => u.id === incident.assigned_to_admin);
@@ -204,60 +222,45 @@ export const IncidentRecordPage: React.FC = () => {
       toast({
         title: "Access Denied",
         description: "You don't have permission to create incidents.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/app/incidents');
       return;
     }
-
     if (incidentId && currentMode !== 'create') {
       if (!incident && !incidentsLoading) {
         toast({
           title: "Incident Not Found",
           description: "The incident you're looking for doesn't exist.",
-          variant: "destructive",
+          variant: "destructive"
         });
         navigate('/app/incidents');
         return;
       }
-
       if (incident && !canView) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to view this incident.",
-          variant: "destructive",
+          variant: "destructive"
         });
         navigate('/app/incidents');
         return;
       }
-
       if (currentMode === 'edit' && !canEditIncident) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to edit this incident.",
-          variant: "destructive",
+          variant: "destructive"
         });
         // Switch to view mode instead
         navigate(`/app/incidents/incident_record?mode=view&id=${incidentId}`);
         return;
       }
     }
-  }, [
-    currentMode, 
-    incidentId, 
-    incident, 
-    incidentsLoading, 
-    canCreate, 
-    canView, 
-    canEditIncident, 
-    navigate, 
-    toast
-  ]);
-
+  }, [currentMode, incidentId, incident, incidentsLoading, canCreate, canView, canEditIncident, navigate, toast]);
   const handleBack = () => {
     navigate('/app/incidents');
   };
-
   const handleModeChange = (newMode: IncidentRecordMode) => {
     if (newMode === 'create') {
       navigate('/app/incidents/incident_record?mode=create');
@@ -265,15 +268,12 @@ export const IncidentRecordPage: React.FC = () => {
       navigate(`/app/incidents/incident_record?mode=${newMode}&id=${incident.id}`);
     }
   };
-
   const handleIncidentCreated = (newIncident: Incident) => {
     navigate('/app/incidents');
   };
-
   const handleIncidentUpdated = (updatedIncident: Incident) => {
     navigate(`/app/incidents/incident_record?mode=view&id=${updatedIncident.id}`);
   };
-
   const handleCancel = () => {
     if (currentMode === 'create') {
       navigate('/app/incidents');
@@ -284,8 +284,7 @@ export const IncidentRecordPage: React.FC = () => {
 
   // Loading state
   if (incidentsLoading) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -293,14 +292,12 @@ export const IncidentRecordPage: React.FC = () => {
           </Button>
         </div>
         <div className="text-center py-8">Loading incident...</div>
-      </div>
-    );
+      </div>;
   }
 
   // Create mode
   if (currentMode === 'create') {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -317,23 +314,16 @@ export const IncidentRecordPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <IncidentFormContent
-                mode="create"
-                onSuccess={handleIncidentCreated}
-                onCancel={handleCancel}
-                showAttachments={false}
-              />
+              <IncidentFormContent mode="create" onSuccess={handleIncidentCreated} onCancel={handleCancel} showAttachments={false} />
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Need incident for view/edit modes
   if (!incident) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -341,14 +331,12 @@ export const IncidentRecordPage: React.FC = () => {
           </Button>
         </div>
         <div className="text-center py-8">Incident not found</div>
-      </div>
-    );
+      </div>;
   }
 
   // Edit mode
   if (currentMode === 'edit') {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -368,23 +356,15 @@ export const IncidentRecordPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <IncidentFormContent
-                mode="edit"
-                incident={incident}
-                onSuccess={handleIncidentUpdated}
-                onCancel={handleCancel}
-                showAttachments={true}
-              />
+              <IncidentFormContent mode="edit" incident={incident} onSuccess={handleIncidentUpdated} onCancel={handleCancel} showAttachments={true} />
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // View mode (default) - using task-like layout
-  return (
-    <div className="container mx-auto py-6 px-4">
+  return <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
         <Button variant="outline" onClick={handleBack} className="mb-4">
@@ -395,22 +375,18 @@ export const IncidentRecordPage: React.FC = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold">
-              {incident.incident_number && (
-                <span className="text-blue-600 font-mono mr-2">
+              {incident.incident_number && <span className="text-blue-600 font-mono mr-2">
                   {incident.incident_number} -
-                </span>
-              )}
+                </span>}
               {incident.title}
             </h1>
           </div>
           
           <div className="flex items-center gap-2">
-            {canEditIncident && hasUnsavedChanges && (
-              <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+            {canEditIncident && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {isLoading ? 'Saving...' : 'Save Changes'}
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </div>
@@ -424,16 +400,14 @@ export const IncidentRecordPage: React.FC = () => {
             <CardHeader className="py-[8px]">
               <CardTitle className="flex items-center justify-between">
                 Summary
-                {canEditIncident && (
-                  <Button variant="ghost" size="sm" onClick={() => {
-                    if (!editingSummary && incident) {
-                      setEditedIncident(incident);
-                    }
-                    setEditingSummary(!editingSummary);
-                  }}>
+                {canEditIncident && <Button variant="ghost" size="sm" onClick={() => {
+                if (!editingSummary && incident) {
+                  setEditedIncident(incident);
+                }
+                setEditingSummary(!editingSummary);
+              }}>
                     <Edit className="w-4 h-4" />
-                  </Button>
-                )}
+                  </Button>}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -445,114 +419,78 @@ export const IncidentRecordPage: React.FC = () => {
                 <div>
                   <span className="text-sm text-muted-foreground">Status</span>
                   <div className="mt-1">
-                    {editingSummary ? (
-                      <Select value={editedIncident.status || ''} onValueChange={(value) => handleIncidentFieldChange('status', value)}>
+                    {editingSummary ? <Select value={editedIncident.status || ''} onValueChange={value => handleIncidentFieldChange('status', value)}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select status" />
                         </SelectTrigger>
                         <SelectContent>
-                          {statusOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
+                          {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
                               {option.label}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={getStatusInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                      </Select> : <Badge className={getStatusInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
                         {getStatusInfo()?.label || incident.status}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Assigned to</span>
-                  {editingSummary ? (
-                    <Select value={editedIncident.assigned_to_admin || 'unassigned'} onValueChange={(value) => handleIncidentFieldChange('assigned_to_admin', value === 'unassigned' ? null : value)}>
+                  {editingSummary ? <Select value={editedIncident.assigned_to_admin || 'unassigned'} onValueChange={value => handleIncidentFieldChange('assigned_to_admin', value === 'unassigned' ? null : value)}>
                       <SelectTrigger className="w-full mt-1">
                         <SelectValue placeholder="Select user" />
                       </SelectTrigger>
                       <SelectContent>
                         <SelectItem value="unassigned">Unassigned</SelectItem>
-                        {activeUsers.map(user => (
-                          <SelectItem key={user.id} value={user.id}>
+                        {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
                             {user.last_name}, {user.first_name}
-                          </SelectItem>
-                        ))}
+                          </SelectItem>)}
                       </SelectContent>
-                    </Select>
-                  ) : (
-                    <p className="font-medium">{getAssignedUserName()}</p>
-                  )}
+                    </Select> : <p className="font-medium">{getAssignedUserName()}</p>}
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Priority</span>
                   <div className="mt-1">
-                    {editingSummary ? (
-                      <Select value={editedIncident.priority || ''} onValueChange={(value) => handleIncidentFieldChange('priority', value)}>
+                    {editingSummary ? <Select value={editedIncident.priority || ''} onValueChange={value => handleIncidentFieldChange('priority', value)}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select priority" />
                         </SelectTrigger>
                         <SelectContent>
-                          {priorityOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
+                          {priorityOptions.map(option => <SelectItem key={option.value} value={option.value}>
                               {option.label}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={getPriorityInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                      </Select> : <Badge className={getPriorityInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
                         {getPriorityInfo()?.label || incident.priority}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Due Date</span>
-                  {editingSummary ? (
-                    <Input 
-                      type="date"
-                      value={editedIncident.due_date ? new Date(editedIncident.due_date).toISOString().slice(0, 10) : ''}
-                      onChange={(e) => handleIncidentFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
-                      className="mt-1"
-                    />
-                  ) : (
-                    <p className="font-medium">
+                  {editingSummary ? <Input type="date" value={editedIncident.due_date ? new Date(editedIncident.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleIncidentFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
                       {incident.due_date ? formatInTimeZone(new Date(incident.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
-                    </p>
-                  )}
+                    </p>}
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Category</span>
                   <div className="mt-1">
-                    {editingSummary ? (
-                      <Select value={editedIncident.category || ''} onValueChange={(value) => handleIncidentFieldChange('category', value)}>
+                    {editingSummary ? <Select value={editedIncident.category || ''} onValueChange={value => handleIncidentFieldChange('category', value)}>
                         <SelectTrigger className="w-full">
                           <SelectValue placeholder="Select category" />
                         </SelectTrigger>
                         <SelectContent>
-                          {categoryOptions.map(option => (
-                            <SelectItem key={option.value} value={option.value}>
+                          {categoryOptions.map(option => <SelectItem key={option.value} value={option.value}>
                               {option.label}
-                            </SelectItem>
-                          ))}
+                            </SelectItem>)}
                         </SelectContent>
-                      </Select>
-                    ) : (
-                      <Badge className={getCategoryInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                      </Select> : <Badge className={getCategoryInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
                         {getCategoryInfo()?.label || incident.category}
-                      </Badge>
-                    )}
+                      </Badge>}
                   </div>
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Created By</span>
                   <p className="font-medium">
-                    {(incident as any).created_by_profile 
-                      ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
-                      : 'Unknown'}
+                    {(incident as any).created_by_profile ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` : 'Unknown'}
                   </p>
                 </div>
               </div>
@@ -564,27 +502,16 @@ export const IncidentRecordPage: React.FC = () => {
             <CardHeader className="py-[8px]">
               <CardTitle className="flex items-center justify-between">
                 Incident Description
-                {canEditIncident && (
-                  <Button variant="ghost" size="sm" onClick={() => setEditingDescription(!editingDescription)}>
+                {canEditIncident && <Button variant="ghost" size="sm" onClick={() => setEditingDescription(!editingDescription)}>
                     <Edit className="w-4 h-4" />
-                  </Button>
-                )}
+                  </Button>}
               </CardTitle>
             </CardHeader>
             <CardContent>
               <div>
-                {editingDescription ? (
-                  <Textarea 
-                    value={editedIncident.description || ''} 
-                    onChange={(e) => handleIncidentFieldChange('description', e.target.value)}
-                    className="min-h-[120px]"
-                    placeholder="Enter incident description..."
-                  />
-                ) : (
-                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                {editingDescription ? <Textarea value={editedIncident.description || ''} onChange={e => handleIncidentFieldChange('description', e.target.value)} className="min-h-[120px]" placeholder="Enter incident description..." /> : <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {incident.description || 'No description provided.'}
-                  </p>
-                )}
+                  </p>}
               </div>
             </CardContent>
           </Card>
@@ -593,23 +520,11 @@ export const IncidentRecordPage: React.FC = () => {
           <Card>
             <CardHeader className="py-[8px]">
               <CardTitle className="flex items-center justify-between">
-                <AttachmentSection 
-                  recordType="incident" 
-                  recordId={incident.id} 
-                  canEdit={canEditIncident} 
-                  defaultOpen={true} 
-                  showTitleWithCount={true} 
-                />
+                <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showTitleWithCount={true} />
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <AttachmentSection 
-                recordType="incident" 
-                recordId={incident.id} 
-                canEdit={canEditIncident} 
-                defaultOpen={true} 
-                showContentOnly={true} 
-              />
+              <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showContentOnly={true} />
             </CardContent>
           </Card>
         </div>
@@ -626,30 +541,12 @@ export const IncidentRecordPage: React.FC = () => {
             <CardContent className="flex flex-col h-[600px] overflow-y-auto">
               {/* Add Comment */}
               <div className="space-y-3 mb-4">
-                <Textarea 
-                  placeholder="Add a comment..." 
-                  value={newComment} 
-                  onChange={e => setNewComment(e.target.value)} 
-                  className="min-h-[80px]" 
-                />
+                <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
                 <div className="flex items-center justify-between">
-                  <Button 
-                    onClick={handleAddComment} 
-                    disabled={!newComment.trim() || isAddingComment} 
-                    size="sm" 
-                    className="w-fit"
-                  >
+                  <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
                     {isAddingComment ? 'Posting...' : 'Post Comment'}
                   </Button>
-                  <Button 
-                    variant="outline" 
-                    size="sm" 
-                    onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)}
-                    className="flex items-center gap-2"
-                  >
-                    <ArrowUpDown className="w-4 h-4" />
-                    {sortCommentsNewestFirst ? 'New → Old' : 'Old → New'}
-                  </Button>
+                  
                 </div>
               </div>
 
@@ -657,16 +554,11 @@ export const IncidentRecordPage: React.FC = () => {
 
               {/* Comments List */}
               <div className="flex-1 space-y-4 overflow-y-auto">
-                <IncidentCommentsSection
-                  comments={comments}
-                  isAddingComment={isAddingComment}
-                  onAddComment={handleAddComment}
-                />
+                <IncidentCommentsSection comments={comments} isAddingComment={isAddingComment} onAddComment={handleAddComment} />
               </div>
             </CardContent>
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
