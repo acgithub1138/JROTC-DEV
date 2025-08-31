@@ -862,7 +862,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                                    <span className="text-sm font-medium">
                                      {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
                                    </span>
-                                   {comment.is_system_comment ? <Badge variant="secondary" className="text-xs">Update</Badge> : <Badge variant="outline" className="text-xs">Comment</Badge>}
+                                   {comment.is_system_comment ? <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge> : <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>}
                                  </div>
                                  <span className="text-xs text-muted-foreground">
                                    {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
