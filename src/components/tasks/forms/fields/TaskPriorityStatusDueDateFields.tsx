@@ -7,6 +7,7 @@ import { TaskFormData } from '../schemas/taskFormSchema';
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
 import { format } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 
 interface TaskPriorityStatusDueDateFieldsProps {
   form: UseFormReturn<TaskFormData>;
@@ -25,6 +26,7 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
   statusOptions,
   priorityOptions
 }) => {
+  const { users, isLoading: isLoadingUsers, error: usersError } = useSchoolUsers();
   return (
     <div className="space-y-4">
       <div className="space-y-2">
@@ -68,6 +70,43 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
           </SelectContent>
         </Select>
       </div>
+
+      {(canEditThisTask && canAssignTasks) && (
+        <div className="space-y-2">
+          <Label htmlFor="assigned_to">Assigned To</Label>
+          {isLoadingUsers ? (
+            <div className="text-sm text-muted-foreground">Loading users...</div>
+          ) : usersError ? (
+            <div className="text-sm text-red-600">Error loading users</div>
+          ) : (
+            <Select 
+              value={form.watch('assigned_to') || ''} 
+              onValueChange={(value) => form.setValue('assigned_to', value || null)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Select assignee" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="">Unassigned</SelectItem>
+                {users
+                  .sort((a, b) => {
+                    const aName = `${a.last_name}, ${a.first_name}`;
+                    const bName = `${b.last_name}, ${b.first_name}`;
+                    return aName.localeCompare(bName);
+                  })
+                  .map((user) => (
+                    <SelectItem key={user.id} value={user.id}>
+                      {user.last_name}, {user.first_name}
+                    </SelectItem>
+                  ))}
+              </SelectContent>
+            </Select>
+          )}
+          {form.formState.errors.assigned_to && (
+            <p className="text-sm text-red-600">{form.formState.errors.assigned_to.message}</p>
+          )}
+        </div>
+      )}
 
       <FormField
         control={form.control}

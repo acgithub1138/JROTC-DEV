@@ -146,7 +146,6 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
           <div className="space-y-6 p-6 border rounded-lg bg-card">
             <TaskTitleField form={form} />
             <TaskDescriptionField form={form} />
-            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
           </div>
 
           {mode === 'edit' && task?.id && showAttachments && (
