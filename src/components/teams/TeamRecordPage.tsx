@@ -63,9 +63,10 @@ const TeamRecordPage = () => {
     enabled: true
   });
 
-  // Filter cadets based on search term
+  // Filter cadets based on search term and exclude team lead from members list
   const filteredCadets = cadets
     .filter(cadet => cadet.active)
+    .filter(cadet => cadet.id !== formData.team_lead_id) // Exclude team lead from members
     .filter(cadet => 
       searchTerm === '' || 
       `${cadet.first_name} ${cadet.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -137,6 +138,24 @@ const TeamRecordPage = () => {
       toast({
         title: "Validation Error",
         description: "Team name is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (!formData.team_lead_id) {
+      toast({
+        title: "Validation Error",
+        description: "Team lead is required",
+        variant: "destructive"
+      });
+      return;
+    }
+
+    if (formData.member_ids.length === 0) {
+      toast({
+        title: "Validation Error",
+        description: "At least one team member is required",
         variant: "destructive"
       });
       return;
@@ -275,7 +294,7 @@ const TeamRecordPage = () => {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="team_lead">Team Lead</Label>
+              <Label htmlFor="team_lead">Team Lead *</Label>
               <Select
                 value={formData.team_lead_id}
                 onValueChange={(value) => handleInputChange('team_lead_id', value)}
@@ -284,7 +303,6 @@ const TeamRecordPage = () => {
                   <SelectValue placeholder="Select team lead" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="none">No Team Lead</SelectItem>
                   {cadets
                     .filter(cadet => cadet.active)
                     .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`))
@@ -298,59 +316,61 @@ const TeamRecordPage = () => {
             </div>
           </div>
 
-          {/* Team Members */}
-          <div>
-            <Label>Team Members</Label>
-            <div className="space-y-3 mt-2">
-              <Input
-                placeholder="Search cadets..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full"
-              />
-              <ScrollArea className="h-48 border rounded-md p-2">
-                {cadetsLoading ? (
-                  <div className="text-center py-4 text-muted-foreground">Loading cadets...</div>
-                ) : filteredCadets.length === 0 ? (
-                  <div className="text-center py-4 text-muted-foreground">No cadets found</div>
-                ) : (
-                  <div className="space-y-2">
-                    {filteredCadets.map(cadet => {
-                      const isSelected = formData.member_ids.includes(cadet.id);
-                      const isTeamLead = formData.team_lead_id === cadet.id;
-                      
-                      return (
-                        <div key={cadet.id} className="flex items-center space-x-2">
-                          <Checkbox
-                            id={`cadet-${cadet.id}`}
-                            checked={isSelected}
-                            onCheckedChange={() => handleMemberToggle(cadet.id)}
-                          />
-                          <Label 
-                            htmlFor={`cadet-${cadet.id}`}
-                            className="flex-1 cursor-pointer flex items-center justify-between"
-                          >
-                            <span>
-                              {cadet.last_name}, {cadet.first_name}
-                              {cadet.grade && ` (${cadet.grade})`}
-                            </span>
-                            {isTeamLead && (
-                              <Badge className="text-xs ml-2">Team Lead</Badge>
-                            )}
-                          </Label>
-                        </div>
-                      );
-                    })}
+          {/* Team Members - Only show when Team Lead is selected */}
+          {formData.team_lead_id && (
+            <div>
+              <Label>Team Members *</Label>
+              <div className="space-y-3 mt-2">
+                <Input
+                  placeholder="Search cadets..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="w-full"
+                />
+                <ScrollArea className="h-48 border rounded-md p-2">
+                  {cadetsLoading ? (
+                    <div className="text-center py-4 text-muted-foreground">Loading cadets...</div>
+                  ) : filteredCadets.length === 0 ? (
+                    <div className="text-center py-4 text-muted-foreground">No cadets found</div>
+                  ) : (
+                    <div className="space-y-2">
+                      {filteredCadets.map(cadet => {
+                        const isSelected = formData.member_ids.includes(cadet.id);
+                        const isTeamLead = formData.team_lead_id === cadet.id;
+                        
+                        return (
+                          <div key={cadet.id} className="flex items-center space-x-2">
+                            <Checkbox
+                              id={`cadet-${cadet.id}`}
+                              checked={isSelected}
+                              onCheckedChange={() => handleMemberToggle(cadet.id)}
+                            />
+                            <Label 
+                              htmlFor={`cadet-${cadet.id}`}
+                              className="flex-1 cursor-pointer flex items-center justify-between"
+                            >
+                              <span>
+                                {cadet.last_name}, {cadet.first_name}
+                                {cadet.grade && ` (${cadet.grade})`}
+                              </span>
+                              {isTeamLead && (
+                                <Badge className="text-xs ml-2">Team Lead</Badge>
+                              )}
+                            </Label>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                </ScrollArea>
+                {formData.member_ids.length > 0 && (
+                  <div className="text-sm text-muted-foreground">
+                    {formData.member_ids.length} member{formData.member_ids.length !== 1 ? 's' : ''} selected
                   </div>
                 )}
-              </ScrollArea>
-              {formData.member_ids.length > 0 && (
-                <div className="text-sm text-muted-foreground">
-                  {formData.member_ids.length} member{formData.member_ids.length !== 1 ? 's' : ''} selected
-                </div>
-              )}
+              </div>
             </div>
-          </div>
+          )}
 
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
