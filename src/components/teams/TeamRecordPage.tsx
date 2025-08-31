@@ -106,7 +106,7 @@ const TeamRecordPage = () => {
   const handleInputChange = (field: keyof TeamFormData, value: any) => {
     setFormData(prev => ({
       ...prev,
-      [field]: value
+      [field]: field === 'team_lead_id' && value === 'none' ? '' : value
     }));
   };
 
@@ -271,7 +271,7 @@ const TeamRecordPage = () => {
                   <SelectValue placeholder="Select team lead" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="">No Team Lead</SelectItem>
+                  <SelectItem value="none">No Team Lead</SelectItem>
                   {cadets
                     .filter(cadet => cadet.active)
                     .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`))
