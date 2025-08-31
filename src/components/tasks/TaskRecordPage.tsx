@@ -430,7 +430,15 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
               {/* Attachments */}
               <Card>
                 <CardHeader>
-                  <CardTitle>Attachments</CardTitle>
+                  <CardTitle className="flex items-center justify-between">
+                    <AttachmentSection
+                      recordType="task"
+                      recordId={task.id}
+                      canEdit={canEdit}
+                      defaultOpen={true}
+                      showTitleWithCount={true}
+                    />
+                  </CardTitle>
                 </CardHeader>
                 <CardContent>
                   <AttachmentSection
@@ -438,6 +446,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     recordId={task.id}
                     canEdit={canEdit}
                     defaultOpen={true}
+                    showContentOnly={true}
                   />
                 </CardContent>
               </Card>
