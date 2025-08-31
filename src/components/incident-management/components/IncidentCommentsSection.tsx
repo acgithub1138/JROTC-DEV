@@ -58,24 +58,9 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
     return commentsSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
   return <div>
-      {/* Add Comment */}
-      <div className="flex items-center justify-between gap-4 mb-4">
-        <div className="flex-1 flex gap-2">
-          <Textarea
-            value={newComment}
-            onChange={(e) => setNewComment(e.target.value)}
-            placeholder="Add a comment..."
-            className="flex-1 min-h-[80px]"
-          />
-          <Button 
-            onClick={handleAddComment}
-            disabled={isAddingComment || !newComment.trim()}
-            className="self-end"
-          >
-            {isAddingComment ? 'Adding...' : 'Post'}
-          </Button>
-        </div>
-        <Button variant="outline" size="sm" onClick={toggleSortOrder} className="flex items-center gap-2 self-end">
+      <div className="flex items-center justify-between mb-4">
+        
+        <Button variant="outline" size="sm" onClick={toggleSortOrder} className="flex items-center gap-2">
           {commentsSortOrder === 'asc' ? <>
               <ArrowUp className="w-4 h-4" />
               Old to New
@@ -85,6 +70,9 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
             </>}
         </Button>
       </div>
+      
+      {/* Add Comment */}
+      
 
       {/* Comments List */}
       <div className="space-y-4 max-h-64 overflow-y-auto">
