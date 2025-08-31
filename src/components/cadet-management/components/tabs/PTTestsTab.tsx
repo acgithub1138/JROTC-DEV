@@ -1,7 +1,10 @@
 import React from 'react';
+import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
+import { Plus, Edit } from 'lucide-react';
 import { useCadetPTTests } from '@/hooks/useCadetRecords';
 interface PTTestsTabProps {
   cadetId: string;
@@ -9,6 +12,7 @@ interface PTTestsTabProps {
 export const PTTestsTab: React.FC<PTTestsTabProps> = ({
   cadetId
 }) => {
+  const navigate = useNavigate();
   const {
     data: ptTests = [],
     isLoading
@@ -42,7 +46,18 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   return <Card>
-      
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>PT Test Records</CardTitle>
+          <Button 
+            onClick={() => navigate('/app/cadets/pt_test_create?mode=single')}
+            size="sm"
+          >
+            <Plus className="w-4 h-4 mr-2" />
+            Add PT Test
+          </Button>
+        </div>
+      </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
@@ -53,7 +68,7 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                 <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Sit-ups</th>
                 <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Plank</th>
                 <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Mile Run</th>
-                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Year</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Actions</th>
               </tr>
             </thead>
             <tbody>
@@ -66,9 +81,14 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                   <td className="p-3 px-[8px] py-[8px]">{formatTime(test.plank_time)}</td>
                   <td className="p-3 px-[8px] py-[8px]">{formatTime(test.mile_time)}</td>
                   <td className="p-3 py-[8px] px-[8px]">
-                    <Badge variant="outline">
-                      {format(new Date(test.date), 'yyyy')}
-                    </Badge>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}
+                    >
+                      <Edit className="w-4 h-4 mr-2" />
+                      Edit
+                    </Button>
                   </td>
                 </tr>)}
             </tbody>

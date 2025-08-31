@@ -11,7 +11,6 @@ import { CadetSearchBar } from './components/CadetSearchBar';
 import { CadetTabsContent } from './components/CadetTabsContent';
 import { TablePagination } from '@/components/ui/table-pagination';
 import { CadetDialogs } from './components/CadetDialogs';
-import { PTTestBulkDialog } from './components/PTTestBulkDialog';
 import { ViewCadetDialog } from './components/ViewCadetDialog';
 import { getFilteredProfiles, getPaginatedProfiles, getTotalPages } from './utils/cadetFilters';
 import { Profile } from './types';
@@ -62,7 +61,9 @@ const CadetManagementPage = () => {
   const [profileToToggle, setProfileToToggle] = useState<Profile | null>(null);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [viewingProfile, setViewingProfile] = useState<Profile | null>(null);
-  const [ptTestDialogOpen, setPTTestDialogOpen] = useState(false);
+  // Removed PT Test dialog states - now using pages
+  const handleOpenPTTestDialog = () => navigate('/app/cadets/pt_test_create?mode=single');
+  const handleOpenPTTestBulkDialog = () => navigate('/app/cadets/pt_test_create?mode=bulk');
 
   // Mass operation dialog states
   const [gradeDialogOpen, setGradeDialogOpen] = useState(false);
@@ -176,7 +177,7 @@ const CadetManagementPage = () => {
             onSelectCadet={handleSelectCadet} 
             onSelectAll={checked => handleSelectAll(checked, paginatedProfiles)} 
             onRefresh={fetchProfiles} 
-            onOpenPTTestDialog={() => setPTTestDialogOpen(true)} 
+            onOpenPTTestDialog={() => navigate('/app/cadets/pt_test_create?mode=bulk')} 
             searchTerm={searchTerm} 
           />
 
@@ -192,10 +193,7 @@ const CadetManagementPage = () => {
       
       <ViewCadetDialog open={viewDialogOpen} onOpenChange={setViewDialogOpen} profile={viewingProfile} onEditProfile={handleEditProfile} />
       
-      <PTTestBulkDialog open={ptTestDialogOpen} onOpenChange={setPTTestDialogOpen} onSuccess={() => {
-      // Refresh any PT test related data if needed
-      fetchProfiles();
-    }} />
+      {/* PT Test dialog removed - now using pages */}
     </div>;
 };
 export default CadetManagementPage;
