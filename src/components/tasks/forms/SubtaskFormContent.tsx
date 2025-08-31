@@ -192,27 +192,45 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
             {/* Left Column - Subtask Info */}
             <div className="space-y-4">
-              <div className="space-y-2">
-                <div className="text-sm font-medium text-muted-foreground">Subtask Information</div>
-                {mode === 'edit' && subtask && (
-                  <div className="text-sm text-muted-foreground">
-                    Created: {subtask.created_at ? new Date(subtask.created_at).toLocaleDateString() : 'Unknown'}
-                  </div>
-                )}
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Number</label>
+                <div className="text-sm mt-1">
+                  {mode === 'edit' && subtask ? subtask.id.slice(0, 8) : 'Auto-generated'}
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Created By</label>
+                <div className="text-sm mt-1">
+                  {mode === 'edit' && subtask?.assigned_by_profile 
+                    ? `${subtask.assigned_by_profile.last_name}, ${subtask.assigned_by_profile.first_name}`
+                    : userProfile ? `${userProfile.last_name}, ${userProfile.first_name}` : 'Unknown'
+                  }
+                </div>
+              </div>
+              
+              <div>
+                <label className="text-sm font-medium text-muted-foreground">Created</label>
+                <div className="text-sm mt-1">
+                  {mode === 'edit' && subtask?.created_at 
+                    ? new Date(subtask.created_at).toLocaleDateString()
+                    : 'Today'
+                  }
+                </div>
               </div>
             </div>
             
-            {/* Right Column - Priority, Status, Due Date, Assignee */}
-            <div className="grid grid-cols-2 gap-4">
-              <TaskStatusField 
-                form={form as any} 
-                statusOptions={statusOptions}
-                isLoading={statusLoading}
-              />
+            {/* Right Column - Priority, Status, Assigned to, Due Date */}
+            <div className="space-y-4">
               <TaskPriorityField 
                 form={form as any} 
                 priorityOptions={priorityOptions}
                 isLoading={priorityLoading}
+              />
+              <TaskStatusField 
+                form={form as any} 
+                statusOptions={statusOptions}
+                isLoading={statusLoading}
               />
               <TaskAssigneeField 
                 form={form as any} 
