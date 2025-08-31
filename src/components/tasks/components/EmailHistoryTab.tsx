@@ -6,6 +6,7 @@ import { Eye, Mail, Clock, CheckCircle, XCircle, AlertCircle, Ban } from 'lucide
 import { format } from 'date-fns';
 import { useTaskEmailHistory } from '@/hooks/email/useTaskEmailHistory';
 import { EmailContentModal } from './EmailContentModal';
+import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 interface EmailHistoryTabProps {
   taskId: string;
 }
@@ -75,21 +76,30 @@ export const EmailHistoryTab: React.FC<EmailHistoryTabProps> = ({
   return <div className="space-y-4">
       {emails.map(email => <Card key={email.id} className="hover:shadow-md transition-shadow">
           <CardHeader className="pb-3">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-2">
-                {getStatusIcon(email.status)}
-                <Badge className={getStatusColor(email.status)}>
-                  {email.status.charAt(0).toUpperCase() + email.status.slice(1)}
-                </Badge>
-                {email.email_templates && <Badge variant="outline" className="text-xs">
-                    {email.email_templates.name}
-                  </Badge>}
-              </div>
-              <Button variant="outline" size="sm" onClick={() => handleViewEmail(email)} className="h-7 px-2">
-                <Eye className="w-3 h-3 mr-1" />
-                View
-              </Button>
-            </div>
+             <div className="flex items-center justify-between">
+               <div className="flex items-center gap-2">
+                 {getStatusIcon(email.status)}
+                 <Badge className={getStatusColor(email.status)}>
+                   {email.status.charAt(0).toUpperCase() + email.status.slice(1)}
+                 </Badge>
+                 {email.email_templates && <Badge variant="outline" className="text-xs">
+                     {email.email_templates.name}
+                   </Badge>}
+                 {(email.sent_at || email.scheduled_at) && (
+                   <span className="text-xs text-muted-foreground ml-2">
+                     {formatTimeForDisplay(
+                       email.sent_at || email.scheduled_at,
+                       TIME_FORMATS.DATETIME_24H,
+                       'America/New_York'
+                     )}
+                   </span>
+                 )}
+               </div>
+               <Button variant="outline" size="sm" onClick={() => handleViewEmail(email)} className="h-7 px-2">
+                 <Eye className="w-3 h-3 mr-1" />
+                 View
+               </Button>
+             </div>
           </CardHeader>
           
         </Card>)}
