@@ -7,16 +7,19 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Edit, Save, X, Check, Copy } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskFormContent } from './forms/TaskFormContent';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 
 type TaskRecordMode = 'create' | 'edit' | 'view';
 
@@ -263,12 +266,36 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     );
   }
 
-  // Render view mode
+  // Render combined view/edit mode
   if (currentMode === 'view' && task) {
     const statusInfo = getStatusInfo();
     const priorityInfo = getPriorityInfo();
     const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
     const isCompleted = isTaskDone(task.status, statusOptions);
+    const [newComment, setNewComment] = useState('');
+    const [isAddingComment, setIsAddingComment] = useState(false);
+
+    const handleAddComment = async () => {
+      if (!newComment.trim()) return;
+      
+      setIsAddingComment(true);
+      try {
+        await addSystemComment(newComment);
+        setNewComment('');
+        toast({
+          title: "Comment Added",
+          description: "Your comment has been added successfully.",
+        });
+      } catch (error) {
+        toast({
+          title: "Error",
+          description: "Failed to add comment. Please try again.",
+          variant: "destructive",
+        });
+      } finally {
+        setIsAddingComment(false);
+      }
+    };
 
     return (
       <div className="container mx-auto py-6 px-4">
@@ -293,9 +320,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 )}
                 {task.title}
               </h1>
-              <p className="text-muted-foreground mt-1">
-                Created on {format(new Date(task.created_at), 'MMM d, yyyy')}
-              </p>
             </div>
             
             <div className="flex items-center gap-2">
@@ -335,152 +359,186 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           </div>
         </div>
 
-        {/* Task Details */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-6">
-            {/* Task Information */}
+        {/* Main Content - Two Column Layout */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left Column */}
+          <div className="space-y-6">
+            {/* Summary */}
             <Card>
               <CardHeader>
-                <CardTitle>Task Details</CardTitle>
+                <CardTitle>Summary</CardTitle>
               </CardHeader>
-              <CardContent className="space-y-4">
+              <CardContent>
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-sm text-muted-foreground">Number</span>
+                    <p className="font-medium">{task.task_number || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Status</span>
+                    <div className="mt-1">
+                      <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {statusInfo?.label || task.status}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Assigned to</span>
+                    <p className="font-medium">{getAssignedUserName()}</p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Priority</span>
+                    <div className="mt-1">
+                      <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {priorityInfo?.label || task.priority}
+                      </Badge>
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Created</span>
+                    <p className="font-medium">
+                      {formatInTimeZone(new Date(task.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                    </p>
+                  </div>
+                  <div>
+                    <span className="text-sm text-muted-foreground">Due Date</span>
+                    <p className="font-medium">
+                      {task.due_date ? formatInTimeZone(new Date(task.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
+                    </p>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+
+            {/* Details */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Details</CardTitle>
+              </CardHeader>
+              <CardContent>
                 <div>
-                  <h4 className="font-medium mb-2">Description</h4>
-                  <p className="text-sm text-muted-foreground">
+                  <h4 className="font-medium mb-2">Task Description</h4>
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {task.description || 'No description provided.'}
                   </p>
                 </div>
               </CardContent>
             </Card>
 
-            {/* Tabs for Comments, Attachments, etc. */}
+            {/* Attachments */}
             <Card>
-              <CardContent className="p-0">
-                <Tabs defaultValue="comments" className="w-full">
-                  <div className="p-6 pb-0">
-                    <TabsList>
-                      <TabsTrigger value="comments">Comments</TabsTrigger>
-                      <TabsTrigger value="attachments">Attachments</TabsTrigger>
-                      <TabsTrigger value="subtasks">Subtasks</TabsTrigger>
-                      <TabsTrigger value="email-history">Email History</TabsTrigger>
-                    </TabsList>
-                  </div>
-                  
-                  <TabsContent value="comments" className="p-6 pt-4">
-                    <div className="text-sm text-muted-foreground">
-                      Comments section will be implemented here.
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="attachments" className="p-6 pt-4">
-                    <div className="text-sm text-muted-foreground">
-                      Attachments section will be implemented here.
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="subtasks" className="p-6 pt-4">
-                    <div>
-                      <h4 className="font-medium mb-4">Subtasks ({subtasks?.length || 0})</h4>
-                      {subtasks && subtasks.length > 0 ? (
-                        <div className="space-y-2">
-                          {subtasks.map((subtask) => (
-                            <div key={subtask.id} className="p-3 border rounded-lg">
-                              <div className="flex items-center justify-between">
-                                <div>
-                                  <span className="font-medium">{subtask.title}</span>
-                                  <Badge className="ml-2" variant="outline">
-                                    {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
-                                  </Badge>
-                                </div>
-                                <Button
-                                  variant="outline"
-                                  size="sm"
-                                  onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)}
-                                >
-                                  View Details
-                                </Button>
-                              </div>
-                            </div>
-                          ))}
+              <CardHeader>
+                <CardTitle>Attachments</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AttachmentSection
+                  recordType="task"
+                  recordId={task.id}
+                  canEdit={canEdit}
+                  defaultOpen={true}
+                />
+              </CardContent>
+            </Card>
+
+            {/* Subtasks */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Subtasks ({subtasks?.length || 0})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {subtasks && subtasks.length > 0 ? (
+                  <div className="space-y-2">
+                    {subtasks.map((subtask) => (
+                      <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                          >
+                            {subtask.task_number}
+                          </button>
+                          <span className="text-sm">{subtask.title}</span>
                         </div>
-                      ) : (
-                        <p className="text-muted-foreground">No subtasks found.</p>
-                      )}
-                    </div>
-                  </TabsContent>
-                  
-                  <TabsContent value="email-history" className="p-6 pt-4">
-                    <div className="text-sm text-muted-foreground">
-                      Email history will be implemented here.
-                    </div>
-                  </TabsContent>
-                </Tabs>
+                        <Badge variant="outline" className="text-xs">
+                          {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No subtasks found.</p>
+                )}
               </CardContent>
             </Card>
           </div>
 
-          {/* Sidebar */}
+          {/* Right Column - Comments & History */}
           <div className="space-y-6">
-            {/* Status & Priority */}
-            <Card>
+            <Card className="h-[calc(100vh-200px)]">
               <CardHeader>
-                <CardTitle className="text-sm">Status & Priority</CardTitle>
+                <CardTitle className="flex items-center gap-2">
+                  <MessageSquare className="w-5 h-5" />
+                  Comments & History
+                </CardTitle>
               </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <span className="text-sm text-muted-foreground">Status</span>
-                  <div className="mt-1">
-                    <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
-                      {statusInfo?.label || task.status}
-                    </Badge>
-                  </div>
+              <CardContent className="flex flex-col h-full">
+                {/* Add Comment */}
+                <div className="space-y-3 mb-4">
+                  <Textarea
+                    placeholder="Add a comment..."
+                    value={newComment}
+                    onChange={(e) => setNewComment(e.target.value)}
+                    className="min-h-[80px]"
+                  />
+                  <Button 
+                    onClick={handleAddComment}
+                    disabled={!newComment.trim() || isAddingComment}
+                    size="sm"
+                    className="w-fit"
+                  >
+                    {isAddingComment ? 'Posting...' : 'Post Comment'}
+                  </Button>
                 </div>
-                
-                <div>
-                  <span className="text-sm text-muted-foreground">Priority</span>
-                  <div className="mt-1">
-                    <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
-                      {priorityInfo?.label || task.priority}
-                    </Badge>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
 
-            {/* Assignment & Dates */}
-            <Card>
-              <CardHeader>
-                <CardTitle className="text-sm">Assignment & Dates</CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-3">
-                <div>
-                  <span className="text-sm text-muted-foreground">Assigned To</span>
-                  <p className="text-sm font-medium">{getAssignedUserName()}</p>
+                <Separator className="mb-4" />
+
+                {/* History Tabs */}
+                <div className="flex-1 overflow-hidden">
+                  <Tabs defaultValue="comments" className="h-full flex flex-col">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="comments">Comments</TabsTrigger>
+                      <TabsTrigger value="history">History</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
+                      <div className="space-y-3">
+                        {comments && comments.length > 0 ? (
+                          comments.map((comment) => (
+                            <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">
+                                  {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                                </span>
+                              </div>
+                              <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>
+                        )}
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
+                      <div className="text-sm text-muted-foreground text-center py-8">
+                        History tracking will be implemented here.
+                      </div>
+                    </TabsContent>
+                  </Tabs>
                 </div>
-                
-                <div>
-                  <span className="text-sm text-muted-foreground">Due Date</span>
-                  <p className="text-sm font-medium">
-                    {task.due_date ? format(new Date(task.due_date), 'MMM d, yyyy') : 'No due date'}
-                  </p>
-                </div>
-                
-                <div>
-                  <span className="text-sm text-muted-foreground">Created</span>
-                  <p className="text-sm font-medium">
-                    {format(new Date(task.created_at), 'MMM d, yyyy')}
-                  </p>
-                </div>
-                
-                {task.completed_at && (
-                  <div>
-                    <span className="text-sm text-muted-foreground">Completed</span>
-                    <p className="text-sm font-medium">
-                      {format(new Date(task.completed_at), 'MMM d, yyyy')}
-                    </p>
-                  </div>
-                )}
               </CardContent>
             </Card>
           </div>
