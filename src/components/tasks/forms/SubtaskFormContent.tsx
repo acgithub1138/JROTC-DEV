@@ -188,10 +188,21 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
     <div className="bg-background p-6 rounded-lg border">
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
-          <div className="grid grid-cols-1 gap-6">
-            <SubtaskTitleField form={form} />
-            <SubtaskDescriptionField form={form} />
+          {/* Top Section - Two Columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
+            {/* Left Column - Subtask Info */}
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <div className="text-sm font-medium text-muted-foreground">Subtask Information</div>
+                {mode === 'edit' && subtask && (
+                  <div className="text-sm text-muted-foreground">
+                    Created: {subtask.created_at ? new Date(subtask.created_at).toLocaleDateString() : 'Unknown'}
+                  </div>
+                )}
+              </div>
+            </div>
             
+            {/* Right Column - Priority, Status, Due Date, Assignee */}
             <div className="grid grid-cols-2 gap-4">
               <TaskStatusField 
                 form={form as any} 
@@ -203,9 +214,6 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
                 priorityOptions={priorityOptions}
                 isLoading={priorityLoading}
               />
-            </div>
-            
-            <div className="grid grid-cols-2 gap-4">
               <TaskAssigneeField 
                 form={form as any} 
                 canAssignTasks={true}
@@ -213,6 +221,12 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
               />
               <TaskDueDateField form={form as any} />
             </div>
+          </div>
+
+          {/* Bottom Section - Single Column */}
+          <div className="space-y-6 p-6 border rounded-lg bg-card">
+            <SubtaskTitleField form={form} />
+            <SubtaskDescriptionField form={form} />
           </div>
 
           <div className="flex justify-end gap-2">
