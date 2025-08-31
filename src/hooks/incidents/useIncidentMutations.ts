@@ -41,10 +41,17 @@ export const useIncidentMutations = () => {
       });
     },
     onError: (error) => {
-      console.error("Error creating incident:", error);
+      console.error("🔴 INCIDENT CREATION ERROR:", error);
+      console.error("🔴 ERROR DETAILS:", {
+        message: error.message,
+        code: (error as any).code,
+        details: (error as any).details,
+        hint: (error as any).hint,
+        stack: error.stack
+      });
       toast({
         title: "Error",
-        description: "Failed to create incident",
+        description: `Failed to create incident: ${error.message}`,
         variant: "destructive",
       });
     },

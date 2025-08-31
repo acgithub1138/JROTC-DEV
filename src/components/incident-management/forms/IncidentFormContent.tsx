@@ -98,6 +98,7 @@ export const IncidentFormContent: React.FC<IncidentFormContentProps> = ({
         onIncidentCreated?.(result);
       }
     } catch (error) {
+      console.error('🔴 HANDLE SUBMIT ERROR:', error);
       onError(error);
     }
   };

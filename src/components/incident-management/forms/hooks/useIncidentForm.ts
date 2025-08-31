@@ -124,7 +124,12 @@ export const useIncidentForm = ({
         return updatedIncident;
       }
     } catch (error) {
-      console.error('Error submitting incident form:', error);
+      console.error('🔴 FORM SUBMISSION ERROR:', error);
+      console.error('🔴 FORM ERROR DETAILS:', {
+        message: error?.message,
+        code: error?.code,
+        data: data
+      });
       throw error;
     }
   };
