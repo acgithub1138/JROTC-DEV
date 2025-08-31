@@ -68,7 +68,7 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
         name="email"
         render={({ field }) => (
           <FormItem className="flex items-center gap-4">
-            <FormLabel className="w-32 text-right flex-shrink-0">
+            <FormLabel className="w-24 text-right flex-shrink-0">
               Email <span className="text-destructive">*</span>
             </FormLabel>
             <div className="flex-1">
