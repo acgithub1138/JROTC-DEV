@@ -585,10 +585,24 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     return <div className="container mx-auto py-6 px-4">
         {/* Header */}
         <div className="mb-6">
-           <Button variant="outline" onClick={handleBack} className="mb-4">
-             <ArrowLeft className="w-4 h-4 mr-2" />
-             {recordType === 'subtask' && parentTask ? `Back to ${parentTask.task_number}` : 'Back to Tasks'}
-           </Button>
+          {recordType === 'subtask' && parentTask ? (
+            <div className="flex items-center gap-2 mb-4">
+              <Button variant="outline" onClick={() => navigate('/app/tasks')}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to Tasks
+              </Button>
+              <span className="text-muted-foreground">/</span>
+              <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?id=${parentTask.id}`)}>
+                <ArrowLeft className="w-4 h-4 mr-2" />
+                Back to {parentTask.task_number}
+              </Button>
+            </div>
+          ) : (
+            <Button variant="outline" onClick={handleBack} className="mb-4">
+              <ArrowLeft className="w-4 h-4 mr-2" />
+              Back to Tasks
+            </Button>
+          )}
           
           <div className="flex items-center justify-between">
             <div>
