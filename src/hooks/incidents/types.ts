@@ -29,6 +29,12 @@ export interface IncidentComment {
   comment_text: string;
   is_system_comment: boolean;
   created_at: string;
+  user?: {
+    first_name: string;
+    last_name: string;
+    email: string;
+    role: string;
+  };
 }
 
 export interface IncidentStatusOption {

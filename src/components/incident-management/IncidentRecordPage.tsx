@@ -19,6 +19,7 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useIncidentPriorityOptions, useIncidentCategoryOptions, useIncidentStatusOptions } from '@/hooks/incidents/useIncidentsQuery';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import type { Incident } from '@/hooks/incidents/types';
@@ -538,33 +539,67 @@ export const IncidentRecordPage: React.FC = () => {
                 Comments & History
               </CardTitle>
             </CardHeader>
-            <CardContent className="flex flex-col h-[600px] overflow-y-auto">
-              {/* Add Comment */}
-              <div className="space-y-3 mb-4">
-                <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
-                <div className="flex items-center justify-between">
-                  <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
-                    {isAddingComment ? 'Posting...' : 'Post Comment'}
-                  </Button>
-                  <Button variant="outline" size="sm" onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)} className="flex items-center gap-2">
-                    <ArrowUpDown className="w-4 h-4" />
-                    {sortCommentsNewestFirst ? 'New to Old' : 'Old to New'}
-                  </Button>
+              <CardContent className="flex flex-col h-[600px] overflow-y-auto">
+                {/* Add Comment */}
+                <div className="space-y-3 mb-4">
+                  <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
+                  <div className="flex items-center justify-between">
+                    <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
+                      {isAddingComment ? 'Posting...' : 'Post Comment'}
+                    </Button>
+                    <Button variant="outline" size="sm" onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)} className="flex items-center gap-2">
+                      <ArrowUpDown className="w-4 h-4" />
+                      {sortCommentsNewestFirst ? 'New to Old' : 'Old to New'}
+                    </Button>
+                  </div>
                 </div>
-              </div>
 
-              <Separator className="mb-4" />
+                <Separator className="mb-4" />
 
-              {/* Comments List */}
-              <div className="flex-1 space-y-4 overflow-y-auto">
-                <IncidentCommentsSection 
-                  comments={comments} 
-                  isAddingComment={isAddingComment} 
-                  onAddComment={handleAddComment} 
-                  sortOrder={sortCommentsNewestFirst ? 'desc' : 'asc'} 
-                />
-              </div>
-            </CardContent>
+                {/* History Tabs */}
+                <div className="flex-1 overflow-hidden">
+                  <Tabs defaultValue="comments" className="h-full flex flex-col">
+                    <TabsList className="grid w-full grid-cols-2">
+                      <TabsTrigger value="comments">Comments</TabsTrigger>
+                      <TabsTrigger value="history">History</TabsTrigger>
+                    </TabsList>
+                    
+                    <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
+                      <div className="space-y-3">
+                        {comments && comments.length > 0 ? comments
+                          .slice()
+                          .sort((a, b) => {
+                            const dateA = new Date(a.created_at).getTime();
+                            const dateB = new Date(b.created_at).getTime();
+                            return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
+                          })
+                          .map(comment => (
+                            <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                              <div className="flex items-center justify-between mb-2">
+                                <span className="text-sm font-medium">
+                                  {comment.user ? `${comment.user.last_name}, ${comment.user.first_name}` : 'System'}
+                                </span>
+                                <span className="text-xs text-muted-foreground">
+                                  {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                                </span>
+                              </div>
+                              <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
+                            </div>
+                          )) : (
+                            <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>
+                          )
+                        }
+                      </div>
+                    </TabsContent>
+                    
+                    <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
+                      <div className="text-sm text-muted-foreground text-center py-8">
+                        History tracking will be implemented here.
+                      </div>
+                    </TabsContent>
+                  </Tabs>
+                </div>
+              </CardContent>
           </Card>
         </div>
       </div>
