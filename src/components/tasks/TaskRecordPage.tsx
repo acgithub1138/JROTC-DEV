@@ -28,20 +28,22 @@ import { EmailHistoryTab } from './components/EmailHistoryTab';
 import { supabase } from '@/integrations/supabase/client';
 type TaskRecordMode = 'create' | 'create_task' | 'create_subtask' | 'edit' | 'view';
 type RecordType = 'task' | 'subtask';
-
 interface TaskRecordPageProps {}
-
 export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
 
   // Extract mode and record ID from URL parameters
   const mode = searchParams.get('mode') as TaskRecordMode || 'view';
   const recordId = searchParams.get('id');
   const parentTaskId = searchParams.get('parent_task_id');
-  
+
   // State to track record type and data
   const [recordType, setRecordType] = useState<RecordType>('task');
   const [record, setRecord] = useState<any>(null);
@@ -49,29 +51,55 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [isLoadingRecord, setIsLoadingRecord] = useState(true);
 
   // Hooks
-  const { canCreate, canUpdate, canUpdateAssigned, canView, canDelete } = useTaskPermissions();
-  const { tasks, updateTask, duplicateTask, isUpdating, isDuplicating } = useTasks();
-  const { subtasks: allSubtasks, updateSubtask } = useSubtasks();
-  const { statusOptions } = useTaskStatusOptions();
-  const { priorityOptions } = useTaskPriorityOptions();
-  const { users: allUsers } = useSchoolUsers(); // All users for display purposes
-  const { users: activeUsers } = useSchoolUsers(true); // Active users only for editing dropdowns
+  const {
+    canCreate,
+    canUpdate,
+    canUpdateAssigned,
+    canView,
+    canDelete
+  } = useTaskPermissions();
+  const {
+    tasks,
+    updateTask,
+    duplicateTask,
+    isUpdating,
+    isDuplicating
+  } = useTasks();
+  const {
+    subtasks: allSubtasks,
+    updateSubtask
+  } = useSubtasks();
+  const {
+    statusOptions
+  } = useTaskStatusOptions();
+  const {
+    priorityOptions
+  } = useTaskPriorityOptions();
+  const {
+    users: allUsers
+  } = useSchoolUsers(); // All users for display purposes
+  const {
+    users: activeUsers
+  } = useSchoolUsers(true); // Active users only for editing dropdowns
 
   // Comments hooks - always call both hooks to avoid conditional hook usage
-  const { comments: taskComments, addSystemComment: addTaskSystemComment } = useTaskComments(
-    recordId || ''
-  );
-  const { comments: subtaskComments, addComment: addSubtaskComment } = useSubtaskComments(
-    recordId || ''
-  );
-  
+  const {
+    comments: taskComments,
+    addSystemComment: addTaskSystemComment
+  } = useTaskComments(recordId || '');
+  const {
+    comments: subtaskComments,
+    addComment: addSubtaskComment
+  } = useSubtaskComments(recordId || '');
+
   // Get correct comments and comment functions based on record type
   const comments = recordType === 'task' ? taskComments : subtaskComments;
-  const addSystemComment = recordType === 'task' ? addTaskSystemComment : 
-    (text: string) => addSubtaskComment(text); // Use regular comment for subtasks
-  
+  const addSystemComment = recordType === 'task' ? addTaskSystemComment : (text: string) => addSubtaskComment(text); // Use regular comment for subtasks
+
   // Get subtasks for the current record (always call the hook)
-  const { subtasks: recordSubtasks } = useSubtasks(recordId || '');
+  const {
+    subtasks: recordSubtasks
+  } = useSubtasks(recordId || '');
 
   // Load record data based on ID
   useEffect(() => {
@@ -92,16 +120,15 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         setIsLoadingRecord(false);
         return;
       }
-      
+
       // Prevent reloading if we already have the record
       if (record && record.id === recordId) {
         console.log('Record already loaded');
         return;
       }
-      
       console.log('Loading record with ID:', recordId);
       setIsLoadingRecord(true);
-      
+
       // Try to find task first
       const foundTask = tasks.find(t => t.id === recordId);
       console.log('Found task in cache:', !!foundTask);
@@ -113,7 +140,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         setIsLoadingRecord(false);
         return;
       }
-      
+
       // Try to find subtask
       const foundSubtask = allSubtasks.find(s => s.id === recordId);
       console.log('Found subtask in cache:', !!foundSubtask);
@@ -127,21 +154,22 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         setIsLoadingRecord(false);
         return;
       }
-      
+
       // Fallback: direct database query
       console.log('Record not found in cache, querying database...');
       try {
         // Check tasks table
-        const { data: taskData, error: taskError } = await supabase
-          .from('tasks')
-          .select(`*, 
+        const {
+          data: taskData,
+          error: taskError
+        } = await supabase.from('tasks').select(`*, 
             assigned_to_profile:profiles!tasks_assigned_to_fkey(id, first_name, last_name, email),
             assigned_by_profile:profiles!tasks_assigned_by_fkey(id, first_name, last_name, email)
-          `)
-          .eq('id', recordId)
-          .maybeSingle();
-          
-        console.log('Task query result:', { taskData: !!taskData, taskError });
+          `).eq('id', recordId).maybeSingle();
+        console.log('Task query result:', {
+          taskData: !!taskData,
+          taskError
+        });
         if (taskData && !taskError) {
           console.log('Found task in database');
           setRecord(taskData);
@@ -150,33 +178,32 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           setIsLoadingRecord(false);
           return;
         }
-        
+
         // Check subtasks table
-        const { data: subtaskData, error: subtaskError } = await supabase
-          .from('subtasks')
-          .select(`*,
+        const {
+          data: subtaskData,
+          error: subtaskError
+        } = await supabase.from('subtasks').select(`*,
             assigned_to_profile:profiles!subtasks_assigned_to_fkey(id, first_name, last_name, email),
             assigned_by_profile:profiles!subtasks_assigned_by_fkey(id, first_name, last_name, email)
-          `)
-          .eq('id', recordId)
-          .maybeSingle();
-          
-        console.log('Subtask query result:', { subtaskData: !!subtaskData, subtaskError });
+          `).eq('id', recordId).maybeSingle();
+        console.log('Subtask query result:', {
+          subtaskData: !!subtaskData,
+          subtaskError
+        });
         if (subtaskData && !subtaskError) {
           console.log('Found subtask in database');
           setRecord(subtaskData);
           setRecordType('subtask');
           // Get parent task
-          const { data: parentData } = await supabase
-            .from('tasks')
-            .select('*')
-            .eq('id', subtaskData.parent_task_id)
-            .maybeSingle();
+          const {
+            data: parentData
+          } = await supabase.from('tasks').select('*').eq('id', subtaskData.parent_task_id).maybeSingle();
           setParentTask(parentData);
           setIsLoadingRecord(false);
           return;
         }
-        
+
         // Record not found
         console.log('Record not found in database');
         setRecord(null);
@@ -186,13 +213,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         setIsLoadingRecord(false);
       }
     };
-    
     loadRecord();
   }, [recordId, parentTaskId, mode]);
 
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
-  
+
   // Update currentMode when URL mode changes
   React.useEffect(() => {
     setCurrentMode(mode);
@@ -216,7 +242,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Permission checks
   useEffect(() => {
     if (isLoadingRecord) return; // Wait for record to load
-    
+
     if (currentMode === 'create' && !canCreate) {
       toast({
         title: "Access Denied",
@@ -269,14 +295,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       navigate('/app/tasks');
     }
   };
-  
   const handleEdit = () => {
     if (recordId) {
       setCurrentMode('edit');
       navigate(`/app/tasks/task_record?mode=edit&id=${recordId}`);
     }
   };
-  
   const handleView = () => {
     if (recordId) {
       setCurrentMode('view');
@@ -289,7 +313,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     if (!record) return;
     try {
       setIsLoading(true);
-
       if (recordType === 'task') {
         // Check if there are incomplete subtasks
         const incompleteSubtasks = recordSubtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
@@ -328,7 +351,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         });
         addSystemComment('Subtask completed');
       }
-      
       toast({
         title: `${recordType === 'task' ? 'Task' : 'Subtask'} Completed`,
         description: `The ${recordType} has been marked as complete.`
@@ -377,7 +399,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     const recordTypeName = recordType === 'task' ? 'Task' : 'Subtask';
     switch (currentMode) {
       case 'create':
-        return 'Create New Task'; // Only tasks can be created from this page
+        return 'Create New Task';
+      // Only tasks can be created from this page
       case 'edit':
         return `Edit ${recordTypeName}: ${record?.task_number || 'N/A'}`;
       case 'view':
@@ -401,20 +424,22 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
   // Handle editing functions
   const handleRecordFieldChange = (field: string, value: any) => {
-    setEditedRecord(prev => ({ ...prev, [field]: value }));
+    setEditedRecord(prev => ({
+      ...prev,
+      [field]: value
+    }));
     setHasUnsavedChanges(true);
   };
-
   const handleSaveChanges = async () => {
     if (!record || !hasUnsavedChanges) return;
-    
     try {
       setIsLoading(true);
-      
+
       // Build update object with only changed fields
-      const updates: any = { id: record.id };
+      const updates: any = {
+        id: record.id
+      };
       const changedFields: string[] = [];
-      
       if (editedRecord.title !== record.title) {
         updates.title = editedRecord.title;
         changedFields.push('title');
@@ -439,7 +464,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         updates.due_date = editedRecord.due_date;
         changedFields.push('due_date');
       }
-
       if (changedFields.length > 0) {
         // Use the appropriate update function
         if (recordType === 'task') {
@@ -447,28 +471,32 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         } else {
           await updateSubtask(updates);
         }
-        
+
         // Add system comment about changes
         const changeDescription = changedFields.map(field => {
-          switch(field) {
-            case 'title': return `Title changed to "${editedRecord.title}"`;
-            case 'description': return 'Description updated';
-            case 'priority': return `Priority changed to ${priorityOptions.find(p => p.value === editedRecord.priority)?.label || editedRecord.priority}`;
-            case 'status': return `Status changed to ${statusOptions.find(s => s.value === editedRecord.status)?.label || editedRecord.status}`;
-            case 'assigned_to': return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
-            case 'due_date': return `Due date changed to ${editedRecord.due_date ? formatInTimeZone(new Date(editedRecord.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}`;
-            default: return `${field} updated`;
+          switch (field) {
+            case 'title':
+              return `Title changed to "${editedRecord.title}"`;
+            case 'description':
+              return 'Description updated';
+            case 'priority':
+              return `Priority changed to ${priorityOptions.find(p => p.value === editedRecord.priority)?.label || editedRecord.priority}`;
+            case 'status':
+              return `Status changed to ${statusOptions.find(s => s.value === editedRecord.status)?.label || editedRecord.status}`;
+            case 'assigned_to':
+              return `Assigned to ${allUsers.find(u => u.id === editedRecord.assigned_to) ? `${allUsers.find(u => u.id === editedRecord.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedRecord.assigned_to)?.first_name}` : 'Unassigned'}`;
+            case 'due_date':
+              return `Due date changed to ${editedRecord.due_date ? formatInTimeZone(new Date(editedRecord.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}`;
+            default:
+              return `${field} updated`;
           }
         }).join(', ');
-        
         addSystemComment(`${recordType === 'task' ? 'Task' : 'Subtask'} updated: ${changeDescription}`);
-        
         toast({
           title: `${recordType === 'task' ? 'Task' : 'Subtask'} Updated`,
           description: "Your changes have been saved successfully."
         });
       }
-      
       setEditingSummary(false);
       setEditingDescription(false);
       setHasUnsavedChanges(false);
@@ -478,7 +506,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       } else {
         handleBack();
       }
-      
     } catch (error) {
       console.error(`Error saving ${recordType}:`, error);
       toast({
@@ -500,22 +527,19 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
   // Show loading state
   if (isLoadingRecord) {
-    return (
-      <div className="container mx-auto py-6 px-4">
+    return <div className="container mx-auto py-6 px-4">
         <div className="flex items-center justify-center h-64">
           <div className="text-center">
             <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto mb-4"></div>
             <p className="text-sm text-muted-foreground">Loading...</p>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Render create/edit form for tasks
-  if (currentMode === 'create' || currentMode === 'create_task' || (currentMode === 'edit' && recordType === 'task')) {
-    return (
-      <div className="container mx-auto py-6 px-4">
+  if (currentMode === 'create' || currentMode === 'create_task' || currentMode === 'edit' && recordType === 'task') {
+    return <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
           <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
@@ -525,46 +549,29 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         </div>
         
         <div className="bg-card rounded-lg border p-6">
-          <TaskFormContent 
-            mode={currentMode === 'create_task' ? 'create' : currentMode} 
-            task={record} 
-            onSuccess={handleTaskSaved} 
-            onCancel={handleFormClose} 
-            onTaskCreated={() => navigate('/app/tasks')} 
-            showAttachments={true} 
-          />
+          <TaskFormContent mode={currentMode === 'create_task' ? 'create' : currentMode} task={record} onSuccess={handleTaskSaved} onCancel={handleFormClose} onTaskCreated={() => navigate('/app/tasks')} showAttachments={true} />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Render create subtask form
   if (currentMode === 'create_subtask') {
-    return (
-      <div className="container mx-auto py-6 px-4">
+    return <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
           <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             {parentTask ? `Back to ${parentTask.task_number}` : 'Back to Tasks'}
           </Button>
           <h1 className="text-3xl font-bold">Create New Subtask</h1>
-          {parentTask && (
-            <p className="text-muted-foreground mt-2">
+          {parentTask && <p className="text-muted-foreground mt-2">
               Creating subtask for: <span className="font-medium">{parentTask.task_number} - {parentTask.title}</span>
-            </p>
-          )}
+            </p>}
         </div>
         
         <div className="bg-card rounded-lg border p-6">
-          <SubtaskForm 
-            mode="create"
-            open={true}
-            onOpenChange={() => {}}
-            parentTaskId={parentTaskId || undefined}
-          />
+          <SubtaskForm mode="create" open={true} onOpenChange={() => {}} parentTaskId={parentTaskId || undefined} />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Render combined view/edit mode
@@ -593,8 +600,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     return <div className="container mx-auto py-6 px-4">
         {/* Header */}
         <div className="mb-6">
-          {recordType === 'subtask' && parentTask ? (
-            <div className="flex items-center gap-2 mb-4">
+          {recordType === 'subtask' && parentTask ? <div className="flex items-center gap-2 mb-4">
               <Button variant="outline" onClick={() => navigate('/app/tasks')}>
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Tasks
@@ -604,13 +610,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to {parentTask.task_number}
               </Button>
-            </div>
-          ) : (
-            <Button variant="outline" onClick={handleBack} className="mb-4">
+            </div> : <Button variant="outline" onClick={handleBack} className="mb-4">
               <ArrowLeft className="w-4 h-4 mr-2" />
               Back to Tasks
-            </Button>
-          )}
+            </Button>}
           
           <div className="flex items-center justify-between">
             <div>
@@ -656,11 +659,11 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                  <CardTitle className="flex items-center justify-between">
                    Summary
                     {canEdit && <Button variant="ghost" size="sm" onClick={() => {
-                      if (!editingSummary && record) {
-                        setEditedRecord(record); // Ensure we have current values
-                      }
-                      setEditingSummary(!editingSummary);
-                    }}>
+                  if (!editingSummary && record) {
+                    setEditedRecord(record); // Ensure we have current values
+                  }
+                  setEditingSummary(!editingSummary);
+                }}>
                       <Edit className="w-4 h-4" />
                     </Button>}
                  </CardTitle>
@@ -674,67 +677,49 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                    <div>
                      <span className="text-sm text-muted-foreground">Status</span>
                      <div className="mt-1">
-                        {editingSummary ? (
-                          <Select value={editedRecord.status || ''} onValueChange={(value) => handleRecordFieldChange('status', value)}>
+                        {editingSummary ? <Select value={editedRecord.status || ''} onValueChange={value => handleRecordFieldChange('status', value)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select status" />
                             </SelectTrigger>
                             <SelectContent>
-                              {statusOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
+                              {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
                                   {option.label}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                          </Select> : <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
                             {statusInfo?.label || record.status}
-                          </Badge>
-                        )}
+                          </Badge>}
                      </div>
                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Assigned to</span>
-                      {editingSummary ? (
-                        <Select value={editedRecord.assigned_to || 'unassigned'} onValueChange={(value) => handleRecordFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
+                      {editingSummary ? <Select value={editedRecord.assigned_to || 'unassigned'} onValueChange={value => handleRecordFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
                           <SelectTrigger className="w-full mt-1">
                             <SelectValue placeholder="Select user" />
                           </SelectTrigger>
                            <SelectContent>
                              <SelectItem value="unassigned">Unassigned</SelectItem>
-                             {activeUsers.map(user => (
-                               <SelectItem key={user.id} value={user.id}>
+                             {activeUsers.map(user => <SelectItem key={user.id} value={user.id}>
                                  {user.last_name}, {user.first_name}
-                               </SelectItem>
-                             ))}
+                               </SelectItem>)}
                            </SelectContent>
-                        </Select>
-                      ) : (
-                        <p className="font-medium">{getAssignedUserName()}</p>
-                      )}
+                        </Select> : <p className="font-medium">{getAssignedUserName()}</p>}
                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Priority</span>
                      <div className="mt-1">
-                        {editingSummary ? (
-                          <Select value={editedRecord.priority || ''} onValueChange={(value) => handleRecordFieldChange('priority', value)}>
+                        {editingSummary ? <Select value={editedRecord.priority || ''} onValueChange={value => handleRecordFieldChange('priority', value)}>
                             <SelectTrigger className="w-full">
                               <SelectValue placeholder="Select priority" />
                             </SelectTrigger>
                             <SelectContent>
-                              {priorityOptions.map(option => (
-                                <SelectItem key={option.value} value={option.value}>
+                              {priorityOptions.map(option => <SelectItem key={option.value} value={option.value}>
                                   {option.label}
-                                </SelectItem>
-                              ))}
+                                </SelectItem>)}
                             </SelectContent>
-                          </Select>
-                        ) : (
-                          <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                          </Select> : <Badge className={priorityInfo?.color_class || 'bg-gray-100 text-gray-800'}>
                             {priorityInfo?.label || record.priority}
-                          </Badge>
-                        )}
+                          </Badge>}
                      </div>
                    </div>
                    <div>
@@ -745,19 +730,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                    </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Due Date</span>
-                       {editingSummary ? (
-                         <Input 
-                           type="date"
-                           value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''}
-                           onChange={(e) => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                           min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
-                           className="mt-1"
-                         />
-                       ) : (
-                         <p className="font-medium">
+                       {editingSummary ? <Input type="date" value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''} onChange={e => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)} min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)} className="mt-1" /> : <p className="font-medium">
                            {record.due_date ? formatInTimeZone(new Date(record.due_date), 'America/New_York', 'M/d/yyyy') : 'No due date'}
-                         </p>
-                      )}
+                         </p>}
                    </div>
                  </div>
                </CardContent>
@@ -775,18 +750,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 </CardHeader>
                 <CardContent>
                   <div>
-                    {editingDescription ? (
-                      <Textarea 
-                        value={editedRecord.description || ''} 
-                        onChange={(e) => handleRecordFieldChange('description', e.target.value)}
-                        className="min-h-[120px]"
-                        placeholder={`Enter ${recordType} description...`}
-                      />
-                    ) : (
-                      <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {editingDescription ? <Textarea value={editedRecord.description || ''} onChange={e => handleRecordFieldChange('description', e.target.value)} className="min-h-[120px]" placeholder={`Enter ${recordType} description...`} /> : <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                         {record.description || 'No description provided.'}
-                      </p>
-                    )}
+                      </p>}
                   </div>
                 </CardContent>
              </Card>
@@ -804,16 +770,13 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             </Card>
 
             {/* Subtasks - only show for tasks */}
-            {recordType === 'task' && (
-              <Card>
+            {recordType === 'task' && <Card>
                 <CardHeader className="py-[8px]">
                   <CardTitle>Subtasks ({recordSubtasks?.length || 0})</CardTitle>
                 </CardHeader>
                 <CardContent>
-                  {recordSubtasks && recordSubtasks.length > 0 ? (
-                    <div className="space-y-2">
-                      {recordSubtasks.map(subtask => (
-                        <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
+                  {recordSubtasks && recordSubtasks.length > 0 ? <div className="space-y-2">
+                      {recordSubtasks.map(subtask => <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
                           <div className="flex items-center gap-3">
                             <button onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
                               {subtask.task_number}
@@ -823,19 +786,13 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                           <Badge variant="outline" className="text-xs">
                             {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
                           </Badge>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No subtasks found.</p>
-                  )}
+                        </div>)}
+                    </div> : <p className="text-muted-foreground text-sm">No subtasks found.</p>}
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
 
             {/* Parent Task Info - only show for subtasks */}
-            {recordType === 'subtask' && parentTask && (
-              <Card>
+            {recordType === 'subtask' && parentTask && <Card>
                 <CardHeader className="py-[8px]">
                   <CardTitle>Parent Task</CardTitle>
                 </CardHeader>
@@ -852,8 +809,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     </Badge>
                   </div>
                 </CardContent>
-              </Card>
-            )}
+              </Card>}
           </div>
 
           {/* Right Column - Comments & History */}
@@ -873,12 +829,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
                       {isAddingComment ? 'Posting...' : 'Post Comment'}
                     </Button>
-                    <Button 
-                      variant="outline" 
-                      size="sm" 
-                      onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)}
-                      className="flex items-center gap-2"
-                    >
+                    <Button variant="outline" size="sm" onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)} className="flex items-center gap-2">
                       <ArrowUpDown className="w-4 h-4" />
                       {sortCommentsNewestFirst ? 'Newest First' : 'Oldest First'}
                     </Button>
@@ -891,20 +842,17 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 <div className="flex-1 overflow-hidden">
                   <Tabs defaultValue="comments" className="h-full flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
-                      <TabsTrigger value="comments">Comments</TabsTrigger>
+                      <TabsTrigger value="comments">Activity History</TabsTrigger>
                       <TabsTrigger value="history">Email History</TabsTrigger>
                     </TabsList>
                     
                      <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
                        <div className="space-y-3">
-                         {comments && comments.length > 0 ? comments
-                           .slice()
-                           .sort((a, b) => {
-                             const dateA = new Date(a.created_at).getTime();
-                             const dateB = new Date(b.created_at).getTime();
-                             return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
-                           })
-                           .map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                         {comments && comments.length > 0 ? comments.slice().sort((a, b) => {
+                        const dateA = new Date(a.created_at).getTime();
+                        const dateB = new Date(b.created_at).getTime();
+                        return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
+                      }).map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium">
                                   {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
