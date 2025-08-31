@@ -86,10 +86,13 @@ export const useCadet = (cadetId: string) => {
   const { toast } = useToast();
   
   const [cadet, setCadet] = useState<Cadet | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false); // Changed default to false
 
   const fetchCadet = async () => {
-    if (!cadetId || !userProfile?.school_id) return;
+    if (!cadetId || cadetId === '' || !userProfile?.school_id) {
+      setLoading(false);
+      return;
+    }
     
     try {
       setLoading(true);

@@ -38,9 +38,9 @@ export const CadetRecordPage: React.FC = () => {
 
   // Data
   const { cadets, loading: cadetsLoading } = useCadets();
-  const { cadet, loading: cadetLoading } = useCadet(cadetId || '');
+  const { cadet, loading: cadetLoading } = useCadet(cadetId && cadetId !== '' ? cadetId : '');
   
-  const isLoading = cadetsLoading || cadetLoading;
+  const isLoading = cadetsLoading || (cadetId ? cadetLoading : false);
   const currentCadet = cadet || cadets.find(c => c.id === cadetId) as any;
 
   // Local state - all hooks must be at top level
@@ -174,7 +174,7 @@ export const CadetRecordPage: React.FC = () => {
   };
 
   // Loading state
-  if (isLoading) {
+  if (isLoading && currentMode !== 'create') {
     return (
       <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
