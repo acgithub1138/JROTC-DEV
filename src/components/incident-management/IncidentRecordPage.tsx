@@ -509,6 +509,22 @@ export const IncidentRecordPage: React.FC = () => {
                   </div>
                 </div>
                 <div>
+                  <span className="text-sm text-muted-foreground">Due Date</span>
+                  {editingSummary ? (
+                    <Input 
+                      type="date"
+                      value={editedIncident.due_date ? new Date(editedIncident.due_date).toISOString().slice(0, 10) : ''}
+                      onChange={(e) => handleIncidentFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <p className="font-medium">
+                      {incident.due_date ? formatInTimeZone(new Date(incident.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
+                    </p>
+                  )}
+                </div>
+                <div>
                   <span className="text-sm text-muted-foreground">Category</span>
                   <div className="mt-1">
                     {editingSummary ? (
@@ -530,28 +546,6 @@ export const IncidentRecordPage: React.FC = () => {
                       </Badge>
                     )}
                   </div>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Created</span>
-                  <p className="font-medium">
-                    {formatInTimeZone(new Date(incident.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Due Date</span>
-                  {editingSummary ? (
-                    <Input 
-                      type="date"
-                      value={editedIncident.due_date ? new Date(editedIncident.due_date).toISOString().slice(0, 10) : ''}
-                      onChange={(e) => handleIncidentFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
-                      className="mt-1"
-                    />
-                  ) : (
-                    <p className="font-medium">
-                      {incident.due_date ? formatInTimeZone(new Date(incident.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
-                    </p>
-                  )}
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Created By</span>
