@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Paperclip, Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { FileAttachmentUpload } from './FileAttachmentUpload';
 import { AttachmentList } from './AttachmentList';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
@@ -20,7 +19,6 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   canEdit = false,
   defaultOpen = false,
 }) => {
-  const [isOpen, setIsOpen] = useState(defaultOpen);
   const [showUpload, setShowUpload] = useState(false);
   const { uploadFile, isUploading, attachments } = useAttachments(recordType, recordId);
 
@@ -36,66 +34,52 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   };
 
   return (
-    <Card>
-      <Collapsible open={isOpen} onOpenChange={setIsOpen}>
-        <CollapsibleTrigger asChild>
-          <CardHeader className="cursor-pointer hover:bg-muted/50 transition-colors">
-            <CardTitle className="flex items-center justify-between text-base">
-              <div className="flex items-center space-x-2">
-                <Paperclip className="h-4 w-4" />
-                <span>Attachments</span>
-                {attachments.length > 0 && (
-                  <span className="text-sm bg-muted px-2 py-1 rounded-full">
-                    {attachments.length}
-                  </span>
-                )}
-              </div>
-              {canEdit && !showUpload && (
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setShowUpload(true);
-                  }}
-                  className="h-6 w-6 p-0"
-                  title="Add attachment"
-                >
-                  <Plus className="h-4 w-4" />
-                </Button>
-              )}
-            </CardTitle>
-          </CardHeader>
-        </CollapsibleTrigger>
-        <CollapsibleContent>
-          <CardContent className="pt-0 space-y-4">
-            <AttachmentList
-              recordType={recordType}
-              recordId={recordId}
-              canEdit={canEdit}
-            />
+    <Card className="relative">
+      <CardHeader>
+        <CardTitle className="flex items-center space-x-2 text-base">
+          <Paperclip className="h-4 w-4" />
+          <span>
+            Attachments {attachments.length > 0 && `(${attachments.length})`}
+          </span>
+        </CardTitle>
+        {canEdit && !showUpload && (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setShowUpload(true)}
+            className="absolute top-4 right-4 h-6 w-6 p-0"
+            title="Add attachment"
+          >
+            <Plus className="h-4 w-4" />
+          </Button>
+        )}
+      </CardHeader>
+      <CardContent className="pt-0 space-y-4">
+        <AttachmentList
+          recordType={recordType}
+          recordId={recordId}
+          canEdit={canEdit}
+        />
 
-            {showUpload && canEdit && (
-              <div className="space-y-3">
-                <FileAttachmentUpload
-                  onFileSelect={handleFileUpload}
-                  disabled={isUploading}
-                />
-                <div className="flex justify-end space-x-2">
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowUpload(false)}
-                    disabled={isUploading}
-                  >
-                    Cancel
-                  </Button>
-                </div>
-              </div>
-            )}
-          </CardContent>
-        </CollapsibleContent>
-      </Collapsible>
+        {showUpload && canEdit && (
+          <div className="space-y-3">
+            <FileAttachmentUpload
+              onFileSelect={handleFileUpload}
+              disabled={isUploading}
+            />
+            <div className="flex justify-end space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setShowUpload(false)}
+                disabled={isUploading}
+              >
+                Cancel
+              </Button>
+            </div>
+          </div>
+        )}
+      </CardContent>
     </Card>
   );
 };
