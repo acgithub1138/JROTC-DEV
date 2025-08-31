@@ -34,52 +34,51 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   };
 
   return (
-    <Card className="relative">
-      <CardHeader>
-        <CardTitle className="flex items-center space-x-2 text-base">
+    <div className="relative space-y-4">
+      <div className="flex items-center justify-between">
+        <div className="flex items-center space-x-2">
           <Paperclip className="h-4 w-4" />
-          <span>
+          <h3 className="text-base font-semibold">
             Attachments {attachments.length > 0 && `(${attachments.length})`}
-          </span>
-        </CardTitle>
+          </h3>
+        </div>
         {canEdit && !showUpload && (
           <Button
             variant="ghost"
             size="sm"
             onClick={() => setShowUpload(true)}
-            className="absolute top-4 right-4 h-6 w-6 p-0"
+            className="h-6 w-6 p-0"
             title="Add attachment"
           >
             <Plus className="h-4 w-4" />
           </Button>
         )}
-      </CardHeader>
-      <CardContent className="pt-0 space-y-4">
-        <AttachmentList
-          recordType={recordType}
-          recordId={recordId}
-          canEdit={canEdit}
-        />
+      </div>
+      
+      <AttachmentList
+        recordType={recordType}
+        recordId={recordId}
+        canEdit={canEdit}
+      />
 
-        {showUpload && canEdit && (
-          <div className="space-y-3">
-            <FileAttachmentUpload
-              onFileSelect={handleFileUpload}
+      {showUpload && canEdit && (
+        <div className="space-y-3">
+          <FileAttachmentUpload
+            onFileSelect={handleFileUpload}
+            disabled={isUploading}
+          />
+          <div className="flex justify-end space-x-2">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowUpload(false)}
               disabled={isUploading}
-            />
-            <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUpload(false)}
-                disabled={isUploading}
-              >
-                Cancel
-              </Button>
-            </div>
+            >
+              Cancel
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+    </div>
   );
 };
