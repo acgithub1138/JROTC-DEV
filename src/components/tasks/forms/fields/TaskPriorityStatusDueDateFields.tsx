@@ -73,7 +73,7 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
 
       {(canEditThisTask && canAssignTasks) && (
         <div className="flex items-center gap-4">
-          <Label htmlFor="assigned_to" className="w-24 text-right">Assigned To</Label>
+          <Label htmlFor="assigned_to" className="w-24 text-right">Assigned To *</Label>
           <div className="flex-1">
             {isLoadingUsers ? (
               <div className="text-sm text-muted-foreground">Loading users...</div>
@@ -81,21 +81,20 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
               <div className="text-sm text-red-600">Error loading users</div>
             ) : (
               <Select 
-                value={form.watch('assigned_to') || 'unassigned'} 
-                onValueChange={(value) => form.setValue('assigned_to', value === 'unassigned' ? null : value)}
+                value={form.watch('assigned_to') || ''} 
+                onValueChange={(value) => form.setValue('assigned_to', value)}
               >
                 <SelectTrigger>
                   <SelectValue placeholder="Select assignee" />
                 </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="unassigned">Unassigned</SelectItem>
-                {users
-                  .sort((a, b) => {
-                    const aName = `${a.last_name}, ${a.first_name}`;
-                    const bName = `${b.last_name}, ${b.first_name}`;
-                    return aName.localeCompare(bName);
-                  })
-                  .map((user) => (
+                <SelectContent>
+                  {users
+                    .sort((a, b) => {
+                      const aName = `${a.last_name}, ${a.first_name}`;
+                      const bName = `${b.last_name}, ${b.first_name}`;
+                      return aName.localeCompare(bName);
+                    })
+                    .map((user) => (
                     <SelectItem key={user.id} value={user.id}>
                       {user.last_name}, {user.first_name}
                     </SelectItem>
