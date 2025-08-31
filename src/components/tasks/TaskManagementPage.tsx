@@ -114,12 +114,7 @@ const TaskManagementPage: React.FC = () => {
           onRefresh={handleRefresh}
         />
 
-      {/* Create Task Form */}
-      <TaskForm
-        open={showCreateForm}
-        onOpenChange={setShowCreateForm}
-        mode="create"
-      />
+      {/* Create Task Form - Removed since we now use dedicated page */}
 
       {/* Edit Task Form */}
       {editingTask && (
