@@ -60,8 +60,11 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     priorityOptions
   } = useTaskPriorityOptions();
   const {
-    users
-  } = useSchoolUsers(); // Remove activeOnly filter to include inactive users for task assignments
+    users: allUsers
+  } = useSchoolUsers(); // All users for display purposes
+  const {
+    users: activeUsers
+  } = useSchoolUsers(true); // Active users only for editing dropdowns
 
   // Find the task if we have an ID
   const task = taskId ? tasks.find(t => t.id === taskId) : null;
@@ -308,7 +311,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             case 'description': return 'Description updated';
             case 'priority': return `Priority changed to ${priorityOptions.find(p => p.value === editedTask.priority)?.label || editedTask.priority}`;
             case 'status': return `Status changed to ${statusOptions.find(s => s.value === editedTask.status)?.label || editedTask.status}`;
-            case 'assigned_to': return `Assigned to ${users.find(u => u.id === editedTask.assigned_to) ? `${users.find(u => u.id === editedTask.assigned_to)?.last_name}, ${users.find(u => u.id === editedTask.assigned_to)?.first_name}` : 'Unassigned'}`;
+            case 'assigned_to': return `Assigned to ${allUsers.find(u => u.id === editedTask.assigned_to) ? `${allUsers.find(u => u.id === editedTask.assigned_to)?.last_name}, ${allUsers.find(u => u.id === editedTask.assigned_to)?.first_name}` : 'Unassigned'}`;
             case 'due_date': return `Due date changed to ${editedTask.due_date ? formatInTimeZone(new Date(editedTask.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}`;
             default: return `${field} updated`;
           }
@@ -342,7 +345,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Get assigned user display name
   const getAssignedUserName = () => {
     if (!task?.assigned_to) return 'Unassigned';
-    const user = users.find(u => u.id === task.assigned_to);
+    const user = allUsers.find(u => u.id === task.assigned_to);
     return user ? `${user.last_name}, ${user.first_name}` : 'Unknown User';
   };
 
@@ -483,14 +486,14 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                          <SelectTrigger className="w-full mt-1">
                            <SelectValue placeholder="Select user" />
                          </SelectTrigger>
-                         <SelectContent>
-                           <SelectItem value="unassigned">Unassigned</SelectItem>
-                           {users.map(user => (
-                             <SelectItem key={user.id} value={user.id}>
-                               {user.last_name}, {user.first_name}
-                             </SelectItem>
-                           ))}
-                         </SelectContent>
+                          <SelectContent>
+                            <SelectItem value="unassigned">Unassigned</SelectItem>
+                            {activeUsers.map(user => (
+                              <SelectItem key={user.id} value={user.id}>
+                                {user.last_name}, {user.first_name}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
                        </Select>
                      ) : (
                        <p className="font-medium">{getAssignedUserName()}</p>
