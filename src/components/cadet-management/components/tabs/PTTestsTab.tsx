@@ -52,38 +52,37 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({ cadetId }) => {
         <CardTitle>PT Test Records ({ptTests.length})</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {ptTests.map((test) => (
-            <div key={test.id} className="border rounded-lg p-4 space-y-2">
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold">
-                  {format(new Date(test.date), 'PPP')}
-                </h4>
-                <Badge variant="outline">
-                  {format(new Date(test.date), 'yyyy')}
-                </Badge>
-              </div>
-              
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
-                <div>
-                  <span className="font-medium text-muted-foreground">Push-ups:</span>
-                  <div className="font-semibold">{test.push_ups || 'N/A'}</div>
-                </div>
-                <div>
-                  <span className="font-medium text-muted-foreground">Sit-ups:</span>
-                  <div className="font-semibold">{test.sit_ups || 'N/A'}</div>
-                </div>
-                <div>
-                  <span className="font-medium text-muted-foreground">Plank:</span>
-                  <div className="font-semibold">{formatTime(test.plank_time)}</div>
-                </div>
-                <div>
-                  <span className="font-medium text-muted-foreground">Mile Run:</span>
-                  <div className="font-semibold">{formatTime(test.mile_time)}</div>
-                </div>
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-left p-3 font-semibold">Push-ups</th>
+                <th className="text-left p-3 font-semibold">Sit-ups</th>
+                <th className="text-left p-3 font-semibold">Plank</th>
+                <th className="text-left p-3 font-semibold">Mile Run</th>
+                <th className="text-left p-3 font-semibold">Year</th>
+              </tr>
+            </thead>
+            <tbody>
+              {ptTests.map((test) => (
+                <tr key={test.id} className="border-b hover:bg-muted/50">
+                  <td className="p-3 font-medium">
+                    {format(new Date(test.date), 'PPP')}
+                  </td>
+                  <td className="p-3">{test.push_ups || 'N/A'}</td>
+                  <td className="p-3">{test.sit_ups || 'N/A'}</td>
+                  <td className="p-3">{formatTime(test.plank_time)}</td>
+                  <td className="p-3">{formatTime(test.mile_time)}</td>
+                  <td className="p-3">
+                    <Badge variant="outline">
+                      {format(new Date(test.date), 'yyyy')}
+                    </Badge>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
