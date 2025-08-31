@@ -46,30 +46,38 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   return <Card>
-      
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>PT Test Records</CardTitle>
+          <Button onClick={() => navigate('/app/cadets/pt_test_create?mode=single')} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Add PT Test
+          </Button>
+        </div>
+      </CardHeader>
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
             <thead>
-              <tr className="border-b">
+              <tr className="border-b py-[6px] px-[8px]">
                 <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Date</th>
                 <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Push-ups</th>
-                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Sit-ups</th>
-                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Plank</th>
-                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Mile Run</th>
-                <th className="text-left p-3 font-semibold px-[8px] py-[8px]">Actions</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[6px]">Sit-ups</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[6px]">Plank</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[6px]">Mile Run</th>
+                <th className="text-left p-3 font-semibold px-[8px] py-[6px]">Actions</th>
               </tr>
             </thead>
             <tbody>
               {ptTests.map(test => <tr key={test.id} className="border-b hover:bg-muted/50">
-                  <td className="p-3 font-medium px-[8px] py-[4px]">
+                  <td className="p-3 font-medium py-[8px] px-[8px]">
                     {format(new Date(test.date), 'PPP')}
                   </td>
-                  <td className="p-3 px-[8px] py-[4px]">{test.push_ups || 'N/A'}</td>
-                  <td className="p-3 px-[8px] py-[4px]">{test.sit_ups || 'N/A'}</td>
-                  <td className="p-3 px-[8px] py-[4px]">{formatTime(test.plank_time)}</td>
-                  <td className="p-3 px-[8px] py-[4px]">{formatTime(test.mile_time)}</td>
-                  <td className="p-3 px-[8px] py-[4px]">
+                  <td className="p-3 px-[8px] py-[8px]">{test.push_ups || 'N/A'}</td>
+                  <td className="p-3 px-[8px] py-[8px]">{test.sit_ups || 'N/A'}</td>
+                  <td className="p-3 px-[8px] py-[8px]">{formatTime(test.plank_time)}</td>
+                  <td className="p-3 px-[8px] py-[8px]">{formatTime(test.mile_time)}</td>
+                  <td className="p-3 py-[8px] px-[8px]">
                     <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
