@@ -112,11 +112,6 @@ const App = () => (
                       <MobileCreateTask />
                     </ProtectedRoute>
                   } />
-                  <Route path="tasks/:id" element={
-                    <ProtectedRoute module="tasks" requirePermission="sidebar">
-                      <TaskRecordPage />
-                    </ProtectedRoute>
-                  } />
                   <Route path="cadets" element={
                     <ProtectedRoute module="cadets" requirePermission="sidebar">
                       <MobileCadetDirectory />
