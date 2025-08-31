@@ -62,14 +62,14 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
             </thead>
             <tbody>
               {ptTests.map(test => <tr key={test.id} className="border-b hover:bg-muted/50">
-                  <td className="p-3 font-medium py-[8px] px-[8px]">
+                  <td className="p-3 font-medium px-[8px] py-[4px]">
                     {format(new Date(test.date), 'PPP')}
                   </td>
-                  <td className="p-3 px-[8px] py-[8px]">{test.push_ups || 'N/A'}</td>
-                  <td className="p-3 px-[8px] py-[8px]">{test.sit_ups || 'N/A'}</td>
-                  <td className="p-3 px-[8px] py-[8px]">{formatTime(test.plank_time)}</td>
-                  <td className="p-3 px-[8px] py-[8px]">{formatTime(test.mile_time)}</td>
-                  <td className="p-3 py-[8px] px-[8px]">
+                  <td className="p-3 px-[8px] py-[4px]">{test.push_ups || 'N/A'}</td>
+                  <td className="p-3 px-[8px] py-[4px]">{test.sit_ups || 'N/A'}</td>
+                  <td className="p-3 px-[8px] py-[4px]">{formatTime(test.plank_time)}</td>
+                  <td className="p-3 px-[8px] py-[4px]">{formatTime(test.mile_time)}</td>
+                  <td className="p-3 px-[8px] py-[4px]">
                     <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
                       <Edit className="w-4 h-4 mr-2" />
                       Edit
