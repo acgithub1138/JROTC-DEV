@@ -1,0 +1,98 @@
+import React from 'react';
+import { Form } from '@/components/ui/form';
+import { Button } from '@/components/ui/button';
+import { TaskInfoFields } from './fields/TaskInfoFields';
+import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
+import { TaskStatusOption, TaskPriorityOption } from '@/hooks/tasks/types';
+
+interface SharedTaskFormLayoutProps {
+  form: any;
+  onSubmit: (e: React.FormEvent) => void;
+  mode: 'create' | 'edit';
+  taskNumber?: string;
+  createdAt?: string;
+  createdBy?: string;
+  canAssignTasks: boolean;
+  canEditThisTask: boolean;
+  isEditingAssignedTask: boolean;
+  statusOptions: TaskStatusOption[];
+  priorityOptions: TaskPriorityOption[];
+  titleField: React.ReactNode;
+  descriptionField: React.ReactNode;
+  attachmentSection?: React.ReactNode;
+  onCancel: () => void;
+  submitButtonText: string;
+  isSubmitting: boolean;
+  isSubmitDisabled?: boolean;
+}
+
+export const SharedTaskFormLayout: React.FC<SharedTaskFormLayoutProps> = ({
+  form,
+  onSubmit,
+  mode,
+  taskNumber,
+  createdAt,
+  createdBy,
+  canAssignTasks,
+  canEditThisTask,
+  isEditingAssignedTask,
+  statusOptions,
+  priorityOptions,
+  titleField,
+  descriptionField,
+  attachmentSection,
+  onCancel,
+  submitButtonText,
+  isSubmitting,
+  isSubmitDisabled = false,
+}) => {
+  return (
+    <div className="bg-background p-6 rounded-lg border">
+      <Form {...form}>
+        <form onSubmit={onSubmit} className="space-y-6">
+          {/* Top Section - Two Columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
+            <TaskInfoFields
+              mode={mode}
+              taskNumber={taskNumber}
+              createdAt={createdAt}
+              createdBy={createdBy}
+            />
+            
+            <TaskPriorityStatusDueDateFields
+              form={form}
+              canAssignTasks={canAssignTasks}
+              canEditThisTask={canEditThisTask}
+              isEditingAssignedTask={isEditingAssignedTask}
+              statusOptions={statusOptions}
+              priorityOptions={priorityOptions}
+            />
+          </div>
+
+          {/* Bottom Section - Single Column */}
+          <div className="space-y-6 p-6 border rounded-lg bg-card">
+            {titleField}
+            {descriptionField}
+            {attachmentSection}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              variant="outline"
+              onClick={onCancel}
+            >
+              Cancel
+            </Button>
+            <Button 
+              type="submit" 
+              disabled={isSubmitting || isSubmitDisabled}
+            >
+              {isSubmitting ? 'Saving...' : submitButtonText}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
+  );
+};

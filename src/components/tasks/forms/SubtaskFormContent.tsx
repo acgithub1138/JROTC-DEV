@@ -12,8 +12,9 @@ import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
 import { SubtaskTitleField } from './fields/SubtaskTitleField';
 import { SubtaskDescriptionField } from './fields/SubtaskDescriptionField';
-import { TaskInfoFields } from './fields/TaskInfoFields';
-import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
+import { SharedTaskFormLayout } from './SharedTaskFormLayout';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 interface SubtaskFormContentProps {
   open: boolean;
@@ -39,6 +40,7 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
 
   const [createdSubtask, setCreatedSubtask] = useState<any>(null);
   const [showAttachments, setShowAttachments] = useState(false);
+  const { uploadFile, isUploading } = useAttachments('subtask', subtask?.id || 'temp');
 
   // Create schema with current options
   const schema = createSubtaskSchema(
@@ -100,6 +102,7 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
 
         const createdRecord = await createSubtask(subtaskData);
         setCreatedSubtask(createdRecord);
+        
         
         // For page-based creation, navigate back to parent task or task list
         toast({
@@ -183,54 +186,37 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
   }
 
   return (
-    <div className="bg-background p-6 rounded-lg border">
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-6">
-          {/* Top Section - Two Columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
-            <TaskInfoFields
-              mode={mode}
-              taskNumber={mode === 'edit' && subtask ? subtask.id.slice(0, 8) : undefined}
-              createdAt={subtask?.created_at}
-              createdBy={mode === 'edit' && subtask?.assigned_by_profile 
-                ? `${subtask.assigned_by_profile.last_name}, ${subtask.assigned_by_profile.first_name}`
-                : undefined
-              }
-            />
-            
-            <TaskPriorityStatusDueDateFields
-              form={form as any}
-              canAssignTasks={true}
-              canEditThisTask={true}
-              isEditingAssignedTask={false}
-              statusOptions={statusOptions}
-              priorityOptions={priorityOptions}
-            />
-          </div>
-
-          {/* Bottom Section - Single Column */}
-          <div className="space-y-6 p-6 border rounded-lg bg-card">
-            <SubtaskTitleField form={form} />
-            <SubtaskDescriptionField form={form} />
-          </div>
-
-          <div className="flex justify-end gap-2">
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onOpenChange(false)}
-            >
-              Cancel
-            </Button>
-            <Button 
-              type="submit" 
-              disabled={isCreating || isUpdating}
-            >
-              {isCreating || isUpdating ? 'Saving...' : mode === 'create' ? 'Create Subtask' : 'Update Subtask'}
-            </Button>
-          </div>
-        </form>
-      </Form>
-    </div>
+    <SharedTaskFormLayout
+      form={form}
+      onSubmit={form.handleSubmit(onSubmit, onError)}
+      mode={mode}
+      taskNumber={mode === 'edit' && subtask ? subtask.id.slice(0, 8) : undefined}
+      createdAt={subtask?.created_at}
+      createdBy={mode === 'edit' && subtask?.assigned_by_profile 
+        ? `${subtask.assigned_by_profile.last_name}, ${subtask.assigned_by_profile.first_name}`
+        : undefined
+      }
+      canAssignTasks={true}
+      canEditThisTask={true}
+      isEditingAssignedTask={false}
+      statusOptions={statusOptions}
+      priorityOptions={priorityOptions}
+      titleField={<SubtaskTitleField form={form} />}
+      descriptionField={<SubtaskDescriptionField form={form} />}
+      attachmentSection={
+        subtask ? (
+          <AttachmentSection
+            recordType="subtask"
+            recordId={subtask.id}
+            canEdit={true}
+            defaultOpen={true}
+          />
+        ) : null
+      }
+      onCancel={() => onOpenChange(false)}
+      submitButtonText={mode === 'create' ? 'Create Subtask' : 'Update Subtask'}
+      isSubmitting={isCreating || isUpdating}
+      isSubmitDisabled={isUploading}
+    />
   );
 };
