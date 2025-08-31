@@ -169,7 +169,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     loadRecord();
   }, [recordId, tasks, allSubtasks]);
 
-  // Local state
+  // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
   const [isLoading, setIsLoading] = useState(false);
   const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true); // Default: New -> Old
@@ -177,6 +177,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [editingDescription, setEditingDescription] = useState(false);
   const [editedRecord, setEditedRecord] = useState<any>(record || {});
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [newComment, setNewComment] = useState('');
+  const [isAddingComment, setIsAddingComment] = useState(false);
 
   // Update edited record when record changes
   useEffect(() => {
@@ -511,8 +513,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     const priorityInfo = getPriorityInfo();
     const canEdit = canUpdate || canUpdateAssigned && record.assigned_to === userProfile?.id;
     const isCompleted = isTaskDone(record.status, statusOptions);
-    const [newComment, setNewComment] = useState('');
-    const [isAddingComment, setIsAddingComment] = useState(false);
     const handleAddComment = async () => {
       if (!newComment.trim()) return;
       setIsAddingComment(true);
