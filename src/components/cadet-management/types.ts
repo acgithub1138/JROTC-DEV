@@ -6,6 +6,10 @@ export interface Profile {
   email: string;
   role_id: string;
   role?: string; // Keep role field for backward compatibility and role_name sync
+  user_roles?: {
+    role_name: string;
+    role_label: string;
+  };
   grade?: string;
   rank?: string;
   flight?: string;
