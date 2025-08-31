@@ -11,7 +11,7 @@ import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
 import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
-import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown } from 'lucide-react';
+import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskFormContent } from './forms/TaskFormContent';
 import { SubtaskForm } from './forms/SubtaskForm';
@@ -616,11 +616,16 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                </h1>
             </div>
             
-            <div className="flex items-center gap-2">
-              {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} className="flex items-center gap-2">
-                  <Check className="w-4 h-4" />
-                  Mark Complete
-                </Button>}
+             <div className="flex items-center gap-2">
+               {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} className="flex items-center gap-2">
+                   <Check className="w-4 h-4" />
+                   Mark Complete
+                 </Button>}
+               
+               {canCreate && recordType === 'task' && <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?mode=create_subtask&parent_task_id=${record.id}`)} className="flex items-center gap-2">
+                   <Plus className="w-4 h-4" />
+                   Create Subtask
+                 </Button>}
               
               {canCreate && recordType === 'task' && <Button variant="outline" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
                   <Copy className="w-4 h-4" />
