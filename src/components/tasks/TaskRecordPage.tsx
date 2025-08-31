@@ -477,7 +477,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
           {/* Right Column - Comments & History */}
           <div className="space-y-6">
-            <Card className="h-[calc(100vh-200px)]">
+            <Card className="h-full">
               <CardHeader>
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
