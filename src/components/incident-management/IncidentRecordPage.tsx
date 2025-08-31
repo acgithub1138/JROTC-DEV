@@ -540,11 +540,8 @@ export const IncidentRecordPage: React.FC = () => {
           <Card>
             <CardHeader className="py-[8px]">
               <CardTitle className="flex items-center justify-between">
-                Attachments {attachments.length > 0 && `(${attachments.length})`}
-				 {canEdit && !showUpload && ( <Button variant="ghost" size="sm" onClick={() => setShowUpload(true)} title="Add attachment">
-					 <Plus className="h-4 w-4" />
-				   </Button> )}
-  		     </CardTitle>
+                <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showTitleWithCount={true} />
+              </CardTitle>
             </CardHeader>
             <CardContent>
               <AttachmentSection recordType="incident" recordId={incident.id} canEdit={canEditIncident} defaultOpen={true} showContentOnly={true} />
