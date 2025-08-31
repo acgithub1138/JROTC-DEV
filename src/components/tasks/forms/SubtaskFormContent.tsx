@@ -102,7 +102,18 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
 
         const createdRecord = await createSubtask(subtaskData);
         setCreatedSubtask(createdRecord);
-        setShowAttachments(true);
+        
+        // For page-based creation, navigate back to parent task or task list
+        toast({
+          title: 'Success',
+          description: 'Subtask created successfully',
+        });
+        
+        if (parentTaskId) {
+          navigate(`/app/tasks/task_record?id=${parentTaskId}`);
+        } else {
+          navigate('/app/tasks');
+        }
       } else {
         // Edit mode
         if (!subtask) return;

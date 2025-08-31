@@ -14,6 +14,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskFormContent } from './forms/TaskFormContent';
+import { SubtaskForm } from './forms/SubtaskForm';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
 import { format } from 'date-fns';
@@ -23,7 +24,6 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
-import { SubtaskForm } from './forms/SubtaskForm';
 import { supabase } from '@/integrations/supabase/client';
 type TaskRecordMode = 'create' | 'create_task' | 'create_subtask' | 'edit' | 'view';
 type RecordType = 'task' | 'subtask';
@@ -77,6 +77,18 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     const loadRecord = async () => {
       if (!recordId) {
         console.log('No recordId provided');
+        // For create modes, set loading to false and handle parent task loading if needed
+        if (mode === 'create_subtask' && parentTaskId) {
+          setIsLoadingRecord(true);
+          const foundParentTask = tasks.find(t => t.id === parentTaskId);
+          if (foundParentTask) {
+            setParentTask(foundParentTask);
+            setRecordType('subtask');
+          }
+        } else {
+          setRecordType(mode === 'create_subtask' ? 'subtask' : 'task');
+        }
+        setIsLoadingRecord(false);
         return;
       }
       
@@ -483,8 +495,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     );
   }
 
-  // Render create/edit form (only for tasks)
-  if (currentMode === 'create' || (currentMode === 'edit' && recordType === 'task')) {
+  // Render create/edit form for tasks
+  if (currentMode === 'create' || currentMode === 'create_task' || (currentMode === 'edit' && recordType === 'task')) {
     return (
       <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
@@ -497,7 +509,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         
         <div className="bg-card rounded-lg border p-6">
           <TaskFormContent 
-            mode={currentMode} 
+            mode={currentMode === 'create_task' ? 'create' : currentMode} 
             task={record} 
             onSuccess={handleTaskSaved} 
             onCancel={handleFormClose} 
@@ -509,7 +521,36 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     );
   }
 
-  // Render combined view/edit mode  
+  // Render create subtask form
+  if (currentMode === 'create_subtask') {
+    return (
+      <div className="container mx-auto py-6 px-4">
+        <div className="mb-6">
+          <Button variant="outline" onClick={handleBack} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            {parentTask ? `Back to ${parentTask.task_number}` : 'Back to Tasks'}
+          </Button>
+          <h1 className="text-3xl font-bold">Create New Subtask</h1>
+          {parentTask && (
+            <p className="text-muted-foreground mt-2">
+              Creating subtask for: <span className="font-medium">{parentTask.task_number} - {parentTask.title}</span>
+            </p>
+          )}
+        </div>
+        
+        <div className="bg-card rounded-lg border p-6">
+          <SubtaskForm 
+            mode="create"
+            open={true}
+            onOpenChange={() => {}}
+            parentTaskId={parentTaskId || undefined}
+          />
+        </div>
+      </div>
+    );
+  }
+
+  // Render combined view/edit mode
   if (currentMode === 'view' && record) {
     const statusInfo = getStatusInfo();
     const priorityInfo = getPriorityInfo();
