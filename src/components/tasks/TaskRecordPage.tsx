@@ -54,12 +54,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const { users: allUsers } = useSchoolUsers(); // All users for display purposes
   const { users: activeUsers } = useSchoolUsers(true); // Active users only for editing dropdowns
 
-  // Comments hooks - conditional based on record type
+  // Comments hooks - always call both hooks to avoid conditional hook usage
   const { comments: taskComments, addSystemComment: addTaskSystemComment } = useTaskComments(
-    recordType === 'task' ? recordId || '' : ''
+    recordId || ''
   );
   const { comments: subtaskComments, addComment: addSubtaskComment } = useSubtaskComments(
-    recordType === 'subtask' ? recordId || '' : ''
+    recordId || ''
   );
   
   // Get correct comments and comment functions based on record type
@@ -67,8 +67,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const addSystemComment = recordType === 'task' ? addTaskSystemComment : 
     (text: string) => addSubtaskComment(text); // Use regular comment for subtasks
   
-  // Get subtasks for the current record (only for tasks)
-  const { subtasks: recordSubtasks } = useSubtasks(recordType === 'task' ? recordId || '' : '');
+  // Get subtasks for the current record (always call the hook)
+  const { subtasks: recordSubtasks } = useSubtasks(recordId || '');
 
   // Load record data based on ID
   useEffect(() => {
