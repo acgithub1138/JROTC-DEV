@@ -43,7 +43,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [recordType, setRecordType] = useState<RecordType>('task');
   const [record, setRecord] = useState<any>(null);
   const [parentTask, setParentTask] = useState<any>(null);
-  const [isLoadingRecord, setIsLoadingRecord] = useState(false);
+  const [isLoadingRecord, setIsLoadingRecord] = useState(true);
 
   // Hooks
   const { canCreate, canUpdate, canUpdateAssigned, canView, canDelete } = useTaskPermissions();
