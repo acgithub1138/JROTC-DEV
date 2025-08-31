@@ -731,10 +731,10 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                      <span className="text-sm text-muted-foreground">Due Date</span>
                        {editingSummary ? (
                          <Input 
-                           type="datetime-local"
-                           value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 16) : ''}
+                           type="date"
+                           value={editedRecord.due_date ? new Date(editedRecord.due_date).toISOString().slice(0, 10) : ''}
                            onChange={(e) => handleRecordFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
-                           min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16)}
+                           min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
                            className="mt-1"
                          />
                        ) : (
