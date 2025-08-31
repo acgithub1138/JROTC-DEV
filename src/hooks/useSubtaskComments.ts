@@ -71,14 +71,16 @@ export const useSubtaskComments = (subtaskId: string) => {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subtask-comments', subtaskId] });
       
-      // Trigger email notification for comment
+      // Trigger email notification for comment with a small delay to ensure subtask record is available
       if (userProfile?.id && userProfile?.school_id) {
-        processCommentEmailRules({
-          sourceTable: 'subtasks',
-          recordId: subtaskId,
-          schoolId: userProfile.school_id,
-          commenterId: userProfile.id,
-        });
+        setTimeout(() => {
+          processCommentEmailRules({
+            sourceTable: 'subtasks',
+            recordId: subtaskId,
+            schoolId: userProfile.school_id,
+            commenterId: userProfile.id,
+          });
+        }, 100); // 100ms delay
       }
     },
     onError: (error) => {
