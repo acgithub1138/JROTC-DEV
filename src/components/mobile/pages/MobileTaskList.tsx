@@ -139,7 +139,7 @@ export const MobileTaskList: React.FC = () => {
 
 
 const openSubtask = (subtaskId: string, parentTaskId: string) => {
-  navigate(`/mobile/subtasks/${subtaskId}`, { state: { parentTaskId } });
+  navigate(`/app/tasks/task_record?id=${subtaskId}`);
 };
 
 const SubtasksForTask: React.FC<{ parentTaskId: string }> = ({ parentTaskId }) => {
@@ -298,7 +298,7 @@ if (isLoading) {
                         isOverdue(task.due_date) && "border-red-500 border-2",
                         !isOverdue(task.due_date) && isDueSoon(task.due_date) && "border-yellow-500 border-2"
                       )}
-                      onClick={() => canViewDetails && navigate(`/mobile/tasks/${task.id}`)}
+                      onClick={() => canViewDetails && navigate(`/app/tasks/task_record?id=${task.id}`)}
                     >
                       <CardContent className="p-4">
                         <div className="flex items-start justify-between mb-2">
@@ -350,7 +350,7 @@ if (isLoading) {
       {canCreate && (
         <Button
           className="fixed bottom-24 right-4 h-14 w-14 rounded-full shadow-lg bg-primary hover:bg-primary/90"
-          onClick={() => navigate('/mobile/tasks/create')}
+          onClick={() => navigate('/app/tasks/task_record?mode=create')}
         >
           <Plus className="h-6 w-6" />
         </Button>

@@ -79,7 +79,12 @@ export const TaskCards: React.FC<TaskCardsProps> = ({
                   {'parent_task_id' in task && <span className="text-xs text-muted-foreground mr-2">SUBTASK:</span>}
                   {task.title}
                 </CardTitle>
-                <p className="text-sm text-muted-foreground">{task.task_number}</p>
+                <p 
+                  className="text-sm text-muted-foreground cursor-pointer hover:text-primary" 
+                  onClick={() => onView(task)}
+                >
+                  {task.task_number}
+                </p>
               </div>
               <div className="flex space-x-1">
                 <Badge className={getPriorityColorClass(task.priority, priorityOptions)}>
