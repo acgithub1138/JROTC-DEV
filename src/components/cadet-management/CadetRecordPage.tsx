@@ -283,10 +283,7 @@ export const CadetRecordPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
-            {canEditCadet && <Button variant="outline" onClick={() => handleModeChange('edit')} className="flex items-center gap-2">
-                <Edit className="w-4 h-4" />
-                Edit Cadet
-              </Button>}
+            {canEditCadet}
             {canEditCadet && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isSubmitting} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
