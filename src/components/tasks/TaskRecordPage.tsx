@@ -20,35 +20,60 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
-
 type TaskRecordMode = 'create' | 'edit' | 'view';
-
 interface TaskRecordPageProps {}
-
 export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
-  
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
+
   // Extract mode and task ID from URL parameters
-  const mode = (searchParams.get('mode') as TaskRecordMode) || 'view';
+  const mode = searchParams.get('mode') as TaskRecordMode || 'view';
   const taskId = searchParams.get('id');
-  
+
   // Hooks
-  const { canCreate, canUpdate, canUpdateAssigned, canView, canDelete } = useTaskPermissions();
-  const { tasks, updateTask, duplicateTask, isUpdating, isDuplicating } = useTasks();
-  const { statusOptions } = useTaskStatusOptions();
-  const { priorityOptions } = useTaskPriorityOptions();
-  const { users } = useSchoolUsers(true);
-  
+  const {
+    canCreate,
+    canUpdate,
+    canUpdateAssigned,
+    canView,
+    canDelete
+  } = useTaskPermissions();
+  const {
+    tasks,
+    updateTask,
+    duplicateTask,
+    isUpdating,
+    isDuplicating
+  } = useTasks();
+  const {
+    statusOptions
+  } = useTaskStatusOptions();
+  const {
+    priorityOptions
+  } = useTaskPriorityOptions();
+  const {
+    users
+  } = useSchoolUsers(true);
+
   // Find the task if we have an ID
   const task = taskId ? tasks.find(t => t.id === taskId) : null;
-  
+
   // Comments and subtasks (only load if viewing/editing existing task)
-  const { comments, addSystemComment } = useTaskComments(taskId || '');
-  const { subtasks, updateSubtask } = useSubtasks(taskId || '');
-  
+  const {
+    comments,
+    addSystemComment
+  } = useTaskComments(taskId || '');
+  const {
+    subtasks,
+    updateSubtask
+  } = useSubtasks(taskId || '');
+
   // Local state
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
   const [isLoading, setIsLoading] = useState(false);
@@ -59,29 +84,27 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       toast({
         title: "Access Denied",
         description: "You don't have permission to create tasks.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/app/tasks');
       return;
     }
-
     if (currentMode === 'view' && !canView) {
       toast({
         title: "Access Denied",
         description: "You don't have permission to view task details.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/app/tasks');
       return;
     }
-
     if (currentMode === 'edit') {
-      const canEdit = canUpdate || (canUpdateAssigned && task?.assigned_to === userProfile?.id);
+      const canEdit = canUpdate || canUpdateAssigned && task?.assigned_to === userProfile?.id;
       if (!canEdit) {
         toast({
           title: "Access Denied",
           description: "You don't have permission to edit this task.",
-          variant: "destructive",
+          variant: "destructive"
         });
         setCurrentMode('view');
         return;
@@ -93,7 +116,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       toast({
         title: "Task Not Found",
         description: "The requested task could not be found.",
-        variant: "destructive",
+        variant: "destructive"
       });
       navigate('/app/tasks');
       return;
@@ -104,14 +127,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const handleBack = () => {
     navigate('/app/tasks');
   };
-
   const handleEdit = () => {
     if (taskId) {
       setCurrentMode('edit');
       navigate(`/app/tasks/task_record?mode=edit&id=${taskId}`);
     }
   };
-
   const handleView = () => {
     if (taskId) {
       setCurrentMode('view');
@@ -122,13 +143,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Handle task completion
   const handleCompleteTask = async () => {
     if (!task) return;
-
     try {
       setIsLoading(true);
-      
+
       // Check if there are incomplete subtasks
       const incompleteSubtasks = subtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
-      
+
       // Update the main task
       await updateTask({
         id: task.id,
@@ -138,10 +158,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
       // If there are incomplete subtasks, ask if they should be completed too
       if (incompleteSubtasks.length > 0) {
-        const shouldCompleteSubtasks = confirm(
-          `This task has ${incompleteSubtasks.length} incomplete subtask(s). Would you like to complete them as well?`
-        );
-
+        const shouldCompleteSubtasks = confirm(`This task has ${incompleteSubtasks.length} incomplete subtask(s). Would you like to complete them as well?`);
         if (shouldCompleteSubtasks) {
           for (const subtask of incompleteSubtasks) {
             await updateSubtask({
@@ -157,18 +174,16 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       } else {
         addSystemComment('Task completed');
       }
-
       toast({
         title: "Task Completed",
-        description: "The task has been marked as complete.",
+        description: "The task has been marked as complete."
       });
-
     } catch (error) {
       console.error('Error completing task:', error);
       toast({
         title: "Error",
         description: "Failed to complete the task. Please try again.",
-        variant: "destructive",
+        variant: "destructive"
       });
     } finally {
       setIsLoading(false);
@@ -182,7 +197,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       onSuccess: () => {
         toast({
           title: "Task Duplicated",
-          description: "A copy of this task has been created.",
+          description: "A copy of this task has been created."
         });
       }
     });
@@ -222,7 +237,6 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     const statusOption = statusOptions.find(s => s.value === task.status);
     return statusOption;
   };
-
   const getPriorityInfo = () => {
     if (!task) return null;
     const priorityOption = priorityOptions.find(p => p.value === task.priority);
@@ -238,14 +252,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
   // Render create/edit form
   if (currentMode === 'create' || currentMode === 'edit') {
-    return (
-      <div className="container mx-auto py-6 px-4">
+    return <div className="container mx-auto py-6 px-4">
         <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={handleBack}
-            className="mb-4"
-          >
+          <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Tasks
           </Button>
@@ -253,59 +262,43 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         </div>
         
         <div className="bg-card rounded-lg border p-6">
-          <TaskFormContent
-            mode={currentMode}
-            task={task}
-            onSuccess={handleTaskSaved}
-            onCancel={handleFormClose}
-            onTaskCreated={() => navigate('/app/tasks')}
-            showAttachments={true}
-          />
+          <TaskFormContent mode={currentMode} task={task} onSuccess={handleTaskSaved} onCancel={handleFormClose} onTaskCreated={() => navigate('/app/tasks')} showAttachments={true} />
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Render combined view/edit mode
   if (currentMode === 'view' && task) {
     const statusInfo = getStatusInfo();
     const priorityInfo = getPriorityInfo();
-    const canEdit = canUpdate || (canUpdateAssigned && task.assigned_to === userProfile?.id);
+    const canEdit = canUpdate || canUpdateAssigned && task.assigned_to === userProfile?.id;
     const isCompleted = isTaskDone(task.status, statusOptions);
     const [newComment, setNewComment] = useState('');
     const [isAddingComment, setIsAddingComment] = useState(false);
-
     const handleAddComment = async () => {
       if (!newComment.trim()) return;
-      
       setIsAddingComment(true);
       try {
         await addSystemComment(newComment);
         setNewComment('');
         toast({
           title: "Comment Added",
-          description: "Your comment has been added successfully.",
+          description: "Your comment has been added successfully."
         });
       } catch (error) {
         toast({
           title: "Error",
           description: "Failed to add comment. Please try again.",
-          variant: "destructive",
+          variant: "destructive"
         });
       } finally {
         setIsAddingComment(false);
       }
     };
-
-    return (
-      <div className="container mx-auto py-6 px-4">
+    return <div className="container mx-auto py-6 px-4">
         {/* Header */}
         <div className="mb-6">
-          <Button 
-            variant="outline" 
-            onClick={handleBack}
-            className="mb-4"
-          >
+          <Button variant="outline" onClick={handleBack} className="mb-4">
             <ArrowLeft className="w-4 h-4 mr-2" />
             Back to Tasks
           </Button>
@@ -313,48 +306,28 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           <div className="flex items-center justify-between">
             <div>
               <h1 className="text-3xl font-bold">
-                {task.task_number && (
-                  <span className="text-blue-600 font-mono mr-2">
+                {task.task_number && <span className="text-blue-600 font-mono mr-2">
                     {task.task_number} -
-                  </span>
-                )}
+                  </span>}
                 {task.title}
               </h1>
             </div>
             
             <div className="flex items-center gap-2">
-              {canEdit && !isCompleted && (
-                <Button 
-                  onClick={handleCompleteTask}
-                  disabled={isLoading}
-                  className="flex items-center gap-2"
-                >
+              {canEdit && !isCompleted && <Button onClick={handleCompleteTask} disabled={isLoading} className="flex items-center gap-2">
                   <Check className="w-4 h-4" />
                   Mark Complete
-                </Button>
-              )}
+                </Button>}
               
-              {canCreate && (
-                <Button 
-                  variant="outline" 
-                  onClick={handleDuplicateTask}
-                  disabled={isDuplicating}
-                  className="flex items-center gap-2"
-                >
+              {canCreate && <Button variant="outline" onClick={handleDuplicateTask} disabled={isDuplicating} className="flex items-center gap-2">
                   <Copy className="w-4 h-4" />
                   {isDuplicating ? 'Duplicating...' : 'Duplicate'}
-                </Button>
-              )}
+                </Button>}
               
-              {canEdit && (
-                <Button 
-                  onClick={handleEdit}
-                  className="flex items-center gap-2"
-                >
+              {canEdit && <Button onClick={handleEdit} className="flex items-center gap-2">
                   <Edit className="w-4 h-4" />
                   Edit
-                </Button>
-              )}
+                </Button>}
             </div>
           </div>
         </div>
@@ -365,7 +338,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           <div className="space-y-6">
             {/* Summary */}
             <Card>
-              <CardHeader>
+              <CardHeader className="py-[8px]">
                 <CardTitle>Summary</CardTitle>
               </CardHeader>
               <CardContent>
@@ -412,12 +385,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
             {/* Details */}
             <Card>
-              <CardHeader>
-                <CardTitle>Details</CardTitle>
+              <CardHeader className="py-[8px]">
+                <CardTitle>Task Description</CardTitle>
               </CardHeader>
               <CardContent>
                 <div>
-                  <h4 className="font-medium mb-2">Task Description</h4>
+                  
                   <p className="text-sm text-muted-foreground whitespace-pre-wrap">
                     {task.description || 'No description provided.'}
                   </p>
@@ -427,43 +400,26 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
             {/* Attachments */}
             <Card>
-              <CardHeader>
+              <CardHeader className="py-[8px]">
                 <CardTitle className="flex items-center justify-between">
-                  <AttachmentSection
-                    recordType="task"
-                    recordId={task.id}
-                    canEdit={canEdit}
-                    defaultOpen={true}
-                    showTitleWithCount={true}
-                  />
+                  <AttachmentSection recordType="task" recordId={task.id} canEdit={canEdit} defaultOpen={true} showTitleWithCount={true} />
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <AttachmentSection
-                  recordType="task"
-                  recordId={task.id}
-                  canEdit={canEdit}
-                  defaultOpen={true}
-                  showContentOnly={true}
-                />
+                <AttachmentSection recordType="task" recordId={task.id} canEdit={canEdit} defaultOpen={true} showContentOnly={true} />
               </CardContent>
             </Card>
 
             {/* Subtasks */}
             <Card>
-              <CardHeader>
+              <CardHeader className="py-[8px]">
                 <CardTitle>Subtasks ({subtasks?.length || 0})</CardTitle>
               </CardHeader>
               <CardContent>
-                {subtasks && subtasks.length > 0 ? (
-                  <div className="space-y-2">
-                    {subtasks.map((subtask) => (
-                      <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
+                {subtasks && subtasks.length > 0 ? <div className="space-y-2">
+                    {subtasks.map(subtask => <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
                         <div className="flex items-center gap-3">
-                          <button
-                            onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)}
-                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                          >
+                          <button onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)} className="text-blue-600 hover:text-blue-800 font-medium text-sm">
                             {subtask.task_number}
                           </button>
                           <span className="text-sm">{subtask.title}</span>
@@ -471,12 +427,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                         <Badge variant="outline" className="text-xs">
                           {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
                         </Badge>
-                      </div>
-                    ))}
-                  </div>
-                ) : (
-                  <p className="text-muted-foreground text-sm">No subtasks found.</p>
-                )}
+                      </div>)}
+                  </div> : <p className="text-muted-foreground text-sm">No subtasks found.</p>}
               </CardContent>
             </Card>
           </div>
@@ -484,7 +436,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           {/* Right Column - Comments & History */}
           <div className="space-y-6">
             <Card className="h-full">
-              <CardHeader>
+              <CardHeader className="py-[8px]">
                 <CardTitle className="flex items-center gap-2">
                   <MessageSquare className="w-5 h-5" />
                   Comments & History
@@ -493,18 +445,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
               <CardContent className="flex flex-col h-full">
                 {/* Add Comment */}
                 <div className="space-y-3 mb-4">
-                  <Textarea
-                    placeholder="Add a comment..."
-                    value={newComment}
-                    onChange={(e) => setNewComment(e.target.value)}
-                    className="min-h-[80px]"
-                  />
-                  <Button 
-                    onClick={handleAddComment}
-                    disabled={!newComment.trim() || isAddingComment}
-                    size="sm"
-                    className="w-fit"
-                  >
+                  <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
+                  <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
                     {isAddingComment ? 'Posting...' : 'Post Comment'}
                   </Button>
                 </div>
@@ -521,9 +463,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     
                     <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
                       <div className="space-y-3">
-                        {comments && comments.length > 0 ? (
-                          comments.map((comment) => (
-                            <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                        {comments && comments.length > 0 ? comments.map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium">
                                   {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
@@ -533,11 +473,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                                 </span>
                               </div>
                               <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
-                            </div>
-                          ))
-                        ) : (
-                          <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>
-                        )}
+                            </div>) : <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>}
                       </div>
                     </TabsContent>
                     
@@ -552,18 +488,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             </Card>
           </div>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Fallback for invalid states
-  return (
-    <div className="container mx-auto py-6 px-4">
-      <Button 
-        variant="outline" 
-        onClick={handleBack}
-        className="mb-4"
-      >
+  return <div className="container mx-auto py-6 px-4">
+      <Button variant="outline" onClick={handleBack} className="mb-4">
         <ArrowLeft className="w-4 h-4 mr-2" />
         Back to Tasks
       </Button>
@@ -573,6 +503,5 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           The requested task operation is not valid or you don't have permission to access it.
         </p>
       </div>
-    </div>
-  );
+    </div>;
 };
