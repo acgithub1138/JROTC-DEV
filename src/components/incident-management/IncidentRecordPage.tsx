@@ -480,7 +480,7 @@ export const IncidentRecordPage: React.FC = () => {
                 <div>
                   <span className="text-sm text-muted-foreground">Created</span>
                   <p className="font-medium">
-                    {incident.created_at ? formatInTimeZone(new Date(incident.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'N/A'}
+                    {incident.created_at ? formatInTimeZone(new Date(incident.created_at), 'America/New_York', 'MM/dd/yyyy') : 'N/A'}
                   </p>
                 </div>
                 <div>
