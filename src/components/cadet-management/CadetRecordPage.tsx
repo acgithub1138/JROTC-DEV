@@ -290,60 +290,7 @@ export const CadetRecordPage: React.FC = () => {
       {/* Main Content - Two Column Layout */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mt-6">
         {/* Left Column */}
-        <div className="space-y-6">
-          {/* Basic Information */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle className="flex items-center justify-between">
-                Basic Information
-                {canEditCadet && <Button variant="ghost" size="sm" onClick={() => {
-                if (!editingBasicInfo && currentCadet) {
-                  setEditedCadet(currentCadet);
-                }
-                setEditingBasicInfo(!editingBasicInfo);
-              }}>
-                    <Edit className="w-4 h-4" />
-                  </Button>}
-              </CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <span className="text-sm text-muted-foreground">Name</span>
-                  <p className="font-medium">{currentCadet.last_name}, {currentCadet.first_name}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Email</span>
-                  <p className="font-medium">{currentCadet.email}</p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Grade</span>
-                  <EditableCadetField type="select" value={currentCadet.grade || ''} options={['9th', '10th', '11th', '12th']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('grade', value)} displayValue={currentCadet.grade || 'Not set'} />
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Rank</span>
-                  <EditableCadetField type="text" value={currentCadet.rank || ''} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('rank', value)} displayValue={currentCadet.rank || 'Not set'} />
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Flight</span>
-                  <EditableCadetField type="select" value={currentCadet.flight || ''} options={['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('flight', value)} displayValue={currentCadet.flight || 'Not assigned'} />
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">Cadet Year</span>
-                  <EditableCadetField type="select" value={currentCadet.cadet_year || ''} options={['AS-1', 'AS-2', 'AS-3', 'AS-4']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('cadet_year', value)} displayValue={currentCadet.cadet_year || 'Not set'} />
-                </div>
-              </div>
-            </CardContent>
-          </Card>
-
-          {/* Status Information */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle>Status Information</CardTitle>
-            </CardHeader>
-            
-          </Card>
-        </div>
+        
 
         {/* Right Column */}
         <div className="space-y-6">
