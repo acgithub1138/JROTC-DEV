@@ -66,8 +66,8 @@ export const useAttachments = (recordType: string, recordId: string) => {
       if (error) throw error;
       return data;
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['attachments', recordType, recordId] });
+    onSuccess: (data, variables) => {
+      queryClient.invalidateQueries({ queryKey: ['attachments', variables.record_type, variables.record_id] });
       toast({
         title: "Success",
         description: "File uploaded successfully",
@@ -138,7 +138,7 @@ export const useAttachments = (recordType: string, recordId: string) => {
     attachments: attachmentsQuery.data || [],
     isLoading: attachmentsQuery.isLoading,
     error: attachmentsQuery.error,
-    uploadFile: uploadMutation.mutate,
+    uploadFile: uploadMutation.mutateAsync,
     deleteFile: deleteMutation.mutate,
     isUploading: uploadMutation.isPending,
     isDeleting: deleteMutation.isPending,

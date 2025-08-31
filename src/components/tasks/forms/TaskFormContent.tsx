@@ -55,12 +55,12 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
     onOpenChange: () => {}, // Not used in page context
     canAssignTasks,
     currentUserId: userProfile?.id || '',
-    onTaskCreated: (newTask: Task) => {
+    onTaskCreated: async (newTask: Task) => {
       setHasUnsavedChanges(false);
       
       // Upload pending files if any
       if (pendingFiles.length > 0 && mode === 'create') {
-        uploadPendingFiles(newTask.id);
+        await uploadPendingFiles(newTask.id);
       }
       
       if (onTaskCreated) {
@@ -73,14 +73,16 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
   
   // Initialize attachment hooks for file upload (with dummy ID for create mode)
   const { uploadFile, isUploading } = useAttachments('task', task?.id || 'temp');
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   
   const uploadPendingFiles = async (taskId: string) => {
     if (pendingFiles.length === 0) return;
     
+    setIsUploadingFiles(true);
     try {
-      // Upload files one by one
+      // Upload files one by one and wait for completion
       for (const file of pendingFiles) {
-        uploadFile({
+        await uploadFile({
           record_type: 'task',
           record_id: taskId,
           file
@@ -89,6 +91,8 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
       setPendingFiles([]);
     } catch (error) {
       console.error('Error uploading files:', error);
+    } finally {
+      setIsUploadingFiles(false);
     }
   };
 
@@ -192,7 +196,7 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
                       }}
                       className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
                     />
-                    {pendingFiles.length > 0 && (
+                     {pendingFiles.length > 0 && (
                       <div className="mt-2 space-y-1">
                         <p className="text-sm text-muted-foreground">Files to upload after task creation:</p>
                         {pendingFiles.map((file, index) => (
@@ -207,6 +211,11 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
                             </button>
                           </div>
                         ))}
+                        {isUploadingFiles && (
+                          <div className="text-sm text-blue-600 font-medium">
+                            Uploading files...
+                          </div>
+                        )}
                       </div>
                     )}
                   </div>
@@ -230,8 +239,8 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
                 Cancel
               </Button>
             )}
-            <Button type="submit" disabled={isSubmitting}>
-              {mode === 'create' ? 'Create Task' : 'Update Task'}
+            <Button type="submit" disabled={isSubmitting || isUploadingFiles}>
+              {isUploadingFiles ? 'Uploading files...' : mode === 'create' ? 'Create Task' : 'Update Task'}
             </Button>
           </div>
         </form>
