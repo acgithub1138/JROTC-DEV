@@ -255,7 +255,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             task={task}
             onSuccess={handleTaskSaved}
             onCancel={handleFormClose}
-            onTaskCreated={(newTask) => navigate(`/app/tasks/task_record?id=${newTask.id}`)}
+            onTaskCreated={() => navigate('/app/tasks')}
             showAttachments={true}
           />
         </div>
