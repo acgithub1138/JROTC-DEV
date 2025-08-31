@@ -474,12 +474,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                    <div>
                      <span className="text-sm text-muted-foreground">Assigned to</span>
                      {editingSummary ? (
-                       <Select value={editedTask.assigned_to || ''} onValueChange={(value) => handleTaskFieldChange('assigned_to', value || null)}>
+                       <Select value={editedTask.assigned_to || 'unassigned'} onValueChange={(value) => handleTaskFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
                          <SelectTrigger className="w-full mt-1">
                            <SelectValue placeholder="Select user" />
                          </SelectTrigger>
                          <SelectContent>
-                           <SelectItem value="">Unassigned</SelectItem>
+                           <SelectItem value="unassigned">Unassigned</SelectItem>
                            {users.map(user => (
                              <SelectItem key={user.id} value={user.id}>
                                {user.last_name}, {user.first_name}
