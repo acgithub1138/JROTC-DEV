@@ -891,7 +891,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                   <Tabs defaultValue="comments" className="h-full flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="comments">Comments</TabsTrigger>
-                      <TabsTrigger value="history">History</TabsTrigger>
+                      <TabsTrigger value="history">Email History</TabsTrigger>
                     </TabsList>
                     
                      <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
@@ -917,11 +917,20 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                       </div>
                     </TabsContent>
                     
-                    <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
-                      <div className="text-sm text-muted-foreground text-center py-8">
-                        History tracking will be implemented here.
-                      </div>
-                    </TabsContent>
+                     <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
+                       <div className="space-y-3">
+                         <div className="text-sm text-muted-foreground text-center py-8">
+                           No emails sent for this {recordType} yet.
+                         </div>
+                         {/* TODO: Implement email history fetching and display
+                             This should show:
+                             - Email subject
+                             - Recipients
+                             - Sent date/time
+                             - Email status (sent, delivered, failed)
+                         */}
+                       </div>
+                     </TabsContent>
                   </Tabs>
                 </div>
               </CardContent>
