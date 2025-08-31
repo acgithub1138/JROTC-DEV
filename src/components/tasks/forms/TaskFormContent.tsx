@@ -35,8 +35,10 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
   const canAssignTasks = canAssign;
   const canEditThisTask = canUpdate || (canUpdateAssigned && task?.assigned_to === userProfile?.id);
   
+  
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
 
   const {
     form,
@@ -146,16 +148,53 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
           <div className="space-y-6 p-6 border rounded-lg bg-card">
             <TaskTitleField form={form} />
             <TaskDescriptionField form={form} />
+            
+            {/* Attachments Section */}
+            {mode === 'create' ? (
+              <div className="space-y-2">
+                <div className="flex items-center gap-4">
+                  <label className="w-32 text-right text-sm font-medium">Attachments</label>
+                  <div className="flex-1">
+                    <input
+                      type="file"
+                      multiple
+                      onChange={(e) => {
+                        const files = Array.from(e.target.files || []);
+                        setPendingFiles(prev => [...prev, ...files]);
+                      }}
+                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                    />
+                    {pendingFiles.length > 0 && (
+                      <div className="mt-2 space-y-1">
+                        <p className="text-sm text-muted-foreground">Files to upload after task creation:</p>
+                        {pendingFiles.map((file, index) => (
+                          <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                            <span>{file.name}</span>
+                            <button
+                              type="button"
+                              onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                              className="text-red-500 hover:text-red-700"
+                            >
+                              ×
+                            </button>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              task?.id && showAttachments && (
+                <AttachmentSection
+                  recordType="task"
+                  recordId={task.id}
+                  canEdit={canEditThisTask}
+                  defaultOpen={false}
+                />
+              )
+            )}
           </div>
-
-          {mode === 'edit' && task?.id && showAttachments && (
-            <AttachmentSection
-              recordType="task"
-              recordId={task.id}
-              canEdit={canEditThisTask}
-              defaultOpen={false}
-            />
-          )}
 
           <div className="flex justify-end gap-2 pt-4">
             {onCancel && (
