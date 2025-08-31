@@ -57,7 +57,7 @@ const TaskManagementPage: React.FC = () => {
   };
 
   const handleCreateTask = () => {
-    navigate('/app/tasks/task_record?mode=create');
+    navigate('/app/tasks/task_record?mode=create_task');
   };
 
   return (

@@ -15,7 +15,7 @@ import { getStatusLabel, getPriorityLabel, getStatusColorClass, getPriorityColor
 import { TaskStatusOption, TaskPriorityOption } from '@/hooks/useTaskOptions';
 import { TaskDescriptionModal } from '../TaskDescriptionModal';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { CreateSubtaskDialog } from '../dialogs/CreateSubtaskDialog';
+
 import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { StatusChangeCommentModal } from '../dialogs/StatusChangeCommentModal';
@@ -56,7 +56,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   const { handleSystemComment } = useTaskSystemComments();
   const { addComment } = useTaskComments(task.id);
   const [isDescriptionModalOpen, setIsDescriptionModalOpen] = useState(false);
-  const [isCreateSubtaskOpen, setIsCreateSubtaskOpen] = useState(false);
+  
   const [isStatusCommentModalOpen, setIsStatusCommentModalOpen] = useState(false);
   const [isSubtaskCompletionModalOpen, setIsSubtaskCompletionModalOpen] = useState(false);
   const [pendingStatusChange, setPendingStatusChange] = useState<string | null>(null);
@@ -292,7 +292,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
           <TableActionButtons
             canCreate={!isSubtask && canCreate}
             canCancel={canCancel}
-            onCreate={() => setIsCreateSubtaskOpen(true)}
+            onCreate={() => navigate(`/app/tasks/task_record?mode=create_subtask&parent_task_id=${task.id}`)}
             onCancel={handleCancel}
           />
         </TableCell>
@@ -319,14 +319,6 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
         taskDescription={task.description}
       />
 
-      {!isSubtask && (
-        <CreateSubtaskDialog
-          isOpen={isCreateSubtaskOpen}
-          onClose={() => setIsCreateSubtaskOpen(false)}
-          parentTaskId={task.id}
-          parentTaskTitle={task.title}
-        />
-      )}
 
       <StatusChangeCommentModal
         isOpen={isStatusCommentModalOpen}

@@ -23,8 +23,9 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { SubtaskForm } from './forms/SubtaskForm';
 import { supabase } from '@/integrations/supabase/client';
-type TaskRecordMode = 'create' | 'edit' | 'view';
+type TaskRecordMode = 'create' | 'create_task' | 'create_subtask' | 'edit' | 'view';
 type RecordType = 'task' | 'subtask';
 
 interface TaskRecordPageProps {}
@@ -38,6 +39,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Extract mode and record ID from URL parameters
   const mode = searchParams.get('mode') as TaskRecordMode || 'view';
   const recordId = searchParams.get('id');
+  const parentTaskId = searchParams.get('parent_task_id');
   
   // State to track record type and data
   const [recordType, setRecordType] = useState<RecordType>('task');
@@ -167,7 +169,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     };
     
     loadRecord();
-  }, [recordId, tasks, allSubtasks]);
+  }, [recordId, parentTaskId, mode, tasks, allSubtasks]);
 
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
