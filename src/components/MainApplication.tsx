@@ -32,6 +32,8 @@ import { PTTestCreatePage } from './cadet-management/PTTestCreatePage';
 import { PTTestEditPage } from './cadet-management/PTTestEditPage';
 import { InspectionCreatePage } from './cadet-management/InspectionCreatePage';
 import { InspectionEditPage } from './cadet-management/InspectionEditPage';
+import { CommunityServiceCreatePage } from './cadet-management/CommunityServiceCreatePage';
+import { CommunityServiceEditPage } from './cadet-management/CommunityServiceEditPage';
 import JobBoardPage from '@/components/job-board/JobBoardPage';
 import TeamsManagementPage from '@/components/teams/TeamsManagementPage';
 import InventoryManagementPage from '@/components/inventory-management/InventoryManagementPage';
@@ -202,9 +204,11 @@ const MainApplication = () => {
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
           <Route path="cadets/pt_test_create" element={<PTTestCreatePage />} />
-          <Route path="cadets/pt_test_edit" element={<PTTestEditPage />} />
+          <Route path="cadets/pt_test_edit/:id" element={<PTTestEditPage />} />
           <Route path="cadets/inspection_create" element={<InspectionCreatePage />} />
-          <Route path="cadets/inspection_edit" element={<InspectionEditPage />} />
+          <Route path="cadets/inspection_edit/:id" element={<InspectionEditPage />} />
+          <Route path="cadets/service_record" element={<CommunityServiceCreatePage />} />
+          <Route path="cadets/service_record_edit/:id" element={<CommunityServiceEditPage />} />
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />
