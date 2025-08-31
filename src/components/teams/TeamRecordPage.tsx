@@ -7,6 +7,8 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
+import { Checkbox } from '@/components/ui/checkbox';
+import { ScrollArea } from '@/components/ui/scroll-area';
 import { ArrowLeft, Save, X, Users } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useTeams } from './hooks/useTeams';
@@ -53,12 +55,23 @@ const TeamRecordPage = () => {
   const [loading, setLoading] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
+  const [searchTerm, setSearchTerm] = useState('');
 
   const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
     initialData,
     currentData: formData,
     enabled: true
   });
+
+  // Filter cadets based on search term
+  const filteredCadets = cadets
+    .filter(cadet => cadet.active)
+    .filter(cadet => 
+      searchTerm === '' || 
+      `${cadet.first_name} ${cadet.last_name}`.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      `${cadet.last_name}, ${cadet.first_name}`.toLowerCase().includes(searchTerm.toLowerCase())
+    )
+    .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`));
 
   // Load existing team data for edit mode
   useEffect(() => {
@@ -285,6 +298,60 @@ const TeamRecordPage = () => {
             </div>
           </div>
 
+          {/* Team Members */}
+          <div>
+            <Label>Team Members</Label>
+            <div className="space-y-3 mt-2">
+              <Input
+                placeholder="Search cadets..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                className="w-full"
+              />
+              <ScrollArea className="h-48 border rounded-md p-2">
+                {cadetsLoading ? (
+                  <div className="text-center py-4 text-muted-foreground">Loading cadets...</div>
+                ) : filteredCadets.length === 0 ? (
+                  <div className="text-center py-4 text-muted-foreground">No cadets found</div>
+                ) : (
+                  <div className="space-y-2">
+                    {filteredCadets.map(cadet => {
+                      const isSelected = formData.member_ids.includes(cadet.id);
+                      const isTeamLead = formData.team_lead_id === cadet.id;
+                      
+                      return (
+                        <div key={cadet.id} className="flex items-center space-x-2">
+                          <Checkbox
+                            id={`cadet-${cadet.id}`}
+                            checked={isSelected}
+                            onCheckedChange={() => handleMemberToggle(cadet.id)}
+                          />
+                          <Label 
+                            htmlFor={`cadet-${cadet.id}`}
+                            className="flex-1 cursor-pointer flex items-center justify-between"
+                          >
+                            <span>
+                              {cadet.last_name}, {cadet.first_name}
+                              {cadet.grade && ` (${cadet.grade})`}
+                            </span>
+                            {isTeamLead && (
+                              <Badge className="text-xs ml-2">Team Lead</Badge>
+                            )}
+                          </Label>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+              </ScrollArea>
+              {formData.member_ids.length > 0 && (
+                <div className="text-sm text-muted-foreground">
+                  {formData.member_ids.length} member{formData.member_ids.length !== 1 ? 's' : ''} selected
+                </div>
+              )}
+            </div>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="description">Description</Label>
             <Textarea
@@ -294,67 +361,6 @@ const TeamRecordPage = () => {
               placeholder="Enter team description (optional)"
               rows={3}
             />
-          </div>
-
-          {/* Team Members */}
-          <div className="space-y-4">
-            <div>
-              <Label>Team Members</Label>
-              <p className="text-sm text-muted-foreground">
-                Select cadets to add to this team
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">
-              {cadets
-                .filter(cadet => cadet.active)
-                .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`))
-                .map(cadet => {
-                  const isSelected = formData.member_ids.includes(cadet.id);
-                  const isTeamLead = formData.team_lead_id === cadet.id;
-                  
-                  return (
-                    <div
-                      key={cadet.id}
-                      className={`p-3 border rounded-lg cursor-pointer transition-colors ${
-                        isSelected 
-                          ? 'border-primary bg-primary/5' 
-                          : 'border-border hover:border-primary/50'
-                      }`}
-                      onClick={() => handleMemberToggle(cadet.id)}
-                    >
-                      <div className="flex items-center justify-between">
-                        <div>
-                          <div className="font-medium">
-                            {cadet.last_name}, {cadet.first_name}
-                          </div>
-                          <div className="text-sm text-muted-foreground">
-                            {cadet.grade}
-                          </div>
-                        </div>
-                        <div className="flex flex-col items-end gap-1">
-                          {isSelected && (
-                            <Badge variant="secondary" className="text-xs">
-                              Member
-                            </Badge>
-                          )}
-                          {isTeamLead && (
-                            <Badge className="text-xs">
-                              Team Lead
-                            </Badge>
-                          )}
-                        </div>
-                      </div>
-                    </div>
-                  );
-                })}
-            </div>
-
-            {formData.member_ids.length > 0 && (
-              <div className="text-sm text-muted-foreground">
-                {formData.member_ids.length} member{formData.member_ids.length !== 1 ? 's' : ''} selected
-              </div>
-            )}
           </div>
         </CardContent>
       </Card>
