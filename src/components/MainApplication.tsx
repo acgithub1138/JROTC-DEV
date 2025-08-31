@@ -44,6 +44,7 @@ import CalendarManagementPage from '@/components/calendar/CalendarManagementPage
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 import AnnouncementManagementPage from '@/components/announcements/AnnouncementManagementPage';
+import { ChainOfCommandRecordPage } from '@/components/cadets/ChainOfCommandRecordPage';
 
 import { RoleManagementPage } from '@/components/role-management/RoleManagementPage';
 
@@ -211,6 +212,7 @@ const MainApplication = () => {
           <Route path="cadets/inspection_edit/:id" element={<InspectionEditPage />} />
           <Route path="cadets/service_record" element={<CommunityServiceCreatePage />} />
           <Route path="cadets/service_record_edit/:id" element={<CommunityServiceEditPage />} />
+            <Route path="cadets/coc_record" element={<ChainOfCommandRecordPage />} />
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />

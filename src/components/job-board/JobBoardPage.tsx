@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -6,8 +7,6 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Plus, Search } from 'lucide-react';
 import { JobBoardTable } from './components/JobBoardTable';
 import { JobBoardChart } from './components/JobBoardChart';
-import { AddJobDialog } from './components/AddJobDialog';
-import { EditJobDialog } from './components/EditJobDialog';
 import { DeleteJobDialog } from './components/DeleteJobDialog';
 import { JobRoleEmailConfirmModal } from './components/JobRoleEmailConfirmModal';
 import { useJobBoard } from './hooks/useJobBoard';
@@ -16,10 +15,9 @@ import { JobBoardWithCadet } from './types';
 import { useJobBoardPermissions } from '@/hooks/useModuleSpecificPermissions';
 const JobBoardPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
-  const [showAddDialog, setShowAddDialog] = useState(false);
-  const [editingJob, setEditingJob] = useState<JobBoardWithCadet | null>(null);
   const [deletingJob, setDeletingJob] = useState<JobBoardWithCadet | null>(null);
   const [activeTab, setActiveTab] = useState('table');
+  const navigate = useNavigate();
   const {
     canManageHierarchy,
     canCreate,
@@ -29,31 +27,13 @@ const JobBoardPage = () => {
   const {
     jobs,
     isLoading,
-    createJob,
-    updateJob,
     deleteJob,
     refetch,
     emailConfirmModal,
     setEmailConfirmModal
   } = useJobBoard();
   const filteredJobs = getFilteredJobs(jobs, searchTerm);
-  const handleAddJob = (newJob: any) => {
-    createJob.mutate(newJob, {
-      onSuccess: () => {
-        setShowAddDialog(false);
-      }
-    });
-  };
-  const handleEditJob = (id: string, updates: any) => {
-    updateJob.mutate({
-      id,
-      updates
-    }, {
-      onSuccess: () => {
-        setEditingJob(null);
-      }
-    });
-  };
+  
   const handleDeleteJob = () => {
     if (deletingJob) {
       deleteJob.mutate(deletingJob.id, {
@@ -63,6 +43,7 @@ const JobBoardPage = () => {
       });
     }
   };
+  
   const handleRefresh = () => {
     refetch();
   };
@@ -80,7 +61,7 @@ const JobBoardPage = () => {
       <div className="max-w-7xl mx-auto">
         <div className="flex justify-between items-center mb-6">
           <h1 className="text-3xl font-bold text-gray-900">Chain of Command</h1>
-          {canCreate && <Button onClick={() => setShowAddDialog(true)}>
+          {canCreate && <Button onClick={() => navigate('/app/cadets/coc_record?mode=create')}>
               <Plus className="w-4 h-4 mr-2" />
               Add Job
             </Button>}
@@ -104,19 +85,25 @@ const JobBoardPage = () => {
               </TabsList>
               
               <TabsContent value="table" className="mt-4">
-                <JobBoardTable jobs={filteredJobs} onEditJob={canUpdate ? setEditingJob : undefined} onDeleteJob={canDelete ? setDeletingJob : undefined} readOnly={!canUpdate && !canDelete} />
+                <JobBoardTable 
+                  jobs={filteredJobs} 
+                  onEditJob={canUpdate ? (job) => navigate(`/app/cadets/coc_record?mode=edit&id=${job.id}`) : undefined} 
+                  onDeleteJob={canDelete ? setDeletingJob : undefined} 
+                  readOnly={!canUpdate && !canDelete} 
+                />
               </TabsContent>
 
               <TabsContent value="chart" className="mt-4">
-                <JobBoardChart jobs={filteredJobs} onRefresh={handleRefresh} onUpdateJob={canUpdate ? handleEditJob : undefined} readOnly={!canUpdate} />
+                <JobBoardChart 
+                  jobs={filteredJobs} 
+                  onRefresh={handleRefresh} 
+                  onUpdateJob={canUpdate ? (jobId, updates) => navigate(`/app/cadets/coc_record?mode=edit&id=${jobId}`) : undefined} 
+                  readOnly={!canUpdate} 
+                />
               </TabsContent>
             </Tabs>
           </CardContent>
         </Card>
-
-        {canCreate && <AddJobDialog open={showAddDialog} onOpenChange={setShowAddDialog} onSubmit={handleAddJob} loading={createJob.isPending} jobs={jobs} />}
-
-        {canUpdate && <EditJobDialog open={!!editingJob} onOpenChange={open => !open && setEditingJob(null)} job={editingJob} onSubmit={handleEditJob} loading={updateJob.isPending} jobs={jobs} />}
 
         {canDelete && <DeleteJobDialog open={!!deletingJob} onOpenChange={open => !open && setDeletingJob(null)} job={deletingJob} onConfirm={handleDeleteJob} loading={deleteJob.isPending} />}
 
