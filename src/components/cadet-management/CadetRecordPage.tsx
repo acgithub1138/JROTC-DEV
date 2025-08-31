@@ -15,6 +15,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Profile } from './types';
 type CadetRecordMode = 'create' | 'edit' | 'view';
 export const CadetRecordPage: React.FC = () => {
@@ -292,7 +293,83 @@ export const CadetRecordPage: React.FC = () => {
       {/* Overview Cards */}
       <CadetOverviewCards cadet={currentCadet} />
 
-      {/* Main Content - Two Column Layout */}
+      {/* Associated Records Tabs */}
+      <div className="mt-6">
+        <Tabs defaultValue="pt-tests" className="w-full">
+          <TabsList className="grid w-full grid-cols-5">
+            <TabsTrigger value="pt-tests">PT Tests</TabsTrigger>
+            <TabsTrigger value="inspection">Inspection</TabsTrigger>
+            <TabsTrigger value="community-service">Community Service</TabsTrigger>
+            <TabsTrigger value="equipment">Equipment</TabsTrigger>
+            <TabsTrigger value="history">History</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="pt-tests" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>PT Test Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No PT test records found for this cadet.
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="inspection" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Inspection Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No inspection records found for this cadet.
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="community-service" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Community Service Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No community service records found for this cadet.
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="equipment" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Equipment Records</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No equipment records found for this cadet.
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+          
+          <TabsContent value="history" className="mt-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Cadet History</CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="text-center py-8 text-muted-foreground">
+                  No history records found for this cadet.
+                </div>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
       
     </div>;
 };
