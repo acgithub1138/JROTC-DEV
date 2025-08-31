@@ -34,8 +34,25 @@ export const EquipmentTab: React.FC<EquipmentTabProps> = ({ cadetId }) => {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="text-center py-8 text-muted-foreground">
-          No equipment records found for this cadet.
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3 font-semibold">Item</th>
+                <th className="text-left p-3 font-semibold">Serial Number</th>
+                <th className="text-left p-3 font-semibold">Condition</th>
+                <th className="text-left p-3 font-semibold">Assigned Date</th>
+                <th className="text-left p-3 font-semibold">Notes</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr className="border-b">
+                <td colSpan={5} className="p-8 text-center text-muted-foreground">
+                  No equipment records found for this cadet.
+                </td>
+              </tr>
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>

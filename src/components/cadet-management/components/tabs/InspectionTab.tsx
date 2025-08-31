@@ -59,35 +59,43 @@ export const InspectionTab: React.FC<InspectionTabProps> = ({ cadetId }) => {
         <CardTitle>Inspection Records ({inspections.length})</CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {inspections.map((inspection) => (
-            <div key={inspection.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <h4 className="font-semibold">
-                  {format(new Date(inspection.date), 'PPP')}
-                </h4>
-                <div className="flex items-center gap-2">
-                  <Badge variant={getGradeBadgeVariant(inspection.grade)}>
-                    {inspection.grade}%
-                  </Badge>
-                  <Badge variant="outline">
-                    {getGradeLabel(inspection.grade)}
-                  </Badge>
-                </div>
-              </div>
-              
-              {inspection.notes && (
-                <div className="text-sm">
-                  <span className="font-medium text-muted-foreground">Notes:</span>
-                  <div className="mt-1 text-foreground">{inspection.notes}</div>
-                </div>
-              )}
-              
-              <div className="text-xs text-muted-foreground">
-                Recorded on {format(new Date(inspection.created_at), 'PPp')}
-              </div>
-            </div>
-          ))}
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-left p-3 font-semibold">Grade</th>
+                <th className="text-left p-3 font-semibold">Status</th>
+                <th className="text-left p-3 font-semibold">Notes</th>
+                <th className="text-left p-3 font-semibold">Recorded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {inspections.map((inspection) => (
+                <tr key={inspection.id} className="border-b hover:bg-muted/50">
+                  <td className="p-3 font-medium">
+                    {format(new Date(inspection.date), 'PPP')}
+                  </td>
+                  <td className="p-3">
+                    <Badge variant={getGradeBadgeVariant(inspection.grade)}>
+                      {inspection.grade}%
+                    </Badge>
+                  </td>
+                  <td className="p-3">
+                    <Badge variant="outline">
+                      {getGradeLabel(inspection.grade)}
+                    </Badge>
+                  </td>
+                  <td className="p-3 max-w-xs">
+                    {inspection.notes || 'No notes'}
+                  </td>
+                  <td className="p-3 text-sm text-muted-foreground">
+                    {format(new Date(inspection.created_at), 'PP')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>

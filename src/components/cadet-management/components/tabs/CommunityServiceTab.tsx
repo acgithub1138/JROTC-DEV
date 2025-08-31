@@ -55,34 +55,40 @@ export const CommunityServiceTab: React.FC<CommunityServiceTabProps> = ({ cadetI
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-4">
-          {communityService.map((service) => (
-            <div key={service.id} className="border rounded-lg p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h4 className="font-semibold">{service.event}</h4>
-                  <p className="text-sm text-muted-foreground">
+        <div className="overflow-x-auto">
+          <table className="w-full border-collapse">
+            <thead>
+              <tr className="border-b">
+                <th className="text-left p-3 font-semibold">Date</th>
+                <th className="text-left p-3 font-semibold">Event</th>
+                <th className="text-left p-3 font-semibold">Hours</th>
+                <th className="text-left p-3 font-semibold">Notes</th>
+                <th className="text-left p-3 font-semibold">Recorded</th>
+              </tr>
+            </thead>
+            <tbody>
+              {communityService.map((service) => (
+                <tr key={service.id} className="border-b hover:bg-muted/50">
+                  <td className="p-3 font-medium">
                     {format(new Date(service.date), 'PPP')}
-                  </p>
-                </div>
-                <Badge variant="secondary" className="flex items-center gap-1">
-                  <Clock className="h-3 w-3" />
-                  {service.hours} hrs
-                </Badge>
-              </div>
-              
-              {service.notes && (
-                <div className="text-sm">
-                  <span className="font-medium text-muted-foreground">Notes:</span>
-                  <div className="mt-1 text-foreground">{service.notes}</div>
-                </div>
-              )}
-              
-              <div className="text-xs text-muted-foreground">
-                Recorded on {format(new Date(service.created_at), 'PPp')}
-              </div>
-            </div>
-          ))}
+                  </td>
+                  <td className="p-3">{service.event}</td>
+                  <td className="p-3">
+                    <Badge variant="secondary" className="flex items-center gap-1 w-fit">
+                      <Clock className="h-3 w-3" />
+                      {service.hours} hrs
+                    </Badge>
+                  </td>
+                  <td className="p-3 max-w-xs">
+                    {service.notes || 'No notes'}
+                  </td>
+                  <td className="p-3 text-sm text-muted-foreground">
+                    {format(new Date(service.created_at), 'PP')}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
       </CardContent>
     </Card>
