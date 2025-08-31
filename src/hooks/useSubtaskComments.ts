@@ -70,10 +70,6 @@ export const useSubtaskComments = (subtaskId: string) => {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['subtask-comments', subtaskId] });
-      toast({
-        title: "Comment added",
-        description: "Your comment has been added successfully.",
-      });
       
       // Trigger email notification for comment
       if (userProfile?.id && userProfile?.school_id) {
