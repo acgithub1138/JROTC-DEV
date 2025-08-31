@@ -50,29 +50,30 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
                   </span>
                 )}
               </div>
+              {canEdit && !showUpload && (
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setShowUpload(true);
+                  }}
+                  className="h-6 w-6 p-0"
+                  title="Add attachment"
+                >
+                  <Plus className="h-4 w-4" />
+                </Button>
+              )}
             </CardTitle>
           </CardHeader>
         </CollapsibleTrigger>
         <CollapsibleContent>
           <CardContent className="pt-0 space-y-4">
-            <div className="flex items-center justify-between">
-              <AttachmentList
-                recordType={recordType}
-                recordId={recordId}
-                canEdit={canEdit}
-              />
-              {canEdit && !showUpload && (
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setShowUpload(true)}
-                  className="flex-shrink-0"
-                >
-                  <Plus className="h-4 w-4 mr-1" />
-                  Add Files
-                </Button>
-              )}
-            </div>
+            <AttachmentList
+              recordType={recordType}
+              recordId={recordId}
+              canEdit={canEdit}
+            />
 
             {showUpload && canEdit && (
               <div className="space-y-3">
