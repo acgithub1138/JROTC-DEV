@@ -12,16 +12,20 @@ interface TaskDescriptionFieldProps {
 export const TaskDescriptionField: React.FC<TaskDescriptionFieldProps> = ({ form }) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="description">Task Details *</Label>
-      <Textarea
-        id="description"
-        {...form.register('description')}
-        placeholder="Enter detailed description of the task"
-        rows={4}
-      />
-      {form.formState.errors.description && (
-        <p className="text-sm text-red-600">{form.formState.errors.description.message}</p>
-      )}
+      <div className="flex items-start gap-4">
+        <Label htmlFor="description" className="w-32 text-right pt-2">Task Details *</Label>
+        <div className="flex-1">
+          <Textarea
+            id="description"
+            {...form.register('description')}
+            placeholder="Enter detailed description of the task"
+            rows={4}
+          />
+          {form.formState.errors.description && (
+            <p className="text-sm text-red-600 mt-1">{form.formState.errors.description.message}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };

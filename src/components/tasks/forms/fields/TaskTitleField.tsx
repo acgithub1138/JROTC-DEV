@@ -12,16 +12,20 @@ interface TaskTitleFieldProps {
 export const TaskTitleField: React.FC<TaskTitleFieldProps> = ({ form }) => {
   return (
     <div className="space-y-2">
-      <Label htmlFor="title">Short Description *</Label>
-      <Input
-        id="title"
-        {...form.register('title')}
-        placeholder="Enter short description (max 150 characters)"
-        maxLength={150}
-      />
-      {form.formState.errors.title && (
-        <p className="text-sm text-red-600">{form.formState.errors.title.message}</p>
-      )}
+      <div className="flex items-center gap-4">
+        <Label htmlFor="title" className="w-32 text-right">Short Description *</Label>
+        <div className="flex-1">
+          <Input
+            id="title"
+            {...form.register('title')}
+            placeholder="Enter short description (max 150 characters)"
+            maxLength={150}
+          />
+          {form.formState.errors.title && (
+            <p className="text-sm text-red-600 mt-1">{form.formState.errors.title.message}</p>
+          )}
+        </div>
+      </div>
     </div>
   );
 };
