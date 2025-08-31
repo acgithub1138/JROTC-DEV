@@ -80,14 +80,14 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
             <div className="text-sm text-red-600">Error loading users</div>
           ) : (
             <Select 
-              value={form.watch('assigned_to') || ''} 
-              onValueChange={(value) => form.setValue('assigned_to', value || null)}
+              value={form.watch('assigned_to') || 'unassigned'} 
+              onValueChange={(value) => form.setValue('assigned_to', value === 'unassigned' ? null : value)}
             >
               <SelectTrigger>
                 <SelectValue placeholder="Select assignee" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Unassigned</SelectItem>
+                <SelectItem value="unassigned">Unassigned</SelectItem>
                 {users
                   .sort((a, b) => {
                     const aName = `${a.last_name}, ${a.first_name}`;
