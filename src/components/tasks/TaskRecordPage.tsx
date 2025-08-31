@@ -364,6 +364,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         title: `${recordType === 'task' ? 'Task' : 'Subtask'} Completed`,
         description: `The ${recordType} has been marked as complete.`
       });
+      
+      // Navigate back to tasks list
+      navigate('/app/tasks');
     } catch (error) {
       console.error(`Error completing ${recordType}:`, error);
       toast({
