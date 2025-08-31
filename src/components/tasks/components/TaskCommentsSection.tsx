@@ -195,9 +195,9 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
                   {comment.user_profile.last_name}, {comment.user_profile.first_name}
                 </span>
                 {comment.is_system_comment ? (
-                  <Badge variant="secondary" className="text-xs">Update</Badge>
+                  <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge>
                 ) : (
-                  <Badge variant="outline" className="text-xs">Comment</Badge>
+                  <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>
                 )}
               </div>
               <span className="text-xs text-gray-500">
