@@ -1,5 +1,6 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
+import { useAuth } from '@/contexts/AuthContext';
 
 // Helper function to get current school year start (August 1st)
 const getCurrentSchoolYearStart = () => {
@@ -18,8 +19,10 @@ const getCurrentSchoolYearEnd = () => {
 };
 
 export const useDashboardStats = () => {
+  const { userProfile } = useAuth();
+  
   return useQuery({
-    queryKey: ['dashboard-stats'],
+    queryKey: ['dashboard-stats', userProfile?.id],
     queryFn: async () => {
       const [
         cadetsResult,
@@ -64,10 +67,11 @@ export const useDashboardStats = () => {
           .from('schools')
           .select('id', { count: 'exact' }),
         
-        // Community service hours for current school year (Aug-June)
+        // Community service hours for current user in current school year (Aug-June)
         supabase
           .from('community_service')
           .select('hours, date')
+          .eq('cadet_id', userProfile?.id || '')
           .gte('date', getCurrentSchoolYearStart())
           .lte('date', getCurrentSchoolYearEnd())
       ]);
@@ -148,6 +152,7 @@ export const useDashboardStats = () => {
         }
       };
     },
+    enabled: !!userProfile?.id, // Only run query when user profile is loaded
     refetchInterval: 5 * 60 * 1000, // Refetch every 5 minutes
   });
 };
