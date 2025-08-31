@@ -72,25 +72,24 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
   });
   
   // Initialize attachment hooks for file upload (with dummy ID for create mode)
-  const { uploadFile } = useAttachments('task', 'temp');
+  const { uploadFile, isUploading } = useAttachments('task', task?.id || 'temp');
   
   const uploadPendingFiles = async (taskId: string) => {
-    for (const file of pendingFiles) {
-      try {
-        await new Promise<void>((resolve, reject) => {
-          uploadFile({
-            record_type: 'task',
-            record_id: taskId,
-            file
-          });
-          // Simple timeout to wait for upload
-          setTimeout(resolve, 1000);
+    if (pendingFiles.length === 0) return;
+    
+    try {
+      // Upload files one by one
+      for (const file of pendingFiles) {
+        uploadFile({
+          record_type: 'task',
+          record_id: taskId,
+          file
         });
-      } catch (error) {
-        console.error('Failed to upload file:', file.name, error);
       }
+      setPendingFiles([]);
+    } catch (error) {
+      console.error('Error uploading files:', error);
     }
-    setPendingFiles([]);
   };
 
   // Track form changes for unsaved warning
