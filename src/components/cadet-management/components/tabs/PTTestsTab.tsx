@@ -46,15 +46,7 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
     return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
   return <Card>
-      <CardHeader>
-        <div className="flex items-center justify-between">
-          <CardTitle>PT Test Records</CardTitle>
-          <Button onClick={() => navigate('/app/cadets/pt_test_create?mode=single')} size="sm">
-            <Plus className="w-4 h-4 mr-2" />
-            Add PT Test
-          </Button>
-        </div>
-      </CardHeader>
+      
       <CardContent>
         <div className="overflow-x-auto">
           <table className="w-full border-collapse">
