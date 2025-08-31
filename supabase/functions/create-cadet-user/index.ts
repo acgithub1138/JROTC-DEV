@@ -1,19 +1,6 @@
 
 import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
-import { 
-  validateAuthentication, 
-  requireCanCreateUserWithRole, 
-  requireSameSchool,
-  AuthenticationError, 
-  AuthorizationError 
-} from '../_shared/auth-utils.ts'
-import {
-  RateLimiter,
-  RATE_LIMITS,
-  getClientIP,
-  createRateLimitResponse,
-  addRateLimitHeaders
-} from '../_shared/rate-limiter.ts'
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
@@ -35,9 +22,45 @@ interface CreateCadetRequest {
   school_id: string
 }
 
-// Rate limiters
-const globalLimiter = new RateLimiter({ ...RATE_LIMITS.GLOBAL_IP, keyPrefix: 'global' })
-const userMgmtLimiter = new RateLimiter({ ...RATE_LIMITS.USER_MANAGEMENT, keyPrefix: 'user-mgmt' })
+// Initialize Supabase admin client
+const supabaseUrl = Deno.env.get('SUPABASE_URL')!
+const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+
+const supabaseAdmin = createClient(supabaseUrl, supabaseServiceKey, {
+  auth: {
+    autoRefreshToken: false,
+    persistSession: false
+  }
+})
+
+// Basic authentication validation
+async function validateAuth(req: Request) {
+  const authHeader = req.headers.get('authorization')
+  if (!authHeader || !authHeader.startsWith('Bearer ')) {
+    throw new Error('Missing or invalid authorization header')
+  }
+
+  const token = authHeader.replace('Bearer ', '')
+  
+  // Verify the JWT token
+  const { data: { user }, error: userError } = await supabaseAdmin.auth.getUser(token)
+  if (userError || !user) {
+    throw new Error('Invalid authentication token')
+  }
+
+  // Get user profile
+  const { data: profile, error: profileError } = await supabaseAdmin
+    .from('profiles')
+    .select('*')
+    .eq('id', user.id)
+    .single()
+
+  if (profileError || !profile) {
+    throw new Error('User profile not found')
+  }
+
+  return { user, profile }
+}
 
 serve(async (req) => {
   if (req.method === 'OPTIONS') {
@@ -47,22 +70,9 @@ serve(async (req) => {
   try {
     console.log('Function started')
     
-    // Rate limiting - Global IP check
-    const clientIP = getClientIP(req)
-    const globalResult = globalLimiter.check(clientIP)
-    if (!globalResult.allowed) {
-      return createRateLimitResponse(globalResult, corsHeaders)
-    }
-
-    // Validate authentication and get user context
-    const { profile: actorProfile, supabaseAdmin } = await validateAuthentication(req)
+    // Validate authentication
+    const { profile: actorProfile } = await validateAuth(req)
     
-    // Rate limiting - Per user check for authenticated users
-    const userResult = userMgmtLimiter.check(actorProfile.id)
-    if (!userResult.allowed) {
-      return createRateLimitResponse(userResult, corsHeaders)
-    }
-
     console.log('Authentication validated for user:', actorProfile.id, 'role:', actorProfile.role)
 
     const requestBody = await req.json()
@@ -144,11 +154,15 @@ serve(async (req) => {
       throw new Error('Required fields missing: email, first_name, last_name, school_id')
     }
 
-    // Validate permissions to create user with specified role
-    await requireCanCreateUserWithRole(actorProfile, finalRoleName, supabaseAdmin)
-
-    // Validate school access (non-admins can only create users in their own school)
-    requireSameSchool(actorProfile, school_id)
+    // Basic validation - ensure admin/instructor can create users and same school
+    if (actorProfile.role !== 'admin' && actorProfile.role !== 'instructor') {
+      throw new Error('Only admin and instructor users can create new users')
+    }
+    
+    // Ensure same school (admins can create for any school)
+    if (actorProfile.role !== 'admin' && actorProfile.school_id !== school_id) {
+      throw new Error('You can only create users for your own school')
+    }
 
     console.log('Creating user:', email, 'with role:', finalRoleName, 'role_id:', finalRoleId, 'in school:', school_id)
 
@@ -255,18 +269,10 @@ serve(async (req) => {
       },
     )
     
-    return addRateLimitHeaders(response, userResult)
+    return response
 
   } catch (error) {
     console.error('Function error:', error)
-    
-    // Handle different error types with appropriate status codes
-    let statusCode = 400
-    if (error instanceof AuthenticationError) {
-      statusCode = error.statusCode
-    } else if (error instanceof AuthorizationError) {
-      statusCode = error.statusCode
-    }
     
     return new Response(
       JSON.stringify({ 
@@ -274,7 +280,7 @@ serve(async (req) => {
       }),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: statusCode,
+        status: 400,
       },
     )
   }
