@@ -220,7 +220,10 @@ export const CreateSubtaskDialog: React.FC<CreateSubtaskDialogProps> = ({
                   </SelectTrigger>
                   <SelectContent>
                     <SelectItem value="unassigned">Unassigned</SelectItem>
-                    {users.sort((a, b) => a.last_name.localeCompare(b.last_name)).map(user => <SelectItem key={user.id} value={user.id}>
+                    {users
+                      .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
+                      .sort((a, b) => a.last_name.localeCompare(b.last_name))
+                      .map(user => <SelectItem key={user.id} value={user.id}>
                           {user.last_name}, {user.first_name}
                         </SelectItem>)}
                   </SelectContent>

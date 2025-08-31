@@ -89,6 +89,7 @@ export const TaskPriorityStatusDueDateFields: React.FC<TaskPriorityStatusDueDate
                 </SelectTrigger>
                 <SelectContent>
                   {users
+                    .filter(user => user.active === true && (user.role === 'cadet' || user.role === 'command_staff'))
                     .sort((a, b) => {
                       const aName = `${a.last_name}, ${a.first_name}`;
                       const bName = `${b.last_name}, ${b.first_name}`;
