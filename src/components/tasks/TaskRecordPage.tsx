@@ -93,15 +93,17 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     comments: subtaskComments,
     addComment: addSubtaskComment
   } = useSubtaskComments(recordId || '');
-  const { handleSystemComment: addTaskSystemComment } = useTaskSystemComments();
-  const { handleSystemComment: addSubtaskSystemComment } = useSubtaskSystemComments();
+  const {
+    handleSystemComment: addTaskSystemComment
+  } = useTaskSystemComments();
+  const {
+    handleSystemComment: addSubtaskSystemComment
+  } = useSubtaskSystemComments();
 
   // Get correct comments and comment functions based on record type
   const comments = recordType === 'task' ? taskComments : subtaskComments;
   const addComment = recordType === 'task' ? addTaskComment : addSubtaskComment;
-  const addSystemComment = recordType === 'task' ? 
-    (text: string) => addTaskSystemComment(recordId || '', text) : 
-    (text: string) => addSubtaskSystemComment(recordId || '', text);
+  const addSystemComment = recordType === 'task' ? (text: string) => addTaskSystemComment(recordId || '', text) : (text: string) => addSubtaskSystemComment(recordId || '', text);
 
   // Get subtasks for the current record (always call the hook)
   const {
@@ -825,7 +827,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                   Comments & History
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col h-[600px] overflow-y-auto">
+              <CardContent className="flex flex-col h-screen overflow-y-auto">
                  {/* Add Comment */}
                 <div className="space-y-3 mb-4">
                   <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
@@ -843,7 +845,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 <Separator className="mb-4" />
 
                 {/* History Tabs */}
-                <div className="flex-1 overflow-hidden h-full">
+                <div className="flex-1 overflow-hidden">
                   <Tabs defaultValue="comments" className="h-full flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="comments">Activity History</TabsTrigger>
