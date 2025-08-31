@@ -126,7 +126,9 @@ export const IncidentRecordPage: React.FC = () => {
   const [showEmailPreview, setShowEmailPreview] = useState(false);
 
   // Email queue for email history
-  const { queueItems } = useEmailQueue();
+  const {
+    queueItems
+  } = useEmailQueue();
 
   // Comments (only if incident exists)
   const {
@@ -200,7 +202,6 @@ export const IncidentRecordPage: React.FC = () => {
       setIsAddingComment(false);
     }
   };
-
   const handleEmailPreviewClick = (emailId: string) => {
     setSelectedEmailId(emailId);
     setShowEmailPreview(true);
@@ -551,7 +552,7 @@ export const IncidentRecordPage: React.FC = () => {
         {/* Right Column - Comments & History */}
         <div className="space-y-6">
           <Card className="h-full">
-            <CardHeader className="py-[8px]">
+            <CardHeader className="py-[12px]">
               <CardTitle className="flex items-center gap-2">
                 <MessageSquare className="w-5 h-5" />
                 Comments & History
@@ -584,15 +585,11 @@ export const IncidentRecordPage: React.FC = () => {
                   
                   <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
                     <div className="space-y-3">
-                      {comments && comments.length > 0 ? comments
-                        .slice()
-                        .sort((a, b) => {
-                          const dateA = new Date(a.created_at).getTime();
-                          const dateB = new Date(b.created_at).getTime();
-                          return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
-                        })
-                        .map(comment => (
-                          <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                      {comments && comments.length > 0 ? comments.slice().sort((a, b) => {
+                      const dateA = new Date(a.created_at).getTime();
+                      const dateB = new Date(b.created_at).getTime();
+                      return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
+                    }).map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
                             <div className="flex items-center justify-between mb-2">
                               <span className="text-sm font-medium">
                                 {comment.user ? `${comment.user.last_name}, ${comment.user.first_name}` : 'System'}
@@ -602,71 +599,44 @@ export const IncidentRecordPage: React.FC = () => {
                               </span>
                             </div>
                             <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
-                          </div>
-                        )) : (
-                          <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>
-                        )
-                      }
+                          </div>) : <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>}
                     </div>
                   </TabsContent>
                   
                   <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
                     <div className="space-y-3">
-                      {comments && comments
-                        .filter(comment => comment.comment_text.includes('[Preview Email]'))
-                        .length > 0 ? (
-                          comments
-                            .filter(comment => comment.comment_text.includes('[Preview Email]'))
-                            .slice()
-                            .sort((a, b) => {
-                              const dateA = new Date(a.created_at).getTime();
-                              const dateB = new Date(b.created_at).getTime();
-                              return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
-                            })
-                            .map(comment => {
-                              const emailLinkMatch = comment.comment_text.match(/\[Preview Email\]\(([^)]+)\)/);
-                              const emailId = emailLinkMatch ? emailLinkMatch[1] : null;
-                              const emailItem = emailId ? queueItems?.find(item => item.id === emailId) : null;
-                              
-                              return (
-                                <div key={comment.id} className="p-3 bg-muted rounded-lg border">
+                      {comments && comments.filter(comment => comment.comment_text.includes('[Preview Email]')).length > 0 ? comments.filter(comment => comment.comment_text.includes('[Preview Email]')).slice().sort((a, b) => {
+                      const dateA = new Date(a.created_at).getTime();
+                      const dateB = new Date(b.created_at).getTime();
+                      return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
+                    }).map(comment => {
+                      const emailLinkMatch = comment.comment_text.match(/\[Preview Email\]\(([^)]+)\)/);
+                      const emailId = emailLinkMatch ? emailLinkMatch[1] : null;
+                      const emailItem = emailId ? queueItems?.find(item => item.id === emailId) : null;
+                      return <div key={comment.id} className="p-3 bg-muted rounded-lg border">
                                   <div className="flex items-center justify-between mb-2">
                                     <div className="flex items-center gap-2">
                                       <Mail className="w-4 h-4 text-blue-600" />
                                       <span className="text-sm font-medium">Email Sent</span>
-                                      {emailItem && (
-                                        <Badge variant={emailItem.status === 'sent' ? 'default' : 'secondary'} className="text-xs">
+                                      {emailItem && <Badge variant={emailItem.status === 'sent' ? 'default' : 'secondary'} className="text-xs">
                                           {emailItem.status}
-                                        </Badge>
-                                      )}
+                                        </Badge>}
                                     </div>
                                     <span className="text-xs text-muted-foreground">
                                       {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
                                     </span>
                                   </div>
-                                  {emailItem && (
-                                    <div className="space-y-1">
+                                  {emailItem && <div className="space-y-1">
                                       <p className="text-sm font-medium">{emailItem.subject}</p>
                                       <p className="text-xs text-muted-foreground">To: {emailItem.recipient_email}</p>
                                       <div className="flex items-center gap-2 mt-2">
-                                        <Button
-                                          size="sm"
-                                          variant="outline"
-                                          onClick={() => handleEmailPreviewClick(emailId!)}
-                                          className="text-xs h-7"
-                                        >
+                                        <Button size="sm" variant="outline" onClick={() => handleEmailPreviewClick(emailId!)} className="text-xs h-7">
                                           View Email
                                         </Button>
                                       </div>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })
-                        ) : (
-                          <p className="text-muted-foreground text-sm text-center py-8">No emails sent for this incident yet.</p>
-                        )
-                      }
+                                    </div>}
+                                </div>;
+                    }) : <p className="text-muted-foreground text-sm text-center py-8">No emails sent for this incident yet.</p>}
                     </div>
                   </TabsContent>
                 </Tabs>
@@ -677,12 +647,6 @@ export const IncidentRecordPage: React.FC = () => {
       </div>
 
       {/* Email View Dialog */}
-      {selectedEmailId && queueItems && (
-        <EmailViewDialog 
-          email={queueItems.find(item => item.id === selectedEmailId)!} 
-          open={showEmailPreview} 
-          onOpenChange={setShowEmailPreview} 
-        />
-      )}
+      {selectedEmailId && queueItems && <EmailViewDialog email={queueItems.find(item => item.id === selectedEmailId)!} open={showEmailPreview} onOpenChange={setShowEmailPreview} />}
     </div>;
 };
