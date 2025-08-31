@@ -263,12 +263,17 @@ export const CadetRecordPage: React.FC = () => {
         
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-3xl font-bold">
-              <span className="text-blue-600 font-mono mr-2">
-                {currentCadet.last_name}, {currentCadet.first_name}
-              </span>
-            </h1>
-            
+            <div className="flex items-center gap-3 mb-2">
+              <h1 className="text-3xl font-bold">
+                <span className="text-blue-600 font-mono">
+                  {currentCadet.last_name}, {currentCadet.first_name}
+                </span>
+              </h1>
+              <Badge variant="secondary" className="text-sm">
+                {currentCadet.user_roles?.role_label || currentCadet.role || 'No Role'}
+              </Badge>
+            </div>
+            <p className="text-muted-foreground">{currentCadet.email}</p>
           </div>
           
           <div className="flex items-center gap-2">
