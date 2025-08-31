@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { Badge } from '@/components/ui/badge';
@@ -25,6 +26,7 @@ export const Header: React.FC<HeaderProps> = ({
   showSidebarToggle = false,
   onSidebarToggle
 }) => {
+  const navigate = useNavigate();
   const {
     signOut,
     userProfile
@@ -168,6 +170,12 @@ export const Header: React.FC<HeaderProps> = ({
                   <DropdownMenuSeparator />
                 </>
               )}
+              
+              <DropdownMenuItem onClick={() => navigate(`/app/cadets/cadet_record?mode=view&id=${userProfile?.id}`)}>
+                <User className="w-4 h-4 mr-2" />
+                My Profile
+              </DropdownMenuItem>
+              <DropdownMenuSeparator />
               
               <DropdownMenuItem onClick={signOut}>
                 <LogOut className="w-4 h-4 mr-2" />
