@@ -172,7 +172,10 @@ export const IncidentRecordPage: React.FC = () => {
   };
 
   const handleIncidentCreated = (newIncident: Incident) => {
-    navigate(`/app/incidents/incident_record?mode=view&id=${newIncident.id}`);
+    // Small delay to allow React Query cache to update
+    setTimeout(() => {
+      navigate(`/app/incidents/incident_record?mode=view&id=${newIncident.id}`);
+    }, 100);
   };
 
   const handleIncidentUpdated = (updatedIncident: Incident) => {
