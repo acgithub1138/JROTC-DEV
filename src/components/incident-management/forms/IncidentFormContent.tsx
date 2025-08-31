@@ -129,34 +129,36 @@ export const IncidentFormContent: React.FC<IncidentFormContentProps> = ({
 
   // File input section for create mode
   const fileInputSection = mode === 'create' ? (
-    <div className="space-y-4">
-      <label className="text-sm font-medium">Attachments (Optional)</label>
-      <input
-        type="file"
-        multiple
-        onChange={(e) => {
-          const files = Array.from(e.target.files || []);
-          setPendingFiles(prev => [...prev, ...files]);
-        }}
-        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-      />
-      {pendingFiles2.length > 0 && (
-        <div className="space-y-2">
-          <p className="text-sm text-muted-foreground">Files to upload:</p>
-          {pendingFiles2.map((file, index) => (
-            <div key={index} className="flex items-center justify-between text-sm bg-muted p-2 rounded">
-              <span>{file.name}</span>
-              <button
-                type="button"
-                onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
-                className="text-destructive hover:text-destructive/80"
-              >
-                Remove
-              </button>
-            </div>
-          ))}
-        </div>
-      )}
+    <div className="flex items-center gap-4">
+      <label className="w-24 text-right text-sm font-medium">Attachments</label>
+      <div className="flex-1">
+        <input
+          type="file"
+          multiple
+          onChange={(e) => {
+            const files = Array.from(e.target.files || []);
+            setPendingFiles(prev => [...prev, ...files]);
+          }}
+          className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+        />
+        {pendingFiles2.length > 0 && (
+          <div className="mt-2 space-y-2">
+            <p className="text-sm text-muted-foreground">Files to upload:</p>
+            {pendingFiles2.map((file, index) => (
+              <div key={index} className="flex items-center justify-between text-sm bg-muted p-2 rounded">
+                <span>{file.name}</span>
+                <button
+                  type="button"
+                  onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                  className="text-destructive hover:text-destructive/80"
+                >
+                  Remove
+                </button>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   ) : null;
 
