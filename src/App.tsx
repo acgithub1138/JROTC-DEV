@@ -34,8 +34,8 @@ import { MobileAddEvent as MobileCompetitionAddEvent } from "@/components/mobile
 import { MobileMore } from "@/components/mobile/pages/MobileMore";
 import { MobileRouteDetector } from "@/components/mobile/MobileRouteDetector";
 import { MobileCreateTask } from "@/components/mobile/pages/MobileCreateTask";
-import { MobileTaskDetail } from "@/components/mobile/pages/MobileTaskDetail";
-import { MobileSubtaskDetail } from "@/components/mobile/pages/MobileSubtaskDetail";
+import { TaskRecordPage } from "@/components/tasks/TaskRecordPage";
+
 import { MobileBudget } from "@/components/mobile/pages/MobileBudget";
 import { MobileCompetitionPortalLayout } from "@/components/mobile/competition-portal/MobileCompetitionPortalLayout";
 import { MobileCompetitionDashboard } from "@/components/mobile/competition-portal/pages/MobileCompetitionDashboard";
@@ -114,12 +114,7 @@ const App = () => (
                   } />
                   <Route path="tasks/:id" element={
                     <ProtectedRoute module="tasks" requirePermission="sidebar">
-                      <MobileTaskDetail />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="subtasks/:id" element={
-                    <ProtectedRoute module="tasks" requirePermission="sidebar">
-                      <MobileSubtaskDetail />
+                      <TaskRecordPage />
                     </ProtectedRoute>
                   } />
                   <Route path="cadets" element={
