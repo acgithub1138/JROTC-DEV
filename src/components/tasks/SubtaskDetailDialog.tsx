@@ -17,11 +17,9 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { resolveUserEmail } from '@/hooks/useEmailResolution';
+
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
@@ -81,18 +79,10 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     userRole: userProfile?.role 
   });
   const {
-    templates
-  } = useEmailTemplates();
-  const {
-    rules
-  } = useEmailRules();
-  const {
     toast
   } = useToast();
   // canAssign is now provided directly by useTaskPermissions()
   const [currentSubtask, setCurrentSubtask] = useState(subtask);
-  const [sendNotification, setSendNotification] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [newComment, setNewComment] = useState('');
@@ -107,14 +97,12 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     due_date: subtask.due_date ? new Date(subtask.due_date) : null
   });
 
-  // Filter templates for subtasks (use task templates)
-  const subtaskTemplates = templates.filter(template => template.is_active && template.source_table === 'tasks');
 
   // Track changes for unsaved warning
   useEffect(() => {
     const hasChanges = editData.title !== currentSubtask.title || editData.description !== (currentSubtask.description || '') || editData.status !== currentSubtask.status || editData.priority !== currentSubtask.priority || editData.assigned_to !== (currentSubtask.assigned_to || 'unassigned') || editData.due_date?.getTime() !== (currentSubtask.due_date ? new Date(currentSubtask.due_date).getTime() : null);
-    setHasUnsavedChanges(hasChanges || sendNotification);
-  }, [editData, currentSubtask, sendNotification]);
+    setHasUnsavedChanges(hasChanges);
+  }, [editData, currentSubtask]);
 
   // Update currentSubtask and editData when the subtask prop changes or when subtasks are refetched
   useEffect(() => {
@@ -131,99 +119,7 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
     });
   }, [subtask, subtasks]);
   const canEdit = canUpdate || currentSubtask.assigned_to === userProfile?.id;
-  const sendNotificationEmail = async () => {
-    const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
-    if (!sendNotification || !selectedTemplate || !newAssignedTo) {
-      return;
-    }
-    try {
-      // Find the assigned user for name information
-      let assignedUser: {
-        id: string;
-        first_name: string;
-        last_name: string;
-      } | undefined = users.find(u => u.id === newAssignedTo);
-
-      // If user not found in school users, fetch directly
-      if (!assignedUser) {
-        const {
-          data: userData,
-          error: userError
-        } = await supabase.from('profiles').select('id, first_name, last_name').eq('id', newAssignedTo).single();
-        if (userError || !userData) {
-          console.error('Error fetching user data:', userError);
-          toast({
-            title: "Error",
-            description: "Could not find the assigned user's information.",
-            variant: "destructive"
-          });
-          return;
-        }
-        assignedUser = userData as {
-          id: string;
-          first_name: string;
-          last_name: string;
-        };
-      }
-
-      // Resolve email with job board priority
-      const emailResult = await resolveUserEmail(newAssignedTo, currentSubtask.school_id);
-      if (!emailResult?.email) {
-        toast({
-          title: "Error",
-          description: "No email address found for the assigned user.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Use the queue_email RPC function
-      const {
-        data: queueId,
-        error
-      } = await supabase.rpc('queue_email', {
-        template_id_param: selectedTemplate,
-        recipient_email_param: emailResult.email,
-        source_table_param: 'subtasks',
-        record_id_param: currentSubtask.id,
-        school_id_param: currentSubtask.school_id
-      });
-      if (error) {
-        console.error('Error queuing notification email:', error);
-        toast({
-          title: "Error",
-          description: "Failed to queue notification email.",
-          variant: "destructive"
-        });
-        throw error;
-      } else {
-        const emailSource = emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)';
-        addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
-        toast({
-          title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`
-        });
-      }
-    } catch (emailError) {
-      console.error('Error sending notification:', emailError);
-      toast({
-        title: "Error",
-        description: "Failed to send notification email.",
-        variant: "destructive"
-      });
-      throw emailError;
-    }
-  };
   const performSave = async () => {
-    // Validate notification requirements
-    if (sendNotification && !selectedTemplate) {
-      toast({
-        title: "Template Required",
-        description: "Please select an email template to send notification.",
-        variant: "destructive"
-      });
-      return;
-    }
     try {
       const updateData: any = {
         id: currentSubtask.id
@@ -276,10 +172,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
         }
       }
 
-      // Send notification email if requested
-      if (sendNotification) {
-        await sendNotificationEmail();
-      }
       onOpenChange(false);
     } catch (error) {
       console.error('Error updating subtask:', error);
@@ -352,21 +244,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
   const currentStatusOption = statusOptions.find(option => option.value === editData.status);
   const currentPriorityOption = priorityOptions.find(option => option.value === editData.priority);
 
-  // Determine if Send Notification checkbox should be shown
-  const shouldShowNotificationCheckbox = () => {
-    // If status is changing to "Need Information" and Task Information Needed rule is enabled, hide checkbox
-    const informationNeededRule = rules.find(rule => rule.rule_type === 'task_information_needed');
-    if (informationNeededRule?.is_active && editData.status === 'need_information') {
-      return false;
-    }
-
-    // If status is changing to "Completed" and Task Completed rule is enabled, hide checkbox
-    const taskCompletedRule = rules.find(rule => rule.rule_type === 'task_completed');
-    if (taskCompletedRule?.is_active && editData.status === 'completed') {
-      return false;
-    }
-    return true;
-  };
   return <>
       <Dialog open={open} onOpenChange={hasUnsavedChanges ? handleCancel : onOpenChange}>
       <DialogContent className="sm:max-w-[800px] max-h-[90vh] overflow-y-auto">
@@ -516,30 +393,6 @@ export const SubtaskDetailDialog: React.FC<SubtaskDetailDialogProps> = ({
                    </span>
                  </div>
                  
-                  {/* Send Notification Section */}
-                  {canEdit && subtaskTemplates.length > 0 && shouldShowNotificationCheckbox() && <div className="pt-3 border-t space-y-3">
-                     <div className="flex items-center gap-2">
-                       <Checkbox id="send-notification-subtask" checked={sendNotification} onCheckedChange={checked => {
-                      setSendNotification(checked as boolean);
-                      if (!checked) setSelectedTemplate('');
-                    }} />
-                       <label htmlFor="send-notification-subtask" className="text-sm font-medium">
-                         Send Notification
-                       </label>
-                     </div>
-                     {sendNotification && <div className="ml-6">
-                         <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                           <SelectTrigger className="h-8 w-full">
-                             <SelectValue placeholder="Select template" />
-                           </SelectTrigger>
-                           <SelectContent>
-                             {subtaskTemplates.map(template => <SelectItem key={template.id} value={template.id}>
-                                 {template.name}
-                               </SelectItem>)}
-                           </SelectContent>
-                         </Select>
-                       </div>}
-                   </div>}
                </CardContent>
              </Card>
            </div>

@@ -21,11 +21,9 @@ import { useSubtasks } from '@/hooks/useSubtasks';
 import { useAuth } from '@/contexts/AuthContext';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { useEmailRules } from '@/hooks/email/useEmailRules';
 import { useToast } from '@/hooks/use-toast';
 import { supabase } from '@/integrations/supabase/client';
-import { resolveUserEmail } from '@/hooks/useEmailResolution';
+
 import { TaskCommentsSection } from './components/TaskCommentsSection';
 import { EmailHistoryTab } from './components/EmailHistoryTab';
 import { UnsavedCommentModal } from './components/UnsavedCommentModal';
@@ -90,19 +88,11 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
     userRole: userProfile?.role 
   });
   const {
-    templates
-  } = useEmailTemplates();
-  const {
-    rules
-  } = useEmailRules();
-  const {
     toast
   } = useToast();
   const [currentTask, setCurrentTask] = useState(task);
   const canEdit = canUpdate || canUpdateAssigned && task.assigned_to === userProfile?.id;
   const [isEditing, setIsEditing] = useState(canEdit); // Open in edit mode if user can edit
-  const [sendNotification, setSendNotification] = useState(false);
-  const [selectedTemplate, setSelectedTemplate] = useState<string>('');
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [showCompleteConfirmDialog, setShowCompleteConfirmDialog] = useState(false);
@@ -118,36 +108,12 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
     due_date: task.due_date ? new Date(task.due_date) : null
   });
 
-  // Filter templates for tasks
-  const taskTemplates = templates.filter(template => template.is_active && template.source_table === 'tasks');
-
-  // Check if email rules are enabled for status changes that should hide the Send Notification checkbox
-  const shouldHideNotificationCheckbox = () => {
-    const originalStatus = currentTask.status;
-    const newStatus = editData.status;
-
-    // Only hide if status is actually changing
-    if (originalStatus === newStatus) return false;
-
-    // Check if changing to "need_information" and the rule is enabled
-    if (newStatus === 'need_information') {
-      const infoNeededRule = rules.find(rule => rule.rule_type === 'task_information_needed');
-      if (infoNeededRule?.is_active) return true;
-    }
-
-    // Check if changing to "completed" and the rule is enabled
-    if (newStatus === 'completed') {
-      const completedRule = rules.find(rule => rule.rule_type === 'task_completed');
-      if (completedRule?.is_active) return true;
-    }
-    return false;
-  };
 
   // Track changes for unsaved warning
   useEffect(() => {
     const hasChanges = editData.title !== currentTask.title || editData.description !== (currentTask.description || '') || editData.status !== currentTask.status || editData.priority !== currentTask.priority || editData.assigned_to !== (currentTask.assigned_to || 'unassigned') || editData.due_date?.getTime() !== (currentTask.due_date ? new Date(currentTask.due_date).getTime() : null);
-    setHasUnsavedChanges(hasChanges || sendNotification);
-  }, [editData, currentTask, sendNotification]);
+    setHasUnsavedChanges(hasChanges);
+  }, [editData, currentTask]);
 
   // Update currentTask and editData when the task prop changes or when tasks are refetched
   useEffect(() => {
@@ -163,89 +129,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
       due_date: taskToUse.due_date ? new Date(taskToUse.due_date) : null
     });
   }, [task, tasks]);
-  const sendNotificationEmail = async () => {
-    const newAssignedTo = editData.assigned_to === 'unassigned' ? null : editData.assigned_to;
-    if (!sendNotification || !selectedTemplate || !newAssignedTo) {
-      return;
-    }
-    try {
-      // Find the assigned user for name information
-      let assignedUser: {
-        id: string;
-        first_name: string;
-        last_name: string;
-      } | undefined = users.find(u => u.id === newAssignedTo);
-
-      // If user not found in school users, fetch directly
-      if (!assignedUser) {
-        const {
-          data: userData,
-          error: userError
-        } = await supabase.from('profiles').select('id, first_name, last_name').eq('id', newAssignedTo).single();
-        if (userError || !userData) {
-          console.error('Error fetching user data:', userError);
-          toast({
-            title: "Error",
-            description: "Could not find the assigned user's information.",
-            variant: "destructive"
-          });
-          return;
-        }
-        assignedUser = userData as {
-          id: string;
-          first_name: string;
-          last_name: string;
-        };
-      }
-
-      // Resolve email with job board priority
-      const emailResult = await resolveUserEmail(newAssignedTo, currentTask.school_id);
-      if (!emailResult?.email) {
-        toast({
-          title: "Error",
-          description: "No email address found for the assigned user.",
-          variant: "destructive"
-        });
-        return;
-      }
-
-      // Use the queue_email RPC function
-      const {
-        data: queueId,
-        error
-      } = await supabase.rpc('queue_email', {
-        template_id_param: selectedTemplate,
-        recipient_email_param: emailResult.email,
-        source_table_param: 'tasks',
-        record_id_param: currentTask.id,
-        school_id_param: currentTask.school_id
-      });
-      if (error) {
-        console.error('Error queuing notification email:', error);
-        toast({
-          title: "Error",
-          description: "Failed to queue notification email.",
-          variant: "destructive"
-        });
-        throw error;
-      } else {
-        const emailSource = emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)';
-        addSystemComment(`Email sent to ${emailResult.email}${emailSource} [Preview Email](${queueId})`);
-        toast({
-          title: "Success",
-          description: `Notification sent to ${emailResult.email}${emailResult.source === 'job_role' ? ' (job role email)' : ' (profile email)'}`
-        });
-      }
-    } catch (emailError) {
-      console.error('Error sending notification:', emailError);
-      toast({
-        title: "Error",
-        description: "Failed to send notification email.",
-        variant: "destructive"
-      });
-      throw emailError;
-    }
-  };
   const handleSave = async () => {
     // Debug logging to track comment state
     console.log('🔍 handleSave called with newComment:', newComment);
@@ -263,15 +146,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
     await performSave();
   };
   const performSave = async () => {
-    // Validate notification requirements
-    if (sendNotification && !selectedTemplate) {
-      toast({
-        title: "Template Required",
-        description: "Please select an email template to send notification.",
-        variant: "destructive"
-      });
-      return;
-    }
     try {
       const updateData: any = {
         id: currentTask.id
@@ -341,10 +215,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
       for (const change of changes) {
         const commentText = formatFieldChangeComment(change.field, change.oldValue, change.newValue, statusOptions, priorityOptions, users);
         addSystemComment(commentText);
-      }
-      // Send notification email if requested
-      if (sendNotification) {
-        await sendNotificationEmail();
       }
 
       // Close the modal after successful save
@@ -630,30 +500,6 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
                    </span>
                  </div>
                  
-                  {/* Send Notification Section */}
-                  {isEditing && canEdit && taskTemplates.length > 0 && !shouldHideNotificationCheckbox() && <div className="pt-3 border-t space-y-3">
-                     <div className="flex items-center gap-2">
-                       <Checkbox id="send-notification" checked={sendNotification} onCheckedChange={checked => {
-                      setSendNotification(checked as boolean);
-                      if (!checked) setSelectedTemplate('');
-                    }} />
-                       <label htmlFor="send-notification" className="text-sm font-medium">
-                         Send Notification
-                       </label>
-                     </div>
-                     {sendNotification && <div className="ml-6">
-                         <Select value={selectedTemplate} onValueChange={setSelectedTemplate}>
-                           <SelectTrigger className="h-8 w-full">
-                             <SelectValue placeholder="Select template" />
-                           </SelectTrigger>
-                           <SelectContent>
-                             {taskTemplates.map(template => <SelectItem key={template.id} value={template.id}>
-                                 {template.name}
-                               </SelectItem>)}
-                           </SelectContent>
-                         </Select>
-                       </div>}
-                   </div>}
                </CardContent>
              </Card>
            </div>
