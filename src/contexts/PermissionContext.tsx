@@ -133,7 +133,8 @@ export const PermissionProvider: React.FC<{ children: React.ReactNode }> = ({ ch
       }
       const key = `${module}:${action}`;
       const result = permissionData[key] || false;
-      if (isDevelopment && (module === 'tasks' || action === 'view')) {
+      // Only log permission checks occasionally to reduce console spam
+      if (isDevelopment && Math.random() < 0.01) { // Only log 1% of permission checks
         console.log(`🔍 PERMISSION CONTEXT: hasPermission(${module}, ${action}) = ${result} for role ${userProfile.role}`);
       }
       return result;

@@ -5,28 +5,34 @@ import { usePermissionContext } from '@/contexts/PermissionContext';
 const useModulePermissions = (module: string) => {
   const { hasPermission } = usePermissionContext();
   
-  return {
+  // Memoize all permission checks to prevent excessive calls
+  return useMemo(() => ({
     canAccess: hasPermission(module, 'sidebar'),
     canRead: hasPermission(module, 'read'),
     canViewDetails: hasPermission(module, 'view'),
     canCreate: hasPermission(module, 'create'),
     canUpdate: hasPermission(module, 'update'),
     canDelete: hasPermission(module, 'delete'),
-  };
+  }), [hasPermission, module]);
 };
 
-// Task-specific permissions
+// Task-specific permissions with memoization
 export const useTaskPermissions = () => {
   const modulePermissions = useModulePermissions('tasks');
   const { hasPermission } = usePermissionContext();
   
-  return {
-    ...modulePermissions,
-    canView: modulePermissions.canViewDetails,
+  // Memoize additional task-specific permissions
+  const additionalPermissions = useMemo(() => ({
     canAssign: hasPermission('tasks', 'assign'),
     canManageOptions: hasPermission('tasks', 'manage_options'),
     canUpdateAssigned: hasPermission('tasks', 'update_assigned'),
-  };
+  }), [hasPermission]);
+  
+  return useMemo(() => ({
+    ...modulePermissions,
+    canView: modulePermissions.canViewDetails,
+    ...additionalPermissions,
+  }), [modulePermissions, additionalPermissions]);
 };
 
 // User management specific permissions
