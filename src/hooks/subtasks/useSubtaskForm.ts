@@ -4,6 +4,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useSubtasks, Subtask } from '@/hooks/useSubtasks';
 import { createSubtaskSchema, SubtaskFormData } from '@/components/tasks/forms/schemas/subtaskFormSchema';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { formatSubtaskFieldChangeComment } from '@/utils/subtaskCommentUtils';
 
 interface UseSubtaskFormProps {
   mode: 'edit';
@@ -17,6 +20,8 @@ export const useSubtaskForm = ({ mode, subtask, onOpenChange, canAssignTasks, cu
   const { updateSubtask, isUpdating } = useSubtasks(subtask?.parent_task_id);
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
+  const { handleSystemComment } = useSubtaskSystemComments();
+  const { users } = useSchoolUsers();
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -74,6 +79,59 @@ export const useSubtaskForm = ({ mode, subtask, onOpenChange, canAssignTasks, cu
 
     try {
       await updateSubtask(subtaskData as any);
+      
+      // Add system comments for tracked field changes
+      const trackedFields = ['status', 'priority', 'assigned_to', 'due_date', 'title'];
+      const changeComments: string[] = [];
+      
+      for (const field of trackedFields) {
+        let oldValue, newValue;
+        
+        switch (field) {
+          case 'status':
+            oldValue = subtask.status;
+            newValue = subtaskData.status;
+            break;
+          case 'priority':
+            oldValue = subtask.priority;
+            newValue = subtaskData.priority;
+            break;
+          case 'assigned_to':
+            oldValue = subtask.assigned_to;
+            newValue = subtaskData.assigned_to;
+            break;
+          case 'due_date':
+            oldValue = subtask.due_date;
+            newValue = subtaskData.due_date;
+            break;
+          case 'title':
+            oldValue = subtask.title;
+            newValue = subtaskData.title;
+            break;
+          default:
+            continue;
+        }
+        
+        if (oldValue !== newValue) {
+          const commentText = formatSubtaskFieldChangeComment(
+            field,
+            oldValue,
+            newValue,
+            statusOptions,
+            priorityOptions,
+            users
+          );
+          changeComments.push(commentText);
+        }
+      }
+      
+      // Add a single system comment with all changes
+      if (changeComments.length > 0) {
+        const commentText = changeComments.length === 1 
+          ? changeComments[0] 
+          : changeComments.join('\n• ');
+        await handleSystemComment(subtask.id, changeComments.length === 1 ? commentText : '• ' + commentText);
+      }
       
       // Only close and reset if successful
       onOpenChange(false);

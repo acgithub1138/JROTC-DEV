@@ -5,6 +5,9 @@ import { zodResolver } from '@hookform/resolvers/zod';
 import { useTasks, Task } from '@/hooks/useTasks';
 import { createTaskSchema, TaskFormData } from '../schemas/taskFormSchema';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
+import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { formatFieldChangeComment } from '@/utils/taskCommentUtils';
 
 interface UseTaskFormProps {
   mode: 'create' | 'edit';
@@ -19,6 +22,8 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
   const { createTask, updateTask, isCreating, isUpdating } = useTasks();
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
+  const { handleSystemComment } = useTaskSystemComments();
+  const { users } = useSchoolUsers();
 
   // Get valid option values
   const validStatuses = statusOptions.map(option => option.value);
@@ -95,6 +100,56 @@ export const useTaskForm = ({ mode, task, onOpenChange, canAssignTasks, currentU
       } else if (task) {
         console.log('Calling updateTask...');
         await updateTask({ id: task.id, ...taskData });
+        
+        // Add system comments for tracked field changes
+        const trackedFields = ['status', 'priority', 'assigned_to', 'due_date'];
+        const changeComments: string[] = [];
+        
+        for (const field of trackedFields) {
+          let oldValue, newValue;
+          
+          switch (field) {
+            case 'status':
+              oldValue = task.status;
+              newValue = taskData.status;
+              break;
+            case 'priority':
+              oldValue = task.priority;
+              newValue = taskData.priority;
+              break;
+            case 'assigned_to':
+              oldValue = task.assigned_to;
+              newValue = taskData.assigned_to;
+              break;
+            case 'due_date':
+              oldValue = task.due_date;
+              newValue = taskData.due_date;
+              break;
+            default:
+              continue;
+          }
+          
+          if (oldValue !== newValue) {
+            const commentText = formatFieldChangeComment(
+              field,
+              oldValue,
+              newValue,
+              statusOptions,
+              priorityOptions,
+              users
+            );
+            changeComments.push(commentText);
+          }
+        }
+        
+        // Add a single system comment with all changes
+        if (changeComments.length > 0) {
+          const commentText = changeComments.length === 1 
+            ? changeComments[0] 
+            : changeComments.join('\n• ');
+          await handleSystemComment(task.id, changeComments.length === 1 ? commentText : '• ' + commentText);
+        }
+        
         onOpenChange(false);
         form.reset();
       }

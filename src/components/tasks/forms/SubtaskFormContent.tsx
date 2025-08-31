@@ -7,13 +7,16 @@ import { createSubtaskSchema, SubtaskFormData } from './schemas/subtaskFormSchem
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
 import { useAuth } from '@/contexts/AuthContext';
-import { useToast } from '@/hooks/use-toast';
+import { toast } from 'sonner';
 import { useNavigate } from 'react-router-dom';
 import { SubtaskTitleField } from './fields/SubtaskTitleField';
 import { SubtaskDescriptionField } from './fields/SubtaskDescriptionField';
 import { SharedTaskFormLayout } from './SharedTaskFormLayout';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
+import { formatSubtaskFieldChangeComment } from '@/utils/subtaskCommentUtils';
 
 interface SubtaskFormContentProps {
   open: boolean;
@@ -34,8 +37,9 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
   const { statusOptions, isLoading: statusLoading } = useTaskStatusOptions();
   const { priorityOptions, isLoading: priorityLoading } = useTaskPriorityOptions();
   const { userProfile } = useAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { handleSystemComment } = useSubtaskSystemComments();
+  const { users } = useSchoolUsers();
 
   const [createdSubtask, setCreatedSubtask] = useState<any>(null);
   const [showAttachments, setShowAttachments] = useState(false);
@@ -104,11 +108,7 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
     try {
       if (mode === 'create') {
         if (!parentTaskId) {
-          toast({
-            title: "Error",
-            description: "Parent task ID is required for subtask creation.",
-            variant: "destructive",
-          });
+          toast.error("Parent task ID is required for subtask creation.");
           return;
         }
 
@@ -132,17 +132,14 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
         setCreatedSubtask(createdRecord);
         
         // For page-based creation, navigate back to task list
-        toast({
-          title: 'Success',
-          description: 'Subtask created successfully',
-        });
+        toast.success('Subtask created successfully');
         
         navigate('/app/tasks');
       } else {
         // Edit mode
         if (!subtask) return;
 
-        await updateSubtask({
+        const subtaskUpdateData = {
           id: subtask.id,
           title: data.title,
           description: data.description || null,
@@ -150,22 +147,70 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
           priority: data.priority,
           assigned_to: data.assigned_to === 'unassigned' ? null : data.assigned_to || null,
           due_date: data.due_date?.toISOString() || null,
-        });
+        };
 
-        toast({
-          title: "Subtask updated",
-          description: "The subtask has been updated successfully.",
-        });
+        await updateSubtask(subtaskUpdateData);
+
+        // Add system comments for tracked field changes
+        const trackedFields = ['status', 'priority', 'assigned_to', 'due_date', 'title'];
+        const changeComments: string[] = [];
+        
+        for (const field of trackedFields) {
+          let oldValue, newValue;
+          
+          switch (field) {
+            case 'status':
+              oldValue = subtask.status;
+              newValue = subtaskUpdateData.status;
+              break;
+            case 'priority':
+              oldValue = subtask.priority;
+              newValue = subtaskUpdateData.priority;
+              break;
+            case 'assigned_to':
+              oldValue = subtask.assigned_to;
+              newValue = subtaskUpdateData.assigned_to;
+              break;
+            case 'due_date':
+              oldValue = subtask.due_date;
+              newValue = subtaskUpdateData.due_date;
+              break;
+            case 'title':
+              oldValue = subtask.title;
+              newValue = subtaskUpdateData.title;
+              break;
+            default:
+              continue;
+          }
+          
+          if (oldValue !== newValue) {
+            const commentText = formatSubtaskFieldChangeComment(
+              field,
+              oldValue,
+              newValue,
+              statusOptions,
+              priorityOptions,
+              users
+            );
+            changeComments.push(commentText);
+          }
+        }
+        
+        // Add a single system comment with all changes
+        if (changeComments.length > 0) {
+          const commentText = changeComments.length === 1 
+            ? changeComments[0] 
+            : changeComments.join('\n• ');
+          await handleSystemComment(subtask.id, changeComments.length === 1 ? commentText : '• ' + commentText);
+        }
+
+        toast.success("The subtask has been updated successfully.");
 
         onOpenChange(false);
       }
     } catch (error) {
       console.error('Form submission error:', error);
-      toast({
-        title: "Error",
-        description: "Failed to save subtask. Please try again.",
-        variant: "destructive",
-      });
+      toast.error("Failed to save subtask. Please try again.");
     }
   };
 
