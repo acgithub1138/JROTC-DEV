@@ -5,30 +5,28 @@ import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { History, User, FileText } from 'lucide-react';
 import { useCadetHistory } from '@/hooks/useCadetRecords';
-
 interface HistoryTabProps {
   cadetId: string;
 }
-
-export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
-  const { data: history = [], isLoading } = useCadetHistory(cadetId);
-
+export const HistoryTab: React.FC<HistoryTabProps> = ({
+  cadetId
+}) => {
+  const {
+    data: history = [],
+    isLoading
+  } = useCadetHistory(cadetId);
   if (isLoading) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle>Cadet History</CardTitle>
         </CardHeader>
         <CardContent>
           <div className="text-center py-8">Loading cadet history...</div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   if (history.length === 0) {
-    return (
-      <Card>
+    return <Card>
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <History className="h-5 w-5" />
@@ -40,10 +38,8 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
             No history records found for this cadet.
           </div>
         </CardContent>
-      </Card>
-    );
+      </Card>;
   }
-
   const getTypeIcon = (type: string) => {
     switch (type.toLowerCase()) {
       case 'profile created':
@@ -53,7 +49,6 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
         return <FileText className="h-4 w-4" />;
     }
   };
-
   const getTypeBadgeVariant = (type: string) => {
     switch (type.toLowerCase()) {
       case 'profile created':
@@ -64,9 +59,7 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
         return 'outline';
     }
   };
-
-  return (
-    <Card>
+  return <Card>
       <CardHeader>
         <CardTitle className="flex items-center gap-2">
           <History className="h-5 w-5" />
@@ -85,10 +78,9 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {history.map((entry) => (
-                <TableRow key={entry.id} className="hover:bg-muted/50">
+              {history.map(entry => <TableRow key={entry.id} className="hover:bg-muted/50">
                   <TableCell>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 py-[8px]">
                       {getTypeIcon(entry.type)}
                       <Badge variant={getTypeBadgeVariant(entry.type)}>
                         {entry.type}
@@ -108,12 +100,10 @@ export const HistoryTab: React.FC<HistoryTabProps> = ({ cadetId }) => {
                       {format(new Date(entry.date), 'MMM dd, yyyy HH:mm')}
                     </span>
                   </TableCell>
-                </TableRow>
-              ))}
+                </TableRow>)}
             </TableBody>
           </Table>
         </div>
       </CardContent>
-    </Card>
-  );
+    </Card>;
 };
