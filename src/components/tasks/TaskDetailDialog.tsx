@@ -545,7 +545,7 @@ export const TaskDetailDialog: React.FC<TaskDetailProps> = ({
             </TabsContent>
             
             <TabsContent value="emails" className="space-y-4">
-              <EmailHistoryTab taskId={task.id} />
+              <EmailHistoryTab recordId={task.id} />
             </TabsContent>
           </Tabs>
         </div>

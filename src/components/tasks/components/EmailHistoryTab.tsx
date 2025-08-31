@@ -8,16 +8,16 @@ import { useTaskEmailHistory } from '@/hooks/email/useTaskEmailHistory';
 import { EmailContentModal } from './EmailContentModal';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 interface EmailHistoryTabProps {
-  taskId: string;
+  recordId: string;
 }
 export const EmailHistoryTab: React.FC<EmailHistoryTabProps> = ({
-  taskId
+  recordId
 }) => {
   const {
     data: emails,
     isLoading,
     error
-  } = useTaskEmailHistory(taskId);
+  } = useTaskEmailHistory(recordId);
   const [selectedEmail, setSelectedEmail] = useState<any>(null);
   const [showEmailModal, setShowEmailModal] = useState(false);
   const getStatusIcon = (status: string) => {

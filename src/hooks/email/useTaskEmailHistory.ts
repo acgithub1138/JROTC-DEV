@@ -16,10 +16,11 @@ interface EmailHistoryItem {
   } | null;
 }
 
-export const useTaskEmailHistory = (taskId: string) => {
+export const useTaskEmailHistory = (recordId: string) => {
   return useQuery({
-    queryKey: ['task-email-history', taskId],
+    queryKey: ['task-email-history', recordId],
     queryFn: async (): Promise<EmailHistoryItem[]> => {
+      // Query for both tasks and subtasks emails for this record
       const { data, error } = await supabase
         .from('email_queue')
         .select(`
@@ -32,22 +33,23 @@ export const useTaskEmailHistory = (taskId: string) => {
           sent_at,
           error_message,
           template_id,
+          source_table,
           email_templates (
             name
           )
         `)
-        .eq('record_id', taskId)
-        .eq('source_table', 'tasks')
+        .eq('record_id', recordId)
+        .in('source_table', ['tasks', 'subtasks'])
         .order('scheduled_at', { ascending: false });
 
       if (error) {
-        console.error('Error fetching task email history:', error);
+        console.error('Error fetching email history:', error);
         throw error;
       }
 
       return data || [];
     },
-    enabled: !!taskId,
+    enabled: !!recordId,
     refetchInterval: 30000, // Refetch every 30 seconds for real-time updates
   });
 };

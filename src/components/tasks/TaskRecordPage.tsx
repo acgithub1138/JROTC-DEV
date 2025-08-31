@@ -918,9 +918,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                       </div>
                     </TabsContent>
                     
-                     <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
-                       <EmailHistoryTab taskId={record.id} />
-                     </TabsContent>
+                       <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
+                         <EmailHistoryTab recordId={record.id} />
+                       </TabsContent>
                   </Tabs>
                 </div>
               </CardContent>
