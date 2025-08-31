@@ -8,7 +8,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { Textarea } from '@/components/ui/textarea';
-import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare } from 'lucide-react';
+import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { TaskFormContent } from './forms/TaskFormContent';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -77,6 +77,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Local state
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
   const [isLoading, setIsLoading] = useState(false);
+  const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true);
 
   // Permission checks
   useEffect(() => {
@@ -443,12 +444,23 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 </CardTitle>
               </CardHeader>
               <CardContent className="flex flex-col h-[600px] overflow-y-auto">
-                {/* Add Comment */}
+                 {/* Add Comment */}
                 <div className="space-y-3 mb-4">
                   <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
-                  <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
-                    {isAddingComment ? 'Posting...' : 'Post Comment'}
-                  </Button>
+                  <div className="flex items-center justify-between">
+                    <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
+                      {isAddingComment ? 'Posting...' : 'Post Comment'}
+                    </Button>
+                    <Button 
+                      variant="outline" 
+                      size="sm" 
+                      onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)}
+                      className="flex items-center gap-2"
+                    >
+                      <ArrowUpDown className="w-4 h-4" />
+                      {sortCommentsNewestFirst ? 'Newest First' : 'Oldest First'}
+                    </Button>
+                  </div>
                 </div>
 
                 <Separator className="mb-4" />
@@ -461,9 +473,16 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                       <TabsTrigger value="history">History</TabsTrigger>
                     </TabsList>
                     
-                    <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
-                      <div className="space-y-3">
-                        {comments && comments.length > 0 ? comments.map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
+                     <TabsContent value="comments" className="flex-1 overflow-y-auto mt-4">
+                       <div className="space-y-3">
+                         {comments && comments.length > 0 ? comments
+                           .slice()
+                           .sort((a, b) => {
+                             const dateA = new Date(a.created_at).getTime();
+                             const dateB = new Date(b.created_at).getTime();
+                             return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
+                           })
+                           .map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
                               <div className="flex items-center justify-between mb-2">
                                 <span className="text-sm font-medium">
                                   {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
