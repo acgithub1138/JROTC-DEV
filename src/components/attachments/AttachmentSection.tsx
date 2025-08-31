@@ -39,15 +39,21 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
 
   if (showTitleWithCount) {
     return (
-      <div className="space-y-3">
-         <div className="flex items-center justify-between">
+      <div className="space-y-3 relative">
+         <div className="flex items-center">
           Attachments
-           {canEdit && !showUpload && ( 
-             <Button variant="ghost" size="sm" onClick={() => setShowUpload(true)} title="Add attachment">
-               <Plus className="h-4 w-4" />
-             </Button>
-           )}
          </div>
+         {canEdit && !showUpload && ( 
+           <Button 
+             variant="ghost" 
+             size="sm" 
+             onClick={() => setShowUpload(true)} 
+             title="Add attachment"
+             className="absolute top-0 right-0"
+           >
+             <Plus className="h-4 w-4" />
+           </Button>
+         )}
         
         {showUpload && canEdit && (
           <div className="space-y-3">
