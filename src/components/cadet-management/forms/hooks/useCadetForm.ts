@@ -74,7 +74,7 @@ export const useCadetForm = ({ mode, cadet, onSuccess }: UseCadetFormProps) => {
         const selectedRole = roleOptions.find(r => r.value === data.role_id);
         const roleName = selectedRole ? selectedRole.role_name : null;
 
-        const cadetData = {
+        const cadetCreateData = {
           first_name: data.first_name,
           last_name: data.last_name,
           email: data.email,
@@ -85,17 +85,18 @@ export const useCadetForm = ({ mode, cadet, onSuccess }: UseCadetFormProps) => {
           role_id: data.role_id === 'none' ? null : data.role_id || null,
           role: roleName,
           start_year: data.start_year === 'none' ? null : (data.start_year ? parseInt(data.start_year) : null),
-          school_id: userProfile?.school_id,
-          active: true
-        } as any;
+          school_id: userProfile?.school_id
+        };
 
-        const { data: createdCadet, error } = await supabase
-          .from('profiles')
-          .insert(cadetData)
-          .select()
-          .single();
+        // Use the create-cadet-user function instead of direct database insertion
+        const { data: result, error } = await supabase.functions.invoke('create-cadet-user', {
+          body: cadetCreateData
+        });
 
         if (error) throw error;
+        if (result?.error) throw new Error(result.error);
+
+        const createdCadet = result?.profile;
 
         toast({
           title: "Success",
