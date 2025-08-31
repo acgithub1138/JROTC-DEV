@@ -4081,22 +4081,6 @@ export type Database = {
         | "Judge 9"
         | "Judge 10"
       payment_method: "cash" | "check" | "debit_card" | "credit_card" | "other"
-      rank_type:
-        | "cadet_private"
-        | "cadet_private_first_class"
-        | "cadet_corporal"
-        | "cadet_sergeant"
-        | "cadet_staff_sergeant"
-        | "cadet_sergeant_first_class"
-        | "cadet_master_sergeant"
-        | "cadet_first_sergeant"
-        | "cadet_sergeant_major"
-        | "cadet_second_lieutenant"
-        | "cadet_first_lieutenant"
-        | "cadet_captain"
-        | "cadet_major"
-        | "cadet_lieutenant_colonel"
-        | "cadet_colonel"
     }
     CompositeTypes: {
       tablefunc_crosstab_2: {
@@ -4328,23 +4312,6 @@ export const Constants = {
         "Judge 10",
       ],
       payment_method: ["cash", "check", "debit_card", "credit_card", "other"],
-      rank_type: [
-        "cadet_private",
-        "cadet_private_first_class",
-        "cadet_corporal",
-        "cadet_sergeant",
-        "cadet_staff_sergeant",
-        "cadet_sergeant_first_class",
-        "cadet_master_sergeant",
-        "cadet_first_sergeant",
-        "cadet_sergeant_major",
-        "cadet_second_lieutenant",
-        "cadet_first_lieutenant",
-        "cadet_captain",
-        "cadet_major",
-        "cadet_lieutenant_colonel",
-        "cadet_colonel",
-      ],
     },
   },
 } as const
