@@ -23,6 +23,7 @@ import { SubtaskCompletionModal } from '../dialogs/SubtaskCompletionModal';
 import { EditableCell } from './EditableCell';
 import { useTaskTableLogic } from '@/hooks/useTaskTableLogic';
 import { isTaskDone, getDefaultCompletionStatus, isCompletionStatus, isCancelStatus } from '@/utils/taskStatusUtils';
+import { useNavigate } from 'react-router-dom';
 
 interface TaskTableRowProps {
   task: Task | Subtask;
@@ -49,6 +50,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
   onToggleExpanded,
   selectedTasks,
 }) => {
+  const navigate = useNavigate();
   const { canCreate, canUpdate, canViewDetails } = useTaskPermissions();
   const { updateTask } = useTasks();
   const { handleSystemComment } = useTaskSystemComments();
@@ -216,7 +218,7 @@ export const TaskTableRow: React.FC<TaskTableRowProps> = ({
             )}
             {canViewDetails ? (
               <button
-                onClick={() => onTaskSelect(task)}
+                onClick={() => navigate(`/app/tasks/task_record?id=${task.id}`)}
                 className={`px-2 py-1 rounded text-blue-600 hover:text-blue-800 hover:underline cursor-pointer font-bold ${
                   task.due_date && new Date(task.due_date) < new Date() && task.status !== 'completed' && task.status !== 'done'
                     ? 'bg-red-100 text-red-800 hover:text-red-900'

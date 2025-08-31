@@ -12,8 +12,10 @@ import { Task } from '@/hooks/useTasks';
 import { Subtask } from '@/hooks/tasks/types';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AccessDeniedDialog } from '../incident-management/AccessDeniedDialog';
+import { useNavigate } from 'react-router-dom';
 
 const TaskManagementPage: React.FC = () => {
+  const navigate = useNavigate();
   const { canCreate, canView } = useTaskPermissions();
   const [selectedTask, setSelectedTask] = useState<Task | null>(null);
   const [editingTask, setEditingTask] = useState<Task | null>(null);
@@ -64,7 +66,7 @@ const TaskManagementPage: React.FC = () => {
   };
 
   const handleCreateTask = () => {
-    setShowCreateForm(true);
+    navigate('/app/tasks/task_record?mode=create');
   };
 
   const handleCloseCreateForm = () => {

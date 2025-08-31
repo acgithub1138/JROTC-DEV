@@ -12,6 +12,7 @@ import { supabase } from '@/integrations/supabase/client';
 import ProtectedRoute from './ProtectedRoute';
 import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
+import { TaskRecordPage } from './tasks/TaskRecordPage';
 import IncidentManagementPage from './incident-management/IncidentManagementPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
@@ -185,6 +186,7 @@ const MainApplication = () => {
           <Routes>
             <Route index element={<DashboardOverview />} />
             <Route path="tasks" element={<TaskManagementPage />} />
+            <Route path="tasks/task_record" element={<TaskRecordPage />} />
             <Route path="incidents" element={<IncidentManagementPage />} />
             <Route path="school" element={<SchoolManagementPage />} />
             <Route path="users" element={<UserAdminPage />} />
