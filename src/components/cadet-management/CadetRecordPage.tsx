@@ -275,7 +275,7 @@ export const CadetRecordPage: React.FC = () => {
                   {currentCadet.last_name}, {currentCadet.first_name}
                 </span>
               </h1>
-              <Badge variant="secondary" className="text-sm">
+              <Badge variant="secondary" className="capitalize py-[6px] text-sm">
                 {currentCadet.user_roles?.role_label || currentCadet.role || 'No Role'}
               </Badge>
             </div>
