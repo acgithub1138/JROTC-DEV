@@ -41,7 +41,7 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
     return (
       <div className="space-y-3">
          <div className="flex items-center justify-between">
-           <div className="flex items-center space-x-2">
+           <div className="flex items-center justify-between">
              <Paperclip className="h-4 w-4" />
              <span>Attachments {attachments.length > 0 && `(${attachments.length})`}</span>
            </div>
