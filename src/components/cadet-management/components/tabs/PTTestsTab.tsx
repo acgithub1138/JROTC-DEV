@@ -72,7 +72,6 @@ export const PTTestsTab: React.FC<PTTestsTabProps> = ({
                   <td className="p-3 px-[8px] py-[4px]">
                     <Button variant="ghost" size="sm" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)}>
                       <Edit className="w-4 h-4 mr-2" />
-                      Edit
                     </Button>
                   </td>
                 </tr>)}
