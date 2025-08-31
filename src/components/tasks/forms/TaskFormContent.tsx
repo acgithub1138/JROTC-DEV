@@ -7,8 +7,8 @@ import { useTaskForm } from './hooks/useTaskForm';
 import { TaskTitleField } from './fields/TaskTitleField';
 import { TaskAssigneeField } from './fields/TaskAssigneeField';
 import { TaskDescriptionField } from './fields/TaskDescriptionField';
-import { TaskPriorityStatusFields } from './fields/TaskPriorityStatusFields';
-import { TaskDueDateField } from './fields/TaskDueDateField';
+import { TaskInfoFields } from './fields/TaskInfoFields';
+import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -120,23 +120,34 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit, onError)} className="space-y-6">
-          <TaskTitleField form={form} />
-          
-          <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
-          
-          <TaskDescriptionField form={form} />
-          
-          <TaskPriorityStatusFields 
-            form={form} 
-            canAssignTasks={canAssignTasks} 
-            canEditThisTask={canEditThisTask} 
-            isEditingAssignedTask={isEditingAssignedTask} 
-            statusOptions={statusOptions} 
-            priorityOptions={priorityOptions} 
-          />
-          
-          <TaskDueDateField form={form} />
+        <form onSubmit={form.handleSubmit(handleSubmit, onError)} className="space-y-8">
+          {/* Top Section - Two Columns */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
+            {/* Left Column - Task Info */}
+            <TaskInfoFields 
+              mode={mode}
+              taskNumber={task?.task_number}
+              createdAt={task?.created_at}
+              createdBy={task?.assigned_by_profile ? `${task.assigned_by_profile.last_name}, ${task.assigned_by_profile.first_name}` : undefined}
+            />
+            
+            {/* Right Column - Priority, Status, Due Date */}
+            <TaskPriorityStatusDueDateFields 
+              form={form} 
+              canAssignTasks={canAssignTasks} 
+              canEditThisTask={canEditThisTask} 
+              isEditingAssignedTask={isEditingAssignedTask} 
+              statusOptions={statusOptions} 
+              priorityOptions={priorityOptions} 
+            />
+          </div>
+
+          {/* Bottom Section - Single Column */}
+          <div className="space-y-6 p-6 border rounded-lg bg-card">
+            <TaskTitleField form={form} />
+            <TaskDescriptionField form={form} />
+            <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
+          </div>
 
           {mode === 'edit' && task?.id && showAttachments && (
             <AttachmentSection
