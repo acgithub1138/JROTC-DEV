@@ -40,14 +40,12 @@ export const ViewTeamMembersDialog = ({
         </DialogHeader>
         
         <div className="space-y-3">
-          {members.length > 0 ? members.map(member => <div key={member!.id} className="flex justify-between items-center p-3 bg-muted rounded-lg">
+          {members.length > 0 ? members.map(member => <div key={member!.id} className="flex justify-between items-center p-3 bg-muted rounded-lg py-[4px]">
                 <div>
                   <div className="font-medium">
                     {member!.lastName}, {member!.firstName}
                   </div>
-                  <div className="text-sm text-muted-foreground capitalize">
-                    {member!.role}
-                  </div>
+                  
                 </div>
                 {member!.grade && <Badge className={`text-xs ${getGradeColor(member!.grade)}`}>
                     {member!.grade}
