@@ -94,9 +94,20 @@ export const useCadetForm = ({ mode, cadet, onSuccess }: UseCadetFormProps) => {
         });
 
         if (error) throw error;
-        if (result?.error) throw new Error(result.error);
+        if (result?.error) {
+          // Check for specific duplicate email error
+          if (result.code === 'duplicate_email' || result.error.includes('already exists')) {
+            toast({
+              title: "Email Already Exists",
+              description: "This email address is already registered. Please use a different email address.",
+              variant: "destructive"
+            });
+            return;
+          }
+          throw new Error(result.error);
+        }
 
-        const createdCadet = result?.profile;
+        const createdCadet = result?.profile || result;
 
         toast({
           title: "Success",

@@ -168,11 +168,19 @@ serve(async (req) => {
 
     if (authError) {
       console.error('Auth invitation error:', authError)
-      // Check if it's a duplicate email error
-      if (authError.message && authError.message.includes('already been registered')) {
+      // Check if it's a duplicate email error - check multiple possible error messages
+      if (authError.message && (
+        authError.message.includes('already been registered') ||
+        authError.message.includes('User already registered') ||
+        authError.message.includes('already registered') ||
+        authError.message.includes('email already exists') ||
+        authError.message.includes('duplicate') ||
+        authError.code === 'user_already_exists'
+      )) {
         return new Response(
           JSON.stringify({ 
-            error: 'User email already exists. Please change it and try again.' 
+            error: 'User email already exists. Please change it and try again.',
+            code: 'duplicate_email'
           }),
           {
             headers: { ...corsHeaders, 'Content-Type': 'application/json' },
@@ -220,10 +228,23 @@ serve(async (req) => {
 
     // Wait for profile update to complete before returning
     await updateProfile()
+    
+    // Fetch the complete profile data to return
+    const { data: profileData, error: profileFetchError } = await supabaseAdmin
+      .from('profiles')
+      .select('*')
+      .eq('id', authUser.user!.id)
+      .single()
+    
+    if (profileFetchError) {
+      console.error('Failed to fetch created profile:', profileFetchError)
+      throw profileFetchError
+    }
 
     const response = new Response(
       JSON.stringify({ 
         success: true, 
+        profile: profileData,
         user_id: authUser.user!.id,
         email_sent: false,
         role: finalRoleName
