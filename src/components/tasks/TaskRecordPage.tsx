@@ -73,13 +73,19 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Load record data based on ID
   useEffect(() => {
     const loadRecord = async () => {
-      if (!recordId) return;
+      if (!recordId) {
+        console.log('No recordId provided');
+        return;
+      }
       
+      console.log('Loading record with ID:', recordId);
       setIsLoadingRecord(true);
       
       // Try to find task first
       const foundTask = tasks.find(t => t.id === recordId);
+      console.log('Found task in cache:', !!foundTask);
       if (foundTask) {
+        console.log('Using cached task data');
         setRecord(foundTask);
         setRecordType('task');
         setParentTask(null);
@@ -89,7 +95,9 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       
       // Try to find subtask
       const foundSubtask = allSubtasks.find(s => s.id === recordId);
+      console.log('Found subtask in cache:', !!foundSubtask);
       if (foundSubtask) {
+        console.log('Using cached subtask data');
         setRecord(foundSubtask);
         setRecordType('subtask');
         // Find parent task
@@ -100,6 +108,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       }
       
       // Fallback: direct database query
+      console.log('Record not found in cache, querying database...');
       try {
         // Check tasks table
         const { data: taskData, error: taskError } = await supabase
@@ -109,9 +118,11 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             assigned_by_profile:profiles!tasks_assigned_by_fkey(id, first_name, last_name, email)
           `)
           .eq('id', recordId)
-          .single();
+          .maybeSingle();
           
+        console.log('Task query result:', { taskData: !!taskData, taskError });
         if (taskData && !taskError) {
+          console.log('Found task in database');
           setRecord(taskData);
           setRecordType('task');
           setParentTask(null);
@@ -127,9 +138,11 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             assigned_by_profile:profiles!subtasks_assigned_by_fkey(id, first_name, last_name, email)
           `)
           .eq('id', recordId)
-          .single();
+          .maybeSingle();
           
+        console.log('Subtask query result:', { subtaskData: !!subtaskData, subtaskError });
         if (subtaskData && !subtaskError) {
+          console.log('Found subtask in database');
           setRecord(subtaskData);
           setRecordType('subtask');
           // Get parent task
@@ -137,13 +150,14 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             .from('tasks')
             .select('*')
             .eq('id', subtaskData.parent_task_id)
-            .single();
+            .maybeSingle();
           setParentTask(parentData);
           setIsLoadingRecord(false);
           return;
         }
         
         // Record not found
+        console.log('Record not found in database');
         setRecord(null);
         setIsLoadingRecord(false);
       } catch (error) {
