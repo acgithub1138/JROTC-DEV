@@ -590,14 +590,21 @@ export const IncidentRecordPage: React.FC = () => {
                       const dateB = new Date(b.created_at).getTime();
                       return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
                     }).map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
-                            <div className="flex items-center justify-between mb-2">
-                              <span className="text-sm font-medium">
-                                {comment.user ? `${comment.user.last_name}, ${comment.user.first_name}` : 'System'}
-                              </span>
-                              <span className="text-xs text-muted-foreground">
-                                {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                              </span>
-                            </div>
+                             <div className="flex items-center justify-between mb-2">
+                               <div className="flex items-center gap-2">
+                                 <span className="text-sm font-medium">
+                                   {comment.user ? `${comment.user.last_name}, ${comment.user.first_name}` : 'System'}
+                                 </span>
+                                 {comment.is_system_comment ? (
+                                   <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge>
+                                 ) : (
+                                   <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>
+                                 )}
+                               </div>
+                               <span className="text-xs text-muted-foreground">
+                                 {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                               </span>
+                             </div>
                             <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
                           </div>) : <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>}
                     </div>

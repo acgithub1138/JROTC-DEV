@@ -63,7 +63,11 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
                 <span className="font-medium text-sm">
                   {comment.user ? `${comment.user.first_name} ${comment.user.last_name}` : 'Unknown User'}
                 </span>
-                {comment.is_system_comment && <Badge variant="secondary" className="text-xs">System</Badge>}
+                {comment.is_system_comment ? (
+                  <Badge variant="secondary" className="text-xs bg-black text-white border border-black">Update</Badge>
+                ) : (
+                  <Badge variant="outline" className="text-xs bg-white text-black border border-black">Comment</Badge>
+                )}
               </div>
               <span className="text-xs text-gray-500">
                 {format(new Date(comment.created_at), 'MMM d, yyyy HH:mm')}
