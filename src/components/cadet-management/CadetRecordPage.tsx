@@ -16,14 +16,16 @@ import { useToast } from '@/hooks/use-toast';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Input } from '@/components/ui/input';
 import { Profile } from './types';
-
 type CadetRecordMode = 'create' | 'edit' | 'view';
-
 export const CadetRecordPage: React.FC = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
-  const { toast } = useToast();
-  const { userProfile } = useAuth();
+  const {
+    toast
+  } = useToast();
+  const {
+    userProfile
+  } = useAuth();
 
   // Extract parameters from URL
   const mode = searchParams.get('mode') as CadetRecordMode || 'view';
@@ -37,9 +39,14 @@ export const CadetRecordPage: React.FC = () => {
   } = useCadetPermissions();
 
   // Data
-  const { cadets, loading: cadetsLoading } = useCadets();
-  const { cadet, loading: cadetLoading } = useCadet(cadetId && cadetId !== '' ? cadetId : '');
-  
+  const {
+    cadets,
+    loading: cadetsLoading
+  } = useCadets();
+  const {
+    cadet,
+    loading: cadetLoading
+  } = useCadet(cadetId && cadetId !== '' ? cadetId : '');
   const isLoading = cadetsLoading || (cadetId ? cadetLoading : false);
   const currentCadet = cadet || cadets.find(c => c.id === cadetId) as any;
 
@@ -74,7 +81,6 @@ export const CadetRecordPage: React.FC = () => {
   // Handle save changes
   const handleSaveChanges = async () => {
     if (!currentCadet || !hasUnsavedChanges) return;
-    
     try {
       setIsSubmitting(true);
       // This would need to be implemented with actual cadet update mutation
@@ -110,7 +116,6 @@ export const CadetRecordPage: React.FC = () => {
       navigate('/app/cadets');
       return;
     }
-
     if (cadetId && currentMode !== 'create') {
       if (!currentCadet && !isLoading) {
         toast({
@@ -121,7 +126,6 @@ export const CadetRecordPage: React.FC = () => {
         navigate('/app/cadets');
         return;
       }
-
       if (currentCadet && !canView) {
         toast({
           title: "Access Denied",
@@ -131,7 +135,6 @@ export const CadetRecordPage: React.FC = () => {
         navigate('/app/cadets');
         return;
       }
-
       if (currentMode === 'edit' && !canEditCadet) {
         toast({
           title: "Access Denied",
@@ -144,11 +147,9 @@ export const CadetRecordPage: React.FC = () => {
       }
     }
   }, [currentMode, cadetId, currentCadet, isLoading, canCreate, canView, canEditCadet, navigate, toast]);
-
   const handleBack = () => {
     navigate('/app/cadets');
   };
-
   const handleModeChange = (newMode: CadetRecordMode) => {
     if (newMode === 'create') {
       navigate('/app/cadets/cadet_record?mode=create');
@@ -156,15 +157,12 @@ export const CadetRecordPage: React.FC = () => {
       navigate(`/app/cadets/cadet_record?mode=${newMode}&id=${currentCadet.id}`);
     }
   };
-
   const handleCadetCreated = (newCadet: Profile) => {
     navigate('/app/cadets');
   };
-
   const handleCadetUpdated = (updatedCadet: Profile) => {
     navigate(`/app/cadets/cadet_record?mode=view&id=${updatedCadet.id}`);
   };
-
   const handleCancel = () => {
     if (currentMode === 'create') {
       navigate('/app/cadets');
@@ -175,8 +173,7 @@ export const CadetRecordPage: React.FC = () => {
 
   // Loading state
   if (isLoading && currentMode !== 'create') {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -184,14 +181,12 @@ export const CadetRecordPage: React.FC = () => {
           </Button>
         </div>
         <div className="text-center py-8">Loading cadet...</div>
-      </div>
-    );
+      </div>;
   }
 
   // Create mode
   if (currentMode === 'create') {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -208,22 +203,16 @@ export const CadetRecordPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <CadetFormContent 
-                mode="create" 
-                onSuccess={handleCadetCreated} 
-                onCancel={handleCancel}
-              />
+              <CadetFormContent mode="create" onSuccess={handleCadetCreated} onCancel={handleCancel} />
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // Need cadet for view/edit modes
   if (!currentCadet) {
-    return (
-      <div className="p-6">
+    return <div className="p-6">
         <div className="flex items-center gap-2 mb-6">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -231,14 +220,12 @@ export const CadetRecordPage: React.FC = () => {
           </Button>
         </div>
         <div className="text-center py-8">Cadet not found</div>
-      </div>
-    );
+      </div>;
   }
 
   // Edit mode
   if (currentMode === 'edit') {
-    return (
-      <div className="p-6 space-y-6">
+    return <div className="p-6 space-y-6">
         <div className="flex items-center gap-2">
           <Button variant="ghost" size="sm" onClick={handleBack}>
             <ArrowLeft className="h-4 w-4 mr-2" />
@@ -258,22 +245,15 @@ export const CadetRecordPage: React.FC = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              <CadetFormContent 
-                mode="edit" 
-                cadet={currentCadet} 
-                onSuccess={handleCadetUpdated} 
-                onCancel={handleCancel}
-              />
+              <CadetFormContent mode="edit" cadet={currentCadet} onSuccess={handleCadetUpdated} onCancel={handleCancel} />
             </CardContent>
           </Card>
         </div>
-      </div>
-    );
+      </div>;
   }
 
   // View mode (default) - using cadet-like layout
-  return (
-    <div className="container mx-auto py-6 px-4">
+  return <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
         <Button variant="outline" onClick={handleBack} className="mb-4">
@@ -288,32 +268,18 @@ export const CadetRecordPage: React.FC = () => {
                 {currentCadet.last_name}, {currentCadet.first_name}
               </span>
             </h1>
-            <p className="text-muted-foreground mt-1">
-              {currentCadet.email} • {currentCadet.grade || 'No Grade'} • {currentCadet.rank || 'No Rank'}
-            </p>
+            
           </div>
           
           <div className="flex items-center gap-2">
-            {canEditCadet && (
-              <Button 
-                variant="outline" 
-                onClick={() => handleModeChange('edit')}
-                className="flex items-center gap-2"
-              >
+            {canEditCadet && <Button variant="outline" onClick={() => handleModeChange('edit')} className="flex items-center gap-2">
                 <Edit className="w-4 h-4" />
                 Edit Cadet
-              </Button>
-            )}
-            {canEditCadet && hasUnsavedChanges && (
-              <Button 
-                onClick={handleSaveChanges} 
-                disabled={isSubmitting} 
-                className="flex items-center gap-2"
-              >
+              </Button>}
+            {canEditCadet && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isSubmitting} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />
                 {isSubmitting ? 'Saving...' : 'Save Changes'}
-              </Button>
-            )}
+              </Button>}
           </div>
         </div>
       </div>
@@ -330,20 +296,14 @@ export const CadetRecordPage: React.FC = () => {
             <CardHeader className="py-3">
               <CardTitle className="flex items-center justify-between">
                 Basic Information
-                {canEditCadet && (
-                  <Button 
-                    variant="ghost" 
-                    size="sm" 
-                    onClick={() => {
-                      if (!editingBasicInfo && currentCadet) {
-                        setEditedCadet(currentCadet);
-                      }
-                      setEditingBasicInfo(!editingBasicInfo);
-                    }}
-                  >
+                {canEditCadet && <Button variant="ghost" size="sm" onClick={() => {
+                if (!editingBasicInfo && currentCadet) {
+                  setEditedCadet(currentCadet);
+                }
+                setEditingBasicInfo(!editingBasicInfo);
+              }}>
                     <Edit className="w-4 h-4" />
-                  </Button>
-                )}
+                  </Button>}
               </CardTitle>
             </CardHeader>
             <CardContent>
@@ -358,46 +318,19 @@ export const CadetRecordPage: React.FC = () => {
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Grade</span>
-                  <EditableCadetField
-                    type="select"
-                    value={currentCadet.grade || ''}
-                    options={['9th', '10th', '11th', '12th']}
-                    isEditing={editingBasicInfo}
-                    onValueChange={(value) => handleCadetFieldChange('grade', value)}
-                    displayValue={currentCadet.grade || 'Not set'}
-                  />
+                  <EditableCadetField type="select" value={currentCadet.grade || ''} options={['9th', '10th', '11th', '12th']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('grade', value)} displayValue={currentCadet.grade || 'Not set'} />
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Rank</span>
-                  <EditableCadetField
-                    type="text"
-                    value={currentCadet.rank || ''}
-                    isEditing={editingBasicInfo}
-                    onValueChange={(value) => handleCadetFieldChange('rank', value)}
-                    displayValue={currentCadet.rank || 'Not set'}
-                  />
+                  <EditableCadetField type="text" value={currentCadet.rank || ''} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('rank', value)} displayValue={currentCadet.rank || 'Not set'} />
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Flight</span>
-                  <EditableCadetField
-                    type="select"
-                    value={currentCadet.flight || ''}
-                    options={['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']}
-                    isEditing={editingBasicInfo}
-                    onValueChange={(value) => handleCadetFieldChange('flight', value)}
-                    displayValue={currentCadet.flight || 'Not assigned'}
-                  />
+                  <EditableCadetField type="select" value={currentCadet.flight || ''} options={['Alpha', 'Bravo', 'Charlie', 'Delta', 'Echo']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('flight', value)} displayValue={currentCadet.flight || 'Not assigned'} />
                 </div>
                 <div>
                   <span className="text-sm text-muted-foreground">Cadet Year</span>
-                  <EditableCadetField
-                    type="select"
-                    value={currentCadet.cadet_year || ''}
-                    options={['AS-1', 'AS-2', 'AS-3', 'AS-4']}
-                    isEditing={editingBasicInfo}
-                    onValueChange={(value) => handleCadetFieldChange('cadet_year', value)}
-                    displayValue={currentCadet.cadet_year || 'Not set'}
-                  />
+                  <EditableCadetField type="select" value={currentCadet.cadet_year || ''} options={['AS-1', 'AS-2', 'AS-3', 'AS-4']} isEditing={editingBasicInfo} onValueChange={value => handleCadetFieldChange('cadet_year', value)} displayValue={currentCadet.cadet_year || 'Not set'} />
                 </div>
               </div>
             </CardContent>
@@ -440,25 +373,7 @@ export const CadetRecordPage: React.FC = () => {
         {/* Right Column */}
         <div className="space-y-6">
           {/* Additional Information */}
-          <Card>
-            <CardHeader className="py-3">
-              <CardTitle>Additional Information</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <div className="space-y-4">
-                <div>
-                  <span className="text-sm text-muted-foreground">Last Updated</span>
-                  <p className="font-medium">
-                    {currentCadet.updated_at ? format(new Date(currentCadet.updated_at), 'MMM dd, yyyy HH:mm') : 'Never'}
-                  </p>
-                </div>
-                <div>
-                  <span className="text-sm text-muted-foreground">School ID</span>
-                  <p className="font-medium text-xs text-muted-foreground">{currentCadet.school_id}</p>
-                </div>
-              </div>
-            </CardContent>
-          </Card>
+          
 
           {/* Quick Actions */}
           <Card>
@@ -467,21 +382,11 @@ export const CadetRecordPage: React.FC = () => {
             </CardHeader>
             <CardContent>
               <div className="space-y-2">
-                {canEditCadet && (
-                  <Button 
-                    variant="outline" 
-                    className="w-full justify-start" 
-                    onClick={() => handleModeChange('edit')}
-                  >
+                {canEditCadet && <Button variant="outline" className="w-full justify-start" onClick={() => handleModeChange('edit')}>
                     <Edit className="w-4 h-4 mr-2" />
                     Edit Information
-                  </Button>
-                )}
-                <Button 
-                  variant="outline" 
-                  className="w-full justify-start"
-                  disabled
-                >
+                  </Button>}
+                <Button variant="outline" className="w-full justify-start" disabled>
                   <GraduationCap className="w-4 h-4 mr-2" />
                   View Records (Coming Soon)
                 </Button>
@@ -490,6 +395,5 @@ export const CadetRecordPage: React.FC = () => {
           </Card>
         </div>
       </div>
-    </div>
-  );
+    </div>;
 };
