@@ -15,7 +15,7 @@ export const IncidentDescriptionField: React.FC<IncidentDescriptionFieldProps> =
       render={({ field }) => (
         <FormItem className="flex items-start gap-4">
           <FormLabel className="w-32 text-right flex-shrink-0 pt-2">
-            Description <span className="text-destructive">*</span>
+            Details <span className="text-destructive">*</span>
           </FormLabel>
           <div className="flex-1">
             <FormControl>

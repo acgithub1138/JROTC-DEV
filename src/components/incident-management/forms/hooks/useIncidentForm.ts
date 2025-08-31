@@ -44,6 +44,7 @@ export const useIncidentForm = ({
       priority: incident?.priority || 'medium',
       category: incident?.category || 'issue',
       status: incident?.status || 'open',
+      assigned_to_admin: incident?.assigned_to_admin || 'unassigned',
       due_date: incident?.due_date ? new Date(incident.due_date) : undefined,
     }
   });
@@ -57,6 +58,7 @@ export const useIncidentForm = ({
         priority: incident.priority || 'medium',
         category: incident.category || 'issue',
         status: incident.status || 'open',
+        assigned_to_admin: incident.assigned_to_admin || 'unassigned',
         due_date: incident.due_date ? new Date(incident.due_date) : undefined,
       });
     } else if (mode === 'create' && priorityOptions.length > 0 && categoryOptions.length > 0 && statusOptions.length > 0) {
@@ -71,6 +73,7 @@ export const useIncidentForm = ({
         priority: defaultPriority,
         category: defaultCategory,
         status: defaultStatus,
+        assigned_to_admin: 'unassigned',
         due_date: undefined,
       });
     }
@@ -79,16 +82,22 @@ export const useIncidentForm = ({
   const onSubmit = async (data: IncidentFormData): Promise<Incident | undefined> => {
     try {
       if (mode === 'create') {
-        const incidentData = {
-          title: data.title,
-          description: data.description,
-          priority: data.priority,
-          category: data.category,
-          status: data.status,
-          school_id: userProfile?.school_id || '',
-          created_by: userProfile?.id,
-          due_date: data.due_date ? data.due_date.toISOString() : null,
-        };
+      const incidentData = {
+        title: data.title,
+        description: data.description,
+        priority: data.priority,
+        category: data.category,
+        status: data.status,
+        school_id: userProfile?.school_id || '',
+        created_by: userProfile?.id,
+        due_date: data.due_date ? data.due_date.toISOString() : null,
+        assigned_to_admin: data.assigned_to_admin && data.assigned_to_admin !== 'unassigned' ? data.assigned_to_admin : null,
+      };
+
+      // Auto-set assigned_to_admin for incidents if not provided and user can assign
+      if (canAssignIncidents && !incidentData.assigned_to_admin) {
+        incidentData.assigned_to_admin = userProfile?.id;
+      }
 
         const result = await createIncident.mutateAsync(incidentData);
         onSuccess(result);
@@ -100,6 +109,7 @@ export const useIncidentForm = ({
           priority: data.priority,
           category: data.category,
           status: data.status,
+          assigned_to_admin: data.assigned_to_admin && data.assigned_to_admin !== 'unassigned' ? data.assigned_to_admin : null,
           due_date: data.due_date ? data.due_date.toISOString() : null,
         };
 

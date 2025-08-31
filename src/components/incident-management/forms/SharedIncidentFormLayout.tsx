@@ -2,9 +2,8 @@ import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import { Form } from '@/components/ui/form';
 import { Button } from '@/components/ui/button';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { IncidentInfoFields } from './fields/IncidentInfoFields';
-import { IncidentPriorityStatusDueDateFields } from './fields/IncidentPriorityStatusDueDateFields';
+import { IncidentInfoLeftFields } from './fields/IncidentInfoLeftFields';
+import { IncidentInfoRightFields } from './fields/IncidentInfoRightFields';
 import type { Incident } from '@/hooks/incidents/types';
 
 interface SharedIncidentFormLayoutProps {
@@ -41,56 +40,45 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Two-column layout for incident info and priority/status/due date */}
+        {/* Top section - Two columns */}
         <div className="grid gap-6 lg:grid-cols-2">
-          <Card>
-            <CardHeader>
-              <CardTitle>Incident Information</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <IncidentInfoFields
-                form={form}
-                canAssignIncidents={canAssignIncidents}
-                categoryOptions={categoryOptions}
-              />
-            </CardContent>
-          </Card>
+          {/* Left Column */}
+          <div className="space-y-4">
+            <IncidentInfoLeftFields
+              form={form}
+              mode={mode}
+              incident={incident}
+              categoryOptions={categoryOptions}
+            />
+          </div>
 
-          <Card>
-            <CardHeader>
-              <CardTitle>Priority & Due Date</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              <IncidentPriorityStatusDueDateFields
-                form={form}
-                mode={mode}
-                priorityOptions={priorityOptions}
-              />
-            </CardContent>
-          </Card>
+          {/* Right Column */}
+          <div className="space-y-4">
+            <IncidentInfoRightFields
+              form={form}
+              mode={mode}
+              canAssignIncidents={canAssignIncidents}
+              priorityOptions={priorityOptions}
+            />
+          </div>
         </div>
 
-        {/* Single-column layout for title, description, and attachments */}
+        {/* Bottom section - Single column */}
         <div className="space-y-6">
-          <Card>
-            <CardHeader>
-              <CardTitle>Title & Description</CardTitle>
-            </CardHeader>
-            <CardContent className="space-y-4">
-              {titleField}
-              {descriptionField}
-            </CardContent>
-          </Card>
+          <div className="space-y-4">
+            {titleField}
+            {descriptionField}
+          </div>
 
           {attachmentSection && (
-            <Card>
-              <CardHeader>
-                <CardTitle>Attachments</CardTitle>
-              </CardHeader>
-              <CardContent>
+            <div className="space-y-2">
+              <label className="w-32 text-right flex-shrink-0 text-sm font-medium inline-block">
+                Attachments
+              </label>
+              <div className="ml-36">
                 {attachmentSection}
-              </CardContent>
-            </Card>
+              </div>
+            </div>
           )}
         </div>
 

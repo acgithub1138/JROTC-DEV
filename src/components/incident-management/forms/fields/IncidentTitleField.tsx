@@ -15,7 +15,7 @@ export const IncidentTitleField: React.FC<IncidentTitleFieldProps> = ({ form }) 
       render={({ field }) => (
         <FormItem className="flex items-center gap-4">
           <FormLabel className="w-32 text-right flex-shrink-0">
-            Title <span className="text-destructive">*</span>
+            Short Description <span className="text-destructive">*</span>
           </FormLabel>
           <div className="flex-1">
             <FormControl>
