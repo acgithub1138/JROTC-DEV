@@ -266,8 +266,8 @@ const App = () => (
               {/* Parent Registration Route */}
               <Route path="/parent-register" element={<ParentRegistrationPage />} />
 
-              {/* Redirect /app/auth to login */}
-              <Route path="/app/auth" element={<LoginPage />} />
+              {/* Redirect /app/login to login */}
+              <Route path="/app/login" element={<LoginPage />} />
               
               {/* Protected Application Routes */}
               <Route 
