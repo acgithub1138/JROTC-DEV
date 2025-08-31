@@ -17,6 +17,8 @@ import { TaskFormContent } from './forms/TaskFormContent';
 import { SubtaskForm } from './forms/SubtaskForm';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useSubtaskComments } from '@/hooks/useSubtaskComments';
+import { useTaskSystemComments } from '@/hooks/useTaskSystemComments';
+import { useSubtaskSystemComments } from '@/hooks/useSubtaskSystemComments';
 import { format } from 'date-fns';
 import { formatInTimeZone } from 'date-fns-tz';
 import { useTaskStatusOptions, useTaskPriorityOptions } from '@/hooks/useTaskOptions';
@@ -85,16 +87,21 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Comments hooks - always call both hooks to avoid conditional hook usage
   const {
     comments: taskComments,
-    addSystemComment: addTaskSystemComment
+    addComment: addTaskComment
   } = useTaskComments(recordId || '');
   const {
     comments: subtaskComments,
     addComment: addSubtaskComment
   } = useSubtaskComments(recordId || '');
+  const { handleSystemComment: addTaskSystemComment } = useTaskSystemComments();
+  const { handleSystemComment: addSubtaskSystemComment } = useSubtaskSystemComments();
 
   // Get correct comments and comment functions based on record type
   const comments = recordType === 'task' ? taskComments : subtaskComments;
-  const addSystemComment = recordType === 'task' ? addTaskSystemComment : (text: string) => addSubtaskComment(text); // Use regular comment for subtasks
+  const addComment = recordType === 'task' ? addTaskComment : addSubtaskComment;
+  const addSystemComment = recordType === 'task' ? 
+    (text: string) => addTaskSystemComment(recordId || '', text) : 
+    (text: string) => addSubtaskSystemComment(recordId || '', text);
 
   // Get subtasks for the current record (always call the hook)
   const {
@@ -583,22 +590,16 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     const priorityInfo = getPriorityInfo();
     const canEdit = canUpdate || canUpdateAssigned && record.assigned_to === userProfile?.id;
     const isCompleted = isTaskDone(record.status, statusOptions);
-    const handleAddComment = async () => {
+    const handleAddComment = () => {
       if (!newComment.trim()) return;
       setIsAddingComment(true);
-      try {
-        await addSystemComment(newComment);
-        setNewComment('');
-        // Toast is handled by the mutation hook
-      } catch (error) {
-        toast({
-          title: "Error",
-          description: "Failed to add comment. Please try again.",
-          variant: "destructive"
-        });
-      } finally {
-        setIsAddingComment(false);
+      if (recordType === 'task') {
+        addTaskComment(newComment);
+      } else {
+        addSubtaskComment(newComment);
       }
+      setNewComment('');
+      setIsAddingComment(false);
     };
     return <div className="container mx-auto py-6 px-4">
         {/* Header */}
