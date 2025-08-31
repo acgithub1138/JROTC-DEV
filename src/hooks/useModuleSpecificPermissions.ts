@@ -58,6 +58,7 @@ export const useCadetPermissions = () => {
     canView: modulePermissions.canRead,
     canResetPassword: hasPermission('cadets', 'reset_password'),
     canBulkImport: hasPermission('cadets', 'bulk_import'),
+    canSidebar: hasPermission('cadets', 'sidebar'),
   };
 };
 

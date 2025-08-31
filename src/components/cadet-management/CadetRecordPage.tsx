@@ -41,7 +41,8 @@ export const CadetRecordPage: React.FC = () => {
   const {
     canCreate,
     canUpdate,
-    canView
+    canView,
+    canSidebar
   } = useCadetPermissions();
 
   // Data
@@ -262,10 +263,12 @@ export const CadetRecordPage: React.FC = () => {
   return <div className="container mx-auto py-6 px-4">
       {/* Header */}
       <div className="mb-6">
-        <Button variant="outline" onClick={handleBack} className="mb-4">
-          <ArrowLeft className="w-4 h-4 mr-2" />
-          Back to Cadets
-        </Button>
+        {canSidebar && (
+          <Button variant="outline" onClick={handleBack} className="mb-4">
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back to Cadets
+          </Button>
+        )}
         
         <div className="flex items-center justify-between">
           <div>
