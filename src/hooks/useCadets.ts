@@ -17,6 +17,10 @@ export interface Cadet {
   created_at: string;
   updated_at: string;
   school_id: string;
+  user_roles?: {
+    role_name: string;
+    role_label: string;
+  };
 }
 
 export const useCadets = () => {
@@ -98,7 +102,13 @@ export const useCadet = (cadetId: string) => {
       setLoading(true);
       const { data, error } = await supabase
         .from('profiles')
-        .select('*')
+        .select(`
+          *,
+          user_roles (
+            role_name,
+            role_label
+          )
+        `)
         .eq('id', cadetId)
         .eq('school_id', userProfile.school_id)
         .single();
