@@ -2,9 +2,6 @@
 import React, { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
-import { TaskForm } from './TaskForm';
-import { TaskDetailDialog } from './TaskDetailDialog';
-import { SubtaskDetailDialog } from './SubtaskDetailDialog';
 import { TaskFilters } from './components/TaskFilters';
 import { TaskTabs } from './components/TaskTabs';
 import { useTaskManagement } from './hooks/useTaskManagement';
@@ -17,10 +14,6 @@ import { useNavigate } from 'react-router-dom';
 const TaskManagementPage: React.FC = () => {
   const navigate = useNavigate();
   const { canCreate, canView } = useTaskPermissions();
-  const [selectedTask, setSelectedTask] = useState<Task | null>(null);
-  const [editingTask, setEditingTask] = useState<Task | null>(null);
-  const [isDetailDialogOpen, setIsDetailDialogOpen] = useState(false);
-  const [showCreateForm, setShowCreateForm] = useState(false);
   const [showAccessDenied, setShowAccessDenied] = useState(false);
 
   const {
@@ -51,30 +44,22 @@ const TaskManagementPage: React.FC = () => {
   const handleTaskSelect = (task: Task | Subtask) => {
     // Check if user has view permissions
     if (canView) {
-      setSelectedTask(task as Task);
-      setIsDetailDialogOpen(true);
+      // Navigate to view page for both tasks and subtasks
+      const taskId = 'parent_task_id' in task ? task.parent_task_id : task.id;
+      navigate(`/app/tasks/task_record?id=${taskId}`);
     } else {
       setShowAccessDenied(true);
     }
   };
 
-  // Check if selected task is actually a subtask
-  const isSubtaskSelected = selectedTask && 'parent_task_id' in selectedTask;
-
   const handleEditTask = (task: Task | Subtask) => {
-    setEditingTask(task as Task);
+    // Navigate to edit page
+    const taskId = 'parent_task_id' in task ? task.parent_task_id : task.id;
+    navigate(`/app/tasks/task_record?mode=edit&id=${taskId}`);
   };
 
   const handleCreateTask = () => {
     navigate('/app/tasks/task_record?mode=create');
-  };
-
-  const handleCloseCreateForm = () => {
-    setShowCreateForm(false);
-  };
-
-  const handleCloseEditForm = () => {
-    setEditingTask(null);
   };
 
   return (
@@ -114,37 +99,7 @@ const TaskManagementPage: React.FC = () => {
           onRefresh={handleRefresh}
         />
 
-      {/* Create Task Form - Removed since we now use dedicated page */}
-
-      {/* Edit Task Form */}
-      {editingTask && (
-        <TaskForm
-          open={!!editingTask}
-          onOpenChange={handleCloseEditForm}
-          mode="edit"
-          task={editingTask}
-        />
-      )}
-
-      {/* Task Detail Dialog */}
-      {selectedTask && !isSubtaskSelected && (
-        <TaskDetailDialog
-          task={selectedTask}
-          open={isDetailDialogOpen}
-          onOpenChange={setIsDetailDialogOpen}
-          onEdit={handleEditTask}
-        />
-      )}
-
-      {/* Subtask Detail Dialog */}
-      {selectedTask && isSubtaskSelected && (
-        <SubtaskDetailDialog
-          subtask={selectedTask as Subtask}
-          open={isDetailDialogOpen}
-          onOpenChange={setIsDetailDialogOpen}
-          onEdit={handleEditTask}
-        />
-      )}
+      {/* All modals removed - now using dedicated task record page */}
 
       <AccessDeniedDialog
         isOpen={showAccessDenied}
