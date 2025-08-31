@@ -172,6 +172,7 @@ const IncidentDetailDialog_Readonly: React.FC<IncidentDetailDialogReadonlyProps>
             comments={comments}
             isAddingComment={addComment.isPending}
             onAddComment={(comment) => addComment.mutate({ comment_text: comment })}
+            sortOrder="desc"
           />
         </div>
       </DialogContent>

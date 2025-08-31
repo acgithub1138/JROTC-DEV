@@ -2,7 +2,6 @@ import React, { useState } from 'react';
 import { Textarea } from '@/components/ui/textarea';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
-import { ArrowUp, ArrowDown } from 'lucide-react';
 import { format } from 'date-fns';
 import { useEmailQueue } from '@/hooks/email/useEmailQueue';
 import { EmailViewDialog } from '@/components/email-management/dialogs/EmailViewDialog';
@@ -10,14 +9,15 @@ interface IncidentCommentsSectionProps {
   comments: any[];
   isAddingComment: boolean;
   onAddComment: (comment: string) => void;
+  sortOrder: 'asc' | 'desc';
 }
 export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = ({
   comments,
   isAddingComment,
-  onAddComment
+  onAddComment,
+  sortOrder
 }) => {
   const [newComment, setNewComment] = useState('');
-  const [commentsSortOrder, setCommentsSortOrder] = useState<'asc' | 'desc'>('desc');
   const [selectedEmailId, setSelectedEmailId] = useState<string | null>(null);
   const [showEmailPreview, setShowEmailPreview] = useState(false);
   const {
@@ -28,9 +28,6 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
       onAddComment(newComment.trim());
       setNewComment('');
     }
-  };
-  const toggleSortOrder = () => {
-    setCommentsSortOrder(prev => prev === 'asc' ? 'desc' : 'asc');
   };
   const handleEmailPreviewClick = (emailId: string) => {
     setSelectedEmailId(emailId);
@@ -55,25 +52,9 @@ export const IncidentCommentsSection: React.FC<IncidentCommentsSectionProps> = (
   const sortedComments = [...comments].sort((a, b) => {
     const dateA = new Date(a.created_at).getTime();
     const dateB = new Date(b.created_at).getTime();
-    return commentsSortOrder === 'asc' ? dateA - dateB : dateB - dateA;
+    return sortOrder === 'asc' ? dateA - dateB : dateB - dateA;
   });
   return <div>
-      <div className="flex items-center justify-between mb-4">
-        
-        <Button variant="outline" size="sm" onClick={toggleSortOrder} className="flex items-center gap-2">
-          {commentsSortOrder === 'asc' ? <>
-              <ArrowUp className="w-4 h-4" />
-              Old to New
-            </> : <>
-              <ArrowDown className="w-4 h-4" />
-              New to Old
-            </>}
-        </Button>
-      </div>
-      
-      {/* Add Comment */}
-      
-
       {/* Comments List */}
       <div className="space-y-4 max-h-64 overflow-y-auto">
         {sortedComments.map(comment => <div key={comment.id} className="border rounded-lg p-4">

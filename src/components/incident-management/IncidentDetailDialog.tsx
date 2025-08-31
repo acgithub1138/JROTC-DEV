@@ -695,7 +695,7 @@ const IncidentDetailDialog: React.FC<IncidentDetailDialogProps> = ({
           {/* Comments Section */}
           <IncidentCommentsSection comments={comments} isAddingComment={addComment.isPending} onAddComment={comment => addComment.mutate({
             comment_text: comment
-          })} />
+          })} sortOrder="desc" />
         </div>
       </DialogContent>
     </Dialog>

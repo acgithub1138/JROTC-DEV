@@ -546,7 +546,10 @@ export const IncidentRecordPage: React.FC = () => {
                   <Button onClick={handleAddComment} disabled={!newComment.trim() || isAddingComment} size="sm" className="w-fit">
                     {isAddingComment ? 'Posting...' : 'Post Comment'}
                   </Button>
-                  
+                  <Button variant="outline" size="sm" onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)} className="flex items-center gap-2">
+                    <ArrowUpDown className="w-4 h-4" />
+                    {sortCommentsNewestFirst ? 'New to Old' : 'Old to New'}
+                  </Button>
                 </div>
               </div>
 
@@ -554,7 +557,12 @@ export const IncidentRecordPage: React.FC = () => {
 
               {/* Comments List */}
               <div className="flex-1 space-y-4 overflow-y-auto">
-                <IncidentCommentsSection comments={comments} isAddingComment={isAddingComment} onAddComment={handleAddComment} />
+                <IncidentCommentsSection 
+                  comments={comments} 
+                  isAddingComment={isAddingComment} 
+                  onAddComment={handleAddComment} 
+                  sortOrder={sortCommentsNewestFirst ? 'desc' : 'asc'} 
+                />
               </div>
             </CardContent>
           </Card>
