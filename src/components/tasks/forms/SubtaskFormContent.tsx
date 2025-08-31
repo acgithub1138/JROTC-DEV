@@ -131,17 +131,13 @@ export const SubtaskFormContent: React.FC<SubtaskFormContentProps> = ({
         
         setCreatedSubtask(createdRecord);
         
-        // For page-based creation, navigate back to parent task or task list
+        // For page-based creation, navigate back to task list
         toast({
           title: 'Success',
           description: 'Subtask created successfully',
         });
         
-        if (parentTaskId) {
-          navigate(`/app/tasks/task_record?id=${parentTaskId}`);
-        } else {
-          navigate('/app/tasks');
-        }
+        navigate('/app/tasks');
       } else {
         // Edit mode
         if (!subtask) return;
