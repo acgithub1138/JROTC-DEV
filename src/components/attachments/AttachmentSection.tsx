@@ -50,10 +50,9 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
                variant="ghost"
                size="sm"
                onClick={() => setShowUpload(true)}
-               className="h-6 w-6 p-0"
                title="Add attachment"
              >
-               <Plus className="h-4 w-4" />
+               <Plus className="w-4 h-4" />
              </Button>
            )}
          </div>
