@@ -19,9 +19,7 @@ export const CadetOverviewCards: React.FC<CadetOverviewCardsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{cadet.grade || 'N/A'}</div>
-          <p className="text-xs text-muted-foreground">
-            {cadet.cadet_year || 'No cadet year'}
-          </p>
+          
         </CardContent>
       </Card>
 
@@ -32,9 +30,7 @@ export const CadetOverviewCards: React.FC<CadetOverviewCardsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{cadet.rank || 'N/A'}</div>
-          <p className="text-xs text-muted-foreground">
-            Current rank
-          </p>
+          
         </CardContent>
       </Card>
 
@@ -45,9 +41,7 @@ export const CadetOverviewCards: React.FC<CadetOverviewCardsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{cadet.flight || 'N/A'}</div>
-          <p className="text-xs text-muted-foreground">
-            Assigned flight
-          </p>
+          
         </CardContent>
       </Card>
 
@@ -58,9 +52,7 @@ export const CadetOverviewCards: React.FC<CadetOverviewCardsProps> = ({
         </CardHeader>
         <CardContent>
           <div className="text-2xl font-bold">{cadet.cadet_year || 'N/A'}</div>
-          <p className="text-xs text-muted-foreground">
-            Current year level
-          </p>
+          
         </CardContent>
       </Card>
 
