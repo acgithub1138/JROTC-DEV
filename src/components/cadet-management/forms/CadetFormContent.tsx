@@ -7,6 +7,7 @@ import { CadetBasicInfoFields } from './fields/CadetBasicInfoFields';
 import { CadetRoleGradeFields } from './fields/CadetRoleGradeFields';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { Profile } from '../types';
+import { useEmailValidation } from '@/hooks/useEmailValidation';
 
 interface CadetFormContentProps {
   mode: 'create' | 'edit';
@@ -35,6 +36,18 @@ export const CadetFormContent: React.FC<CadetFormContentProps> = ({
 
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+
+  // Watch email field value for validation
+  const emailValue = form.watch('email');
+  
+  // Email validation hook - only check in create mode
+  const { isChecking: isCheckingEmail, exists: emailExists, error: emailError } = useEmailValidation(
+    emailValue,
+    mode === 'create' && emailValue && emailValue.length > 0
+  );
+
+  // Determine if the form should be disabled
+  const isFormDisabled = isSubmitting || (mode === 'create' && emailExists === true);
 
   // Watch form changes to detect unsaved modifications
   React.useEffect(() => {
@@ -99,7 +112,7 @@ export const CadetFormContent: React.FC<CadetFormContentProps> = ({
             </Button>
             <Button 
               type="submit" 
-              disabled={isSubmitting}
+              disabled={isFormDisabled}
             >
               {isSubmitting ? 'Saving...' : (mode === 'create' ? 'Add Cadet' : 'Update Cadet')}
             </Button>

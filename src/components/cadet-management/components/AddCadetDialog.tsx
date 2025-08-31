@@ -270,7 +270,7 @@ export const AddCadetDialog = ({
             <Button type="button" variant="outline" onClick={handleCancel}>
               Cancel
             </Button>
-            <Button type="submit">
+            <Button type="submit" disabled={emailExists === true || isCheckingEmail}>
               Create Cadet
             </Button>
           </div>
