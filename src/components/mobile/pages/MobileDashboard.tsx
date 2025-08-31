@@ -7,7 +7,8 @@ import {
   DollarSign,
   Package,
   Building,
-  Smartphone
+  Smartphone,
+  Heart
 } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
@@ -33,6 +34,7 @@ export const MobileDashboard: React.FC = () => {
     canViewStatsTasks,
     canViewStatsInventory,
     canViewStatsIncidents,
+    canViewStatsCommunityService,
     canViewStatsSchools,
     canViewUpcomingEvents,
     canViewMobileFeatures
@@ -124,6 +126,17 @@ export const MobileDashboard: React.FC = () => {
         change: statsLoading ? '...' : `${stats?.inventory.issued || 0} issued`,
         icon: Package,
         color: 'text-purple-600'
+      });
+    }
+
+    // Community Service Statistics
+    if (canViewStatsCommunityService) {
+      baseStats.push({
+        title: 'Service Hours',
+        value: statsLoading ? '...' : (stats?.communityService.totalHours || 0).toString(),
+        change: statsLoading ? '...' : `${stats?.communityService.totalRecords || 0} records this year`,
+        icon: Heart,
+        color: 'text-pink-600'
       });
     }
 

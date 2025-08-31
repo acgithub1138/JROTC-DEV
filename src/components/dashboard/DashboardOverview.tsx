@@ -2,7 +2,7 @@ import React, { useState, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
-import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle, Building, Smartphone } from 'lucide-react';
+import { Users, CheckSquare, DollarSign, Plus, Zap, Calendar, Package, AlertTriangle, Building, Smartphone, Heart } from 'lucide-react';
 import { useDashboardStats } from '@/hooks/useDashboardStats';
 import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
@@ -40,6 +40,7 @@ const DashboardOverview = () => {
     canViewStatsBudget,
     canViewStatsInventory,
     canViewStatsIncidents,
+    canViewStatsCommunityService,
     canViewStatsSchools,
     canViewMyTasks,
     canViewMyCadets,
@@ -203,6 +204,18 @@ const DashboardOverview = () => {
         icon: DollarSign,
         color: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'text-green-600' : 'text-red-600',
         bgColor: stats?.budget.netBudget && stats.budget.netBudget >= 0 ? 'bg-green-100' : 'bg-red-100'
+      });
+    }
+
+    // Community Service Statistics
+    if (canViewStatsCommunityService) {
+      baseStats.push({
+        title: 'Service Hours',
+        value: statsLoading ? '...' : (stats?.communityService.totalHours || 0).toString(),
+        change: statsLoading ? '...' : `${stats?.communityService.totalRecords || 0} records this year`,
+        icon: Heart,
+        color: 'text-pink-600',
+        bgColor: 'bg-pink-100'
       });
     }
 

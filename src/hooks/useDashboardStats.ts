@@ -1,6 +1,22 @@
 import { useQuery } from '@tanstack/react-query';
 import { supabase } from '@/integrations/supabase/client';
 
+// Helper function to get current school year start (August 1st)
+const getCurrentSchoolYearStart = () => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const schoolYearStart = now.getMonth() >= 7 ? currentYear : currentYear - 1; // August is month 7
+  return `${schoolYearStart}-08-01`;
+};
+
+// Helper function to get current school year end (June 30th)
+const getCurrentSchoolYearEnd = () => {
+  const now = new Date();
+  const currentYear = now.getFullYear();
+  const schoolYearEnd = now.getMonth() >= 7 ? currentYear + 1 : currentYear;
+  return `${schoolYearEnd}-06-30`;
+};
+
 export const useDashboardStats = () => {
   return useQuery({
     queryKey: ['dashboard-stats'],
@@ -11,7 +27,8 @@ export const useDashboardStats = () => {
         budgetResult,
         inventoryResult,
         incidentsResult,
-        schoolsResult
+        schoolsResult,
+        communityServiceResult
       ] = await Promise.all([
         // Total cadets count
         supabase
@@ -45,7 +62,14 @@ export const useDashboardStats = () => {
         // Total schools count (for admin dashboard)
         supabase
           .from('schools')
-          .select('id', { count: 'exact' })
+          .select('id', { count: 'exact' }),
+        
+        // Community service hours for current school year (Aug-June)
+        supabase
+          .from('community_service')
+          .select('hours, date')
+          .gte('date', getCurrentSchoolYearStart())
+          .lte('date', getCurrentSchoolYearEnd())
       ]);
 
       // Calculate overdue tasks
@@ -86,6 +110,12 @@ export const useDashboardStats = () => {
         incident.status !== 'resolved' && incident.status !== 'canceled'
       ) || [];
 
+      // Calculate community service hours
+      const totalCommunityServiceHours = communityServiceResult.data?.reduce((sum, record) => 
+        sum + (record.hours || 0), 0
+      ) || 0;
+      const totalRecords = communityServiceResult.data?.length || 0;
+
       return {
         cadets: {
           total: cadetsResult.count || 0,
@@ -111,6 +141,10 @@ export const useDashboardStats = () => {
         },
         schools: {
           total: schoolsResult.count || 0
+        },
+        communityService: {
+          totalHours: totalCommunityServiceHours,
+          totalRecords: totalRecords
         }
       };
     },

@@ -137,6 +137,7 @@ export const useDashboardPermissions = () => {
     canViewStatsBudget: hasPermission('dashboard', 'view_stats_budget'),
     canViewStatsInventory: hasPermission('dashboard', 'view_stats_inventory'),
     canViewStatsIncidents: hasPermission('dashboard', 'view_stats_incidents'),
+    canViewStatsCommunityService: hasPermission('dashboard', 'view_stats_community_service'),
     canViewStatsSchools: hasPermission('dashboard', 'view_stats_schools'),
     canViewMyTasks: hasPermission('dashboard', 'view_my_tasks'),
     canViewMyCadets: hasPermission('dashboard', 'view_my_cadets'),
