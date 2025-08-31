@@ -425,63 +425,60 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
               </CardContent>
             </Card>
 
-            {/* Attachments and Subtasks - Side by Side */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Attachments */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className="flex items-center justify-between">
-                    <AttachmentSection
-                      recordType="task"
-                      recordId={task.id}
-                      canEdit={canEdit}
-                      defaultOpen={true}
-                      showTitleWithCount={true}
-                    />
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
+            {/* Attachments */}
+            <Card>
+              <CardHeader>
+                <CardTitle className="flex items-center justify-between">
                   <AttachmentSection
                     recordType="task"
                     recordId={task.id}
                     canEdit={canEdit}
                     defaultOpen={true}
-                    showContentOnly={true}
+                    showTitleWithCount={true}
                   />
-                </CardContent>
-              </Card>
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <AttachmentSection
+                  recordType="task"
+                  recordId={task.id}
+                  canEdit={canEdit}
+                  defaultOpen={true}
+                  showContentOnly={true}
+                />
+              </CardContent>
+            </Card>
 
-              {/* Subtasks */}
-              <Card>
-                <CardHeader>
-                  <CardTitle>Subtasks ({subtasks?.length || 0})</CardTitle>
-                </CardHeader>
-                <CardContent>
-                  {subtasks && subtasks.length > 0 ? (
-                    <div className="space-y-2">
-                      {subtasks.map((subtask) => (
-                        <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
-                          <div className="flex items-center gap-3">
-                            <button
-                              onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)}
-                              className="text-blue-600 hover:text-blue-800 font-medium text-sm"
-                            >
-                              {subtask.task_number}
-                            </button>
-                            <span className="text-sm">{subtask.title}</span>
-                          </div>
-                          <Badge variant="outline" className="text-xs">
-                            {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
-                          </Badge>
+            {/* Subtasks */}
+            <Card>
+              <CardHeader>
+                <CardTitle>Subtasks ({subtasks?.length || 0})</CardTitle>
+              </CardHeader>
+              <CardContent>
+                {subtasks && subtasks.length > 0 ? (
+                  <div className="space-y-2">
+                    {subtasks.map((subtask) => (
+                      <div key={subtask.id} className="flex items-center justify-between p-3 border rounded-lg">
+                        <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => navigate(`/app/tasks/task_record?id=${subtask.id}`)}
+                            className="text-blue-600 hover:text-blue-800 font-medium text-sm"
+                          >
+                            {subtask.task_number}
+                          </button>
+                          <span className="text-sm">{subtask.title}</span>
                         </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <p className="text-muted-foreground text-sm">No subtasks found.</p>
-                  )}
-                </CardContent>
-              </Card>
-            </div>
+                        <Badge variant="outline" className="text-xs">
+                          {statusOptions.find(s => s.value === subtask.status)?.label || subtask.status}
+                        </Badge>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p className="text-muted-foreground text-sm">No subtasks found.</p>
+                )}
+              </CardContent>
+            </Card>
           </div>
 
           {/* Right Column - Comments & History */}
