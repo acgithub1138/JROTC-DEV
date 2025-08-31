@@ -41,12 +41,12 @@ export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
     return (
       <div className="space-y-3">
          <div className="">
-           <div className="">
+           <div className="flex items-center justify-center gap-2">
              <Paperclip className="h-4 w-4" />
              <span>Attachments {attachments.length > 0 && `(${attachments.length})`}</span>
            </div>
            {canEdit && !showUpload && (
-             <Button classname="justify-right"
+             <Button
                variant="ghost"
                size="sm"
                onClick={() => setShowUpload(true)}
