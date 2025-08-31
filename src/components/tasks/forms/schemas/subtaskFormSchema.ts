@@ -8,10 +8,10 @@ export const createSubtaskSchema = (statusOptions: string[], priorityOptions: st
   
   return z.object({
     title: z.string().min(1, 'Subtask title is required').max(150, 'Subtask title must be 150 characters or less'),
-    description: z.string().optional(),
+    description: z.string().min(1, 'Subtask details are required'),
     status: z.enum(statusOptions as [string, ...string[]]),
     priority: z.enum(priorityOptions as [string, ...string[]]),
-    assigned_to: z.string().optional(),
+    assigned_to: z.string().min(1, 'Assigned to is required'),
     due_date: z.date()
       .optional()
       .refine((date) => {
@@ -26,9 +26,9 @@ export const createSubtaskSchema = (statusOptions: string[], priorityOptions: st
 // Type for subtask form data
 export type SubtaskFormData = {
   title: string;
-  description?: string;
+  description: string;
   status: string;
   priority: string;
-  assigned_to?: string;
+  assigned_to: string;
   due_date?: Date;
 };

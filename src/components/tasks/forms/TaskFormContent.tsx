@@ -1,18 +1,14 @@
 import React, { useState, useEffect } from 'react';
-import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
 import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/hooks/useTasks';
 import { useTaskForm } from './hooks/useTaskForm';
 import { TaskTitleField } from './fields/TaskTitleField';
-import { TaskAssigneeField } from './fields/TaskAssigneeField';
 import { TaskDescriptionField } from './fields/TaskDescriptionField';
-import { TaskInfoFields } from './fields/TaskInfoFields';
-import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueDateFields';
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
+import { SharedTaskFormLayout } from './SharedTaskFormLayout';
 
 interface TaskFormContentProps {
   mode: 'create' | 'edit';
@@ -151,100 +147,79 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
     );
   }
 
+  // Create attachment section for the layout
+  const attachmentSection = mode === 'create' ? (
+    <div className="space-y-2">
+      <div className="flex items-center gap-4">
+        <label className="w-32 text-right text-sm font-medium">Attachments</label>
+        <div className="flex-1">
+          <input
+            type="file"
+            multiple
+            onChange={(e) => {
+              const files = Array.from(e.target.files || []);
+              setPendingFiles(prev => [...prev, ...files]);
+            }}
+            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+          />
+          {pendingFiles.length > 0 && (
+            <div className="mt-2 space-y-1">
+              <p className="text-sm text-muted-foreground">Files to upload after task creation:</p>
+              {pendingFiles.map((file, index) => (
+                <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                  <span>{file.name}</span>
+                  <button
+                    type="button"
+                    onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    ×
+                  </button>
+                </div>
+              ))}
+              {isUploadingFiles && (
+                <div className="text-sm text-blue-600 font-medium">
+                  Uploading files...
+                </div>
+              )}
+            </div>
+          )}
+        </div>
+      </div>
+    </div>
+  ) : (
+    task?.id && showAttachments && (
+      <AttachmentSection
+        recordType="task"
+        recordId={task.id}
+        canEdit={canEditThisTask}
+        defaultOpen={false}
+      />
+    )
+  );
+
   return (
     <>
-      <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleSubmit, onError)} className="space-y-8">
-          {/* Top Section - Two Columns */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 p-6 border rounded-lg bg-card">
-            {/* Left Column - Task Info */}
-            <TaskInfoFields 
-              mode={mode}
-              taskNumber={task?.task_number}
-              createdAt={task?.created_at}
-              createdBy={task?.assigned_by_profile ? `${task.assigned_by_profile.last_name}, ${task.assigned_by_profile.first_name}` : undefined}
-            />
-            
-            {/* Right Column - Priority, Status, Due Date */}
-            <TaskPriorityStatusDueDateFields 
-              form={form} 
-              canAssignTasks={canAssignTasks} 
-              canEditThisTask={canEditThisTask} 
-              isEditingAssignedTask={isEditingAssignedTask} 
-              statusOptions={statusOptions} 
-              priorityOptions={priorityOptions} 
-            />
-          </div>
-
-          {/* Bottom Section - Single Column */}
-          <div className="space-y-6 p-6 border rounded-lg bg-card">
-            <TaskTitleField form={form} />
-            <TaskDescriptionField form={form} />
-            
-            {/* Attachments Section */}
-            {mode === 'create' ? (
-              <div className="space-y-2">
-                <div className="flex items-center gap-4">
-                  <label className="w-32 text-right text-sm font-medium">Attachments</label>
-                  <div className="flex-1">
-                    <input
-                      type="file"
-                      multiple
-                      onChange={(e) => {
-                        const files = Array.from(e.target.files || []);
-                        setPendingFiles(prev => [...prev, ...files]);
-                      }}
-                      className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
-                    />
-                     {pendingFiles.length > 0 && (
-                      <div className="mt-2 space-y-1">
-                        <p className="text-sm text-muted-foreground">Files to upload after task creation:</p>
-                        {pendingFiles.map((file, index) => (
-                          <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
-                            <span>{file.name}</span>
-                            <button
-                              type="button"
-                              onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
-                              className="text-red-500 hover:text-red-700"
-                            >
-                              ×
-                            </button>
-                          </div>
-                        ))}
-                        {isUploadingFiles && (
-                          <div className="text-sm text-blue-600 font-medium">
-                            Uploading files...
-                          </div>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            ) : (
-              task?.id && showAttachments && (
-                <AttachmentSection
-                  recordType="task"
-                  recordId={task.id}
-                  canEdit={canEditThisTask}
-                  defaultOpen={false}
-                />
-              )
-            )}
-          </div>
-
-          <div className="flex justify-end gap-2 pt-4">
-            {onCancel && (
-              <Button type="button" variant="outline" onClick={handleCancel}>
-                Cancel
-              </Button>
-            )}
-            <Button type="submit" disabled={isSubmitting || isUploadingFiles}>
-              {isUploadingFiles ? 'Uploading files...' : mode === 'create' ? 'Create Task' : 'Update Task'}
-            </Button>
-          </div>
-        </form>
-      </Form>
+      <SharedTaskFormLayout
+        form={form}
+        onSubmit={form.handleSubmit(handleSubmit, onError)}
+        mode={mode}
+        taskNumber={task?.task_number}
+        createdAt={task?.created_at}
+        createdBy={task?.assigned_by_profile ? `${task.assigned_by_profile.last_name}, ${task.assigned_by_profile.first_name}` : undefined}
+        canAssignTasks={canAssignTasks}
+        canEditThisTask={canEditThisTask}
+        isEditingAssignedTask={isEditingAssignedTask}
+        statusOptions={statusOptions}
+        priorityOptions={priorityOptions}
+        titleField={<TaskTitleField form={form} />}
+        descriptionField={<TaskDescriptionField form={form} />}
+        attachmentSection={attachmentSection}
+        onCancel={handleCancel}
+        submitButtonText={mode === 'create' ? 'Create Task' : 'Update Task'}
+        isSubmitting={isSubmitting}
+        isSubmitDisabled={isUploadingFiles}
+      />
 
       <UnsavedChangesDialog
         open={showConfirmDialog}
