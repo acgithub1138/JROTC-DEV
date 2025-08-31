@@ -14,6 +14,7 @@ import DashboardOverview from './dashboard/DashboardOverview';
 import TaskManagementPage from './tasks/TaskManagementPage';
 import { TaskRecordPage } from './tasks/TaskRecordPage';
 import IncidentManagementPage from './incident-management/IncidentManagementPage';
+import { IncidentRecordPage } from './incident-management/IncidentRecordPage';
 import SchoolManagementPage from './school-management/SchoolManagementPage';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import UserAdminPage from './user-management/UserAdminPage';
@@ -188,6 +189,7 @@ const MainApplication = () => {
             <Route path="tasks" element={<TaskManagementPage />} />
             <Route path="tasks/task_record" element={<TaskRecordPage />} />
             <Route path="incidents" element={<IncidentManagementPage />} />
+            <Route path="incidents/incident_record" element={<IncidentRecordPage />} />
             <Route path="school" element={<SchoolManagementPage />} />
             <Route path="users" element={<UserAdminPage />} />
             <Route path="email" element={<EmailManagementPage />} />

@@ -1,4 +1,5 @@
 import React, { useState, useMemo } from "react";
+import { useNavigate } from 'react-router-dom';
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Plus } from "lucide-react";
@@ -15,6 +16,7 @@ import { BulkEditToolbar } from "./BulkEditToolbar";
 import type { Incident } from "@/hooks/incidents/types";
 
 const IncidentManagementPage: React.FC = () => {
+  const navigate = useNavigate();
   const { userProfile } = useAuth();
   const { canCreate, canUpdate, canUpdateAssigned, canDelete } = useIncidentPermissions();
   const isAdmin = userProfile?.role === 'admin';
@@ -80,25 +82,17 @@ const IncidentManagementPage: React.FC = () => {
   }, [currentIncidents, searchValue]);
 
   const handleIncidentSelect = (incident: Incident) => {
-    // Check if user has update permissions
-    if (canUpdate || canUpdateAssigned) {
-      setSelectedIncident(incident);
-      setIncidentDialogMode('edit');
-      setShowIncidentDialog(true);
-    } else {
-      setShowAccessDenied(true);
-    }
+    // Navigate to incident record page in edit mode
+    navigate(`/app/incidents/incident_record?mode=edit&id=${incident.id}`);
   };
 
   const handleIncidentView = (incident: Incident) => {
-    // View mode - always accessible if user has view permissions
-    setSelectedIncident(incident);
-    setIncidentDialogMode('view');
-    setShowIncidentDialog(true);
+    // Navigate to incident record page in view mode
+    navigate(`/app/incidents/incident_record?mode=view&id=${incident.id}`);
   };
 
   const handleCreateIncident = () => {
-    setShowCreateForm(true);
+    navigate('/app/incidents/incident_record?mode=create');
   };
 
   const handleCloseCreateForm = () => {

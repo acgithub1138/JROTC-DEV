@@ -97,16 +97,16 @@ const IncidentTable: React.FC<IncidentTableProps> = ({
                     />
                   )}
                   <CardTitle className="text-lg">
-                    {canView ? (
-                      <button 
-                        onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)} 
-                        className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
-                      >
-                        {incident.incident_number}
-                      </button>
-                    ) : (
-                      <span>{incident.incident_number}</span>
-                    )}
+                  {canView ? (
+                    <button 
+                      onClick={() => onIncidentView ? onIncidentView(incident) : onIncidentSelect(incident)} 
+                      className="text-blue-600 hover:text-blue-800 hover:underline transition-colors"
+                    >
+                      {incident.incident_number}
+                    </button>
+                  ) : (
+                    <span>{incident.incident_number}</span>
+                  )}
                   </CardTitle>
                 </div>
                 <div className="flex gap-2">
