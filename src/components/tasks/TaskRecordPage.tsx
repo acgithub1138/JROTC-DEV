@@ -490,8 +490,13 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             default:
               return `${field} updated`;
           }
-        }).join(', ');
-        addSystemComment(`${recordType === 'task' ? 'Task' : 'Subtask'} updated: ${changeDescription}`);
+        });
+        
+        // Format as bulleted list instead of CSV
+        const commentText = changeDescription.length === 1 
+          ? changeDescription[0] 
+          : changeDescription.join('\n• ');
+        addSystemComment(changeDescription.length === 1 ? commentText : '• ' + commentText);
         toast({
           title: `${recordType === 'task' ? 'Task' : 'Subtask'} Updated`,
           description: "Your changes have been saved successfully."
@@ -853,15 +858,53 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                         const dateB = new Date(b.created_at).getTime();
                         return sortCommentsNewestFirst ? dateB - dateA : dateA - dateB;
                       }).map(comment => <div key={comment.id} className="p-3 bg-muted rounded-lg">
-                              <div className="flex items-center justify-between mb-2">
-                                <span className="text-sm font-medium">
-                                  {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
-                                </span>
-                                <span className="text-xs text-muted-foreground">
-                                  {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
-                                </span>
-                              </div>
-                              <p className="text-sm whitespace-pre-wrap">{comment.comment_text}</p>
+                               <div className="flex items-center justify-between mb-2">
+                                 <div className="flex items-center gap-2">
+                                   <span className="text-sm font-medium">
+                                     {comment.user_profile ? `${comment.user_profile.last_name}, ${comment.user_profile.first_name}` : 'System'}
+                                   </span>
+                                   {comment.is_system_comment ? (
+                                     <Badge variant="secondary" className="text-xs">Update</Badge>
+                                   ) : (
+                                     <Badge variant="outline" className="text-xs">Comment</Badge>
+                                   )}
+                                 </div>
+                                 <span className="text-xs text-muted-foreground">
+                                   {formatInTimeZone(new Date(comment.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                                 </span>
+                               </div>
+                               <div className="text-sm whitespace-pre-wrap">
+                                 {(comment.comment_text.startsWith('• ') || comment.comment_text.includes('\n• ')) ? (
+                                   <div className="space-y-1">
+                                     {comment.comment_text.split('\n').map((line: string, index: number) => (
+                                       <div key={index} className={line.startsWith('• ') ? 'ml-4' : ''}>
+                                         {line.startsWith('• ') ? (
+                                           <span className="flex items-start">
+                                             <span className="mr-2">•</span>
+                                             <span className="text-sm">{line.substring(2)}</span>
+                                           </span>
+                                         ) : (
+                                           <span className="text-sm">{line}</span>
+                                         )}
+                                       </div>
+                                     ))}
+                                   </div>
+                                 ) : comment.comment_text.includes('Task updated:') || comment.comment_text.includes('Subtask updated:') ? (
+                                   (() => {
+                                     const changesPart = comment.comment_text.replace(/^(Task updated:|Subtask updated:)\s*/, '');
+                                     const items = changesPart.split(', ').map((item: string) => item.trim());
+                                     return items.length > 1 ? (
+                                       <ul className="list-disc list-inside space-y-1 ml-4">
+                                         {items.map((item: string, index: number) => (
+                                           <li key={index} className="text-sm">{item}</li>
+                                         ))}
+                                       </ul>
+                                     ) : <span>{comment.comment_text}</span>;
+                                   })()
+                                 ) : (
+                                   <span>{comment.comment_text}</span>
+                                 )}
+                               </div>
                             </div>) : <p className="text-muted-foreground text-sm text-center py-8">No comments yet.</p>}
                       </div>
                     </TabsContent>

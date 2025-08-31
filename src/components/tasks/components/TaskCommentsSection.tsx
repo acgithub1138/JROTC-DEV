@@ -73,8 +73,47 @@ export const TaskCommentsSection: React.FC<TaskCommentsSectionProps> = ({
       );
     }
     
-    // Convert CSV-like lists to bulleted lists
-    // Look for patterns like "A, B, C" and convert to bullet points
+    // Update TaskCommentsSection to handle the new format and remove the old "Task updated:" pattern matching
+    // since we're no longer using that prefix
+    if (text.startsWith('• ') || text.includes('\n• ')) {
+      // Already formatted as bulleted list
+      return (
+        <div className="space-y-1">
+          {text.split('\n').map((line, index) => (
+            <div key={index} className={line.startsWith('• ') ? 'ml-4' : ''}>
+              {line.startsWith('• ') ? (
+                <span className="flex items-start">
+                  <span className="mr-2">•</span>
+                  <span className="text-sm">{line.substring(2)}</span>
+                </span>
+              ) : (
+                <span className="text-sm">{line}</span>
+              )}
+            </div>
+          ))}
+        </div>
+      );
+    }
+    
+    // Convert CSV-like lists to bulleted lists for system comments
+    // Look for task/subtask update patterns (legacy format)
+    if (text.includes('Task updated:') || text.includes('Subtask updated:')) {
+      // Remove the prefix and split the changes
+      const changesPart = text.replace(/^(Task updated:|Subtask updated:)\s*/, '');
+      const items = changesPart.split(', ').map(item => item.trim());
+      
+      if (items.length > 1) {
+        return (
+          <ul className="list-disc list-inside space-y-1 ml-4">
+            {items.map((item, index) => (
+              <li key={index} className="text-sm">{item}</li>
+            ))}
+          </ul>
+        );
+      }
+    }
+    
+    // Convert other CSV-like lists to bulleted lists
     const csvPattern = /(.+?), (.+?), (.+)/;
     if (csvPattern.test(text) && !text.includes('changed from')) {
       const items = text.split(', ').map(item => item.trim());
