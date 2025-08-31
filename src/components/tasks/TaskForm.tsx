@@ -1,17 +1,9 @@
 import React, { useState, useEffect } from 'react';
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Form } from '@/components/ui/form';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { useAuth } from '@/contexts/AuthContext';
 import { Task } from '@/hooks/useTasks';
-import { useTaskForm } from './forms/hooks/useTaskForm';
-import { TaskTitleField } from './forms/fields/TaskTitleField';
-import { TaskAssigneeField } from './forms/fields/TaskAssigneeField';
-import { TaskDescriptionField } from './forms/fields/TaskDescriptionField';
-import { TaskPriorityStatusFields } from './forms/fields/TaskPriorityStatusFields';
-import { TaskDueDateField } from './forms/fields/TaskDueDateField';
-import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { TaskFormContent } from './forms/TaskFormContent';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 interface TaskFormProps {
   open: boolean;
@@ -25,65 +17,12 @@ export const TaskForm: React.FC<TaskFormProps> = ({
   mode,
   task
 }) => {
-  const { userProfile } = useAuth();
-  const { canAssign, canUpdate, canUpdateAssigned } = useTaskPermissions();
-  const canAssignTasks = canAssign;
-  const canEditThisTask = canUpdate || (canUpdateAssigned && task?.assigned_to === userProfile?.id);
-  
-  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
-  const [showConfirmDialog, setShowConfirmDialog] = useState(false);
   const [createdTask, setCreatedTask] = useState<Task | null>(null);
   const [showAttachments, setShowAttachments] = useState(false);
   const [showAttachmentConfirm, setShowAttachmentConfirm] = useState(false);
 
-  const {
-    form,
-    onSubmit,
-    onError,
-    isSubmitting,
-    isLoading,
-    statusOptions,
-    priorityOptions
-  } = useTaskForm({
-    mode,
-    task,
-    onOpenChange: (open: boolean) => {
-      if (!open && !showAttachments) {
-        setCreatedTask(null);
-        onOpenChange(false);
-      }
-    },
-    canAssignTasks,
-    currentUserId: userProfile?.id || '',
-    onTaskCreated: (newTask: Task) => {
-      setCreatedTask(newTask);
-      setShowAttachmentConfirm(true);
-      setHasUnsavedChanges(false);
-    }
-  });
-
-  // Track form changes for unsaved warning
-  useEffect(() => {
-    const subscription = form.watch((value) => {
-      const hasChanges = mode === 'create' 
-        ? !!(value.title || value.description || value.assigned_to || (value.due_date && value.due_date.getTime() > 0))
-        : !!(
-          value.title !== (task?.title || '') ||
-          value.description !== (task?.description || '') ||
-          value.assigned_to !== (task?.assigned_to || '') ||
-          value.priority !== (task?.priority || 'medium') ||
-          value.status !== (task?.status || 'not_started') ||
-          (value.due_date?.getTime() || null) !== (task?.due_date ? new Date(task.due_date).getTime() : null)
-        );
-      setHasUnsavedChanges(hasChanges);
-    });
-    return () => subscription.unsubscribe();
-  }, [form, mode, task]);
-
   const handleClose = () => {
-    if (hasUnsavedChanges && !showAttachments) {
-      setShowConfirmDialog(true);
-    } else if (showAttachments) {
+    if (showAttachments) {
       setShowAttachments(false);
       setCreatedTask(null);
       onOpenChange(false);
@@ -102,18 +41,10 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }
   };
 
-  const confirmClose = () => {
-    setShowConfirmDialog(false);
-    setShowAttachments(false);
-    setCreatedTask(null);
-    form.reset();
-    onOpenChange(false);
+  const handleTaskCreated = (newTask: Task) => {
+    setCreatedTask(newTask);
+    setShowAttachmentConfirm(true);
   };
-
-  const cancelClose = () => {
-    setShowConfirmDialog(false);
-  };
-  const isEditingAssignedTask = mode === 'edit' && task?.assigned_to === userProfile?.id;
   const getDialogTitle = () => {
     if (showAttachments && createdTask) {
       return `Add Attachments - ${createdTask.task_number || createdTask.title}`;
@@ -126,87 +57,57 @@ export const TaskForm: React.FC<TaskFormProps> = ({
     }
     return `Edit Task - ${task.title}`;
   };
-  if (isLoading) {
-    return <Dialog open={open} onOpenChange={onOpenChange}>
-        <DialogContent className="sm:max-w-2xl">
-          <div className="flex items-center justify-center p-6">
-            <div className="text-center">Loading task options...</div>
-          </div>
-        </DialogContent>
-      </Dialog>;
-  }
   return (
     <>
-        <Dialog open={open && !showAttachmentConfirm} onOpenChange={hasUnsavedChanges ? handleClose : onOpenChange}>
+      <Dialog open={open && !showAttachmentConfirm} onOpenChange={handleClose}>
         <DialogContent className="sm:max-w-[600px] max-h-[90vh] overflow-y-auto">
           <DialogHeader>
             <DialogTitle>
               {getDialogTitle()}
             </DialogTitle>
-          <DialogDescription>
-            {showAttachments 
-              ? 'Your task has been created successfully! You can now add attachments or close this dialog.'
-              : mode === 'create' 
-                ? 'Fill in the details to create a new task.' 
-                : 'Update the task details below.'
-            }
-          </DialogDescription>
-        </DialogHeader>
+            <DialogDescription>
+              {showAttachments 
+                ? 'Your task has been created successfully! You can now add attachments or close this dialog.'
+                : mode === 'create' 
+                  ? 'Fill in the details to create a new task.' 
+                  : 'Update the task details below.'
+              }
+            </DialogDescription>
+          </DialogHeader>
 
-        {showAttachments && createdTask ? (
-          <div className="space-y-4">
-            <div className="p-4 bg-muted/50 rounded-lg">
-              <h3 className="font-medium text-sm mb-2">Task Created Successfully!</h3>
-              <p className="text-sm text-muted-foreground">
-                <strong>{createdTask.task_number}</strong> - {createdTask.title}
-              </p>
-            </div>
-            
-            <AttachmentSection
-              recordType="task"
-              recordId={createdTask.id}
-              canEdit={true}
-              defaultOpen={true}
-            />
-
-            <div className="flex justify-end pt-4">
-              <Button onClick={() => handleClose()}>
-                Done
-              </Button>
-            </div>
-          </div>
-        ) : (
-          <Form {...form}>
-            <form onSubmit={form.handleSubmit(onSubmit, onError)} className="space-y-4">
-              <TaskTitleField form={form} />
+          {showAttachments && createdTask ? (
+            <div className="space-y-4">
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <h3 className="font-medium text-sm mb-2">Task Created Successfully!</h3>
+                <p className="text-sm text-muted-foreground">
+                  <strong>{createdTask.task_number}</strong> - {createdTask.title}
+                </p>
+              </div>
               
-              <TaskAssigneeField form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} />
-              
-              <TaskDescriptionField form={form} />
-              
-              <TaskPriorityStatusFields form={form} canAssignTasks={canAssignTasks} canEditThisTask={canEditThisTask} isEditingAssignedTask={isEditingAssignedTask} statusOptions={statusOptions} priorityOptions={priorityOptions} />
-              
-              <TaskDueDateField form={form} />
-
-              {mode === 'edit' && task?.id && (
-                <AttachmentSection
-                  recordType="task"
-                  recordId={task.id}
-                  canEdit={canEditThisTask}
-                  defaultOpen={false}
-                />
-              )}
+              <AttachmentSection
+                recordType="task"
+                recordId={createdTask.id}
+                canEdit={true}
+                defaultOpen={true}
+              />
 
               <div className="flex justify-end pt-4">
-                <Button type="submit" disabled={isSubmitting}>
-                  {mode === 'create' ? 'Create Task' : 'Update Task'}
+                <Button onClick={() => handleClose()}>
+                  Done
                 </Button>
               </div>
-            </form>
-          </Form>
-        )}
+            </div>
+          ) : (
+            <TaskFormContent
+              mode={mode}
+              task={task}
+              onTaskCreated={handleTaskCreated}
+              onCancel={() => onOpenChange(false)}
+              showAttachments={true}
+            />
+          )}
         </DialogContent>
-        </Dialog>
+      </Dialog>
 
         {/* Attachment Confirmation Dialog */}
         <Dialog open={showAttachmentConfirm} onOpenChange={() => {}}>
@@ -228,21 +129,6 @@ export const TaskForm: React.FC<TaskFormProps> = ({
           </DialogContent>
         </Dialog>
 
-      {/* Unsaved Changes Confirmation Dialog */}
-      <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Unsaved Changes</AlertDialogTitle>
-            <AlertDialogDescription>
-              You have unsaved changes. Are you sure you want to close without saving?
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel onClick={cancelClose}>Stay</AlertDialogCancel>
-            <AlertDialogAction onClick={confirmClose}>Discard Changes</AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
     </>
   );
 };

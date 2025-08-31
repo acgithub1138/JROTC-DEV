@@ -9,7 +9,7 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { ArrowLeft, Edit, Save, X, Check, Copy } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { TaskForm } from './TaskForm';
+import { TaskFormContent } from './forms/TaskFormContent';
 import { useTaskComments } from '@/hooks/useTaskComments';
 import { useSubtasks } from '@/hooks/useSubtasks';
 import { format } from 'date-fns';
@@ -191,14 +191,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   };
 
   // Handle successful task creation/update
-  const handleTaskSaved = (savedTask: any) => {
-    if (currentMode === 'create') {
-      // Navigate to view mode for the newly created task
-      navigate(`/app/tasks/task_record?id=${savedTask.id}`);
-    } else {
+  const handleTaskSaved = () => {
+    if (currentMode === 'edit') {
       // Switch to view mode
       handleView();
     }
+    // For create mode, TaskFormContent will handle navigation via onTaskCreated
   };
 
   // Get page title
@@ -251,12 +249,16 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           <h1 className="text-3xl font-bold">{getPageTitle()}</h1>
         </div>
         
-        <TaskForm
-          open={true}
-          onOpenChange={(open) => !open && handleFormClose()}
-          mode={currentMode}
-          task={task}
-        />
+        <div className="bg-card rounded-lg border p-6">
+          <TaskFormContent
+            mode={currentMode}
+            task={task}
+            onSuccess={handleTaskSaved}
+            onCancel={handleFormClose}
+            onTaskCreated={(newTask) => navigate(`/app/tasks/task_record?id=${newTask.id}`)}
+            showAttachments={true}
+          />
+        </div>
       </div>
     );
   }
