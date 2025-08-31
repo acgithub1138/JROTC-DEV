@@ -843,7 +843,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                 <Separator className="mb-4" />
 
                 {/* History Tabs */}
-                <div className="flex-1 overflow-hidden">
+                <div className="flex-1 overflow-hidden h-full">
                   <Tabs defaultValue="comments" className="h-full flex flex-col">
                     <TabsList className="grid w-full grid-cols-2">
                       <TabsTrigger value="comments">Activity History</TabsTrigger>
