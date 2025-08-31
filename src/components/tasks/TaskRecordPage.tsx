@@ -61,7 +61,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   } = useTaskPriorityOptions();
   const {
     users
-  } = useSchoolUsers(true);
+  } = useSchoolUsers(); // Remove activeOnly filter to include inactive users for task assignments
 
   // Find the task if we have an ID
   const task = taskId ? tasks.find(t => t.id === taskId) : null;
