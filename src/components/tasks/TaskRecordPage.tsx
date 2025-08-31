@@ -442,7 +442,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                   Comments & History
                 </CardTitle>
               </CardHeader>
-              <CardContent className="flex flex-col">
+              <CardContent className="flex flex-col h-[400px] overflow-y-auto">
                 {/* Add Comment */}
                 <div className="space-y-3 mb-4">
                   <Textarea placeholder="Add a comment..." value={newComment} onChange={e => setNewComment(e.target.value)} className="min-h-[80px]" />
