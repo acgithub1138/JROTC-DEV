@@ -92,6 +92,12 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
         return;
       }
       
+      // Prevent reloading if we already have the record
+      if (record && record.id === recordId) {
+        console.log('Record already loaded');
+        return;
+      }
+      
       console.log('Loading record with ID:', recordId);
       setIsLoadingRecord(true);
       
@@ -181,7 +187,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
     };
     
     loadRecord();
-  }, [recordId, parentTaskId, mode, tasks, allSubtasks]);
+  }, [recordId, parentTaskId, mode]);
 
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
