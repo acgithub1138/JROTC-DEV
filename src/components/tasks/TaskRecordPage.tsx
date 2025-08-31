@@ -24,6 +24,7 @@ import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { getDefaultCompletionStatus, isTaskDone } from '@/utils/taskStatusUtils';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { EmailHistoryTab } from './components/EmailHistoryTab';
 import { supabase } from '@/integrations/supabase/client';
 type TaskRecordMode = 'create' | 'create_task' | 'create_subtask' | 'edit' | 'view';
 type RecordType = 'task' | 'subtask';
@@ -918,18 +919,7 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
                     </TabsContent>
                     
                      <TabsContent value="history" className="flex-1 overflow-y-auto mt-4">
-                       <div className="space-y-3">
-                         <div className="text-sm text-muted-foreground text-center py-8">
-                           No emails sent for this {recordType} yet.
-                         </div>
-                         {/* TODO: Implement email history fetching and display
-                             This should show:
-                             - Email subject
-                             - Recipients
-                             - Sent date/time
-                             - Email status (sent, delivered, failed)
-                         */}
-                       </div>
+                       <EmailHistoryTab taskId={record.id} />
                      </TabsContent>
                   </Tabs>
                 </div>
