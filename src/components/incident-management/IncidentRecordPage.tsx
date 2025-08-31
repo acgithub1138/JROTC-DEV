@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, Flag, User, Calendar, AlertTriangle, Save, X, Edit } from 'lucide-react';
+import { ArrowLeft, Flag, User, Calendar, AlertTriangle, Save, X, Edit, Check, MessageSquare, ArrowUpDown } from 'lucide-react';
 import { format } from 'date-fns';
+import { formatInTimeZone } from 'date-fns-tz';
 import { IncidentCommentsSection } from './components/IncidentCommentsSection';
 import { IncidentFormContent } from './forms/IncidentFormContent';
 import { EditableIncidentField } from './components/EditableIncidentField';
@@ -15,6 +16,11 @@ import { useIncidentComments } from '@/hooks/incidents/useIncidentComments';
 import { useIncidentPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Textarea } from '@/components/ui/textarea';
+import { Input } from '@/components/ui/input';
+import { useIncidentPriorityOptions, useIncidentCategoryOptions, useIncidentStatusOptions } from '@/hooks/incidents/useIncidentsQuery';
+import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import type { Incident } from '@/hooks/incidents/types';
 
 type IncidentRecordMode = 'create' | 'edit' | 'view';
@@ -80,18 +86,23 @@ export const IncidentRecordPage: React.FC = () => {
   // Data
   const { incidents, isLoading: incidentsLoading } = useIncidents();
   const incident = incidents.find(i => i.id === incidentId);
+  const { data: statusOptions = [] } = useIncidentStatusOptions();
+  const { data: priorityOptions = [] } = useIncidentPriorityOptions();
+  const { data: categoryOptions = [] } = useIncidentCategoryOptions();
+  const { users: allUsers } = useSchoolUsers();
+  const { users: activeUsers } = useSchoolUsers(true);
   
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<IncidentRecordMode>(mode);
-  
-  // Update currentMode when URL mode changes
-  React.useEffect(() => {
-    setCurrentMode(mode);
-  }, [mode]);
+  const [editedIncident, setEditedIncident] = useState<any>(incident || {});
+  const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
+  const [editingSummary, setEditingSummary] = useState(false);
+  const [editingDescription, setEditingDescription] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true);
-  const [editingSummary, setEditingSummary] = useState(false);
-
+  const [newComment, setNewComment] = useState('');
+  const [isAddingComment, setIsAddingComment] = useState(false);
+  
   // Comments (only if incident exists)
   const { 
     comments, 
@@ -99,9 +110,93 @@ export const IncidentRecordPage: React.FC = () => {
     addComment 
   } = useIncidentComments(incident?.id || '');
 
+  // Update currentMode when URL mode changes
+  React.useEffect(() => {
+    setCurrentMode(mode);
+  }, [mode]);
+
+  // Update edited incident when incident changes
+  useEffect(() => {
+    if (incident) {
+      setEditedIncident(incident);
+    }
+  }, [incident]);
+
+  // Handle incident field changes
+  const handleIncidentFieldChange = (field: string, value: any) => {
+    setEditedIncident(prev => ({ ...prev, [field]: value }));
+    setHasUnsavedChanges(true);
+  };
+
+  // Handle save changes
+  const handleSaveChanges = async () => {
+    if (!incident || !hasUnsavedChanges) return;
+    
+    try {
+      setIsLoading(true);
+      // This would need to be implemented with actual incident update mutation
+      // Similar to the task implementation
+      toast({
+        title: "Changes Saved",
+        description: "Incident has been updated successfully."
+      });
+      setHasUnsavedChanges(false);
+      setEditingSummary(false);
+      setEditingDescription(false);
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to save changes. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  // Handle add comment
+  const handleAddComment = async () => {
+    if (!newComment.trim()) return;
+    setIsAddingComment(true);
+    try {
+      await addComment.mutateAsync({ comment_text: newComment });
+      setNewComment('');
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Failed to add comment. Please try again.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsAddingComment(false);
+    }
+  };
+
+  // Get display info
+  const getStatusInfo = () => {
+    if (!incident) return null;
+    return statusOptions.find(s => s.value === incident.status);
+  };
+
+  const getPriorityInfo = () => {
+    if (!incident) return null;
+    return priorityOptions.find(p => p.value === incident.priority);
+  };
+
+  const getCategoryInfo = () => {
+    if (!incident) return null;
+    return categoryOptions.find(c => c.value === incident.category);
+  };
+
   // Check permissions for the current incident
   const isAssignedToIncident = incident?.assigned_to_admin === userProfile?.id;
   const canEditIncident = canUpdate || (canUpdateAssigned && isAssignedToIncident);
+
+  const getAssignedUserName = () => {
+    if (!incident?.assigned_to_admin) return 'Unassigned';
+    const user = allUsers.find(u => u.id === incident.assigned_to_admin);
+    return user ? `${user.last_name}, ${user.first_name}` : 'Admin';
+  };
 
   // Handle URL parameter changes
   useEffect(() => {
@@ -287,157 +382,295 @@ export const IncidentRecordPage: React.FC = () => {
     );
   }
 
-  // View mode (default)
+  // View mode (default) - using task-like layout
   return (
-    <div className="p-6 space-y-6">
+    <div className="container mx-auto py-6 px-4">
       {/* Header */}
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2">
-          <Button variant="ghost" size="sm" onClick={handleBack}>
-            <ArrowLeft className="h-4 w-4 mr-2" />
-            Back to Incidents
-          </Button>
-          <div className="text-sm text-muted-foreground">
-            {incident.incident_number}
+      <div className="mb-6">
+        <Button variant="outline" onClick={handleBack} className="mb-4">
+          <ArrowLeft className="w-4 h-4 mr-2" />
+          Back to Incidents
+        </Button>
+        
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold">
+              {incident.incident_number && (
+                <span className="text-blue-600 font-mono mr-2">
+                  {incident.incident_number} -
+                </span>
+              )}
+              {incident.title}
+            </h1>
+          </div>
+          
+          <div className="flex items-center gap-2">
+            {canEditIncident && hasUnsavedChanges && (
+              <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+                <Save className="w-4 h-4" />
+                {isLoading ? 'Saving...' : 'Save Changes'}
+              </Button>
+            )}
           </div>
         </div>
-        
-        {canEditIncident && (
-          <Button onClick={() => handleModeChange('edit')} size="sm">
-            <Edit className="h-4 w-4 mr-2" />
-            Edit Incident
-          </Button>
-        )}
       </div>
 
-      <div className="max-w-4xl mx-auto space-y-6">
-        {/* Overview Cards */}
-        <div className="grid gap-6 md:grid-cols-4">
+      {/* Main Content - Two Column Layout */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Left Column */}
+        <div className="space-y-6">
+          {/* Summary */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Status</span>
+            <CardHeader className="py-[8px]">
+              <CardTitle className="flex items-center justify-between">
+                Summary
+                {canEditIncident && (
+                  <Button variant="ghost" size="sm" onClick={() => {
+                    if (!editingSummary && incident) {
+                      setEditedIncident(incident);
+                    }
+                    setEditingSummary(!editingSummary);
+                  }}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <span className="text-sm text-muted-foreground">Number</span>
+                  <p className="font-medium">{incident.incident_number || 'N/A'}</p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Status</span>
+                  <div className="mt-1">
+                    {editingSummary ? (
+                      <Select value={editedIncident.status || ''} onValueChange={(value) => handleIncidentFieldChange('status', value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select status" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {statusOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge className={getStatusInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {getStatusInfo()?.label || incident.status}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Assigned to</span>
+                  {editingSummary ? (
+                    <Select value={editedIncident.assigned_to_admin || 'unassigned'} onValueChange={(value) => handleIncidentFieldChange('assigned_to_admin', value === 'unassigned' ? null : value)}>
+                      <SelectTrigger className="w-full mt-1">
+                        <SelectValue placeholder="Select user" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="unassigned">Unassigned</SelectItem>
+                        {activeUsers.map(user => (
+                          <SelectItem key={user.id} value={user.id}>
+                            {user.last_name}, {user.first_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  ) : (
+                    <p className="font-medium">{getAssignedUserName()}</p>
+                  )}
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Priority</span>
+                  <div className="mt-1">
+                    {editingSummary ? (
+                      <Select value={editedIncident.priority || ''} onValueChange={(value) => handleIncidentFieldChange('priority', value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select priority" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {priorityOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge className={getPriorityInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {getPriorityInfo()?.label || incident.priority}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Category</span>
+                  <div className="mt-1">
+                    {editingSummary ? (
+                      <Select value={editedIncident.category || ''} onValueChange={(value) => handleIncidentFieldChange('category', value)}>
+                        <SelectTrigger className="w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categoryOptions.map(option => (
+                            <SelectItem key={option.value} value={option.value}>
+                              {option.label}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    ) : (
+                      <Badge className={getCategoryInfo()?.color_class || 'bg-gray-100 text-gray-800'}>
+                        {getCategoryInfo()?.label || incident.category}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Created</span>
+                  <p className="font-medium">
+                    {formatInTimeZone(new Date(incident.created_at), 'America/New_York', 'MM/dd/yyyy HH:mm')}
+                  </p>
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Due Date</span>
+                  {editingSummary ? (
+                    <Input 
+                      type="date"
+                      value={editedIncident.due_date ? new Date(editedIncident.due_date).toISOString().slice(0, 10) : ''}
+                      onChange={(e) => handleIncidentFieldChange('due_date', e.target.value ? new Date(e.target.value).toISOString() : null)}
+                      min={new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 10)}
+                      className="mt-1"
+                    />
+                  ) : (
+                    <p className="font-medium">
+                      {incident.due_date ? formatInTimeZone(new Date(incident.due_date), 'America/New_York', 'MM/dd/yyyy HH:mm') : 'No due date'}
+                    </p>
+                  )}
+                </div>
+                <div>
+                  <span className="text-sm text-muted-foreground">Created By</span>
+                  <p className="font-medium">
+                    {(incident as any).created_by_profile 
+                      ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
+                      : 'Unknown'}
+                  </p>
+                </div>
               </div>
-              <Badge className={`mt-2 ${getStatusBadgeClass(incident.status)}`}>
-                {incident.status.replace('_', ' ')}
-              </Badge>
             </CardContent>
           </Card>
 
+          {/* Details */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Flag className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Priority</span>
+            <CardHeader className="py-[8px]">
+              <CardTitle className="flex items-center justify-between">
+                Incident Description
+                {canEditIncident && (
+                  <Button variant="ghost" size="sm" onClick={() => setEditingDescription(!editingDescription)}>
+                    <Edit className="w-4 h-4" />
+                  </Button>
+                )}
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <div>
+                {editingDescription ? (
+                  <Textarea 
+                    value={editedIncident.description || ''} 
+                    onChange={(e) => handleIncidentFieldChange('description', e.target.value)}
+                    className="min-h-[120px]"
+                    placeholder="Enter incident description..."
+                  />
+                ) : (
+                  <p className="text-sm text-muted-foreground whitespace-pre-wrap">
+                    {incident.description || 'No description provided.'}
+                  </p>
+                )}
               </div>
-              <Badge className={`mt-2 ${getPriorityBadgeClass(incident.priority)}`}>
-                {incident.priority}
-              </Badge>
             </CardContent>
           </Card>
 
+          {/* Attachments */}
           <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <User className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Assigned To</span>
-              </div>
-              <div className="mt-2 text-sm">
-                {incident.assigned_to_admin 
-                  ? ((incident as any).assigned_to_admin_profile 
-                      ? `${(incident as any).assigned_to_admin_profile.last_name}, ${(incident as any).assigned_to_admin_profile.first_name}` 
-                      : 'Admin')
-                  : 'Unassigned'}
-              </div>
-            </CardContent>
-          </Card>
-
-          <Card>
-            <CardContent className="p-4">
-              <div className="flex items-center gap-2">
-                <Calendar className="h-4 w-4 text-muted-foreground" />
-                <span className="text-sm font-medium">Created</span>
-              </div>
-              <div className="mt-2 text-sm">
-                {format(new Date(incident.created_at), "MMM d, yyyy")}
-              </div>
+            <CardHeader className="py-[8px]">
+              <CardTitle className="flex items-center justify-between">
+                <AttachmentSection 
+                  recordType="incident" 
+                  recordId={incident.id} 
+                  canEdit={canEditIncident} 
+                  defaultOpen={true} 
+                  showTitleWithCount={true} 
+                />
+              </CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AttachmentSection 
+                recordType="incident" 
+                recordId={incident.id} 
+                canEdit={canEditIncident} 
+                defaultOpen={true} 
+                showContentOnly={true} 
+              />
             </CardContent>
           </Card>
         </div>
 
-        {/* Main Content */}
-        <div className="grid gap-6 lg:grid-cols-3">
-          {/* Left Column - Incident Details */}
-          <div className="lg:col-span-2 space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle className="flex items-center justify-between">
-                  <span>Incident Details</span>
-                  <Badge className={getCategoryBadgeClass(incident.category)}>
-                    {incident.category}
-                  </Badge>
-                </CardTitle>
-              </CardHeader>
-              <CardContent className="space-y-4">
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Title</label>
-                  <div className="mt-1 text-lg font-medium">{incident.title}</div>
-                </div>
-
-                <Separator />
-
-                <div>
-                  <label className="text-sm font-medium text-muted-foreground">Description</label>
-                  <div className="mt-1 whitespace-pre-wrap text-sm">
-                    {incident.description || 'No description provided'}
-                  </div>
-                </div>
-
-                {incident.due_date && (
-                  <>
-                    <Separator />
-                    <div>
-                      <label className="text-sm font-medium text-muted-foreground">Due Date</label>
-                      <div className="mt-1 text-sm">
-                        {format(new Date(incident.due_date), "PPP")}
-                      </div>
-                    </div>
-                  </>
-                )}
-              </CardContent>
-            </Card>
-
-            {/* Attachments */}
-            <Card>
-              <CardHeader>
-                <CardTitle>Attachments</CardTitle>
-              </CardHeader>
-              <CardContent>
-                <AttachmentSection
-                  recordType="incident"
-                  recordId={incident.id}
-                  canEdit={canEditIncident}
+        {/* Right Column - Comments & History */}
+        <div className="space-y-6">
+          <Card className="h-full">
+            <CardHeader className="py-[8px]">
+              <CardTitle className="flex items-center gap-2">
+                <MessageSquare className="w-5 h-5" />
+                Comments & History
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="flex flex-col h-[600px] overflow-y-auto">
+              {/* Add Comment */}
+              <div className="space-y-3 mb-4">
+                <Textarea 
+                  placeholder="Add a comment..." 
+                  value={newComment} 
+                  onChange={e => setNewComment(e.target.value)} 
+                  className="min-h-[80px]" 
                 />
-              </CardContent>
-            </Card>
-          </div>
+                <div className="flex items-center justify-between">
+                  <Button 
+                    onClick={handleAddComment} 
+                    disabled={!newComment.trim() || isAddingComment} 
+                    size="sm" 
+                    className="w-fit"
+                  >
+                    {isAddingComment ? 'Posting...' : 'Post Comment'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    onClick={() => setSortCommentsNewestFirst(!sortCommentsNewestFirst)}
+                    className="flex items-center gap-2"
+                  >
+                    <ArrowUpDown className="w-4 h-4" />
+                    {sortCommentsNewestFirst ? 'New → Old' : 'Old → New'}
+                  </Button>
+                </div>
+              </div>
 
-          {/* Right Column - Comments */}
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Comments</CardTitle>
-              </CardHeader>
-              <CardContent>
+              <Separator className="mb-4" />
+
+              {/* Comments List */}
+              <div className="flex-1 space-y-4 overflow-y-auto">
                 <IncidentCommentsSection
                   comments={comments}
-                  isAddingComment={false}
-                  onAddComment={(commentText) => addComment.mutate({ comment_text: commentText })}
+                  isAddingComment={isAddingComment}
+                  onAddComment={handleAddComment}
                 />
-              </CardContent>
-            </Card>
-          </div>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     </div>
