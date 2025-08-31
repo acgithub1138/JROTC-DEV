@@ -138,7 +138,7 @@ export const IncidentFormContent: React.FC<IncidentFormContentProps> = ({
           const files = Array.from(e.target.files || []);
           setPendingFiles(prev => [...prev, ...files]);
         }}
-        className="block w-full text-sm text-muted-foreground file:mr-4 file:py-2 file:px-4 file:rounded-md file:border-0 file:text-sm file:font-medium file:bg-primary file:text-primary-foreground hover:file:bg-primary/90"
+        className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
       />
       {pendingFiles2.length > 0 && (
         <div className="space-y-2">

@@ -38,60 +38,62 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
   isSubmitting
 }) => {
   return (
-    <Form {...form}>
-      <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        {/* Top section - Two columns */}
-        <div className="grid gap-6 lg:grid-cols-2">
-          {/* Left Column */}
-          <div className="space-y-4">
-            <IncidentInfoLeftFields
-              form={form}
-              mode={mode}
-              incident={incident}
-              categoryOptions={categoryOptions}
-            />
-          </div>
-
-          {/* Right Column */}
-          <div className="space-y-4">
-            <IncidentInfoRightFields
-              form={form}
-              mode={mode}
-              canAssignIncidents={canAssignIncidents}
-              priorityOptions={priorityOptions}
-            />
-          </div>
-        </div>
-
-        {/* Bottom section - Single column */}
-        <div className="space-y-6">
-          <div className="space-y-4">
-            {titleField}
-            {descriptionField}
-          </div>
-
-          {attachmentSection && (
-            <div className="space-y-2">
-              <label className="w-32 text-right flex-shrink-0 text-sm font-medium inline-block">
-                Attachments
-              </label>
-              <div className="ml-36">
-                {attachmentSection}
-              </div>
+    <div className="bg-background p-6 rounded-lg border">
+      <Form {...form}>
+        <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
+          {/* Top section - Two columns */}
+          <div className="grid gap-6 lg:grid-cols-2 p-6 border rounded-lg bg-card">
+            {/* Left Column */}
+            <div className="space-y-4">
+              <IncidentInfoLeftFields
+                form={form}
+                mode={mode}
+                incident={incident}
+                categoryOptions={categoryOptions}
+              />
             </div>
-          )}
-        </div>
 
-        {/* Form Actions */}
-        <div className="flex justify-end gap-2 pt-4">
-          <Button type="button" variant="outline" onClick={onCancel}>
-            Cancel
-          </Button>
-          <Button type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Saving...' : submitButtonText}
-          </Button>
-        </div>
-      </form>
-    </Form>
+            {/* Right Column */}
+            <div className="space-y-4">
+              <IncidentInfoRightFields
+                form={form}
+                mode={mode}
+                canAssignIncidents={canAssignIncidents}
+                priorityOptions={priorityOptions}
+              />
+            </div>
+          </div>
+
+          {/* Bottom section - Single column */}
+          <div className="space-y-6 p-6 border rounded-lg bg-card">
+            <div className="space-y-4">
+              {titleField}
+              {descriptionField}
+            </div>
+
+            {attachmentSection && (
+              <div className="space-y-2">
+                <label className="w-32 text-right flex-shrink-0 text-sm font-medium inline-block">
+                  Attachments
+                </label>
+                <div className="ml-36">
+                  {attachmentSection}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* Form Actions */}
+          <div className="flex justify-end gap-2">
+            <Button type="button" variant="outline" onClick={onCancel}>
+              Cancel
+            </Button>
+            <Button type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Saving...' : submitButtonText}
+            </Button>
+          </div>
+        </form>
+      </Form>
+    </div>
   );
 };
