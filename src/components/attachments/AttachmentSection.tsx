@@ -5,7 +5,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { FileAttachmentUpload } from './FileAttachmentUpload';
 import { AttachmentList } from './AttachmentList';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
-
 interface AttachmentSectionProps {
   recordType: 'task' | 'subtask' | 'incident' | 'announcement';
   recordId: string;
@@ -14,138 +13,77 @@ interface AttachmentSectionProps {
   showTitleWithCount?: boolean;
   showContentOnly?: boolean;
 }
-
 export const AttachmentSection: React.FC<AttachmentSectionProps> = ({
   recordType,
   recordId,
   canEdit = false,
   defaultOpen = false,
   showTitleWithCount = false,
-  showContentOnly = false,
+  showContentOnly = false
 }) => {
   const [showUpload, setShowUpload] = useState(false);
-  const { uploadFile, isUploading, attachments } = useAttachments(recordType, recordId);
-
+  const {
+    uploadFile,
+    isUploading,
+    attachments
+  } = useAttachments(recordType, recordId);
   const handleFileUpload = (files: File[]) => {
-    files.forEach((file) => {
+    files.forEach(file => {
       uploadFile({
         record_type: recordType,
         record_id: recordId,
-        file,
+        file
       });
     });
     setShowUpload(false);
   };
-
   if (showTitleWithCount) {
-    return (
-      <div className="space-y-3 relative">
+    return <div className="space-y-3 relative">
          <div className="flex items-center">
           Attachments
          </div>
-         {canEdit && !showUpload && ( 
-           <Button 
-             variant="ghost" 
-             size="sm" 
-             onClick={() => setShowUpload(true)} 
-             title="Add attachment"
-             className="absolute top-0 right-0"
-           >
+         {canEdit && !showUpload && <Button variant="ghost" size="sm" onClick={() => setShowUpload(true)} title="Add attachment" className="">
              <Plus className="h-4 w-4" />
-           </Button>
-         )}
+           </Button>}
         
-        {showUpload && canEdit && (
-          <div className="space-y-3">
-            <FileAttachmentUpload
-              onFileSelect={handleFileUpload}
-              disabled={isUploading}
-            />
+        {showUpload && canEdit && <div className="space-y-3">
+            <FileAttachmentUpload onFileSelect={handleFileUpload} disabled={isUploading} />
             <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUpload(false)}
-                disabled={isUploading}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowUpload(false)} disabled={isUploading}>
                 Cancel
               </Button>
             </div>
-          </div>
-        )}
-      </div>
-    );
+          </div>}
+      </div>;
   }
-
   if (showContentOnly) {
-    return (
-      <div className="space-y-4">
-        <AttachmentList
-          recordType={recordType}
-          recordId={recordId}
-          canEdit={canEdit}
-        />
+    return <div className="space-y-4">
+        <AttachmentList recordType={recordType} recordId={recordId} canEdit={canEdit} />
 
-        {showUpload && canEdit && (
-          <div className="space-y-3">
-            <FileAttachmentUpload
-              onFileSelect={handleFileUpload}
-              disabled={isUploading}
-            />
+        {showUpload && canEdit && <div className="space-y-3">
+            <FileAttachmentUpload onFileSelect={handleFileUpload} disabled={isUploading} />
             <div className="flex justify-end space-x-2">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => setShowUpload(false)}
-                disabled={isUploading}
-              >
+              <Button variant="outline" size="sm" onClick={() => setShowUpload(false)} disabled={isUploading}>
                 Cancel
               </Button>
             </div>
-          </div>
-        )}
-      </div>
-    );
+          </div>}
+      </div>;
   }
+  return <div className="space-y-4">
+      <AttachmentList recordType={recordType} recordId={recordId} canEdit={canEdit} />
 
-  return (
-    <div className="space-y-4">
-      <AttachmentList
-        recordType={recordType}
-        recordId={recordId}
-        canEdit={canEdit}
-      />
-
-      {showUpload && canEdit && (
-        <div className="space-y-3">
-          <FileAttachmentUpload
-            onFileSelect={handleFileUpload}
-            disabled={isUploading}
-          />
+      {showUpload && canEdit && <div className="space-y-3">
+          <FileAttachmentUpload onFileSelect={handleFileUpload} disabled={isUploading} />
           <div className="flex justify-end space-x-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowUpload(false)}
-              disabled={isUploading}
-            >
+            <Button variant="outline" size="sm" onClick={() => setShowUpload(false)} disabled={isUploading}>
               Cancel
             </Button>
           </div>
-        </div>
-      )}
+        </div>}
       
-      {canEdit && !showUpload && (
-        <Button
-          variant="ghost"
-          size="sm"
-          onClick={() => setShowUpload(true)}
-          className="fixed top-4 right-4 h-6 w-6 p-0 z-10"
-          title="Add attachment"
-        >
+      {canEdit && !showUpload && <Button variant="ghost" size="sm" onClick={() => setShowUpload(true)} className="fixed top-4 right-4 h-6 w-6 p-0 z-10" title="Add attachment">
           <Plus className="h-4 w-4" />
-        </Button>
-      )}
-    </div>
-  );
+        </Button>}
+    </div>;
 };
