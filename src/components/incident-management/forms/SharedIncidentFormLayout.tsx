@@ -72,11 +72,11 @@ export const SharedIncidentFormLayout: React.FC<SharedIncidentFormLayoutProps> =
             </div>
 
             {attachmentSection && (
-              <div className="space-y-2">
-                <label className="w-32 text-right flex-shrink-0 text-sm font-medium inline-block">
+              <div className="flex items-center gap-4">
+                <label className="w-24 text-right flex-shrink-0 text-sm font-medium">
                   Attachments
                 </label>
-                <div className="ml-36">
+                <div className="flex-1">
                   {attachmentSection}
                 </div>
               </div>

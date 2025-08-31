@@ -3,6 +3,8 @@ import { UseFormReturn } from 'react-hook-form';
 import { format } from 'date-fns';
 import { FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
 import { useAuth } from '@/contexts/AuthContext';
 import type { Incident } from '@/hooks/incidents/types';
 
@@ -25,40 +27,36 @@ export const IncidentInfoLeftFields: React.FC<IncidentInfoLeftFieldsProps> = ({
     <>
       {/* Incident Number - Read only field */}
       <div className="flex items-center gap-4">
-        <label className="w-32 text-right flex-shrink-0 text-sm font-medium">
-          Number
-        </label>
-        <div className="flex-1 text-sm text-muted-foreground">
-          {mode === 'create' ? 'Auto-generated' : incident?.incident_number || 'N/A'}
-        </div>
+        <Label className="w-24 text-right">Number</Label>
+        <Input value={mode === 'create' ? 'Next #' : incident?.incident_number || ''} disabled className="bg-muted flex-1" />
       </div>
 
       {/* Created By - Read only field */}
       <div className="flex items-center gap-4">
-        <label className="w-32 text-right flex-shrink-0 text-sm font-medium">
-          Created By
-        </label>
-        <div className="flex-1 text-sm text-muted-foreground">
-          {mode === 'create' 
+        <Label className="w-24 text-right">Created by</Label>
+        <Input 
+          value={mode === 'create' 
             ? (userProfile ? `${userProfile.last_name}, ${userProfile.first_name}` : 'Current User')
             : ((incident as any)?.created_by_profile 
                 ? `${(incident as any).created_by_profile.last_name}, ${(incident as any).created_by_profile.first_name}` 
                 : 'Unknown')
-          }
-        </div>
+          } 
+          disabled 
+          className="bg-muted flex-1" 
+        />
       </div>
 
       {/* Created Date - Read only field */}
       <div className="flex items-center gap-4">
-        <label className="w-32 text-right flex-shrink-0 text-sm font-medium">
-          Created
-        </label>
-        <div className="flex-1 text-sm text-muted-foreground">
-          {mode === 'create' 
-            ? format(new Date(), "MMM d, yyyy")
-            : (incident?.created_at ? format(new Date(incident.created_at), "MMM d, yyyy") : 'N/A')
+        <Label className="w-24 text-right">Created</Label>
+        <Input 
+          value={mode === 'create' 
+            ? format(new Date(), "MM/dd/yyyy HH:mm")
+            : (incident?.created_at ? format(new Date(incident.created_at), "MM/dd/yyyy HH:mm") : '')
           }
-        </div>
+          disabled 
+          className="bg-muted flex-1" 
+        />
       </div>
 
       {/* Category */}
@@ -67,7 +65,7 @@ export const IncidentInfoLeftFields: React.FC<IncidentInfoLeftFieldsProps> = ({
         name="category"
         render={({ field }) => (
           <FormItem className="flex items-start gap-4">
-            <FormLabel className="w-32 text-right flex-shrink-0 pt-2">
+            <FormLabel className="w-24 text-right flex-shrink-0 pt-2">
               Category <span className="text-destructive">*</span>
             </FormLabel>
             <div className="flex-1">
