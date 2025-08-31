@@ -13,6 +13,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { ArrowLeft, Edit, Save, X, Check, Copy, MessageSquare, ArrowUpDown, Plus } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
 import { TaskFormContent } from './forms/TaskFormContent';
 import { SubtaskForm } from './forms/SubtaskForm';
 import { useTaskComments } from '@/hooks/useTaskComments';
@@ -240,6 +241,8 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   const [hasUnsavedChanges, setHasUnsavedChanges] = useState(false);
   const [newComment, setNewComment] = useState('');
   const [isAddingComment, setIsAddingComment] = useState(false);
+  const [showCompleteTaskModal, setShowCompleteTaskModal] = useState(false);
+  const [incompleteSubtasksCount, setIncompleteSubtasksCount] = useState(0);
 
   // Update edited record when record changes
   useEffect(() => {
@@ -320,12 +323,29 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
   // Handle record completion
   const handleCompleteRecord = async () => {
     if (!record) return;
+    
+    if (recordType === 'task') {
+      // Check if there are incomplete subtasks
+      const incompleteSubtasks = recordSubtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
+      
+      if (incompleteSubtasks.length > 0) {
+        // Show modal for confirmation
+        setIncompleteSubtasksCount(incompleteSubtasks.length);
+        setShowCompleteTaskModal(true);
+        return;
+      }
+    }
+    
+    // Complete directly if no subtasks or it's a subtask
+    await performCompleteRecord(false);
+  };
+
+  // Perform the actual completion
+  const performCompleteRecord = async (completeSubtasks: boolean) => {
+    if (!record) return;
     try {
       setIsLoading(true);
       if (recordType === 'task') {
-        // Check if there are incomplete subtasks
-        const incompleteSubtasks = recordSubtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
-
         // Update the main task
         await updateTask({
           id: record.id,
@@ -333,21 +353,17 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
           completed_at: new Date().toISOString()
         });
 
-        // If there are incomplete subtasks, ask if they should be completed too
-        if (incompleteSubtasks.length > 0) {
-          const shouldCompleteSubtasks = confirm(`This task has ${incompleteSubtasks.length} incomplete subtask(s). Would you like to complete them as well?`);
-          if (shouldCompleteSubtasks) {
-            for (const subtask of incompleteSubtasks) {
-              await updateSubtask({
-                id: subtask.id,
-                status: getDefaultCompletionStatus(statusOptions),
-                completed_at: new Date().toISOString()
-              });
-            }
-            addSystemComment('Task and all subtasks completed');
-          } else {
-            addSystemComment('Task completed');
+        // Handle subtasks if requested
+        if (completeSubtasks) {
+          const incompleteSubtasks = recordSubtasks?.filter(subtask => !isTaskDone(subtask.status, statusOptions)) || [];
+          for (const subtask of incompleteSubtasks) {
+            await updateSubtask({
+              id: subtask.id,
+              status: getDefaultCompletionStatus(statusOptions),
+              completed_at: new Date().toISOString()
+            });
           }
+          addSystemComment('Task and all subtasks completed');
         } else {
           addSystemComment('Task completed');
         }
@@ -606,100 +622,102 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
       setNewComment('');
       setIsAddingComment(false);
     };
-    return <div className="container mx-auto py-6 px-4">
-        {/* Header */}
-        <div className="mb-6">
-          {recordType === 'subtask' && parentTask ? <div className="flex items-center gap-2 mb-4">
-              <Button variant="outline" onClick={() => navigate('/app/tasks')}>
+    return (
+      <>
+        <div className="container mx-auto py-6 px-4">
+          {/* Header */}
+          <div className="mb-6">
+            {recordType === 'subtask' && parentTask ? <div className="flex items-center gap-2 mb-4">
+                <Button variant="outline" onClick={() => navigate('/app/tasks')}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to Tasks
+                </Button>
+                <span className="text-muted-foreground">/</span>
+                <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?id=${parentTask.id}`)}>
+                  <ArrowLeft className="w-4 h-4 mr-2" />
+                  Back to {parentTask.task_number}
+                </Button>
+              </div> : <Button variant="outline" onClick={handleBack} className="mb-4">
                 <ArrowLeft className="w-4 h-4 mr-2" />
                 Back to Tasks
-              </Button>
-              <span className="text-muted-foreground">/</span>
-              <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?id=${parentTask.id}`)}>
-                <ArrowLeft className="w-4 h-4 mr-2" />
-                Back to {parentTask.task_number}
-              </Button>
-            </div> : <Button variant="outline" onClick={handleBack} className="mb-4">
-              <ArrowLeft className="w-4 h-4 mr-2" />
-              Back to Tasks
-            </Button>}
-          
-          <div className="flex items-center justify-between">
-            <div>
-               <h1 className="text-3xl font-bold">
-                 {record.task_number && <span className="text-blue-600 font-mono mr-2">
-                     {record.task_number} -
-                   </span>}
-                 {record.title}
-               </h1>
-            </div>
+              </Button>}
             
-             <div className="flex items-center gap-2">
-               {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} className="flex items-center gap-2">
-                   <Check className="w-4 h-4" />
-                   Mark Complete
-                 </Button>}
-               
-               {canCreate && recordType === 'task' && <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?mode=create_subtask&parent_task_id=${record.id}`)} className="flex items-center gap-2">
-                   <Plus className="w-4 h-4" />
-                   Create Subtask
-                 </Button>}
+            <div className="flex items-center justify-between">
+              <div>
+                 <h1 className="text-3xl font-bold">
+                    {record.task_number && <span className="text-blue-600 font-mono mr-2">
+                        {record.task_number} -
+                      </span>}
+                    {record.title}
+                  </h1>
+              </div>
               
-              {canCreate && recordType === 'task' && <Button variant="outline" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
-                  <Copy className="w-4 h-4" />
-                  {isDuplicating ? 'Duplicating...' : 'Duplicate'}
-                </Button>}
-              
-              {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
-                  <Save className="w-4 h-4" />
-                  {isLoading ? 'Saving...' : 'Save Changes'}
-                </Button>}
+               <div className="flex items-center gap-2">
+                  {canEdit && !isCompleted && <Button onClick={handleCompleteRecord} disabled={isLoading} className="flex items-center gap-2">
+                      <Check className="w-4 h-4" />
+                      Mark Complete
+                    </Button>}
+                  
+                  {canCreate && recordType === 'task' && <Button variant="outline" onClick={() => navigate(`/app/tasks/task_record?mode=create_subtask&parent_task_id=${record.id}`)} className="flex items-center gap-2">
+                      <Plus className="w-4 h-4" />
+                      Create Subtask
+                    </Button>}
+                 
+                 {canCreate && recordType === 'task' && <Button variant="outline" onClick={handleDuplicateRecord} disabled={isDuplicating} className="flex items-center gap-2">
+                     <Copy className="w-4 h-4" />
+                     {isDuplicating ? 'Duplicating...' : 'Duplicate'}
+                   </Button>}
+                 
+                 {canEdit && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isLoading} className="flex items-center gap-2">
+                     <Save className="w-4 h-4" />
+                     {isLoading ? 'Saving...' : 'Save Changes'}
+                   </Button>}
+              </div>
             </div>
           </div>
-        </div>
 
-        {/* Main Content - Two Column Layout */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Left Column */}
-          <div className="space-y-6">
-            {/* Summary */}
-            <Card>
-               <CardHeader className="py-[8px]">
-                 <CardTitle className="flex items-center justify-between">
-                   Summary
-                    {canEdit && <Button variant="ghost" size="sm" onClick={() => {
-                  if (!editingSummary && record) {
-                    setEditedRecord(record); // Ensure we have current values
-                  }
-                  setEditingSummary(!editingSummary);
-                }}>
-                      <Edit className="w-4 h-4" />
-                    </Button>}
-                 </CardTitle>
-               </CardHeader>
-               <CardContent>
-                 <div className="grid grid-cols-2 gap-4">
-                    <div>
-                      <span className="text-sm text-muted-foreground">Number</span>
-                      <p className="font-medium">{record.task_number || 'N/A'}</p>
-                    </div>
-                   <div>
-                     <span className="text-sm text-muted-foreground">Status</span>
-                     <div className="mt-1">
-                        {editingSummary ? <Select value={editedRecord.status || ''} onValueChange={value => handleRecordFieldChange('status', value)}>
-                            <SelectTrigger className="w-full">
-                              <SelectValue placeholder="Select status" />
-                            </SelectTrigger>
-                            <SelectContent>
-                              {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
-                                  {option.label}
-                                </SelectItem>)}
-                            </SelectContent>
-                          </Select> : <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
-                            {statusInfo?.label || record.status}
-                          </Badge>}
-                     </div>
-                   </div>
+          {/* Main Content - Two Column Layout */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            {/* Left Column */}
+            <div className="space-y-6">
+              {/* Summary */}
+              <Card>
+                 <CardHeader className="py-[8px]">
+                    <CardTitle className="flex items-center justify-between">
+                      Summary
+                       {canEdit && <Button variant="ghost" size="sm" onClick={() => {
+                     if (!editingSummary && record) {
+                       setEditedRecord(record); // Ensure we have current values
+                     }
+                     setEditingSummary(!editingSummary);
+                   }}>
+                         <Edit className="w-4 h-4" />
+                       </Button>}
+                    </CardTitle>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="grid grid-cols-2 gap-4">
+                       <div>
+                         <span className="text-sm text-muted-foreground">Number</span>
+                         <p className="font-medium">{record.task_number || 'N/A'}</p>
+                       </div>
+                      <div>
+                        <span className="text-sm text-muted-foreground">Status</span>
+                        <div className="mt-1">
+                           {editingSummary ? <Select value={editedRecord.status || ''} onValueChange={value => handleRecordFieldChange('status', value)}>
+                               <SelectTrigger className="w-full">
+                                 <SelectValue placeholder="Select status" />
+                               </SelectTrigger>
+                               <SelectContent>
+                                 {statusOptions.map(option => <SelectItem key={option.value} value={option.value}>
+                                     {option.label}
+                                   </SelectItem>)}
+                               </SelectContent>
+                             </Select> : <Badge className={statusInfo?.color_class || 'bg-gray-100 text-gray-800'}>
+                               {statusInfo?.label || record.status}
+                             </Badge>}
+                        </div>
+                      </div>
                    <div>
                      <span className="text-sm text-muted-foreground">Assigned to</span>
                       {editingSummary ? <Select value={editedRecord.assigned_to || 'unassigned'} onValueChange={value => handleRecordFieldChange('assigned_to', value === 'unassigned' ? null : value)}>
@@ -902,7 +920,38 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
             </Card>
           </div>
         </div>
-      </div>;
+        </div>
+
+        {/* Complete Task Modal */}
+        <AlertDialog open={showCompleteTaskModal} onOpenChange={setShowCompleteTaskModal}>
+          <AlertDialogContent>
+            <AlertDialogHeader>
+              <AlertDialogTitle>Complete Task</AlertDialogTitle>
+              <AlertDialogDescription>
+                This task has {incompleteSubtasksCount} incomplete subtask{incompleteSubtasksCount > 1 ? 's' : ''}. Would you like to complete them as well?
+              </AlertDialogDescription>
+            </AlertDialogHeader>
+            <AlertDialogFooter>
+              <AlertDialogCancel onClick={() => setShowCompleteTaskModal(false)}>
+                Cancel
+              </AlertDialogCancel>
+              <AlertDialogAction onClick={() => {
+                setShowCompleteTaskModal(false);
+                performCompleteRecord(false);
+              }}>
+                Complete Task Only
+              </AlertDialogAction>
+              <AlertDialogAction onClick={() => {
+                setShowCompleteTaskModal(false);
+                performCompleteRecord(true);
+              }}>
+                Complete Task & Subtasks
+              </AlertDialogAction>
+            </AlertDialogFooter>
+          </AlertDialogContent>
+        </AlertDialog>
+      </>
+    );
   }
 
   // Fallback for invalid states
