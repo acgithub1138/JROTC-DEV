@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { ArrowLeft, User, Calendar, Edit, Save, X, GraduationCap } from 'lucide-react';
+import { ArrowLeft, User, Calendar, Edit, Save, X, GraduationCap, Plus } from 'lucide-react';
 import { format } from 'date-fns';
 import { CadetFormContent } from './forms/CadetFormContent';
 import { EditableCadetField } from './components/EditableCadetField';
@@ -286,6 +286,14 @@ export const CadetRecordPage: React.FC = () => {
           </div>
           
           <div className="flex items-center gap-2">
+            <Button
+              onClick={() => navigate(`/app/cadets/my_service_record?cadet_id=${currentCadet.id}`)}
+              variant="outline"
+              className="flex items-center gap-2"
+            >
+              <Plus className="w-4 h-4" />
+              Add Service Hours
+            </Button>
             {canEditCadet}
             {canEditCadet && hasUnsavedChanges && <Button onClick={handleSaveChanges} disabled={isSubmitting} className="flex items-center gap-2">
                 <Save className="w-4 h-4" />

@@ -28,6 +28,7 @@ import EmailManagementPage from './email-management/EmailManagementPage';
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
 import { CadetRecordPage } from '@/components/cadet-management/CadetRecordPage';
+import { MyServiceRecordPage } from '@/components/cadet-management/MyServiceRecordPage';
 import { PTTestCreatePage } from './cadet-management/PTTestCreatePage';
 import { PTTestEditPage } from './cadet-management/PTTestEditPage';
 import { InspectionCreatePage } from './cadet-management/InspectionCreatePage';
@@ -203,6 +204,7 @@ const MainApplication = () => {
             <Route path="settings" element={<SettingsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
+            <Route path="cadets/my_service_record" element={<MyServiceRecordPage />} />
           <Route path="cadets/pt_test_create" element={<PTTestCreatePage />} />
           <Route path="cadets/pt_test_edit/:id" element={<PTTestEditPage />} />
           <Route path="cadets/inspection_create" element={<InspectionCreatePage />} />
