@@ -191,6 +191,11 @@ export const TaskRecordPage: React.FC<TaskRecordPageProps> = () => {
 
   // Local state - all hooks must be at top level
   const [currentMode, setCurrentMode] = useState<TaskRecordMode>(mode);
+  
+  // Update currentMode when URL mode changes
+  React.useEffect(() => {
+    setCurrentMode(mode);
+  }, [mode]);
   const [isLoading, setIsLoading] = useState(false);
   const [sortCommentsNewestFirst, setSortCommentsNewestFirst] = useState(true); // Default: New -> Old
   const [editingSummary, setEditingSummary] = useState(false);
