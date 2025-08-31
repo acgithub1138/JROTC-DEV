@@ -12,6 +12,7 @@ import { TaskPriorityStatusDueDateFields } from './fields/TaskPriorityStatusDueD
 import { useTaskPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 interface TaskFormContentProps {
   mode: 'create' | 'edit';
@@ -56,6 +57,12 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
     currentUserId: userProfile?.id || '',
     onTaskCreated: (newTask: Task) => {
       setHasUnsavedChanges(false);
+      
+      // Upload pending files if any
+      if (pendingFiles.length > 0 && mode === 'create') {
+        uploadPendingFiles(newTask.id);
+      }
+      
       if (onTaskCreated) {
         onTaskCreated(newTask);
       } else if (onSuccess) {
@@ -63,6 +70,28 @@ export const TaskFormContent: React.FC<TaskFormContentProps> = ({
       }
     }
   });
+  
+  // Initialize attachment hooks for file upload (with dummy ID for create mode)
+  const { uploadFile } = useAttachments('task', 'temp');
+  
+  const uploadPendingFiles = async (taskId: string) => {
+    for (const file of pendingFiles) {
+      try {
+        await new Promise<void>((resolve, reject) => {
+          uploadFile({
+            record_type: 'task',
+            record_id: taskId,
+            file
+          });
+          // Simple timeout to wait for upload
+          setTimeout(resolve, 1000);
+        });
+      } catch (error) {
+        console.error('Failed to upload file:', file.name, error);
+      }
+    }
+    setPendingFiles([]);
+  };
 
   // Track form changes for unsaved warning
   useEffect(() => {
