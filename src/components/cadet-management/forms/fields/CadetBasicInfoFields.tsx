@@ -3,6 +3,7 @@ import { FormField, FormItem, FormLabel, FormControl, FormMessage } from '@/comp
 import { Input } from '@/components/ui/input';
 import { UseFormReturn } from 'react-hook-form';
 import { CadetFormData } from '../schemas/cadetFormSchema';
+import { useEmailValidation } from '@/hooks/useEmailValidation';
 
 interface CadetBasicInfoFieldsProps {
   form: UseFormReturn<CadetFormData>;
@@ -13,6 +14,14 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
   form,
   mode
 }) => {
+  const emailValue = form.watch('email');
+  
+  // Email validation hook - only check in create mode
+  const { isChecking: isCheckingEmail, exists: emailExists, error: emailError } = useEmailValidation(
+    emailValue,
+    mode === 'create' && emailValue.length > 0
+  );
+
   return (
     <div className="space-y-4">
       {/* First Name and Last Name Row */}
@@ -81,6 +90,23 @@ export const CadetBasicInfoFields: React.FC<CadetBasicInfoFieldsProps> = ({
                 />
               </FormControl>
               <FormMessage />
+              {/* Real-time email validation feedback */}
+              {mode === 'create' && field.value && (
+                <>
+                  {isCheckingEmail && (
+                    <p className="text-sm text-muted-foreground mt-1">Checking email...</p>
+                  )}
+                  {!isCheckingEmail && emailExists === false && (
+                    <p className="text-sm text-emerald-600 mt-1">✓ Email is available</p>
+                  )}
+                  {!isCheckingEmail && emailExists === true && (
+                    <p className="text-sm text-destructive mt-1">⚠ This email address is already registered</p>
+                  )}
+                  {emailError && (
+                    <p className="text-sm text-destructive mt-1">{emailError}</p>
+                  )}
+                </>
+              )}
             </div>
           </FormItem>
         )}
