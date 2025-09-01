@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Plus, Eye, Edit, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -8,9 +9,7 @@ import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/comp
 import { useCompetitionSchools } from '@/hooks/competition-portal/useCompetitionSchools';
 import { useCompetitionSchoolsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AddSchoolModal } from '@/components/competition-portal/modals/AddSchoolModal';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
-import { EditSchoolModal } from '@/components/competition-portal/modals/EditSchoolModal';
 import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
 import { AddSchoolEventScoreSheetModal } from '@/components/competition-portal/modals/AddSchoolEventScoreSheetModal';
@@ -28,6 +27,7 @@ interface CompetitionSchoolsTabProps {
 export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   competitionId
 }) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const {
     schools,
@@ -44,11 +44,9 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
     canDelete
   } = useCompetitionSchoolsPermissions();
   
-  const [showAddModal, setShowAddModal] = useState(false);
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
-  const [selectedSchoolForEdit, setSelectedSchoolForEdit] = useState<string | null>(null);
   const [selectedSchoolForAddEvent, setSelectedSchoolForAddEvent] = useState<string | null>(null);
-  const [sortField, setSortField] = useState<string>('');
+  const [sortField, setSortField] = useState<string>('school_name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (field: string) => {
     if (sortField === field) {
@@ -115,7 +113,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   return <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Registered Schools</h2>
-        {canCreate && <Button onClick={() => setShowAddModal(true)}>
+        {canCreate && <Button onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/school_record?mode=create`)}>
             <Plus className="w-4 h-4 mr-2" />
             Register School
           </Button>}
@@ -196,7 +194,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                             </Tooltip>
                             <Tooltip>
                               <TooltipTrigger asChild>
-                                <Button variant="outline" size="sm" onClick={() => setSelectedSchoolForEdit(school.id)}>
+                                <Button variant="outline" size="sm" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/school_record?mode=edit&id=${school.id}`)}>
                                   <Edit className="w-4 h-4 mr-1" />
                                   Edit
                                 </Button>
@@ -315,7 +313,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                 </Tooltip>
                                 <Tooltip>
                                   <TooltipTrigger asChild>
-                                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => setSelectedSchoolForEdit(school.id)}>
+                                    <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/school_record?mode=edit&id=${school.id}`)}>
                                       <Edit className="w-3 h-3" />
                                     </Button>
                                   </TooltipTrigger>
@@ -336,11 +334,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
         </TooltipProvider>
       )}
 
-      <AddSchoolModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onSchoolAdded={createSchoolRegistration} />
-      
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
-      
-      <EditSchoolModal open={!!selectedSchoolForEdit} onOpenChange={() => setSelectedSchoolForEdit(null)} competitionId={competitionId} schoolId={selectedSchoolForEdit || ''} onSchoolUpdated={refetch} />
 
       <AddSchoolEventScoreSheetModal
         open={!!selectedSchoolForAddEvent}
