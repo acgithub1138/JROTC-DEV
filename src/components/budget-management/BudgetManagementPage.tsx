@@ -89,7 +89,18 @@ const BudgetManagementPage = () => {
   const handleAddExpense = () => {
     navigate('/app/budget/expense_record?mode=create');
   };
-  return <div className="p-6 space-y-6">
+
+  // Handle edit navigation
+  const handleEditTransaction = (transaction: BudgetTransaction) => {
+    if (transaction.category === 'income') {
+      navigate(`/app/budget/income_record?mode=edit&id=${transaction.id}`);
+    } else if (transaction.category === 'expense') {
+      navigate(`/app/budget/expense_record?mode=edit&id=${transaction.id}`);
+    }
+  };
+
+  return (
+    <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
         <div>
           <h1 className="text-3xl font-bold">Budget Management</h1>
@@ -120,9 +131,9 @@ const BudgetManagementPage = () => {
 
       <div className="rounded-lg border bg-card">
         {isMobile ? (
-          <BudgetCards transactions={transactions} onEdit={setEditingItem} onView={setViewingItem} onDelete={handleDeleteTransaction} />
+          <BudgetCards transactions={transactions} onEdit={handleEditTransaction} onView={setViewingItem} onDelete={handleDeleteTransaction} />
         ) : (
-          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onView={setViewingItem} onDelete={handleDeleteTransaction} />
+          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={handleEditTransaction} onView={setViewingItem} onDelete={handleDeleteTransaction} />
         )}
       </div>
 
@@ -133,7 +144,7 @@ const BudgetManagementPage = () => {
         onOpenChange={() => setViewingItem(null)} 
         item={viewingItem} 
         onEdit={() => {
-          setEditingItem(viewingItem);
+          handleEditTransaction(viewingItem);
           setViewingItem(null);
         }}
       />}
@@ -145,6 +156,7 @@ const BudgetManagementPage = () => {
         onConfirm={handleConfirmDelete} 
         loading={false}
       />
-    </div>;
+    </div>
+  );
 };
 export default BudgetManagementPage;
