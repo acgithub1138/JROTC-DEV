@@ -304,17 +304,19 @@ export const BudgetExpenseRecordPage: React.FC = () => {
             {isFormMode ? (
               <Form {...form}>
                 <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
                     <FormField
                       control={form.control}
                       name="item"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Item *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter item name" {...field} />
-                          </FormControl>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Item *</FormLabel>
+                          <div className="flex-1">
+                            <FormControl>
+                              <Input placeholder="Enter item name" {...field} />
+                            </FormControl>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -323,23 +325,25 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="type"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Type *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select expense type" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="equipment">Equipment</SelectItem>
-                              <SelectItem value="travel">Travel</SelectItem>
-                              <SelectItem value="meals">Meals</SelectItem>
-                              <SelectItem value="supplies">Supplies</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Type *</FormLabel>
+                          <div className="flex-1">
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select expense type" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="equipment">Equipment</SelectItem>
+                                <SelectItem value="travel">Travel</SelectItem>
+                                <SelectItem value="meals">Meals</SelectItem>
+                                <SelectItem value="supplies">Supplies</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -348,40 +352,43 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="date"
                       render={({ field }) => (
-                        <FormItem className="flex flex-col">
-                          <FormLabel>Date *</FormLabel>
-                          <Popover>
-                            <PopoverTrigger asChild>
-                              <FormControl>
-                                <Button
-                                  variant="outline"
-                                  className={cn(
-                                    "w-full pl-3 text-left font-normal",
-                                    !field.value && "text-muted-foreground"
-                                  )}
-                                >
-                                  {field.value ? (
-                                    format(field.value, "PPP")
-                                  ) : (
-                                    <span>Pick a date</span>
-                                  )}
-                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
-                                </Button>
-                              </FormControl>
-                            </PopoverTrigger>
-                            <PopoverContent className="w-auto p-0" align="start">
-                              <Calendar
-                                mode="single"
-                                selected={field.value}
-                                onSelect={field.onChange}
-                                disabled={(date) =>
-                                  date > new Date() || date < new Date("1900-01-01")
-                                }
-                                initialFocus
-                              />
-                            </PopoverContent>
-                          </Popover>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Date *</FormLabel>
+                          <div className="flex-1">
+                            <Popover>
+                              <PopoverTrigger asChild>
+                                <FormControl>
+                                  <Button
+                                    variant="outline"
+                                    className={cn(
+                                      "w-full pl-3 text-left font-normal",
+                                      !field.value && "text-muted-foreground"
+                                    )}
+                                  >
+                                    {field.value ? (
+                                      format(field.value, "PPP")
+                                    ) : (
+                                      <span>Pick a date</span>
+                                    )}
+                                    <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                  </Button>
+                                </FormControl>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <Calendar
+                                  mode="single"
+                                  selected={field.value}
+                                  onSelect={field.onChange}
+                                  disabled={(date) =>
+                                    date > new Date() || date < new Date("1900-01-01")
+                                  }
+                                  initialFocus
+                                  className={cn("p-3 pointer-events-auto")}
+                                />
+                              </PopoverContent>
+                            </Popover>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -390,18 +397,20 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="amount"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Amount *</FormLabel>
-                          <FormControl>
-                            <Input
-                              type="number"
-                              step="0.01"
-                              placeholder="0.00"
-                              {...field}
-                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
-                            />
-                          </FormControl>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Amount *</FormLabel>
+                          <div className="flex-1">
+                            <FormControl>
+                              <Input
+                                type="number"
+                                step="0.01"
+                                placeholder="0.00"
+                                {...field}
+                                onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -410,23 +419,25 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="payment_method"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Payment Method *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select payment method" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="cash">Cash</SelectItem>
-                              <SelectItem value="check">Check</SelectItem>
-                              <SelectItem value="debit_card">Debit Card</SelectItem>
-                              <SelectItem value="credit_card">Credit Card</SelectItem>
-                              <SelectItem value="other">Other</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Payment Method *</FormLabel>
+                          <div className="flex-1">
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select payment method" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="cash">Cash</SelectItem>
+                                <SelectItem value="check">Check</SelectItem>
+                                <SelectItem value="debit_card">Debit Card</SelectItem>
+                                <SelectItem value="credit_card">Credit Card</SelectItem>
+                                <SelectItem value="other">Other</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -435,21 +446,23 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                       control={form.control}
                       name="status"
                       render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Status *</FormLabel>
-                          <Select onValueChange={field.onChange} value={field.value}>
-                            <FormControl>
-                              <SelectTrigger>
-                                <SelectValue placeholder="Select status" />
-                              </SelectTrigger>
-                            </FormControl>
-                            <SelectContent>
-                              <SelectItem value="pending">Pending</SelectItem>
-                              <SelectItem value="paid">Paid</SelectItem>
-                              <SelectItem value="not_paid">Not Paid</SelectItem>
-                            </SelectContent>
-                          </Select>
-                          <FormMessage />
+                        <FormItem className="flex items-center gap-4">
+                          <FormLabel className="w-32 text-right shrink-0">Status *</FormLabel>
+                          <div className="flex-1">
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger>
+                                  <SelectValue placeholder="Select status" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
+                                <SelectItem value="pending">Pending</SelectItem>
+                                <SelectItem value="paid">Paid</SelectItem>
+                                <SelectItem value="not_paid">Not Paid</SelectItem>
+                              </SelectContent>
+                            </Select>
+                            <FormMessage />
+                          </div>
                         </FormItem>
                       )}
                     />
@@ -459,16 +472,18 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                     control={form.control}
                     name="description"
                     render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Description</FormLabel>
-                        <FormControl>
-                          <Textarea
-                            placeholder="Optional description"
-                            className="resize-none"
-                            {...field}
-                          />
-                        </FormControl>
-                        <FormMessage />
+                      <FormItem className="flex gap-4">
+                        <FormLabel className="w-32 text-right shrink-0 mt-2">Description</FormLabel>
+                        <div className="flex-1">
+                          <FormControl>
+                            <Textarea
+                              placeholder="Optional description"
+                              className="resize-none"
+                              {...field}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </div>
                       </FormItem>
                     )}
                   />
