@@ -123,7 +123,7 @@ export const InspectionCreatePage = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                <Label htmlFor="flight" className="w-32 text-left shrink-0">Flight</Label>
+                <Label htmlFor="flight" className="w-16 text-right shrink-0">Flight</Label>
                 <div className="flex-1">
                   <Select value={selectedFlight} onValueChange={setSelectedFlight}>
                     <SelectTrigger>
