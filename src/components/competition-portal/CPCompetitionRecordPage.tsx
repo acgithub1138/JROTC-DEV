@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -84,10 +84,42 @@ export const CPCompetitionRecordPage = () => {
   const [formData, setFormData] = useState<FormData>(initialData);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  // Reinitialize form data when competition data becomes available
+  useEffect(() => {
+    if (existingCompetition && (isEditMode || isViewMode)) {
+      const updatedData: FormData = {
+        name: existingCompetition.name || '',
+        description: existingCompetition.description || '',
+        location: existingCompetition.location || '',
+        start_date: existingCompetition.start_date ? new Date(existingCompetition.start_date).toISOString().split('T')[0] : '',
+        start_time_hour: existingCompetition.start_date ? new Date(existingCompetition.start_date).getHours().toString().padStart(2, '0') : '09',
+        start_time_minute: existingCompetition.start_date ? new Date(existingCompetition.start_date).getMinutes().toString().padStart(2, '0') : '00',
+        end_date: existingCompetition.end_date ? new Date(existingCompetition.end_date).toISOString().split('T')[0] : '',
+        end_time_hour: existingCompetition.end_date ? new Date(existingCompetition.end_date).getHours().toString().padStart(2, '0') : '17',
+        end_time_minute: existingCompetition.end_date ? new Date(existingCompetition.end_date).getMinutes().toString().padStart(2, '0') : '00',
+        program: existingCompetition.program || 'air_force',
+        fee: existingCompetition.fee?.toString() || '',
+        address: existingCompetition.address || '',
+        city: existingCompetition.city || '',
+        state: existingCompetition.state || '',
+        zip: existingCompetition.zip || '',
+        max_participants: existingCompetition.max_participants?.toString() || '',
+        registration_deadline_date: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).toISOString().split('T')[0] : '',
+        registration_deadline_hour: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).getHours().toString().padStart(2, '0') : '23',
+        registration_deadline_minute: existingCompetition.registration_deadline ? new Date(existingCompetition.registration_deadline).getMinutes().toString().padStart(2, '0') : '59',
+        hosting_school: existingCompetition.hosting_school || userProfile?.schools?.name || '',
+        sop: existingCompetition.sop || 'none',
+        sop_link: existingCompetition.sop_link || '',
+        sop_text: existingCompetition.sop_text || '',
+      };
+      setFormData(updatedData);
+    }
+  }, [existingCompetition, isEditMode, isViewMode, userProfile?.schools?.name]);
   const quillRef = React.useRef<ReactQuill>(null);
 
   const { hasUnsavedChanges } = useUnsavedChanges({
-    initialData,
+    initialData: existingCompetition ? formData : initialData, // Use current form data as initial when editing existing competition
     currentData: formData,
     enabled: !isViewMode // Disable unsaved changes tracking in view mode
   });
@@ -252,6 +284,24 @@ export const CPCompetitionRecordPage = () => {
       setIsSubmitting(false);
     }
   };
+
+  // Show loading state while waiting for competition data
+  if ((isEditMode || isViewMode) && competitionId && !existingCompetition) {
+    return (
+      <div className="p-6 space-y-6">
+        <div className="flex items-center gap-4">
+          <Button variant="ghost" size="sm" onClick={() => navigate('/app/competition-portal/competitions')}>
+            <ArrowLeft className="w-4 h-4 mr-2" />
+            Back
+          </Button>
+          <div>
+            <h1 className="text-3xl font-bold">Loading...</h1>
+            <p className="text-muted-foreground">Please wait while we load the competition details.</p>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="p-6 space-y-6">
