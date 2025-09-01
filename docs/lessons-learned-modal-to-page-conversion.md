@@ -30,6 +30,7 @@
 - Add proper page header with back navigation button using `ArrowLeft` icon
 - Convert `DialogContent` to `CardContent` and `DialogHeader` to `CardHeader`
 - Remove modal-specific props like `open`, `onOpenChange`
+- **Field Labels**: Put field labels to the left of fields on create & edit forms (follow UI/UX standards)
 
 ### 4. Data Management
 **Issue**: Converting from controlled component pattern (modal) to autonomous page pattern.
