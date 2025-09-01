@@ -230,7 +230,7 @@ const MainApplication = () => {
             <Route path="contacts" element={<ContactManagementPage />} />
             <Route path="contacts/contact_record" element={<ContactRecordPage />} />
             <Route path="calendar" element={<CalendarManagementPage />} />
-            <Route path="cadets/calendar_record" element={<CalendarRecordPage />} />
+            <Route path="calendar/calendar_record" element={<CalendarRecordPage />} />
             <Route path="competitions" element={<CompetitionManagementPage />} />
             <Route path="competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
             <Route path="announcements" element={<AnnouncementManagementPage />} />

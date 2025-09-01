@@ -66,17 +66,17 @@ const CalendarManagementPage = () => {
     deleteRecurringSeries
   } = useEvents(filters);
   const handleCreateEvent = () => {
-    navigate('/app/cadets/calendar_record');
+    navigate('/app/calendar/calendar_record');
   };
   
   const handleEditEvent = (event: Event) => {
     if (!canViewDetails) return; // Don't show anything if can't view
 
     if (canUpdateEvents) {
-      navigate(`/app/cadets/calendar_record?id=${event.id}`);
+      navigate(`/app/calendar/calendar_record?id=${event.id}`);
     } else {
       // Show read-only view if can view but can't update
-      navigate(`/app/cadets/calendar_record?id=${event.id}&view=true`);
+      navigate(`/app/calendar/calendar_record?id=${event.id}&view=true`);
     }
   };
   
@@ -101,7 +101,7 @@ const CalendarManagementPage = () => {
   const handleDateDoubleClick = (date: Date) => {
     if (!canCreateEvents) return;
     const dateString = format(date, 'yyyy-MM-dd');
-    navigate(`/app/cadets/calendar_record?date=${dateString}`);
+    navigate(`/app/calendar/calendar_record?date=${dateString}`);
   };
   const handleDeleteEvent = (event: Event) => {
     // Check if this is a recurring event
