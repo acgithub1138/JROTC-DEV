@@ -131,7 +131,12 @@ export const CalendarToolbar = ({
               </SelectItem>)}
           </SelectContent>
         </Select>
-        {!readOnly && onCreateEvent}
+        {!readOnly && onCreateEvent && (
+          <Button onClick={onCreateEvent} size="sm">
+            <Plus className="w-4 h-4 mr-2" />
+            Create Event
+          </Button>
+        )}
       </div>
     </div>;
 };

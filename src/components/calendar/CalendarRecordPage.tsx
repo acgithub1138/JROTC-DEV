@@ -14,7 +14,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { ArrowLeft, Plus } from 'lucide-react';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
-import { toast } from 'sonner';
+import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { Event } from './CalendarManagementPage';
 import { useEvents } from './hooks/useEvents';
@@ -48,6 +48,7 @@ export const CalendarRecordPage: React.FC = () => {
   const [searchParams] = useSearchParams();
   const { canUpdate, canDelete, canCreate } = useCalendarPermissions();
   const { timezone, isLoading: timezoneLoading } = useSchoolTimezone();
+  const { toast } = useToast();
   
   const eventId = searchParams.get('id');
   const selectedDateParam = searchParams.get('date');
@@ -158,12 +159,20 @@ export const CalendarRecordPage: React.FC = () => {
             setRecurrenceRule(foundEvent.recurrence_rule);
           }
         } else {
-          toast.error('Event not found');
+          toast({
+            title: 'Error',
+            description: 'Event not found',
+            variant: 'destructive'
+          });
           navigate('/app/calendar');
         }
       } catch (error) {
         console.error('Error loading event:', error);
-        toast.error('Failed to load event');
+        toast({
+          title: 'Error',
+          description: 'Failed to load event',
+          variant: 'destructive'
+        });
         navigate('/app/calendar');
       } finally {
         setIsLoading(false);
@@ -219,7 +228,11 @@ export const CalendarRecordPage: React.FC = () => {
       // Validate date/time
       const validation = validateDateTime(data);
       if (!validation.isValid) {
-        toast.error(validation.error);
+        toast({
+          title: 'Error',
+          description: validation.error,
+          variant: 'destructive'
+        });
         return;
       }
 
@@ -248,16 +261,26 @@ export const CalendarRecordPage: React.FC = () => {
 
       if (isEditMode && event) {
         await updateEvent(event.id, eventData);
-        toast.success('Event updated successfully');
+        toast({
+          title: 'Success',
+          description: 'Event updated successfully'
+        });
       } else {
         await createEvent(eventData);
-        toast.success('Event created successfully');
+        toast({
+          title: 'Success',
+          description: 'Event created successfully'
+        });
       }
       
       navigate('/app/calendar');
     } catch (error) {
       console.error('Error saving event:', error);
-      toast.error('Failed to save event');
+      toast({
+        title: 'Error',
+        description: 'Failed to save event',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -266,11 +289,18 @@ export const CalendarRecordPage: React.FC = () => {
     
     try {
       await deleteEvent(event.id);
-      toast.success('Event deleted successfully');
+      toast({
+        title: 'Success',
+        description: 'Event deleted successfully'
+      });
       navigate('/app/calendar');
     } catch (error) {
       console.error('Error deleting event:', error);
-      toast.error('Failed to delete event');
+      toast({
+        title: 'Error',
+        description: 'Failed to delete event',
+        variant: 'destructive'
+      });
     }
   };
 
@@ -301,7 +331,10 @@ export const CalendarRecordPage: React.FC = () => {
       form.setValue('event_type', newEventType.id);
       setNewEventTypeName('');
       setShowAddEventTypeDialog(false);
-      toast.success('Event type created successfully');
+      toast({
+        title: 'Success',
+        description: 'Event type created successfully'
+      });
     }
   };
 
