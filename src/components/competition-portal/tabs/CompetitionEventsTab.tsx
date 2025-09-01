@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { Plus, Edit, Trash2, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
@@ -12,8 +13,7 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
-import { AddEventModal } from '@/components/competition-portal/modals/AddEventModal';
-import { EditEventModal } from '@/components/competition-portal/modals/EditEventModal';
+// Modals removed - using page navigation instead
 import { ViewJudgesModal } from '@/components/competition-portal/modals/ViewJudgesModal';
 import { ViewResourcesModal } from '@/components/competition-portal/modals/ViewResourcesModal';
 import { ViewEventSchoolsModal } from '@/components/competition-portal/modals/ViewEventSchoolsModal';
@@ -23,6 +23,7 @@ interface CompetitionEventsTabProps {
 export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   competitionId
 }) => {
+  const navigate = useNavigate();
   const { timezone } = useSchoolTimezone();
   const isMobile = useIsMobile();
   const {
@@ -45,9 +46,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     data: events,
     defaultSort: { key: 'start_time', direction: 'asc' }
   });
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [showEditModal, setShowEditModal] = useState(false);
-  const [selectedEvent, setSelectedEvent] = useState<typeof events[0] | null>(null);
+  // Modal states removed - using page navigation instead
   const [showJudgesModal, setShowJudgesModal] = useState(false);
   const [showResourcesModal, setShowResourcesModal] = useState(false);
   const [showSchoolsModal, setShowSchoolsModal] = useState(false);
@@ -56,8 +55,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
   const [eventToDelete, setEventToDelete] = useState<typeof events[0] | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const handleEditEvent = (event: typeof events[0]) => {
-    setSelectedEvent(event);
-    setShowEditModal(true);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/events_record?mode=edit&id=${event.id}`);
   };
   const handleViewJudges = (event: typeof events[0]) => {
     setSelectedEventForView(event);
@@ -101,7 +99,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
     <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Competition Events</h2>
-        {canCreate && <Button onClick={() => setShowAddModal(true)}>
+        {canCreate && <Button onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/events_record?mode=create`)}>
             <Plus className="w-4 h-4 mr-2" />
             Add Event
           </Button>}
@@ -335,8 +333,7 @@ export const CompetitionEventsTab: React.FC<CompetitionEventsTabProps> = ({
           </Table>
         </div>}
 
-      <AddEventModal open={showAddModal} onOpenChange={setShowAddModal} competitionId={competitionId} onEventAdded={createEvent} />
-      <EditEventModal open={showEditModal} onOpenChange={setShowEditModal} event={selectedEvent} onEventUpdated={updateEvent} />
+      {/* Modals removed - using page navigation instead */}
       <ViewJudgesModal open={showJudgesModal} onOpenChange={setShowJudgesModal} event={selectedEventForView} />
       <ViewResourcesModal open={showResourcesModal} onOpenChange={setShowResourcesModal} event={selectedEventForView} />
       <ViewEventSchoolsModal open={showSchoolsModal} onOpenChange={setShowSchoolsModal} event={selectedEventForView} />

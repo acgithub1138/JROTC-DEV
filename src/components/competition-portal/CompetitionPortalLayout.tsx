@@ -9,6 +9,7 @@ import { ScoreSheetsPage } from './ScoreSheetsPage';
 import { JudgesPage } from './JudgesPage';
 import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
+import { CompetitionEventRecord } from './pages/CompetitionEventRecord';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { CPCompetitionRecordPage } from './CPCompetitionRecordPage';
@@ -122,6 +123,8 @@ const CompetitionPortalLayout = () => {
       return <MyCompetitionsPage />;
     } else if (path.startsWith('/app/competition-portal/my-competitions/score-sheets/')) {
       return <ScoreSheetPage />;
+    } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/events_record')) {
+      return <CompetitionEventRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/')) {
       return <CompetitionDetailsPage />;
     } else if (path === '/app/competition-portal/score-sheets') {
