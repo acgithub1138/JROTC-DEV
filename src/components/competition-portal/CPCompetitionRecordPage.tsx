@@ -355,8 +355,8 @@ export const CPCompetitionRecordPage = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Competition Name */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            {/* Competition Name & JROTC Program */}
+            <div className="grid grid-cols-8 items-center gap-4">
               <Label htmlFor="name" className="text-right font-medium">
                 Competition Name *
               </Label>
@@ -368,6 +368,22 @@ export const CPCompetitionRecordPage = () => {
                   disabled={isViewMode}
                   required
                 />
+              </div>
+              <Label className="text-right font-medium">JROTC Program *</Label>
+              <div className="col-span-3">
+                <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)} disabled={isViewMode}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select JROTC Program" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="air_force">Air Force JROTC</SelectItem>
+                    <SelectItem value="army">Army JROTC</SelectItem>
+                    <SelectItem value="navy">Navy JROTC</SelectItem>
+                    <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
+                    <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
+                    <SelectItem value="space_force">Space Force JROTC</SelectItem>
+                  </SelectContent>
+                </Select>
               </div>
             </div>
 
@@ -385,26 +401,6 @@ export const CPCompetitionRecordPage = () => {
                   rows={3}
                   disabled={isViewMode}
                 />
-              </div>
-            </div>
-
-            {/* JROTC Program */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">JROTC Program *</Label>
-              <div className="col-span-3">
-                <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)} disabled={isViewMode}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select JROTC Program" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="air_force">Air Force JROTC</SelectItem>
-                    <SelectItem value="army">Army JROTC</SelectItem>
-                    <SelectItem value="navy">Navy JROTC</SelectItem>
-                    <SelectItem value="marine_corps">Marine Corps JROTC</SelectItem>
-                    <SelectItem value="coast_guard">Coast Guard JROTC</SelectItem>
-                    <SelectItem value="space_force">Space Force JROTC</SelectItem>
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
@@ -500,66 +496,6 @@ export const CPCompetitionRecordPage = () => {
               </div>
             </div>
 
-            {/* Location */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Location *</Label>
-              <div className="col-span-3">
-                <AddressLookupField
-                  value={formData.location}
-                  onValueChange={(value) => updateFormData('location', value)}
-                  placeholder="Enter competition location or search address"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-
-            {/* Hosting School */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label htmlFor="hosting_school" className="text-right font-medium">
-                Hosting School
-              </Label>
-              <div className="col-span-3">
-                <Input
-                  id="hosting_school"
-                  value={formData.hosting_school}
-                  onChange={(e) => updateFormData('hosting_school', e.target.value)}
-                  placeholder="Hosting school name"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-
-            {/* Entry Fee */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Entry Fee</Label>
-              <div className="col-span-3">
-                <Input
-                  type="number"
-                  step="0.01"
-                  min="0"
-                  value={formData.fee}
-                  onChange={(e) => updateFormData('fee', e.target.value)}
-                  placeholder="Entry fee (0.00)"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-
-            {/* Max Participants */}
-            <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Max Participants</Label>
-              <div className="col-span-3">
-                <Input
-                  type="number"
-                  min="1"
-                  value={formData.max_participants}
-                  onChange={(e) => updateFormData('max_participants', e.target.value)}
-                  placeholder="Max participants (unlimited)"
-                  disabled={isViewMode}
-                />
-              </div>
-            </div>
-
             {/* Registration Deadline */}
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">Registration Deadline</Label>
@@ -602,6 +538,58 @@ export const CPCompetitionRecordPage = () => {
                     </Select>
                   </div>
                 </div>
+              </div>
+            </div>
+
+            {/* Hosting School & Location */}
+            <div className="grid grid-cols-8 items-center gap-4">
+              <Label htmlFor="hosting_school" className="text-right font-medium">
+                Hosting School
+              </Label>
+              <div className="col-span-3">
+                <Input
+                  id="hosting_school"
+                  value={formData.hosting_school}
+                  onChange={(e) => updateFormData('hosting_school', e.target.value)}
+                  placeholder="Hosting school name"
+                  disabled={isViewMode}
+                />
+              </div>
+              <Label className="text-right font-medium">Location *</Label>
+              <div className="col-span-3">
+                <AddressLookupField
+                  value={formData.location}
+                  onValueChange={(value) => updateFormData('location', value)}
+                  placeholder="Enter competition location or search address"
+                  disabled={isViewMode}
+                />
+              </div>
+            </div>
+
+            {/* Entry Fee & Max Participants */}
+            <div className="grid grid-cols-8 items-center gap-4">
+              <Label className="text-right font-medium">Entry Fee</Label>
+              <div className="col-span-3">
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.fee}
+                  onChange={(e) => updateFormData('fee', e.target.value)}
+                  placeholder="Entry fee (0.00)"
+                  disabled={isViewMode}
+                />
+              </div>
+              <Label className="text-right font-medium">Max Participants</Label>
+              <div className="col-span-3">
+                <Input
+                  type="number"
+                  min="1"
+                  value={formData.max_participants}
+                  onChange={(e) => updateFormData('max_participants', e.target.value)}
+                  placeholder="Max participants (unlimited)"
+                  disabled={isViewMode}
+                />
               </div>
             </div>
 
