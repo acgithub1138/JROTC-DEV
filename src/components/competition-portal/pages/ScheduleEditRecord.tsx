@@ -311,9 +311,9 @@ export const ScheduleEditRecord = () => {
             </CardTitle>
           </CardHeader>
 
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-2">
             {isLoading ? (
-              <div className="text-center py-4">
+              <div className="text-center py-2">
                 <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-primary mx-auto"></div>
                 <p className="mt-2 text-sm text-muted-foreground">Loading schools...</p>
               </div>
