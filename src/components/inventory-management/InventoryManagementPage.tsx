@@ -169,21 +169,23 @@ const InventoryManagementPage = () => {
         </div>
       </div>
 
-      <StockCounter 
-        inStockCount={inStockCount} 
-        outOfStockCount={outOfStockCount} 
-      />
-
-      <InventoryFilters
-        showOutOfStockOnly={showOutOfStockOnly}
-        onShowOutOfStockChange={setShowOutOfStockOnly}
-      />
-
       <StandardTableWrapper
         title="Inventory Items"
         searchValue={searchTerm}
         onSearchChange={setSearchTerm}
         searchPlaceholder="Search inventory items..."
+        stockCounter={
+          <StockCounter 
+            inStockCount={inStockCount} 
+            outOfStockCount={outOfStockCount} 
+          />
+        }
+        extraControls={
+          <InventoryFilters
+            showOutOfStockOnly={showOutOfStockOnly}
+            onShowOutOfStockChange={setShowOutOfStockOnly}
+          />
+        }
       >
         <InventoryTable 
           items={paginatedItems as any}
