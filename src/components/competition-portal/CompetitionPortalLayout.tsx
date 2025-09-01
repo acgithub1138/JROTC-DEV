@@ -32,7 +32,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal/': 'cp_dashboard',
     '/app/competition-portal/dashboard': 'cp_dashboard',
     '/app/competition-portal/competitions': 'cp_competitions',
-    '/app/competition-portal/my-competitions': 'my_competitions',
+    '/app/competition-portal/my-competitions': 'competitions',
     '/app/competition-portal/score-sheets': 'cp_score_sheets',
     '/app/competition-portal/judges': 'cp_judges',
     '/app/competition-portal/analytics': 'analytics',
@@ -44,7 +44,7 @@ const CompetitionPortalLayout = () => {
   const moduleToRouteMap: { [key: string]: string } = {
     'cp_dashboard': '/app/competition-portal/dashboard',
     'cp_competitions': '/app/competition-portal/competitions',
-    'my_competitions': '/app/competition-portal/my-competitions',
+    'competitions': '/app/competition-portal/my-competitions',
     'cp_score_sheets': '/app/competition-portal/score-sheets',
     'cp_judges': '/app/competition-portal/judges',
     'analytics': '/app/competition-portal/analytics',
@@ -63,7 +63,7 @@ const CompetitionPortalLayout = () => {
     const pathToModuleMap: { [key: string]: string } = {
       '/dashboard': 'cp_dashboard',
       '/competitions': 'cp_competitions',
-      '/my-competitions': 'my_competitions',
+      '/my-competitions': 'competitions',
       '/score-sheets': 'cp_score_sheets',
       '/judges': 'cp_judges',
       '/open-competitions': 'open_competitions',
