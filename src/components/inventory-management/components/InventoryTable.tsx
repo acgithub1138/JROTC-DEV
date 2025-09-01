@@ -12,7 +12,6 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useTableSettings } from '@/hooks/useTableSettings';
 import { useInventoryTablePermissions } from '@/hooks/useOptimizedInventoryPermissions';
 import { IssuedUsersPopover } from './IssuedUsersPopover';
-import { EditInventoryItemDialog } from './EditInventoryItemDialog';
 import { InventoryHistoryDialog } from './InventoryHistoryDialog';
 import { ViewInventoryItemDialog } from './ViewInventoryItemDialog';
 import type { Tables } from '@/integrations/supabase/types';
@@ -40,7 +39,6 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
   onView,
   onDelete,
 }) => {
-  const [editingItem, setEditingItem] = useState<InventoryItem | null>(null);
   const [viewingItem, setViewingItem] = useState<InventoryItem | null>(null);
   const [editingQty, setEditingQty] = useState<{itemId: string, field: 'qty_total' | 'qty_issued'} | null>(null);
   const [historyItem, setHistoryItem] = useState<InventoryItem | null>(null);
@@ -52,9 +50,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
     defaultSort: { key: 'category', direction: 'asc' }
   });
 
-  const handleEdit = (item: InventoryItem) => {
+  const handleEdit = async (item: InventoryItem) => {
     if (!canUpdate) return;
-    setEditingItem(item);
+    await onEdit(item);
   };
 
   const handleView = (item: InventoryItem) => {
@@ -63,10 +61,9 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
 
   const handleEditSubmit = async (updatedItem: any) => {
     await onEdit(updatedItem);
-    setEditingItem(null);
   };
 
-  const handleQtyEdit = (itemId: string, field: 'qty_total' | 'qty_issued', value: string) => {
+  const handleQtyEdit = async (itemId: string, field: 'qty_total' | 'qty_issued', value: string) => {
     if (!canUpdate) return;
     const numValue = parseInt(value) || 0;
     if (numValue < 0) return;
@@ -75,7 +72,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
       id: itemId, 
       [field]: numValue
     };
-    onEdit(updatedItem);
+    await onEdit(updatedItem);
   };
 
   const handleQtyKeyPress = (e: React.KeyboardEvent, itemId: string, field: 'qty_total' | 'qty_issued') => {
@@ -351,20 +348,11 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
         item={viewingItem}
         open={!!viewingItem}
         onOpenChange={(open) => !open && setViewingItem(null)}
-        onEdit={(item) => {
-          setEditingItem(item);
+        onEdit={async (item) => {
+          await onEdit(item);
           setViewingItem(null);
         }}
       />
-
-      {editingItem && (
-        <EditInventoryItemDialog
-          item={editingItem}
-          open={!!editingItem}
-          onOpenChange={(open) => !open && setEditingItem(null)}
-          onSubmit={handleEditSubmit}
-        />
-      )}
 
       <InventoryHistoryDialog
         item={historyItem}
