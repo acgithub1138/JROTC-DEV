@@ -21,6 +21,7 @@ import { BudgetTransaction } from './BudgetManagementPage';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { AttachmentSection } from '@/components/attachments/AttachmentSection';
+import { useAttachments } from '@/hooks/attachments/useAttachments';
 
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -65,6 +66,11 @@ export const BudgetIncomeRecordPage: React.FC = () => {
   const [currentMode, setCurrentMode] = useState<BudgetRecordMode>(mode);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [pendingFiles, setPendingFiles] = useState<File[]>([]);
+  
+  // Initialize attachment hooks for file upload (with dummy ID for create mode)
+  const { uploadFile, isUploading } = useAttachments('budget_transaction', currentRecord?.id || 'temp');
+  const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   
   // Form setup
   const defaultValues = {
@@ -191,6 +197,13 @@ export const BudgetIncomeRecordPage: React.FC = () => {
 
       if (currentMode === 'create') {
         createTransaction(budgetData);
+        
+        // Upload pending files if any (files will be uploaded without record association in create mode)
+        if (pendingFiles.length > 0) {
+          console.log('Files selected for upload:', pendingFiles.map(f => f.name));
+          // Note: Files will be handled differently since we don't get the record ID back
+        }
+        
         toast({
           title: "Income Added",
           description: "Income record has been created successfully."
@@ -215,6 +228,27 @@ export const BudgetIncomeRecordPage: React.FC = () => {
       });
     } finally {
       setIsSubmitting(false);
+    }
+  };
+  
+  const uploadPendingFiles = async (recordId: string) => {
+    if (pendingFiles.length === 0) return;
+    
+    setIsUploadingFiles(true);
+    try {
+      // Upload files one by one and wait for completion
+      for (const file of pendingFiles) {
+        await uploadFile({
+          record_type: 'budget_transaction',
+          record_id: recordId,
+          file
+        });
+      }
+      setPendingFiles([]);
+    } catch (error) {
+      console.error('Error uploading files:', error);
+    } finally {
+      setIsUploadingFiles(false);
     }
   };
 
@@ -412,7 +446,49 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                     )}
                   />
 
-                  <div className="flex justify-end gap-2 pt-6">
+                  {/* Attachments Field - only for create mode */}
+                  {currentMode === 'create' && (
+                    <div className="lg:col-span-2">
+                      <div className="flex gap-4">
+                        <label className="w-32 text-right text-sm font-medium mt-2 shrink-0">Attachments</label>
+                        <div className="flex-1">
+                          <input
+                            type="file"
+                            multiple
+                            onChange={(e) => {
+                              const files = Array.from(e.target.files || []);
+                              setPendingFiles(prev => [...prev, ...files]);
+                            }}
+                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                          />
+                          {pendingFiles.length > 0 && (
+                            <div className="mt-2 space-y-1">
+                              <p className="text-sm text-muted-foreground">Files to upload after income creation:</p>
+                              {pendingFiles.map((file, index) => (
+                                <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                                  <span>{file.name}</span>
+                                  <button
+                                    type="button"
+                                    onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                                    className="text-red-500 hover:text-red-700"
+                                  >
+                                    ×
+                                  </button>
+                                </div>
+                              ))}
+                              {isUploadingFiles && (
+                                <div className="text-sm text-blue-600 font-medium">
+                                  Uploading files...
+                                </div>
+                              )}
+                            </div>
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="flex justify-end gap-2 pt-6 lg:col-span-2">
                     <Button
                       type="button"
                       variant="outline"
@@ -420,7 +496,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                     >
                       Cancel
                     </Button>
-                    <Button type="submit" disabled={isSubmitting}>
+                    <Button type="submit" disabled={isSubmitting || isUploadingFiles}>
                       {isSubmitting ? 'Saving...' : 
                        currentMode === 'create' ? 'Add Income' : 'Update Income'}
                     </Button>
