@@ -63,6 +63,7 @@ const CompetitionPortalLayout = () => {
     const pathToModuleMap: { [key: string]: string } = {
       '/dashboard': 'cp_dashboard',
       '/competitions': 'cp_competitions',
+      '/competition-details': 'cp_competitions',
       '/my-competitions': 'competitions',
       '/score-sheets': 'cp_score_sheets',
       '/judges': 'cp_judges',
