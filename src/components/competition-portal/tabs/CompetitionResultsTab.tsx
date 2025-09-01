@@ -1,12 +1,11 @@
 import React, { useEffect, useMemo, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { supabase } from '@/integrations/supabase/client';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
-import { Eye, Edit } from 'lucide-react';
+import { Eye } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { ScoreSheetTable as PortalScoreSheetTable } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/ScoreSheetTable';
 interface CompetitionResultsTabProps {
   competitionId: string;
 }
@@ -30,6 +29,7 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
   competitionId
 }) => {
   const isMobile = useIsMobile();
+  const navigate = useNavigate();
   const {
     canView,
     canViewDetails,
@@ -40,11 +40,6 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
   const [eventMap, setEventMap] = useState<Record<string, string>>({});
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [viewEventId, setViewEventId] = useState<string | null>(null);
-  const [viewEventName, setViewEventName] = useState<string | null>(null);
-  const [eventSheets, setEventSheets] = useState<any[]>([]);
-  const [isDialogLoading, setIsDialogLoading] = useState(false);
-  const [viewSchoolId, setViewSchoolId] = useState<string | null>(null);
   const fetchData = async () => {
     setIsLoading(true);
     setError(null);
@@ -77,32 +72,6 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
       active = false;
     };
   }, [competitionId]);
-  const fetchEventSheets = async () => {
-    if (!viewEventId || !viewSchoolId) return;
-    setIsDialogLoading(true);
-    const {
-      data,
-      error
-    } = await supabase.from('competition_events').select('id, event, score_sheet, total_points, cadet_ids, team_name, school_id, created_at').eq('source_type', 'portal').eq('source_competition_id', competitionId).eq('event', viewEventId as any).eq('school_id', viewSchoolId as any);
-    setEventSheets(error ? [] : data || []);
-    setIsDialogLoading(false);
-  };
-  useEffect(() => {
-    let active = true;
-    const load = async () => {
-      await fetchEventSheets();
-    };
-    load();
-    return () => {
-      active = false;
-    };
-  }, [viewEventId, viewSchoolId, competitionId]);
-  const handleEventsRefresh = async () => {
-    // Small delay to ensure database updates are committed
-    await new Promise(resolve => setTimeout(resolve, 200));
-    // Refresh both main results and dialog data
-    await Promise.all([fetchData(), fetchEventSheets()]);
-  };
   const grouped = useMemo(() => {
     type JudgeScore = {
       judgeNumber?: number;
@@ -230,16 +199,14 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                               <span className="text-sm">{js ? js.score : '-'}</span>
                             </div>;
                 })}
-                         <div className="flex justify-end pt-2">
-                           {canViewDetails && <Button variant="outline" size="sm" onClick={() => {
-                    setViewEventId(group.eventId);
-                    setViewEventName(group.event);
-                    setViewSchoolId(s.schoolId);
-                  }}>
-                               <Eye className="h-4 w-4 mr-1" />
-                               View Details
-                             </Button>}
-                         </div>
+                          <div className="flex justify-end pt-2">
+                            {canViewDetails && <Button variant="outline" size="sm" onClick={() => {
+                     navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
+                   }}>
+                                <Eye className="h-4 w-4 mr-1" />
+                                View Details
+                              </Button>}
+                          </div>
                       </div>
                     </CardContent>
                   </Card>)}
@@ -264,37 +231,19 @@ export const CompetitionResultsTab: React.FC<CompetitionResultsTabProps> = ({
                   return <td key={n} className="px-3 py-2">{js ? js.score : '-'}</td>;
                 })}
                          <td className="px-3 font-medium py-[2px]">{s.total.toFixed(1)}</td>
-                         <td className="px-3 py-[2px]">
-                           {canViewDetails && <Button variant="ghost" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
-                    setViewEventId(group.eventId);
-                    setViewEventName(group.event);
-                    setViewSchoolId(s.schoolId);
-                  }}>
-                               <Eye className="h-4 w-4" />
-                             </Button>}
-                         </td>
+                          <td className="px-3 py-[2px]">
+                            {canViewDetails && <Button variant="ghost" size="icon" aria-label={`View score sheets for ${s.schoolName}`} onClick={() => {
+                     navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet?eventId=${group.eventId}&schoolId=${s.schoolId}&eventName=${encodeURIComponent(group.event)}`);
+                   }}>
+                                <Eye className="h-4 w-4" />
+                              </Button>}
+                          </td>
                       </tr>)}
 
                   </tbody>
                 </table>
               </div>}
           </CardContent>
-        </Card>)}
-      <Dialog open={!!viewEventId && !!viewSchoolId} onOpenChange={open => {
-      if (!open) {
-        setViewEventId(null);
-        setViewEventName(null);
-        setViewSchoolId(null);
-      }
-    }}>
-        <DialogContent className="max-w-6xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>
-              {viewEventName ? `${viewEventName} - ${viewSchoolId ? schoolMap[viewSchoolId] || 'School' : ''} Score Sheets` : 'Score Sheets'}
-            </DialogTitle>
-          </DialogHeader>
-          {isDialogLoading ? <div className="p-4 text-sm text-muted-foreground">Loading score sheets...</div> : eventSheets.length === 0 ? <div className="p-8 text-center text-muted-foreground">No score sheets found for this school.</div> : <PortalScoreSheetTable events={eventSheets as any} onEventsRefresh={handleEventsRefresh} />}
-        </DialogContent>
-      </Dialog>
+         </Card>)}
     </div>;
 };
