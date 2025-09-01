@@ -12,7 +12,6 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { ViewSchoolEventsModal } from '@/components/competition-portal/modals/ViewSchoolEventsModal';
 import { ColorPicker } from '@/components/ui/color-picker';
 import type { Database } from '@/integrations/supabase/types';
-import { AddSchoolEventScoreSheetModal } from '@/components/competition-portal/modals/AddSchoolEventScoreSheetModal';
 
 // Extend the type to include the paid and color fields
 type CompSchoolWithPaid = Database['public']['Tables']['cp_comp_schools']['Row'] & {
@@ -45,7 +44,6 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
   } = useCompetitionSchoolsPermissions();
   
   const [selectedSchoolForEvents, setSelectedSchoolForEvents] = useState<string | null>(null);
-  const [selectedSchoolForAddEvent, setSelectedSchoolForAddEvent] = useState<string | null>(null);
   const [sortField, setSortField] = useState<string>('school_name');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
   const handleSort = (field: string) => {
@@ -182,7 +180,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                 <Button
                                   variant="outline"
                                   size="sm"
-                                  onClick={() => setSelectedSchoolForAddEvent(school.id)}
+                                  onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}
                                 >
                                   <Plus className="w-4 h-4 mr-1" />
                                   Add Score
@@ -302,7 +300,7 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
                                       variant="outline"
                                       size="icon"
                                       className="h-6 w-6"
-                                      onClick={() => setSelectedSchoolForAddEvent(school.id)}
+                                      onClick={() => navigate(`/app/competition-portal/competition-details/${competitionId}/score_sheet_record?mode=create&school_id=${school.id}`)}
                                     >
                                       <Plus className="w-3 h-3" />
                                     </Button>
@@ -335,12 +333,5 @@ export const CompetitionSchoolsTab: React.FC<CompetitionSchoolsTabProps> = ({
       )}
 
       <ViewSchoolEventsModal open={!!selectedSchoolForEvents} onOpenChange={() => setSelectedSchoolForEvents(null)} competitionId={competitionId} schoolId={selectedSchoolForEvents || ''} />
-
-      <AddSchoolEventScoreSheetModal
-        open={!!selectedSchoolForAddEvent}
-        onOpenChange={(o) => { if (!o) setSelectedSchoolForAddEvent(null); }}
-        competitionId={competitionId}
-        schoolRegistrationId={selectedSchoolForAddEvent || ''}
-      />
     </div>;
 };

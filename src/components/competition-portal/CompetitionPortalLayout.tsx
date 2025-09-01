@@ -12,6 +12,7 @@ import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { CompetitionEventRecord } from './pages/CompetitionEventRecord';
 import { CompetitionResourceRecord } from './pages/CompetitionResourceRecord';
 import { CompetitionSchoolRecord } from './pages/CompetitionSchoolRecord';
+import { ScoreSheetRecord } from './pages/ScoreSheetRecord';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
 import { CPCompetitionRecordPage } from './CPCompetitionRecordPage';
@@ -131,6 +132,8 @@ const CompetitionPortalLayout = () => {
       return <CompetitionResourceRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/school_record')) {
       return <CompetitionSchoolRecord />;
+    } else if (path.startsWith('/app/competition-portal/competition-details/') && path.includes('/score_sheet_record')) {
+      return <ScoreSheetRecord />;
     } else if (path.startsWith('/app/competition-portal/competition-details/')) {
       return <CompetitionDetailsPage />;
     } else if (path === '/app/competition-portal/score-sheets') {
