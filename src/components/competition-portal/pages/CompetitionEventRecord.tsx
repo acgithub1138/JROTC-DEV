@@ -513,31 +513,58 @@ export const CompetitionEventRecord: React.FC = () => {
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
-            {/* Event Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="event" className="text-right">Event *</Label>
-              <Select value={formData.event} onValueChange={value => setFormData(prev => ({
-              ...prev,
-              event: value
-            }))} disabled={isViewMode}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select an event" />
-                </SelectTrigger>
-                <SelectContent>
-                  {eventTypes.sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <SelectItem key={eventType.id} value={eventType.id}>
-                        {eventType.name}
+            {/* Event & Score Template */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="event" className="text-right">Event *</Label>
+                <Select value={formData.event} onValueChange={value => setFormData(prev => ({
+                ...prev,
+                event: value
+              }))} disabled={isViewMode}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select an event" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {eventTypes.sort((a, b) => a.name.localeCompare(b.name)).map(eventType => <SelectItem key={eventType.id} value={eventType.id}>
+                          {eventType.name}
+                        </SelectItem>)}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
+                <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
+                ...prev,
+                score_sheet: value
+              }))} disabled={isViewMode}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a score template" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
+                        {sheet.template_name}
                       </SelectItem>)}
-                </SelectContent>
-              </Select>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
 
-            {/* Location */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="location" className="text-right">Location *</Label>
-              <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
-              ...prev,
-              location: e.target.value
-            }))} placeholder="Event location" disabled={isViewMode} required />
+            {/* Fee & Location */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="fee" className="text-right">Fee *</Label>
+                <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
+                ...prev,
+                fee: e.target.value
+              }))} placeholder="Event fee" disabled={isViewMode} required />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="location" className="text-right">Location *</Label>
+                <Input id="location" value={formData.location} onChange={e => setFormData(prev => ({
+                ...prev,
+                location: e.target.value
+              }))} placeholder="Event location" disabled={isViewMode} required />
+              </div>
             </div>
 
             {/* Start Date & Time */}
@@ -742,32 +769,6 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
             </div>
 
-            {/* Fee */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="fee" className="text-right">Fee *</Label>
-              <Input id="fee" type="number" step="0.01" value={formData.fee} onChange={e => setFormData(prev => ({
-              ...prev,
-              fee: e.target.value
-            }))} placeholder="Event fee" disabled={isViewMode} required />
-            </div>
-
-            {/* Score Sheet */}
-            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
-              <Select value={formData.score_sheet} onValueChange={value => setFormData(prev => ({
-              ...prev,
-              score_sheet: value
-            }))} disabled={isViewMode}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a score template" />
-                </SelectTrigger>
-                <SelectContent>
-                  {scoreSheets.map(sheet => <SelectItem key={sheet.id} value={sheet.id}>
-                      {sheet.template_name}
-                    </SelectItem>)}
-                </SelectContent>
-              </Select>
-            </div>
 
             {/* Notes */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
