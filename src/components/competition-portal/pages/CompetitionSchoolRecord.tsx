@@ -438,23 +438,25 @@ export const CompetitionSchoolRecord = () => {
           </Button>
           <h1 className="text-2xl font-bold">{pageTitle}</h1>
         </div>
-        {canEdit && !isViewMode && (
-          <div className="flex items-center gap-2">
-            <Button type="button" variant="outline" onClick={handleBack}>
-              Cancel
-            </Button>
-            <Button type="submit" form="school-form" disabled={isSubmitting}>
-              <Save className="h-4 w-4" />
-              {isSubmitting ? 'Saving...' : 'Save'}
-            </Button>
-          </div>
-        )}
-        {canDelete && !isCreateMode && (
-          <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
-            <Trash2 className="h-4 w-4" />
-            Delete
-          </Button>
-        )}
+        <div className="flex items-center gap-2">
+          {canEdit && !isViewMode && (
+            <>
+              <Button type="button" variant="outline" onClick={handleBack}>
+                Cancel
+              </Button>
+              {canDelete && !isCreateMode && (
+                <Button variant="destructive" onClick={() => setShowDeleteDialog(true)}>
+                  <Trash2 className="h-4 w-4" />
+                  Delete
+                </Button>
+              )}
+              <Button type="submit" form="school-form" disabled={isSubmitting}>
+                <Save className="h-4 w-4" />
+                {isSubmitting ? 'Saving...' : 'Save'}
+              </Button>
+            </>
+          )}
+        </div>
       </div>
 
       <Card>
