@@ -172,7 +172,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             {isColumnVisible('qty_available') && <SortableTableHead sortKey="qty_available" currentSort={sortConfig} onSort={handleSort} className="w-20">
                 Available
               </SortableTableHead>}
-            {isColumnVisible('status') && <TableHead>Status</TableHead>}
+            {isColumnVisible('status') && <TableHead className="text-center">Status</TableHead>}
             {isColumnVisible('stock_number') && <SortableTableHead sortKey="stock_number" currentSort={sortConfig} onSort={handleSort}>
                 Stock Number
               </SortableTableHead>}
