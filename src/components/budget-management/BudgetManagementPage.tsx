@@ -7,7 +7,6 @@ import { BudgetSummaryCards } from './components/BudgetSummaryCards';
 import { BudgetTable } from './components/BudgetTable';
 import { BudgetFilters } from './components/BudgetFilters';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
-import { ViewBudgetItemDialog } from './components/ViewBudgetItemDialog';
 import { DeleteBudgetDialog } from './components/DeleteBudgetDialog';
 import { BudgetCards } from './components/BudgetCards';
 import { useBudgetTransactions } from './hooks/useBudgetTransactions';
@@ -44,7 +43,6 @@ const BudgetManagementPage = () => {
   const navigate = useNavigate();
   const { canCreate, canEdit: canUpdate } = useTablePermissions('budget');
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
-  const [viewingItem, setViewingItem] = useState<BudgetTransaction | null>(null);
   const [deletingItem, setDeletingItem] = useState<BudgetTransaction | null>(null);
   const [filters, setFilters] = useState<BudgetFilters>({
     search: '',
@@ -99,6 +97,15 @@ const BudgetManagementPage = () => {
     }
   };
 
+  // Handle view navigation  
+  const handleViewTransaction = (transaction: BudgetTransaction) => {
+    if (transaction.category === 'income') {
+      navigate(`/app/budget/income_record?id=${transaction.id}`);
+    } else if (transaction.category === 'expense') {
+      navigate(`/app/budget/expense_record?id=${transaction.id}`);
+    }
+  };
+
   return (
     <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
@@ -131,25 +138,15 @@ const BudgetManagementPage = () => {
 
       <div className="rounded-lg border bg-card">
         {isMobile ? (
-          <BudgetCards transactions={transactions} onEdit={handleEditTransaction} onView={setViewingItem} onDelete={handleDeleteTransaction} />
+          <BudgetCards transactions={transactions} onEdit={handleEditTransaction} onView={handleViewTransaction} onDelete={handleDeleteTransaction} />
         ) : (
-          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={handleEditTransaction} onView={setViewingItem} onDelete={handleDeleteTransaction} />
+          <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={handleEditTransaction} onView={handleViewTransaction} onDelete={handleDeleteTransaction} />
         )}
       </div>
 
       {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
-      
-      {viewingItem && <ViewBudgetItemDialog 
-        open={!!viewingItem} 
-        onOpenChange={() => setViewingItem(null)} 
-        item={viewingItem} 
-        onEdit={() => {
-          handleEditTransaction(viewingItem);
-          setViewingItem(null);
-        }}
-      />}
 
-      <DeleteBudgetDialog 
+      <DeleteBudgetDialog
         open={!!deletingItem} 
         onOpenChange={() => setDeletingItem(null)} 
         transaction={deletingItem} 
