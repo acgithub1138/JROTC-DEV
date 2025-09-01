@@ -103,8 +103,7 @@ export const MultiSelectResources: React.FC<MultiSelectResourcesProps> = ({
                 filteredResources.map((resource) => (
                   <div
                     key={resource.id}
-                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md cursor-pointer"
-                    onClick={() => handleToggleResource(resource.id)}
+                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
                   >
                     <Checkbox
                       checked={selectedResourceIds.includes(resource.id)}

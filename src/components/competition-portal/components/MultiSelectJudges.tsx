@@ -102,8 +102,7 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
                 filteredJudges.map((judge) => (
                   <div
                     key={judge.id}
-                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md cursor-pointer"
-                    onClick={() => handleToggleJudge(judge.id)}
+                    className="flex items-center space-x-2 p-2 hover:bg-accent rounded-md"
                   >
                     <Checkbox
                       checked={selectedJudgeIds.includes(judge.id)}
