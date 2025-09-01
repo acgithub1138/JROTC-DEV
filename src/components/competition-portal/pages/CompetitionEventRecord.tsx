@@ -580,8 +580,8 @@ export const CompetitionEventRecord: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <Label htmlFor="event" className="text-right md:text-left">Event *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label htmlFor="event" className="md:text-right">Event *</Label>
               <Select 
                 value={formData.event} 
                 onValueChange={value => setFormData(prev => ({ ...prev, event: value }))}
@@ -603,8 +603,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Location */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <Label htmlFor="location" className="text-right md:text-left">Location *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label htmlFor="location" className="md:text-right">Location *</Label>
               <Input 
                 id="location" 
                 value={formData.location} 
@@ -809,8 +809,8 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Interval & Max Participants */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <Label htmlFor="interval" className="text-right md:text-left">Interval (minutes) *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="interval" className="md:text-right">Interval (minutes) *</Label>
                 <Input 
                   id="interval" 
                   type="number" 
@@ -821,8 +821,8 @@ export const CompetitionEventRecord: React.FC = () => {
                   required 
                 />
               </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                <Label htmlFor="max_participants" className="text-right md:text-left">Max Participants *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="max_participants" className="md:text-right">Max Participants *</Label>
                 <Input 
                   id="max_participants" 
                   type="number" 
@@ -836,8 +836,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Fee */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <Label htmlFor="fee" className="text-right md:text-left">Fee *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label htmlFor="fee" className="md:text-right">Fee *</Label>
               <Input 
                 id="fee" 
                 type="number" 
@@ -851,8 +851,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Score Sheet */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-              <Label htmlFor="score_sheet" className="text-right md:text-left">Score Template *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label htmlFor="score_sheet" className="md:text-right">Score Template *</Label>
               <Select 
                 value={formData.score_sheet} 
                 onValueChange={value => setFormData(prev => ({ ...prev, score_sheet: value }))}
@@ -872,8 +872,8 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">
-              <Label htmlFor="notes" className="text-right md:text-left mt-2">Notes</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-start">
+              <Label htmlFor="notes" className="md:text-right mt-2">Notes</Label>
               <Textarea 
                 id="notes" 
                 value={formData.notes} 
@@ -888,8 +888,8 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="space-y-4">
               <Label className="font-medium">Judges</Label>
               {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                  <Label className="text-right md:text-left">Add Judge</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+                  <Label className="md:text-right">Add Judge</Label>
                   <Select onValueChange={addJudge}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a judge to add" />
@@ -928,8 +928,8 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="space-y-4">
               <Label className="font-medium">Resources</Label>
               {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 items-center">
-                  <Label className="text-right md:text-left">Add Resource</Label>
+                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+                  <Label className="md:text-right">Add Resource</Label>
                   <Select onValueChange={addResource}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a resource to add" />
