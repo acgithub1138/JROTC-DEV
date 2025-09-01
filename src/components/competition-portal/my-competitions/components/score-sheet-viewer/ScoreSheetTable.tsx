@@ -1,11 +1,11 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { TableActionButtons } from '@/components/ui/table-action-buttons';
 import { Button } from '@/components/ui/button';
 import { Eye } from 'lucide-react';
 import type { CompetitionEvent } from './types';
 import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotalAverage } from './utils/fieldHelpers';
-import { EditScoreSheetDialog } from './EditScoreSheetDialog';
 import { DeleteScoreSheetDialog } from './DeleteScoreSheetDialog';
 import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
@@ -19,8 +19,8 @@ interface ScoreSheetTableProps {
 }
 
 export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
-  const [selectedEvent, setSelectedEvent] = useState<CompetitionEvent | null>(null);
-  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const navigate = useNavigate();
+  
   const [deleteDialog, setDeleteDialog] = useState<{
     open: boolean;
     event: CompetitionEvent | null;
@@ -79,8 +79,11 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   };
 
   const handleEditScoreSheet = (event: CompetitionEvent) => {
-    setSelectedEvent(event);
-    setIsEditDialogOpen(true);
+    // Navigate to edit score sheet page
+    const competitionId = (events[0] as any)?.source_competition_id || (events[0] as any)?.competition_id;
+    if (competitionId) {
+      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet/edit_score_sheet?eventId=${event.id}&schoolId=${event.school_id}`);
+    }
   };
 
   const handleEventUpdated = () => {
@@ -272,15 +275,6 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
         </TableBody>
       </Table>
       </div>
-
-      {canUpdate && (
-        <EditScoreSheetDialog
-          open={isEditDialogOpen}
-          onOpenChange={setIsEditDialogOpen}
-          event={selectedEvent}
-          onEventUpdated={handleEventUpdated}
-        />
-      )}
 
       <DeleteScoreSheetDialog
         open={deleteDialog.open}
