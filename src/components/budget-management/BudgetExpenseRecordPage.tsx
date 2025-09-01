@@ -71,8 +71,8 @@ export const BudgetExpenseRecordPage: React.FC = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [pendingFiles, setPendingFiles] = useState<File[]>([]);
   
-  // Initialize attachment hooks for file upload (with dummy ID for create mode)
-  const { uploadFile, isUploading } = useAttachments('budget_transaction', currentRecord?.id || 'temp');
+  // Initialize attachment hooks for file upload (only when we have a valid record ID)
+  const { uploadFile, isUploading } = useAttachments('budget_transaction', recordId || 'temp');
   const [isUploadingFiles, setIsUploadingFiles] = useState(false);
   
   // Form setup
