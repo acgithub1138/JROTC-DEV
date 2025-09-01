@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Card, CardContent } from '@/components/ui/card';
@@ -18,7 +19,6 @@ import { useSortableTable } from '@/hooks/useSortableTable';
 import { useDebounce } from 'use-debounce';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
-import { PTTestEditModal } from './PTTestEditModal';
 import { usePTTestEdit } from '../hooks/usePTTestEdit';
 interface PTTestsTabProps {
   onOpenBulkDialog: () => void;
@@ -43,6 +43,7 @@ export const PTTestsTab = ({
   onOpenBulkDialog,
   searchTerm: externalSearchTerm = ''
 }: PTTestsTabProps) => {
+  const navigate = useNavigate();
   const {
     userProfile
   } = useAuth();
@@ -59,7 +60,6 @@ export const PTTestsTab = ({
   const searchTerm = externalSearchTerm;
   const [debouncedSearchTerm] = useDebounce(searchTerm, 300);
   const [selectedDate, setSelectedDate] = useState<Date>();
-  const [editingPTTest, setEditingPTTest] = useState<PTTest | null>(null);
   const {
     deletePTTest,
     isDeleting
@@ -285,7 +285,7 @@ export const PTTestsTab = ({
                     </TableCell>
                     {(canUpdate || canDelete) && <TableCell className="text-center">
                         <div className="flex items-center justify-center gap-2">
-                          {canUpdate && <Button variant="outline" size="icon" onClick={() => setEditingPTTest(test)} className="h-6 w-6">
+                          {canUpdate && <Button variant="outline" size="icon" onClick={() => navigate(`/app/cadets/pt_test_edit?id=${test.id}`)} className="h-6 w-6">
                               <Edit className="w-3 h-3" />
                             </Button>}
                            {canDelete && <AlertDialog>
@@ -317,10 +317,5 @@ export const PTTestsTab = ({
             </Table>
           </CardContent>
         </Card>}
-      
-      <PTTestEditModal open={!!editingPTTest} onOpenChange={open => !open && setEditingPTTest(null)} ptTest={editingPTTest} onSuccess={() => {
-      refetch();
-      setEditingPTTest(null);
-    }} />
     </div>;
 };
