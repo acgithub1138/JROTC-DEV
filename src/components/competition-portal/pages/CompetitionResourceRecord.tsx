@@ -187,7 +187,7 @@ export const CompetitionResourceRecord: React.FC = () => {
       }
 
       resetChanges();
-      navigate(`/app/competition-portal/competition-details/${competitionId}?tab=resources`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
     } catch (error) {
       console.error('Error saving resource:', error);
       toast.error('Failed to save resource');
@@ -202,7 +202,7 @@ export const CompetitionResourceRecord: React.FC = () => {
     try {
       await deleteResource(resourceId);
       toast.success('Resource deleted successfully');
-      navigate(`/app/competition-portal/competition-details/${competitionId}?tab=resources`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
     } catch (error) {
       console.error('Error deleting resource:', error);
       toast.error('Failed to delete resource');
@@ -213,13 +213,13 @@ export const CompetitionResourceRecord: React.FC = () => {
     if (hasUnsavedChanges) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(`/app/competition-portal/competition-details/${competitionId}?tab=resources`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
     }
   };
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    navigate(`/app/competition-portal/competition-details/${competitionId}?tab=resources`);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/resources`);
   };
 
   const handleCancelDiscard = () => {
