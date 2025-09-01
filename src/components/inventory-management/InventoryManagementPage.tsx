@@ -71,7 +71,7 @@ const InventoryManagementPage = () => {
   };
 
   const handleViewItem = (item: any) => {
-    setViewingItem(item);
+    navigate(`/app/cadets/inventory_record?id=${item.id}`);
   };
 
   const handleBulkImport = async (items: any[]) => {
