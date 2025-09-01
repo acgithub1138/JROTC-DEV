@@ -30,8 +30,8 @@ export const IssuedUsersPopover: React.FC<IssuedUsersPopoverProps> = ({ issuedTo
   return (
     <Popover>
       <PopoverTrigger asChild>
-        <Button variant="ghost" size="sm" title="View issued users">
-          <Users className="w-4 h-4" />
+        <Button variant="outline" size="icon" className="h-6 w-6" title="View issued users">
+          <Users className="w-3 h-3" />
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80">
