@@ -338,7 +338,7 @@ export const CompetitionSchoolRecord = () => {
       }
 
       resetChanges();
-      navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     } catch (error) {
       console.error('Error saving school:', error);
       toast.error('Failed to save school registration');
@@ -354,7 +354,7 @@ export const CompetitionSchoolRecord = () => {
     try {
       await deleteSchoolRegistration(schoolRegistration.id);
       toast.success('School registration deleted successfully');
-      navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     } catch (error) {
       console.error('Error deleting school:', error);
       toast.error('Failed to delete school registration');
@@ -368,13 +368,13 @@ export const CompetitionSchoolRecord = () => {
     if (hasUnsavedChanges && !isViewMode) {
       setShowUnsavedDialog(true);
     } else {
-      navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
     }
   };
 
   const handleDiscardChanges = () => {
     setShowUnsavedDialog(false);
-    navigate(`/app/competition-portal/competition-details/${competitionId}#schools`);
+    navigate(`/app/competition-portal/competition-details/${competitionId}/schools`);
   };
 
   const handleContinueEditing = () => {
