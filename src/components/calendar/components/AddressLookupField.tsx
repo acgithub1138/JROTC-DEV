@@ -21,12 +21,14 @@ interface AddressLookupFieldProps {
   value?: string;
   onValueChange: (value: string) => void;
   placeholder?: string;
+  disabled?: boolean;
 }
 
 export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   value,
   onValueChange,
   placeholder = "Enter location...",
+  disabled = false,
 }) => {
   const [inputValue, setInputValue] = useState(value || '');
   const [suggestions, setSuggestions] = useState<AddressSuggestion[]>([]);
@@ -93,6 +95,7 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   }, []);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (disabled) return;
     const newValue = e.target.value;
     setInputValue(newValue);
     onValueChange(newValue);
@@ -105,9 +108,8 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
   };
 
   const handleInputFocus = () => {
-    if (suggestions.length > 0) {
-      setShowSuggestions(true);
-    }
+    if (disabled || suggestions.length === 0) return;
+    setShowSuggestions(true);
   };
 
   const formatAddress = (suggestion: AddressSuggestion) => {
@@ -125,10 +127,11 @@ export const AddressLookupField: React.FC<AddressLookupFieldProps> = ({
           onFocus={handleInputFocus}
           placeholder={placeholder}
           className="pl-10"
+          disabled={disabled}
         />
       </div>
       
-      {showSuggestions && (suggestions.length > 0 || isLoading || inputValue.length >= 3) && (
+      {!disabled && showSuggestions && (suggestions.length > 0 || isLoading || inputValue.length >= 3) && (
         <div className="absolute top-full left-0 right-0 z-50 mt-1 bg-popover border border-border rounded-md shadow-lg">
           <Command>
             <CommandList className="max-h-[200px]">

@@ -46,12 +46,14 @@ export const CPCompetitionRecordPage = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const competitionId = searchParams.get('id');
-  const isEditMode = !!competitionId;
+  const mode = searchParams.get('mode');
+  const isEditMode = !!competitionId && mode !== 'view';
+  const isViewMode = mode === 'view';
   const { userProfile } = useAuth();
   const { createCompetition, updateCompetition, competitions } = useCompetitions();
 
-  // Find competition data if editing
-  const existingCompetition = isEditMode ? competitions.find(c => c.id === competitionId) : null;
+  // Find competition data if editing or viewing
+  const existingCompetition = competitionId ? competitions.find(c => c.id === competitionId) : null;
 
   const initialData: FormData = {
     name: existingCompetition?.name || '',
@@ -87,7 +89,7 @@ export const CPCompetitionRecordPage = () => {
   const { hasUnsavedChanges } = useUnsavedChanges({
     initialData,
     currentData: formData,
-    enabled: true
+    enabled: !isViewMode // Disable unsaved changes tracking in view mode
   });
 
   const updateFormData = (field: keyof FormData, value: string) => {
@@ -261,10 +263,10 @@ export const CPCompetitionRecordPage = () => {
         </Button>
         <div>
           <h1 className="text-3xl font-bold">
-            {isEditMode ? 'Edit Competition' : 'Create Competition'}
+            {isViewMode ? 'View Competition' : isEditMode ? 'Edit Competition' : 'Create Competition'}
           </h1>
           <p className="text-muted-foreground">
-            {isEditMode ? 'Update the competition details below' : 'Fill in the details to create a new competition'}
+            {isViewMode ? 'Competition details (read-only)' : isEditMode ? 'Update the competition details below' : 'Fill in the details to create a new competition'}
           </p>
         </div>
       </div>
@@ -285,7 +287,7 @@ export const CPCompetitionRecordPage = () => {
                   id="name"
                   value={formData.name}
                   onChange={(e) => updateFormData('name', e.target.value)}
-                  placeholder="Enter competition name"
+                  disabled={isViewMode}
                   required
                 />
               </div>
@@ -303,6 +305,7 @@ export const CPCompetitionRecordPage = () => {
                   onChange={(e) => updateFormData('description', e.target.value)}
                   placeholder="Enter competition description"
                   rows={3}
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -311,7 +314,7 @@ export const CPCompetitionRecordPage = () => {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">JROTC Program *</Label>
               <div className="col-span-3">
-                <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)}>
+                <Select value={formData.program} onValueChange={(value) => updateFormData('program', value)} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select JROTC Program" />
                   </SelectTrigger>
@@ -338,34 +341,17 @@ export const CPCompetitionRecordPage = () => {
                       value={formData.start_date}
                       onChange={(e) => updateFormData('start_date', e.target.value)}
                       required
+                      disabled={isViewMode}
                     />
                   </div>
                   <div>
-                    <Select value={formData.start_time_hour} onValueChange={(value) => updateFormData('start_time_hour', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.start_time_hour} onValueChange={(value) => updateFormData('start_time_hour', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.start_time_minute} onValueChange={(value) => updateFormData('start_time_minute', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                          <SelectItem key={minute} value={minute}>
-                            {minute}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.start_time_minute} onValueChange={(value) => updateFormData('start_time_minute', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                 </div>
@@ -381,36 +367,18 @@ export const CPCompetitionRecordPage = () => {
                     <Input
                       type="date"
                       value={formData.end_date}
-                      onChange={(e) => updateFormData('end_date', e.target.value)}
                       required
+                      disabled={isViewMode}
                     />
                   </div>
                   <div>
-                    <Select value={formData.end_time_hour} onValueChange={(value) => updateFormData('end_time_hour', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.end_time_hour} onValueChange={(value) => updateFormData('end_time_hour', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.end_time_minute} onValueChange={(value) => updateFormData('end_time_minute', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                          <SelectItem key={minute} value={minute}>
-                            {minute}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.end_time_minute} onValueChange={(value) => updateFormData('end_time_minute', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                 </div>
@@ -425,6 +393,7 @@ export const CPCompetitionRecordPage = () => {
                   value={formData.location}
                   onValueChange={(value) => updateFormData('location', value)}
                   placeholder="Enter competition location or search address"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -440,6 +409,7 @@ export const CPCompetitionRecordPage = () => {
                   value={formData.hosting_school}
                   onChange={(e) => updateFormData('hosting_school', e.target.value)}
                   placeholder="Hosting school name"
+                  disabled={isViewMode}
                 />
               </div>
             </div>
@@ -457,6 +427,7 @@ export const CPCompetitionRecordPage = () => {
                       value={formData.fee}
                       onChange={(e) => updateFormData('fee', e.target.value)}
                       placeholder="Entry fee (0.00)"
+                      disabled={isViewMode}
                     />
                   </div>
                   <div>
@@ -466,6 +437,7 @@ export const CPCompetitionRecordPage = () => {
                       value={formData.max_participants}
                       onChange={(e) => updateFormData('max_participants', e.target.value)}
                       placeholder="Max participants (unlimited)"
+                      disabled={isViewMode}
                     />
                   </div>
                 </div>
@@ -482,34 +454,17 @@ export const CPCompetitionRecordPage = () => {
                       type="date"
                       value={formData.registration_deadline_date}
                       onChange={(e) => updateFormData('registration_deadline_date', e.target.value)}
+                      disabled={isViewMode}
                     />
                   </div>
                   <div>
-                    <Select value={formData.registration_deadline_hour} onValueChange={(value) => updateFormData('registration_deadline_hour', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Hour" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {Array.from({ length: 24 }, (_, i) => (
-                          <SelectItem key={i} value={i.toString().padStart(2, '0')}>
-                            {i.toString().padStart(2, '0')}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.registration_deadline_hour} onValueChange={(value) => updateFormData('registration_deadline_hour', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                   <div>
-                    <Select value={formData.registration_deadline_minute} onValueChange={(value) => updateFormData('registration_deadline_minute', value)}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Min" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['00', '10', '20', '30', '40', '50'].map((minute) => (
-                          <SelectItem key={minute} value={minute}>
-                            {minute}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
+                    <Select value={formData.registration_deadline_minute} onValueChange={(value) => updateFormData('registration_deadline_minute', value)} disabled={isViewMode}>
+...
                     </Select>
                   </div>
                 </div>
@@ -520,7 +475,7 @@ export const CPCompetitionRecordPage = () => {
             <div className="grid grid-cols-4 items-center gap-4">
               <Label className="text-right font-medium">Competition SOP</Label>
               <div className="col-span-3">
-                <Select value={formData.sop} onValueChange={(value) => updateFormData('sop', value)}>
+                <Select value={formData.sop} onValueChange={(value) => updateFormData('sop', value)} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select SOP type" />
                   </SelectTrigger>
@@ -546,6 +501,7 @@ export const CPCompetitionRecordPage = () => {
                     value={formData.sop_link}
                     onChange={(e) => updateFormData('sop_link', e.target.value)}
                     placeholder="https://example.com/sop"
+                    disabled={isViewMode}
                   />
                 </div>
               </div>
@@ -563,6 +519,7 @@ export const CPCompetitionRecordPage = () => {
                       onChange={(value) => updateFormData('sop_text', value)}
                       placeholder="Enter SOP text here..."
                       style={{ minHeight: '200px' }}
+                      readOnly={isViewMode}
                     />
                   </div>
                 </div>
@@ -570,22 +527,34 @@ export const CPCompetitionRecordPage = () => {
             )}
 
             {/* Form Actions */}
-            <div className="flex justify-end gap-4 pt-6">
-              <Button
-                type="button"
-                variant="outline"
-                onClick={handleBackClick}
-                disabled={isSubmitting}
-              >
-                Cancel
-              </Button>
-              <Button type="submit" disabled={isSubmitting}>
-                {isSubmitting 
-                  ? (isEditMode ? 'Updating...' : 'Creating...') 
-                  : (isEditMode ? 'Update Competition' : 'Create Competition')
-                }
-              </Button>
-            </div>
+            {!isViewMode && (
+              <div className="flex justify-end gap-4 pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBackClick}
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit" disabled={isSubmitting}>
+                  {isSubmitting 
+                    ? (isEditMode ? 'Updating...' : 'Creating...') 
+                    : (isEditMode ? 'Update Competition' : 'Create Competition')
+                  }
+                </Button>
+              </div>
+            )}
+            {isViewMode && (
+              <div className="flex justify-end gap-4 pt-6">
+                <Button 
+                  type="button"
+                  onClick={handleBackClick}
+                >
+                  Back to Competitions
+                </Button>
+              </div>
+            )}
           </form>
         </CardContent>
       </Card>
