@@ -616,9 +616,9 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Start Date & Time */}
-            <div className="space-y-4">
-              <Label className="font-medium">Start Date & Time *</Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label>Start Date & Time *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
                   <Input 
                     type="date" 
@@ -678,9 +678,9 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="space-y-4">
-              <Label className="font-medium">End Date & Time *</Label>
-              <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label>End Date & Time *</Label>
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
                   <Input 
                     type="date" 
@@ -729,11 +729,11 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Lunch Break */}
-            <div className="space-y-4">
-              <Label className="font-medium">Lunch Break *</Label>
+            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+              <Label>Lunch Break *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
-                  <Label className="text-sm text-muted-foreground">Start Time</Label>
+                  <Label className="text-sm text-muted-foreground mb-2 block">Start Time</Label>
                   <div className="flex gap-2">
                     <Select 
                       value={formData.lunch_start_hour} 
@@ -769,7 +769,7 @@ export const CompetitionEventRecord: React.FC = () => {
                   </div>
                 </div>
                 <div>
-                  <Label className="text-sm text-muted-foreground">End Time</Label>
+                  <Label className="text-sm text-muted-foreground mb-2 block">End Time</Label>
                   <div className="flex gap-2">
                     <Select 
                       value={formData.lunch_end_hour} 
