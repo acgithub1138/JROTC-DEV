@@ -24,7 +24,7 @@ const contactSchema = z.object({
   type_other: z.string().optional(),
   status: z.enum(['active', 'semi_active', 'not_active']),
   cadet_id: z.string().min(1),
-  phone: z.string().optional(),
+  phone: z.string().min(1, 'Phone is required'),
   email: z.string().email('Invalid email').optional().or(z.literal('')),
   notes: z.string().optional()
 }).refine(data => {
@@ -267,7 +267,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="type"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Type</FormLabel>
+                      <FormLabel className="w-16 text-left shrink-0">Type *</FormLabel>
                       <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
@@ -296,7 +296,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Phone</FormLabel>
+                      <FormLabel className="w-16 text-left shrink-0">Phone *</FormLabel>
                       <div className="flex-1">
                         <FormControl>
                           <Input placeholder="Phone number" {...field} />
@@ -359,7 +359,7 @@ export const ContactRecordPage: React.FC = () => {
                   name="status"
                   render={({ field }) => (
                     <FormItem className="flex items-center gap-2">
-                      <FormLabel className="w-16 text-left shrink-0">Status</FormLabel>
+                      <FormLabel className="w-16 text-left shrink-0">Status *</FormLabel>
                       <div className="flex-1">
                         <Select onValueChange={field.onChange} value={field.value}>
                           <FormControl>
