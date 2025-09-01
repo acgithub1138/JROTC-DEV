@@ -214,7 +214,7 @@ export const ScheduleEditRecord = () => {
       
       resetChanges();
       await refetch();
-      navigate(-1); // Go back to previous page
+      navigate(`/app/competition-portal/competition-details/${competitionId}/schedule`); // Go back to schedule tab
     } catch (error) {
       console.error('Error updating schedule:', error);
       toast({
