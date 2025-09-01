@@ -140,11 +140,14 @@ export const CompetitionEventRecord: React.FC = () => {
   useEffect(() => {
     if (existingEvent && (isEditMode || isViewMode) && eventTypes.length > 0) {
       const convertedData = convertEventToFormData(existingEvent);
-      setFormData(convertedData);
       
-      // Fetch score sheets for the loaded event immediately
+      // Fetch score sheets first, then set form data to ensure UUID is preserved
       if (convertedData.event && competitionId) {
-        fetchFilteredScoreSheets(convertedData.event);
+        fetchFilteredScoreSheets(convertedData.event).then(() => {
+          setFormData(convertedData);
+        });
+      } else {
+        setFormData(convertedData);
       }
     }
   }, [existingEvent, isEditMode, isViewMode, eventTypes, timezone]);
