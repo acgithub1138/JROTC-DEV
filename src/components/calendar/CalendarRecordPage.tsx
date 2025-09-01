@@ -756,7 +756,7 @@ export const CalendarRecordPage: React.FC = () => {
                 name="description"
                 render={({ field }) => (
                   <FormItem className="flex items-start gap-2">
-                    <FormLabel className="w-16 text-left shrink-0 pt-2">Description</FormLabel>
+                    <FormLabel className="w-32 text-left shrink-0 pt-2">Description</FormLabel>
                     <div className="flex-1">
                       <FormControl>
                         <Textarea 
