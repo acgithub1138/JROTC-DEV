@@ -152,7 +152,6 @@ export const ContactRecordPage: React.FC = () => {
         .from('profiles')
         .select('id, first_name, last_name')
         .eq('school_id', userProfile.school_id)
-        .in('role', ['cadet', 'command_staff'])
         .eq('active', true)
         .order('last_name');
       
