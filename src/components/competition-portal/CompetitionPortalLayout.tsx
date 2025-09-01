@@ -11,6 +11,7 @@ import { CompetitionDetailsPage } from './CompetitionDetailsPage';
 import { CompetitionSettingsPage } from './pages/CompetitionSettingsPage';
 import { OpenCompetitionsPage } from './OpenCompetitionsPage';
 import { ScoreSheetPage } from './my-competitions/ScoreSheetPage';
+import { CPCompetitionRecordPage } from './CPCompetitionRecordPage';
 import { useAuth } from '@/contexts/AuthContext';
 import { usePortal } from '@/contexts/PortalContext';
 import { useIsMobile } from '@/hooks/use-mobile';
@@ -112,6 +113,8 @@ const CompetitionPortalLayout = () => {
     
     if (path === '/app/competition-portal' || path === '/app/competition-portal/' || path === '/app/competition-portal/dashboard') {
       return <CompetitionDashboard />;
+    } else if (path.startsWith('/app/competition-portal/competitions/competition_record')) {
+      return <CPCompetitionRecordPage />;
     } else if (path === '/app/competition-portal/competitions') {
       return <CompetitionsPage />;
     } else if (path === '/app/competition-portal/my-competitions') {
