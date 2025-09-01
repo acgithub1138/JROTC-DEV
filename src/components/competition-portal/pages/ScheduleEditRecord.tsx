@@ -326,7 +326,7 @@ export const ScheduleEditRecord = () => {
                     slot.assignedSchool : null;
 
                   return (
-                    <div key={slot.time.toISOString()} className={`flex w-1/3 items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
+                    <div key={slot.time.toISOString()} className={`flex w-1/2 items-center gap-4 p-3 rounded-lg border ${index % 2 === 0 ? 'bg-background' : 'bg-muted/20'}`}>
                       <div className="font-mono text-sm min-w-[80px]">
                         {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                       </div>
