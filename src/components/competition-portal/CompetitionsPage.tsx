@@ -67,12 +67,10 @@ const CompetitionsPage = () => {
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-const [showCreateDialog, setShowCreateDialog] = useState(false);
-const [showViewModal, setShowViewModal] = useState(false);
-const [showEditModal, setShowEditModal] = useState(false);
-const [showCopyModal, setShowCopyModal] = useState(false);
-const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
-const [isCopying, setIsCopying] = useState(false);
+  const [showViewModal, setShowViewModal] = useState(false);
+  const [showCopyModal, setShowCopyModal] = useState(false);
+  const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
+  const [isCopying, setIsCopying] = useState(false);
   const [updatingStatus, setUpdatingStatus] = useState<string | null>(null);
   const [showCancelDialog, setShowCancelDialog] = useState(false);
   const [competitionToCancel, setCompetitionToCancel] = useState<Competition | null>(null);
@@ -194,27 +192,8 @@ const [isCopying, setIsCopying] = useState(false);
       if (aValue > bValue) return sortDirection === 'asc' ? 1 : -1;
       return 0;
     });
+  // Remove unused modal functions and state
   const canCreateCompetition = canCreate;
-  const handleCreateCompetition = async (data: any) => {
-    try {
-      const {
-        error
-      } = await supabase.from('cp_competitions').insert([{
-        ...data,
-        school_id: userProfile?.school_id,
-        created_by: userProfile?.id,
-        status: 'draft'
-      }]);
-      if (error) throw error;
-      toast.success('Competition created successfully');
-      refetchCompetitions();
-      fetchRegistrationCounts();
-      setShowCreateDialog(false);
-    } catch (error) {
-      console.error('Error creating competition:', error);
-      toast.error('Failed to create competition');
-    }
-  };
 const handleViewCompetition = (competition: Competition) => {
   setSelectedCompetition(competition);
   setShowViewModal(true);
@@ -225,24 +204,12 @@ const handleEditCompetition = (competition: Competition) => {
 
 // Open edit modal directly
 const handleOpenEdit = (competition: Competition) => {
-  setSelectedCompetition(competition);
-  setShowEditModal(true);
+  navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}`);
 };
 
 const handleEditSubmit = async (data: any) => {
-  try {
-    const { error } = await supabase
-      .from('cp_competitions')
-      .update(data)
-      .eq('id', selectedCompetition?.id);
-    if (error) throw error;
-    toast.success('Competition updated successfully');
-    setShowEditModal(false);
-    refetchCompetitions();
-  } catch (error) {
-    console.error('Error updating competition:', error);
-    toast.error('Failed to update competition');
-  }
+  // This function is no longer needed since we navigate to the page
+  refetchCompetitions();
 };
 
   const handleCancelCompetitionClick = (competition: Competition) => {
@@ -326,7 +293,7 @@ const handleEditSubmit = async (data: any) => {
           <h1 className="text-3xl font-bold">Competitions</h1>
           <p className="text-muted-foreground">Manage tournament competitions and events</p>
         </div>
-        {canCreateCompetition && <Button onClick={() => setShowCreateDialog(true)}>
+        {canCreateCompetition && <Button onClick={() => navigate('/app/competition-portal/competitions/competition_record')}>
             <Plus className="w-4 h-4 mr-2" />
             Create Competition
           </Button>}
@@ -449,7 +416,7 @@ const handleEditSubmit = async (data: any) => {
                     <TableRow key={competition.id}>
                       <TableCell className="py-[8px]">
                         {canManage ? (
-                          <button onClick={() => navigate(`/app/competition-portal/competition-details/${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
+                          <button onClick={() => navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}`)} className="font-medium text-blue-600 hover:text-blue-800 hover:underline cursor-pointer text-left">
                             {competition.name}
                           </button>
                         ) : (
@@ -598,8 +565,8 @@ const handleEditSubmit = async (data: any) => {
         </TabsContent>
       </Tabs>
 
-{/* Create Competition Dialog */}
-<CPCompetitionDialog open={showCreateDialog} onOpenChange={setShowCreateDialog} onSubmit={handleCreateCompetition} />
+{/* Remove modal dialogs since we're using navigation */}
+{/* Create/Edit competition is now handled by CPCompetitionRecordPage */}
 
 {/* View Competition Modal */}
  <ViewCompetitionModal 
@@ -608,14 +575,6 @@ const handleEditSubmit = async (data: any) => {
   onOpenChange={setShowViewModal} 
   hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
   onCompetitionUpdated={refetchCompetitions}
-/>
-
-{/* Edit Competition Modal */}
-<EditCompetitionModal 
-  open={showEditModal}
-  onOpenChange={setShowEditModal}
-  competition={selectedCompetition}
-  onSubmit={handleEditSubmit}
 />
 
 {/* Copy Competition Modal */}

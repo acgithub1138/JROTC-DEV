@@ -26,6 +26,7 @@ import CompetitionEventTypesManagement from './competition-management/Competitio
 import EmailManagementPage from './email-management/EmailManagementPage';
 import { EmailTemplateRecordPage } from './email-management/EmailTemplateRecordPage';
 import { EmailPreviewRecordPage } from './email-management/EmailPreviewRecordPage';
+import { CPCompetitionRecordPage } from './competition-portal/CPCompetitionRecordPage';
 
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
@@ -248,6 +249,7 @@ const MainApplication = () => {
             <Route path="competition-portal/" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/dashboard" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/competitions" element={<CompetitionPortalLayout />} />
+            <Route path="competition-portal/competitions/competition_record" element={<CPCompetitionRecordPage />} />
             <Route path="competition-portal/teams" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/score-sheets" element={<CompetitionPortalLayout />} />
             <Route path="competition-portal/judges" element={<CompetitionPortalLayout />} />
