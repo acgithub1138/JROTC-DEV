@@ -176,13 +176,16 @@ export const CompetitionEventRecord: React.FC = () => {
       const interval = parseInt(formData.interval);
       if (interval > 0 && totalMinutes > 0) {
         const maxParticipants = Math.floor(totalMinutes / interval);
-        setFormData(prev => ({
-          ...prev,
-          max_participants: maxParticipants.toString()
-        }));
+        // Only update if the calculated value is different from current value
+        if (formData.max_participants !== maxParticipants.toString()) {
+          setFormData(prev => ({
+            ...prev,
+            max_participants: maxParticipants.toString()
+          }));
+        }
       }
     }
-  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute]);
+  }, [formData.interval, formData.start_date, formData.start_hour, formData.start_minute, formData.end_hour, formData.end_minute, formData.lunch_start_hour, formData.lunch_start_minute, formData.lunch_end_hour, formData.lunch_end_minute, formData.max_participants]);
   function convertEventToFormData(event: CompEvent): FormData {
     // Convert UTC times to school timezone Date objects
     const startDate = event.start_time ? convertToSchoolTimezone(event.start_time, timezone) : null;
