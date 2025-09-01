@@ -523,51 +523,60 @@ export const BudgetExpenseRecordPage: React.FC = () => {
                           </FormControl>
                           <FormMessage />
                         </div>
-                      </FormItem>
-                    )}
-                  />
+                       </FormItem>
+                     )}
+                   />
 
-                  {/* Attachments Field - only for create mode */}
-                  {currentMode === 'create' && (
-                    <div className="lg:col-span-2">
-                      <div className="flex gap-4">
-                        <label className="w-32 text-right text-sm font-medium mt-2 shrink-0">Attachments</label>
-                        <div className="flex-1">
-                          <input
-                            type="file"
-                            multiple
-                            onChange={(e) => {
-                              const files = Array.from(e.target.files || []);
-                              setPendingFiles(prev => [...prev, ...files]);
-                            }}
-                            className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                  {/* Attachments Section */}
+                  <div className="lg:col-span-2">
+                    <div className="flex gap-4">
+                      <label className="w-32 text-right text-sm font-medium mt-2 shrink-0">Attachments</label>
+                      <div className="flex-1">
+                        {currentMode === 'create' ? (
+                          <>
+                            <input
+                              type="file"
+                              multiple
+                              onChange={(e) => {
+                                const files = Array.from(e.target.files || []);
+                                setPendingFiles(prev => [...prev, ...files]);
+                              }}
+                              className="block w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-primary file:text-primary-foreground hover:file:bg-primary/80"
+                            />
+                            {pendingFiles.length > 0 && (
+                              <div className="mt-2 space-y-1">
+                                <p className="text-sm text-muted-foreground">Files to upload after expense creation:</p>
+                                {pendingFiles.map((file, index) => (
+                                  <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
+                                    <span>{file.name}</span>
+                                    <button
+                                      type="button"
+                                      onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
+                                      className="text-red-500 hover:text-red-700"
+                                    >
+                                      ×
+                                    </button>
+                                  </div>
+                                ))}
+                                {isUploadingFiles && (
+                                  <div className="text-sm text-blue-600 font-medium">
+                                    Uploading files...
+                                  </div>
+                                )}
+                              </div>
+                            )}
+                          </>
+                        ) : recordId ? (
+                          <AttachmentSection
+                            recordType="budget_transaction"
+                            recordId={recordId}
+                            canEdit={canEdit && currentMode === 'edit'}
+                            showContentOnly
                           />
-                          {pendingFiles.length > 0 && (
-                            <div className="mt-2 space-y-1">
-                              <p className="text-sm text-muted-foreground">Files to upload after expense creation:</p>
-                              {pendingFiles.map((file, index) => (
-                                <div key={index} className="flex items-center justify-between bg-muted p-2 rounded text-sm">
-                                  <span>{file.name}</span>
-                                  <button
-                                    type="button"
-                                    onClick={() => setPendingFiles(prev => prev.filter((_, i) => i !== index))}
-                                    className="text-red-500 hover:text-red-700"
-                                  >
-                                    ×
-                                  </button>
-                                </div>
-                              ))}
-                              {isUploadingFiles && (
-                                <div className="text-sm text-blue-600 font-medium">
-                                  Uploading files...
-                                </div>
-                              )}
-                            </div>
-                          )}
-                        </div>
+                        ) : null}
                       </div>
                     </div>
-                  )}
+                  </div>
 
                   <div className="flex justify-end gap-2 pt-6 lg:col-span-2">
                     <Button
@@ -635,22 +644,6 @@ export const BudgetExpenseRecordPage: React.FC = () => {
           </CardContent>
         </Card>
 
-        {/* Attachments Section */}
-        {recordId && (
-          <Card>
-            <CardHeader>
-              <CardTitle>Attachments</CardTitle>
-            </CardHeader>
-            <CardContent>
-              <AttachmentSection
-                recordType="budget_transaction"
-                recordId={recordId}
-                canEdit={canEdit && (currentMode === 'edit' || currentMode === 'view')}
-                showContentOnly
-              />
-            </CardContent>
-          </Card>
-        )}
       </div>
 
       <UnsavedChangesDialog
