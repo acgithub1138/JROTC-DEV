@@ -11,9 +11,6 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { CPCompetitionDialog } from './components/CPCompetitionDialog';
-import { ViewCompetitionModal } from './ViewCompetitionModal';
-import { EditCompetitionModal } from './modals/EditCompetitionModal';
 import { CopyCompetitionModal } from './components/CopyCompetitionModal';
 import { CompetitionCards } from './components/CompetitionCards';
 import { useCompetitions } from '@/hooks/competition-portal/useCompetitions';
@@ -67,7 +64,6 @@ const CompetitionsPage = () => {
   const [activeTab, setActiveTab] = useState<'active' | 'non-active'>('active');
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
-  const [showViewModal, setShowViewModal] = useState(false);
   const [showCopyModal, setShowCopyModal] = useState(false);
   const [selectedCompetition, setSelectedCompetition] = useState<Competition | null>(null);
   const [isCopying, setIsCopying] = useState(false);
@@ -195,8 +191,7 @@ const CompetitionsPage = () => {
   // Remove unused modal functions and state
   const canCreateCompetition = canCreate;
 const handleViewCompetition = (competition: Competition) => {
-  setSelectedCompetition(competition);
-  setShowViewModal(true);
+  navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}&mode=view`);
 };
 const handleEditCompetition = (competition: Competition) => {
   navigate(`/app/competition-portal/competition-details/${competition.id}`);
@@ -564,18 +559,6 @@ const handleEditSubmit = async (data: any) => {
 
         </TabsContent>
       </Tabs>
-
-{/* Remove modal dialogs since we're using navigation */}
-{/* Create/Edit competition is now handled by CPCompetitionRecordPage */}
-
-{/* View Competition Modal */}
- <ViewCompetitionModal 
-  competition={selectedCompetition} 
-  open={showViewModal} 
-  onOpenChange={setShowViewModal} 
-  hostSchoolName={selectedCompetition ? getSchoolName(selectedCompetition.school_id) : ''} 
-  onCompetitionUpdated={refetchCompetitions}
-/>
 
 {/* Copy Competition Modal */}
 <CopyCompetitionModal 
