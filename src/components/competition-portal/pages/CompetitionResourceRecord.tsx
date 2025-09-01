@@ -288,7 +288,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                       disabled={isSubmitting}
                     >
                       <Save className="h-4 w-4" />
-                      {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save Changes'}
+                      {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save'}
                     </Button>
                   </>
                 )}
