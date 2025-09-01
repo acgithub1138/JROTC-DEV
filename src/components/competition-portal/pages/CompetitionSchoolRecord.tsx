@@ -445,7 +445,7 @@ export const CompetitionSchoolRecord = () => {
             </Button>
             <Button type="submit" form="school-form" disabled={isSubmitting}>
               <Save className="h-4 w-4" />
-              {isSubmitting ? 'Saving...' : 'Save Changes'}
+              {isSubmitting ? 'Saving...' : 'Register School'}
             </Button>
           </div>
         )}
