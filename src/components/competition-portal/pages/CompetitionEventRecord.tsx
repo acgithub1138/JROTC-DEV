@@ -560,7 +560,7 @@ export const CompetitionEventRecord: React.FC = () => {
         <CardContent>
           <form id="event-form" onSubmit={handleSubmit} className="space-y-6">
             {/* Event & Score Template */}
-            <div className="grid grid-cols-1 md:grid-cols-1 gap-6">
+            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                 <Label htmlFor="event" className="text-right">Event *</Label>
                 <Select value={formData.event} onValueChange={value => setFormData(prev => ({
