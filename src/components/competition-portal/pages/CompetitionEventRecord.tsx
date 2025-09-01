@@ -14,12 +14,15 @@ import { toast } from 'sonner';
 import type { Database } from '@/integrations/supabase/types';
 import { useSchoolUsers } from '@/hooks/useSchoolUsers';
 import { useSchoolTimezone } from '@/hooks/useSchoolTimezone';
+import { useJudges } from '@/hooks/competition-portal/useJudges';
 import { formatInSchoolTimezone, convertFromSchoolTimezone, convertToSchoolTimezone } from '@/utils/timezoneUtils';
 import { formatTimeForDisplay, TIME_FORMATS } from '@/utils/timeDisplayUtils';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useCompetitionEventTypes } from '../../competition-management/hooks/useCompetitionEventTypes';
 import { useCompetitionEventsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { MultiSelectJudges } from '../components/MultiSelectJudges';
+import { MultiSelectResources } from '../components/MultiSelectResources';
 type CompEvent = Database['public']['Tables']['cp_comp_events']['Row'] & {
   competition_event_types?: {
     name: string;
@@ -592,53 +595,25 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
             </div>
 
-            {/* Add Judge & Add Resources */}
+            {/* Judge & Resource Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-4">
-                {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                    <Label className="text-right">Add Judge</Label>
-                    <Select onValueChange={addJudge}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a judge to add" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableJudges().map(judge => <SelectItem key={judge.id} value={judge.id}>
-                            {judge.name}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>}
-                {getSelectedJudges().length > 0 && <div className="flex flex-wrap gap-2">
-                    {getSelectedJudges().map(judge => <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
-                        {judge.name}
-                        {!isViewMode && <button type="button" onClick={() => removeJudge(judge.id)} className="ml-1 hover:text-destructive">
-                            ×
-                          </button>}
-                      </Badge>)}
-                  </div>}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Judges</Label>
+                <MultiSelectJudges
+                  judges={judges}
+                  selectedJudgeIds={formData.judges}
+                  onChange={(judgeIds) => setFormData(prev => ({ ...prev, judges: judgeIds }))}
+                  disabled={isViewMode}
+                />
               </div>
-              <div className="space-y-4">
-                {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                    <Label className="text-right">Add Resource</Label>
-                    <Select onValueChange={addResource}>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select a resource to add" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {getAvailableResources().map(user => <SelectItem key={user.id} value={user.id}>
-                            {user.last_name}, {user.first_name}
-                          </SelectItem>)}
-                      </SelectContent>
-                    </Select>
-                  </div>}
-                {getSelectedResources().length > 0 && <div className="flex flex-wrap gap-2">
-                    {getSelectedResources().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                        {user.last_name}, {user.first_name}
-                        {!isViewMode && <button type="button" onClick={() => removeResource(user.id)} className="ml-1 hover:text-destructive">
-                            ×
-                          </button>}
-                      </Badge>)}
-                  </div>}
+              <div className="space-y-2">
+                <Label className="text-sm font-medium">Resources</Label>
+                <MultiSelectResources
+                  resources={schoolUsers}
+                  selectedResourceIds={formData.resources}
+                  onChange={(resourceIds) => setFormData(prev => ({ ...prev, resources: resourceIds }))}
+                  disabled={isViewMode}
+                />
               </div>
             </div>
 
