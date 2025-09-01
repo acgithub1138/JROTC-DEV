@@ -279,7 +279,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource.id)}>
-                              <Edit2 className="w-3 h-3" />
+                              <Edit className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
