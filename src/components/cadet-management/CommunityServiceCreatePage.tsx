@@ -183,9 +183,9 @@ export const CommunityServiceCreatePage: React.FC = () => {
             )}
 
             {/* Cadet Selection */}
-            <div>
-              <Label>Select Cadets *</Label>
-              <div className="space-y-3 mt-2">
+            <div className="flex items-start gap-4">
+              <Label className="w-32 text-right shrink-0 pt-2">Select Cadets *</Label>
+              <div className="flex-1 space-y-3">
                 <Input
                   placeholder="Search cadets..."
                   value={searchTerm}
@@ -221,11 +221,11 @@ export const CommunityServiceCreatePage: React.FC = () => {
               </div>
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column */}
-              <div className="space-y-4">
-                <div>
-                  <Label>Date *</Label>
+            <div className="space-y-4">
+              {/* Date */}
+              <div className="flex items-center gap-4">
+                <Label className="w-32 text-right shrink-0">Date *</Label>
+                <div className="flex-1">
                   <Popover>
                     <PopoverTrigger asChild>
                       <Button 
@@ -249,9 +249,12 @@ export const CommunityServiceCreatePage: React.FC = () => {
                     </PopoverContent>
                   </Popover>
                 </div>
+              </div>
 
-                <div>
-                  <Label htmlFor="hours">Hours *</Label>
+              {/* Hours */}
+              <div className="flex items-center gap-4">
+                <Label htmlFor="hours" className="w-32 text-right shrink-0">Hours *</Label>
+                <div className="flex-1">
                   <Input
                     id="hours"
                     type="number"
@@ -266,10 +269,10 @@ export const CommunityServiceCreatePage: React.FC = () => {
                 </div>
               </div>
 
-              {/* Right Column */}
-              <div className="space-y-4">
-                <div>
-                  <Label htmlFor="event">Activity/Event *</Label>
+              {/* Activity/Event */}
+              <div className="flex items-center gap-4">
+                <Label htmlFor="event" className="w-32 text-right shrink-0">Activity/Event *</Label>
+                <div className="flex-1">
                   <Input
                     id="event"
                     value={event}
@@ -282,15 +285,17 @@ export const CommunityServiceCreatePage: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div>
-              <Label htmlFor="notes">Event Description</Label>
-              <Textarea
-                id="notes"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                placeholder="Add details about the event..."
-                rows={3}
-              />
+            <div className="flex items-start gap-4">
+              <Label htmlFor="notes" className="w-32 text-right shrink-0 pt-2">Event Description</Label>
+              <div className="flex-1">
+                <Textarea
+                  id="notes"
+                  value={notes}
+                  onChange={(e) => setNotes(e.target.value)}
+                  placeholder="Add details about the event..."
+                  rows={3}
+                />
+              </div>
             </div>
 
             {/* Actions */}

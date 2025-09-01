@@ -188,105 +188,117 @@ export const PTTestCreatePage = () => {
             <CardTitle>Single Cadet PT Test</CardTitle>
           </CardHeader>
           <CardContent>
-            <form onSubmit={handleSingleSubmit} className="space-y-4">
+            <form onSubmit={handleSingleSubmit} className="space-y-6">
               {/* Cadet Selection */}
-              <div className="space-y-2">
-                <Label htmlFor="cadet">Cadet *</Label>
-                <Select
-                  value={singleData.cadetId}
-                  onValueChange={(value) => setSingleData(prev => ({ ...prev, cadetId: value }))}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a cadet" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {cadets_single.map((cadet) => (
-                      <SelectItem key={cadet.id} value={cadet.id}>
-                        {cadet.last_name}, {cadet.first_name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="cadet" className="w-32 text-right shrink-0">Cadet *</Label>
+                <div className="flex-1">
+                  <Select
+                    value={singleData.cadetId}
+                    onValueChange={(value) => setSingleData(prev => ({ ...prev, cadetId: value }))}
+                  >
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a cadet" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {cadets_single.map((cadet) => (
+                        <SelectItem key={cadet.id} value={cadet.id}>
+                          {cadet.last_name}, {cadet.first_name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
 
               {/* Date Selection */}
-              <div className="space-y-2">
-                <Label>Date *</Label>
-                <Popover>
-                  <PopoverTrigger asChild>
-                    <Button
-                      variant="outline"
-                      className={cn(
-                        "w-full justify-start text-left font-normal",
-                        !singleData.date && "text-muted-foreground"
-                      )}
-                    >
-                      <CalendarIcon className="mr-2 h-4 w-4" />
-                      {singleData.date ? format(singleData.date, "PPP") : "Pick a date"}
-                    </Button>
-                  </PopoverTrigger>
-                  <PopoverContent className="w-auto p-0" align="start">
-                    <Calendar
-                      mode="single"
-                      selected={singleData.date}
-                      onSelect={(date) => setSingleData(prev => ({ ...prev, date }))}
-                      initialFocus
-                      className="pointer-events-auto"
-                    />
-                  </PopoverContent>
-                </Popover>
+              <div className="flex items-center gap-4">
+                <Label className="w-32 text-right shrink-0">Date *</Label>
+                <div className="flex-1">
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <Button
+                        variant="outline"
+                        className={cn(
+                          "w-full justify-start text-left font-normal",
+                          !singleData.date && "text-muted-foreground"
+                        )}
+                      >
+                        <CalendarIcon className="mr-2 h-4 w-4" />
+                        {singleData.date ? format(singleData.date, "PPP") : "Pick a date"}
+                      </Button>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={singleData.date}
+                        onSelect={(date) => setSingleData(prev => ({ ...prev, date }))}
+                        initialFocus
+                        className="pointer-events-auto"
+                      />
+                    </PopoverContent>
+                  </Popover>
+                </div>
               </div>
 
               {/* Test Scores */}
-              <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-2">
-                  <Label htmlFor="pushUps">Push-ups</Label>
-                  <Input
-                    id="pushUps"
-                    type="number"
-                    min="0"
-                    placeholder="Enter number"
-                    value={singleData.pushUps}
-                    onChange={(e) => setSingleData(prev => ({ ...prev, pushUps: e.target.value }))}
-                  />
+              <div className="space-y-4">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="pushUps" className="w-32 text-right shrink-0">Push-ups</Label>
+                  <div className="flex-1">
+                    <Input
+                      id="pushUps"
+                      type="number"
+                      min="0"
+                      placeholder="Enter number"
+                      value={singleData.pushUps}
+                      onChange={(e) => setSingleData(prev => ({ ...prev, pushUps: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="sitUps">Sit-ups</Label>
-                  <Input
-                    id="sitUps"
-                    type="number"
-                    min="0"
-                    placeholder="Enter number"
-                    value={singleData.sitUps}
-                    onChange={(e) => setSingleData(prev => ({ ...prev, sitUps: e.target.value }))}
-                  />
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="sitUps" className="w-32 text-right shrink-0">Sit-ups</Label>
+                  <div className="flex-1">
+                    <Input
+                      id="sitUps"
+                      type="number"
+                      min="0"
+                      placeholder="Enter number"
+                      value={singleData.sitUps}
+                      onChange={(e) => setSingleData(prev => ({ ...prev, sitUps: e.target.value }))}
+                    />
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="plankTime">Plank Time (seconds)</Label>
-                  <Input
-                    id="plankTime"
-                    type="number"
-                    min="0"
-                    placeholder="Enter seconds"
-                    value={singleData.plankTime}
-                    onChange={(e) => setSingleData(prev => ({ ...prev, plankTime: e.target.value }))}
-                  />
-                  <p className="text-xs text-muted-foreground">Enter time in seconds (e.g., 120 for 2 minutes)</p>
+                <div className="flex items-start gap-4">
+                  <Label htmlFor="plankTime" className="w-32 text-right shrink-0 pt-2">Plank Time</Label>
+                  <div className="flex-1 space-y-1">
+                    <Input
+                      id="plankTime"
+                      type="number"
+                      min="0"
+                      placeholder="Enter seconds"
+                      value={singleData.plankTime}
+                      onChange={(e) => setSingleData(prev => ({ ...prev, plankTime: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">Enter time in seconds (e.g., 120 for 2 minutes)</p>
+                  </div>
                 </div>
 
-                <div className="space-y-2">
-                  <Label htmlFor="mileTime">Mile Time (seconds)</Label>
-                  <Input
-                    id="mileTime"
-                    type="number"
-                    min="0"
-                    placeholder="Enter seconds"
-                    value={singleData.mileTime}
-                    onChange={(e) => setSingleData(prev => ({ ...prev, mileTime: e.target.value }))}
-                  />
-                  <p className="text-xs text-muted-foreground">Enter time in seconds (e.g., 480 for 8:00)</p>
+                <div className="flex items-start gap-4">
+                  <Label htmlFor="mileTime" className="w-32 text-right shrink-0 pt-2">Mile Time</Label>
+                  <div className="flex-1 space-y-1">
+                    <Input
+                      id="mileTime"
+                      type="number"
+                      min="0"
+                      placeholder="Enter seconds"
+                      value={singleData.mileTime}
+                      onChange={(e) => setSingleData(prev => ({ ...prev, mileTime: e.target.value }))}
+                    />
+                    <p className="text-xs text-muted-foreground">Enter time in seconds (e.g., 480 for 8:00)</p>
+                  </div>
                 </div>
               </div>
 
@@ -310,39 +322,43 @@ export const PTTestCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="test-date">Test Date</Label>
-                <Input 
-                  id="test-date" 
-                  type="date" 
-                  value={bulkDate ? format(bulkDate, 'yyyy-MM-dd') : ''} 
-                  onChange={(e) => {
-                    const dateValue = e.target.value;
-                    if (dateValue) {
-                      setBulkDate(new Date(dateValue + 'T00:00:00'));
-                    } else {
-                      setBulkDate(undefined);
-                    }
-                  }}
-                  className="w-full" 
-                />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="test-date" className="w-32 text-right shrink-0">Test Date</Label>
+                <div className="flex-1">
+                  <Input 
+                    id="test-date" 
+                    type="date" 
+                    value={bulkDate ? format(bulkDate, 'yyyy-MM-dd') : ''} 
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
+                      if (dateValue) {
+                        setBulkDate(new Date(dateValue + 'T00:00:00'));
+                      } else {
+                        setBulkDate(undefined);
+                      }
+                    }}
+                    className="w-full" 
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="flight">Flight</Label>
-                <Select value={selectedFlight} onValueChange={setSelectedFlight}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a flight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FLIGHTS.map((flight) => (
-                      <SelectItem key={flight} value={flight}>
-                        {flight}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="flight" className="w-32 text-right shrink-0">Flight</Label>
+                <div className="flex-1">
+                  <Select value={selectedFlight} onValueChange={setSelectedFlight}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a flight" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLIGHTS.map((flight) => (
+                        <SelectItem key={flight} value={flight}>
+                          {flight}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 

@@ -101,39 +101,43 @@ export const InspectionCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="inspection-date">Inspection Date</Label>
-                <Input
-                  id="inspection-date"
-                  type="date"
-                  value={date ? format(date, 'yyyy-MM-dd') : ''}
-                  onChange={(e) => {
-                    const dateValue = e.target.value;
-                    if (dateValue) {
-                      setDate(new Date(dateValue + 'T00:00:00'));
-                    } else {
-                      setDate(undefined);
-                    }
-                  }}
-                  className="w-full"
-                />
+            <div className="space-y-4">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="inspection-date" className="w-32 text-right shrink-0">Inspection Date</Label>
+                <div className="flex-1">
+                  <Input
+                    id="inspection-date"
+                    type="date"
+                    value={date ? format(date, 'yyyy-MM-dd') : ''}
+                    onChange={(e) => {
+                      const dateValue = e.target.value;
+                      if (dateValue) {
+                        setDate(new Date(dateValue + 'T00:00:00'));
+                      } else {
+                        setDate(undefined);
+                      }
+                    }}
+                    className="w-full"
+                  />
+                </div>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="flight">Flight</Label>
-                <Select value={selectedFlight} onValueChange={setSelectedFlight}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a flight" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {FLIGHTS.map((flight) => (
-                      <SelectItem key={flight} value={flight}>
-                        {flight}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="flight" className="w-32 text-right shrink-0">Flight</Label>
+                <div className="flex-1">
+                  <Select value={selectedFlight} onValueChange={setSelectedFlight}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a flight" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {FLIGHTS.map((flight) => (
+                        <SelectItem key={flight} value={flight}>
+                          {flight}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
               </div>
             </div>
 

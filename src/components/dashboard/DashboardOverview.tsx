@@ -8,8 +8,6 @@ import { useEvents } from '@/components/calendar/hooks/useEvents';
 import { useBudgetTransactions } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { useToast } from '@/hooks/use-toast';
 import { TaskForm } from '@/components/tasks/TaskForm';
-import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
-import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
 import { EventDialog } from '@/components/calendar/components/EventDialog';
 import IncidentForm from '@/components/incident-management/IncidentForm';
 import { CreateUserDialog } from '@/components/admin/CreateUserDialog';
@@ -115,12 +113,11 @@ const DashboardOverview = () => {
     return filtered;
   }, [events, eventsLoading]);
   const [isCreateTaskOpen, setIsCreateTaskOpen] = useState(false);
-  const [isAddIncomeOpen, setIsAddIncomeOpen] = useState(false);
-  const [isAddExpenseOpen, setIsAddExpenseOpen] = useState(false);
   const [isCreateEventOpen, setIsCreateEventOpen] = useState(false);
   const [isCreateIncidentOpen, setIsCreateIncidentOpen] = useState(false);
   const [isCreateUserOpen, setIsCreateUserOpen] = useState(false);
   const [isCreateSchoolOpen, setIsCreateSchoolOpen] = useState(false);
+
   const handleCreateTransaction = async (data: any) => {
     try {
       await createTransaction(data);
@@ -266,11 +263,11 @@ const DashboardOverview = () => {
                     <AlertTriangle className="w-4 h-4 text-orange-600 mr-2" />
                     <p className="font-medium text-sm">Create Incident</p>
                   </button>
-                  <button onClick={() => setIsAddIncomeOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => navigate('/app/budget/income_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <Plus className="w-4 h-4 text-green-600 mr-2" />
                     <p className="font-medium text-sm">Add Income</p>
                   </button>
-                  <button onClick={() => setIsAddExpenseOpen(true)} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
+                  <button onClick={() => navigate('/app/budget/expense_record?mode=create')} className="p-3 text-left border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors flex items-center">
                     <DollarSign className="w-4 h-4 text-red-600 mr-2" />
                     <p className="font-medium text-sm">Add Expense</p>
                   </button>
@@ -378,11 +375,6 @@ const DashboardOverview = () => {
 
       {/* Modals - Only show for roles that can use them */}
       {userProfile?.role === 'instructor' && <>
-
-          <AddIncomeDialog open={isAddIncomeOpen} onOpenChange={setIsAddIncomeOpen} onSubmit={handleCreateTransaction} />
-
-          <AddExpenseDialog open={isAddExpenseOpen} onOpenChange={setIsAddExpenseOpen} onSubmit={handleCreateTransaction} />
-
           <IncidentForm isOpen={isCreateIncidentOpen} onClose={() => setIsCreateIncidentOpen(false)} />
         </>}
 

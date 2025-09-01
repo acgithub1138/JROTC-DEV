@@ -282,45 +282,49 @@ const TeamRecordPage = () => {
         </CardHeader>
         <CardContent className="space-y-6">
           {/* Basic Info */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-2">
-              <Label htmlFor="name">Team Name *</Label>
-              <Input
-                id="name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Enter team name"
-              />
+          <div className="space-y-6">
+            <div className="flex items-center gap-4">
+              <Label htmlFor="name" className="w-32 text-right shrink-0">Team Name *</Label>
+              <div className="flex-1">
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => handleInputChange('name', e.target.value)}
+                  placeholder="Enter team name"
+                />
+              </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="team_lead">Team Lead *</Label>
-              <Select
-                value={formData.team_lead_id}
-                onValueChange={(value) => handleInputChange('team_lead_id', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select team lead" />
-                </SelectTrigger>
-                <SelectContent>
-                  {cadets
-                    .filter(cadet => cadet.active)
-                    .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`))
-                    .map(cadet => (
-                      <SelectItem key={cadet.id} value={cadet.id}>
-                        {cadet.last_name}, {cadet.first_name}
-                      </SelectItem>
-                    ))}
-                </SelectContent>
-              </Select>
+            <div className="flex items-center gap-4">
+              <Label htmlFor="team_lead" className="w-32 text-right shrink-0">Team Lead *</Label>
+              <div className="flex-1">
+                <Select
+                  value={formData.team_lead_id}
+                  onValueChange={(value) => handleInputChange('team_lead_id', value)}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team lead" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {cadets
+                      .filter(cadet => cadet.active)
+                      .sort((a, b) => `${a.last_name}, ${a.first_name}`.localeCompare(`${b.last_name}, ${b.first_name}`))
+                      .map(cadet => (
+                        <SelectItem key={cadet.id} value={cadet.id}>
+                          {cadet.last_name}, {cadet.first_name}
+                        </SelectItem>
+                      ))}
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
           </div>
 
           {/* Team Members - Only show when Team Lead is selected */}
           {formData.team_lead_id && (
-            <div>
-              <Label>Team Members *</Label>
-              <div className="space-y-3 mt-2">
+            <div className="flex items-start gap-4">
+              <Label className="w-32 text-right shrink-0 pt-2">Team Members *</Label>
+              <div className="flex-1 space-y-3">
                 <Input
                   placeholder="Search cadets..."
                   value={searchTerm}
@@ -372,15 +376,17 @@ const TeamRecordPage = () => {
             </div>
           )}
 
-          <div className="space-y-2">
-            <Label htmlFor="description">Description</Label>
-            <Textarea
-              id="description"
-              value={formData.description}
-              onChange={(e) => handleInputChange('description', e.target.value)}
-              placeholder="Enter team description (optional)"
-              rows={3}
-            />
+          <div className="flex items-start gap-4">
+            <Label htmlFor="description" className="w-32 text-right shrink-0 pt-2">Description</Label>
+            <div className="flex-1">
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleInputChange('description', e.target.value)}
+                placeholder="Enter team description (optional)"
+                rows={3}
+              />
+            </div>
           </div>
         </CardContent>
       </Card>
