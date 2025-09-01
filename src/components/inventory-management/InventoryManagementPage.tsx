@@ -63,15 +63,15 @@ const InventoryManagementPage = () => {
 
   // Handle navigation for create/edit
   const handleCreateNew = () => {
-    navigate('/app/cadets/inventory_record?mode=create');
+    navigate('/app/inventory/inventory_record?mode=create');
   };
 
   const handleEditItem = async (item: any) => {
-    navigate(`/app/cadets/inventory_record?mode=edit&id=${item.id}`);
+    navigate(`/app/inventory/inventory_record?mode=edit&id=${item.id}`);
   };
 
   const handleViewItem = (item: any) => {
-    navigate(`/app/cadets/inventory_record?id=${item.id}`);
+    navigate(`/app/inventory/inventory_record?id=${item.id}`);
   };
 
   const handleBulkImport = async (items: any[]) => {

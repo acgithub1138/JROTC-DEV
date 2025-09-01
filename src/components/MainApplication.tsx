@@ -223,7 +223,7 @@ const MainApplication = () => {
             <Route path="job-board" element={<JobBoardPage />} />
             <Route path="teams" element={<TeamsManagementPage />} />
             <Route path="inventory" element={<InventoryManagementPage />} />
-            <Route path="cadets/inventory_record" element={<InventoryRecordPage />} />
+            <Route path="inventory/inventory_record" element={<InventoryRecordPage />} />
             <Route path="budget" element={<BudgetManagementPage />} />
             <Route path="budget/income_record" element={<BudgetIncomeRecordPage />} />
             <Route path="budget/expense_record" element={<BudgetExpenseRecordPage />} />
