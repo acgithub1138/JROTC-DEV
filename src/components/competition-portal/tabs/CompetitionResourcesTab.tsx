@@ -1,15 +1,14 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown } from 'lucide-react';
+import { Plus, Edit2, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle, AlertDialogTrigger } from '@/components/ui/alert-dialog';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { useCompetitionResources } from '@/hooks/competition-portal/useCompetitionResources';
-import { useCompetitionResourcesPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { useIsMobile } from '@/hooks/use-mobile';
-import { AddResourceModal } from '@/components/competition-portal/modals/AddResourceModal';
-import { EditResourceModal } from '@/components/competition-portal/modals/EditResourceModal';
 import { format } from 'date-fns';
 interface CompetitionResourcesTabProps {
   competitionId: string;
@@ -17,22 +16,15 @@ interface CompetitionResourcesTabProps {
 export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = ({
   competitionId
 }) => {
+  const navigate = useNavigate();
   const isMobile = useIsMobile();
   const {
     resources,
     isLoading,
-    createResource,
-    updateResource,
     deleteResource
   } = useCompetitionResources(competitionId);
-  const {
-    canCreate,
-    canView,
-    canUpdate,
-    canDelete
-  } = useCompetitionResourcesPermissions();
-  const [showAddModal, setShowAddModal] = useState(false);
-  const [editingResource, setEditingResource] = useState(null);
+  const { canCreate, canEdit, canDelete, canView, canViewDetails } = useTablePermissions('cp_comp_resources');
+  
   const [deletingResourceId, setDeletingResourceId] = useState(null);
   const [sortField, setSortField] = useState<string>('');
   const [sortDirection, setSortDirection] = useState<'asc' | 'desc'>('asc');
@@ -82,8 +74,16 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     return 0;
   });
 
-  const handleEdit = (resource) => {
-    setEditingResource(resource);
+  const handleView = (resourceId: string) => {
+    navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=view&id=${resourceId}`);
+  };
+
+  const handleEdit = (resourceId: string) => {
+    navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=edit&id=${resourceId}`);
+  };
+
+  const handleCreate = () => {
+    navigate(`/app/competition-portal/competition-details/${competitionId}/resources_record?mode=create`);
   };
 
   const handleDelete = async (id) => {
@@ -101,7 +101,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
     <div className="space-y-4">
       <div className="flex items-center justify-between py-[8px]">
         <h2 className="text-lg font-semibold">Competition Resources</h2>
-        {canCreate && <Button onClick={() => setShowAddModal(true)}>
+        {canCreate && <Button onClick={handleCreate}>
             <Plus className="w-4 h-4 mr-2" />
             Add Resource
           </Button>}
@@ -138,13 +138,26 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                       <span className="text-sm font-medium text-muted-foreground">End:</span>
                       <p className="text-sm">{resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}</p>
                     </div>
-                     {(canUpdate || canDelete) && (
+                     {(canViewDetails || canEdit || canDelete) && (
                        <div className="flex flex-wrap gap-2 pt-2">
-                         {canUpdate && (
+                         {canViewDetails && (
                           <Tooltip>
                             <TooltipTrigger asChild>
-                              <Button variant="outline" size="sm" onClick={() => handleEdit(resource)}>
-                                <Edit className="w-4 h-4 mr-1" />
+                              <Button variant="outline" size="sm" onClick={() => handleView(resource.id)}>
+                                <Eye className="w-4 h-4 mr-1" />
+                                View
+                              </Button>
+                            </TooltipTrigger>
+                            <TooltipContent>
+                              <p>View Resource</p>
+                            </TooltipContent>
+                          </Tooltip>
+                        )}
+                         {canEdit && (
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <Button variant="outline" size="sm" onClick={() => handleEdit(resource.id)}>
+                                <Edit2 className="w-4 h-4 mr-1" />
                                 Edit
                               </Button>
                             </TooltipTrigger>
@@ -248,13 +261,25 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                 <TableCell>
                   {resource.end_time ? format(new Date(resource.end_time), 'MMM, d yyyy HH:mm') : '-'}
                 </TableCell>
-                 {(canUpdate || canDelete) && <TableCell>
+                 {(canViewDetails || canEdit || canDelete) && <TableCell>
                      <div className="flex items-center justify-center gap-2">
-                       {canUpdate && (
+                       {canViewDetails && (
                         <Tooltip>
                           <TooltipTrigger asChild>
-                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource)}>
-                              <Edit className="w-3 h-3" />
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleView(resource.id)}>
+                              <Eye className="w-3 h-3" />
+                            </Button>
+                          </TooltipTrigger>
+                          <TooltipContent>
+                            <p>View Resource</p>
+                          </TooltipContent>
+                        </Tooltip>
+                      )}
+                       {canEdit && (
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEdit(resource.id)}>
+                              <Edit2 className="w-3 h-3" />
                             </Button>
                           </TooltipTrigger>
                           <TooltipContent>
@@ -304,20 +329,6 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
           </TableBody>
         </Table>
       </div>}
-
-      <AddResourceModal 
-        open={showAddModal} 
-        onOpenChange={setShowAddModal} 
-        competitionId={competitionId} 
-        onResourceAdded={createResource} 
-      />
-      
-      <EditResourceModal
-        open={!!editingResource}
-        onOpenChange={(open) => !open && setEditingResource(null)}
-        resource={editingResource}
-        onResourceUpdated={updateResource}
-      />
     </div>
   </TooltipProvider>;
 };
