@@ -1,20 +1,20 @@
 import React, { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from '@/components/ui/table';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
-import { useAnnouncements, useCreateAnnouncement, useUpdateAnnouncement, useDeleteAnnouncement, Announcement } from '@/hooks/useAnnouncements';
-import { AnnouncementDialog } from './AnnouncementDialog';
-import { AnnouncementViewer } from './components/AnnouncementViewer';
-import { AnnouncementAttachments } from '../dashboard/widgets/AnnouncementAttachments';
-import { Plus, Edit, Trash2, Eye, Calendar, AlertCircle, User, MessageSquare } from 'lucide-react';
+import { useAnnouncements, useDeleteAnnouncement, Announcement } from '@/hooks/useAnnouncements';
+import { Plus, Edit, Trash2, MessageSquare } from 'lucide-react';
 import { format } from 'date-fns';
-import { toast } from '@/hooks/use-toast';
+import { useToast } from '@/hooks/use-toast';
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from '@/components/ui/alert-dialog';
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
+
 const AnnouncementManagementPage = () => {
+  const navigate = useNavigate();
+  const { toast } = useToast();
   const {
     canCreate,
     canEdit,
@@ -25,49 +25,36 @@ const AnnouncementManagementPage = () => {
     data: announcements,
     isLoading
   } = useAnnouncements();
-  const createMutation = useCreateAnnouncement();
-  const updateMutation = useUpdateAnnouncement();
   const deleteMutation = useDeleteAnnouncement();
-  const [selectedAnnouncement, setSelectedAnnouncement] = useState<Announcement | null>(null);
-  const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
-  const [isDialogOpen, setIsDialogOpen] = useState(false);
-  const [isViewDialogOpen, setIsViewDialogOpen] = useState(false);
   const [deleteAnnouncementId, setDeleteAnnouncementId] = useState<string | null>(null);
   const [activeTab, setActiveTab] = useState<'active' | 'inactive'>('active');
 
   // Filter announcements based on active tab
   const filteredAnnouncements = announcements?.filter(announcement => activeTab === 'active' ? announcement.is_active : !announcement.is_active) || [];
   const handleCreate = () => {
-    setSelectedAnnouncement(null);
-    setDialogMode('create');
-    setIsDialogOpen(true);
+    navigate('/app/announcements/announcements_record?mode=create');
   };
   const handleEdit = (announcement: Announcement) => {
-    setSelectedAnnouncement(announcement);
-    setDialogMode('edit');
-    setIsDialogOpen(true);
+    navigate(`/app/announcements/announcements_record?mode=edit&id=${announcement.id}`);
   };
   const handleView = (announcement: Announcement) => {
-    setSelectedAnnouncement(announcement);
-    setIsViewDialogOpen(true);
-  };
-  const handleSubmit = async (data: any) => {
-    try {
-      if (dialogMode === 'create') {
-        await createMutation.mutateAsync(data);
-      } else {
-        await updateMutation.mutateAsync(data);
-      }
-    } catch (error) {
-      console.error('Error submitting announcement:', error);
-    }
+    navigate(`/app/announcements/announcements_record?mode=view&id=${announcement.id}`);
   };
   const handleDelete = async (id: string) => {
     try {
       await deleteMutation.mutateAsync(id);
       setDeleteAnnouncementId(null);
+      toast({
+        title: "Success",
+        description: "Announcement deleted successfully",
+      });
     } catch (error) {
       console.error('Error deleting announcement:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete announcement",
+        variant: "destructive",
+      });
     }
   };
   const getPriorityColor = (priority: number) => {
@@ -259,49 +246,6 @@ const AnnouncementManagementPage = () => {
           </Tabs>
         </CardContent>
       </Card>
-
-      {/* Create/Edit Dialog */}
-      <AnnouncementDialog open={isDialogOpen} onOpenChange={setIsDialogOpen} announcement={selectedAnnouncement} onSubmit={handleSubmit} mode={dialogMode} />
-
-      {/* View Dialog */}
-      <Dialog open={isViewDialogOpen} onOpenChange={setIsViewDialogOpen}>
-        <DialogContent className="max-w-4xl max-h-[80vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2">
-              {selectedAnnouncement?.title}
-              {selectedAnnouncement && <>
-                  <Badge variant="secondary" className={getPriorityColor(selectedAnnouncement.priority)}>
-                    {getPriorityLabel(selectedAnnouncement.priority)}
-                  </Badge>
-                  {!selectedAnnouncement.is_active && <Badge variant="outline">Inactive</Badge>}
-                </>}
-            </DialogTitle>
-          </DialogHeader>
-          
-          {selectedAnnouncement && <div className="space-y-4">
-              <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                  <User className="w-3 h-3" />
-                  {selectedAnnouncement.author ? `${selectedAnnouncement.author.first_name} ${selectedAnnouncement.author.last_name}` : 'Unknown Author'}
-                </div>
-                <div className="flex items-center gap-1">
-                  <Calendar className="w-3 h-3" />
-                  Published {format(new Date(selectedAnnouncement.publish_date), 'PPP')}
-                </div>
-                {selectedAnnouncement.expire_date && <div className="flex items-center gap-1">
-                    <AlertCircle className="w-3 h-3" />
-                    Expires {format(new Date(selectedAnnouncement.expire_date), 'PPP')}
-                  </div>}
-              </div>
-              
-              <div className="border-t pt-4">
-                <AnnouncementViewer content={selectedAnnouncement.content} />
-              </div>
-              
-              <AnnouncementAttachments announcementId={selectedAnnouncement.id} />
-            </div>}
-        </DialogContent>
-      </Dialog>
 
       {/* Delete Confirmation Dialog */}
       <AlertDialog open={!!deleteAnnouncementId} onOpenChange={() => setDeleteAnnouncementId(null)}>

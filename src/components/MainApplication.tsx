@@ -49,6 +49,7 @@ import { CalendarRecordPage } from '@/components/calendar/CalendarRecordPage';
 import CompetitionManagementPage from '@/components/competition-management/CompetitionManagementPage';
 import { ScoreSheetPage } from '@/components/competition-management/ScoreSheetPage';
 import AnnouncementManagementPage from '@/components/announcements/AnnouncementManagementPage';
+import { AnnouncementRecordPage } from '@/components/announcements/AnnouncementRecordPage';
 import { ChainOfCommandRecordPage } from '@/components/cadets/ChainOfCommandRecordPage';
 import TeamRecordPage from '@/components/teams/TeamRecordPage';
 
@@ -234,6 +235,7 @@ const MainApplication = () => {
             <Route path="competitions" element={<CompetitionManagementPage />} />
             <Route path="competitions/score-sheets/:competitionId" element={<ScoreSheetPage />} />
             <Route path="announcements" element={<AnnouncementManagementPage />} />
+            <Route path="announcements/announcements_record" element={<AnnouncementRecordPage />} />
             <Route path="roles" element={<RoleManagementPage />} />
             
             {/* Competition Portal Routes */}
