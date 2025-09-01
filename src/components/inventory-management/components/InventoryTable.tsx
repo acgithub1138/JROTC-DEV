@@ -179,7 +179,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
             {isColumnVisible('unit_of_measure') && <SortableTableHead sortKey="unit_of_measure" currentSort={sortConfig} onSort={handleSort}>
                 Unit
               </SortableTableHead>}
-            <TableHead">Actions</TableHead>
+            <TableHead className="text-center">Actions</TableHead>
           </TableRow>
         </StandardTableHeader>
         <StandardTableBody emptyMessage="No inventory items found" emptyIcon={<Package className="w-12 h-12" />} colSpan={visibleColumns.length + 2}>
