@@ -1,24 +1,26 @@
 
 import React, { useState, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Switch } from '@/components/ui/switch';
 import { Plus, Search } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
-import { EmailTemplateDialog } from '../dialogs/EmailTemplateDialog';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const EmailTemplatesTab: React.FC = () => {
+  const navigate = useNavigate();
   const { 
     templates, 
     isLoading, 
     showOnlyMyTemplates, 
     searchQuery, 
     setSearchQuery, 
-    toggleMyTemplatesFilter, 
+    toggleMyTemplatesFilter,
     copyTemplate,
     canEditTemplate,
     canCopyTemplate,
@@ -26,8 +28,8 @@ export const EmailTemplatesTab: React.FC = () => {
     canViewTemplate,
     canCreate
   } = useEmailTemplates();
-  const [showCreateDialog, setShowCreateDialog] = useState(false);
-  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  
+  const permissions = useTablePermissions('email_management');
   const [previewingTemplate, setPreviewingTemplate] = useState<any>(null);
   const [currentPage, setCurrentPage] = useState(1);
   
@@ -42,16 +44,15 @@ export const EmailTemplatesTab: React.FC = () => {
   const totalPages = Math.ceil(templates.length / ITEMS_PER_PAGE);
 
   const handleEdit = (template: any) => {
-    setEditingTemplate(template);
+    navigate(`/app/email/template_record/${template.id}?mode=edit`);
   };
 
   const handleView = (template: any) => {
-    setPreviewingTemplate(template);
+    navigate(`/app/email/template_record/${template.id}?mode=view`);
   };
 
-  const handleCloseDialog = () => {
-    setShowCreateDialog(false);
-    setEditingTemplate(null);
+  const handleCreate = () => {
+    navigate('/app/email/template_record?mode=create');
   };
 
   const handleCopy = async (templateId: string) => {
@@ -66,8 +67,8 @@ export const EmailTemplatesTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Email Templates</h2>
-        {canCreate && (
-          <Button onClick={() => setShowCreateDialog(true)} className="flex items-center gap-2">
+        {permissions.canCreate && (
+          <Button onClick={handleCreate} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Create Template
           </Button>
@@ -114,13 +115,6 @@ export const EmailTemplatesTab: React.FC = () => {
           onPageChange={setCurrentPage}
         />
       )}
-
-      <EmailTemplateDialog
-        open={showCreateDialog || !!editingTemplate}
-        onOpenChange={handleCloseDialog}
-        template={editingTemplate}
-        mode={editingTemplate ? 'edit' : 'create'}
-      />
 
       <EmailPreviewDialog
         open={!!previewingTemplate}
