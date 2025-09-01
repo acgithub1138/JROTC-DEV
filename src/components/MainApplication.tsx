@@ -212,7 +212,7 @@ const MainApplication = () => {
           <Route path="cadets/pt_test_create" element={<PTTestCreatePage />} />
           <Route path="cadets/pt_test_edit" element={<PTTestEditPage />} />
           <Route path="cadets/inspection_create" element={<InspectionCreatePage />} />
-          <Route path="cadets/inspection_edit/:id" element={<InspectionEditPage />} />
+          <Route path="cadets/inspection_edit" element={<InspectionEditPage />} />
           <Route path="cadets/service_record" element={<CommunityServiceCreatePage />} />
           <Route path="cadets/service_record_edit/:id" element={<CommunityServiceEditPage />} />
             <Route path="cadets/coc_record" element={<ChainOfCommandRecordPage />} />
