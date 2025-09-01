@@ -567,6 +567,74 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
             </div>
 
+            {/* Add Judge & Add Resources */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-4">
+                {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                    <Label className="text-right">Add Judge</Label>
+                    <Select onValueChange={addJudge}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a judge to add" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableJudges().map(judge => <SelectItem key={judge.id} value={judge.id}>
+                            {judge.name}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>}
+                {getSelectedJudges().length > 0 && <div className="flex flex-wrap gap-2">
+                    {getSelectedJudges().map(judge => <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
+                        {judge.name}
+                        {!isViewMode && <button type="button" onClick={() => removeJudge(judge.id)} className="ml-1 hover:text-destructive">
+                            ×
+                          </button>}
+                      </Badge>)}
+                  </div>}
+              </div>
+              <div className="space-y-4">
+                {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                    <Label className="text-right">Add Resource</Label>
+                    <Select onValueChange={addResource}>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a resource to add" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {getAvailableResources().map(user => <SelectItem key={user.id} value={user.id}>
+                            {user.last_name}, {user.first_name}
+                          </SelectItem>)}
+                      </SelectContent>
+                    </Select>
+                  </div>}
+                {getSelectedResources().length > 0 && <div className="flex flex-wrap gap-2">
+                    {getSelectedResources().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
+                        {user.last_name}, {user.first_name}
+                        {!isViewMode && <button type="button" onClick={() => removeResource(user.id)} className="ml-1 hover:text-destructive">
+                            ×
+                          </button>}
+                      </Badge>)}
+                  </div>}
+              </div>
+            </div>
+
+            {/* Interval & Max Participants */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
+                <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
+                ...prev,
+                interval: e.target.value
+              }))} placeholder="Interval in minutes" disabled={isViewMode} required />
+              </div>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
+                <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
+                ...prev,
+                max_participants: e.target.value
+              }))} placeholder="Maximum participants" disabled={isViewMode} required />
+              </div>
+            </div>
+
             {/* Start Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label className="text-right">Start Date & Time *</Label>
@@ -751,23 +819,6 @@ export const CompetitionEventRecord: React.FC = () => {
               </div>
             </div>
 
-            {/* Interval & Max Participants */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
-                <Input id="interval" type="number" value={formData.interval} onChange={e => setFormData(prev => ({
-                ...prev,
-                interval: e.target.value
-              }))} placeholder="Interval in minutes" disabled={isViewMode} required />
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
-                <Input id="max_participants" type="number" value={formData.max_participants} onChange={e => setFormData(prev => ({
-                ...prev,
-                max_participants: e.target.value
-              }))} placeholder="Maximum participants" disabled={isViewMode} required />
-              </div>
-            </div>
 
 
             {/* Notes */}
@@ -779,57 +830,6 @@ export const CompetitionEventRecord: React.FC = () => {
             }))} placeholder="Additional notes about the event" disabled={isViewMode} rows={3} />
             </div>
 
-            {/* Judges */}
-            <div className="space-y-4">
-              
-              {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label className="text-right">Add Judge</Label>
-                  <Select onValueChange={addJudge}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a judge to add" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAvailableJudges().map(judge => <SelectItem key={judge.id} value={judge.id}>
-                          {judge.name}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>}
-              {getSelectedJudges().length > 0 && <div className="flex flex-wrap gap-2">
-                  {getSelectedJudges().map(judge => <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
-                      {judge.name}
-                      {!isViewMode && <button type="button" onClick={() => removeJudge(judge.id)} className="ml-1 hover:text-destructive">
-                          ×
-                        </button>}
-                    </Badge>)}
-                </div>}
-            </div>
-
-            {/* Resources */}
-            <div className="space-y-4">
-              
-              {!isViewMode && <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label className="text-right">Add Resource</Label>
-                  <Select onValueChange={addResource}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a resource to add" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {getAvailableResources().map(user => <SelectItem key={user.id} value={user.id}>
-                          {user.last_name}, {user.first_name}
-                        </SelectItem>)}
-                    </SelectContent>
-                  </Select>
-                </div>}
-              {getSelectedResources().length > 0 && <div className="flex flex-wrap gap-2">
-                  {getSelectedResources().map(user => <Badge key={user.id} variant="secondary" className="flex items-center gap-1">
-                      {user.last_name}, {user.first_name}
-                      {!isViewMode && <button type="button" onClick={() => removeResource(user.id)} className="ml-1 hover:text-destructive">
-                          ×
-                        </button>}
-                    </Badge>)}
-                </div>}
-            </div>
 
             {/* Form Actions */}
             {canEditForm && <div className="flex justify-end gap-4 pt-6">
