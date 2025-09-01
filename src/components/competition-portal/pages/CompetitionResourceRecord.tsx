@@ -273,6 +273,15 @@ export const CompetitionResourceRecord: React.FC = () => {
                     <Button type="button" variant="outline" onClick={handleBack}>
                       Cancel
                     </Button>
+                    {(isEditMode || isViewMode) && canDelete && (
+                      <Button 
+                        variant="destructive" 
+                        onClick={() => setShowDeleteDialog(true)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                        Delete
+                      </Button>
+                    )}
                     <Button 
                       type="submit" 
                       form="resource-form" 
@@ -282,15 +291,6 @@ export const CompetitionResourceRecord: React.FC = () => {
                       {isSubmitting ? 'Saving...' : isCreateMode ? 'Add Resource' : 'Save Changes'}
                     </Button>
                   </>
-                )}
-                {(isEditMode || isViewMode) && canDelete && (
-                  <Button 
-                    variant="destructive" 
-                    onClick={() => setShowDeleteDialog(true)}
-                  >
-                    <Trash2 className="h-4 w-4" />
-                    Delete
-                  </Button>
                 )}
               </div>
             </div>
