@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -12,8 +12,26 @@ import { CompetitionScheduleTab } from './tabs/CompetitionScheduleTab';
 import { CompetitionResultsTab } from './tabs/CompetitionResultsTab';
 export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const params = useParams();
   const competitionId = params.competitionId || window.location.pathname.split('/').pop();
+
+  // Determine active tab from URL
+  const getActiveTabFromUrl = () => {
+    const pathSegments = location.pathname.split('/');
+    const lastSegment = pathSegments[pathSegments.length - 1];
+    
+    // Map URL segments to tab names
+    const urlToTabMap: { [key: string]: string } = {
+      'events': 'cp_comp_events',
+      'resources': 'cp_comp_resources', 
+      'schools': 'cp_comp_schools',
+      'schedule': 'cp_schedules',
+      'results': 'cp_results'
+    };
+    
+    return urlToTabMap[lastSegment] || null;
+  };
 
   // Get permissions for each tab
   const eventsPermissions = useCompetitionEventsPermissions();
@@ -49,6 +67,12 @@ export const CompetitionDetailsPage = () => {
     label: 'Results',
     canAccess: resultsPermissions.canAccess
   }].filter(tab => tab.canAccess);
+
+  // Get the active tab from URL, fallback to first available tab
+  const activeTabFromUrl = getActiveTabFromUrl();
+  const defaultTab = activeTabFromUrl && availableTabs.find(tab => tab.name === activeTabFromUrl) 
+    ? activeTabFromUrl 
+    : availableTabs[0]?.name;
   console.log('Route params:', params);
   console.log('Competition ID:', competitionId);
   console.log('Current path:', window.location.pathname);
@@ -72,7 +96,7 @@ export const CompetitionDetailsPage = () => {
         </Button>
       </div>
 
-      {availableTabs.length > 0 ? <Tabs defaultValue={availableTabs[0]?.name} className="w-full">
+      {availableTabs.length > 0 ? <Tabs defaultValue={defaultTab} className="w-full">
           <TabsList className={`grid w-full grid-cols-${Math.min(availableTabs.length, 6)}`}>
             {availableTabs.map(tab => <TabsTrigger key={tab.id} value={tab.name}>
                 {tab.label}
