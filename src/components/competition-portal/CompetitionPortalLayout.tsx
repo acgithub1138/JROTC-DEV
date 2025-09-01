@@ -31,7 +31,7 @@ const CompetitionPortalLayout = () => {
     '/app/competition-portal': 'cp_dashboard',
     '/app/competition-portal/': 'cp_dashboard',
     '/app/competition-portal/dashboard': 'cp_dashboard',
-    '/app/competition-portal/competitions': 'hosting_competitions',
+    '/app/competition-portal/competitions': 'cp_competitions',
     '/app/competition-portal/my-competitions': 'my_competitions',
     '/app/competition-portal/score-sheets': 'cp_score_sheets',
     '/app/competition-portal/judges': 'cp_judges',
@@ -43,7 +43,7 @@ const CompetitionPortalLayout = () => {
   // Map modules to routes - keeping for backward compatibility with header
   const moduleToRouteMap: { [key: string]: string } = {
     'cp_dashboard': '/app/competition-portal/dashboard',
-    'hosting_competitions': '/app/competition-portal/competitions',
+    'cp_competitions': '/app/competition-portal/competitions',
     'my_competitions': '/app/competition-portal/my-competitions',
     'cp_score_sheets': '/app/competition-portal/score-sheets',
     'cp_judges': '/app/competition-portal/judges',
@@ -62,7 +62,7 @@ const CompetitionPortalLayout = () => {
     // Map current path to module
     const pathToModuleMap: { [key: string]: string } = {
       '/dashboard': 'cp_dashboard',
-      '/competitions': 'hosting_competitions',
+      '/competitions': 'cp_competitions',
       '/my-competitions': 'my_competitions',
       '/score-sheets': 'cp_score_sheets',
       '/judges': 'cp_judges',
