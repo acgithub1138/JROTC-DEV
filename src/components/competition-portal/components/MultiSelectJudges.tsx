@@ -52,26 +52,6 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Selected Judges Badges */}
-      {selectedJudges.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedJudges.map((judge) => (
-            <Badge key={judge.id} variant="secondary" className="flex items-center gap-1">
-              {judge.name}
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(judge.id)}
-                  className="ml-1 hover:text-destructive"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </Badge>
-          ))}
-        </div>
-      )}
-
       {/* Collapsible Selector */}
       {!disabled && (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>

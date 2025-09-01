@@ -53,26 +53,6 @@ export const MultiSelectResources: React.FC<MultiSelectResourcesProps> = ({
 
   return (
     <div className="space-y-3">
-      {/* Selected Resources Badges */}
-      {selectedResources.length > 0 && (
-        <div className="flex flex-wrap gap-2">
-          {selectedResources.map((resource) => (
-            <Badge key={resource.id} variant="secondary" className="flex items-center gap-1">
-              {resource.last_name}, {resource.first_name}
-              {!disabled && (
-                <button
-                  type="button"
-                  onClick={() => handleRemove(resource.id)}
-                  className="ml-1 hover:text-destructive"
-                >
-                  <X className="w-3 h-3" />
-                </button>
-              )}
-            </Badge>
-          ))}
-        </div>
-      )}
-
       {/* Collapsible Selector */}
       {!disabled && (
         <Collapsible open={isOpen} onOpenChange={setIsOpen}>
