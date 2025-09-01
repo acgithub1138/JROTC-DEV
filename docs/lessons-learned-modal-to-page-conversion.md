@@ -170,6 +170,51 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 - Use `gap-4` for appropriate spacing between label and field columns
 - This creates professional, aligned forms that match user expectations
 
+### 16. Action Button Placement
+**Issue**: Traditional placement of action buttons (Save, Cancel, Delete) at the bottom of forms can be inconvenient for users, especially on long forms or large screens.
+**Solution**: Move action buttons to the top right corner of the page for better accessibility and user experience.
+
+**Implementation**:
+```tsx
+// Header with action buttons in top right
+<div className="flex items-center justify-between">
+  <div className="flex items-center gap-4">
+    <Button variant="outline" size="sm" onClick={handleBack}>
+      <ArrowLeft className="h-4 w-4" />
+      Back to List
+    </Button>
+    <h1 className="text-2xl font-bold">{pageTitle}</h1>
+  </div>
+  <div className="flex items-center gap-2">
+    {canEdit && (
+      <>
+        <Button type="button" variant="outline" onClick={handleCancel}>
+          Cancel
+        </Button>
+        <Button type="submit" form="main-form">
+          <Save className="h-4 w-4" />
+          Save Changes
+        </Button>
+      </>
+    )}
+    {canDelete && (
+      <Button variant="destructive" onClick={handleDelete}>
+        <Trash2 className="h-4 w-4" />
+        Delete
+      </Button>
+    )}
+  </div>
+</div>
+```
+
+**Key Points**:
+- Action buttons are always visible and easily accessible
+- Users don't need to scroll to the bottom of long forms to save their work
+- Button order follows convention: Cancel, Save/Submit, Delete (destructive action last)
+- Use form ID attribute to connect external Save button to form submission
+- Provides better user experience on both desktop and mobile devices
+- Maintains consistency with modern web application patterns
+
 ## Best Practices Summary
 
 1. **Always show loading states** when fetching data for edit/view modes
@@ -187,3 +232,4 @@ const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
 13. **Convert to autonomous page pattern** from controlled modal pattern
 14. **Test across devices** and screen sizes
 15. **Use consistent form field layout** with right-aligned labels in fixed-width columns for professional appearance
+16. **Place action buttons in top right corner** for better accessibility and user experience - users don't need to scroll to save their work
