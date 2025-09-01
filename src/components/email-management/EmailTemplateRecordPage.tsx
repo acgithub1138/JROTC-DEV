@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
+import { useNavigate, useParams, useSearchParams, useLocation } from 'react-router-dom';
 import ReactQuill from 'react-quill';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
@@ -15,7 +15,6 @@ import { useAuth } from '@/contexts/AuthContext';
 import { useEmailTemplates, EmailTemplate } from '@/hooks/email/useEmailTemplates';
 import { useAvailableTables, useTableColumns, useEnhancedVariables, useGroupedReferenceFields } from '@/hooks/email/useTableColumns';
 import { VariablesPanel } from './dialogs/components/VariablesPanel';
-import { EmailPreviewDialog } from './dialogs/EmailPreviewDialog';
 import { extractVariables } from '@/utils/templateProcessor';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
 import { toast } from 'sonner';
@@ -41,6 +40,7 @@ const formats = [
 
 export const EmailTemplateRecordPage: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { id } = useParams();
   const [searchParams] = useSearchParams();
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || (id ? 'view' : 'create');
@@ -68,7 +68,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
     is_global: false
   });
 
-  const [showPreview, setShowPreview] = useState(false);
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [pendingNavigation, setPendingNavigation] = useState<string | null>(null);
 
@@ -294,7 +293,16 @@ export const EmailTemplateRecordPage: React.FC = () => {
             <Button
               type="button"
               variant="outline"
-              onClick={() => setShowPreview(true)}
+              onClick={() => {
+                navigate('/app/email/email_preview_record', {
+                  state: {
+                    subject: formData.subject,
+                    body: formData.body,
+                    sourceTable: formData.source_table,
+                    from: location.pathname + location.search
+                  }
+                });
+              }}
               disabled={!canPreview}
             >
               <Eye className="w-4 h-4 mr-2" />
@@ -485,14 +493,6 @@ export const EmailTemplateRecordPage: React.FC = () => {
         onOpenChange={setShowUnsavedDialog} 
         onDiscard={handleDiscardChanges} 
         onCancel={handleContinueEditing} 
-      />
-
-      <EmailPreviewDialog 
-        open={showPreview} 
-        onOpenChange={setShowPreview} 
-        subject={formData.subject} 
-        body={formData.body} 
-        sourceTable={formData.source_table} 
       />
     </div>
   );

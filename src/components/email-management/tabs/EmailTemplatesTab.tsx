@@ -1,6 +1,6 @@
 
 import React, { useState, useMemo } from 'react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
@@ -8,11 +8,11 @@ import { Switch } from '@/components/ui/switch';
 import { Plus, Search } from 'lucide-react';
 import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
-import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
 
 export const EmailTemplatesTab: React.FC = () => {
   const navigate = useNavigate();
+  const location = useLocation();
   const { 
     templates, 
     isLoading, 
@@ -49,7 +49,15 @@ export const EmailTemplatesTab: React.FC = () => {
   };
 
   const handleView = (template: any) => {
-    navigate(`/app/email/template_record/${template.id}?mode=view`);
+    navigate('/app/email/email_preview_record', {
+      state: {
+        subject: template.subject,
+        body: template.body,
+        sourceTable: template.source_table,
+        templateId: template.id,
+        from: location.pathname
+      }
+    });
   };
 
   const handleCreate = () => {
@@ -58,10 +66,6 @@ export const EmailTemplatesTab: React.FC = () => {
 
   const handleCopy = async (templateId: string) => {
     copyTemplate(templateId);
-  };
-
-  const handleClosePreviewDialog = () => {
-    setPreviewingTemplate(null);
   };
 
   return (
@@ -116,15 +120,6 @@ export const EmailTemplatesTab: React.FC = () => {
           onPageChange={setCurrentPage}
         />
       )}
-
-      <EmailPreviewDialog
-        open={!!previewingTemplate}
-        onOpenChange={handleClosePreviewDialog}
-        subject={previewingTemplate?.subject || ''}
-        body={previewingTemplate?.body || ''}
-        sourceTable={previewingTemplate?.source_table || ''}
-        templateId={previewingTemplate?.id}
-      />
     </div>
   );
 };

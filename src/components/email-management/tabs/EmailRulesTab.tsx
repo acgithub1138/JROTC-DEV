@@ -1,5 +1,6 @@
 
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { AlertCircle, Loader2, Settings } from 'lucide-react';
@@ -8,15 +9,14 @@ import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { useUserManagement } from '@/components/user-management/hooks/useUserManagement';
 import { RuleCard } from '../components/RuleCard';
 import { Alert, AlertDescription } from '@/components/ui/alert';
-import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 import { useAuth } from '@/contexts/AuthContext';
 
 export const EmailRulesTab: React.FC = () => {
+  const navigate = useNavigate();
+  const location = useLocation();
   const { userProfile } = useAuth();
   const { schools } = useUserManagement();
   const [selectedSchoolId, setSelectedSchoolId] = useState<string>('');
-  const [previewDialogOpen, setPreviewDialogOpen] = useState(false);
-  const [selectedTemplateForPreview, setSelectedTemplateForPreview] = useState<string | null>(null);
 
   // Determine the school ID to use for fetching rules
   const schoolIdForRules = userProfile?.role === 'admin' ? selectedSchoolId : userProfile?.school_id || '';
@@ -44,8 +44,18 @@ export const EmailRulesTab: React.FC = () => {
   };
 
   const handlePreview = (templateId: string) => {
-    setSelectedTemplateForPreview(templateId);
-    setPreviewDialogOpen(true);
+    const template = templates.find(t => t.id === templateId);
+    if (template) {
+      navigate('/app/email/email_preview_record', {
+        state: {
+          subject: template.subject,
+          body: template.body,
+          sourceTable: template.source_table,
+          templateId: template.id,
+          from: location.pathname
+        }
+      });
+    }
   };
 
   if (isLoading) {
@@ -190,17 +200,6 @@ export const EmailRulesTab: React.FC = () => {
           </div>
           </CardContent>
         </Card>
-      )}
-
-      {selectedTemplateForPreview && (
-        <EmailPreviewDialog
-          open={previewDialogOpen}
-          onOpenChange={setPreviewDialogOpen}
-          subject={templates.find(t => t.id === selectedTemplateForPreview)?.subject || ''}
-          body={templates.find(t => t.id === selectedTemplateForPreview)?.body || ''}
-          sourceTable={templates.find(t => t.id === selectedTemplateForPreview)?.source_table || ''}
-          templateId={selectedTemplateForPreview}
-        />
       )}
     </div>
   );

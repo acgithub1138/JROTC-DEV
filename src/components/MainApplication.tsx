@@ -25,6 +25,7 @@ import EventTypesManagement from './event-types/EventTypesManagement';
 import CompetitionEventTypesManagement from './competition-management/CompetitionEventTypesManagement';
 import EmailManagementPage from './email-management/EmailManagementPage';
 import { EmailTemplateRecordPage } from './email-management/EmailTemplateRecordPage';
+import { EmailPreviewRecordPage } from './email-management/EmailPreviewRecordPage';
 
 import NotFound from '@/pages/NotFound';
 import CadetManagementPage from '@/components/cadet-management/CadetManagementPage';
@@ -212,6 +213,7 @@ const MainApplication = () => {
             <Route path="email" element={<EmailManagementPage />} />
             <Route path="email/template_record" element={<EmailTemplateRecordPage />} />
             <Route path="email/template_record/:id" element={<EmailTemplateRecordPage />} />
+            <Route path="email/email_preview_record" element={<EmailPreviewRecordPage />} />
             <Route path="settings" element={<SettingsPage />} />
             <Route path="cadets" element={<CadetManagementPage />} />
             <Route path="cadets/cadet_record" element={<CadetRecordPage />} />
