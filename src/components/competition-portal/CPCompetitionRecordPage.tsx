@@ -529,33 +529,34 @@ export const CPCompetitionRecordPage = () => {
               </div>
             </div>
 
-            {/* Entry Fee and Max Participants */}
+            {/* Entry Fee */}
             <div className="grid grid-cols-4 items-center gap-4">
-              <Label className="text-right font-medium">Entry Fee & Max Participants</Label>
+              <Label className="text-right font-medium">Entry Fee</Label>
               <div className="col-span-3">
-                <div className="grid grid-cols-2 gap-4">
-                  <div>
-                    <Input
-                      type="number"
-                      step="0.01"
-                      min="0"
-                      value={formData.fee}
-                      onChange={(e) => updateFormData('fee', e.target.value)}
-                      placeholder="Entry fee (0.00)"
-                      disabled={isViewMode}
-                    />
-                  </div>
-                  <div>
-                    <Input
-                      type="number"
-                      min="1"
-                      value={formData.max_participants}
-                      onChange={(e) => updateFormData('max_participants', e.target.value)}
-                      placeholder="Max participants (unlimited)"
-                      disabled={isViewMode}
-                    />
-                  </div>
-                </div>
+                <Input
+                  type="number"
+                  step="0.01"
+                  min="0"
+                  value={formData.fee}
+                  onChange={(e) => updateFormData('fee', e.target.value)}
+                  placeholder="Entry fee (0.00)"
+                  disabled={isViewMode}
+                />
+              </div>
+            </div>
+
+            {/* Max Participants */}
+            <div className="grid grid-cols-4 items-center gap-4">
+              <Label className="text-right font-medium">Max Participants</Label>
+              <div className="col-span-3">
+                <Input
+                  type="number"
+                  min="1"
+                  value={formData.max_participants}
+                  onChange={(e) => updateFormData('max_participants', e.target.value)}
+                  placeholder="Max participants (unlimited)"
+                  disabled={isViewMode}
+                />
               </div>
             </div>
 
