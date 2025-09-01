@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useParams, useNavigate, useSearchParams, useLocation } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft } from 'lucide-react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -9,8 +9,21 @@ import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermi
 
 export const ViewScoreSheet: React.FC = () => {
   const navigate = useNavigate();
-  const { competitionId } = useParams();
+  const location = useLocation();
+  const params = useParams();
   const [searchParams] = useSearchParams();
+  
+  // Extract competition ID correctly from URL path
+  const getCompetitionIdFromPath = () => {
+    const pathSegments = location.pathname.split('/');
+    const competitionDetailsIndex = pathSegments.findIndex(segment => segment === 'competition-details');
+    if (competitionDetailsIndex !== -1 && pathSegments[competitionDetailsIndex + 1]) {
+      return pathSegments[competitionDetailsIndex + 1];
+    }
+    return params.competitionId;
+  };
+  
+  const competitionId = getCompetitionIdFromPath();
   const eventId = searchParams.get('eventId');
   const schoolId = searchParams.get('schoolId');
   const eventName = searchParams.get('eventName');
