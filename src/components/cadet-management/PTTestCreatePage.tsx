@@ -326,9 +326,9 @@ export const PTTestCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-6">
               <div className="flex items-center gap-4">
-                <Label htmlFor="test-date" className="w-32 text-right shrink-0">Test Date</Label>
+                <Label htmlFor="test-date" className="w-20 text-right shrink-0">Test Date</Label>
                 <div className="flex-1">
                   <Input 
                     id="test-date" 
@@ -348,7 +348,7 @@ export const PTTestCreatePage = () => {
               </div>
 
               <div className="flex items-center gap-4">
-                <Label htmlFor="flight" className="w-32 text-right shrink-0">Flight</Label>
+                <Label htmlFor="flight" className="w-16 text-right shrink-0">Flight</Label>
                 <div className="flex-1">
                   <Select value={selectedFlight} onValueChange={setSelectedFlight}>
                     <SelectTrigger>
