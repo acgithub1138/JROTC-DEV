@@ -636,26 +636,6 @@ export const CompetitionSchoolRecord = () => {
                 </div>
               )}
 
-              {/* Row 4: Notes (full width) */}
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter any notes" 
-                        {...field} 
-                        disabled={isViewMode}
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-
               {/* Event Selection - only for edit/view mode */}
               {(isEditMode || isViewMode) && availableEvents && availableEvents.length > 0 && (
                 <div className="space-y-4">
@@ -718,6 +698,26 @@ export const CompetitionSchoolRecord = () => {
                   </div>
                 </div>
               )}
+
+              {/* Notes (full width) - moved to bottom */}
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem>
+                    <FormLabel>Notes</FormLabel>
+                    <FormControl>
+                      <Textarea 
+                        placeholder="Enter any notes" 
+                        {...field} 
+                        disabled={isViewMode}
+                        className="min-h-[100px]"
+                      />
+                    </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
             </form>
           </Form>
         </CardContent>
