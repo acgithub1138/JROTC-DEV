@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
+import { useNavigate, useLocation, useSearchParams } from 'react-router-dom';
 import { ArrowLeft, Save, Trash2 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -50,9 +50,14 @@ interface FormData {
 }
 export const CompetitionEventRecord: React.FC = () => {
   const navigate = useNavigate();
-  const {
-    competitionId
-  } = useParams();
+  const location = useLocation();
+  
+  // Extract competition ID from pathname since route isn't parameterized
+  const competitionId = React.useMemo(() => {
+    const match = location.pathname.match(/\/competition-details\/([^\/]+)\/events_record/);
+    return match?.[1] || null;
+  }, [location.pathname]);
+  
   const [searchParams] = useSearchParams();
   const eventId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view' || 'create';
