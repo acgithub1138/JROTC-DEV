@@ -240,10 +240,10 @@ export const InspectionEditPage = () => {
           <CardHeader>
             <CardTitle>Inspection Details</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="inspection-date">Inspection Date</Label>
+          <CardContent className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="inspection-date" className="w-32 text-right shrink-0">Inspection Date</Label>
                 <Input
                   id="inspection-date"
                   type="date"
@@ -252,8 +252,8 @@ export const InspectionEditPage = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="grade">Grade (0-100)</Label>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="grade" className="w-32 text-right shrink-0">Grade (0-100)</Label>
                 <Input
                   id="grade"
                   type="number"
@@ -266,14 +266,15 @@ export const InspectionEditPage = () => {
               </div>
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="notes">Notes</Label>
+            <div className="flex gap-4">
+              <Label htmlFor="notes" className="w-32 text-right shrink-0 mt-2">Notes</Label>
               <Textarea
                 id="notes"
                 value={formData.notes}
                 onChange={(e) => setFormData(prev => ({ ...prev, notes: e.target.value }))}
                 placeholder="Optional notes about the inspection"
                 rows={4}
+                className="flex-1"
               />
             </div>
 
