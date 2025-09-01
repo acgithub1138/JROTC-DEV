@@ -466,121 +466,133 @@ export const CompetitionSchoolRecord = () => {
             <form id="school-form" onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
               {/* Row 1: School and Status */}
               <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <FormField
-                  control={form.control}
-                  name="school_id"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>School *</FormLabel>
-                      <Select 
-                        onValueChange={field.onChange} 
-                        defaultValue={field.value} 
-                        disabled={isLoadingSchools || isViewMode || isEditMode}
-                      >
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          {schools.map((school) => (
-                            <SelectItem key={school.id} value={school.id}>
-                              {school.name}
-                            </SelectItem>
-                          ))}
-                          {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                  <Label className="text-right">School *</Label>
+                  <FormField
+                    control={form.control}
+                    name="school_id"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select 
+                          onValueChange={field.onChange} 
+                          defaultValue={field.value} 
+                          disabled={isLoadingSchools || isViewMode || isEditMode}
+                        >
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder={isLoadingSchools ? "Loading schools..." : "Select a school"} />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            {schools.map((school) => (
+                              <SelectItem key={school.id} value={school.id}>
+                                {school.name}
+                              </SelectItem>
+                            ))}
+                            {isCreateMode && <SelectItem value="not_listed">Not listed</SelectItem>}
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
 
-                <FormField
-                  control={form.control}
-                  name="status"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Status</FormLabel>
-                      <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isViewMode}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="registered">Registered</SelectItem>
-                          <SelectItem value="confirmed">Confirmed</SelectItem>
-                          <SelectItem value="cancelled">Cancelled</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
+                <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                  <Label className="text-right">Status</Label>
+                  <FormField
+                    control={form.control}
+                    name="status"
+                    render={({ field }) => (
+                      <FormItem>
+                        <Select onValueChange={field.onChange} defaultValue={field.value} disabled={isViewMode}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="registered">Registered</SelectItem>
+                            <SelectItem value="confirmed">Confirmed</SelectItem>
+                            <SelectItem value="cancelled">Cancelled</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
               </div>
 
               {/* New School Fields - Row 2 & 3: School Name/Initials, Contact Person/Email */}
               {form.watch('school_id') === 'not_listed' && isCreateMode && (
                 <>
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="new_school_name"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>School Name *</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter school name" {...field} disabled={isViewMode} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                      <Label className="text-right">School Name *</Label>
+                      <FormField
+                        control={form.control}
+                        name="new_school_name"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Enter school name" {...field} disabled={isViewMode} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="new_school_initials"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Initials</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter school initials" {...field} disabled={isViewMode} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                      <Label className="text-right">Initials</Label>
+                      <FormField
+                        control={form.control}
+                        name="new_school_initials"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Enter school initials" {...field} disabled={isViewMode} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    <FormField
-                      control={form.control}
-                      name="new_school_contact"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Contact Person</FormLabel>
-                          <FormControl>
-                            <Input placeholder="Enter contact person" {...field} disabled={isViewMode} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                      <Label className="text-right">Contact Person</Label>
+                      <FormField
+                        control={form.control}
+                        name="new_school_contact"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input placeholder="Enter contact person" {...field} disabled={isViewMode} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
 
-                    <FormField
-                      control={form.control}
-                      name="new_school_email"
-                      render={({ field }) => (
-                        <FormItem>
-                          <FormLabel>Email</FormLabel>
-                          <FormControl>
-                            <Input type="email" placeholder="Enter contact email" {...field} disabled={isViewMode} />
-                          </FormControl>
-                          <FormMessage />
-                        </FormItem>
-                      )}
-                    />
+                    <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                      <Label className="text-right">Email</Label>
+                      <FormField
+                        control={form.control}
+                        name="new_school_email"
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormControl>
+                              <Input type="email" placeholder="Enter contact email" {...field} disabled={isViewMode} />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
                   </div>
                 </>
               )}
@@ -588,51 +600,55 @@ export const CompetitionSchoolRecord = () => {
               {/* Payment Status and Color - only for edit mode */}
               {(isEditMode || isViewMode) && (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  <FormField
-                    control={form.control}
-                    name="paid"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Payment Status</FormLabel>
-                        <div className="flex items-center space-x-2">
-                          <Switch 
-                            id="paid" 
-                            checked={field.value} 
-                            onCheckedChange={field.onChange} 
-                            disabled={isViewMode}
-                          />
-                          <Label htmlFor="paid">Payment Received</Label>
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-[120px_1fr] gap-4 items-center">
+                    <Label className="text-right">Payment Status</Label>
+                    <FormField
+                      control={form.control}
+                      name="paid"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center space-x-2">
+                            <Switch 
+                              id="paid" 
+                              checked={field.value} 
+                              onCheckedChange={field.onChange} 
+                              disabled={isViewMode}
+                            />
+                            <Label htmlFor="paid">Payment Received</Label>
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
 
-                  <FormField
-                    control={form.control}
-                    name="color"
-                    render={({ field }) => (
-                      <FormItem>
-                        <FormLabel>Color</FormLabel>
-                        <div className="flex items-center space-x-2">
-                          <input 
-                            type="color" 
-                            value={field.value} 
-                            onChange={(e) => field.onChange(e.target.value)} 
-                            className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
-                            disabled={isViewMode}
-                          />
-                          <Input 
-                            type="text" 
-                            value={field.value} 
-                            onChange={(e) => field.onChange(e.target.value)} 
-                            placeholder="#3B82F6" 
-                            className="w-32"
-                            disabled={isViewMode}
-                          />
-                        </div>
-                      </FormItem>
-                    )}
-                  />
+                  <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-center">
+                    <Label className="text-right">Color</Label>
+                    <FormField
+                      control={form.control}
+                      name="color"
+                      render={({ field }) => (
+                        <FormItem>
+                          <div className="flex items-center space-x-2">
+                            <input 
+                              type="color" 
+                              value={field.value} 
+                              onChange={(e) => field.onChange(e.target.value)} 
+                              className="w-10 h-6 p-0 rounded border-0 cursor-pointer"
+                              disabled={isViewMode}
+                            />
+                            <Input 
+                              type="text" 
+                              value={field.value} 
+                              onChange={(e) => field.onChange(e.target.value)} 
+                              placeholder="#3B82F6" 
+                              className="w-32"
+                              disabled={isViewMode}
+                            />
+                          </div>
+                        </FormItem>
+                      )}
+                    />
+                  </div>
                 </div>
               )}
 
@@ -700,24 +716,26 @@ export const CompetitionSchoolRecord = () => {
               )}
 
               {/* Notes (full width) - moved to bottom */}
-              <FormField
-                control={form.control}
-                name="notes"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Notes</FormLabel>
-                    <FormControl>
-                      <Textarea 
-                        placeholder="Enter any notes" 
-                        {...field} 
-                        disabled={isViewMode}
-                        className="min-h-[100px]"
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+              <div className="grid grid-cols-1 md:grid-cols-[100px_1fr] gap-4 items-start">
+                <Label className="text-right pt-2">Notes</Label>
+                <FormField
+                  control={form.control}
+                  name="notes"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Enter any notes" 
+                          {...field} 
+                          disabled={isViewMode}
+                          className="min-h-[100px]"
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+              </div>
             </form>
           </Form>
         </CardContent>
