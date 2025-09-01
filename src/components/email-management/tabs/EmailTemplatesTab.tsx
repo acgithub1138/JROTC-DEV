@@ -10,7 +10,6 @@ import { useEmailTemplates } from '@/hooks/email/useEmailTemplates';
 import { EmailTemplatesTable } from '../tables/EmailTemplatesTable';
 import { EmailPreviewDialog } from '../dialogs/EmailPreviewDialog';
 import { TablePagination } from '@/components/ui/table-pagination';
-import { useTablePermissions } from '@/hooks/useTablePermissions';
 
 export const EmailTemplatesTab: React.FC = () => {
   const navigate = useNavigate();
@@ -29,8 +28,10 @@ export const EmailTemplatesTab: React.FC = () => {
     canCreate
   } = useEmailTemplates();
   
-  const permissions = useTablePermissions('email_management');
   const [previewingTemplate, setPreviewingTemplate] = useState<any>(null);
+  
+  // Debug permissions
+  console.log('EmailTemplatesTab canCreate from hook:', canCreate);
   const [currentPage, setCurrentPage] = useState(1);
   
   const ITEMS_PER_PAGE = 25;
@@ -67,7 +68,7 @@ export const EmailTemplatesTab: React.FC = () => {
     <div className="space-y-4">
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-semibold">Email Templates</h2>
-        {permissions.canCreate && (
+        {canCreate && (
           <Button onClick={handleCreate} className="flex items-center gap-2">
             <Plus className="w-4 h-4" />
             Create Template
