@@ -141,6 +141,11 @@ export const CompetitionEventRecord: React.FC = () => {
     if (existingEvent && (isEditMode || isViewMode) && eventTypes.length > 0) {
       const convertedData = convertEventToFormData(existingEvent);
       setFormData(convertedData);
+      
+      // Fetch score sheets for the loaded event immediately
+      if (convertedData.event && competitionId) {
+        fetchFilteredScoreSheets(convertedData.event);
+      }
     }
   }, [existingEvent, isEditMode, isViewMode, eventTypes, timezone]);
 
@@ -155,7 +160,7 @@ export const CompetitionEventRecord: React.FC = () => {
   // Fetch filtered score sheets when event changes
   useEffect(() => {
     if (formData.event && competitionId) {
-      fetchFilteredScoreSheets();
+      fetchFilteredScoreSheets(formData.event);
     }
   }, [formData.event, competitionId]);
 
@@ -279,8 +284,9 @@ export const CompetitionEventRecord: React.FC = () => {
       console.error('Error fetching competition date:', error);
     }
   };
-  const fetchFilteredScoreSheets = async () => {
-    if (!formData.event || !competitionId) {
+  const fetchFilteredScoreSheets = async (eventId?: string) => {
+    const eventToUse = eventId || formData.event;
+    if (!eventToUse || !competitionId) {
       setScoreSheets([]);
       return;
     }
@@ -294,7 +300,7 @@ export const CompetitionEventRecord: React.FC = () => {
         const {
           data,
           error
-        } = await supabase.from('competition_templates').select('id, template_name, jrotc_program').eq('is_active', true).eq('jrotc_program', competitionData.program).eq('event', formData.event).order('template_name', {
+        } = await supabase.from('competition_templates').select('id, template_name, jrotc_program').eq('is_active', true).eq('jrotc_program', competitionData.program).eq('event', eventToUse).order('template_name', {
           ascending: true
         });
         if (error) throw error;
