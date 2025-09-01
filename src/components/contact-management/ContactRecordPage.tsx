@@ -244,103 +244,142 @@ export const ContactRecordPage: React.FC = () => {
         <CardContent>
           <Form {...form}>
             <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
-              {/* Name Field */}
-              <FormField
-                control={form.control}
-                name="name"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Name *</FormLabel>
-                    <div className="col-span-3">
-                      <FormControl>
-                        <Input placeholder="Enter contact name" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {/* Type Field */}
-              <FormField
-                control={form.control}
-                name="type"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Type</FormLabel>
-                    <div className="col-span-3">
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select contact type" />
-                          </SelectTrigger>
-                        </FormControl>
-                        <SelectContent>
-                          <SelectItem value="parent">Parent</SelectItem>
-                          <SelectItem value="relative">Relative</SelectItem>
-                          <SelectItem value="friend">Friend</SelectItem>
-                          <SelectItem value="other">Other</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {/* Other Type Field (conditional) */}
-              {form.watch('type') === 'other' && (
+              {/* Row 1: Name - Type */}
+              <div className="grid grid-cols-2 gap-6">
                 <FormField
                   control={form.control}
-                  name="type_other"
+                  name="name"
                   render={({ field }) => (
-                    <FormItem className="grid grid-cols-4 items-center gap-4">
-                      <FormLabel className="text-right">Other</FormLabel>
-                      <div className="col-span-3">
+                    <FormItem className="grid grid-cols-3 items-center gap-3">
+                      <FormLabel className="text-left">Name *</FormLabel>
+                      <div className="col-span-2">
                         <FormControl>
-                          <Input placeholder="Specify other type" {...field} />
+                          <Input placeholder="Enter contact name" {...field} />
                         </FormControl>
                         <FormMessage />
                       </div>
                     </FormItem>
                   )}
                 />
-              )}
 
-              {/* Status Field */}
-              <FormField
-                control={form.control}
-                name="status"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Status</FormLabel>
-                    <div className="col-span-3">
-                      <Select onValueChange={field.onChange} value={field.value}>
+                <FormField
+                  control={form.control}
+                  name="type"
+                  render={({ field }) => (
+                    <FormItem className="grid grid-cols-3 items-center gap-3">
+                      <FormLabel className="text-left">Type</FormLabel>
+                      <div className="col-span-2">
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select contact type" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="parent">Parent</SelectItem>
+                            <SelectItem value="relative">Relative</SelectItem>
+                            <SelectItem value="friend">Friend</SelectItem>
+                            <SelectItem value="other">Other</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Row 2: Phone - Email */}
+              <div className="grid grid-cols-2 gap-6">
+                <FormField
+                  control={form.control}
+                  name="phone"
+                  render={({ field }) => (
+                    <FormItem className="grid grid-cols-3 items-center gap-3">
+                      <FormLabel className="text-left">Phone</FormLabel>
+                      <div className="col-span-2">
                         <FormControl>
-                          <SelectTrigger>
-                            <SelectValue placeholder="Select status" />
-                          </SelectTrigger>
+                          <Input placeholder="Phone number" {...field} />
                         </FormControl>
-                        <SelectContent>
-                          <SelectItem value="active">Active</SelectItem>
-                          <SelectItem value="semi_active">Semi-Active</SelectItem>
-                          <SelectItem value="not_active">Not Active</SelectItem>
-                        </SelectContent>
-                      </Select>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
 
-              {/* Cadet Field */}
+                <FormField
+                  control={form.control}
+                  name="email"
+                  render={({ field }) => (
+                    <FormItem className="grid grid-cols-3 items-center gap-3">
+                      <FormLabel className="text-left">Email</FormLabel>
+                      <div className="col-span-2">
+                        <FormControl>
+                          <Input type="email" placeholder="Email address" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Row 3: Other Type (conditional) - Status */}
+              <div className="grid grid-cols-2 gap-6">
+                {form.watch('type') === 'other' ? (
+                  <FormField
+                    control={form.control}
+                    name="type_other"
+                    render={({ field }) => (
+                      <FormItem className="grid grid-cols-3 items-center gap-3">
+                        <FormLabel className="text-left">Other</FormLabel>
+                        <div className="col-span-2">
+                          <FormControl>
+                            <Input placeholder="Specify other type" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </div>
+                      </FormItem>
+                    )}
+                  />
+                ) : (
+                  <div></div>
+                )}
+
+                <FormField
+                  control={form.control}
+                  name="status"
+                  render={({ field }) => (
+                    <FormItem className="grid grid-cols-3 items-center gap-3">
+                      <FormLabel className="text-left">Status</FormLabel>
+                      <div className="col-span-2">
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <FormControl>
+                            <SelectTrigger>
+                              <SelectValue placeholder="Select status" />
+                            </SelectTrigger>
+                          </FormControl>
+                          <SelectContent>
+                            <SelectItem value="active">Active</SelectItem>
+                            <SelectItem value="semi_active">Semi-Active</SelectItem>
+                            <SelectItem value="not_active">Not Active</SelectItem>
+                          </SelectContent>
+                        </Select>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              </div>
+
+              {/* Row 4: Cadet */}
               <FormField
                 control={form.control}
                 name="cadet_id"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Cadet (Optional)</FormLabel>
-                    <div className="col-span-3">
+                  <FormItem className="grid grid-cols-6 items-center gap-3">
+                    <FormLabel className="text-left">Cadet (Optional)</FormLabel>
+                    <div className="col-span-2">
                       <Select onValueChange={field.onChange} value={field.value}>
                         <FormControl>
                           <SelectTrigger>
@@ -353,56 +392,24 @@ export const ContactRecordPage: React.FC = () => {
                             <SelectItem key={cadet.id} value={cadet.id}>
                               {cadet.last_name}, {cadet.first_name}
                             </SelectItem>
-                          ))}</SelectContent>
+                          ))}
+                        </SelectContent>
                       </Select>
                       <FormMessage />
                     </div>
+                    <div className="col-span-3"></div>
                   </FormItem>
                 )}
               />
 
-              {/* Phone Field */}
-              <FormField
-                control={form.control}
-                name="phone"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Phone</FormLabel>
-                    <div className="col-span-3">
-                      <FormControl>
-                        <Input placeholder="Phone number" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {/* Email Field */}
-              <FormField
-                control={form.control}
-                name="email"
-                render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-center gap-4">
-                    <FormLabel className="text-right">Email</FormLabel>
-                    <div className="col-span-3">
-                      <FormControl>
-                        <Input type="email" placeholder="Email address" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </div>
-                  </FormItem>
-                )}
-              />
-
-              {/* Notes Field */}
+              {/* Row 5: Notes */}
               <FormField
                 control={form.control}
                 name="notes"
                 render={({ field }) => (
-                  <FormItem className="grid grid-cols-4 items-start gap-4">
-                    <FormLabel className="text-right pt-2">Notes</FormLabel>
-                    <div className="col-span-3">
+                  <FormItem className="grid grid-cols-6 items-start gap-3">
+                    <FormLabel className="text-left pt-2">Notes</FormLabel>
+                    <div className="col-span-5">
                       <FormControl>
                         <Textarea 
                           placeholder="Additional notes" 
