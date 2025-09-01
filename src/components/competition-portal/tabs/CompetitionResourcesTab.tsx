@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { Plus, Edit, Edit2, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
@@ -157,7 +157,7 @@ export const CompetitionResourcesTab: React.FC<CompetitionResourcesTabProps> = (
                           <Tooltip>
                             <TooltipTrigger asChild>
                               <Button variant="outline" size="sm" onClick={() => handleEdit(resource.id)}>
-                                <Edit2 className="w-4 h-4 mr-1" />
+                                <Edit className="w-4 h-4 mr-1" />
                                 Edit
                               </Button>
                             </TooltipTrigger>
