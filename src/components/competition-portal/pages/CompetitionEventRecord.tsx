@@ -524,13 +524,7 @@ export const CompetitionEventRecord: React.FC = () => {
               <Button type="button" variant="outline" onClick={handleBack} disabled={isSaving}>
                 Cancel
               </Button>
-              {isEditMode && canDelete && (
-                <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
-                  <Trash2 className="h-4 w-4" />
-                  Delete Event
-                </Button>
-              )}
-              <Button
+              <Button 
                 type="submit" 
                 form="event-form"
                 disabled={isSaving} 
@@ -540,6 +534,12 @@ export const CompetitionEventRecord: React.FC = () => {
                 {isSaving ? 'Saving...' : isCreateMode ? 'Create Event' : 'Save Changes'}
               </Button>
             </>
+          )}
+          {isEditMode && canDelete && (
+            <Button variant="destructive" size="sm" onClick={() => setShowDeleteDialog(true)} className="flex items-center gap-2">
+              <Trash2 className="h-4 w-4" />
+              Delete Event
+            </Button>
           )}
         </div>
       </div>
