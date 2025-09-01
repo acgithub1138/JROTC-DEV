@@ -43,6 +43,11 @@ export const CompetitionResourceRecord: React.FC = () => {
   const resourceId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
   
+  // Debug logs
+  console.log('CompetitionResourceRecord - competitionId:', competitionId);
+  console.log('CompetitionResourceRecord - resourceId:', resourceId);
+  console.log('CompetitionResourceRecord - mode:', mode);
+  
   const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
   const [showDeleteDialog, setShowDeleteDialog] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
