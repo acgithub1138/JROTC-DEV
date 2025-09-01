@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Plus, Edit2, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
+import { Plus, Edit, Trash2, Loader2, ArrowUpDown, ArrowUp, ArrowDown, Eye } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
