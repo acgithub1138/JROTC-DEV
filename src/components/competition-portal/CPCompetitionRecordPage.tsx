@@ -388,11 +388,11 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Description */}
-            <div className="grid grid-cols-4 items-start gap-4">
+            <div className="grid grid-cols-8 items-start gap-4">
               <Label htmlFor="description" className="text-right font-medium pt-2">
                 Description
               </Label>
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <Textarea
                   id="description"
                   value={formData.description}
@@ -405,9 +405,9 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Start Date & Time */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-8 items-center gap-4">
               <Label className="text-right font-medium">Start Date & Time *</Label>
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
                     <Input
@@ -451,9 +451,9 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-8 items-center gap-4">
               <Label className="text-right font-medium">End Date & Time *</Label>
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
                     <Input
@@ -497,9 +497,9 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Registration Deadline */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-8 items-center gap-4">
               <Label className="text-right font-medium">Registration Deadline</Label>
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <div className="grid grid-cols-4 gap-2">
                   <div className="col-span-2">
                     <Input
@@ -594,9 +594,9 @@ export const CPCompetitionRecordPage = () => {
             </div>
 
             {/* Competition SOP */}
-            <div className="grid grid-cols-4 items-center gap-4">
+            <div className="grid grid-cols-8 items-center gap-4">
               <Label className="text-right font-medium">Competition SOP</Label>
-              <div className="col-span-3">
+              <div className="col-span-7">
                 <Select value={formData.sop} onValueChange={(value) => updateFormData('sop', value)} disabled={isViewMode}>
                   <SelectTrigger>
                     <SelectValue placeholder="Select SOP type" />
@@ -612,11 +612,11 @@ export const CPCompetitionRecordPage = () => {
 
             {/* SOP Link */}
             {formData.sop === 'Link' && (
-              <div className="grid grid-cols-4 items-center gap-4">
+              <div className="grid grid-cols-8 items-center gap-4">
                 <Label htmlFor="sop_link" className="text-right font-medium">
                   SOP Link
                 </Label>
-                <div className="col-span-3">
+                <div className="col-span-7">
                   <Input
                     id="sop_link"
                     type="url"
@@ -631,9 +631,9 @@ export const CPCompetitionRecordPage = () => {
 
             {/* SOP Text */}
             {formData.sop === 'Text' && (
-              <div className="grid grid-cols-4 items-start gap-4">
+              <div className="grid grid-cols-8 items-start gap-4">
                 <Label className="text-right font-medium pt-2">SOP Text</Label>
-                <div className="col-span-3">
+                <div className="col-span-7">
                   <div className="border rounded-md">
                     <ReactQuill
                       ref={quillRef}
