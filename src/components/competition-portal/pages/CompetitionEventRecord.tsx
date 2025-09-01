@@ -597,8 +597,8 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Judge & Resource Selection */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Judges</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label className="text-right">Judges</Label>
                 <MultiSelectJudges
                   judges={judges}
                   selectedJudgeIds={formData.judges}
@@ -606,8 +606,8 @@ export const CompetitionEventRecord: React.FC = () => {
                   disabled={isViewMode}
                 />
               </div>
-              <div className="space-y-2">
-                <Label className="text-sm font-medium">Resources</Label>
+              <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
+                <Label className="text-right">Resources</Label>
                 <MultiSelectResources
                   resources={schoolUsers}
                   selectedResourceIds={formData.resources}
