@@ -657,7 +657,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label className="text-right">Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <Input type="date" value={formData.start_date} onChange={e => {
                   setFormData(prev => ({
                     ...prev,
@@ -720,7 +720,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label></Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-2 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-end">
                   <Label>Lunch Start Time</Label>
                 </div>
                 <div>
@@ -763,7 +763,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label></Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-2 flex items-center justify-end">
+                <div className="md:col-span-1 flex items-center justify-end">
                   <Label>Lunch End Time</Label>
                 </div>
                 <div>
@@ -806,7 +806,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label className="text-right">End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
-                <div className="md:col-span-2">
+                <div className="md:col-span-1">
                   <Input type="date" value={formData.end_date} onChange={e => setFormData(prev => ({
                   ...prev,
                   end_date: e.target.value
