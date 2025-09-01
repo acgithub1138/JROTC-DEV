@@ -580,7 +580,7 @@ export const CompetitionEventRecord: React.FC = () => {
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Selection */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="event">Event *</Label>
               <Select 
                 value={formData.event} 
@@ -603,7 +603,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Location */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="location">Location *</Label>
               <Input 
                 id="location" 
@@ -616,7 +616,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Start Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label>Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
@@ -678,7 +678,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* End Date & Time */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label>End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
@@ -729,7 +729,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Lunch Break */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label>Lunch Break *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
@@ -836,7 +836,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Fee */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="fee">Fee *</Label>
               <Input 
                 id="fee" 
@@ -851,7 +851,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Score Sheet */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
               <Label htmlFor="score_sheet">Score Template *</Label>
               <Select 
                 value={formData.score_sheet} 
@@ -872,7 +872,7 @@ export const CompetitionEventRecord: React.FC = () => {
             </div>
 
             {/* Notes */}
-            <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-start">
+            <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
               <Label htmlFor="notes" className="mt-2">Notes</Label>
               <Textarea 
                 id="notes" 
@@ -888,7 +888,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="space-y-4">
               <Label className="font-medium">Judges</Label>
               {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                   <Label>Add Judge</Label>
                   <Select onValueChange={addJudge}>
                     <SelectTrigger>
@@ -928,7 +928,7 @@ export const CompetitionEventRecord: React.FC = () => {
             <div className="space-y-4">
               <Label className="font-medium">Resources</Label>
               {!isViewMode && (
-                <div className="grid grid-cols-1 md:grid-cols-[200px_1fr] gap-4 items-center">
+                <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
                   <Label>Add Resource</Label>
                   <Select onValueChange={addResource}>
                     <SelectTrigger>
