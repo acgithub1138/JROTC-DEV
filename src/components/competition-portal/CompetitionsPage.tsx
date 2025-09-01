@@ -193,11 +193,7 @@ const CompetitionsPage = () => {
 const handleViewCompetition = (competition: Competition) => {
   navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}&mode=view`);
 };
-const handleEditCompetition = (competition: Competition) => {
-  navigate(`/app/competition-portal/competition-details/${competition.id}`);
-};
 
-// Open edit modal directly
 const handleOpenEdit = (competition: Competition) => {
   navigate(`/app/competition-portal/competitions/competition_record?id=${competition.id}`);
 };
@@ -350,7 +346,7 @@ const handleEditSubmit = async (data: any) => {
           userProfile={userProfile}
           getStatusBadgeVariant={getStatusBadgeVariant}
           handleViewCompetition={handleViewCompetition}
-          handleEditCompetition={handleEditCompetition}
+          handleEditCompetition={handleOpenEdit}
           handleCancelCompetitionClick={handleCancelCompetitionClick}
           handleStatusChange={handleStatusChange}
           updatingStatus={updatingStatus}
@@ -517,7 +513,7 @@ const handleEditSubmit = async (data: any) => {
 
         <Tooltip>
           <TooltipTrigger asChild>
-            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleEditCompetition(competition)}>
+            <Button variant="outline" size="icon" className="h-6 w-6" onClick={() => handleOpenEdit(competition)}>
               <GitCompareArrows className="w-3 h-3" />
             </Button>
           </TooltipTrigger>
