@@ -362,7 +362,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
                   <Label className="text-right pt-2">Start Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <FormField
                         control={form.control}
                         name="start_date"
@@ -451,7 +451,7 @@ export const CompetitionResourceRecord: React.FC = () => {
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
                   <Label className="text-right pt-2">End Date & Time</Label>
                   <div className="grid grid-cols-4 gap-2">
-                    <div className="col-span-2">
+                    <div className="col-span-1">
                       <FormField
                         control={form.control}
                         name="end_date"
