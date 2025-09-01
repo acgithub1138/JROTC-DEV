@@ -331,7 +331,7 @@ export const ScheduleEditRecord = () => {
                         {formatTimeForDisplay(slot.time, TIME_FORMATS.TIME_ONLY_24H, timezone)}
                       </div>
 
-                      <div className="w-1/3">
+                      <div className="w-1/2">
                         {slot.isLunchBreak ? (
                           <div className="px-3 py-1 rounded-md text-sm bg-orange-100 text-orange-800 font-medium text-center">
                             Lunch Break
@@ -355,7 +355,7 @@ export const ScheduleEditRecord = () => {
                             value={currentAssignment || ""} 
                             onValueChange={schoolId => handleLocalScheduleChange(slot.time, schoolId)}
                           >
-                            <SelectTrigger className="w-full">
+                            <SelectTrigger className="w-1/2">
                               <SelectValue placeholder="Select school..." />
                             </SelectTrigger>
                             <SelectContent>
