@@ -581,7 +581,7 @@ export const CompetitionEventRecord: React.FC = () => {
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Event Selection */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="event">Event *</Label>
+              <Label htmlFor="event" className="text-right">Event *</Label>
               <Select 
                 value={formData.event} 
                 onValueChange={value => setFormData(prev => ({ ...prev, event: value }))}
@@ -604,7 +604,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Location */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="location">Location *</Label>
+              <Label htmlFor="location" className="text-right">Location *</Label>
               <Input 
                 id="location" 
                 value={formData.location} 
@@ -617,7 +617,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Start Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label>Start Date & Time *</Label>
+              <Label className="text-right">Start Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
                   <Input 
@@ -679,7 +679,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* End Date & Time */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label>End Date & Time *</Label>
+              <Label className="text-right">End Date & Time *</Label>
               <div className="grid grid-cols-1 md:grid-cols-4 gap-2">
                 <div className="md:col-span-2">
                   <Input 
@@ -730,7 +730,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Lunch Break */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label>Lunch Break *</Label>
+              <Label className="text-right">Lunch Break *</Label>
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <Label className="text-sm text-muted-foreground mb-2 block">Start Time</Label>
@@ -810,7 +810,7 @@ export const CompetitionEventRecord: React.FC = () => {
             {/* Interval & Max Participants */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="interval">Interval (minutes) *</Label>
+                <Label htmlFor="interval" className="text-right">Interval (minutes) *</Label>
                 <Input 
                   id="interval" 
                   type="number" 
@@ -822,7 +822,7 @@ export const CompetitionEventRecord: React.FC = () => {
                 />
               </div>
               <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                <Label htmlFor="max_participants">Max Participants *</Label>
+                <Label htmlFor="max_participants" className="text-right">Max Participants *</Label>
                 <Input 
                   id="max_participants" 
                   type="number" 
@@ -837,7 +837,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Fee */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="fee">Fee *</Label>
+              <Label htmlFor="fee" className="text-right">Fee *</Label>
               <Input 
                 id="fee" 
                 type="number" 
@@ -852,7 +852,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Score Sheet */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-              <Label htmlFor="score_sheet">Score Template *</Label>
+              <Label htmlFor="score_sheet" className="text-right">Score Template *</Label>
               <Select 
                 value={formData.score_sheet} 
                 onValueChange={value => setFormData(prev => ({ ...prev, score_sheet: value }))}
@@ -873,7 +873,7 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Notes */}
             <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-start">
-              <Label htmlFor="notes" className="mt-2">Notes</Label>
+              <Label htmlFor="notes" className="mt-2 text-right">Notes</Label>
               <Textarea 
                 id="notes" 
                 value={formData.notes} 
@@ -886,10 +886,10 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Judges */}
             <div className="space-y-4">
-              <Label className="font-medium">Judges</Label>
+              <Label className="font-medium text-right block">Judges</Label>
               {!isViewMode && (
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label>Add Judge</Label>
+                  <Label className="text-right">Add Judge</Label>
                   <Select onValueChange={addJudge}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a judge to add" />
@@ -926,10 +926,10 @@ export const CompetitionEventRecord: React.FC = () => {
 
             {/* Resources */}
             <div className="space-y-4">
-              <Label className="font-medium">Resources</Label>
+              <Label className="font-medium text-right block">Resources</Label>
               {!isViewMode && (
                 <div className="grid grid-cols-1 md:grid-cols-[140px_1fr] gap-4 items-center">
-                  <Label>Add Resource</Label>
+                  <Label className="text-right">Add Resource</Label>
                   <Select onValueChange={addResource}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a resource to add" />
