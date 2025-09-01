@@ -9,7 +9,8 @@ import { ArrowLeft } from 'lucide-react';
 import { supabase } from '@/integrations/supabase/client';
 import { toast } from 'sonner';
 import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
-import { getCleanFieldName } from '@/components/competition-portal/my-competitions/components/score-sheet-viewer/utils/fieldHelpers';
+import { EventScoreForm } from '@/components/competition-management/components/EventScoreForm';
+import { useCompetitionTemplates } from '@/components/competition-portal/my-competitions/hooks/useCompetitionTemplates';
 
 type CompetitionEvent = {
   id: string;
@@ -43,9 +44,13 @@ export const EditScoreSheet: React.FC = () => {
   const schoolId = searchParams.get('schoolId');
 
   const { canUpdate } = useCompetitionResultsPermissions();
+  const { templates } = useCompetitionTemplates();
   const [event, setEvent] = useState<CompetitionEvent | null>(null);
-  const [scores, setScores] = useState<Record<string, string>>({});
+  const [selectedTemplate, setSelectedTemplate] = useState<any>(null);
+  const [scores, setScores] = useState<Record<string, any>>({});
+  const [totalPoints, setTotalPoints] = useState<number>(0);
   const [judgeNumber, setJudgeNumber] = useState('');
+  const [teamName, setTeamName] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSaving, setIsSaving] = useState(false);
   const [error, setError] = useState<string | null>(null);
@@ -73,11 +78,40 @@ export const EditScoreSheet: React.FC = () => {
       if (!data) throw new Error('Score sheet not found');
 
       setEvent(data);
-      if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet) && 'scores' in data.score_sheet) {
-        setScores(data.score_sheet.scores as Record<string, string>);
+      
+      // Load existing scores and metadata
+      if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet)) {
+        if ('scores' in data.score_sheet) {
+          setScores(data.score_sheet.scores as Record<string, any>);
+        }
+        if ('judge_number' in data.score_sheet) {
+          setJudgeNumber(String(data.score_sheet.judge_number));
+        }
       }
-      if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet) && 'judge_number' in data.score_sheet) {
-        setJudgeNumber(String(data.score_sheet.judge_number));
+      
+      if (data.team_name) {
+        setTeamName(data.team_name);
+      }
+      
+      if (data.total_points) {
+        setTotalPoints(Number(data.total_points));
+      }
+
+      // Find and set the template
+      if (data.score_sheet && typeof data.score_sheet === 'object' && !Array.isArray(data.score_sheet) && 'template_id' in data.score_sheet) {
+        const scoreSheet = data.score_sheet as { template_id?: string };
+        if (scoreSheet.template_id) {
+          const template = templates.find(t => t.id === scoreSheet.template_id);
+          if (template) {
+            setSelectedTemplate(template);
+          }
+        }
+      } else if (data.event) {
+        // Try to find template by event type
+        const template = templates.find(t => t.event === data.event);
+        if (template) {
+          setSelectedTemplate(template);
+        }
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load score sheet');
@@ -88,13 +122,11 @@ export const EditScoreSheet: React.FC = () => {
 
   useEffect(() => {
     fetchEvent();
-  }, [eventId, competitionId]);
+  }, [eventId, competitionId, templates]);
 
-  const handleScoreChange = (fieldName: string, value: string) => {
-    setScores(prev => ({
-      ...prev,
-      [fieldName]: value
-    }));
+  const handleScoreChange = (newScores: Record<string, any>, newTotalPoints: number) => {
+    setScores(newScores);
+    setTotalPoints(newTotalPoints);
     setHasUnsavedChanges(true);
   };
 
@@ -103,13 +135,9 @@ export const EditScoreSheet: React.FC = () => {
     setHasUnsavedChanges(true);
   };
 
-  const calculateTotal = () => {
-    let total = 0;
-    Object.values(scores).forEach(value => {
-      const numValue = parseFloat(value) || 0;
-      total += numValue;
-    });
-    return total;
+  const handleTeamNameChange = (value: string) => {
+    setTeamName(value);
+    setHasUnsavedChanges(true);
   };
 
   const handleSave = async () => {
@@ -121,6 +149,7 @@ export const EditScoreSheet: React.FC = () => {
         ...event.score_sheet,
         scores,
         judge_number: judgeNumber,
+        template_id: selectedTemplate?.id,
         calculated_at: new Date().toISOString()
       };
 
@@ -128,7 +157,8 @@ export const EditScoreSheet: React.FC = () => {
         .from('competition_events')
         .update({
           score_sheet: updatedScoreSheet,
-          total_points: calculateTotal(),
+          total_points: totalPoints,
+          team_name: teamName || null,
           updated_at: new Date().toISOString()
         })
         .eq('id', event.id);
@@ -234,24 +264,15 @@ export const EditScoreSheet: React.FC = () => {
     );
   }
 
-  if (!event) {
+  if (!event || !selectedTemplate) {
     return (
       <div className="p-6">
         <div className="text-center">
-          <h1 className="text-2xl font-bold text-destructive">Score Sheet Not Found</h1>
-          <p className="text-muted-foreground">The requested score sheet could not be found.</p>
+          <p className="text-muted-foreground">Loading score sheet...</p>
         </div>
       </div>
     );
   }
-
-  const sortedFieldNames = Object.keys(scores).sort((a, b) => {
-    const getNumber = (str: string) => {
-      const match = str.match(/^field_(\d+)/);
-      return match ? parseInt(match[1]) : 999;
-    };
-    return getNumber(a) - getNumber(b);
-  });
 
   return (
     <div className="p-6 space-y-6">
@@ -287,12 +308,12 @@ export const EditScoreSheet: React.FC = () => {
           <CardTitle>Score Sheet Details</CardTitle>
         </CardHeader>
         <CardContent className="space-y-6">
-          {/* Judge Number Field */}
-          <div className="grid grid-cols-4 items-center gap-4">
-            <Label htmlFor="judge-number" className="text-right">
-              Judge Number
-            </Label>
-            <div className="col-span-3">
+          {/* Judge Number and Team Name Fields */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="space-y-2">
+              <Label htmlFor="judge-number" className="font-medium">
+                Judge Number
+              </Label>
               <Input 
                 id="judge-number" 
                 value={judgeNumber} 
@@ -300,42 +321,40 @@ export const EditScoreSheet: React.FC = () => {
                 placeholder="Enter judge number" 
               />
             </div>
+            
+            <div className="space-y-2">
+              <Label htmlFor="team-name" className="font-medium">
+                Team Name
+              </Label>
+              <Input 
+                id="team-name" 
+                value={teamName} 
+                onChange={(e) => handleTeamNameChange(e.target.value)}
+                placeholder="Enter team name" 
+              />
+            </div>
           </div>
 
           <Separator />
 
-          {/* Score Fields */}
-          <div className="space-y-4">
-            <h3 className="text-lg font-medium">Scoring Fields</h3>
+          {/* Score Sheet Section */}
+          {selectedTemplate && (
             <div className="space-y-4">
-              {sortedFieldNames.map(fieldName => (
-                <div key={fieldName} className="grid grid-cols-4 items-center gap-4">
-                  <Label htmlFor={fieldName} className="text-right font-medium">
-                    {getCleanFieldName(fieldName)}
-                  </Label>
-                  <div className="col-span-3">
-                    <Input 
-                      id={fieldName} 
-                      type="number" 
-                      value={scores[fieldName] || ''} 
-                      onChange={(e) => handleScoreChange(fieldName, e.target.value)}
-                      placeholder="Enter score" 
-                    />
-                  </div>
-                </div>
-              ))}
+              <h3 className="text-lg font-medium">Score Sheet: {selectedTemplate.template_name}</h3>
+              <EventScoreForm
+                templateScores={selectedTemplate.scores as Record<string, any>}
+                onScoreChange={handleScoreChange}
+                initialScores={scores}
+                judgeNumber={judgeNumber}
+              />
             </div>
-          </div>
+          )}
 
-          <Separator />
-
-          {/* Total Points */}
-          <div className="bg-muted/30 p-4 rounded-md">
-            <div className="flex justify-between items-center">
-              <span className="text-lg font-medium">Total Points:</span>
-              <span className="text-2xl font-bold">{calculateTotal()}</span>
+          {!selectedTemplate && (
+            <div className="text-center py-8 text-muted-foreground">
+              <p>Loading score sheet template...</p>
             </div>
-          </div>
+          )}
         </CardContent>
       </Card>
 
