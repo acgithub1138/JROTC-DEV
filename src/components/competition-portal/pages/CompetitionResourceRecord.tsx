@@ -37,13 +37,17 @@ const formSchema = z.object({
 type FormData = z.infer<typeof formSchema>;
 
 export const CompetitionResourceRecord: React.FC = () => {
-  const { competitionId } = useParams<{ competitionId: string }>();
+  const { '*': splat } = useParams();
   const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const resourceId = searchParams.get('id');
   const mode = searchParams.get('mode') as 'create' | 'edit' | 'view';
   
+  // Extract competitionId from the splat parameter
+  const competitionId = splat?.split('/')[2]; // competition-details/{competitionId}/resources_record
+  
   // Debug logs
+  console.log('CompetitionResourceRecord - splat:', splat);
   console.log('CompetitionResourceRecord - competitionId:', competitionId);
   console.log('CompetitionResourceRecord - resourceId:', resourceId);
   console.log('CompetitionResourceRecord - mode:', mode);
