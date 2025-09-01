@@ -1,0 +1,551 @@
+import React, { useState, useEffect } from 'react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { format } from 'date-fns';
+import { CalendarIcon, ArrowLeft } from 'lucide-react';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Calendar } from '@/components/ui/calendar';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Badge } from '@/components/ui/badge';
+import { cn } from '@/lib/utils';
+import { useToast } from '@/hooks/use-toast';
+import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useBudgetTransactions } from './hooks/useBudgetTransactions';
+import { BudgetTransaction } from './BudgetManagementPage';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+
+const expenseSchema = z.object({
+  item: z.string().min(1, 'Item is required'),
+  type: z.enum(['equipment', 'travel', 'meals', 'supplies', 'other']),
+  description: z.string().optional(),
+  date: z.date({
+    required_error: 'Date is required'
+  }),
+  amount: z.number().min(0.01, 'Amount must be greater than 0'),
+  payment_method: z.enum(['cash', 'check', 'debit_card', 'credit_card', 'other']),
+  status: z.enum(['pending', 'paid', 'not_paid'])
+});
+
+type ExpenseFormData = z.infer<typeof expenseSchema>;
+type BudgetRecordMode = 'create' | 'edit' | 'view';
+
+export const BudgetExpenseRecordPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { toast } = useToast();
+  
+  // Extract mode and record ID from URL parameters
+  const mode = searchParams.get('mode') as BudgetRecordMode || 'view';
+  const recordId = searchParams.get('id');
+  
+  // Permissions
+  const { canCreate, canEdit, canView } = useTablePermissions('budget');
+  
+  // Data hooks
+  const { transactions, createTransaction, updateTransaction, isLoading } = useBudgetTransactions({
+    search: '',
+    category: '',
+    type: '',
+    paymentMethod: '',
+    status: '',
+    showArchived: false,
+    budgetYear: ''
+  });
+  
+  // Find current record
+  const currentRecord = recordId ? transactions.find(t => t.id === recordId) : null;
+  
+  // Local state
+  const [currentMode, setCurrentMode] = useState<BudgetRecordMode>(mode);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Form setup
+  const defaultValues = {
+    item: currentRecord?.item || '',
+    type: (currentRecord?.type as 'equipment' | 'travel' | 'meals' | 'supplies' | 'other') || 'other' as const,
+    description: currentRecord?.description || '',
+    date: currentRecord?.date ? new Date(currentRecord.date) : new Date(),
+    amount: currentRecord?.amount || 0,
+    payment_method: (currentRecord?.payment_method as 'cash' | 'check' | 'debit_card' | 'credit_card' | 'other') || 'cash' as const,
+    status: (currentRecord?.status as 'pending' | 'paid' | 'not_paid') || 'pending' as const
+  };
+
+  const form = useForm<ExpenseFormData>({
+    resolver: zodResolver(expenseSchema),
+    defaultValues
+  });
+
+  // Unsaved changes detection
+  const { hasUnsavedChanges, resetChanges } = useUnsavedChanges({
+    initialData: defaultValues,
+    currentData: form.watch(),
+    enabled: currentMode !== 'view'
+  });
+
+  // Update currentMode when URL mode changes
+  useEffect(() => {
+    setCurrentMode(mode);
+  }, [mode]);
+
+  // Reset form when record changes
+  useEffect(() => {
+    if (currentRecord) {
+      const newDefaults = {
+        item: currentRecord.item || '',
+        type: (currentRecord.type as 'equipment' | 'travel' | 'meals' | 'supplies' | 'other') || 'other' as const,
+        description: currentRecord.description || '',
+        date: currentRecord.date ? new Date(currentRecord.date) : new Date(),
+        amount: currentRecord.amount || 0,
+        payment_method: (currentRecord.payment_method as 'cash' | 'check' | 'debit_card' | 'credit_card' | 'other') || 'cash' as const,
+        status: (currentRecord.status as 'pending' | 'paid' | 'not_paid') || 'pending' as const
+      };
+      form.reset(newDefaults);
+      resetChanges();
+    }
+  }, [currentRecord, form, resetChanges]);
+
+  // Permission checks
+  useEffect(() => {
+    if (currentMode === 'create' && !canCreate) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to create budget items.",
+        variant: "destructive"
+      });
+      navigate('/app/budget');
+      return;
+    }
+    
+    if (currentMode === 'view' && !canView) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to view budget items.",
+        variant: "destructive"
+      });
+      navigate('/app/budget');
+      return;
+    }
+    
+    if (currentMode === 'edit' && !canEdit) {
+      toast({
+        title: "Access Denied",
+        description: "You don't have permission to edit budget items.",
+        variant: "destructive"
+      });
+      setCurrentMode('view');
+      return;
+    }
+
+    // If record not found but we need one
+    if ((currentMode === 'view' || currentMode === 'edit') && recordId && !currentRecord && !isLoading) {
+      toast({
+        title: "Expense Record Not Found",
+        description: "The requested expense record could not be found.",
+        variant: "destructive"
+      });
+      navigate('/app/budget');
+      return;
+    }
+  }, [currentMode, canCreate, canEdit, canView, currentRecord, recordId, navigate, toast, isLoading]);
+
+  // Handle navigation
+  const handleBack = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      navigate('/app/budget');
+    }
+  };
+
+  const handleEdit = () => {
+    if (recordId) {
+      setCurrentMode('edit');
+      navigate(`/app/budget/expense_record?mode=edit&id=${recordId}`);
+    }
+  };
+
+  const handleView = () => {
+    if (recordId) {
+      setCurrentMode('view');
+      navigate(`/app/budget/expense_record?id=${recordId}`);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (data: ExpenseFormData) => {
+    try {
+      setIsSubmitting(true);
+      
+      const budgetData = {
+        item: data.item,
+        category: 'expense' as const,
+        type: data.type,
+        description: data.description,
+        date: format(data.date, 'yyyy-MM-dd'),
+        amount: data.amount,
+        payment_method: data.payment_method,
+        status: data.status,
+        archive: false
+      };
+
+      if (currentMode === 'create') {
+        createTransaction(budgetData);
+        toast({
+          title: "Expense Added",
+          description: "Expense record has been created successfully."
+        });
+        navigate('/app/budget');
+      } else if (currentMode === 'edit' && recordId) {
+        updateTransaction(recordId, budgetData);
+        toast({
+          title: "Expense Updated",
+          description: "Expense record has been updated successfully."
+        });
+        handleView();
+      }
+      
+      resetChanges();
+    } catch (error) {
+      console.error(`Error ${currentMode === 'create' ? 'creating' : 'updating'} expense:`, error);
+      toast({
+        title: "Error",
+        description: `Failed to ${currentMode === 'create' ? 'create' : 'update'} expense record. Please try again.`,
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
+  // Handle unsaved changes dialog
+  const handleDiscardChanges = () => {
+    form.reset();
+    resetChanges();
+    setShowUnsavedDialog(false);
+    navigate('/app/budget');
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  // Get page title
+  const getPageTitle = () => {
+    switch (currentMode) {
+      case 'create':
+        return 'Add Expense';
+      case 'edit':
+        return `Edit Expense: ${currentRecord?.item || 'N/A'}`;
+      case 'view':
+        return `Expense: ${currentRecord?.item || 'N/A'}`;
+      default:
+        return 'Expense Record';
+    }
+  };
+
+  // Get status badge variant
+  const getStatusBadgeVariant = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'default';
+      case 'pending':
+        return 'secondary';
+      case 'not_paid':
+        return 'destructive';
+      default:
+        return 'secondary';
+    }
+  };
+
+  const isFormMode = currentMode === 'create' || currentMode === 'edit';
+
+  return (
+    <>
+      <div className="p-6 space-y-6">
+        {/* Header */}
+        <div className="flex items-center justify-between">
+          <div className="flex items-center gap-4">
+            <Button variant="ghost" size="sm" onClick={handleBack}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Back to Budget
+            </Button>
+            <div>
+              <h1 className="text-2xl font-bold">{getPageTitle()}</h1>
+              <p className="text-muted-foreground">
+                Budget → {getPageTitle()}
+              </p>
+            </div>
+          </div>
+          
+          {currentMode === 'view' && canEdit && (
+            <Button onClick={handleEdit}>
+              Edit Expense
+            </Button>
+          )}
+        </div>
+
+        {/* Form/View Content */}
+        <Card>
+          <CardHeader>
+            <CardTitle>
+              {currentMode === 'create' ? 'Add New Expense' : 'Expense Details'}
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            {isFormMode ? (
+              <Form {...form}>
+                <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    <FormField
+                      control={form.control}
+                      name="item"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Item *</FormLabel>
+                          <FormControl>
+                            <Input placeholder="Enter item name" {...field} />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="type"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Type *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select expense type" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="equipment">Equipment</SelectItem>
+                              <SelectItem value="travel">Travel</SelectItem>
+                              <SelectItem value="meals">Meals</SelectItem>
+                              <SelectItem value="supplies">Supplies</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="date"
+                      render={({ field }) => (
+                        <FormItem className="flex flex-col">
+                          <FormLabel>Date *</FormLabel>
+                          <Popover>
+                            <PopoverTrigger asChild>
+                              <FormControl>
+                                <Button
+                                  variant="outline"
+                                  className={cn(
+                                    "w-full pl-3 text-left font-normal",
+                                    !field.value && "text-muted-foreground"
+                                  )}
+                                >
+                                  {field.value ? (
+                                    format(field.value, "PPP")
+                                  ) : (
+                                    <span>Pick a date</span>
+                                  )}
+                                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                                </Button>
+                              </FormControl>
+                            </PopoverTrigger>
+                            <PopoverContent className="w-auto p-0" align="start">
+                              <Calendar
+                                mode="single"
+                                selected={field.value}
+                                onSelect={field.onChange}
+                                disabled={(date) =>
+                                  date > new Date() || date < new Date("1900-01-01")
+                                }
+                                initialFocus
+                              />
+                            </PopoverContent>
+                          </Popover>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Amount *</FormLabel>
+                          <FormControl>
+                            <Input
+                              type="number"
+                              step="0.01"
+                              placeholder="0.00"
+                              {...field}
+                              onChange={(e) => field.onChange(parseFloat(e.target.value) || 0)}
+                            />
+                          </FormControl>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="payment_method"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Payment Method *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select payment method" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="cash">Cash</SelectItem>
+                              <SelectItem value="check">Check</SelectItem>
+                              <SelectItem value="debit_card">Debit Card</SelectItem>
+                              <SelectItem value="credit_card">Credit Card</SelectItem>
+                              <SelectItem value="other">Other</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+
+                    <FormField
+                      control={form.control}
+                      name="status"
+                      render={({ field }) => (
+                        <FormItem>
+                          <FormLabel>Status *</FormLabel>
+                          <Select onValueChange={field.onChange} value={field.value}>
+                            <FormControl>
+                              <SelectTrigger>
+                                <SelectValue placeholder="Select status" />
+                              </SelectTrigger>
+                            </FormControl>
+                            <SelectContent>
+                              <SelectItem value="pending">Pending</SelectItem>
+                              <SelectItem value="paid">Paid</SelectItem>
+                              <SelectItem value="not_paid">Not Paid</SelectItem>
+                            </SelectContent>
+                          </Select>
+                          <FormMessage />
+                        </FormItem>
+                      )}
+                    />
+                  </div>
+
+                  <FormField
+                    control={form.control}
+                    name="description"
+                    render={({ field }) => (
+                      <FormItem>
+                        <FormLabel>Description</FormLabel>
+                        <FormControl>
+                          <Textarea
+                            placeholder="Optional description"
+                            className="resize-none"
+                            {...field}
+                          />
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+
+                  <div className="flex justify-end gap-2 pt-6">
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={handleBack}
+                    >
+                      Cancel
+                    </Button>
+                    <Button type="submit" disabled={isSubmitting}>
+                      {isSubmitting ? 'Saving...' : 
+                       currentMode === 'create' ? 'Add Expense' : 'Update Expense'}
+                    </Button>
+                  </div>
+                </form>
+              </Form>
+            ) : (
+              // View mode
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Item</h3>
+                    <p className="text-sm">{currentRecord?.item || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Type</h3>
+                    <p className="text-sm capitalize">{currentRecord?.type || 'N/A'}</p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Date</h3>
+                    <p className="text-sm">
+                      {currentRecord?.date ? format(new Date(currentRecord.date), 'PPP') : 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Amount</h3>
+                    <p className="text-sm font-medium text-red-600">
+                      ${currentRecord?.amount?.toFixed(2) || '0.00'}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Payment Method</h3>
+                    <p className="text-sm capitalize">
+                      {currentRecord?.payment_method?.replace('_', ' ') || 'N/A'}
+                    </p>
+                  </div>
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Status</h3>
+                    {currentRecord?.status && (
+                      <Badge variant={getStatusBadgeVariant(currentRecord.status)} className="capitalize">
+                        {currentRecord.status.replace('_', ' ')}
+                      </Badge>
+                    )}
+                  </div>
+                </div>
+                
+                {currentRecord?.description && (
+                  <div>
+                    <h3 className="font-medium text-sm text-muted-foreground mb-1">Description</h3>
+                    <p className="text-sm">{currentRecord.description}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </div>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
+    </>
+  );
+};

@@ -1,12 +1,11 @@
 import React, { useState } from 'react';
 import { Plus } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { BudgetSummaryCards } from './components/BudgetSummaryCards';
 import { BudgetTable } from './components/BudgetTable';
 import { BudgetFilters } from './components/BudgetFilters';
-import { AddIncomeDialog } from './components/AddIncomeDialog';
-import { AddExpenseDialog } from './components/AddExpenseDialog';
 import { EditBudgetItemDialog } from './components/EditBudgetItemDialog';
 import { ViewBudgetItemDialog } from './components/ViewBudgetItemDialog';
 import { DeleteBudgetDialog } from './components/DeleteBudgetDialog';
@@ -42,9 +41,8 @@ export interface BudgetFilters {
   budgetYear: string;
 }
 const BudgetManagementPage = () => {
+  const navigate = useNavigate();
   const { canCreate, canEdit: canUpdate } = useTablePermissions('budget');
-  const [showAddIncome, setShowAddIncome] = useState(false);
-  const [showAddExpense, setShowAddExpense] = useState(false);
   const [editingItem, setEditingItem] = useState<BudgetTransaction | null>(null);
   const [viewingItem, setViewingItem] = useState<BudgetTransaction | null>(null);
   const [deletingItem, setDeletingItem] = useState<BudgetTransaction | null>(null);
@@ -83,6 +81,14 @@ const BudgetManagementPage = () => {
       setDeletingItem(null);
     }
   };
+
+  const handleAddIncome = () => {
+    navigate('/app/budget/income_record?mode=create');
+  };
+
+  const handleAddExpense = () => {
+    navigate('/app/budget/expense_record?mode=create');
+  };
   return <div className="p-6 space-y-6">
       <div className="flex justify-between items-start">
         <div>
@@ -91,13 +97,13 @@ const BudgetManagementPage = () => {
         </div>
         <div className="flex gap-2 flex-col md:flex-row">
           {canCreate && (
-            <Button onClick={() => setShowAddIncome(true)} className="bg-green-600 hover:bg-green-700 text-white">
+            <Button onClick={handleAddIncome} className="bg-green-600 hover:bg-green-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Income
             </Button>
           )}
           {canCreate && (
-            <Button onClick={() => setShowAddExpense(true)} className="bg-red-600 hover:bg-red-700 text-white">
+            <Button onClick={handleAddExpense} className="bg-red-600 hover:bg-red-700 text-white">
               <Plus className="w-4 h-4 mr-2" />
               Add Expense
             </Button>
@@ -119,10 +125,6 @@ const BudgetManagementPage = () => {
           <BudgetTable transactions={transactions} isLoading={isLoading} onEdit={setEditingItem} onView={setViewingItem} onDelete={handleDeleteTransaction} />
         )}
       </div>
-
-      <AddIncomeDialog open={showAddIncome} onOpenChange={setShowAddIncome} onSubmit={createTransaction} />
-
-      <AddExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} onSubmit={createTransaction} />
 
       {editingItem && <EditBudgetItemDialog open={!!editingItem} onOpenChange={() => setEditingItem(null)} item={editingItem} onSubmit={updateTransaction} />}
       

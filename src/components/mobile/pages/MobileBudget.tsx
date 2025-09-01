@@ -1,16 +1,15 @@
-import React, { useState } from 'react';
+import React from 'react';
 import { Plus, Filter, Archive, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
+import { useNavigate } from 'react-router-dom';
 import { BudgetFilters } from '@/components/budget-management/BudgetManagementPage';
 import { useBudgetTransactions, useBudgetYears } from '@/components/budget-management/hooks/useBudgetTransactions';
 import { formatCurrency } from '@/utils/timeDisplayUtils';
-import { AddIncomeDialog } from '@/components/budget-management/components/AddIncomeDialog';
-import { AddExpenseDialog } from '@/components/budget-management/components/AddExpenseDialog';
+
 export const MobileBudget: React.FC = () => {
-  const [showAddIncome, setShowAddIncome] = useState(false);
-  const [showAddExpense, setShowAddExpense] = useState(false);
+  const navigate = useNavigate();
 
   // Remove filters to show all budget data
   const {
@@ -34,6 +33,7 @@ export const MobileBudget: React.FC = () => {
   const totalIncome = transactions.filter(t => t.category === 'income').reduce((sum, t) => sum + (t.amount || 0), 0);
   const totalExpenses = transactions.filter(t => t.category === 'expense').reduce((sum, t) => sum + (t.amount || 0), 0);
   const netBalance = totalIncome - totalExpenses;
+  
   const getStatusColor = (status: string) => {
     switch (status) {
       case 'pending':
@@ -46,35 +46,41 @@ export const MobileBudget: React.FC = () => {
         return 'bg-gray-100 text-gray-800';
     }
   };
+  
   const getTypeIcon = (category: string) => {
     return category === 'income' ? TrendingUp : TrendingDown;
   };
+  
   const getTypeColor = (category: string) => {
     return category === 'income' ? 'text-green-600' : 'text-red-600';
   };
+  
   const formatTypeDisplay = (type: string) => {
     if (!type) return '';
     // Remove spaces and capitalize first letter
     const formatted = type.replace(/\s+/g, '');
     return formatted.charAt(0).toUpperCase() + formatted.slice(1).toLowerCase();
   };
+  
   const formatStatusDisplay = (status: string) => {
     if (!status) return '';
     // Replace underscores with spaces and capitalize each word
     return status.replace(/_/g, ' ').split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase()).join(' ');
   };
+  
   if (isLoading) {
-    return <div className="flex items-center justify-center h-64">
+    return (
+      <div className="flex items-center justify-center h-64">
         <div className="text-center">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary mx-auto"></div>
           <p className="mt-2 text-muted-foreground">Loading budget data...</p>
         </div>
-      </div>;
+      </div>
+    );
   }
-  return <div className="p-4 space-y-4">
-      {/* Header */}
-      
-
+  
+  return (
+    <div className="p-4 space-y-4">
       {/* Summary Cards */}
       <div className="grid grid-cols-1 gap-4">
         <Card>
@@ -111,11 +117,11 @@ export const MobileBudget: React.FC = () => {
 
       {/* Action Buttons */}
       <div className="grid grid-cols-2 gap-2">
-        <Button onClick={() => setShowAddIncome(true)} className="w-full" variant="outline">
+        <Button onClick={() => navigate('/app/budget/income_record?mode=create')} className="w-full" variant="outline">
           <Plus className="h-4 w-4 mr-2" />
           Add Income
         </Button>
-        <Button onClick={() => setShowAddExpense(true)} className="w-full" variant="outline">
+        <Button onClick={() => navigate('/app/budget/expense_record?mode=create')} className="w-full" variant="outline">
           <Plus className="h-4 w-4 mr-2" />
           Add Expense
         </Button>
@@ -130,7 +136,8 @@ export const MobileBudget: React.FC = () => {
           </span>
         </div>
         
-        {transactions.length === 0 ? <Card>
+        {transactions.length === 0 ? (
+          <Card>
             <CardContent className="py-8 text-center">
               <DollarSign className="h-12 w-12 text-muted-foreground mx-auto mb-4" />
               <h3 className="font-medium text-muted-foreground">No transactions found</h3>
@@ -138,10 +145,13 @@ export const MobileBudget: React.FC = () => {
                 Add your first income or expense to get started.
               </p>
             </CardContent>
-          </Card> : <div className="space-y-2">
+          </Card>
+        ) : (
+          <div className="space-y-2">
             {transactions.map(transaction => {
-          const TypeIcon = getTypeIcon(transaction.category);
-          return <Card key={transaction.id} className="p-4">
+              const TypeIcon = getTypeIcon(transaction.category);
+              return (
+                <Card key={transaction.id} className="p-4">
                   <div className="flex items-start justify-between">
                     <div className="flex items-start gap-3 flex-1">
                       <div className={`p-2 rounded-lg ${transaction.category === 'income' ? 'bg-green-100' : 'bg-red-100'}`}>
@@ -152,34 +162,28 @@ export const MobileBudget: React.FC = () => {
                         <p className="text-xs text-muted-foreground">
                           {formatTypeDisplay(transaction.type)} • {new Date(transaction.date).toLocaleDateString()}
                         </p>
-                        {transaction.description && <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
+                        {transaction.description && (
+                          <p className="text-xs text-muted-foreground mt-1 line-clamp-2">
                             {transaction.description}
-                          </p>}
+                          </p>
+                        )}
                       </div>
                     </div>
                     <div className="text-right space-y-1">
                       <div className={`font-semibold text-sm ${getTypeColor(transaction.category)}`}>
                         {transaction.category === 'income' ? '+' : '-'}{formatCurrency(transaction.amount)}
                       </div>
-                       <Badge variant="secondary" className={`text-xs ${getStatusColor(transaction.status)}`}>
-                         {formatStatusDisplay(transaction.status)}
-                       </Badge>
+                      <Badge variant="secondary" className={`text-xs ${getStatusColor(transaction.status)}`}>
+                        {formatStatusDisplay(transaction.status)}
+                      </Badge>
                     </div>
                   </div>
-                </Card>;
-        })}
-          </div>}
+                </Card>
+              );
+            })}
+          </div>
+        )}
       </div>
-
-      {/* Dialogs */}
-      <AddIncomeDialog open={showAddIncome} onOpenChange={setShowAddIncome} onSubmit={data => {
-      createTransaction(data);
-      setShowAddIncome(false);
-    }} />
-
-      <AddExpenseDialog open={showAddExpense} onOpenChange={setShowAddExpense} onSubmit={data => {
-      createTransaction(data);
-      setShowAddExpense(false);
-    }} />
-    </div>;
+    </div>
+  );
 };
