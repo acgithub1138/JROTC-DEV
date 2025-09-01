@@ -14,7 +14,18 @@ export const CompetitionDetailsPage = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const params = useParams();
-  const competitionId = params.competitionId || window.location.pathname.split('/').pop();
+  
+  // Extract competition ID correctly from URL path
+  const getCompetitionIdFromPath = () => {
+    const pathSegments = location.pathname.split('/');
+    const competitionDetailsIndex = pathSegments.findIndex(segment => segment === 'competition-details');
+    if (competitionDetailsIndex !== -1 && pathSegments[competitionDetailsIndex + 1]) {
+      return pathSegments[competitionDetailsIndex + 1];
+    }
+    return params.competitionId;
+  };
+  
+  const competitionId = getCompetitionIdFromPath();
 
   // Determine active tab from URL
   const getActiveTabFromUrl = () => {
