@@ -226,10 +226,10 @@ export const PTTestEditPage = () => {
           <CardTitle>PT Test Scores</CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="space-y-4">
-            <div className="grid grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="push-ups">Push-Ups</Label>
+          <div className="space-y-6">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              <div className="flex items-center gap-4">
+                <Label htmlFor="push-ups" className="w-24 text-right shrink-0">Push-Ups</Label>
                 <Input
                   id="push-ups"
                   type="number"
@@ -240,8 +240,8 @@ export const PTTestEditPage = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="sit-ups">Sit-Ups</Label>
+              <div className="flex items-center gap-4">
+                <Label htmlFor="sit-ups" className="w-24 text-right shrink-0">Sit-Ups</Label>
                 <Input
                   id="sit-ups"
                   type="number"
@@ -252,26 +252,30 @@ export const PTTestEditPage = () => {
                 />
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="plank-time">Plank Time</Label>
-                <Input
-                  id="plank-time"
-                  placeholder="MM:SS or seconds"
-                  value={plankTime}
-                  onChange={(e) => setPlankTime(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">Enter as MM:SS or total seconds</p>
+              <div>
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="plank-time" className="w-24 text-right shrink-0">Plank Time</Label>
+                  <Input
+                    id="plank-time"
+                    placeholder="MM:SS or seconds"
+                    value={plankTime}
+                    onChange={(e) => setPlankTime(e.target.value)}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-28">Enter as MM:SS or total seconds</p>
               </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="mile-time">Mile Time</Label>
-                <Input
-                  id="mile-time"
-                  placeholder="MM:SS or seconds"
-                  value={mileTime}
-                  onChange={(e) => setMileTime(e.target.value)}
-                />
-                <p className="text-xs text-muted-foreground">Enter as MM:SS or total seconds</p>
+              <div>
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="mile-time" className="w-24 text-right shrink-0">Mile Time</Label>
+                  <Input
+                    id="mile-time"
+                    placeholder="MM:SS or seconds"
+                    value={mileTime}
+                    onChange={(e) => setMileTime(e.target.value)}
+                  />
+                </div>
+                <p className="text-xs text-muted-foreground mt-1 ml-28">Enter as MM:SS or total seconds</p>
               </div>
             </div>
           </div>
