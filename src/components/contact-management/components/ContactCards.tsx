@@ -10,6 +10,7 @@ interface ContactCardsProps {
   contacts: Contact[];
   isLoading: boolean;
   onEdit: (contact: Contact) => void;
+  onView?: (contact: Contact) => void;
   onDelete: (contact: Contact) => void;
 }
 
@@ -17,6 +18,7 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
   contacts,
   isLoading,
   onEdit,
+  onView,
   onDelete,
 }) => {
   const { canEdit: canUpdate, canDelete, canViewDetails } = useTablePermissions('contacts');
@@ -132,11 +134,11 @@ export const ContactCards: React.FC<ContactCardsProps> = ({
             </div>
             
             <div className="flex justify-end space-x-2 pt-2">
-              {canViewDetails && (
+              {canViewDetails && onView && (
                 <Button
                   variant="outline"
                   size="sm"
-                  onClick={() => onEdit(contact)}
+                  onClick={() => onView(contact)}
                 >
                   <Eye className="w-4 h-4" />
                 </Button>

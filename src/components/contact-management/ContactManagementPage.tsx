@@ -4,13 +4,12 @@ import { Button } from '@/components/ui/button';
 import { StandardTableWrapper } from '@/components/ui/standard-table';
 import { ContactTable } from './components/ContactTable';
 import { ContactCards } from './components/ContactCards';
-import { AddContactDialog } from './components/AddContactDialog';
-import { EditContactDialog } from './components/EditContactDialog';
 import { ViewContactDialog } from './components/ViewContactDialog';
 import { DeleteContactDialog } from './components/DeleteContactDialog';
 import { useContacts } from './hooks/useContacts';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useTablePermissions } from '@/hooks/useTablePermissions';
+import { useNavigate } from 'react-router-dom';
 
 export interface Contact {
   id: string;
@@ -29,9 +28,8 @@ export interface Contact {
 }
 
 const ContactManagementPage = () => {
+  const navigate = useNavigate();
   const { canCreate } = useTablePermissions('contacts');
-  const [showAddContact, setShowAddContact] = useState(false);
-  const [editingContact, setEditingContact] = useState<Contact | null>(null);
   const [viewingContact, setViewingContact] = useState<Contact | null>(null);
   const [deletingContact, setDeletingContact] = useState<Contact | null>(null);
   const [searchValue, setSearchValue] = useState('');
@@ -42,8 +40,6 @@ const ContactManagementPage = () => {
   const {
     contacts,
     isLoading,
-    createContact,
-    updateContact,
     deleteContact,
   } = useContacts(searchValue);
 
@@ -97,6 +93,14 @@ const ContactManagementPage = () => {
     return 0;
   });
 
+  const handleAddContact = () => {
+    navigate('/app/contacts/contact_record');
+  };
+
+  const handleEditContact = (contact: Contact) => {
+    navigate(`/app/contacts/contact_record?id=${contact.id}`);
+  };
+
   const handleDeleteContact = (contact: Contact) => {
     setDeletingContact(contact);
   };
@@ -118,7 +122,7 @@ const ContactManagementPage = () => {
         </div>
         <div className="flex gap-2">
           {canCreate && (
-            <Button onClick={() => setShowAddContact(true)}>
+            <Button onClick={handleAddContact}>
               <Plus className="w-4 h-4 mr-2" />
               Add Contact
             </Button>
@@ -137,14 +141,15 @@ const ContactManagementPage = () => {
           <ContactCards
             contacts={sortedContacts}
             isLoading={isLoading}
-            onEdit={setEditingContact}
+            onEdit={handleEditContact}
+            onView={setViewingContact}
             onDelete={handleDeleteContact}
           />
         ) : (
           <ContactTable
             contacts={sortedContacts}
             isLoading={isLoading}
-            onEdit={setEditingContact}
+            onEdit={handleEditContact}
             onView={setViewingContact}
             onDelete={handleDeleteContact}
             sortField={sortField}
@@ -155,28 +160,13 @@ const ContactManagementPage = () => {
         )}
       </StandardTableWrapper>
 
-      <AddContactDialog
-        open={showAddContact}
-        onOpenChange={setShowAddContact}
-        onSubmit={createContact}
-      />
-
-      {editingContact && (
-        <EditContactDialog
-          open={!!editingContact}
-          onOpenChange={() => setEditingContact(null)}
-          contact={editingContact}
-          onSubmit={updateContact}
-        />
-      )}
-
       {viewingContact && (
         <ViewContactDialog
           open={!!viewingContact}
           onOpenChange={() => setViewingContact(null)}
           contact={viewingContact}
           onEdit={() => {
-            setEditingContact(viewingContact);
+            handleEditContact(viewingContact);
             setViewingContact(null);
           }}
         />

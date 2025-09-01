@@ -158,7 +158,7 @@ export const ContactTable: React.FC<ContactTableProps> = ({
         {contacts.map(contact => <TableRow key={contact.id}>
             <TableCell className="font-medium py-[8px]">
               <button
-                onClick={() => onView(contact)}
+                onClick={() => onEdit(contact)}
                 className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium"
               >
                 {contact.name}

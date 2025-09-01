@@ -1,0 +1,444 @@
+import React, { useState, useEffect } from 'react';
+import { useForm } from 'react-hook-form';
+import { zodResolver } from '@hookform/resolvers/zod';
+import { z } from 'zod';
+import { useNavigate, useSearchParams } from 'react-router-dom';
+import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { Input } from '@/components/ui/input';
+import { Textarea } from '@/components/ui/textarea';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { useAuth } from '@/contexts/AuthContext';
+import { supabase } from '@/integrations/supabase/client';
+import { useContacts } from './hooks/useContacts';
+import { Contact } from './ContactManagementPage';
+import { ArrowLeft } from 'lucide-react';
+import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
+import { toast } from 'sonner';
+
+const contactSchema = z.object({
+  name: z.string().min(1, 'Name is required'),
+  type: z.enum(['parent', 'relative', 'friend', 'other']),
+  type_other: z.string().optional(),
+  status: z.enum(['active', 'semi_active', 'not_active']),
+  cadet_id: z.string().min(1),
+  phone: z.string().optional(),
+  email: z.string().email('Invalid email').optional().or(z.literal('')),
+  notes: z.string().optional()
+}).refine(data => {
+  if (data.type === 'other') {
+    return data.type_other && data.type_other.trim().length > 0;
+  }
+  return true;
+}, {
+  message: "Please specify the other type",
+  path: ["type_other"]
+});
+
+type ContactFormData = z.infer<typeof contactSchema>;
+
+interface Cadet {
+  id: string;
+  first_name: string;
+  last_name: string;
+}
+
+export const ContactRecordPage: React.FC = () => {
+  const navigate = useNavigate();
+  const [searchParams] = useSearchParams();
+  const { userProfile } = useAuth();
+  const { createContact, updateContact } = useContacts();
+  
+  const contactId = searchParams.get('id');
+  const isEditMode = !!contactId;
+  
+  const [contact, setContact] = useState<Contact | null>(null);
+  const [cadets, setCadets] = useState<Cadet[]>([]);
+  const [isLoading, setIsLoading] = useState(isEditMode);
+  const [showUnsavedDialog, setShowUnsavedDialog] = useState(false);
+
+  const form = useForm<ContactFormData>({
+    resolver: zodResolver(contactSchema),
+    defaultValues: {
+      name: '',
+      type: 'parent',
+      type_other: '',
+      status: 'active',
+      cadet_id: 'none',
+      phone: '',
+      email: '',
+      notes: ''
+    }
+  });
+
+  // Initial form data for comparison
+  const initialFormData = {
+    name: contact?.name || '',
+    type: contact?.type || 'parent',
+    type_other: contact?.type_other || '',
+    status: contact?.status || 'active',
+    cadet_id: contact?.cadet_id || 'none',
+    phone: contact?.phone || '',
+    email: contact?.email || '',
+    notes: contact?.notes || ''
+  };
+
+  // Get current form values with proper defaults
+  const watchedData = form.watch();
+  const currentFormData = {
+    name: watchedData.name || '',
+    type: watchedData.type || 'parent',
+    type_other: watchedData.type_other || '',
+    status: watchedData.status || 'active',
+    cadet_id: watchedData.cadet_id || 'none',
+    phone: watchedData.phone || '',
+    email: watchedData.email || '',
+    notes: watchedData.notes || ''
+  };
+
+  const { hasUnsavedChanges } = useUnsavedChanges({
+    initialData: initialFormData,
+    currentData: currentFormData,
+    enabled: true
+  });
+
+  // Load contact data if editing
+  useEffect(() => {
+    const loadContact = async () => {
+      if (!contactId || !userProfile?.school_id) return;
+      
+      setIsLoading(true);
+      try {
+        const { data, error } = await supabase
+          .from('contacts')
+          .select('*')
+          .eq('id', contactId)
+          .eq('school_id', userProfile.school_id)
+          .single();
+
+        if (error) throw error;
+        
+        setContact(data);
+        form.reset({
+          name: data.name,
+          type: data.type,
+          type_other: data.type_other || '',
+          status: data.status,
+          cadet_id: data.cadet_id || 'none',
+          phone: data.phone || '',
+          email: data.email || '',
+          notes: data.notes || ''
+        });
+      } catch (error) {
+        console.error('Error loading contact:', error);
+        toast.error('Failed to load contact');
+        navigate('/app/contacts');
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    loadContact();
+  }, [contactId, userProfile?.school_id, form, navigate]);
+
+  // Load cadets
+  useEffect(() => {
+    const fetchCadets = async () => {
+      if (!userProfile?.school_id) return;
+      
+      const { data } = await supabase
+        .from('profiles')
+        .select('id, first_name, last_name')
+        .eq('school_id', userProfile.school_id)
+        .eq('role', 'cadet')
+        .eq('active', true)
+        .order('last_name');
+      
+      setCadets(data || []);
+    };
+
+    fetchCadets();
+  }, [userProfile?.school_id]);
+
+  const handleSubmit = async (data: ContactFormData) => {
+    try {
+      const contactData = {
+        name: data.name,
+        type: data.type,
+        type_other: data.type === 'other' ? data.type_other || null : null,
+        status: data.status,
+        cadet_id: data.cadet_id === 'none' ? null : data.cadet_id || null,
+        phone: data.phone || null,
+        email: data.email || null,
+        notes: data.notes || null
+      };
+
+      if (isEditMode && contact) {
+        await updateContact(contact.id, contactData);
+      } else {
+        await createContact(contactData);
+      }
+      
+      navigate('/app/contacts');
+    } catch (error) {
+      console.error('Error saving contact:', error);
+    }
+  };
+
+  const handleBack = () => {
+    if (hasUnsavedChanges) {
+      setShowUnsavedDialog(true);
+    } else {
+      navigate('/app/contacts');
+    }
+  };
+
+  const handleDiscardChanges = () => {
+    setShowUnsavedDialog(false);
+    navigate('/app/contacts');
+  };
+
+  const handleContinueEditing = () => {
+    setShowUnsavedDialog(false);
+  };
+
+  if (isLoading) {
+    return (
+      <div className="p-6">
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-gray-200 rounded w-1/4"></div>
+          <div className="h-64 bg-gray-200 rounded"></div>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-6 space-y-6">
+      <div className="flex items-center gap-4">
+        <Button
+          variant="ghost"
+          size="sm"
+          onClick={handleBack}
+          className="flex items-center gap-2"
+        >
+          <ArrowLeft className="h-4 w-4" />
+          Back to Contacts
+        </Button>
+        <div>
+          <h1 className="text-3xl font-bold">
+            {isEditMode ? 'Edit Contact' : 'Add Contact'}
+          </h1>
+          <p className="text-muted-foreground">
+            {isEditMode ? 'Update contact information' : 'Create a new contact record'}
+          </p>
+        </div>
+      </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Contact Information</CardTitle>
+        </CardHeader>
+        <CardContent>
+          <Form {...form}>
+            <form onSubmit={form.handleSubmit(handleSubmit)} className="space-y-6">
+              {/* Name Field */}
+              <FormField
+                control={form.control}
+                name="name"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Name *</FormLabel>
+                    <div className="col-span-3">
+                      <FormControl>
+                        <Input placeholder="Enter contact name" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Type Field */}
+              <FormField
+                control={form.control}
+                name="type"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Type</FormLabel>
+                    <div className="col-span-3">
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select contact type" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="parent">Parent</SelectItem>
+                          <SelectItem value="relative">Relative</SelectItem>
+                          <SelectItem value="friend">Friend</SelectItem>
+                          <SelectItem value="other">Other</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Other Type Field (conditional) */}
+              {form.watch('type') === 'other' && (
+                <FormField
+                  control={form.control}
+                  name="type_other"
+                  render={({ field }) => (
+                    <FormItem className="grid grid-cols-4 items-center gap-4">
+                      <FormLabel className="text-right">Other</FormLabel>
+                      <div className="col-span-3">
+                        <FormControl>
+                          <Input placeholder="Specify other type" {...field} />
+                        </FormControl>
+                        <FormMessage />
+                      </div>
+                    </FormItem>
+                  )}
+                />
+              )}
+
+              {/* Status Field */}
+              <FormField
+                control={form.control}
+                name="status"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Status</FormLabel>
+                    <div className="col-span-3">
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select status" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="active">Active</SelectItem>
+                          <SelectItem value="semi_active">Semi-Active</SelectItem>
+                          <SelectItem value="not_active">Not Active</SelectItem>
+                        </SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Cadet Field */}
+              <FormField
+                control={form.control}
+                name="cadet_id"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Cadet (Optional)</FormLabel>
+                    <div className="col-span-3">
+                      <Select onValueChange={field.onChange} value={field.value}>
+                        <FormControl>
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select cadet" />
+                          </SelectTrigger>
+                        </FormControl>
+                        <SelectContent>
+                          <SelectItem value="none">No cadet selected</SelectItem>
+                          {cadets.map(cadet => (
+                            <SelectItem key={cadet.id} value={cadet.id}>
+                              {cadet.last_name}, {cadet.first_name}
+                            </SelectItem>
+                          ))}</SelectContent>
+                      </Select>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Phone Field */}
+              <FormField
+                control={form.control}
+                name="phone"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Phone</FormLabel>
+                    <div className="col-span-3">
+                      <FormControl>
+                        <Input placeholder="Phone number" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Email Field */}
+              <FormField
+                control={form.control}
+                name="email"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-center gap-4">
+                    <FormLabel className="text-right">Email</FormLabel>
+                    <div className="col-span-3">
+                      <FormControl>
+                        <Input type="email" placeholder="Email address" {...field} />
+                      </FormControl>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              {/* Notes Field */}
+              <FormField
+                control={form.control}
+                name="notes"
+                render={({ field }) => (
+                  <FormItem className="grid grid-cols-4 items-start gap-4">
+                    <FormLabel className="text-right pt-2">Notes</FormLabel>
+                    <div className="col-span-3">
+                      <FormControl>
+                        <Textarea 
+                          placeholder="Additional notes" 
+                          className="resize-none min-h-[100px]" 
+                          {...field} 
+                        />
+                      </FormControl>
+                      <FormMessage />
+                    </div>
+                  </FormItem>
+                )}
+              />
+
+              <div className="flex justify-end gap-2 pt-6">
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={handleBack}
+                >
+                  Cancel
+                </Button>
+                <Button type="submit">
+                  {isEditMode ? 'Update Contact' : 'Add Contact'}
+                </Button>
+              </div>
+            </form>
+          </Form>
+        </CardContent>
+      </Card>
+
+      <UnsavedChangesDialog
+        open={showUnsavedDialog}
+        onOpenChange={setShowUnsavedDialog}
+        onDiscard={handleDiscardChanges}
+        onCancel={handleContinueEditing}
+      />
+    </div>
+  );
+};
