@@ -123,6 +123,10 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
     },
   });
 
+  const createTransaction = async (newTransaction: Omit<BudgetTransaction, 'id' | 'created_at' | 'updated_at' | 'school_id' | 'created_by'>) => {
+    return await createMutation.mutateAsync(newTransaction);
+  };
+
   const updateMutation = useMutation({
     mutationFn: async ({ id, updates }: { id: string; updates: Partial<BudgetTransaction> }) => {
       const { data, error } = await supabase
@@ -212,10 +216,11 @@ export const useBudgetTransactions = (filters: BudgetFilters) => {
   return {
     transactions,
     isLoading,
-    createTransaction: createMutation.mutate,
+    createTransaction,
     updateTransaction: (id: string, updates: Partial<BudgetTransaction>) =>
       updateMutation.mutate({ id, updates }),
     deleteTransaction: deleteMutation.mutate,
     archiveAllTransactions: archiveAllMutation.mutate,
+    isCreating: createMutation.isPending,
   };
 };

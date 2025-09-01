@@ -49,7 +49,7 @@ export const BudgetIncomeRecordPage: React.FC = () => {
   const { canCreate, canEdit, canView } = useTablePermissions('budget');
   
   // Data hooks
-  const { transactions, createTransaction, updateTransaction, isLoading } = useBudgetTransactions({
+  const { transactions, createTransaction, updateTransaction, isLoading, isCreating } = useBudgetTransactions({
     search: '',
     category: '',
     type: '',
@@ -182,6 +182,8 @@ export const BudgetIncomeRecordPage: React.FC = () => {
 
   // Handle form submission
   const handleSubmit = async (data: IncomeFormData) => {
+    if (isSubmitting || isCreating || isUploadingFiles) return;
+    
     try {
       setIsSubmitting(true);
       
@@ -196,19 +198,21 @@ export const BudgetIncomeRecordPage: React.FC = () => {
       };
 
       if (currentMode === 'create') {
-        createTransaction(budgetData);
+        // Create the record and get the new ID
+        const newRecord = await createTransaction(budgetData);
         
-        // Upload pending files if any (files will be uploaded without record association in create mode)
+        // Upload pending files with the new record ID
         if (pendingFiles.length > 0) {
-          console.log('Files selected for upload:', pendingFiles.map(f => f.name));
-          // Note: Files will be handled differently since we don't get the record ID back
+          await uploadPendingFiles(newRecord.id);
         }
         
         toast({
           title: "Income Added",
           description: "Income record has been created successfully."
         });
-        navigate('/app/budget');
+        
+        // Navigate to the view page
+        navigate(`/app/budget/income_record?mode=view&id=${newRecord.id}`);
       } else if (currentMode === 'edit' && recordId) {
         updateTransaction(recordId, budgetData);
         toast({
@@ -497,8 +501,8 @@ export const BudgetIncomeRecordPage: React.FC = () => {
                       Cancel
                     </Button>
                     <Button type="submit" disabled={isSubmitting || isUploadingFiles}>
-                      {isSubmitting ? 'Saving...' : 
-                       currentMode === 'create' ? 'Add Income' : 'Update Income'}
+                     {(isSubmitting || isCreating || isUploadingFiles) ? 'Saving...' : 
+                      currentMode === 'create' ? 'Add Income' : 'Update Income'}
                     </Button>
                   </div>
                 </form>
