@@ -20,6 +20,7 @@ import { useBudgetTransactions } from './hooks/useBudgetTransactions';
 import { BudgetTransaction } from './BudgetManagementPage';
 import { UnsavedChangesDialog } from '@/components/ui/unsaved-changes-dialog';
 import { useUnsavedChanges } from '@/hooks/useUnsavedChanges';
+import { AttachmentSection } from '@/components/attachments/AttachmentSection';
 
 const incomeSchema = z.object({
   item: z.string().min(1, 'Item is required'),
@@ -462,6 +463,23 @@ export const BudgetIncomeRecordPage: React.FC = () => {
             )}
           </CardContent>
         </Card>
+
+        {/* Attachments Section */}
+        {recordId && (
+          <Card>
+            <CardHeader>
+              <CardTitle>Attachments</CardTitle>
+            </CardHeader>
+            <CardContent>
+              <AttachmentSection
+                recordType="budget_transaction"
+                recordId={recordId}
+                canEdit={canEdit && (currentMode === 'edit' || currentMode === 'view')}
+                showContentOnly
+              />
+            </CardContent>
+          </Card>
+        )}
       </div>
 
       <UnsavedChangesDialog

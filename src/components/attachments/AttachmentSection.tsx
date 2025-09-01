@@ -6,7 +6,7 @@ import { FileAttachmentUpload } from './FileAttachmentUpload';
 import { AttachmentList } from './AttachmentList';
 import { useAttachments } from '@/hooks/attachments/useAttachments';
 interface AttachmentSectionProps {
-  recordType: 'task' | 'subtask' | 'incident' | 'announcement';
+  recordType: 'task' | 'subtask' | 'incident' | 'announcement' | 'budget_transaction';
   recordId: string;
   canEdit?: boolean;
   defaultOpen?: boolean;
