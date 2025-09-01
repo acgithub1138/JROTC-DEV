@@ -152,7 +152,8 @@ export const ViewScoreSheet: React.FC = () => {
           ) : (
             <PortalScoreSheetTable 
               events={eventSheets as any} 
-              onEventsRefresh={handleEventsRefresh} 
+              onEventsRefresh={handleEventsRefresh}
+              competitionId={competitionId}
             />
           )}
         </CardContent>

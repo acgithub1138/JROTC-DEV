@@ -16,9 +16,10 @@ import { toast } from 'sonner';
 interface ScoreSheetTableProps {
   events: CompetitionEvent[];
   onEventsRefresh?: () => void;
+  competitionId?: string;
 }
 
-export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh }) => {
+export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEventsRefresh, competitionId: propCompetitionId }) => {
   const navigate = useNavigate();
   
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -34,8 +35,8 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   }>({ open: false, fieldName: '', notes: '', judgeNumber: '' });
   const { canViewDetails, canUpdate, canDelete } = useCompetitionResultsPermissions();
   console.log('ScoreSheetTable permissions:', { canUpdate, canDelete, canViewDetails });
-  const competitionId = (events[0] as any)?.competition_id; // Get from first event
-  const { deleteEvent } = useCompetitionEvents(competitionId);
+  const fallbackCompetitionId = (events[0] as any)?.competition_id; // Get from first event as fallback
+  const { deleteEvent } = useCompetitionEvents(propCompetitionId || fallbackCompetitionId);
   const { templates } = useCompetitionTemplates();
   const fieldNames = getFieldNames(events, templates);
 
@@ -80,9 +81,9 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   };
 
   const handleEditScoreSheet = (event: CompetitionEvent) => {
-    // Navigate to edit score sheet page
-    const competitionId = (events[0] as any)?.source_competition_id || (events[0] as any)?.competition_id;
-    console.log('Edit score sheet clicked:', { event, competitionId });
+    // Use passed competitionId or try to get from events
+    const competitionId = propCompetitionId || (events[0] as any)?.source_competition_id || (events[0] as any)?.competition_id;
+    console.log('Edit score sheet clicked:', { event, competitionId, propCompetitionId });
     if (competitionId) {
       const url = `/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet/edit_score_sheet?eventId=${event.id}&schoolId=${event.school_id}`;
       console.log('Navigating to:', url);
