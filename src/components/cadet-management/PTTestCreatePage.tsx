@@ -189,62 +189,63 @@ export const PTTestCreatePage = () => {
           </CardHeader>
           <CardContent>
             <form onSubmit={handleSingleSubmit} className="space-y-6">
-              {/* Cadet Selection */}
-              <div className="flex items-center gap-4">
-                <Label htmlFor="cadet" className="w-32 text-right shrink-0">Cadet *</Label>
-                <div className="flex-1">
-                  <Select
-                    value={singleData.cadetId}
-                    onValueChange={(value) => setSingleData(prev => ({ ...prev, cadetId: value }))}
-                  >
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a cadet" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {cadets_single.map((cadet) => (
-                        <SelectItem key={cadet.id} value={cadet.id}>
-                          {cadet.last_name}, {cadet.first_name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </div>
-              </div>
-
-              {/* Date Selection */}
-              <div className="flex items-center gap-4">
-                <Label className="w-32 text-right shrink-0">Date *</Label>
-                <div className="flex-1">
-                  <Popover>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        className={cn(
-                          "w-full justify-start text-left font-normal",
-                          !singleData.date && "text-muted-foreground"
-                        )}
-                      >
-                        <CalendarIcon className="mr-2 h-4 w-4" />
-                        {singleData.date ? format(singleData.date, "PPP") : "Pick a date"}
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <Calendar
-                        mode="single"
-                        selected={singleData.date}
-                        onSelect={(date) => setSingleData(prev => ({ ...prev, date }))}
-                        initialFocus
-                        className="pointer-events-auto"
-                      />
-                    </PopoverContent>
-                  </Popover>
-                </div>
-              </div>
-
-              {/* Test Scores */}
-              <div className="space-y-4">
+              {/* Row 1: Cadet and Date */}
+              <div className="grid grid-cols-2 gap-6">
                 <div className="flex items-center gap-4">
-                  <Label htmlFor="pushUps" className="w-32 text-right shrink-0">Push-ups</Label>
+                  <Label htmlFor="cadet" className="w-20 text-right shrink-0">Cadet *</Label>
+                  <div className="flex-1">
+                    <Select
+                      value={singleData.cadetId}
+                      onValueChange={(value) => setSingleData(prev => ({ ...prev, cadetId: value }))}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select a cadet" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        {cadets_single.map((cadet) => (
+                          <SelectItem key={cadet.id} value={cadet.id}>
+                            {cadet.last_name}, {cadet.first_name}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+                </div>
+
+                <div className="flex items-center gap-4">
+                  <Label className="w-16 text-right shrink-0">Date *</Label>
+                  <div className="flex-1">
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <Button
+                          variant="outline"
+                          className={cn(
+                            "w-full justify-start text-left font-normal",
+                            !singleData.date && "text-muted-foreground"
+                          )}
+                        >
+                          <CalendarIcon className="mr-2 h-4 w-4" />
+                          {singleData.date ? format(singleData.date, "PPP") : "Pick a date"}
+                        </Button>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0" align="start">
+                        <Calendar
+                          mode="single"
+                          selected={singleData.date}
+                          onSelect={(date) => setSingleData(prev => ({ ...prev, date }))}
+                          initialFocus
+                          className="pointer-events-auto"
+                        />
+                      </PopoverContent>
+                    </Popover>
+                  </div>
+                </div>
+              </div>
+
+              {/* Row 2: Push-ups and Sit-ups */}
+              <div className="grid grid-cols-2 gap-6">
+                <div className="flex items-center gap-4">
+                  <Label htmlFor="pushUps" className="w-20 text-right shrink-0">Push-ups</Label>
                   <div className="flex-1">
                     <Input
                       id="pushUps"
@@ -258,7 +259,7 @@ export const PTTestCreatePage = () => {
                 </div>
 
                 <div className="flex items-center gap-4">
-                  <Label htmlFor="sitUps" className="w-32 text-right shrink-0">Sit-ups</Label>
+                  <Label htmlFor="sitUps" className="w-16 text-right shrink-0">Sit-ups</Label>
                   <div className="flex-1">
                     <Input
                       id="sitUps"
@@ -270,9 +271,12 @@ export const PTTestCreatePage = () => {
                     />
                   </div>
                 </div>
+              </div>
 
+              {/* Row 3: Plank Time and Mile Time */}
+              <div className="grid grid-cols-2 gap-6">
                 <div className="flex items-start gap-4">
-                  <Label htmlFor="plankTime" className="w-32 text-right shrink-0 pt-2">Plank Time</Label>
+                  <Label htmlFor="plankTime" className="w-20 text-right shrink-0 pt-2">Plank Time</Label>
                   <div className="flex-1 space-y-1">
                     <Input
                       id="plankTime"
@@ -287,7 +291,7 @@ export const PTTestCreatePage = () => {
                 </div>
 
                 <div className="flex items-start gap-4">
-                  <Label htmlFor="mileTime" className="w-32 text-right shrink-0 pt-2">Mile Time</Label>
+                  <Label htmlFor="mileTime" className="w-16 text-right shrink-0 pt-2">Mile Time</Label>
                   <div className="flex-1 space-y-1">
                     <Input
                       id="mileTime"
