@@ -34,6 +34,9 @@ export const ViewScoreSheet: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  console.log('ViewScoreSheet permissions:', { canViewDetails, eventSheets });
+  console.log('ViewScoreSheet eventSheets length:', eventSheets.length);
+
   const fetchEventSheets = async () => {
     if (!eventId || !schoolId || !competitionId) return;
     

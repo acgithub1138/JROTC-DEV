@@ -9,7 +9,7 @@ import { getFieldNames, getCleanFieldName, calculateFieldAverage, calculateTotal
 import { DeleteScoreSheetDialog } from './DeleteScoreSheetDialog';
 import { NotesViewDialog } from './NotesViewDialog';
 import { useCompetitionEvents } from '../../hooks/useCompetitionEvents';
-import { useMyCompetitionsPermissions } from '@/hooks/useModuleSpecificPermissions';
+import { useCompetitionResultsPermissions } from '@/hooks/useModuleSpecificPermissions';
 import { useCompetitionTemplates } from '../../hooks/useCompetitionTemplates';
 import { toast } from 'sonner';
 
@@ -32,7 +32,8 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
     notes: string;
     judgeNumber?: string;
   }>({ open: false, fieldName: '', notes: '', judgeNumber: '' });
-  const { canViewDetails, canUpdate, canDelete } = useMyCompetitionsPermissions();
+  const { canViewDetails, canUpdate, canDelete } = useCompetitionResultsPermissions();
+  console.log('ScoreSheetTable permissions:', { canUpdate, canDelete, canViewDetails });
   const competitionId = (events[0] as any)?.competition_id; // Get from first event
   const { deleteEvent } = useCompetitionEvents(competitionId);
   const { templates } = useCompetitionTemplates();
@@ -81,8 +82,13 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
   const handleEditScoreSheet = (event: CompetitionEvent) => {
     // Navigate to edit score sheet page
     const competitionId = (events[0] as any)?.source_competition_id || (events[0] as any)?.competition_id;
+    console.log('Edit score sheet clicked:', { event, competitionId });
     if (competitionId) {
-      navigate(`/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet/edit_score_sheet?eventId=${event.id}&schoolId=${event.school_id}`);
+      const url = `/app/competition-portal/competition-details/${competitionId}/results/view_score_sheet/edit_score_sheet?eventId=${event.id}&schoolId=${event.school_id}`;
+      console.log('Navigating to:', url);
+      navigate(url);
+    } else {
+      console.error('No competition ID found for navigation');
     }
   };
 
@@ -176,13 +182,16 @@ export const ScoreSheetTable: React.FC<ScoreSheetTableProps> = ({ events, onEven
              {events.map((event, index) => (
                 <TableHead key={event.id} className={`text-center border-r px-2 min-w-24 ${getJudgeColorClasses(index)}`}>
                   <div className="space-y-1">
-                    <TableActionButtons
-                      canView={canViewDetails}
-                      canEdit={canUpdate}
-                      canDelete={canDelete}
-                      onEdit={() => handleEditScoreSheet(event)}
-                      onDelete={() => handleDeleteEvent(event)}
-                    />
+                     <TableActionButtons
+                       canView={canViewDetails}
+                       canEdit={canUpdate}
+                       canDelete={canDelete}
+                       onEdit={() => {
+                         console.log('Edit button clicked for event:', event.id);
+                         handleEditScoreSheet(event);
+                       }}
+                       onDelete={() => handleDeleteEvent(event)}
+                     />
                     <div className="font-medium text-xs">
                       {event.score_sheet?.judge_number || `Judge ${index + 1}`}
                     </div>
