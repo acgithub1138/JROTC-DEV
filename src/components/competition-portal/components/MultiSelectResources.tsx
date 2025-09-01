@@ -107,12 +107,12 @@ export const MultiSelectResources: React.FC<MultiSelectResourcesProps> = ({
                     onClick={() => handleToggleResource(resource.id)}
                   >
                     <Checkbox
-                      id={resource.id}
                       checked={selectedResourceIds.includes(resource.id)}
+                      onCheckedChange={() => handleToggleResource(resource.id)}
                     />
-                    <label htmlFor={resource.id} className="flex-1 cursor-pointer">
+                    <div className="flex-1 cursor-pointer">
                       {resource.last_name}, {resource.first_name}
-                    </label>
+                    </div>
                   </div>
                 ))
               ) : (

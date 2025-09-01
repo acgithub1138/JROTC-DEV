@@ -106,12 +106,12 @@ export const MultiSelectJudges: React.FC<MultiSelectJudgesProps> = ({
                     onClick={() => handleToggleJudge(judge.id)}
                   >
                     <Checkbox
-                      id={judge.id}
                       checked={selectedJudgeIds.includes(judge.id)}
+                      onCheckedChange={() => handleToggleJudge(judge.id)}
                     />
-                    <label htmlFor={judge.id} className="flex-1 cursor-pointer">
+                    <div className="flex-1 cursor-pointer">
                       {judge.name}
-                    </label>
+                    </div>
                   </div>
                 ))
               ) : (
