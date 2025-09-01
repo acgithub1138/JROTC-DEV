@@ -188,7 +188,7 @@ export const InventoryTable: React.FC<InventoryTableProps> = ({
                 <Checkbox checked={selectedItems.includes(item.id)} onCheckedChange={checked => handleSelectItem(item.id, !!checked)} />
               </TableCell>
                   {isColumnVisible('item_id') && <TableCell className={`font-medium ${getPaddingClass()}`}>
-                      <button onClick={() => navigate(`/app/cadets/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
+                      <button onClick={() => navigate(`/app/inventory/inventory_record?id=${item.id}`)} className="text-blue-600 hover:text-blue-800 cursor-pointer underline-offset-4 hover:underline text-left font-medium">
                         {item.item_id}
                       </button>
                     </TableCell>}
