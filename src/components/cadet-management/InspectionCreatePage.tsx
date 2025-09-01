@@ -101,7 +101,7 @@ export const InspectionCreatePage = () => {
           </CardHeader>
           <CardContent className="space-y-6">
             {/* Header Controls */}
-            <div className="space-y-4">
+            <div className="grid grid-cols-2 gap-6">
               <div className="flex items-center gap-4">
                 <Label htmlFor="inspection-date" className="w-32 text-right shrink-0">Inspection Date</Label>
                 <div className="flex-1">
